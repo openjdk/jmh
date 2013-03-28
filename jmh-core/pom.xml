@@ -30,12 +30,12 @@ questions.
     <groupId>org.openjdk.jmh</groupId>
     <artifactId>jmh-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <name>Java Microbenchmark Harness Core</name>
 
     <organization>
         <name>Oracle and/or its affiliates. All rights reserved.</name>
-        <url>http://openjdk.org/</url>
+        <url>http://openjdk.java.net/</url>
     </organization>
     <inceptionYear>2012</inceptionYear>
 
@@ -284,16 +284,4 @@ questions.
         </plugins>
     </reporting>
 
-    <distributionManagement>
-        <repository>
-            <id>jrpg-enginfra-releases</id>
-            <name>JRPG Enginfra Repository Releases</name>
-            <url>http://maven.se.oracle.com/nexus/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>jrpg-enginfra-snapshots</id>
-            <name>JRPG Enginfra Repository Snapshots</name>
-            <url>http://maven.se.oracle.com/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
