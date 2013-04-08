@@ -165,8 +165,12 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         public Result call() throws Exception {
             try {
                 return invokeBenchmark(invocationHandler.get().getInstance());
-            } catch (Throwable t) {
-                throw new Exception(t);
+            } catch (Throwable e) {
+                // about to fail the iteration;
+                // compensate for missed sync-iteration latches, we don't care about that anymore
+                loop.preSetup();
+                loop.preTearDown();
+                throw new Exception(e); // wrapping Throwable
             }
         }
 
