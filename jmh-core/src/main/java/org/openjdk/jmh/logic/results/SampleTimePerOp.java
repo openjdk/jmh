@@ -156,7 +156,7 @@ public class SampleTimePerOp extends Result {
             double[] interval95 = bootedStat.getConfidenceInterval(0.05);
             double[] interval99 = bootedStat.getConfidenceInterval(0.01);
 
-            sb.append(String.format("  p%-3.0f = %10.3f ±(95%%) %.3f ±(99%%) %.3f %s\n",
+            sb.append(String.format("  p%-3.0f = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s\n",
                     p,
                     convertNs(bootedStat.getMean()),
                     convertNs((interval95[1] - interval95[0]) / 2),
