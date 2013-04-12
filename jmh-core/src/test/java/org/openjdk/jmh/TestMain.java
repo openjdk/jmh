@@ -49,7 +49,8 @@ public class TestMain {
         Main.main(new String[] {"-kakor"});
         System.setErr(tmp);
 
-        assertTrue(baos.toString().contains("\"-kakor\" is not a valid option"));
+        String s = baos.toString();
+        assertTrue(s, s.contains("\"-kakor\" is not a valid option"));
         baos.close();
     }
 
@@ -63,7 +64,8 @@ public class TestMain {
         Main.main(new String[] {});
         System.setErr(tmp);
 
-        assertTrue(baos.toString().contains("Usage: [options]"));
+        String s = baos.toString();
+        assertTrue(s, s.contains("Usage: [options]"));
         baos.close();
     }
 
@@ -76,7 +78,8 @@ public class TestMain {
         Main.main(new String[] {"-h"});
         System.setErr(tmp);
 
-        assertTrue(baos.toString().contains("Usage: [options]"));
+        String s = baos.toString();
+        assertTrue(s, s.contains("Usage: [options]"));
         baos.close();
     }
 
