@@ -50,7 +50,8 @@ public class TestMain {
         System.setErr(tmp);
 
         String s = baos.toString();
-        assertTrue(s, s.contains("\"-kakor\" is not a valid option"));
+        assertTrue(s, s.contains("\"-kakor\""));
+        assertTrue(s, s.contains("Usage"));
         baos.close();
     }
 
