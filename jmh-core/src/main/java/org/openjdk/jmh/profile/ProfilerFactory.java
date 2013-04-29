@@ -264,34 +264,6 @@ public class ProfilerFactory {
             public String description() {
                 return "Simple and naive Java stack profiler";
             }
-        },
-        JFR {
-
-            @Override
-            public String id() {
-                return "jfr";
-            }
-
-            @Override
-            public String label() {
-                return "JFR";
-            }
-
-            @Override
-            public Profiler createInstance(boolean verbose) {
-                return new JFRProfiler(label(), verbose);
-            }
-
-            @Override
-            public boolean isSupported() {
-                return JFRProfiler.isSupported();
-            }
-
-            @Override
-            public String description() {
-                return "Simple and naive Java Flight Recorder profiler";
-            }
-
         };
 
         public abstract Profiler createInstance(boolean verbose);
