@@ -33,16 +33,18 @@ import java.util.concurrent.TimeUnit;
 public class JMHSample_02_BenchmarkTypes {
 
     /*
-     * JMH generates lots of synthetic code for the microbenchmarks for you during
-     * the compilation. We can request different generation strategies, and measure
-     * different things.
+     * JMH generates lots of synthetic code for the microbenchmarks for
+     * you during the compilation. We can request different generation
+     * strategies, and measure different things.
      *
-     * With this scenario, we start to measure something useful. Note that we can
-     * conveniently have the exception at the benchmark method, in order to reduce
-     * some of the clutter.
+     * With this scenario, we start to measure something useful. Note
+     * that we can conveniently have the exception at the benchmark method,
+     * in order to reduce some of the clutter.
      *
-     * P.S. It is helping at times to look into the generated code trying to diagnose
-     * the performance issue. You might see you don't measuring it right!
+     * P.S. It is helping at times to look into the generated code trying
+     * to diagnose  the performance issue. You might see you don't measuring
+     * it right! The generated code for this particular sample is somewhere at
+     *  target/generated-sources/annotations/.../JMHSample_02_BenchmarkTypes.java
      */
 
     /*

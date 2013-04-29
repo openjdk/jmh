@@ -44,6 +44,13 @@ public class JMHSample_01_HelloWorld {
      * finishes as well. If you throw the exception from the method body,
      * the JMH run ends abruptly for this benchmark, and JMH will run
      * the next benchmark down the list.
+     *
+     * Although this benchmark measures "nothing", it is the good showcase
+     * for the overheads the infrastructure bear on the code you measure
+     * in the method. There are no magical infrastructures which incur no
+     * overhead, and it's important to know what are the infra overheads
+     * you are dealing with. You might find this thought unfolded in future
+     * examples by having the "baseline" measurements to compare against.
      */
 
     @GenerateMicroBenchmark
