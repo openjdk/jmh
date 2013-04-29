@@ -204,7 +204,9 @@ public class HarnessOptions extends BaseOptions {
             }
 
             for (String arg : args) {
+                jvmArguments.append('"');
                 jvmArguments.append(arg);
+                jvmArguments.append('"');
                 jvmArguments.append(' ');
             }
 
