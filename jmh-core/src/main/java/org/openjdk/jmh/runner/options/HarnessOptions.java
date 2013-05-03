@@ -38,6 +38,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -148,7 +149,7 @@ public class HarnessOptions extends BaseOptions {
      * @param port host VM port
      * @return the final command to execute
      */
-    public String getSeparateExecutionCommand(String benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
+    public String[] getSeparateExecutionCommand(String benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
 
         Properties props = System.getProperties();
         String javaHome = (String) props.get("java.home");
@@ -169,11 +170,11 @@ public class HarnessOptions extends BaseOptions {
             classPath = '"' + classPath + '"';
         }
 
-        String javaExecutableString;
+        List<String> command = new ArrayList<String>();
 
         // use supplied jvm if given
         if (getJvm() != null) {
-            javaExecutableString = getJvm();
+            command.add(getJvm());
         } else {
             // else find out which one parent is and use that
             StringBuilder javaExecutable = new StringBuilder();
@@ -183,87 +184,60 @@ public class HarnessOptions extends BaseOptions {
             javaExecutable.append(separator);
             javaExecutable.append("java");
             javaExecutable.append(platformSpecificBinaryPostfix);
-            javaExecutableString = javaExecutable.toString();
+            command.add(javaExecutable.toString());
         }
 
-
-        String jvmArgumentsString;
         if (getJvmArgs() != null) { // use supplied jvm args if given in cmd line
-            jvmArgumentsString = getJvmArgs();
+            command.add(getJvmArgs());
         } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
-            jvmArgumentsString = annJvmArgs;
+            command.add(annJvmArgs);
         } else {
             // else use same jvm args given to this runner
-            StringBuilder jvmArguments = new StringBuilder();
             RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
             List<String> args = RuntimemxBean.getInputArguments();
 
             // prepend jvm args
             if (annJvmArgsPrepend != null) {
-                jvmArguments.append(annJvmArgsPrepend).append(' ');
+                command.add(annJvmArgsPrepend);
             }
 
             for (String arg : args) {
-                jvmArguments.append(arg);
-                jvmArguments.append(' ');
+                command.add(arg);
             }
 
             // append jvm args
             if (annJvmArgsAppend != null) {
-                jvmArguments.append(annJvmArgsAppend).append(' ');
+                command.add(annJvmArgsAppend);
             }
-
-            // with sweet love from Sweden: remove final delimiter
-            if (jvmArguments.length() > 0) {
-                jvmArguments.setLength(jvmArguments.length() - 1);
-            }
-
-            jvmArgumentsString = jvmArguments.toString();
         }
 
         // add any compiler oracle hints
-        String compilerHintsString = "";
         {
-            StringBuilder compilerHints = new StringBuilder();
             Set<String> hints = CompilerHints.defaultList().get();
             if (!hints.isEmpty()) {
-                compilerHints.append("-XX:CompileCommand=quiet ");
+                command.add("-XX:CompileCommand=quiet ");
             }
             for (String l : hints) {
-                compilerHints.append("-XX:CompileCommand=");
-                compilerHints.append(l);
-                compilerHints.append(' ');
+                command.add("-XX:CompileCommand=" + l);
             }
-            compilerHintsString = compilerHints.toString();
         }
 
         // assemble final process command
-
-        StringBuilder command = new StringBuilder();
-        command.append(javaExecutableString);
-
-        if (!jvmArgumentsString.isEmpty()) {
-            command.append(' ');
-            command.append(jvmArgumentsString);
-        }
-
-        command.append(' ');
-        command.append(compilerHintsString);
-
-        command.append(" -cp ");
-        command.append(classPath);
-        command.append(' ');
-        command.append(ForkedMain.class.getName());
-
-        // jvm command
-        String jvmCommand = command.toString();
+        command.add("-cp");
+        command.add(classPath);
+        command.add(ForkedMain.class.getName());
 
         // if user supplied micro flags, give those as well
-        String argumentCommand = this.toCommandLine();
+        Collections.addAll(command, toCommandLine());
 
-        String connectionString = " --hostName " + host + " --hostPort " + port;
+        command.add(benchmark);
 
-        return jvmCommand + ' ' + benchmark + (!argumentCommand.isEmpty() ? ' ' + argumentCommand : "") + connectionString;
+        command.add("--hostName");
+        command.add(host);
+        command.add("--hostPort");
+        command.add(String.valueOf(port));
+
+        return command.toArray(new String[command.size()]);
     }
 
 

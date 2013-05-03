@@ -54,7 +54,15 @@ public class TestOptions {
     private static String getForked(String[] argv) throws Exception{
         HarnessOptions options =  HarnessOptions.newInstance();
         options.parseArguments(argv);
-        return options.toCommandLine().trim();
+        StringBuilder sb = new StringBuilder();
+        for (String l : options.toCommandLine()) {
+            sb.append(l).append(' ');
+        }
+        // with sweet love from Sweden: remove final delimiter
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
     }
 
     @Test
@@ -133,26 +141,6 @@ public class TestOptions {
 
         assertEquals(Runtime.getRuntime().availableProcessors(), mbp.getMaxThreads());
     }
-
-    @Test
-    public void testGetSeparateExecutionCommand() throws Exception {
-        String[] argv = {"-f", "-t", "max", "--jvm", "/home/bin/apa", "--jvmargs", "-Xmx10m"};
-        HarnessOptions options = getOptions(argv);
-
-        String command = options.getSeparateExecutionCommand("testBenchmark", "", null, null, "oracle", 0);
-        assertTrue(command.contains(ORACLE_FORKED_MAIN_CLASS + " testBenchmark -t 0  --hostName oracle --hostPort 0"));
-    }
-
-
-    @Test
-    public void testGetSeparateExecutionCommandNoJvmFlags() throws Exception {
-        String[] argv = {"-f", "-t", "max"};
-        HarnessOptions options = getOptions(argv);
-
-        String command = options.getSeparateExecutionCommand("testBenchmark", "", null, null, "oracle", 0).trim();
-        assertTrue(command.endsWith(ORACLE_FORKED_MAIN_CLASS + " testBenchmark -t 0  --hostName oracle --hostPort 0"));
-    }
-
 
     @Test
     public void testThreadsMax() throws Exception {

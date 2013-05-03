@@ -121,16 +121,18 @@ public class BaseOptions {
      *
      * @return
      */
-    public String toCommandLine() {
-        StringBuilder sb = new StringBuilder();
+    public String[] toCommandLine() {
+        List<String> sb = new ArrayList<String>();
         List<Field> fields = getOptionFields();
         for (Field f : fields) {
             String opImage = fieldToCommandLineImage(f);
             if (opImage != null && !opImage.isEmpty()) {
-                sb.append(opImage).append(' ');
+                for (String s : opImage.split(" ")) {
+                    sb.add(s);
+                }
             }
         }
-        return sb.toString();
+        return sb.toArray(new String[sb.size()]);
     }
 
     /**

@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -327,32 +328,39 @@ public class Runner extends BaseRunner {
             annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
         }
 
-        String commandString = options.getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, host, port);
+        String[] commandString = options.getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, host, port);
 
         int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
         int warmupForkCount = forkAnnotation != null ? forkAnnotation.warmups() : 0;
         if( warmupForkCount>0) {
-            String warmupForkCheat = commandString+" -wi 1 -i 0";
+            String[] warmupForkCheat = concat(commandString, new String[]{"-wi", "1", "-i", "0"});
             if (warmupForkCount == 1) {
-                outputHandler.verbosePrintln("Warmup forking using command: " + warmupForkCheat);
+                outputHandler.verbosePrintln("Warmup forking using command: " + Arrays.toString(warmupForkCheat));
             } else {
-                outputHandler.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + warmupForkCheat);
+                outputHandler.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
             }
             for (int i = 0; i < warmupForkCount; i++) {
                 doFork(warmupForkCheat);
             }
         }
         if (forkCount == 1) {
-            outputHandler.verbosePrintln("Forking using command: " + commandString);
+            outputHandler.verbosePrintln("Forking using command: " + Arrays.toString(commandString));
         } else {
-            outputHandler.verbosePrintln("Forking " + forkCount + " times using command: " + commandString);
+            outputHandler.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
         }
         for (int i = 0; i < forkCount; i++) { // TODO should we report fork number somehow?
             doFork(commandString);
         }
     }
 
-    private void doFork(String commandString) {
+    public String[] concat(String[] t1, String[] t2) {
+        String[] r = new String[t1.length + t2.length];
+        System.arraycopy(t1, 0, r, 0, t1.length);
+        System.arraycopy(t2, 0, r, t1.length, t2.length);
+        return r;
+    }
+
+    private void doFork(String[] commandString) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
