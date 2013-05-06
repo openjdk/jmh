@@ -44,6 +44,9 @@ import java.util.Map;
  * @author anders.astrand@oracle.com
  */
 public class ClassUtils {
+
+    private static final boolean USE_SEPARATE_CLASSLOADER = Boolean.getBoolean("jmh.separateClassLoader");
+
     // Static access only
     private ClassUtils() {
 
@@ -95,8 +98,12 @@ public class ClassUtils {
     }
 
     public static Class<?> loadClass(String className) {
-        // load the class in a different classloader
         try {
+            if (!USE_SEPARATE_CLASSLOADER) {
+                return Class.forName(className);
+            }
+
+            // load the class in a different classloader
             String classPathValue = System.getProperty("java.class.path");
             String[] classPath = classPathValue.split(File.pathSeparator);
             URL[] classPathUrl = new URL[classPath.length];
