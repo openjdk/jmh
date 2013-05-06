@@ -68,52 +68,52 @@ public class BaseOptions {
      */
 
     @Option(name = "-i", aliases = {"--iterations"}, metaVar = "INT", usage = "Number of iterations.")
-    private int iterations = -1;
+    protected int iterations = -1;
 
     @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms; defaults to " + Defaults.ITERATION_TIME_SECS + "s", handler = TimeValueOptionHandler.class)
-    private TimeValue runTime = null;
+    protected TimeValue runTime = null;
 
     @Option(name = "-wi", aliases = {"--warmupiterations"}, metaVar = "INT", usage = "Number of warmup iterations to run.")
-    private int warmupIterations = -1;
+    protected int warmupIterations = -1;
 
     @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms; defaults to " + Defaults.WARMUP_TIME_SECS + "", handler = TimeValueOptionHandler.class)
-    private TimeValue warmupTime = null;
+    protected TimeValue warmupTime = null;
 
     @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" or 0 will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
-    private int threads = -1;
+    protected int threads = -1;
 
     @Option(name = "-sc", aliases = {"--scale"}, usage = "Scale number of threads from 1 to -t/--threads? Default is false", handler = BooleanOptionHandler.class)
-    private boolean scale = false;
+    protected boolean scale = false;
 
     @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work? Default is " + Defaults.SHOULD_SYNCH_ITERATIONS, handler = BooleanOptionHandler.class)
-    private Boolean synchIterations = null; // true
+    protected Boolean synchIterations = null; // true
 
     @Option(name = "-gc", usage = "Should do System.gc() between iterations?", handler = BooleanOptionHandler.class)
-    private boolean gcEachIteration = false;
+    protected boolean gcEachIteration = false;
 
     @Option(name = "-frw", aliases = {"--forcerewarmup"}, usage = "Force re-warmup for each iteration (> 1) if the number of threads differ from last iteration", handler = BooleanOptionHandler.class)
-    private boolean forceReWarmup = false;
+    protected boolean forceReWarmup = false;
 
     @Option(name = "-tc", aliases = {"--threadcounts"}, multiValued = false, usage = "Custom list of concurrent threads per iteration. Example: 1,2,4,8,16 (no spaces). Will override -i/--iterations with length of this array. Note: Only use this if you want a specific ad-hoc pattern.", handler = ThreadCountsOptionHandler.class)
-    private List<Integer> threadCounts = new ArrayList<Integer>();
+    protected List<Integer> threadCounts = new ArrayList<Integer>();
 
     @Option(name = "-v", aliases = {"--verbose"}, usage = "Verbose mode, default off", handler = BooleanOptionHandler.class)
-    private boolean verbose = false;
+    protected boolean verbose = false;
 
     @Option(name = "-tl", aliases = {"--tracelevel"}, usage = "Trace level, default 0")
-    private int traceLevel = -1;
+    protected int traceLevel = -1;
 
     @Option(name = "-odr", aliases = {"--outputdetailedresults"}, usage = "Output detailed results. Default is false", handler = BooleanOptionHandler.class)
-    private boolean outputDetailedResults = false;
+    protected boolean outputDetailedResults = false;
 
     @Option(name = "-otss", aliases = {"--outputthreadsubstatistics"}, usage = "Output thread sub-statistics. A threadcount of: 1,1,2,2 will display statistics between and after 1,1 and 2,2. Default is false", handler = BooleanOptionHandler.class)
-    private boolean outputThreadSubStatistics = false;
+    protected boolean outputThreadSubStatistics = false;
 
     @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
-    private boolean failOnError = false;
+    protected boolean failOnError = false;
 
     @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listprofilers to list available profilers", handler = ProfilersOptionHandler.class)
-    private Set<ProfilerFactory.Profilers> profilers = EnumSet.noneOf(ProfilerFactory.Profilers.class);
+    protected Set<ProfilerFactory.Profilers> profilers = EnumSet.noneOf(ProfilerFactory.Profilers.class);
 
 
     /**

@@ -38,13 +38,13 @@ public class ForkedOptions extends BaseOptions {
 
 
     @Argument(metaVar = "benchmark", usage = "Microbenchmarks to run")
-    private String benchmark = null;
+    protected String benchmark = null;
 
     @Option(name = "--hostName", metaVar = "String", usage = "The IP address of host JVM")
-    private String hostName = null;
+    protected String hostName = null;
 
     @Option(name = "--hostPort", metaVar = "INT", usage = "The IP port of host JVM")
-    private int hostPort = 0;
+    protected int hostPort = 0;
 
     /**
      * Kawaguchi's parser

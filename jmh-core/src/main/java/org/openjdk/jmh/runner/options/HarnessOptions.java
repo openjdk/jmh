@@ -54,51 +54,51 @@ public class HarnessOptions extends BaseOptions {
 
     // test selection options
     @Argument(metaVar = "REGEXP", usage = "Microbenchmarks to run. Regexp filtering out classes or methods which are MicroBenchmarks.")
-    private List<String> regexps = new ArrayList<String>();
+    protected List<String> regexps = new ArrayList<String>();
 
     // micro options
     // the following list of options are not forwarding into forked JVM.
     // "forwarding option should be declared in BaseOptions class" (c) capt. O.
 
     @Option(name = "-f", aliases = {"--fork"}, metaVar = "{ INT }", usage = "Start each benchmark in new JVM, forking from the same JDK unless --jvm is set. Optional parameter specifies number of times harness should fork. Zero forks means \"no fork\", also \"false\" is accepted", handler = ForkOptionHandler.class)
-    private int fork = -1;
+    protected int fork = -1;
 
     @Option(name = "-o", aliases = {"--output"}, metaVar = "FILE", usage = "Redirect output to FILE")
-    private String output = null;
+    protected String output = null;
 
     @Option(name = "-of", aliases = {"--outputformat"}, metaVar = "FORMAT", usage = "Format to use for output, use --listformats to list available formats")
-    private OutputFormatType outputFormat = OutputFormatType.TextReport;
+    protected OutputFormatType outputFormat = OutputFormatType.TextReport;
 
     @Option(name = "--jvm", metaVar = "JVM", usage = "Custom JVM to use with fork.")
-    private String jvm = null;
+    protected String jvm = null;
 
     @Option(name = "--jvmargs", metaVar = "JVMARGS", usage = "Custom JVM arguments for --jvm, default is to use parent process's arguments")
-    private String jvmArgs = null;
+    protected String jvmArgs = null;
 
     @Option(name = "--jvmclasspath", metaVar = "CLASSPATH", usage = "Custom classpath for --jvm, default is to use parent process's classpath")
-    private String jvmClassPath = null;
+    protected String jvmClassPath = null;
 
     @Option(name = "-e", aliases = {"--exclude"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to exclude. Regexp filtering out classes or methods which are MicroBenchmarks.")
-    private List<String> excludes = new ArrayList<String>();
+    protected List<String> excludes = new ArrayList<String>();
 
     @Option(name = "-wm", aliases = {"--warmupmode"}, usage = "Warmup mode for warming up selected micro benchmarks. Warmup modes are BeforeAny (measurements) or BeforeEach (measurement) (original mode)")
-    private WarmupMode warmupMode = WarmupMode.BEFOREEACH;
+    protected WarmupMode warmupMode = WarmupMode.BEFOREEACH;
 
     @Option(name = "-wmb", aliases = {"--warmupmicrobenchmarks"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to run for warmup before running any other benchmarks. These micros may be different from the target micros to warm up the harness or other parts of the JVM prior to running the target micro benchmarks. Regexp filtering out classes or methods which are MicroBenchmarks.")
-    private List<String> warmupMicros = new ArrayList<String>();
+    protected List<String> warmupMicros = new ArrayList<String>();
 
     // show something options
     @Option(name = "-l", aliases = {"--list"}, usage = "List available microbenchmarks and exit. Filter using available regexps.")
-    private boolean list = false;
+    protected boolean list = false;
 
     @Option(name = "--listformats", usage = "List available output formats")
-    private boolean listFormats = false;
+    protected boolean listFormats = false;
 
     @Option(name = "-h", aliases = {"--help"}, usage = "Display help")
-    private boolean help = false;
+    protected boolean help = false;
 
     @Option(name = "--listprofilers", usage = "List available profilers")
-    private boolean listProfilers = false;
+    protected boolean listProfilers = false;
 
     /**
      * Warmup Mode enum
