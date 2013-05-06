@@ -24,28 +24,28 @@ questions.
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>org.openjdk.jmh</groupId>
-    <artifactId>jmh-parent</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>jmh-simple-benchmark-archetype</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Java Microbenchmark Harness Parent</name>
+    <packaging>jar</packaging>
+    <name>Java Microbenchmark Harness: Simple Benchmark Archetype</name>
+
+    <organization>
+        <name>Oracle and/or its affiliates. All rights reserved.</name>
+        <url>http://openjdk.java.net/</url>
+    </organization>
+    <inceptionYear>2012</inceptionYear>
 
     <description>
-        This is  a framework for writing and running Java Microbenchmarks.
+        This is the sample JMH benchmark archetype.
     </description>
 
     <prerequisites>
         <maven>3.0</maven>
     </prerequisites>
 
-    <modules>
-        <module>jmh-core</module>
-        <module>jmh-core-it</module>
-        <module>jmh-samples</module>
-        <module>jmh-simple-benchmark-archetype</module>
-    </modules>
-
 </project>
+

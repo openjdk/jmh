@@ -23,29 +23,10 @@ or visit www.oracle.com if you need additional information or have any
 questions.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.openjdk.jmh</groupId>
-    <artifactId>jmh-parent</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <name>Java Microbenchmark Harness Parent</name>
-
-    <description>
-        This is  a framework for writing and running Java Microbenchmarks.
-    </description>
-
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-
-    <modules>
-        <module>jmh-core</module>
-        <module>jmh-core-it</module>
-        <module>jmh-samples</module>
-        <module>jmh-simple-benchmark-archetype</module>
-    </modules>
-
-</project>
+<archetype xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0 http://maven.apache.org/xsd/archetype-1.0.0.xsd">
+  <id>jmh-simple-benchmark-archetype</id>
+  <sources>
+    <source>src/main/java/MyBenchmark.java</source>
+  </sources>
+</archetype>
