@@ -118,7 +118,7 @@ public class HarnessOptions extends BaseOptions {
         return opts;
     }
 
-    private HarnessOptions() {
+    protected HarnessOptions() {
     }
 
     /**

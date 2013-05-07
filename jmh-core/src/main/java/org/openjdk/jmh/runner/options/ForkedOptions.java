@@ -57,7 +57,7 @@ public class ForkedOptions extends BaseOptions {
         return opts;
     }
 
-    private ForkedOptions() {
+    protected ForkedOptions() {
     }
 
     /**
