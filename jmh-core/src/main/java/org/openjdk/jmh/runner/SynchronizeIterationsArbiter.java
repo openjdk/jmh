@@ -24,55 +24,29 @@
  */
 package org.openjdk.jmh.runner;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SynchronizeIterationsArbiter implements Arbiter {
 
-    private final int numThreads;
-
-    private volatile int version;
-
+    private final int expected;
+    private final AtomicInteger visited;
     private volatile boolean shouldWait;
 
-    private final boolean[] ready;
-
-    private final AtomicInteger indexCounter = new AtomicInteger();
-
-    private final Map<Thread, Integer> indexes = new ConcurrentHashMap<Thread, Integer>();
-
     public SynchronizeIterationsArbiter(int numThreads) {
-        this.numThreads = numThreads;
-        this.ready = new boolean[numThreads];
+        this.expected = numThreads;
+        this.visited = new AtomicInteger();
         this.shouldWait = true;
     }
 
     @Override
     public void announceReady() {
-        Thread thread = Thread.currentThread();
-        Integer index = indexes.get(thread);
-        if (index == null) {
-            index = indexCounter.getAndIncrement();
-            if (index >= numThreads) {
-                throw new IllegalStateException("More threads than expected");
-            }
-            indexes.put(thread, index);
+        int v = visited.incrementAndGet();
+        if (v == expected) {
+            shouldWait = false;
         }
 
-        if (!ready[index]) {
-            ready[index] = true;
-            version++; // publish
-        }
-
-        if (version > 0) {
-            boolean allSet = true;
-            for (boolean b : ready) {
-                allSet &= b;
-            }
-            if (allSet) {
-                shouldWait = false;
-            }
+        if (v > expected) {
+            throw new IllegalStateException("More threads than expected");
         }
     }
 
