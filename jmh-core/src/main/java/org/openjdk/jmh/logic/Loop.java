@@ -52,30 +52,66 @@ public class Loop {
         }
     });
 
-    /* Flag for if we are done or not.
-     * This is specifically the public field, so to spare one virtual call.
+    static class L1 {
+        public long p01, p02, p03, p04, p05, p06, p07, p08;
+        public long p11, p12, p13, p14, p15, p16, p17, p18;
+    }
+
+    /**
+     * @see BlackHole for rationale
      */
-    public volatile boolean isDone;
+    public static class Data extends L1 {
+        /* Flag for if we are done or not.
+         * This is specifically the public field, so to spare one virtual call.
+         */
+        public volatile boolean isDone;
 
-    /** How long we should loop */
-    private final long duration;
-    /** Start timestamp */
-    private long start;
-    /** End timestamp */
-    private long end;
-    /** Start of pause */
-    private long pauseStart;
-    /** Total pause time */
-    private long totalPause;
+        /** How long we should loop */
+        public final long duration;
+        /** Start timestamp */
+        public long start;
+        /** End timestamp */
+        public long end;
+        /** Start of pause */
+        public long pauseStart;
+        /** Total pause time */
+        public long totalPause;
 
-    private final Arbiter warmupArbiter;
-    private final Arbiter warmdownArbiter;
-    private final CountDownLatch preSetup;
-    private final CountDownLatch preTearDown;
-    private final boolean lastIteration;
+        public final Arbiter warmupArbiter;
+        public final Arbiter warmdownArbiter;
+        public final CountDownLatch preSetup;
+        public final CountDownLatch preTearDown;
+        public final boolean lastIteration;
 
-    private volatile long pad01, pad02, pad03, pad04, pad05, pad06, pad07, pad08;
-    private volatile long pad11, pad12, pad13, pad14, pad15, pad16, pad17, pad18;
+        public Data(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+            this.warmupArbiter = warmupArbiter;
+            this.warmdownArbiter = warmdownArbiter;
+            this.preSetup = preSetup;
+            this.preTearDown = preTearDown;
+            this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
+            this.lastIteration = lastIteration;
+        }
+
+    }
+
+    static class L3 extends Data {
+        public long e01, e02, e03, e04, e05, e06, e07, e08;
+        public long e11, e12, e13, e14, p15, p16, p17, p18;
+
+        public L3(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+            super(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);
+        }
+    }
+
+    static class L4 extends L3 {
+        public int marker;
+
+        public L4(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+            super(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);
+        }
+    }
+
+    public final L4 data;
 
     /**
      * Constructor
@@ -96,12 +132,7 @@ public class Loop {
     }
 
     public Loop(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-        this.warmupArbiter = warmupArbiter;
-        this.warmdownArbiter = warmdownArbiter;
-        this.preSetup = preSetup;
-        this.preTearDown = preTearDown;
-        this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
-        this.lastIteration = lastIteration;
+        data = new L4(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);
     }
 
 
@@ -110,22 +141,22 @@ public class Loop {
     public void start() {
         enable();
 
-        assert start == 0;
-        assert end == 0;
-        start = System.nanoTime();
+        assert data.start == 0;
+        assert data.end == 0;
+        data.start = System.nanoTime();
     }
 
 
     public void enable() {
-        assert !isDone;
-        isDone = false;
+        assert !data.isDone;
+        data.isDone = false;
 
         timers.schedule(new Runnable() {
             @Override
             public void run() {
-                isDone = true;
+                data.isDone = true;
             }
-        }, duration, TimeUnit.NANOSECONDS);
+        }, data.duration, TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -135,23 +166,23 @@ public class Loop {
      */
     @Deprecated // GMB generator emits the proper code instead
     public void pauseMeasurement() {
-        assert pauseStart == 0;
-        pauseStart = System.nanoTime();
+        assert data.pauseStart == 0;
+        data.pauseStart = System.nanoTime();
     }
 
     /** Resume a paused timing */
     @Deprecated // GMB generator emits the proper code instead
     public void resumeMeasurement() {
-        assert pauseStart != 0;
-        totalPause += System.nanoTime() - pauseStart;
-        pauseStart = 0;
+        assert data.pauseStart != 0;
+        data.totalPause += System.nanoTime() - data.pauseStart;
+        data.pauseStart = 0;
     }
 
     /** End timer and record the end time */
     @Deprecated // GMB generator emits the proper code instead
     public void end() {
-        assert isDone;
-        end = System.nanoTime();
+        assert data.isDone;
+        data.end = System.nanoTime();
     }
 
     /**
@@ -161,8 +192,8 @@ public class Loop {
      */
     @Deprecated // GMB generator emits the proper code instead
     public boolean done() {
-        assert start != 0;
-        return isDone;
+        assert data.start != 0;
+        return data.isDone;
     }
 
     /**
@@ -174,10 +205,10 @@ public class Loop {
      * @return the time the iteration took
      */
     public long getTime() {
-        assert start != 0;
-        assert end != 0;
-        assert isDone;
-        return (end - start - totalPause);
+        assert data.start != 0;
+        assert data.end != 0;
+        assert data.isDone;
+        return (data.end - data.start - data.totalPause);
     }
 
     /**
@@ -186,10 +217,10 @@ public class Loop {
      * @return The total pause time in nanoseconds
      */
     public long getTotalPausetime() {
-        assert start != 0;
-        assert end != 0;
-        assert isDone;
-        return totalPause;
+        assert data.start != 0;
+        assert data.end != 0;
+        assert data.isDone;
+        return data.totalPause;
     }
 
     /**
@@ -198,10 +229,10 @@ public class Loop {
      * @return The total iteration run time including pauses in nanoseconds
      */
     public long getTotalRuntime() {
-        assert start != 0;
-        assert end != 0;
-        assert isDone;
-        return (end - start);
+        assert data.start != 0;
+        assert data.end != 0;
+        assert data.isDone;
+        return (data.end - data.start);
     }
 
     /**
@@ -220,29 +251,29 @@ public class Loop {
      * @return
      */
     public long getDuration(TimeUnit unit) {
-        return unit.convert(duration, TimeUnit.NANOSECONDS);
+        return unit.convert(data.duration, TimeUnit.NANOSECONDS);
     }
 
     public boolean shouldContinueWarmup() {
-        return warmupArbiter.shouldWait();
+        return data.warmupArbiter.shouldWait();
     }
 
     public boolean shouldContinueWarmdown() {
-        return warmdownArbiter.shouldWait();
+        return data.warmdownArbiter.shouldWait();
     }
 
     public void announceWarmupReady() {
-        warmupArbiter.announceReady();
+        data.warmupArbiter.announceReady();
     }
 
     public void announceWarmdownReady() {
-        warmdownArbiter.announceReady();
+        data.warmdownArbiter.announceReady();
     }
 
     public void preSetup() {
         try {
-            preSetup.countDown();
-            preSetup.await();
+            data.preSetup.countDown();
+            data.preSetup.await();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -250,14 +281,14 @@ public class Loop {
 
     public void preTearDown() {
         try {
-            preTearDown.countDown();
-            preTearDown.await();
+            data.preTearDown.countDown();
+            data.preTearDown.await();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
 
     public boolean isLastIteration() {
-        return lastIteration;
+        return data.lastIteration;
     }
 }
