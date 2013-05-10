@@ -329,21 +329,19 @@ public class BlackHole {
         }
     }
 
-    public static long consumedCPU;
+    public static volatile long consumedCPU = 42;
 
     /**
      * Consume some amount of time tokens.
-     * This call does the CPU work linear to the number of tokens.
-     * <p>
-     * One token is really small, around 40 clocks on 2.0 Ghz i5.
-     * The method is also having static overhead of around 20ns per call.
+     * This method does the CPU work almost linear to the number of tokens.
+     * One token is really small, around 3 clocks on 2.0 Ghz i5,
+     * see JMH samples for the complete demo.
      *
      * @param tokens CPU tokens to consume
      */
     public static void consumeCPU(long tokens) {
         // randomize start so that JIT could not memoize;
-        // this costs significantly on low token count.
-        long t = System.nanoTime();
+        long t = consumedCPU;
 
         for (long i = 0; i < tokens; i++) {
             t += (t * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
@@ -351,7 +349,8 @@ public class BlackHole {
 
         // need to guarantee side-effect on the result,
         // but can't afford contention; make sure we update the shared state
-        // only in the unlikely even
+        // only in the unlikely case, so not to do the furious writes,
+        // but still dodge DCE.
         if (t == 42) {
             consumedCPU += t;
         }
