@@ -53,8 +53,10 @@ public class Loop {
     });
 
     static class L1 {
-        public long p01, p02, p03, p04, p05, p06, p07, p08;
-        public long p11, p12, p13, p14, p15, p16, p17, p18;
+        public int p01, p02, p03, p04, p05, p06, p07, p08;
+        public int p11, p12, p13, p14, p15, p16, p17, p18;
+        public int p21, p22, p23, p24, p25, p26, p27, p28;
+        public int p31, p32, p33, p34, p35, p36, p37, p38;
     }
 
     /**
@@ -95,8 +97,10 @@ public class Loop {
     }
 
     static class L3 extends Data {
-        public long e01, e02, e03, e04, e05, e06, e07, e08;
-        public long e11, e12, e13, e14, p15, p16, p17, p18;
+        public int e01, e02, e03, e04, e05, e06, e07, e08;
+        public int e11, e12, e13, e14, e15, e16, e17, e18;
+        public int e21, e22, e23, e24, e25, e26, e27, e28;
+        public int e31, e32, e33, e34, e35, e36, e37, e38;
 
         public L3(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
             super(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);

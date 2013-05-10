@@ -72,6 +72,9 @@ public class BlackHole {
      * hierarchy so that the padding in super- and sub-class are laid out
      * right before and right after the protected fields.
      * <p/>
+     * We also pad with "int"-s so that dense layout in superclass does not
+     * have the gap where runtime can fit the subclass field.
+     * <p/>
      * 2. Compilers are unable to predict the value of the volatile read.
      * While the compilers can speculatively optimize until the relevant
      * volatile write happens, it is unlikely to be practical to be able to stop
@@ -97,8 +100,10 @@ public class BlackHole {
     private final L4 sink;
 
     static class L1 {
-        public long p01, p02, p03, p04, p05, p06, p07, p08;
-        public long p11, p12, p13, p14, p15, p16, p17, p18;
+        public int p01, p02, p03, p04, p05, p06, p07, p08;
+        public int p11, p12, p13, p14, p15, p16, p17, p18;
+        public int p21, p22, p23, p24, p25, p26, p27, p28;
+        public int p31, p32, p33, p34, p35, p36, p37, p38;
     }
 
     static class L2 extends L1 {
@@ -114,8 +119,10 @@ public class BlackHole {
     }
 
     static class L3 extends L2 {
-        public long e01, e02, e03, e04, e05, e06, e07, e08;
-        public long e11, e12, e13, e14, p15, p16, p17, p18;
+        public int e01, e02, e03, e04, e05, e06, e07, e08;
+        public int e11, e12, e13, e14, e15, e16, e17, e18;
+        public int e21, e22, e23, e24, e25, e26, e27, e28;
+        public int e31, e32, e33, e34, e35, e36, e37, e38;
     }
 
     static class L4 extends L3 {

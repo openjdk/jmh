@@ -437,6 +437,22 @@ public class StateObjectHandler {
             result.add("   private volatile int jmh_auto_generated_pad14;");
             result.add("   private volatile int jmh_auto_generated_pad15;");
             result.add("   private volatile int jmh_auto_generated_pad16;");
+            result.add("   private volatile int jmh_auto_generated_pad17;");
+            result.add("   private volatile int jmh_auto_generated_pad18;");
+            result.add("   private volatile int jmh_auto_generated_pad19;");
+            result.add("   private volatile int jmh_auto_generated_pad20;");
+            result.add("   private volatile int jmh_auto_generated_pad21;");
+            result.add("   private volatile int jmh_auto_generated_pad22;");
+            result.add("   private volatile int jmh_auto_generated_pad23;");
+            result.add("   private volatile int jmh_auto_generated_pad24;");
+            result.add("   private volatile int jmh_auto_generated_pad25;");
+            result.add("   private volatile int jmh_auto_generated_pad26;");
+            result.add("   private volatile int jmh_auto_generated_pad27;");
+            result.add("   private volatile int jmh_auto_generated_pad28;");
+            result.add("   private volatile int jmh_auto_generated_pad29;");
+            result.add("   private volatile int jmh_auto_generated_pad30;");
+            result.add("   private volatile int jmh_auto_generated_pad31;");
+            result.add("   private volatile int jmh_auto_generated_pad32;");
             result.add("}");
         }
         return result;

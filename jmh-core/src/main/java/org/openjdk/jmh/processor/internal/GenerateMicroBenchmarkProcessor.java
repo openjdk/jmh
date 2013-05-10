@@ -369,22 +369,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private void generatePadding(PrintWriter writer) {
         // Generate padding
         writer.println(
-                "    public volatile long pad01;\n" +
-                "    public volatile long pad02;\n" +
-                "    public volatile long pad03;\n" +
-                "    public volatile long pad04;\n" +
-                "    public volatile long pad05;\n" +
-                "    public volatile long pad06;\n" +
-                "    public volatile long pad07;\n" +
-                "    public volatile long pad08;\n" +
-                "    public volatile long pad09;\n" +
-                "    public volatile long pad10;\n" +
-                "    public volatile long pad11;\n" +
-                "    public volatile long pad12;\n" +
-                "    public volatile long pad13;\n" +
-                "    public volatile long pad14;\n" +
-                "    public volatile long pad15;\n" +
-                "    public volatile long pad16;\n" +
+                "    public volatile int pad01, pad02, pad03, pad04, pad05, pad06, pad07, pad08;\n" +
+                "    public volatile int pad11, pad12, pad13, pad24, pad15, pad16, pad17, pad18;\n" +
+                "    public volatile int pad21, pad22, pad23, pad34, pad25, pad26, pad27, pad28;\n" +
+                "    public volatile int pad31, pad32, pad33, pad44, pad35, pad36, pad37, pad38;\n" +
                 "    ");
     }
 
