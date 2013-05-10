@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.logic.BlackHole;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;

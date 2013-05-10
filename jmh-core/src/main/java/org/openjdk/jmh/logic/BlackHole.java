@@ -115,7 +115,8 @@ public class BlackHole {
         public volatile long l1 = 1, l2 = 2;
         public volatile float f1 = 1.0f, f2 = 2.0f;
         public volatile double d1 = 1.0d, d2 = 2.0d;
-        public volatile Object obj1 = new Object(), obj2 = new Object();
+        public volatile Object obj1 = new Object();
+        public volatile Object objs1 = new Object[]{new Object()};
     }
 
     static class L3 extends L2 {
@@ -147,6 +148,7 @@ public class BlackHole {
         }
 
         consistencyCheck();
+        warmup();
     }
 
     static void consistencyCheck() {
@@ -168,7 +170,7 @@ public class BlackHole {
         check("d1");
         check("d2");
         check("obj1");
-        check("obj2");
+        check("objs1");
     }
 
     static void check(String fieldName) {
@@ -189,14 +191,48 @@ public class BlackHole {
         }
     }
 
+    private static BlackHole warmedUp;
+
+    /**
+     * This is highly HotSpot-specific and may change in future.
+     *
+     * Need to have some of the branches taken before going to production.
+     * Object consumers are susceptible to EA figuring out the reference equality
+     * with newly allocated, but not escaped object is always false. We can break
+     * this by letting EA know there is alive code branch on which we actually need
+     * the object. Normally, non-taken branches will not be considered by EA; thus,
+     * we need to warm them up.
+     */
+    public static void warmup() {
+        BlackHole bh = new BlackHole();
+        final int COUNT = 100000;
+        for (int i = 0; i < COUNT; i++) {
+            try {
+                bh.consume(bh.sink.obj1);
+            } catch (IllegalStateException e) {
+                // do nothing
+            }
+        }
+
+        for (int i = 0; i < COUNT; i++) {
+            try {
+                bh.consume(bh.sink.objs1);
+            } catch (IllegalStateException e) {
+                // do nothing
+            }
+        }
+
+        warmedUp = bh;
+    }
+
     /**
      * Consume object. This call provides a side effect preventing JIT to eliminate dependent computations.
      *
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
-        if (obj == sink.obj1 & obj == sink.obj2) {
-            // VERY UNLIKELY, and will in the end result in the exception.
+        if (obj == sink.obj1) {
+            // SHOULD NEVER HAPPEN IN PRODUCTION
             StringBuilder sb = new StringBuilder();
             try {
                 for (Field f : obj.getClass().getDeclaredFields()) {
@@ -206,7 +242,7 @@ public class BlackHole {
             } catch (Throwable t) {
                 // do nothing
             }
-            throw new Error("JMH infrastructure bug: obj = " + obj + ", sb = " + sb);
+            throw new IllegalStateException("JMH infrastructure bug: obj = " + obj + ", sb = " + sb);
         }
     }
 
@@ -216,8 +252,8 @@ public class BlackHole {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
-        if (objs == sink.obj1 & objs == sink.obj2) {
-            // VERY UNLIKELY, and will in the end result in the exception.
+        if (objs == sink.objs1) {
+            // SHOULD NEVER HAPPEN IN PRODUCTION
             StringBuilder sb = new StringBuilder();
             for (Object obj : objs) {
                 try {
@@ -229,7 +265,7 @@ public class BlackHole {
                     // do nothing
                 }
             }
-            throw new Error("JMH infrastructure bug: objs = " + Arrays.toString(objs) + ", sb = " + sb);
+            throw new IllegalStateException("JMH infrastructure bug: objs = " + Arrays.toString(objs) + ", sb = " + sb);
         }
     }
 
@@ -241,7 +277,7 @@ public class BlackHole {
     public final void consume(byte b) {
         if (b == sink.b1 & b == sink.b2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: b = " + b);
+            throw new IllegalStateException("JMH infrastructure bug: b = " + b);
         }
     }
 
@@ -253,7 +289,7 @@ public class BlackHole {
     public final void consume(boolean bool) {
         if (bool == sink.bool1 & bool == sink.bool2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: bool = " + bool);
+            throw new IllegalStateException("JMH infrastructure bug: bool = " + bool);
         }
     }
 
@@ -265,7 +301,7 @@ public class BlackHole {
     public final void consume(char c) {
         if (c == sink.c1 & c == sink.c2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: c = " + c);
+            throw new IllegalStateException("JMH infrastructure bug: c = " + c);
         }
     }
 
@@ -277,7 +313,7 @@ public class BlackHole {
     public final void consume(short s) {
         if (s == sink.s1 & s == sink.s2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: s = " + s);
+            throw new IllegalStateException("JMH infrastructure bug: s = " + s);
         }
     }
 
@@ -289,7 +325,7 @@ public class BlackHole {
     public final void consume(int i) {
         if (i == sink.i1 & i == sink.i2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: i = " + i);
+            throw new IllegalStateException("JMH infrastructure bug: i = " + i);
         }
     }
 
@@ -301,7 +337,7 @@ public class BlackHole {
     public final void consume(long l) {
         if (l == sink.l1 & l == sink.l2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: l = " + l);
+            throw new IllegalStateException("JMH infrastructure bug: l = " + l);
         }
     }
 
@@ -313,7 +349,7 @@ public class BlackHole {
     public final void consume(float f) {
         if (f == sink.f1 & f == sink.f2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: f = " + f);
+            throw new IllegalStateException("JMH infrastructure bug: f = " + f);
         }
     }
 
@@ -325,7 +361,7 @@ public class BlackHole {
     public final void consume(double d) {
         if (d == sink.d1 & d == sink.d2) {
             // SHOULD NEVER HAPPEN
-            throw new Error("JMH infrastructure bug: d = " + d);
+            throw new IllegalStateException("JMH infrastructure bug: d = " + d);
         }
     }
 
