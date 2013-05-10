@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.logic.BlackHole;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
@@ -42,8 +41,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * abstract runner - base class for Runner & ForkedRunner

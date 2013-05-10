@@ -32,7 +32,6 @@ import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
-import org.openjdk.jmh.runner.parameters.Defaults;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;

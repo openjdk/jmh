@@ -25,8 +25,6 @@
 package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.CompilerHints;
 
 import javax.annotation.processing.AbstractProcessor;

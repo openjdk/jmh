@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.output.format.OutputFormat;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openjdk.jmh.output.OutputFormatFactory;
+import org.openjdk.jmh.output.format.OutputFormat;
 
 import java.util.ArrayList;
 import java.util.List;

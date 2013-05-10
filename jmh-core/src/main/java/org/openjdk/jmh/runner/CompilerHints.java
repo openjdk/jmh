@@ -27,7 +27,6 @@ package org.openjdk.jmh.runner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 

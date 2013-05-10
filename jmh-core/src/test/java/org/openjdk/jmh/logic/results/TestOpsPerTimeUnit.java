@@ -25,8 +25,6 @@
 package org.openjdk.jmh.logic.results;
 
 import org.junit.Test;
-import org.openjdk.jmh.logic.results.OpsPerTimeUnit;
-import org.openjdk.jmh.logic.results.Result;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;

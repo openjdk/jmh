@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.util;
 
-import org.openjdk.jmh.util.internal.Statistics;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openjdk.jmh.util.internal.Statistics;
 
 import static org.junit.Assert.assertEquals;
 

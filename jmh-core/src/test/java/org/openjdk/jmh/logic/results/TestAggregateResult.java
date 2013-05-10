@@ -24,19 +24,14 @@
  */
 package org.openjdk.jmh.logic.results;
 
-import org.junit.Ignore;
-import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openjdk.jmh.logic.results.OpsPerTimeUnit;
-import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.results.internal.IterationResult;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for AggregateResult

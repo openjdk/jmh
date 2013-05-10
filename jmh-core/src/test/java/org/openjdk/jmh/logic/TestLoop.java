@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.logic;
 
-import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.junit.Test;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.TimeUnit;
 

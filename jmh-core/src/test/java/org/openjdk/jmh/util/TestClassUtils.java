@@ -27,17 +27,9 @@ package org.openjdk.jmh.util;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  *

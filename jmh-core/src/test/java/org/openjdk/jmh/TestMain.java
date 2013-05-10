@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh;
 
-import org.openjdk.jmh.Main;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
