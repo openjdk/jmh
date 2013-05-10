@@ -34,9 +34,9 @@ import java.util.Arrays;
 /**
  * Black Hole.
  * <p/>
- * Harness is supposed to have a thread-local black hole available for every test.
- * Writes ("consumes") to black hole have the side effect for JIT to not to eliminate
- * computations resulted in blackholed value.
+ * Black hole "consumes" the values, conceiving no information to JIT whether the
+ * value is actually used afterwards. This can save from the dead-code elimination
+ * of the computations resulting in the given values.
  *
  * @author aleksey.shipilev@oracle.com
  */
@@ -46,40 +46,87 @@ public class BlackHole {
     /**
      * IMPLEMENTATION NOTES:
      * <p/>
-     * These fields are public to trick JIT into believing
-     * someone can finally read these values. There are fields to primitive types
-     * as well to prevent auto-boxing.
+     * The major things to dodge with Blackholes are:
+     *   a) dead-code elimination: the arguments should be used on every call,
+     *      so that compilers are unable to fold them into constants or
+     *      otherwise optimize them away along with the computations resulted
+     *      in them.
+     *   b) false sharing: reading/writing the state may disturb the cache
+     *      lines. We need to isolate the critical fields to achieve tolerable
+     *      performance.
+     *   c) write wall: we need to ease off on writes as much as possible,
+     *      since it disturbs the caches, pollutes the write buffers, etc.
+     *      This may very well result in hitting the memory wall prematurely.
+     *      Reading memory is fine as long as it is cacheable.
      * <p/>
-     * Note that side-effect is guaranteed only for latest object put in blackhole.
-     * If you need to blackhole multiple things, either compute something on them,
-     * and blackhole the result, or use different blackholes.
+     * To achieve these goals, we are piggybacking on several things in the
+     * compilers:
      * <p/>
-     * Objects are consumed with the aliasing trick: we can't normally afford
-     * to write the object reference, because Blackhole can already be in the old
-     * gen, and writing the reference will entail GC write barrier.
+     * 1. Superclass fields are not reordered with the subclass' fields.
+     * No practical VM that we are aware of is doing this. It is unpractical,
+     * because if the superclass fields are at the different offsets in two
+     * subclasses, the VMs would then need to do the polymorphic access for
+     * the superclass fields.
      * <p/>
-     * We make the trick of reading some "arbitrary" offset of Blackhole and
-     * compare the incoming object against it. We inherently piggyback on JIT
-     * inability to figure out the offset, being read from the raw memory each time
-     * at runtime. The offset is always the same, so the read always returns the
-     * unique object. In the face However, JIT can not predict the stored object would be
-     * the same, and it should pessimistically keep the object around.
+     * This allows us to "squash" the protected fields in the inheritance
+     * hierarchy so that the padding in super- and sub-class are laid out
+     * right before and right after the protected fields.
+     * <p/>
+     * 2. Compilers are unable to predict the value of the volatile read.
+     * While the compilers can speculatively optimize until the relevant
+     * volatile write happens, it is unlikely to be practical to be able to stop
+     * all the threads the instant that write had happened.
+     * <p/>
+     * This allows us to compare the incoming values against the relevant
+     * volatile fields. The values in those volatile fields are never changing,
+     * but due to (2), we should re-read the values again and again.
+     * <p/>
+     * Then, due to Java referential semantics, the incoming objects will never
+     * be equal to the distinct object we have. Reading the object fields at
+     * unlikely path helps to introduce the dependencies for all the fields in
+     * that object. We do two comparisons to match primitive cases, see below.
+     * <p/>
+     * The primitives are harder, because we can't predict what values we
+     * will be fed. But we can compare the incoming value with *two* distinct
+     * known values, and both checks will never be true at the same time.
+     * <p/>
+     * Note the bitwise AND in all the predicates: both to spare additional
+     * branch, and also to provide more uniformity in the performance.
      */
 
-    public byte b;
-    public boolean bool;
-    public char c;
-    public short s;
-    public int i;
-    public long l;
-    public float f;
-    public double d;
+    private final L4 sink;
 
-    // globally reachable, volatile for a reason, see impl. note
-    public volatile Object uniqueObj = new Object();
+    static class L1 {
+        public long p01, p02, p03, p04, p05, p06, p07, p08;
+        public long p11, p12, p13, p14, p15, p16, p17, p18;
+    }
+
+    static class L2 extends L1 {
+        public volatile byte b1 = 1, b2 = 2;
+        public volatile boolean bool1 = false, bool2 = true;
+        public volatile char c1 = 'A', c2 = 'B';
+        public volatile short s1 = 1, s2 = 2;
+        public volatile int i1 = 1, i2 = 2;
+        public volatile long l1 = 1, l2 = 2;
+        public volatile float f1 = 1.0f, f2 = 2.0f;
+        public volatile double d1 = 1.0d, d2 = 2.0d;
+        public volatile Object obj1 = new Object(), obj2 = new Object();
+    }
+
+    static class L3 extends L2 {
+        public long e01, e02, e03, e04, e05, e06, e07, e08;
+        public long e11, e12, e13, e14, p15, p16, p17, p18;
+    }
+
+    static class L4 extends L3 {
+        public int marker;
+    }
+
+    public BlackHole() {
+        sink = new L4();
+    }
 
     private static Unsafe U;
-    private static long OFFSET_ADDR;
 
     static {
         try {
@@ -92,15 +139,47 @@ public class BlackHole {
             throw new IllegalStateException(e);
         }
 
-        OFFSET_ADDR = U.allocateMemory(16);
+        consistencyCheck();
+    }
+
+    static void consistencyCheck() {
+        // checking the fields are not reordered
+        check("b1");
+        check("b2");
+        check("bool1");
+        check("bool2");
+        check("c1");
+        check("c2");
+        check("s1");
+        check("s2");
+        check("i1");
+        check("i2");
+        check("l1");
+        check("l2");
+        check("f1");
+        check("f2");
+        check("d1");
+        check("d2");
+        check("obj1");
+    }
+
+    static void check(String fieldName) {
+        final long requiredGap = 128;
+        long markerOff = getOffset("marker");
+        long off = getOffset(fieldName);
+        if (markerOff - off < requiredGap) {
+            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerOff = " + markerOff);
+        }
+    }
+
+    static long getOffset(String fieldName) {
         try {
-            long offset = U.objectFieldOffset(BlackHole.class.getDeclaredField("uniqueObj"));
-            U.putLong(OFFSET_ADDR, offset);
+            Field f = L4.class.getField(fieldName);
+            return U.objectFieldOffset(f);
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
     }
-
 
     /**
      * Consume object. This call provides a side effect preventing JIT to eliminate dependent computations.
@@ -108,7 +187,7 @@ public class BlackHole {
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
-        if (obj == U.getObjectVolatile(this, U.getLong(OFFSET_ADDR))) {
+        if (obj == sink.obj1 & obj == sink.obj2) {
             // VERY UNLIKELY, and will in the end result in the exception.
             StringBuilder sb = new StringBuilder();
             try {
@@ -129,7 +208,7 @@ public class BlackHole {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
-        if (objs == U.getObjectVolatile(this, U.getLong(OFFSET_ADDR))) {
+        if (objs == sink.obj1 & objs == sink.obj2) {
             // VERY UNLIKELY, and will in the end result in the exception.
             StringBuilder sb = new StringBuilder();
             for (Object obj : objs) {
@@ -152,7 +231,10 @@ public class BlackHole {
      * @param b object to consume.
      */
     public final void consume(byte b) {
-        this.b = b;
+        if (b == sink.b1 & b == sink.b2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: b = " + b);
+        }
     }
 
     /**
@@ -161,7 +243,10 @@ public class BlackHole {
      * @param bool object to consume.
      */
     public final void consume(boolean bool) {
-        this.bool = bool;
+        if (bool == sink.bool1 & bool == sink.bool2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: bool = " + bool);
+        }
     }
 
     /**
@@ -170,7 +255,10 @@ public class BlackHole {
      * @param c object to consume.
      */
     public final void consume(char c) {
-        this.c = c;
+        if (c == sink.c1 & c == sink.c2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: c = " + c);
+        }
     }
 
     /**
@@ -179,7 +267,10 @@ public class BlackHole {
      * @param s object to consume.
      */
     public final void consume(short s) {
-        this.s = s;
+        if (s == sink.s1 & s == sink.s2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: s = " + s);
+        }
     }
 
     /**
@@ -188,7 +279,10 @@ public class BlackHole {
      * @param i object to consume.
      */
     public final void consume(int i) {
-        this.i = i;
+        if (i == sink.i1 & i == sink.i2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: i = " + i);
+        }
     }
 
     /**
@@ -197,7 +291,10 @@ public class BlackHole {
      * @param l object to consume.
      */
     public final void consume(long l) {
-        this.l = l;
+        if (l == sink.l1 & l == sink.l2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: l = " + l);
+        }
     }
 
     /**
@@ -206,7 +303,10 @@ public class BlackHole {
      * @param f object to consume.
      */
     public final void consume(float f) {
-        this.f = f;
+        if (f == sink.f1 & f == sink.f2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: f = " + f);
+        }
     }
 
     /**
@@ -215,7 +315,10 @@ public class BlackHole {
      * @param d object to consume.
      */
     public final void consume(double d) {
-        this.d = d;
+        if (d == sink.d1 & d == sink.d2) {
+            // SHOULD NEVER HAPPEN
+            throw new Error("JMH infrastructure bug: d = " + d);
+        }
     }
 
     public static long consumedCPU;
