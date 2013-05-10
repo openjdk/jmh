@@ -161,6 +161,7 @@ public class BlackHole {
         check("d1");
         check("d2");
         check("obj1");
+        check("obj2");
     }
 
     static void check(String fieldName) {
