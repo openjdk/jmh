@@ -29,7 +29,6 @@ import org.openjdk.jmh.annotations.State;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
 /**
  * Black Hole.
@@ -84,17 +83,22 @@ public class BlackHole {
      * volatile fields. The values in those volatile fields are never changing,
      * but due to (2), we should re-read the values again and again.
      * <p/>
-     * Then, due to Java referential semantics, the incoming objects will never
-     * be equal to the distinct object we have. Reading the object fields at
-     * unlikely path helps to introduce the dependencies for all the fields in
-     * that object. We do two comparisons to match primitive cases, see below.
-     * <p/>
-     * The primitives are harder, because we can't predict what values we
+     * Primitives are a bit hard, because we can't predict what values we
      * will be fed. But we can compare the incoming value with *two* distinct
      * known values, and both checks will never be true at the same time.
-     * <p/>
      * Note the bitwise AND in all the predicates: both to spare additional
      * branch, and also to provide more uniformity in the performance.
+     * <p/>
+     * Objects should normally abide the Java's referential semantics, i.e. the
+     * incoming objects will never be equal to the distinct object we have, and
+     * volatile read will break the speculation about what we compare with.
+     * However, smart compilers may deduce that the distinct non-escaped object
+     * on the other side is not equal to anything we have, and fold the comparison
+     * to "false". We do inlined thread-local random to get those objects escaped
+     * with infinitesimal probability. Then again, smart compilers may skip from
+     * generating the slow path, and apply the previous logic to constant-fold
+     * the condition to "false". We are warming up the slow-path in the beginning
+     * to evade that effect.
      */
 
     private final L4 sink;
@@ -115,9 +119,10 @@ public class BlackHole {
         public volatile long l1 = 1, l2 = 2;
         public volatile float f1 = 1.0f, f2 = 2.0f;
         public volatile double d1 = 1.0d, d2 = 2.0d;
-        public volatile Object obj1 = new Object(), obj2;
-        public volatile Object[] objs1 = new Object[]{new Object()}, objs2;
-        public volatile boolean alwaysTrue = true;
+        public volatile Object obj1 = new Object();
+        public volatile Object[] objs1 = new Object[]{new Object()};
+        public long tlr = System.nanoTime();
+        public long tlrMask = 1;
     }
 
     static class L3 extends L2 {
@@ -149,7 +154,6 @@ public class BlackHole {
         }
 
         consistencyCheck();
-        warmup();
     }
 
     static void consistencyCheck() {
@@ -192,52 +196,20 @@ public class BlackHole {
         }
     }
 
-    private static BlackHole warmedUp;
-
-    /**
-     * This is highly HotSpot-specific and may change in future.
-     *
-     * Need to have some of the branches taken before going to production.
-     * Object consumers are susceptible to EA figuring out the reference equality
-     * with newly allocated, but not escaped object is always false. We can break
-     * this by letting EA know there is alive code branch on which we actually need
-     * the object. Normally, non-taken branches will not be considered by EA; thus,
-     * we need to warm them up.
-     */
-    public static void warmup() {
-        BlackHole bh = new BlackHole();
-        bh.sink.alwaysTrue = false;
-        final int COUNT = 100000;
-        for (int i = 0; i < COUNT; i++) {
-            try {
-                bh.consume(bh.sink.obj1);
-            } catch (IllegalStateException e) {
-                // do nothing
-            }
-        }
-
-        for (int i = 0; i < COUNT; i++) {
-            try {
-                bh.consume(bh.sink.objs1);
-            } catch (IllegalStateException e) {
-                // do nothing
-            }
-        }
-        bh.sink.alwaysTrue = true;
-        warmedUp = bh;
-    }
-
     /**
      * Consume object. This call provides a side effect preventing JIT to eliminate dependent computations.
      *
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
-        Object o = sink.alwaysTrue ? obj : sink.obj1;
-        if (o == sink.obj1) {
-            // SHOULD NEVER HAPPEN IN PRODUCTION
-            sink.obj2 = o;
-            throw new IllegalStateException("JMH infrastructure bug: obj = " + obj);
+        L4 s = sink;
+        s.tlr = (s.tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        if ((s.tlr & s.tlrMask) == 0) {
+            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
+            if (s.tlrMask != 0x7FFFFFFFFFFFFFFFL) {
+                s.tlrMask = (s.tlrMask << 1) + 1;
+            }
+            s.obj1 = obj;
         }
     }
 
@@ -247,11 +219,14 @@ public class BlackHole {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
-        Object[] os = sink.alwaysTrue ? objs : sink.objs1;
-        if (os == sink.objs1) {
-            // SHOULD NEVER HAPPEN IN PRODUCTION
-            sink.objs2 = os;
-            throw new IllegalStateException("JMH infrastructure bug: objs = " + Arrays.toString(objs));
+        L4 s = sink;
+        s.tlr = (s.tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        if ((s.tlr & s.tlrMask) == 0) {
+            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
+            if (s.tlrMask != 0x7FFFFFFFFFFFFFFFL) {
+                s.tlrMask = (s.tlrMask << 1) + 1;
+            }
+            s.objs1 = objs;
         }
     }
 
