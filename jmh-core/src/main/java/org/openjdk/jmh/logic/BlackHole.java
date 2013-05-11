@@ -116,7 +116,7 @@ public class BlackHole {
         public volatile float f1 = 1.0f, f2 = 2.0f;
         public volatile double d1 = 1.0d, d2 = 2.0d;
         public volatile Object obj1 = new Object();
-        public volatile Object objs1 = new Object[]{new Object()};
+        public volatile Object[] objs1 = new Object[]{new Object()};
     }
 
     static class L3 extends L2 {
