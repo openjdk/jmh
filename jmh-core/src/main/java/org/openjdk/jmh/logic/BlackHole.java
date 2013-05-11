@@ -115,8 +115,9 @@ public class BlackHole {
         public volatile long l1 = 1, l2 = 2;
         public volatile float f1 = 1.0f, f2 = 2.0f;
         public volatile double d1 = 1.0d, d2 = 2.0d;
-        public volatile Object obj1 = new Object();
-        public volatile Object[] objs1 = new Object[]{new Object()};
+        public volatile Object obj1 = new Object(), obj2;
+        public volatile Object[] objs1 = new Object[]{new Object()}, objs2;
+        public volatile boolean alwaysTrue = true;
     }
 
     static class L3 extends L2 {
@@ -205,6 +206,7 @@ public class BlackHole {
      */
     public static void warmup() {
         BlackHole bh = new BlackHole();
+        bh.sink.alwaysTrue = false;
         final int COUNT = 100000;
         for (int i = 0; i < COUNT; i++) {
             try {
@@ -221,7 +223,7 @@ public class BlackHole {
                 // do nothing
             }
         }
-
+        bh.sink.alwaysTrue = true;
         warmedUp = bh;
     }
 
@@ -231,18 +233,11 @@ public class BlackHole {
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
-        if (obj == sink.obj1) {
+        Object o = sink.alwaysTrue ? obj : sink.obj1;
+        if (o == sink.obj1) {
             // SHOULD NEVER HAPPEN IN PRODUCTION
-            StringBuilder sb = new StringBuilder();
-            try {
-                for (Field f : obj.getClass().getDeclaredFields()) {
-                    sb.append(f.get(obj).toString());
-                    sb.append(",");
-                }
-            } catch (Throwable t) {
-                // do nothing
-            }
-            throw new IllegalStateException("JMH infrastructure bug: obj = " + obj + ", sb = " + sb);
+            sink.obj2 = o;
+            throw new IllegalStateException("JMH infrastructure bug: obj = " + obj);
         }
     }
 
@@ -252,20 +247,11 @@ public class BlackHole {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
-        if (objs == sink.objs1) {
+        Object[] os = sink.alwaysTrue ? objs : sink.objs1;
+        if (os == sink.objs1) {
             // SHOULD NEVER HAPPEN IN PRODUCTION
-            StringBuilder sb = new StringBuilder();
-            for (Object obj : objs) {
-                try {
-                    for (Field f : obj.getClass().getDeclaredFields()) {
-                        sb.append(f.get(obj).toString());
-                        sb.append(",");
-                    }
-                } catch (Throwable t) {
-                    // do nothing
-                }
-            }
-            throw new IllegalStateException("JMH infrastructure bug: objs = " + Arrays.toString(objs) + ", sb = " + sb);
+            sink.objs2 = os;
+            throw new IllegalStateException("JMH infrastructure bug: objs = " + Arrays.toString(objs));
         }
     }
 
