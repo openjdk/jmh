@@ -106,15 +106,14 @@ public class SampleTimePerOp extends Result {
         sb.append(String.format("mean = %.0f %s",
                 convertNs(stats.getMean()),
                 getScoreUnit()));
-        sb.append(String.format(", p{0, 1, 5, 10, 50, 90, 95, 99, 100} = %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f %s",
+        sb.append(String.format(", p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f %s",
                 convertNs(stats.getPercentile(Double.MIN_VALUE)),
-                convertNs(stats.getPercentile(1)),
-                convertNs(stats.getPercentile(5)),
-                convertNs(stats.getPercentile(10)),
                 convertNs(stats.getPercentile(50)),
                 convertNs(stats.getPercentile(90)),
                 convertNs(stats.getPercentile(95)),
                 convertNs(stats.getPercentile(99)),
+                convertNs(stats.getPercentile(99.9)),
+                convertNs(stats.getPercentile(99.99)),
                 convertNs(stats.getPercentile(100)),
                 getScoreUnit()));
         return sb.toString();
@@ -135,29 +134,29 @@ public class SampleTimePerOp extends Result {
         if (stats.getN() > 2) {
             double[] interval95 = stats.getConfidenceInterval(0.05);
             double[] interval99 = stats.getConfidenceInterval(0.01);
-            sb.append(String.format("  mean = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f",
+            sb.append(String.format("       mean = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f",
                     convertNs(stats.getMean()),
                     convertNs((interval95[1] - interval95[0]) / 2),
                     convertNs((interval99[1] - interval99[0]) / 2)
             ));
         } else {
-            sb.append(String.format("  mean = %10.3f (<= 2 iterations)",
+            sb.append(String.format("       mean = %10.3f (<= 2 iterations)",
                     convertNs(stats.getMean())
             ));
         }
         sb.append(" ").append(getScoreUnit()).append("\n");
 
-        sb.append(String.format("   min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
+        sb.append(String.format("        min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
 
         BootstrappedStatistics boot = new BootstrappedStatistics(stats);
-        for (double p : new double[] {Double.MIN_VALUE, 1, 5, 10, 50, 90, 95, 99, 100}) {
-            Statistics bootedStat = boot.getBootPercentile(p);
+        for (double p : new double[] {Double.MIN_VALUE, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00}) {
+            Statistics bootedStat = boot.getBootPercentile(p*100);
 
             double[] interval95 = bootedStat.getConfidenceInterval(0.05);
             double[] interval99 = bootedStat.getConfidenceInterval(0.01);
 
-            sb.append(String.format("  p%-3.0f = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s\n",
-                    p,
+            sb.append(String.format("  %9s = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s\n",
+                    "p(" + String.format("%.4f", p) + ")",
                     convertNs(bootedStat.getMean()),
                     convertNs((interval95[1] - interval95[0]) / 2),
                     convertNs((interval99[1] - interval99[0]) / 2),
@@ -165,7 +164,7 @@ public class SampleTimePerOp extends Result {
             ));
         }
 
-        sb.append(String.format("   max = %10.3f %s\n",  convertNs(stats.getMax()), getScoreUnit()));
+        sb.append(String.format("        max = %10.3f %s\n",  convertNs(stats.getMax()), getScoreUnit()));
 
         return sb.toString();
     }
