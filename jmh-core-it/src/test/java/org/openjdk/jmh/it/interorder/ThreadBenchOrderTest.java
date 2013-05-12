@@ -30,6 +30,7 @@ import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests global setup -> run -> tearDown sequence.
@@ -39,42 +40,44 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ThreadBenchOrderTest {
 
-    private volatile long tickSetInstance;
-    private volatile long tickSetIteration;
-    private volatile long tickSetInvocation;
-    private volatile long tickTearInstance;
-    private volatile long tickTearIteration;
-    private volatile long tickTearInvocation;
-    private volatile long tickRun;
+    public static final AtomicInteger TICKER = new AtomicInteger();
+
+    private volatile int tickSetInstance;
+    private volatile int tickSetIteration;
+    private volatile int tickSetInvocation;
+    private volatile int tickTearInstance;
+    private volatile int tickTearIteration;
+    private volatile int tickTearInvocation;
+    private volatile int tickRun;
 
     @Setup(Level.Trial)
     public void setupInstance() {
-        tickSetInstance = System.nanoTime();
+        tickSetInstance = TICKER.incrementAndGet();
     }
 
     @Setup(Level.Iteration)
     public void setupIteration() {
-        tickSetIteration = System.nanoTime();
+        tickSetIteration = TICKER.incrementAndGet();
     }
 
     @Setup(Level.Invocation)
     public void setupInvocation() {
-        tickSetInvocation = System.nanoTime();
+        tickSetInvocation = TICKER.incrementAndGet();
     }
 
     @TearDown(Level.Invocation)
     public void tearDownInvocation() {
-        tickTearInvocation = System.nanoTime();
+        tickTearInvocation = TICKER.incrementAndGet();
     }
 
     @TearDown(Level.Iteration)
     public void tearDownIteration() {
-        tickTearIteration = System.nanoTime();
+        tickTearIteration = TICKER.incrementAndGet();
     }
 
     @TearDown(Level.Trial)
     public void tearDownInstance() {
-        tickTearInstance = System.nanoTime();
+        tickTearInstance = TICKER.incrementAndGet();
 
         Assert.assertTrue("Setup/instance called before setup/iteration", tickSetInstance < tickSetIteration);
         Assert.assertTrue("Setup/iteration called before setup/invocation", tickSetIteration < tickSetInvocation);
@@ -89,7 +92,7 @@ public class ThreadBenchOrderTest {
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(1)
     public void test() {
-        tickRun = System.nanoTime();
+        tickRun = TICKER.incrementAndGet();
         Fixtures.work();
     }
 
