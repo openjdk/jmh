@@ -89,7 +89,7 @@ public class AbstractResourceReader {
                         try {
                             r.close();
                         } catch (IOException e1) {
-                            e.addSuppressed(e1);
+                            // ignore
                         }
                     }
                     throw new RuntimeException("IOException while opening resource: " + url, e);
