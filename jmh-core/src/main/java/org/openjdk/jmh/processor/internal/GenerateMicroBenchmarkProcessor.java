@@ -346,8 +346,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateFields(PrintWriter writer) {
-        writer.println("    public long rnd = System.nanoTime();");
-        writer.println("    public int rndMult = 1;");
+        // nothing here
     }
 
     private void validateSignature(TypeElement clazz, Element method) {
@@ -980,25 +979,25 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        SampleBuffer buffer = new SampleBuffer();");
             writer.println("        long pauseTime = 0;");
             writer.println("        Loop.Data ld = loop.data;");
-            writer.println("        long lastSample = System.nanoTime();");
+            writer.println("        long rnd = System.nanoTime();");
+            writer.println("        long rndMask = 1;");
             writer.println("        loop.enable();");
             writer.println("        do {");
 
             invocationProlog(writer, 3, method, states, true);
 
             writer.println("            rnd = (rnd * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);");
-            writer.println("            if ((rnd & ((1 << rndMult) - 1)) == 0) {");
+            writer.println("            if ((rnd & rndMask) == 0) {");
             writer.println("                long time1 = System.nanoTime();");
             writer.println("                " + emitCall(method, states) + ';');
             writer.println("                long time2 = System.nanoTime();");
             writer.println("                boolean flipped = buffer.add(time2 - time1);");
             writer.println("                ");
             writer.println("                if (flipped) {");
-            writer.println("                    if (rndMult < 31) {");
-            writer.println("                        rndMult++;");
+            writer.println("                    if (rndMask != 0xFFFFFFFFFFFFL) {");
+            writer.println("                        rndMask = (rndMask << 1) + 1;");
             writer.println("                    }");
             writer.println("                }");
-            writer.println("                lastSample = time2;");
             writer.println("            } else { ");
             writer.println("                " + emitCall(method, states) + ';');
             writer.println("            }");
