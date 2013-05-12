@@ -275,7 +275,7 @@ public class Runner extends BaseRunner {
         try {
             reader = new BinaryOutputFormatReader(outputHandler);
             for (String benchmark : benchmarksToFork) {
-                runSeparateMicroBenchmark(benchmark, reader.getHost(), reader.getPort());
+                runSeparateMicroBenchmark(reader, benchmark, reader.getHost(), reader.getPort());
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -304,7 +304,7 @@ public class Runner extends BaseRunner {
      * @param host host VM host
      * @param port host VM port
      */
-    private void runSeparateMicroBenchmark(String benchmark, String host, int port) {
+    private void runSeparateMicroBenchmark(BinaryOutputFormatReader reader, String benchmark, String host, int port) {
 
         /*
          * Running microbenchmark in separate JVM requires to read some options from annotations.
@@ -340,7 +340,7 @@ public class Runner extends BaseRunner {
                 outputHandler.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
             }
             for (int i = 0; i < warmupForkCount; i++) {
-                doFork(warmupForkCheat);
+                doFork(reader, warmupForkCheat);
             }
         }
         if (forkCount == 1) {
@@ -349,7 +349,7 @@ public class Runner extends BaseRunner {
             outputHandler.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
         }
         for (int i = 0; i < forkCount; i++) { // TODO should we report fork number somehow?
-            doFork(commandString);
+            doFork(reader, commandString);
         }
     }
 
@@ -360,7 +360,7 @@ public class Runner extends BaseRunner {
         return r;
     }
 
-    private void doFork(String[] commandString) {
+    private void doFork(BinaryOutputFormatReader reader, String[] commandString) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
@@ -375,6 +375,10 @@ public class Runner extends BaseRunner {
 
             errDrainer.join();
             outDrainer.join();
+
+            // need to wait for all pending messages to be processed
+            // before starting the next benchmark
+            reader.waitFinish();
 
             if (ecode != 0) {
                 outputHandler.println("WARNING: Forked process returned code: " + ecode);

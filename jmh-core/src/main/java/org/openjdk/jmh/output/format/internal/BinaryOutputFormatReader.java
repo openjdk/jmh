@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,6 +105,18 @@ public class BinaryOutputFormatReader {
         }
     }
 
+    public void waitFinish() {
+        for (Iterator<Reader> iterator = registeredReaders.iterator(); iterator.hasNext(); ) {
+            Reader r = iterator.next();
+            try {
+                r.join();
+                iterator.remove();
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+    }
+
     private final class Acceptor extends Thread {
 
         private final ServerSocket server;
@@ -118,6 +131,7 @@ public class BinaryOutputFormatReader {
                 while (!Thread.interrupted()) {
                     Socket clientSocket = server.accept();
                     Reader r = new Reader(clientSocket);
+                    registeredReaders.add(r);
                     r.start();
                 }
             } catch (SocketException e) {
