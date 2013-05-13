@@ -780,10 +780,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + emitCall(method, states) + ';');
             invocationEpilog(writer, 2, method, states, true);
 
-            writer.println("            operations += " + opsPerInv + "L;");
+            writer.println("            operations++;");
             writer.println("        } while(!ld.isDone);");
             writer.println("        long stopTime = System.nanoTime();");
-            writer.println("        return new RawResultPair(operations, (stopTime - startTime) - pauseTime);");
+            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L, (stopTime - startTime) - pauseTime);");
             writer.println("    }");
             writer.println();
         }
@@ -874,10 +874,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + emitCall(method, states) + ';');
             invocationEpilog(writer, 3, method, states, true);
 
-            writer.println("            operations += " + opsPerInv + "L;");
+            writer.println("            operations++;");
             writer.println("        } while(!ld.isDone);");
             writer.println("        long end = System.nanoTime();");
-            writer.println("        return new RawResultPair(operations, (end - start) - pauseTime);");
+            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L, (end - start) - pauseTime);");
             writer.println("    }");
             writer.println();
         }
