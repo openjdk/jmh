@@ -37,6 +37,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -187,9 +188,9 @@ public class HarnessOptions extends BaseOptions {
         }
 
         if (getJvmArgs() != null) { // use supplied jvm args if given in cmd line
-            command.add(getJvmArgs());
+            command.addAll(Arrays.asList(getJvmArgs().split(" ")));
         } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
-            command.add(annJvmArgs);
+            command.addAll(Arrays.asList(annJvmArgs.split(" ")));
         } else {
             // else use same jvm args given to this runner
             RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
@@ -197,7 +198,7 @@ public class HarnessOptions extends BaseOptions {
 
             // prepend jvm args
             if (annJvmArgsPrepend != null) {
-                command.add(annJvmArgsPrepend);
+                command.addAll(Arrays.asList(annJvmArgsPrepend.split(" ")));
             }
 
             for (String arg : args) {
@@ -206,7 +207,7 @@ public class HarnessOptions extends BaseOptions {
 
             // append jvm args
             if (annJvmArgsAppend != null) {
-                command.add(annJvmArgsAppend);
+                command.addAll(Arrays.asList(annJvmArgsAppend.split(" ")));
             }
         }
 
