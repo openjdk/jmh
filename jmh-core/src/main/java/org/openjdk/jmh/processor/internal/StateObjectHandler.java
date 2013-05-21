@@ -238,14 +238,14 @@ public class StateObjectHandler {
 
             switch (type) {
                 case SETUP:
-                    result.add("synchronized (" + so.fieldIdentifier + ") {");
-                    result.add("    if (!" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
-                    result.add("        " + so.fieldIdentifier + "_" + helperLevel + "_inited = true;");
+                    result.add("if (!" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
+                    result.add("    synchronized (" + so.fieldIdentifier + ") {");
+                    result.add("        if (!" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
                     break;
                 case TEARDOWN:
-                    result.add("synchronized (" + so.fieldIdentifier + ") {");
-                    result.add("    if (" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
-                    result.add("    " + so.fieldIdentifier + "_" + helperLevel + "_inited = false;");
+                    result.add("if (" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
+                    result.add("    synchronized (" + so.fieldIdentifier + ") {");
+                    result.add("        if (" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
                     break;
                 default:
                     throw new IllegalStateException("Unknown helper type: " + type);
@@ -253,10 +253,22 @@ public class StateObjectHandler {
 
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel == helperLevel && hmi.type == type) {
-                    result.add("        " + so.localIdentifier + "." + hmi.name + "();");
+                    result.add("            " + so.localIdentifier + "." + hmi.name + "();");
                 }
             }
 
+            switch (type) {
+                case SETUP:
+                    result.add("            " + so.fieldIdentifier + "_" + helperLevel + "_inited = true;");
+                    break;
+                case TEARDOWN:
+                    result.add("            " + so.fieldIdentifier + "_" + helperLevel + "_inited = false;");
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown helper type: " + type);
+            }
+
+            result.add("        }");
             result.add("    }");
             result.add("}");
         }
