@@ -750,9 +750,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // synchronize iterations epilog: catchup loop
             writer.println(ident(3) + "while (loop.shouldContinueWarmdown()) {");
 
-            invocationProlog(writer, 3, method, states, false);
+            invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 3, method, states, false);
+            invocationEpilog(writer, 4, method, states, false);
 
             writer.println(ident(3) + "}");
 
@@ -776,9 +776,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        Loop.Data ld = loop.data;");
             writer.println("        do {");
 
-            invocationProlog(writer, 2, method, states, true);
+            invocationProlog(writer, 3, method, states, true);
             writer.println(ident(3) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 2, method, states, true);
+            invocationEpilog(writer, 3, method, states, true);
 
             writer.println("            operations++;");
             writer.println("        } while(!ld.isDone);");
@@ -931,9 +931,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // synchronize iterations prolog: catchup loop
             writer.println(ident(3) + "while (loop.shouldContinueWarmup()) {");
 
-            invocationProlog(writer, 0, method, states, false);
+            invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 0, method, states, false);
+            invocationEpilog(writer, 4, method, states, false);
 
             writer.println(ident(3) + "}");
             writer.println();
@@ -957,9 +957,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // synchronize iterations epilog: catchup loop
             writer.println(ident(3) + "while (loop.shouldContinueWarmdown()) {");
 
-            invocationProlog(writer, 3, method, states, false);
+            invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 3, method, states, false);
+            invocationEpilog(writer, 4, method, states, false);
 
             writer.println(ident(3) + "}");
             writer.println();
@@ -984,7 +984,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        loop.enable();");
             writer.println("        do {");
 
-            invocationProlog(writer, 3, method, states, true);
+            invocationProlog(writer, 4, method, states, true);
 
             writer.println("            rnd = (rnd * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);");
             writer.println("            if ((rnd & rndMask) == 0) {");
@@ -1002,7 +1002,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("                " + emitCall(method, states) + ';');
             writer.println("            }");
 
-            invocationEpilog(writer, 3, method, states, true);
+            invocationEpilog(writer, 4, method, states, true);
 
             writer.println("        } while(!ld.isDone);");
             writer.println("        return new SampleTimePerOp(\"" + method.getSimpleName() + "\", buffer, TimeUnit." + timeUnit + ");");
