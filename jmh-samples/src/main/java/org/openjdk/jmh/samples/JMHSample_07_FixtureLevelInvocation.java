@@ -54,7 +54,9 @@ public class JMHSample_07_FixtureLevelInvocation {
     /*
      * Fixtures have different Levels to control when they are about to run.
      * Level.Invocation is useful sometimes to do some per-invocation work,
-     * which should not count as payload.
+     * which should not count as payload. Note the timestamping and
+     * synchronization for Level.Invocation helpers might significantly
+     * offset the measurement, use with care.
      *
      * Consider this sample:
      */

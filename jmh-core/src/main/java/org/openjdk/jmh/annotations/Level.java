@@ -27,12 +27,26 @@ package org.openjdk.jmh.annotations;
 /** Level enumeration for Setup and TearDown */
 public enum Level {
 
-    /** Trial level, for each run of the benchmark */
+    /**
+     * Trial level.
+     *
+     * To be executed each run of the benchmark
+     */
     Trial,
 
-    /** Iteration level, for each iteration in a benchmark execution */
+    /**
+     * Iteration level.
+     *
+     * To be executued for each iteration in a benchmark execution
+     */
     Iteration,
 
-    /** Invocation level, for each method entry or exit in a benchmark execution */
+    /**
+     * Invocation level.
+     *
+     * To be executed for each benchmark method execution. Note this might
+     * bring in the unwanted performance effects for the benchmark runs.
+     * Use with the extreme care!
+     */
     Invocation,
 }
