@@ -136,7 +136,7 @@ public class ThreadStateSetupOrderTest {
     @GenerateMicroBenchmark(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public void test() {
+    public void test(MyState state) {
         Fixtures.work();
     }
 
