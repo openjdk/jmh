@@ -202,12 +202,16 @@ public class BlackHole {
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
+        // let's play the optimizing compiler, dude!
         L4 s = sink;
-        s.tlr = (s.tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
-        if ((s.tlr & s.tlrMask) == 0) {
+        long tlr = s.tlr;
+        long tlrMask = s.tlrMask;
+
+        s.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            if (s.tlrMask != 0x7FFFFFFFFFFFFFFFL) {
-                s.tlrMask = (s.tlrMask << 1) + 1;
+            if (tlrMask != 0x7FFFFFFFFFFFFFFFL) {
+                s.tlrMask = (tlrMask << 1) + 1;
             }
             s.obj1 = obj;
         }
@@ -219,12 +223,16 @@ public class BlackHole {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
+        // let's play the optimizing compiler, dude!
         L4 s = sink;
-        s.tlr = (s.tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
-        if ((s.tlr & s.tlrMask) == 0) {
+        long tlr = s.tlr;
+        long tlrMask = s.tlrMask;
+
+        s.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            if (s.tlrMask != 0x7FFFFFFFFFFFFFFFL) {
-                s.tlrMask = (s.tlrMask << 1) + 1;
+            if (tlrMask != 0x7FFFFFFFFFFFFFFFL) {
+                s.tlrMask = (tlrMask << 1) + 1;
             }
             s.objs1 = objs;
         }
