@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.logic;
 
-import org.openjdk.jmh.runner.Arbiter;
+import org.openjdk.jmh.runner.Waiter;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.CountDownLatch;
@@ -79,15 +79,15 @@ public class Loop {
         /** Total pause time */
         public long totalPause;
 
-        public final Arbiter warmupArbiter;
-        public final Arbiter warmdownArbiter;
+        public final Waiter warmupWaiter;
+        public final Waiter warmdownWaiter;
         public final CountDownLatch preSetup;
         public final CountDownLatch preTearDown;
         public final boolean lastIteration;
 
-        public Data(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-            this.warmupArbiter = warmupArbiter;
-            this.warmdownArbiter = warmdownArbiter;
+        public Data(TimeValue loopTime, Waiter warmupWaiter, Waiter warmdownWaiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+            this.warmupWaiter = warmupWaiter;
+            this.warmdownWaiter = warmdownWaiter;
             this.preSetup = preSetup;
             this.preTearDown = preTearDown;
             this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
@@ -102,16 +102,16 @@ public class Loop {
         public int e21, e22, e23, e24, e25, e26, e27, e28;
         public int e31, e32, e33, e34, e35, e36, e37, e38;
 
-        public L3(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-            super(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);
+        public L3(TimeValue loopTime, Waiter warmupWaiter, Waiter warmdownWaiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+            super(loopTime, warmupWaiter, warmdownWaiter, preSetup, preTearDown, lastIteration);
         }
     }
 
     static class L4 extends L3 {
         public int marker;
 
-        public L4(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-            super(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);
+        public L4(TimeValue loopTime, Waiter warmupWaiter, Waiter warmdownWaiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+            super(loopTime, warmupWaiter, warmdownWaiter, preSetup, preTearDown, lastIteration);
         }
     }
 
@@ -135,8 +135,8 @@ public class Loop {
         this(loopTime, null, null, null, null, false);
     }
 
-    public Loop(TimeValue loopTime, Arbiter warmupArbiter, Arbiter warmdownArbiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-        data = new L4(loopTime, warmupArbiter, warmdownArbiter, preSetup, preTearDown, lastIteration);
+    public Loop(TimeValue loopTime, Waiter warmupWaiter, Waiter warmdownWaiter, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+        data = new L4(loopTime, warmupWaiter, warmdownWaiter, preSetup, preTearDown, lastIteration);
     }
 
 
@@ -259,19 +259,19 @@ public class Loop {
     }
 
     public boolean shouldContinueWarmup() {
-        return data.warmupArbiter.shouldWait();
+        return data.warmupWaiter.shouldWait();
     }
 
     public boolean shouldContinueWarmdown() {
-        return data.warmdownArbiter.shouldWait();
+        return data.warmdownWaiter.shouldWait();
     }
 
     public void announceWarmupReady() {
-        data.warmupArbiter.announceReady();
+        data.warmupWaiter.announceReady();
     }
 
     public void announceWarmdownReady() {
-        data.warmdownArbiter.announceReady();
+        data.warmdownWaiter.announceReady();
     }
 
     public void preSetup() {

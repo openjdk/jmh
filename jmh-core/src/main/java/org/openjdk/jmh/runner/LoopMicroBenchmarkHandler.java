@@ -91,12 +91,12 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         IterationData iterationResults = new IterationData(microbenchmark, numThreads, runtime);
 
         // create tasks
-        Arbiter warmupArbiter = shouldSynchIterations ? new SynchronizeIterationsArbiter(numThreads) : new NoopArbiter();
-        Arbiter warmdownArbiter = shouldSynchIterations ? new SynchronizeIterationsArbiter(numThreads) : new NoopArbiter();
+        Waiter warmupWaiter = shouldSynchIterations ? new SpinningWaiter(numThreads) : new NoopWaiter();
+        Waiter warmdownWaiter = shouldSynchIterations ? new SpinningWaiter(numThreads) : new NoopWaiter();
 
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, new Loop(runtime, warmupArbiter, warmdownArbiter, preSetupBarrier, preTearDownBarrier, last));
+            runners[i] = new BenchmarkTask(threadLocal, new Loop(runtime, warmupWaiter, warmdownWaiter, preSetupBarrier, preTearDownBarrier, last));
         }
 
         // submit tasks to threadpool

@@ -24,35 +24,16 @@
  */
 package org.openjdk.jmh.runner;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class SynchronizeIterationsArbiter implements Arbiter {
-
-    private final int expected;
-    private final AtomicInteger visited;
-    private volatile boolean shouldWait;
-
-    public SynchronizeIterationsArbiter(int numThreads) {
-        this.expected = numThreads;
-        this.visited = new AtomicInteger();
-        this.shouldWait = true;
-    }
+public class NoopWaiter implements Waiter {
 
     @Override
     public void announceReady() {
-        int v = visited.incrementAndGet();
-        if (v == expected) {
-            shouldWait = false;
-        }
-
-        if (v > expected) {
-            throw new IllegalStateException("More threads than expected");
-        }
+        // do nothing
     }
 
     @Override
     public boolean shouldWait() {
-        return shouldWait;
+        return false;
     }
 
 }

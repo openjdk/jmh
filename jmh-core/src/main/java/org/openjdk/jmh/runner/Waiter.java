@@ -24,8 +24,23 @@
  */
 package org.openjdk.jmh.runner;
 
-public interface Arbiter {
+/**
+ * Defines the active waiter.
+ * <p/>
+ * Usage:
+ *   waiter.announceReady();
+ *   while (waiter.shouldWait()); // burn
+ */
+public interface Waiter {
 
+    /**
+     * Announce the arrival to the waiter.
+     */
     void announceReady();
+
+    /**
+     * Check if we should wait longer
+     * @return true, if need to wait
+     */
     boolean shouldWait();
 }
