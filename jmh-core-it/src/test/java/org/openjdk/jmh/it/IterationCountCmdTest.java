@@ -58,9 +58,8 @@ public class IterationCountCmdTest {
     }
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public void test() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void test() {
+        Fixtures.work();
     }
 
     @Test

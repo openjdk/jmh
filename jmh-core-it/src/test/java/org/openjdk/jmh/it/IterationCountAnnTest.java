@@ -61,7 +61,7 @@ public class IterationCountAnnTest {
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MILLISECONDS)
-    public void test() throws InterruptedException {
+    public void test() {
         Fixtures.work();
     }
 

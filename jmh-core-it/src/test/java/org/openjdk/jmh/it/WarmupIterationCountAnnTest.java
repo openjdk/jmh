@@ -61,9 +61,8 @@ public class WarmupIterationCountAnnTest {
     @GenerateMicroBenchmark
     @Warmup(iterations = 3, time = 1)
     @Measurement(iterations = 1, time = 1)
-    public void test() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void test() {
+        Fixtures.work();
     }
 
     @Test

@@ -26,6 +26,7 @@ package org.openjdk.jmh.it.compile;
 
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.logic.BlackHole;
 
 import java.util.concurrent.TimeUnit;
@@ -38,42 +39,36 @@ import java.util.concurrent.TimeUnit;
 public class BlackholeApiTest {
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public void testNothing() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void testNothing() {
+        Fixtures.work();
     }
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public Object testReturnObject() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public Object testReturnObject() {
+        Fixtures.work();
         return null;
     }
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public int testReturnInt() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public int testReturnInt() {
+        Fixtures.work();
         return 0;
     }
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public void testBH(BlackHole bh) throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void testBH(BlackHole bh) {
+        Fixtures.work();
     }
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public Object testBH_ReturnObject(BlackHole bh) throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public Object testBH_ReturnObject(BlackHole bh) {
+        Fixtures.work();
         return null;
     }
 
     @GenerateMicroBenchmark(BenchmarkType.All)
-    public int testBH_ReturnInt(BlackHole bh) throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public int testBH_ReturnInt(BlackHole bh) {
+        Fixtures.work();
         return 0;
     }
 

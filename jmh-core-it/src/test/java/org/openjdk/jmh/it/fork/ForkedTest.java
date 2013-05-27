@@ -48,7 +48,7 @@ public class ForkedTest {
     @GenerateMicroBenchmark(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public void test1() throws InterruptedException {
+    public void test1() {
         Fixtures.work();
         test1executed = true;
         Assert.assertFalse(test2executed);
@@ -57,7 +57,7 @@ public class ForkedTest {
     @GenerateMicroBenchmark(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public void test2() throws InterruptedException {
+    public void test2() {
         Fixtures.work();
         test2executed = true;
         Assert.assertFalse(test1executed);

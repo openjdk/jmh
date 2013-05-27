@@ -46,9 +46,8 @@ public class ForkedJvmAppendPrependArgsTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgs = "-Dreplaced", jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
-    public void test1() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test1() {
+        Fixtures.work();
         Assert.assertNotNull(System.getProperty("replaced"));
         Assert.assertNull(System.getProperty("appended"));
         Assert.assertNull(System.getProperty("prepended"));
@@ -58,9 +57,8 @@ public class ForkedJvmAppendPrependArgsTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
-    public void test2() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test2() {
+        Fixtures.work();
         Assert.assertNull(System.getProperty("replaced"));
         Assert.assertNotNull(System.getProperty("appended"));
         Assert.assertNotNull(System.getProperty("prepended"));
@@ -70,9 +68,8 @@ public class ForkedJvmAppendPrependArgsTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsPrepend = "-Dprepended")
-    public void test3() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test3() {
+        Fixtures.work();
         Assert.assertNull(System.getProperty("replaced"));
         Assert.assertNull(System.getProperty("appended"));
         Assert.assertNotNull(System.getProperty("prepended"));
@@ -82,9 +79,8 @@ public class ForkedJvmAppendPrependArgsTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsAppend = "-Dappended")
-    public void test4() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test4() {
+        Fixtures.work();
         Assert.assertNull(System.getProperty("replaced"));
         Assert.assertNotNull(System.getProperty("appended"));
         Assert.assertNull(System.getProperty("prepended"));

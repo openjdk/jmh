@@ -49,7 +49,7 @@ public class ForkOverride_F1_F1_Test {
     @Fork(1)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public void test1() throws InterruptedException {
+    public void test1() {
         Fixtures.work();
         sameVM = true;
     }

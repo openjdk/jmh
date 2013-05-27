@@ -50,9 +50,8 @@ public class AnnotatedForkedTest2 {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork()
-    public void test1() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test1() {
+        Fixtures.work();
         test1executed = true;
         Assert.assertFalse(test2executed);
     }
@@ -61,9 +60,8 @@ public class AnnotatedForkedTest2 {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(value = 2, warmups = 1)
-    public void test2() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test2() {
+        Fixtures.work();
         test2executed = true;
         Assert.assertFalse(test1executed);
     }

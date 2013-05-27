@@ -46,7 +46,7 @@ public class ForkedJvmArgsTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgs = "-Dtest1")
-    public void test1() throws InterruptedException {
+    public void test1() {
         Fixtures.work();
         Assert.assertNotNull(System.getProperty("test1"));
         Assert.assertNull(System.getProperty("test2"));
@@ -56,7 +56,7 @@ public class ForkedJvmArgsTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgs = "-Dtest2")
-    public void test2() throws InterruptedException {
+    public void test2() {
         Fixtures.work();
         Assert.assertNull(System.getProperty("test1"));
         Assert.assertNotNull(System.getProperty("test2"));

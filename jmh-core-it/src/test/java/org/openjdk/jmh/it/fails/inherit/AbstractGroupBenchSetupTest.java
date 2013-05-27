@@ -50,9 +50,8 @@ public class AbstractGroupBenchSetupTest extends AbstractSetupBase {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Threads(1)
-    public void test() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void test() {
+        Fixtures.work();
     }
 
     @Test

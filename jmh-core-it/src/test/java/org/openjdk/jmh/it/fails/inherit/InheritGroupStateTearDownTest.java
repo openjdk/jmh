@@ -49,9 +49,8 @@ public class InheritGroupStateTearDownTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Threads(1)
-    public void test(MyState state) throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void test(MyState state) {
+        Fixtures.work();
     }
 
     @Test

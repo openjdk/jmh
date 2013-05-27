@@ -44,17 +44,15 @@ public class SingleShotTest {
     private static final AtomicInteger test2executed = new AtomicInteger();
 
     @GenerateMicroBenchmark(BenchmarkType.SingleShotTime)
-    public void test1() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(10);
+    public void test1() {
+        Fixtures.work();
         Assert.assertEquals(1, test1executed.incrementAndGet());
         Assert.assertEquals(0, test2executed.get());
     }
 
     @GenerateMicroBenchmark(BenchmarkType.SingleShotTime)
-    public void test2() throws InterruptedException {
-        // courtesy for parallel-running tests
-        TimeUnit.MILLISECONDS.sleep(100);
+    public void test2() {
+        Fixtures.work();
         Assert.assertEquals(1, test2executed.incrementAndGet());
         Assert.assertEquals(0, test1executed.get());
     }

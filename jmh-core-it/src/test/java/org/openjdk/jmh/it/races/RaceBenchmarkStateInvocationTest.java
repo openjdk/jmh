@@ -61,7 +61,7 @@ public class RaceBenchmarkStateInvocationTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(4)
-    public void test(MyState state) throws InterruptedException {
+    public void test(MyState state) {
         // Useless to test this condition here, intrinsic races.
 //        Assert.assertEquals("Run", 1, state.value);
         Fixtures.work();

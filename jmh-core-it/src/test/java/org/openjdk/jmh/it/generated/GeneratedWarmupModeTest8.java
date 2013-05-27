@@ -53,7 +53,7 @@ public class GeneratedWarmupModeTest8 {
     private static Queue<String> testSequence = new ConcurrentLinkedQueue<String>();
 
     @MicroBenchmark
-    public Result testBig(Loop loop) throws InterruptedException {
+    public Result testBig(Loop loop) {
         if (loop.getDuration() == 1000) { // warmup
             testSequence.add("W");
         } else if (loop.getDuration() == 2000) {  // iteration
@@ -61,8 +61,7 @@ public class GeneratedWarmupModeTest8 {
         }
         loop.start();
         while (!loop.done()) {
-            // courtesy for parallel-running tests
-            TimeUnit.MILLISECONDS.sleep(100);
+            Fixtures.work();
         }
 
         return new AverageTimePerOp("test", 1, 42, TimeUnit.NANOSECONDS);
@@ -70,7 +69,7 @@ public class GeneratedWarmupModeTest8 {
 
 
     @MicroBenchmark
-    public Result testSmall(Loop loop) throws InterruptedException {
+    public Result testSmall(Loop loop) {
         if (loop.getDuration() == 1000) { // warmup
             testSequence.add("w");
         } else if (loop.getDuration() == 2000) {  // iteration
@@ -78,8 +77,7 @@ public class GeneratedWarmupModeTest8 {
         }
         loop.start();
         while (!loop.done()) {
-            // courtesy for parallel-running tests
-            TimeUnit.MILLISECONDS.sleep(100);
+            Fixtures.work();
         }
 
         return new AverageTimePerOp("test", 1, 42, TimeUnit.NANOSECONDS);
