@@ -50,7 +50,9 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -248,7 +250,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             // Create file and open an outputstream
             JavaFileObject jof = processingEnv.getFiler().createSourceFile(generatedPackageName + "." + generatedClassName, clazz);
-            PrintWriter writer = new PrintWriter(jof.openOutputStream());
+            PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(jof.openOutputStream()), 64*1024), false);
 
             // Write package and imports
             writer.println("package " + generatedPackageName + ';');
