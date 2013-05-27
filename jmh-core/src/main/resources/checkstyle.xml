@@ -53,7 +53,6 @@
         </module>
 
         <module name="DefaultComesLast"/>
-        <module name="DoubleCheckedLocking"/>
         <module name="DeclarationOrder" />
         <!--<module name="DescendantToken" />-->
         <!--<module name="DesignForExtension" />-->
