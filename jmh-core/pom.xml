@@ -31,16 +31,18 @@ questions.
     <artifactId>jmh-core</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>Java Microbenchmark Harness Core</name>
+    <name>JMH Core</name>
 
     <organization>
-        <name>Oracle and/or its affiliates. All rights reserved.</name>
+        <name>Oracle</name>
         <url>http://openjdk.java.net/</url>
     </organization>
     <inceptionYear>2012</inceptionYear>
 
     <description>
-        This is the core framework for writing and running Java Microbenchmarks.
+        The jmh is a Java harness for building, running, and analysing
+        nano/micro/macro benchmarks written in Java and other languages
+        targeting the JVM.
     </description>
 
     <dependencies>
@@ -322,7 +324,6 @@ questions.
                                 </tags>
                             </tagClass>
                         </tagClasses>
-
                     </tagListOptions>
                 </configuration>
             </plugin>

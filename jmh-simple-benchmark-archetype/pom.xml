@@ -31,10 +31,10 @@ questions.
     <artifactId>jmh-simple-benchmark-archetype</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Java Microbenchmark Harness: Simple Benchmark Archetype</name>
+    <name>JMH Simple Benchmark Archetype</name>
 
     <organization>
-        <name>Oracle and/or its affiliates. All rights reserved.</name>
+        <name>Oracle</name>
         <url>http://openjdk.java.net/</url>
     </organization>
     <inceptionYear>2012</inceptionYear>

@@ -30,10 +30,10 @@ questions.
     <artifactId>jmh-core-it</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>Java Microbenchmark Harness Integration Tests</name>
+    <name>JMH Integration Tests</name>
 
     <organization>
-        <name>Oracle and/or its affiliates. All rights reserved.</name>
+        <name>Oracle</name>
         <url>http://openjdk.java.net/</url>
     </organization>
     <inceptionYear>2012</inceptionYear>
