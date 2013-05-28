@@ -90,13 +90,13 @@ public class InvocationBench {
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void group(BenchmarkSetupTeardown g) {
+    public void group(GroupSetupTeardown g) {
         // do nothing
     }
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void thread(BenchmarkSetupTeardown g) {
+    public void thread(ThreadSetupTeardown g) {
         // do nothing
     }
 
