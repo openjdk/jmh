@@ -44,6 +44,7 @@ questions.
     <modules>
         <module>jmh-core</module>
         <module>jmh-core-it</module>
+        <module>jmh-core-benchmarks</module>
         <module>jmh-samples</module>
         <module>jmh-simple-benchmark-archetype</module>
     </modules>
