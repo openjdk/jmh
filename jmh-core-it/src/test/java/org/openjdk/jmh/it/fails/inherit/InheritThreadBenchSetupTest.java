@@ -46,7 +46,7 @@ public class InheritThreadBenchSetupTest extends InheritableThreadSetupState {
     @GenerateMicroBenchmark(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
-    @Threads(1)
+    @Threads(4)
     public void test() {
         Fixtures.work();
     }
@@ -55,7 +55,7 @@ public class InheritThreadBenchSetupTest extends InheritableThreadSetupState {
     public void invoke() {
         boolean failed;
         try {
-            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -f false");
+            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
             failed = false;
         } catch (Throwable t) {
             failed = true;

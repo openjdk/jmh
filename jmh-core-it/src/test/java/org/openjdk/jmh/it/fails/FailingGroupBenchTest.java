@@ -48,7 +48,7 @@ public class FailingGroupBenchTest {
     @GenerateMicroBenchmark(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
-    @Threads(1)
+    @Threads(4)
     public void doTest() {
         Assert.fail();
     }
@@ -57,7 +57,7 @@ public class FailingGroupBenchTest {
     public void invoke() {
         boolean failed;
         try {
-            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -v -w 1 -r 1 -f false");
+            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -v -w 1 -r 1");
             failed = false;
         } catch (Throwable t) {
             failed = true;
