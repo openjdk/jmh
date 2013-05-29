@@ -40,6 +40,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Handler for a single shot micro benchmark.
@@ -113,22 +114,40 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         stopProfilers(iterationResults);
 
-        // iterate over Callables, get() blocks until benchmark/thread completion
+        // wait for the result, continuously polling the worker threads.
+        //
+        int expected = numThreads;
+        while (expected > 0) {
+            for (Future<Result> fr : resultList) {
+                try {
+                    fr.get(runtime.getTime() * 2, runtime.getTimeUnit());
+                    expected--;
+                } catch (InterruptedException ex) {
+                    log(ex);
+                    iterationResults.clearResults();
+                    return iterationResults;
+                } catch (ExecutionException ex) {
+                    Throwable cause = ex.getCause().getCause(); // unwrap
+                    log(cause);
+                    iterationResults.clearResults();
+                    if (shouldFailOnError) {
+                        throw new IllegalStateException(cause.getMessage(), cause);
+                    }
+                    return iterationResults;
+                } catch (TimeoutException e) {
+                    // do nothing, respin
+                }
+            }
+        }
+
+        // get the results
         for (Future<Result> fr : resultList) {
             try {
                 iterationResults.addResult(fr.get());
             } catch (InterruptedException ex) {
-                log(ex);
-                iterationResults.clearResults();
-                break;
+                throw new IllegalStateException("Impossible to be here");
             } catch (ExecutionException ex) {
-                Throwable cause = ex.getCause().getCause(); // unwrap;
-                log(cause);
-                iterationResults.clearResults();
-                if (shouldFailOnError) {
-                    throw new IllegalStateException(cause.getMessage(), cause);
-                }
-                break;
+                throw new IllegalStateException("Impossible to be here");
             }
         }
 
@@ -168,8 +187,8 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
-                loop.preSetup();
-                loop.preTearDown();
+                loop.preSetupForce();
+                loop.preTearDownForce();
                 throw new Exception(e); // wrapping Throwable
             }
         }

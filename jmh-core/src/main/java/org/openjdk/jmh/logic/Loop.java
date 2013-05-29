@@ -292,6 +292,14 @@ public class Loop {
         }
     }
 
+    public void preSetupForce() {
+        data.preSetup.countDown();
+    }
+
+    public void preTearDownForce() {
+        data.preTearDown.countDown();
+    }
+
     public boolean isLastIteration() {
         return data.lastIteration;
     }

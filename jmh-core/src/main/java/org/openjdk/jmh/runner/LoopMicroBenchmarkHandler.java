@@ -36,11 +36,15 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Handler for a single micro benchmark (with Loop).
@@ -122,23 +126,40 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         }
         stopProfilers(iterationResults);
 
+        // wait for the result, continuously polling the worker threads.
+        //
+        int expected = numThreads;
+        while (expected > 0) {
+            for (Future<Result> fr : resultList) {
+                try {
+                    fr.get(runtime.getTime() * 2, runtime.getTimeUnit());
+                    expected--;
+                } catch (InterruptedException ex) {
+                    log(ex);
+                    iterationResults.clearResults();
+                    return iterationResults;
+                } catch (ExecutionException ex) {
+                    Throwable cause = ex.getCause().getCause(); // unwrap
+                    log(cause);
+                    iterationResults.clearResults();
+                    if (shouldFailOnError) {
+                        throw new IllegalStateException(cause.getMessage(), cause);
+                    }
+                    return iterationResults;
+                } catch (TimeoutException e) {
+                    // do nothing, respin
+                }
+            }
+        }
 
-        // iterate over Callables, get() blocks until benchmark/thread completion
+        // get the results
         for (Future<Result> fr : resultList) {
             try {
                 iterationResults.addResult(fr.get());
             } catch (InterruptedException ex) {
-                log(ex);
-                iterationResults.clearResults();
-                break;
+                throw new IllegalStateException("Impossible to be here");
             } catch (ExecutionException ex) {
-                Throwable cause = ex.getCause().getCause(); // unwrap
-                log(cause);
-                iterationResults.clearResults();
-                if (shouldFailOnError) {
-                    throw new IllegalStateException(cause.getMessage(), cause);
-                }
-                break;
+                throw new IllegalStateException("Impossible to be here");
             }
         }
 
@@ -181,10 +202,21 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
-                loop.announceWarmupReady();
-                loop.announceWarmdownReady();
-                loop.preSetup();
-                loop.preTearDown();
+                loop.preSetupForce();
+                loop.preTearDownForce();
+
+                try {
+                    loop.announceWarmupReady();
+                } catch (Exception e1) {
+                    // more threads than expected
+                }
+
+                try {
+                    loop.announceWarmdownReady();
+                } catch (Exception e1) {
+                    // more threads than expected
+                }
+
                 throw new Exception(e); // wrapping Throwable
             }
 
