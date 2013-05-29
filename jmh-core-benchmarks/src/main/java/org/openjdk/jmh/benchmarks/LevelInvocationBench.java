@@ -35,45 +35,70 @@ import org.openjdk.jmh.annotations.TearDown;
 
 import java.util.concurrent.TimeUnit;
 
-public class InvocationBench {
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+public class LevelInvocationBench {
 
     @State(Scope.Benchmark)
     public static class BenchmarkSetupTeardown {
         @Setup(Level.Invocation)
-        public void setup() {
-            // do nothing
-        }
+        public void setup() {}
 
         @TearDown(Level.Invocation)
-        public void tearDown() {
-            // do nothing
-        }
+        public void tearDown() {}
+    }
+
+    @State(Scope.Benchmark)
+    public static class BenchmarkSetup {
+        @Setup(Level.Invocation)
+        public void setup() {}
+    }
+
+    @State(Scope.Benchmark)
+    public static class BenchmarkTeardown {
+        @TearDown(Level.Invocation)
+        public void tearDown() {}
     }
 
     @State(Scope.Thread)
     public static class ThreadSetupTeardown {
         @Setup(Level.Invocation)
-        public void setup() {
-            // do nothing
-        }
+        public void setup() {}
 
         @TearDown(Level.Invocation)
-        public void tearDown() {
-            // do nothing
-        }
+        public void tearDown() {}
+    }
+
+    @State(Scope.Thread)
+    public static class ThreadSetup {
+        @Setup(Level.Invocation)
+        public void setup() {}
+    }
+
+    @State(Scope.Thread)
+    public static class ThreadTeardown {
+        @TearDown(Level.Invocation)
+        public void tearDown() {}
     }
 
     @State(Scope.Group)
     public static class GroupSetupTeardown {
         @Setup(Level.Invocation)
-        public void setup() {
-            // do nothing
-        }
+        public void setup() {}
 
         @TearDown(Level.Invocation)
-        public void tearDown() {
-            // do nothing
-        }
+        public void tearDown() {}
+    }
+
+    @State(Scope.Group)
+    public static class GroupSetup {
+        @Setup(Level.Invocation)
+        public void setup() {}
+    }
+
+    @State(Scope.Group)
+    public static class GroupTeardown {
+        @TearDown(Level.Invocation)
+        public void tearDown() {}
     }
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
@@ -83,21 +108,30 @@ public class InvocationBench {
     }
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void benchmark(BenchmarkSetupTeardown g) {
-        // do nothing
-    }
+    public void benchmark_setup_teardown(BenchmarkSetupTeardown g) {}
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void group(GroupSetupTeardown g) {
-        // do nothing
-    }
+    public void benchmark_setup(BenchmarkSetup g) {}
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void thread(ThreadSetupTeardown g) {
-        // do nothing
-    }
+    public void benchmark_teardown(BenchmarkTeardown g) {}
+
+    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    public void group_setup_teardown(GroupSetupTeardown g) {}
+
+    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    public void group_setup(GroupSetup g) {}
+
+    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    public void group_teardown(GroupTeardown g) {}
+
+    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    public void thread_setup_teardown(ThreadSetupTeardown g) {}
+
+    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    public void thread_setup(ThreadSetup g) {}
+
+    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    public void thread_teardown(ThreadTeardown g) {}
 
 }
