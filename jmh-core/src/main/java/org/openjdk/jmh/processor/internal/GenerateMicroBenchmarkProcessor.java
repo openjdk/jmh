@@ -773,7 +773,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " RawResultPair " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
-            writer.println("        long pauseTime = 0;");
+            writer.println("        long realTime = 0;");
             writer.println("        long startTime = System.nanoTime();");
             writer.println("        Loop.Data ld = loop.data;");
             writer.println("        do {");
@@ -785,7 +785,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("            operations++;");
             writer.println("        } while(!ld.isDone);");
             writer.println("        long stopTime = System.nanoTime();");
-            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L, (stopTime - startTime) - pauseTime);");
+            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (stopTime - startTime));");
             writer.println("    }");
             writer.println();
         }
@@ -867,7 +867,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " RawResultPair " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
-            writer.println("        long pauseTime = 0;");
+            writer.println("        long realTime = 0;");
             writer.println("        long start = System.nanoTime();");
             writer.println("        Loop.Data ld = loop.data;");
             writer.println("        do {");
@@ -879,7 +879,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("            operations++;");
             writer.println("        } while(!ld.isDone);");
             writer.println("        long end = System.nanoTime();");
-            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L, (end - start) - pauseTime);");
+            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (end - start));");
             writer.println("    }");
             writer.println();
         }
@@ -979,7 +979,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        SampleBuffer buffer = new SampleBuffer();");
-            writer.println("        long pauseTime = 0;");
+            writer.println("        long realTime = 0;");
             writer.println("        Loop.Data ld = loop.data;");
             writer.println("        long rnd = System.nanoTime();");
             writer.println("        long rndMask = 1;");
@@ -1018,7 +1018,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         methodProlog(writer, methodGroup);
 
-        writer.println(ident(2) + "long pauseTime = 0;");
+        writer.println(ident(2) + "long realTime = 0;");
 
         int threadTally = 0;
         for (Element method : methodGroup.methods()) {
@@ -1043,7 +1043,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new SingleShotTime(\"" + method.getSimpleName() + "\",  (time2 - time1) - pauseTime, TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new SingleShotTime(\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -1054,12 +1054,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
     private void invocationProlog(PrintWriter writer, int prefix, Element method, StateObjectHandler states, boolean pauseMeasurement) {
         if (!states.getInvocationSetups(method).isEmpty()) {
-            if (pauseMeasurement)
-                writer.println(ident(prefix) + "long ptS = System.nanoTime();");
             for (String s : states.getInvocationSetups(method))
                 writer.println(ident(prefix) + s);
             if (pauseMeasurement)
-                writer.println(ident(prefix) + "pauseTime += (System.nanoTime() - ptS);");
+                writer.println(ident(prefix) + "long rt = System.nanoTime();");
             writer.println();
         }
     }
@@ -1068,11 +1066,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         if (!states.getInvocationTearDowns(method).isEmpty()) {
             writer.println();
             if (pauseMeasurement)
-                writer.println(ident(prefix) + "long ptT = System.nanoTime();");
+                writer.println(ident(prefix) + "realTime += (System.nanoTime() - rt);");
             for (String s : states.getInvocationTearDowns(method))
                 writer.println(ident(prefix) + s);
-            if (pauseMeasurement)
-                writer.println(ident(prefix) + "pauseTime += (System.nanoTime() - ptT);");
             writer.println();
         }
     }
