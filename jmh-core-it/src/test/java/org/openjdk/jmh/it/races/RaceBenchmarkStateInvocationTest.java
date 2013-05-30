@@ -59,12 +59,11 @@ public class RaceBenchmarkStateInvocationTest {
 
     @GenerateMicroBenchmark(BenchmarkType.All)
     @Warmup(iterations = 0)
-    @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
     @Threads(4)
     public void test(MyState state) {
         // Useless to test this condition here, intrinsic races.
-//        Assert.assertEquals("Run", 1, state.value);
-        Fixtures.work();
+        Assert.assertEquals("Run", 1, state.value);
     }
 
     @Test
