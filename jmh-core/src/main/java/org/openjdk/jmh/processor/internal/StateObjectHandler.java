@@ -64,8 +64,7 @@ public class StateObjectHandler {
     private final HashMap<String, String> collapsedTypes = new HashMap<String, String>();
     private int collapsedIndex = 0;
 
-    private final HashMap<String, String> paddedTypes = new HashMap<String, String>();
-    private int paddedIndex = 0;
+    private final HashMap<String, String> jmhTypes = new HashMap<String, String>();
 
     public StateObjectHandler(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -75,15 +74,18 @@ public class StateObjectHandler {
         this.helpersByState = new TreesetMultimap<StateObject, HelperMethodInvocation>();
     }
 
-    private String getPaddedType(String type) {
-        String padded = paddedTypes.get(type);
-        if (padded == null) {
-            padded = "padded_" + (paddedIndex++);
-            paddedTypes.put(type, padded);
+    private String getJMHtype(String type) {
+        String jmhType = jmhTypes.get(type);
+        if (jmhType == null) {
+            jmhType = getBaseType(type) + "_jmh";
+            jmhTypes.put(type, jmhType);
         }
-        return padded;
+        return jmhType;
     }
 
+    private String getBaseType(String type) {
+        return type.substring(type.lastIndexOf(".") + 1);
+    }
 
     public void bindArg(ExecutableElement execMethod, TypeElement type) {
         State ann = type.getAnnotation(State.class);
@@ -137,11 +139,11 @@ public class StateObjectHandler {
 
         StateObject so;
         if (implicitLabel != null) {
-            so = new StateObject(className, getPaddedType(className), scope, "f_" + implicitLabel, "l_" + implicitLabel);
+            so = new StateObject(className, getJMHtype(className), scope, "f_" + implicitLabel, "l_" + implicitLabel);
             implicits.put(implicitLabel, so);
         } else {
             String identifier = collapseTypeName(className) + index;
-            so = new StateObject(className, getPaddedType(className), scope, "f_" + identifier, "l_" + identifier);
+            so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
             args.put(execMethod.getSimpleName().toString(), so);
         }
 
@@ -221,88 +223,18 @@ public class StateObjectHandler {
         // Handle Thread object helpers
         List<String> result = new ArrayList<String>();
         for (StateObject so : states) {
-            if (so.scope != Scope.Thread) continue;
-            if (!hasHelpers.contains(so)) continue;
-
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
-                if (hmi.helperLevel == helperLevel && hmi.type == type) {
-                    result.add("" + so.localIdentifier + "." + hmi.name + "();");
-                }
-            }
-        }
-
-        // Handle Benchmark object helpers
-        for (StateObject so : states) {
-            if (so.scope != Scope.Benchmark) continue;
             if (!hasHelpers.contains(so)) continue;
 
             switch (type) {
                 case SETUP:
-                    result.add("if (!" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
-                    result.add("    synchronized (" + so.fieldIdentifier + ") {");
-                    result.add("        if (!" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
+                    result.add(so.localIdentifier + "." + helperLevel + "Setups();");
                     break;
                 case TEARDOWN:
-                    result.add("if (" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
-                    result.add("    synchronized (" + so.fieldIdentifier + ") {");
-                    result.add("        if (" + so.fieldIdentifier + "_" + helperLevel + "_inited) {");
+                    result.add(so.localIdentifier + "." + helperLevel + "Teardowns();");
                     break;
                 default:
                     throw new IllegalStateException("Unknown helper type: " + type);
             }
-
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
-                if (hmi.helperLevel == helperLevel && hmi.type == type) {
-                    result.add("            " + so.localIdentifier + "." + hmi.name + "();");
-                }
-            }
-
-            switch (type) {
-                case SETUP:
-                    result.add("            " + so.fieldIdentifier + "_" + helperLevel + "_inited = true;");
-                    break;
-                case TEARDOWN:
-                    result.add("            " + so.fieldIdentifier + "_" + helperLevel + "_inited = false;");
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown helper type: " + type);
-            }
-
-            result.add("        }");
-            result.add("    }");
-            result.add("}");
-        }
-
-        // Handle Group object handlers
-        for (StateObject so : states) {
-            if (so.scope != Scope.Group) continue;
-            if (!hasHelpers.contains(so)) continue;
-
-            switch (type) {
-                case SETUP:
-            result.add("synchronized (" + so.localIdentifier + ") {");
-            result.add("    Boolean inited = group_" + helperLevel + "_inited.get(" + so.localIdentifier + ");");
-            result.add("    if (inited == null || inited == false) {");
-            result.add("        group_" + helperLevel + "_inited.put(" + so.localIdentifier + ", Boolean.TRUE);");
-            break;
-            case TEARDOWN:
-                result.add("synchronized (" + so.localIdentifier + ") {");
-                result.add("    Boolean inited = group_" + helperLevel + "_inited.get(" + so.localIdentifier + ");");
-                result.add("    if (inited == null || inited == true) {");
-                result.add("        group_" + helperLevel + "_inited.put(" + so.localIdentifier + ", Boolean.FALSE);");
-                break;
-            default:
-                throw new IllegalStateException("Unknown helper type: " + type);
-        }
-
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
-                if (hmi.helperLevel == helperLevel && hmi.type == type) {
-                    result.add("        " + so.localIdentifier + "." + hmi.name + "();");
-                }
-            }
-
-            result.add("    }");
-            result.add("}");
         }
 
         return result;
@@ -344,15 +276,8 @@ public class StateObjectHandler {
             result.add("    if (" + so.fieldIdentifier + " == null) {");
             result.add("        synchronized(this.getClass()) {");
             result.add("            if (" + so.fieldIdentifier + " == null) {");
-            for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                if (mi.helperLevel == Level.Trial && mi.type == HelperType.SETUP) {
-                    result.add("                val." + mi.name + "();");
-                }
-            }
+            result.add("                val." + Level.Trial + "Setups();");
             result.add("                " + so.fieldIdentifier + " = val;");
-            result.add("                synchronized (" + so.fieldIdentifier + ") {");
-            result.add("                    " + so.fieldIdentifier + "_" + Level.Trial + "_inited = true;");
-            result.add("                }");
             result.add("            }");
             result.add("        }");
             result.add("    }");
@@ -368,13 +293,8 @@ public class StateObjectHandler {
             result.add("");
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(" + so.type + " val) throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
-            for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                if (mi.helperLevel == Level.Trial && mi.type == HelperType.SETUP) {
-                    result.add("         val." + mi.name + "();");
-                }
-            }
+            result.add("          val." + Level.Trial + "Setups();");
             result.add("          " + so.fieldIdentifier + " = val;");
-            result.add("          " + so.fieldIdentifier + "_" + Level.Trial + "_inited = true;");
             result.add("    }");
             result.add("    return " + so.fieldIdentifier + ";");
             result.add("}");
@@ -390,15 +310,8 @@ public class StateObjectHandler {
             result.add("    if (!" + so.fieldIdentifier + "_map.containsKey(groupId)) {");
             result.add("        synchronized(this.getClass()) {");
             result.add("            if (!" + so.fieldIdentifier + "_map.containsKey(groupId)) {");
-            for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                if (mi.helperLevel == Level.Trial && mi.type == HelperType.SETUP) {
-                    result.add("                val." + mi.name + "();");
-                }
-            }
+            result.add("                val." + Level.Trial + "Setups();");
             result.add("                " + so.fieldIdentifier + "_map.put(groupId, val);");
-            result.add("                synchronized (val) {");
-            result.add("                    group_" + Level.Trial + "_inited.put(val, Boolean.TRUE);");
-            result.add("                }");
             result.add("            }");
             result.add("        }");
             result.add("    }");
@@ -414,10 +327,10 @@ public class StateObjectHandler {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(new " + so.paddedType + "());");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(new " + so.type + "());");
                     break;
                 case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(groupId, new " + so.paddedType + "());");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(groupId, new " + so.type + "());");
                     break;
                 default:
                     throw new IllegalStateException("Unhandled scope: " + so.scope);
@@ -431,41 +344,107 @@ public class StateObjectHandler {
 
         List<String> result = new ArrayList<String>();
         for (StateObject so : cons(stateObjects)) {
-            if (!visited.add(so.paddedType)) continue;
-            result.add("static final class " + so.paddedType + " extends " + so.type + " {");
-            result.add("   private volatile int jmh_auto_generated_pad01;");
-            result.add("   private volatile int jmh_auto_generated_pad02;");
-            result.add("   private volatile int jmh_auto_generated_pad03;");
-            result.add("   private volatile int jmh_auto_generated_pad04;");
-            result.add("   private volatile int jmh_auto_generated_pad05;");
-            result.add("   private volatile int jmh_auto_generated_pad06;");
-            result.add("   private volatile int jmh_auto_generated_pad07;");
-            result.add("   private volatile int jmh_auto_generated_pad08;");
-            result.add("   private volatile int jmh_auto_generated_pad09;");
-            result.add("   private volatile int jmh_auto_generated_pad10;");
-            result.add("   private volatile int jmh_auto_generated_pad11;");
-            result.add("   private volatile int jmh_auto_generated_pad12;");
-            result.add("   private volatile int jmh_auto_generated_pad13;");
-            result.add("   private volatile int jmh_auto_generated_pad14;");
-            result.add("   private volatile int jmh_auto_generated_pad15;");
-            result.add("   private volatile int jmh_auto_generated_pad16;");
-            result.add("   private volatile int jmh_auto_generated_pad17;");
-            result.add("   private volatile int jmh_auto_generated_pad18;");
-            result.add("   private volatile int jmh_auto_generated_pad19;");
-            result.add("   private volatile int jmh_auto_generated_pad20;");
-            result.add("   private volatile int jmh_auto_generated_pad21;");
-            result.add("   private volatile int jmh_auto_generated_pad22;");
-            result.add("   private volatile int jmh_auto_generated_pad23;");
-            result.add("   private volatile int jmh_auto_generated_pad24;");
-            result.add("   private volatile int jmh_auto_generated_pad25;");
-            result.add("   private volatile int jmh_auto_generated_pad26;");
-            result.add("   private volatile int jmh_auto_generated_pad27;");
-            result.add("   private volatile int jmh_auto_generated_pad28;");
-            result.add("   private volatile int jmh_auto_generated_pad29;");
-            result.add("   private volatile int jmh_auto_generated_pad30;");
-            result.add("   private volatile int jmh_auto_generated_pad31;");
-            result.add("   private volatile int jmh_auto_generated_pad32;");
-            result.add("}");
+            if (!visited.add(so.userType)) continue;
+            result.add("static final class " + so.type + " extends " + so.userType + " {");
+            result.add("    private volatile int jmh_auto_generated_pad01;");
+            result.add("    private volatile int jmh_auto_generated_pad02;");
+            result.add("    private volatile int jmh_auto_generated_pad03;");
+            result.add("    private volatile int jmh_auto_generated_pad04;");
+            result.add("    private volatile int jmh_auto_generated_pad05;");
+            result.add("    private volatile int jmh_auto_generated_pad06;");
+            result.add("    private volatile int jmh_auto_generated_pad07;");
+            result.add("    private volatile int jmh_auto_generated_pad08;");
+            result.add("    private volatile int jmh_auto_generated_pad09;");
+            result.add("    private volatile int jmh_auto_generated_pad10;");
+            result.add("    private volatile int jmh_auto_generated_pad11;");
+            result.add("    private volatile int jmh_auto_generated_pad12;");
+            result.add("    private volatile int jmh_auto_generated_pad13;");
+            result.add("    private volatile int jmh_auto_generated_pad14;");
+            result.add("    private volatile int jmh_auto_generated_pad15;");
+            result.add("    private volatile int jmh_auto_generated_pad16;");
+            result.add("    private volatile int jmh_auto_generated_pad17;");
+            result.add("    private volatile int jmh_auto_generated_pad18;");
+            result.add("    private volatile int jmh_auto_generated_pad19;");
+            result.add("    private volatile int jmh_auto_generated_pad20;");
+            result.add("    private volatile int jmh_auto_generated_pad21;");
+            result.add("    private volatile int jmh_auto_generated_pad22;");
+            result.add("    private volatile int jmh_auto_generated_pad23;");
+            result.add("    private volatile int jmh_auto_generated_pad24;");
+            result.add("    private volatile int jmh_auto_generated_pad25;");
+            result.add("    private volatile int jmh_auto_generated_pad26;");
+            result.add("    private volatile int jmh_auto_generated_pad27;");
+            result.add("    private volatile int jmh_auto_generated_pad28;");
+            result.add("    private volatile int jmh_auto_generated_pad29;");
+            result.add("    private volatile int jmh_auto_generated_pad30;");
+            result.add("    private volatile int jmh_auto_generated_pad31;");
+            result.add("    private volatile int jmh_auto_generated_pad32;");
+            result.add("");
+
+            switch (so.scope) {
+                case Benchmark:
+                case Group:
+                    for (Level level : Level.values()) {
+                        result.add("    private volatile boolean ready" + level + ";");
+
+                        result.add("    public void " + level + "Setups() throws Exception {");
+                        result.add("        if (ready" + level + ") return;");
+                        result.add("        synchronized(this) {");
+                        result.add("            if (ready" + level + ") return;");
+                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                            if (mi.helperLevel == level && mi.type == HelperType.SETUP) {
+                                result.add("            " + mi.name + "();");
+                            }
+                        }
+                        result.add("            ready" + level + " = true;");
+                        result.add("        }");
+                        result.add("    }");
+
+                        result.add("    public void " + level + "Teardowns() throws Exception {");
+                        result.add("        if (!ready" + level + ") return;");
+                        result.add("        synchronized(this) {");
+                        result.add("            if (!ready" + level + ") return;");
+                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                            if (mi.helperLevel == level && mi.type == HelperType.TEARDOWN) {
+                                result.add("            " + mi.name + "();");
+                            }
+                        }
+                        result.add("            ready" + level + " = false;");
+                        result.add("        }");
+                        result.add("    }");
+                    }
+
+                    result.add("}");
+                    break;
+                case Thread:
+                    for (Level level : Level.values()) {
+                        result.add("    private boolean ready" + level + ";");
+
+                        result.add("    public void " + level + "Setups() throws Exception {");
+                        result.add("        if (ready" + level + ") return;");
+                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                            if (mi.helperLevel == level && mi.type == HelperType.SETUP) {
+                                result.add("            " + mi.name + "();");
+                            }
+                        }
+                        result.add("        ready" + level + " = true;");
+                        result.add("    }");
+
+                        result.add("    public void " + level + "Teardowns() throws Exception {");
+                        result.add("        if (!ready" + level + ") return;");
+                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                            if (mi.helperLevel == level && mi.type == HelperType.TEARDOWN) {
+                                result.add("        " + mi.name + "();");
+                            }
+                        }
+                        result.add("        ready" + level + " = false;");
+                        result.add("    }");
+                    }
+
+                    result.add("}");
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown state scope: " + so.scope);
+            }
         }
         return result;
     }
@@ -477,29 +456,6 @@ public class StateObjectHandler {
 
     public Collection<String> getFields() {
         Collection<String> result = new ArrayList<String>();
-        for (StateObject so : cons(stateObjects)) {
-            switch (so.scope) {
-                case Benchmark:
-                    result.add("private static boolean " + so.fieldIdentifier + "_"    + Level.Trial + "_inited;");
-                    result.add("private static boolean " + so.fieldIdentifier + "_"    + Level.Iteration  + "_inited;");
-                    result.add("private static boolean " + so.fieldIdentifier + "_"    + Level.Invocation + "_inited;");
-                    break;
-                case Group:
-                    break;
-                case Thread:
-                    result.add("private boolean " + so.fieldIdentifier + "_"    + Level.Trial + "_inited;");
-                    result.add("private boolean " + so.fieldIdentifier + "_"    + Level.Iteration  + "_inited;");
-                    result.add("private boolean " + so.fieldIdentifier + "_"    + Level.Invocation + "_inited;");
-                    break;
-                default:
-                    throw new IllegalStateException("Unhandled scope: " + so.scope);
-            }
-        }
-
-        result.add("private static final java.util.Map<Object, Boolean> group_" + Level.Trial + "_inited = java.util.Collections.synchronizedMap(new java.util.HashMap<Object, Boolean>());");
-        result.add("private static final java.util.Map<Object, Boolean> group_" + Level.Iteration + "_inited = java.util.Collections.synchronizedMap(new java.util.HashMap<Object, Boolean>());");
-        result.add("private static final java.util.Map<Object, Boolean> group_" + Level.Invocation + "_inited = java.util.Collections.synchronizedMap(new java.util.HashMap<Object, Boolean>());");
-
         result.add("private static final java.util.concurrent.atomic.AtomicInteger threadSelector = new java.util.concurrent.atomic.AtomicInteger();");
         result.add("private int threadId = 0;");
         result.add("private boolean threadId_inited = false;");

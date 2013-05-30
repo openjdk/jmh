@@ -37,15 +37,15 @@ public class StateObject {
         }
     };
 
+    public final String userType;
     public final String type;
-    public final String paddedType;
     public final Scope scope;
     public final String localIdentifier;
     public final String fieldIdentifier;
 
-    public StateObject(String type, String paddedType, Scope scope, String fieldIdentifier, String localIdentifier) {
-        this.type = type;
-        this.paddedType = paddedType;
+    public StateObject(String userType, String jmhType, Scope scope, String fieldIdentifier, String localIdentifier) {
+        this.userType = userType;
+        this.type = jmhType;
         this.scope = scope;
         this.localIdentifier = localIdentifier;
         this.fieldIdentifier = fieldIdentifier;
