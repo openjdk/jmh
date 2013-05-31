@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author staffan.friberg@oracle.com, anders.astrand@oracle.com, aleksey.shipilev@oracle.com
  */
-public class Loop {
+public class Loop extends LoopL4 {
 
     /** Timers */
     private static final ScheduledExecutorService timers = Executors.newScheduledThreadPool(1, new ThreadFactory() {
@@ -51,84 +51,6 @@ public class Loop {
             return t;
         }
     });
-
-    public static class L1 {
-        public int p01, p02, p03, p04, p05, p06, p07, p08;
-        public int p11, p12, p13, p14, p15, p16, p17, p18;
-        public int p21, p22, p23, p24, p25, p26, p27, p28;
-        public int p31, p32, p33, p34, p35, p36, p37, p38;
-    }
-
-    /**
-     * @see BlackHole for rationale
-     */
-    public static class Data extends L1 {
-        /* Flag for if we are done or not.
-         * This is specifically the public field, so to spare one virtual call.
-         */
-        public volatile boolean isDone;
-
-        /** How long we should loop */
-        public final long duration;
-        /** Start timestamp */
-        public long start;
-        /** End timestamp */
-        public long end;
-        /** Start of pause */
-        public long pauseStart;
-        /** Total pause time */
-        public long totalPause;
-
-        public final int threads;
-        public final CountDownLatch preSetup;
-        public final CountDownLatch preTearDown;
-        public final boolean lastIteration;
-        public final boolean syncIterations;
-
-        public final AtomicInteger warmupVisited, warmdownVisited;
-        public volatile boolean warmupShouldWait, warmdownShouldWait;
-
-
-        public Data(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-            this.threads = threads;
-            this.preSetup = preSetup;
-            this.preTearDown = preTearDown;
-            this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
-            this.lastIteration = lastIteration;
-
-            this.warmupVisited = new AtomicInteger();
-            this.warmdownVisited = new AtomicInteger();
-
-            if (!syncIterations) {
-                warmupShouldWait = false;
-                warmdownShouldWait = false;
-            }
-
-            this.syncIterations = syncIterations;
-        }
-
-    }
-
-    public static class L3 extends Data {
-        public int e01, e02, e03, e04, e05, e06, e07, e08;
-        public int e11, e12, e13, e14, e15, e16, e17, e18;
-        public int e21, e22, e23, e24, e25, e26, e27, e28;
-        public int e31, e32, e33, e34, e35, e36, e37, e38;
-
-        public L3(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-            super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
-        }
-    }
-
-    public static class L4 extends L3 {
-        public int marker;
-
-        public L4(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-            super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
-        }
-    }
-
-    public final L4 data;
 
     /**
      * Constructor
@@ -149,7 +71,7 @@ public class Loop {
     }
 
     public Loop(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-        data = new L4(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
+        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
     }
 
 
@@ -158,22 +80,22 @@ public class Loop {
     public void start() {
         enable();
 
-        assert data.start == 0;
-        assert data.end == 0;
-        data.start = System.nanoTime();
+        assert start == 0;
+        assert end == 0;
+        start = System.nanoTime();
     }
 
 
     public void enable() {
-        assert !data.isDone;
-        data.isDone = false;
+        assert !isDone;
+        isDone = false;
 
         timers.schedule(new Runnable() {
             @Override
             public void run() {
-                data.isDone = true;
+                isDone = true;
             }
-        }, data.duration, TimeUnit.NANOSECONDS);
+        }, duration, TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -183,23 +105,23 @@ public class Loop {
      */
     @Deprecated // GMB generator emits the proper code instead
     public void pauseMeasurement() {
-        assert data.pauseStart == 0;
-        data.pauseStart = System.nanoTime();
+        assert pauseStart == 0;
+        pauseStart = System.nanoTime();
     }
 
     /** Resume a paused timing */
     @Deprecated // GMB generator emits the proper code instead
     public void resumeMeasurement() {
-        assert data.pauseStart != 0;
-        data.totalPause += System.nanoTime() - data.pauseStart;
-        data.pauseStart = 0;
+        assert pauseStart != 0;
+        totalPause += System.nanoTime() - pauseStart;
+        pauseStart = 0;
     }
 
     /** End timer and record the end time */
     @Deprecated // GMB generator emits the proper code instead
     public void end() {
-        assert data.isDone;
-        data.end = System.nanoTime();
+        assert isDone;
+        end = System.nanoTime();
     }
 
     /**
@@ -209,8 +131,8 @@ public class Loop {
      */
     @Deprecated // GMB generator emits the proper code instead
     public boolean done() {
-        assert data.start != 0;
-        return data.isDone;
+        assert start != 0;
+        return isDone;
     }
 
     /**
@@ -222,10 +144,10 @@ public class Loop {
      * @return the time the iteration took
      */
     public long getTime() {
-        assert data.start != 0;
-        assert data.end != 0;
-        assert data.isDone;
-        return (data.end - data.start - data.totalPause);
+        assert start != 0;
+        assert end != 0;
+        assert isDone;
+        return (end - start - totalPause);
     }
 
     /**
@@ -234,10 +156,10 @@ public class Loop {
      * @return The total pause time in nanoseconds
      */
     public long getTotalPausetime() {
-        assert data.start != 0;
-        assert data.end != 0;
-        assert data.isDone;
-        return data.totalPause;
+        assert start != 0;
+        assert end != 0;
+        assert isDone;
+        return totalPause;
     }
 
     /**
@@ -246,10 +168,10 @@ public class Loop {
      * @return The total iteration run time including pauses in nanoseconds
      */
     public long getTotalRuntime() {
-        assert data.start != 0;
-        assert data.end != 0;
-        assert data.isDone;
-        return (data.end - data.start);
+        assert start != 0;
+        assert end != 0;
+        assert isDone;
+        return (end - start);
     }
 
     /**
@@ -268,45 +190,45 @@ public class Loop {
      * @return
      */
     public long getDuration(TimeUnit unit) {
-        return unit.convert(data.duration, TimeUnit.NANOSECONDS);
+        return unit.convert(duration, TimeUnit.NANOSECONDS);
     }
 
     public boolean shouldContinueWarmup() {
-        return data.warmupShouldWait;
+        return warmupShouldWait;
     }
 
     public boolean shouldContinueWarmdown() {
-        return data.warmdownShouldWait;
+        return warmdownShouldWait;
     }
 
     public void announceWarmupReady() {
-        if (!data.syncIterations) return;
-        int v = data.warmupVisited.incrementAndGet();
-        if (v == data.threads) {
-            data.warmupShouldWait = false;
+        if (!syncIterations) return;
+        int v = warmupVisited.incrementAndGet();
+        if (v == threads) {
+            warmupShouldWait = false;
         }
 
-        if (v > data.threads) {
+        if (v > threads) {
             throw new IllegalStateException("More threads than expected");
         }
     }
 
     public void announceWarmdownReady() {
-        if (!data.syncIterations) return;
-        int v = data.warmdownVisited.incrementAndGet();
-        if (v == data.threads) {
-            data.warmdownShouldWait = false;
+        if (!syncIterations) return;
+        int v = warmdownVisited.incrementAndGet();
+        if (v == threads) {
+            warmdownShouldWait = false;
         }
 
-        if (v > data.threads) {
+        if (v > threads) {
             throw new IllegalStateException("More threads than expected");
         }
     }
 
     public void preSetup() {
         try {
-            data.preSetup.countDown();
-            data.preSetup.await();
+            preSetup.countDown();
+            preSetup.await();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -314,22 +236,99 @@ public class Loop {
 
     public void preTearDown() {
         try {
-            data.preTearDown.countDown();
-            data.preTearDown.await();
+            preTearDown.countDown();
+            preTearDown.await();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
 
     public void preSetupForce() {
-        data.preSetup.countDown();
+        preSetup.countDown();
     }
 
     public void preTearDownForce() {
-        data.preTearDown.countDown();
+        preTearDown.countDown();
     }
 
     public boolean isLastIteration() {
-        return data.lastIteration;
+        return lastIteration;
     }
 }
+
+class LoopL1 {
+    public int p01, p02, p03, p04, p05, p06, p07, p08;
+    public int p11, p12, p13, p14, p15, p16, p17, p18;
+    public int p21, p22, p23, p24, p25, p26, p27, p28;
+    public int p31, p32, p33, p34, p35, p36, p37, p38;
+}
+
+/**
+ * @see BlackHole for rationale
+ */
+class LoopL2 extends LoopL1 {
+    /* Flag for if we are done or not.
+     * This is specifically the public field, so to spare one virtual call.
+     */
+    public volatile boolean isDone;
+
+    /** How long we should loop */
+    public final long duration;
+    /** Start timestamp */
+    public long start;
+    /** End timestamp */
+    public long end;
+    /** Start of pause */
+    public long pauseStart;
+    /** Total pause time */
+    public long totalPause;
+
+    public final int threads;
+    public final CountDownLatch preSetup;
+    public final CountDownLatch preTearDown;
+    public final boolean lastIteration;
+    public final boolean syncIterations;
+
+    public final AtomicInteger warmupVisited, warmdownVisited;
+    public volatile boolean warmupShouldWait, warmdownShouldWait;
+
+
+    public LoopL2(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
+        this.threads = threads;
+        this.preSetup = preSetup;
+        this.preTearDown = preTearDown;
+        this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
+        this.lastIteration = lastIteration;
+
+        this.warmupVisited = new AtomicInteger();
+        this.warmdownVisited = new AtomicInteger();
+
+        if (!syncIterations) {
+            warmupShouldWait = false;
+            warmdownShouldWait = false;
+        }
+
+        this.syncIterations = syncIterations;
+    }
+
+}
+
+class LoopL3 extends LoopL2 {
+    public int e01, e02, e03, e04, e05, e06, e07, e08;
+    public int e11, e12, e13, e14, e15, e16, e17, e18;
+    public int e21, e22, e23, e24, e25, e26, e27, e28;
+    public int e31, e32, e33, e34, e35, e36, e37, e38;
+
+    public LoopL3(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
+        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
+    }
+}
+
+class LoopL4 extends LoopL3 {
+    public int marker;
+
+    public LoopL4(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
+        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
+    }
+}
+

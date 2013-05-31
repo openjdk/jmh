@@ -725,7 +725,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "loop.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.data.warmupShouldWait) {");
+            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -752,7 +752,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "loop.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.data.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -777,7 +777,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        long startTime = System.nanoTime();");
-            writer.println("        Loop.Data ld = loop.data;");
             writer.println("        do {");
 
             invocationProlog(writer, 3, method, states, true);
@@ -785,7 +784,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, true);
 
             writer.println("            operations++;");
-            writer.println("        } while(!ld.isDone);");
+            writer.println("        } while(!loop.isDone);");
             writer.println("        long stopTime = System.nanoTime();");
             writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (stopTime - startTime));");
             writer.println("    }");
@@ -820,7 +819,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "loop.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.data.warmupShouldWait) {");
+            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -847,7 +846,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "loop.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.data.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -871,7 +870,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        long start = System.nanoTime();");
-            writer.println("        Loop.Data ld = loop.data;");
             writer.println("        do {");
 
             invocationProlog(writer, 3, method, states, true);
@@ -879,7 +877,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, true);
 
             writer.println("            operations++;");
-            writer.println("        } while(!ld.isDone);");
+            writer.println("        } while(!loop.isDone);");
             writer.println("        long end = System.nanoTime();");
             writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (end - start));");
             writer.println("    }");
@@ -934,7 +932,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "loop.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.data.warmupShouldWait) {");
+            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -960,7 +958,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "loop.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.data.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -983,7 +981,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        SampleBuffer buffer = new SampleBuffer();");
             writer.println("        long realTime = 0;");
-            writer.println("        Loop.Data ld = loop.data;");
             writer.println("        long rnd = System.nanoTime();");
             writer.println("        long rndMask = 1;");
             writer.println("        long time = 0;");
@@ -1009,7 +1006,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             invocationEpilog(writer, 4, method, states, true);
 
-            writer.println("        } while(!ld.isDone);");
+            writer.println("        } while(!loop.isDone);");
             writer.println("        return new SampleTimePerOp(\"" + method.getSimpleName() + "\", buffer, TimeUnit." + timeUnit + ");");
             writer.println("    }");
             writer.println();
