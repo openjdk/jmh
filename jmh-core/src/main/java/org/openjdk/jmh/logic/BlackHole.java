@@ -30,6 +30,44 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
+/*
+    See the rationale for L1..L4 classes below.
+ */
+
+class L1 {
+    public int p01, p02, p03, p04, p05, p06, p07, p08;
+    public int p11, p12, p13, p14, p15, p16, p17, p18;
+    public int p21, p22, p23, p24, p25, p26, p27, p28;
+    public int p31, p32, p33, p34, p35, p36, p37, p38;
+}
+
+class L2 extends L1 {
+    public volatile byte b1 = 1, b2 = 2;
+    public volatile boolean bool1 = false, bool2 = true;
+    public volatile char c1 = 'A', c2 = 'B';
+    public volatile short s1 = 1, s2 = 2;
+    public volatile int i1 = 1, i2 = 2;
+    public volatile long l1 = 1, l2 = 2;
+    public volatile float f1 = 1.0f, f2 = 2.0f;
+    public volatile double d1 = 1.0d, d2 = 2.0d;
+    public volatile Object obj1 = new Object();
+    public volatile Object[] objs1 = new Object[]{new Object()};
+    public volatile L2 nullBait = null;
+    public long tlr = System.nanoTime();
+    public long tlrMask = 1;
+}
+
+class L3 extends L2 {
+    public int e01, e02, e03, e04, e05, e06, e07, e08;
+    public int e11, e12, e13, e14, e15, e16, e17, e18;
+    public int e21, e22, e23, e24, e25, e26, e27, e28;
+    public int e31, e32, e33, e34, e35, e36, e37, e38;
+}
+
+class L4 extends L3 {
+    public int marker;
+}
+
 /**
  * Black Hole.
  * <p/>
@@ -40,7 +78,7 @@ import java.lang.reflect.Field;
  * @author aleksey.shipilev@oracle.com
  */
 @State(Scope.Thread) // Blackholes are always acting like a thread-local state
-public class BlackHole {
+public class BlackHole extends L4 {
 
     /**
      * IMPLEMENTATION NOTES:
@@ -100,45 +138,6 @@ public class BlackHole {
      * the condition to "false". We are warming up the slow-path in the beginning
      * to evade that effect.
      */
-
-    private final L4 sink;
-
-    static class L1 {
-        public int p01, p02, p03, p04, p05, p06, p07, p08;
-        public int p11, p12, p13, p14, p15, p16, p17, p18;
-        public int p21, p22, p23, p24, p25, p26, p27, p28;
-        public int p31, p32, p33, p34, p35, p36, p37, p38;
-    }
-
-    static class L2 extends L1 {
-        public volatile byte b1 = 1, b2 = 2;
-        public volatile boolean bool1 = false, bool2 = true;
-        public volatile char c1 = 'A', c2 = 'B';
-        public volatile short s1 = 1, s2 = 2;
-        public volatile int i1 = 1, i2 = 2;
-        public volatile long l1 = 1, l2 = 2;
-        public volatile float f1 = 1.0f, f2 = 2.0f;
-        public volatile double d1 = 1.0d, d2 = 2.0d;
-        public volatile Object obj1 = new Object();
-        public volatile Object[] objs1 = new Object[]{new Object()};
-        public long tlr = System.nanoTime();
-        public long tlrMask = 1;
-    }
-
-    static class L3 extends L2 {
-        public int e01, e02, e03, e04, e05, e06, e07, e08;
-        public int e11, e12, e13, e14, e15, e16, e17, e18;
-        public int e21, e22, e23, e24, e25, e26, e27, e28;
-        public int e31, e32, e33, e34, e35, e36, e37, e38;
-    }
-
-    static class L4 extends L3 {
-        public int marker;
-    }
-
-    public BlackHole() {
-        sink = new L4();
-    }
 
     private static Unsafe U;
 
@@ -203,17 +202,16 @@ public class BlackHole {
      */
     public final void consume(Object obj) {
         // let's play the optimizing compiler, dude!
-        L4 s = sink;
-        long tlr = s.tlr;
-        long tlrMask = s.tlrMask;
+        long tlr = this.tlr;
+        long tlrMask = this.tlrMask;
 
-        s.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        this.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             if (tlrMask != 0x7FFFFFFFFFFFFFFFL) {
-                s.tlrMask = (tlrMask << 1) + 1;
+                this.tlrMask = (tlrMask << 1) + 1;
             }
-            s.obj1 = obj;
+            this.obj1 = obj;
         }
     }
 
@@ -224,17 +222,16 @@ public class BlackHole {
      */
     public final void consume(Object[] objs) {
         // let's play the optimizing compiler, dude!
-        L4 s = sink;
-        long tlr = s.tlr;
-        long tlrMask = s.tlrMask;
+        long tlr = this.tlr;
+        long tlrMask = this.tlrMask;
 
-        s.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        this.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             if (tlrMask != 0x7FFFFFFFFFFFFFFFL) {
-                s.tlrMask = (tlrMask << 1) + 1;
+                this.tlrMask = (tlrMask << 1) + 1;
             }
-            s.objs1 = objs;
+            this.objs1 = objs;
         }
     }
 
@@ -244,9 +241,9 @@ public class BlackHole {
      * @param b object to consume.
      */
     public final void consume(byte b) {
-        if (b == sink.b1 & b == sink.b2) {
+        if (b == b1 & b == b2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: b = " + b);
+            nullBait.b1 = b; // implicit null pointer exception
         }
     }
 
@@ -256,9 +253,9 @@ public class BlackHole {
      * @param bool object to consume.
      */
     public final void consume(boolean bool) {
-        if (bool == sink.bool1 & bool == sink.bool2) {
+        if (bool == bool1 & bool == bool2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: bool = " + bool);
+            nullBait.bool1 = bool; // implicit null pointer exception
         }
     }
 
@@ -268,9 +265,9 @@ public class BlackHole {
      * @param c object to consume.
      */
     public final void consume(char c) {
-        if (c == sink.c1 & c == sink.c2) {
+        if (c == c1 & c == c2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: c = " + c);
+            nullBait.c1 = c; // implicit null pointer exception
         }
     }
 
@@ -280,9 +277,9 @@ public class BlackHole {
      * @param s object to consume.
      */
     public final void consume(short s) {
-        if (s == sink.s1 & s == sink.s2) {
+        if (s == s1 & s == s2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: s = " + s);
+            nullBait.s1 = s; // implicit null pointer exception
         }
     }
 
@@ -292,9 +289,9 @@ public class BlackHole {
      * @param i object to consume.
      */
     public final void consume(int i) {
-        if (i == sink.i1 & i == sink.i2) {
+        if (i == i1 & i == i2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: i = " + i);
+            nullBait.i1 = i; // implicit null pointer exception
         }
     }
 
@@ -304,9 +301,9 @@ public class BlackHole {
      * @param l object to consume.
      */
     public final void consume(long l) {
-        if (l == sink.l1 & l == sink.l2) {
+        if (l == l1 & l == l2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: l = " + l);
+            nullBait.l1 = l; // implicit null pointer exception
         }
     }
 
@@ -316,9 +313,9 @@ public class BlackHole {
      * @param f object to consume.
      */
     public final void consume(float f) {
-        if (f == sink.f1 & f == sink.f2) {
+        if (f == f1 & f == f2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: f = " + f);
+            nullBait.f1 = f; // implicit null pointer exception
         }
     }
 
@@ -328,9 +325,9 @@ public class BlackHole {
      * @param d object to consume.
      */
     public final void consume(double d) {
-        if (d == sink.d1 & d == sink.d2) {
+        if (d == d1 & d == d2) {
             // SHOULD NEVER HAPPEN
-            throw new IllegalStateException("JMH infrastructure bug: d = " + d);
+            nullBait.d1 = d; // implicit null pointer exception
         }
     }
 
