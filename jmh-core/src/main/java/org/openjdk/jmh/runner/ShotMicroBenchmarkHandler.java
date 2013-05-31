@@ -87,7 +87,7 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // create tasks
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, new Loop(TimeValue.NONE, null, null, preSetupBarrier, preTearDownBarrier, last));
+            runners[i] = new BenchmarkTask(threadLocal, new Loop(numThreads, TimeValue.NONE, preSetupBarrier, preTearDownBarrier, last, false));
         }
 
         // submit tasks to threadpool

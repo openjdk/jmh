@@ -220,20 +220,69 @@ public class StateObjectHandler {
             }
         }
 
-        // Handle Thread object helpers
         List<String> result = new ArrayList<String>();
+
+        // Handle Thread object helpers
         for (StateObject so : states) {
+            if (so.scope != Scope.Thread) continue;
             if (!hasHelpers.contains(so)) continue;
 
-            switch (type) {
-                case SETUP:
-                    result.add(so.localIdentifier + "." + helperLevel + "Setups();");
-                    break;
-                case TEARDOWN:
-                    result.add(so.localIdentifier + "." + helperLevel + "Teardowns();");
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown helper type: " + type);
+            if (type == HelperType.SETUP) {
+                result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                    if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
+                        result.add("    " + so.localIdentifier + "." + mi.name + "();");
+                    }
+                }
+                result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = true;");
+                result.add("}");
+            }
+
+            if (type == HelperType.TEARDOWN) {
+                result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                    if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
+                        result.add("    " + so.localIdentifier + "." + mi.name + "();");
+                    }
+                }
+                result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = false;");
+                result.add("}");
+            }
+        }
+
+        // Handle Benchmark/Group object helpers
+        for (StateObject so : states) {
+            if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
+            if (!hasHelpers.contains(so)) continue;
+
+            if (type == HelperType.SETUP) {
+                result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                result.add("    synchronized(" + so.localIdentifier + ") {");
+                result.add("        if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                    if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
+                        result.add("        " + so.localIdentifier + "." + mi.name + "();");
+                    }
+                }
+                result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = true;");
+                result.add("        }");
+                result.add("    }");
+                result.add("}");
+            }
+
+            if (type == HelperType.TEARDOWN) {
+                result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                result.add("    synchronized(" + so.localIdentifier + ") {");
+                result.add("        if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                    if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
+                        result.add("            " + so.localIdentifier + "." + mi.name + "();");
+                    }
+                }
+                result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = false;");
+                result.add("        }");
+                result.add("    }");
+                result.add("}");
             }
         }
 
@@ -276,7 +325,12 @@ public class StateObjectHandler {
             result.add("    if (" + so.fieldIdentifier + " == null) {");
             result.add("        synchronized(this.getClass()) {");
             result.add("            if (" + so.fieldIdentifier + " == null) {");
-            result.add("                val." + Level.Trial + "Setups();");
+            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+                if (hmi.helperLevel != Level.Trial) continue;
+                if (hmi.type != HelperType.SETUP) continue;
+                result.add("                val." + hmi.name + "();");
+            }
+            result.add("                " + "val.ready" + Level.Trial + " = true;");
             result.add("                " + so.fieldIdentifier + " = val;");
             result.add("            }");
             result.add("        }");
@@ -293,7 +347,12 @@ public class StateObjectHandler {
             result.add("");
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(" + so.type + " val) throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
-            result.add("          val." + Level.Trial + "Setups();");
+            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+                if (hmi.helperLevel != Level.Trial) continue;
+                if (hmi.type != HelperType.SETUP) continue;
+                result.add("                val." + hmi.name + "();");
+            }
+            result.add("                " + "val.ready" + Level.Trial + " = true;");
             result.add("          " + so.fieldIdentifier + " = val;");
             result.add("    }");
             result.add("    return " + so.fieldIdentifier + ";");
@@ -310,7 +369,12 @@ public class StateObjectHandler {
             result.add("    if (!" + so.fieldIdentifier + "_map.containsKey(groupId)) {");
             result.add("        synchronized(this.getClass()) {");
             result.add("            if (!" + so.fieldIdentifier + "_map.containsKey(groupId)) {");
-            result.add("                val." + Level.Trial + "Setups();");
+            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+                if (hmi.helperLevel != Level.Trial) continue;
+                if (hmi.type != HelperType.SETUP) continue;
+                result.add("                val." + hmi.name + "();");
+            }
+            result.add("                " + "val.ready" + Level.Trial + " = true;");
             result.add("                " + so.fieldIdentifier + "_map.put(groupId, val);");
             result.add("            }");
             result.add("        }");
@@ -385,66 +449,18 @@ public class StateObjectHandler {
                 case Group:
                     for (Level level : Level.values()) {
                         result.add("    private volatile boolean ready" + level + ";");
-
-                        result.add("    public void " + level + "Setups() throws Exception {");
-                        result.add("        if (ready" + level + ") return;");
-                        result.add("        synchronized(this) {");
-                        result.add("            if (ready" + level + ") return;");
-                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                            if (mi.helperLevel == level && mi.type == HelperType.SETUP) {
-                                result.add("            " + mi.name + "();");
-                            }
-                        }
-                        result.add("            ready" + level + " = true;");
-                        result.add("        }");
-                        result.add("    }");
-
-                        result.add("    public void " + level + "Teardowns() throws Exception {");
-                        result.add("        if (!ready" + level + ") return;");
-                        result.add("        synchronized(this) {");
-                        result.add("            if (!ready" + level + ") return;");
-                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                            if (mi.helperLevel == level && mi.type == HelperType.TEARDOWN) {
-                                result.add("            " + mi.name + "();");
-                            }
-                        }
-                        result.add("            ready" + level + " = false;");
-                        result.add("        }");
-                        result.add("    }");
                     }
-
-                    result.add("}");
                     break;
                 case Thread:
                     for (Level level : Level.values()) {
                         result.add("    private boolean ready" + level + ";");
-
-                        result.add("    public void " + level + "Setups() throws Exception {");
-                        result.add("        if (ready" + level + ") return;");
-                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                            if (mi.helperLevel == level && mi.type == HelperType.SETUP) {
-                                result.add("            " + mi.name + "();");
-                            }
-                        }
-                        result.add("        ready" + level + " = true;");
-                        result.add("    }");
-
-                        result.add("    public void " + level + "Teardowns() throws Exception {");
-                        result.add("        if (!ready" + level + ") return;");
-                        for (HelperMethodInvocation mi : helpersByState.get(so)) {
-                            if (mi.helperLevel == level && mi.type == HelperType.TEARDOWN) {
-                                result.add("        " + mi.name + "();");
-                            }
-                        }
-                        result.add("        ready" + level + " = false;");
-                        result.add("    }");
                     }
-
-                    result.add("}");
                     break;
                 default:
                     throw new IllegalStateException("Unknown state scope: " + so.scope);
             }
+
+            result.add("}");
         }
         return result;
     }

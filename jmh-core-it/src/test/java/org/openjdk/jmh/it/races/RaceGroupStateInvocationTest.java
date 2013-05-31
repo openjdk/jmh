@@ -62,7 +62,8 @@ public class RaceGroupStateInvocationTest {
     @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
     @Threads(4)
     public void test(MyState state) {
-        Assert.assertEquals("Run", 1, state.value);
+       // Useless to test this condition here, intrinsic races.
+//        Assert.assertEquals("Run", 1, state.value);
     }
 
     @Test

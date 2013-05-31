@@ -63,7 +63,7 @@ public class RaceBenchmarkStateInvocationTest {
     @Threads(4)
     public void test(MyState state) {
         // Useless to test this condition here, intrinsic races.
-        Assert.assertEquals("Run", 1, state.value);
+//        Assert.assertEquals("Run", 1, state.value);
     }
 
     @Test
