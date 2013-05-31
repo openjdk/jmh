@@ -42,12 +42,11 @@ public class RaceGroupStateIterationTest {
 
     @State(Scope.Group)
     public static class MyState {
-        public int value = 0;
+        public int value = 2;
 
         @Setup(Level.Iteration)
         public void setup() {
-            System.err.println("Executing setup");
-            Assert.assertNotSame("Setup", 1, value);
+            Assert.assertEquals("Setup", 2, value);
             value = 1;
         }
 

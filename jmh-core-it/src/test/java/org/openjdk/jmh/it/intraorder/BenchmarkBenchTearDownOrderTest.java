@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @State(Scope.Benchmark)
 public class BenchmarkBenchTearDownOrderTest {
 
-    private static final AtomicInteger seq = new AtomicInteger();
+    private final AtomicInteger seq = new AtomicInteger();
     private int run1, run2, run3, runD;
     private int iter1, iter2, iter3, iterD;
     private int invoc1, invoc2, invoc3, invocD;
