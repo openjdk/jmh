@@ -36,68 +36,68 @@ import org.openjdk.jmh.annotations.TearDown;
 import java.util.concurrent.TimeUnit;
 
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-public class LevelInvocationBench {
+public class LevelTrialBench {
 
     @State(Scope.Benchmark)
     public static class BenchmarkSetupTeardown {
-        @Setup(Level.Invocation)
+        @Setup(Level.Trial)
         public void setup() {}
 
-        @TearDown(Level.Invocation)
+        @TearDown(Level.Trial)
         public void tearDown() {}
     }
 
     @State(Scope.Benchmark)
     public static class BenchmarkSetup {
-        @Setup(Level.Invocation)
+        @Setup(Level.Trial)
         public void setup() {}
     }
 
     @State(Scope.Benchmark)
     public static class BenchmarkTeardown {
-        @TearDown(Level.Invocation)
+        @TearDown(Level.Trial)
         public void tearDown() {}
     }
 
     @State(Scope.Thread)
     public static class ThreadSetupTeardown {
-        @Setup(Level.Invocation)
+        @Setup(Level.Trial)
         public void setup() {}
 
-        @TearDown(Level.Invocation)
+        @TearDown(Level.Trial)
         public void tearDown() {}
     }
 
     @State(Scope.Thread)
     public static class ThreadSetup {
-        @Setup(Level.Invocation)
+        @Setup(Level.Trial)
         public void setup() {}
     }
 
     @State(Scope.Thread)
     public static class ThreadTeardown {
-        @TearDown(Level.Invocation)
+        @TearDown(Level.Trial)
         public void tearDown() {}
     }
 
     @State(Scope.Group)
     public static class GroupSetupTeardown {
-        @Setup(Level.Invocation)
+        @Setup(Level.Trial)
         public void setup() {}
 
-        @TearDown(Level.Invocation)
+        @TearDown(Level.Trial)
         public void tearDown() {}
     }
 
     @State(Scope.Group)
     public static class GroupSetup {
-        @Setup(Level.Invocation)
+        @Setup(Level.Trial)
         public void setup() {}
     }
 
     @State(Scope.Group)
     public static class GroupTeardown {
-        @TearDown(Level.Invocation)
+        @TearDown(Level.Trial)
         public void tearDown() {}
     }
 
