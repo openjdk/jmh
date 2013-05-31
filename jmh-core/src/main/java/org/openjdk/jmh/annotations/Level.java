@@ -44,9 +44,17 @@ public enum Level {
     /**
      * Invocation level.
      *
-     * To be executed for each benchmark method execution. Note this might
-     * bring in the unwanted performance effects for the benchmark runs.
-     * Use with the extreme care!
+     * To be executed for each benchmark method execution.
+     *
+     * <p>WARNING #1: This level will bring the unwanted performance
+     * effects for the benchmark runs. The use is mostly warranted
+     * with the large benchmarks, when the overhead of making the
+     * timestamps for each invocation is negligible. It is almost
+     * never a good idea to use this otherwise.
+     *
+     * <p>WARNING #2: Because JMH can not afford synchronizing the
+     * state on which the Level.Invocation helper is being called,
+     * the helper method execution may overlap with the work itself.
      */
     Invocation,
 }
