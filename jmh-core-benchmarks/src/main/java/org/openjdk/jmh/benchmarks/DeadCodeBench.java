@@ -41,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class DeadCodeBench {
 
-    public int i;
+    public int x = 1;
+    public int y = 2;
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
     public void base() {
@@ -50,11 +51,11 @@ public class DeadCodeBench {
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
     public int constant() {
-        return 42;
+        return 3;
     }
 
     @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
     public int payload() {
-        return (int) Math.pow(i, 42);
+        return x + y;
     }
 }
