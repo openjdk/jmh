@@ -22,42 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.benchmarks;
+package org.openjdk.jmh.annotations;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
-import org.openjdk.jmh.annotations.DefaultMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.logic.BlackHole;
+/**
+ * Annotations declares the default mode in which benchmark should be run.
+ */
+public @interface DefaultMode {
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+    BenchmarkType value();
 
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
-@DefaultMode(BenchmarkType.AverageTimePerOp)
-public class DeadCodeBench {
-
-    public int x = 1;
-    public int y = 2;
-
-    @GenerateMicroBenchmark
-    public void base() {
-        //
-    }
-
-    @GenerateMicroBenchmark
-    public int constant() {
-        return 3;
-    }
-
-    @GenerateMicroBenchmark
-    public int payload() {
-        return x + y;
-    }
 }

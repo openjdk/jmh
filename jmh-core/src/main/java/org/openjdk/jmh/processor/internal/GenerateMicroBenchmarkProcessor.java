@@ -82,7 +82,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
                     // Generate code for all found Classes and Methods
                     for (Map.Entry<TypeElement, Set<? extends Element>> typeElementSetEntry : clazzes.entrySet()) {
-                        generateClasses(typeElementSetEntry.getKey(), typeElementSetEntry.getValue());
+                        TypeElement clazz = typeElementSetEntry.getKey();
+                        generateClass(clazz, validateAndSplit(clazz, typeElementSetEntry.getValue()));
                     }
                 }
             }
@@ -128,7 +129,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * @param methods
      * @return
      */
-    private Map<BenchmarkType, Map<String, MethodGroup>> validateAndSplit(TypeElement clazz, Set<? extends Element> methods) {
+    private Map<String, MethodGroup> validateAndSplit(TypeElement clazz, Set<? extends Element> methods) {
         // validate against rogue fields
         if (clazz.getAnnotation(State.class) == null || clazz.getModifiers().contains(Modifier.ABSTRACT)) {
             for (VariableElement field : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
@@ -143,49 +144,40 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
-        Map<BenchmarkType, Map<String, MethodGroup>> result = new EnumMap<BenchmarkType, Map<String, MethodGroup>>(BenchmarkType.class);
-        for (BenchmarkType b : BenchmarkType.values()) {
-            result.put(b, new TreeMap<String, MethodGroup>());
-        }
+        Map<String, MethodGroup> result = new TreeMap<String, MethodGroup>();
 
         boolean classStrictFP = clazz.getModifiers().contains(Modifier.STRICTFP);
 
         for (Element method : methods) {
             validateSignature(clazz, method);
-            GenerateMicroBenchmark mbAn = method.getAnnotation(GenerateMicroBenchmark.class);
 
             boolean methodStrictFP = method.getModifiers().contains(Modifier.STRICTFP);
 
-            EnumSet<BenchmarkType> anns = EnumSet.noneOf(BenchmarkType.class);
-            Collections.addAll(anns, mbAn.value());
-
-            if (anns.contains(BenchmarkType.All)) {
-                for (BenchmarkType type : BenchmarkType.values()) {
-                    if (type == BenchmarkType.All) continue;
-                    MethodGroup group = getMethodGroup(result, method, type);
-                    group.addStrictFP(classStrictFP);
-                    group.addStrictFP(methodStrictFP);
-                    group.addMethod(method, getThreads(method));
-                }
+            BenchmarkType type = BenchmarkType.OpsPerTimeUnit;
+            DefaultMode mbAn = method.getAnnotation(DefaultMode.class);
+            if (mbAn != null) {
+                type = mbAn.value();
             } else {
-                for (BenchmarkType type : anns) {
-                    MethodGroup group = getMethodGroup(result, method, type);
-                    group.addStrictFP(classStrictFP);
-                    group.addStrictFP(methodStrictFP);
-                    group.addMethod(method, getThreads(method));
+                mbAn = method.getEnclosingElement().getAnnotation(DefaultMode.class);
+                if (mbAn != null) {
+                    type = mbAn.value();
                 }
             }
+
+            MethodGroup group = getMethodGroup(result, method, type);
+            group.addStrictFP(classStrictFP);
+            group.addStrictFP(methodStrictFP);
+            group.addMethod(method, getThreads(method));
         }
         return result;
     }
 
-    private MethodGroup getMethodGroup(Map<BenchmarkType, Map<String, MethodGroup>> result, Element method, BenchmarkType type) {
+    private MethodGroup getMethodGroup(Map<String, MethodGroup> groups, Element method, BenchmarkType defaultMode) {
         Group groupAnn = method.getAnnotation(Group.class);
         String groupName = (groupAnn != null) ? groupAnn.value() : method.getSimpleName().toString();
-        Map<String, MethodGroup> groups = result.get(type);
         MethodGroup methodGroup = groups.get(groupName);
         if (methodGroup == null) {
-            methodGroup = new MethodGroup(convertToJavaIdentfier(groupName));
+            methodGroup = new MethodGroup(convertToJavaIdentfier(groupName), defaultMode);
             groups.put(groupName, methodGroup);
         }
         return methodGroup;
@@ -202,15 +194,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
         return String.valueOf(result);
-    }
-
-    private void generateClasses(TypeElement clazz, Set<? extends Element> methods) {
-        Map<BenchmarkType, Map<String, MethodGroup>> perKind = validateAndSplit(clazz, methods);
-        for (Map.Entry<BenchmarkType, Map<String, MethodGroup>> e : perKind.entrySet()) {
-            if (!e.getValue().isEmpty()) {
-                generateClass(e.getKey(), clazz, e.getValue());
-            }
-        }
     }
 
     private String packageNameByType(BenchmarkType bt) {
@@ -232,11 +215,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     /**
      * Create and generate Java code for a class and it's methods
      *
-     * @param benchmarkKind
      * @param clazz
      * @param methods
      */
-    private void generateClass(BenchmarkType benchmarkKind, TypeElement clazz, Map<String, MethodGroup> methods) {
+    private void generateClass(TypeElement clazz, Map<String, MethodGroup> methods) {
         try {
             String sourcePackage = packageName(clazz);
             if (sourcePackage.isEmpty()) {
@@ -246,7 +228,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // Build package name and class name for the Class to generate
-            String generatedPackageName = sourcePackage + ".generated." + packageNameByType(benchmarkKind);
+            String generatedPackageName = sourcePackage + ".generated";
             String generatedClassName = clazz.getSimpleName().toString();
 
             // Create file and open an outputstream
@@ -289,7 +271,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     }
                 }
 
-                generateMethod(benchmarkKind, writer, methods.get(groupName), states);
+                for (BenchmarkType benchmarkKind : BenchmarkType.values()) {
+                    if (benchmarkKind == BenchmarkType.All) continue; // FIXME: This mode should be EOL'ed
+                    generateMethod(benchmarkKind, writer, methods.get(groupName), states);
+                }
                 states.clearArgs();
             }
 
@@ -399,6 +384,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + Measurement.class.getName() + ';');
         writer.println("import " + Threads.class.getName() + ';');
         writer.println("import " + Warmup.class.getName() + ';');
+        writer.println("import " + DefaultMode.class.getName() + ';');
         writer.println("import " + RawResultPair.class.getName() + ';');
         writer.println();
     }
@@ -490,16 +476,16 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         final TimeUnit timeUnit = findTimeUnit(methodGroup);
         switch (benchmarkKind) {
             case OpsPerTimeUnit:
-                generateOpsPerTimeUnit(writer, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
+                generateOpsPerTimeUnit(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
                 break;
             case AverageTimePerOp:
-                generateAverageTime(writer, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
+                generateAverageTime(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
                 break;
             case SampleTimePerOp:
-                generateTimeDistribution(writer, methodGroup, timeUnit, states);
+                generateTimeDistribution(writer, benchmarkKind, methodGroup, timeUnit, states);
                 break;
             case SingleShotTime:
-                generateSingleShot(writer, methodGroup, timeUnit, states);
+                generateSingleShot(writer, benchmarkKind, methodGroup, timeUnit, states);
                 break;
             default:
                 throw new AssertionError("Shouldn't be here");
@@ -695,8 +681,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateOpsPerTimeUnit(PrintWriter writer, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "(Loop loop) throws Throwable { ");
+    private void generateOpsPerTimeUnit(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -741,7 +727,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             // measurement loop call
             writer.println(ident(3) + "loop.enable();");
-            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -773,7 +759,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " RawResultPair " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        long startTime = System.nanoTime();");
@@ -792,8 +778,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateAverageTime(PrintWriter writer, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "(Loop loop) throws Throwable { ");
+    private void generateAverageTime(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
 
@@ -835,7 +821,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             // measurement loop call
             writer.println(ident(3) + "loop.enable();");
-            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -866,7 +852,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " RawResultPair " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        long start = System.nanoTime();");
@@ -905,8 +891,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateTimeDistribution(PrintWriter writer, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "(Loop loop) throws Throwable { ");
+    private void generateTimeDistribution(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -947,7 +933,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "Result res = " + method.getSimpleName() + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "Result res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -978,7 +964,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        SampleBuffer buffer = new SampleBuffer();");
             writer.println("        long realTime = 0;");
             writer.println("        long rnd = System.nanoTime();");
@@ -1013,8 +999,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateSingleShot(PrintWriter writer, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "(Loop loop) throws Throwable { ");
+    private void generateSingleShot(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
 

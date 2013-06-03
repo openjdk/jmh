@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.processor.internal;
 
+import org.openjdk.jmh.annotations.BenchmarkType;
+
 import javax.lang.model.element.Element;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,12 +34,14 @@ import java.util.Set;
 
 public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
+    private final BenchmarkType defaultMode;
     private final Set<MethodInvocation> methods;
     private boolean strictFP;
 
-    MethodGroup(String name) {
+    MethodGroup(String name, BenchmarkType defaultMode) {
         this.name = name;
         this.methods = new LinkedHashSet<MethodInvocation>();
+        this.defaultMode = defaultMode;
     }
 
     @Override
