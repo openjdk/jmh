@@ -283,7 +283,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             generateImport(writer);
             // Write class header
-            writer.println(generateClassAnnotation(info.methodGroups.keySet()));
+            writer.println("@Generated(\"" + GenerateMicroBenchmarkProcessor.class.getCanonicalName() + "\")");
             writer.println("public final class " + info.generatedClassName + " {");
             writer.println();
             generatePadding(writer);
@@ -456,23 +456,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
 
         return "";
-    }
-
-
-    /**
-     * Generate the annotation telling this class has been generated
-     *
-     * @param methods
-     * @return
-     */
-    private static String generateClassAnnotation(Set<String> methods) {
-        StringBuilder sb = new StringBuilder("@Generated({");
-        for (String method : methods) {
-            sb.append('"').append(method).append("\",");
-        }
-        sb.setCharAt(sb.length() - 1, '}');
-        sb.append(')');
-        return sb.toString();
     }
 
 
