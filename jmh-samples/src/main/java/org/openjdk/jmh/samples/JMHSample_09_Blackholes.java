@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -33,6 +34,7 @@ import org.openjdk.jmh.logic.BlackHole;
 
 import java.util.concurrent.TimeUnit;
 
+@BenchmarkMode(BenchmarkType.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
 public class JMHSample_09_Blackholes {
@@ -48,7 +50,7 @@ public class JMHSample_09_Blackholes {
      * Baseline measurement: how much single Math.log costs.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public double baseline() {
         return Math.log(x1);
     }
@@ -58,7 +60,7 @@ public class JMHSample_09_Blackholes {
      * is redundant and optimized out.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public double measureWrong() {
         Math.log(x1);
         return Math.log(x2);
@@ -72,7 +74,7 @@ public class JMHSample_09_Blackholes {
      * the results does not offset the results much.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public double measureRight_1() {
         return Math.log(x1) + Math.log(x2);
     }
@@ -86,7 +88,7 @@ public class JMHSample_09_Blackholes {
      * bundled with JMH).
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void measureRight_2(BlackHole bh1, BlackHole bh2) {
         bh1.consume(Math.log(x1));
         bh2.consume(Math.log(x2));

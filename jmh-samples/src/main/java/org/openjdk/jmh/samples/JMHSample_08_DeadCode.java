@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -33,6 +34,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
+@BenchmarkMode(BenchmarkType.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_08_DeadCode {
 
@@ -48,18 +50,18 @@ public class JMHSample_08_DeadCode {
 
     private double x = Math.PI;
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void baseline() {
         // do nothing, this is a baseline
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void measureWrong() {
         // This is wrong: result is not used, and the entire computation is optimized out.
         Math.log(x);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public double measureRight() {
         // This is correct: the result is being used.
         return Math.log(x);

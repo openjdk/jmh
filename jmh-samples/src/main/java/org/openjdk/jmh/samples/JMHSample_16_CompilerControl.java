@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -34,6 +35,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
+@BenchmarkMode(BenchmarkType.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_16_CompilerControl {
 
@@ -76,27 +78,27 @@ public class JMHSample_16_CompilerControl {
      * These method measures the calls performance.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void baseline() {
         // this method was intentionally left blank
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void blank() {
         target_blank();
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void dontinline() {
         target_dontInline();
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void inline() {
         target_inline();
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public void exclude() {
         target_exclude();
     }

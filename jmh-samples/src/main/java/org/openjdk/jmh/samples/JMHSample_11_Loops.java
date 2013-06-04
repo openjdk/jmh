@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -34,6 +35,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
+@BenchmarkMode(BenchmarkType.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_11_Loops {
 
@@ -58,7 +60,7 @@ public class JMHSample_11_Loops {
      * This is what you do with JMH.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     public int measureRight() {
         return (x + y);
     }
@@ -81,37 +83,37 @@ public class JMHSample_11_Loops {
      * to get the individual operation cost.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @OperationsPerInvocation(1)
     public int measureWrong_1() {
         return reps(1);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @OperationsPerInvocation(10)
     public int measureWrong_10() {
         return reps(10);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @OperationsPerInvocation(100)
     public int measureWrong_100() {
         return reps(100);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @OperationsPerInvocation(1000)
     public int measureWrong_1000() {
         return reps(1000);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @OperationsPerInvocation(10000)
     public int measureWrong_10000() {
         return reps(10000);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @OperationsPerInvocation(100000)
     public int measureWrong_100000() {
         return reps(100000);

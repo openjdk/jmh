@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
@@ -103,12 +104,14 @@ public class JMHSample_07_FixtureLevelInvocation {
      * when we are sleeping.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
     public double measureHot(NormalState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
     public double measureCold(LaggingState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }

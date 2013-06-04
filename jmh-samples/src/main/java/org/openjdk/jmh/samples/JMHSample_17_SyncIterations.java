@@ -44,7 +44,7 @@ public class JMHSample_17_SyncIterations {
 
     private double src;
 
-    @GenerateMicroBenchmark(BenchmarkType.OpsPerTimeUnit)
+    @GenerateMicroBenchmark
     public double test() {
         double s = src;
         for (int i = 0; i < 1000; i++) {

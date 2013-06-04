@@ -24,18 +24,21 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 
 import java.util.concurrent.TimeUnit;
 
-public class JMHSample_02_BenchmarkTypes {
+public class JMHSample_02_BenchmarkModes {
 
     /*
      * JMH generates lots of synthetic code for the microbenchmarks for
-     * you during the compilation. We can request different generation
-     * strategies, and measure different things.
+     * you during the compilation. JMH can measure the methods in lots
+     * of modes, and it will generate all the needed code at once.
+     * Users may select the default benchmark mode with the special
+     * annotation, or select/override the mode via the command line.
      *
      * With this scenario, we start to measure something useful. Note
      * that we can conveniently have the exception at the benchmark method,
@@ -44,7 +47,7 @@ public class JMHSample_02_BenchmarkTypes {
      * P.S. It is helping at times to look into the generated code trying
      * to diagnose  the performance issue. You might see you don't measuring
      * it right! The generated code for this particular sample is somewhere at
-     *  target/generated-sources/annotations/.../JMHSample_02_BenchmarkTypes.java
+     *  target/generated-sources/annotations/.../JMHSample_02_BenchmarkModes.java
      */
 
     /*
@@ -54,7 +57,8 @@ public class JMHSample_02_BenchmarkTypes {
      */
 
     @OutputTimeUnit(TimeUnit.SECONDS)
-    @GenerateMicroBenchmark(BenchmarkType.OpsPerTimeUnit)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.OpsPerTimeUnit)
     public void measureThroughput() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -66,7 +70,8 @@ public class JMHSample_02_BenchmarkTypes {
      */
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
     public void measureAvgTime() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -82,7 +87,8 @@ public class JMHSample_02_BenchmarkTypes {
      * is long enough, you will end up capturing all the samples.
      */
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @GenerateMicroBenchmark(BenchmarkType.SampleTimePerOp)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.SampleTimePerOp)
     public void measureSamples() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -94,7 +100,8 @@ public class JMHSample_02_BenchmarkTypes {
      */
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @GenerateMicroBenchmark(BenchmarkType.SingleShotTime)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.SingleShotTime)
     public void measureSingleShot() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }

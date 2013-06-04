@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -34,6 +35,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
+@BenchmarkMode(BenchmarkType.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_12_Forking {
 
@@ -97,7 +99,7 @@ public class JMHSample_12_Forking {
      * Fork(0) helps to run in the same JVM.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(0)
     public int measure_1_c1() {
         return measure(c1);
@@ -107,7 +109,7 @@ public class JMHSample_12_Forking {
      * Then Counter2...
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(0)
     public int measure_2_c2() {
         return measure(c2);
@@ -117,7 +119,7 @@ public class JMHSample_12_Forking {
      * Then Counter1 again...
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(0)
     public int measure_3_c1_again() {
         return measure(c1);
@@ -133,7 +135,7 @@ public class JMHSample_12_Forking {
      * This is the test for Counter1.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(1)
     public int measure_4_forked_c1() {
         return measure(c1);
@@ -143,7 +145,7 @@ public class JMHSample_12_Forking {
      * ...and this is the test for Counter2.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(1)
     public int measure_5_forked_c2() {
         return measure(c2);

@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -35,6 +36,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
+@BenchmarkMode(BenchmarkType.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class JMHSample_13_RunToRun {
 
@@ -68,19 +70,19 @@ public class JMHSample_13_RunToRun {
      * Now, we will run this different number of times.
      */
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(1)
     public void baseline(SleepyState s) throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(s.sleepTime);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(5)
     public void fork_1(SleepyState s) throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(s.sleepTime);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.AverageTimePerOp)
+    @GenerateMicroBenchmark
     @Fork(20)
     public void fork_2(SleepyState s) throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(s.sleepTime);
