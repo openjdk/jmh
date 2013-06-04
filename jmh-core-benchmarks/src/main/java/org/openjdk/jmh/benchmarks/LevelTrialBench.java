@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.benchmarks;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
@@ -35,6 +36,7 @@ import org.openjdk.jmh.annotations.TearDown;
 
 import java.util.concurrent.TimeUnit;
 
+@BenchmarkMode(BenchmarkType.All)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class LevelTrialBench {
 
@@ -101,37 +103,37 @@ public class LevelTrialBench {
         public void tearDown() {}
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void raw() {
         // do nothing
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void benchmark_setup_teardown(BenchmarkSetupTeardown g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void benchmark_setup(BenchmarkSetup g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void benchmark_teardown(BenchmarkTeardown g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void group_setup_teardown(GroupSetupTeardown g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void group_setup(GroupSetup g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void group_teardown(GroupTeardown g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void thread_setup_teardown(ThreadSetupTeardown g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void thread_setup(ThreadSetup g) {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void thread_teardown(ThreadTeardown g) {}
 
 }
