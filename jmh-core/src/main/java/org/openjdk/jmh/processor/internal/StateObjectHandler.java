@@ -322,17 +322,17 @@ public class StateObjectHandler {
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(" + so.type + " val) throws Throwable {");
-            result.add("    if (" + so.fieldIdentifier + " == null) {");
-            result.add("        synchronized(this.getClass()) {");
-            result.add("            if (" + so.fieldIdentifier + " == null) {");
+            result.add("    synchronized(this.getClass()) {");
+            result.add("        if (" + so.fieldIdentifier + " == null) {");
+            result.add("            " + so.fieldIdentifier + " = val;");
+            result.add("        }");
+            result.add("        if (!" + so.fieldIdentifier + ".ready" + Level.Trial + ") {");
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                result.add("                val." + hmi.name + "();");
+                result.add("            " + so.fieldIdentifier + "." + hmi.name + "();");
             }
-            result.add("                " + "val.ready" + Level.Trial + " = true;");
-            result.add("                " + so.fieldIdentifier + " = val;");
-            result.add("            }");
+            result.add("            " + so.fieldIdentifier + ".ready" + Level.Trial + " = true;");
             result.add("        }");
             result.add("    }");
             result.add("    return " + so.fieldIdentifier + ";");
