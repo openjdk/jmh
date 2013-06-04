@@ -32,7 +32,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     private final String userName;
     private final String generatedName;
-    private Mode mode;
+    private final Mode mode;
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this.userName = userName;
@@ -90,10 +90,6 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     public String getUsername() {
         return userName;
-    }
-
-    public void setMode(Mode mode) {
-        this.mode = mode;
     }
 
     public Mode getMode() {

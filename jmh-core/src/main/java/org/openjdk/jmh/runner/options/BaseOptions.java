@@ -27,7 +27,7 @@ package org.openjdk.jmh.runner.options;
 import org.kohsuke.args4j.Option;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.profile.ProfilerFactory;
-import org.openjdk.jmh.runner.options.handlers.BenchmarkTypeOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
@@ -38,6 +38,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -81,8 +82,8 @@ public class BaseOptions {
     @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms; defaults to " + Defaults.WARMUP_TIME_SECS + "", handler = TimeValueOptionHandler.class)
     protected TimeValue warmupTime = null;
 
-    @Option(name = "-bt", aliases = {"--type"}, metaVar = "TYPE", usage = "Benchmark type", handler = BenchmarkTypeOptionHandler.class)
-    protected Mode benchType = null;
+    @Option(name = "-bm", aliases = {"--mode"}, multiValued = false, metaVar = "MODE", usage = "Benchmark mode", handler = BenchmarkModeTypeOptionHandler.class)
+    protected List<Mode> benchMode = null;
 
     @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" or 0 will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
     protected int threads = -1;
@@ -468,7 +469,7 @@ public class BaseOptions {
         return profilers;
     }
 
-    public Mode getBenchType() {
-        return benchType;
+    public Collection<Mode> getBenchModes() {
+        return benchMode;
     }
 }

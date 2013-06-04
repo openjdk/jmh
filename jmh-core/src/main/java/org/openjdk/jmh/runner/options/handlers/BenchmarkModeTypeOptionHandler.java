@@ -35,7 +35,7 @@ import org.openjdk.jmh.annotations.Mode;
 /**
  * OptionHandler for Mode options.
  */
-public class BenchmarkTypeOptionHandler extends OptionHandler<Mode> {
+public class BenchmarkModeTypeOptionHandler extends OptionHandler<Mode> {
 
     /**
      * Constructor
@@ -44,7 +44,7 @@ public class BenchmarkTypeOptionHandler extends OptionHandler<Mode> {
      * @param option Run-time copy of the Option
      * @param setter Setter to feed back the value
      */
-    public BenchmarkTypeOptionHandler(CmdLineParser parser, OptionDef option, Setter<Mode> setter) {
+    public BenchmarkModeTypeOptionHandler(CmdLineParser parser, OptionDef option, Setter<Mode> setter) {
         super(parser, option, setter);
     }
 
@@ -53,8 +53,11 @@ public class BenchmarkTypeOptionHandler extends OptionHandler<Mode> {
         if (params.size() > 0) {
             String param = params.getParameter(0);
             try {
-                Mode value = Mode.deepValueOf(param);
-                setter.addValue(value);
+                String[] modes = param.split(",");
+                for (String c : modes) {
+                    Mode value = Mode.deepValueOf(c);
+                    setter.addValue(value);
+                }
                 return 1;
             } catch (Exception e) {
                 throw new CmdLineException(owner, e.getMessage());
@@ -65,6 +68,6 @@ public class BenchmarkTypeOptionHandler extends OptionHandler<Mode> {
 
     @Override
     public String getDefaultMetaVariable() {
-        return "TYPE";
+        return "MODE";
     }
 }
