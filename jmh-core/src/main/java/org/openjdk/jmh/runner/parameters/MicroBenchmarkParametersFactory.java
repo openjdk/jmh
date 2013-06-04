@@ -29,6 +29,7 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.MicroBenchmark;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.BaseOptions;
 
 import java.io.Serializable;
@@ -43,10 +44,10 @@ public class MicroBenchmarkParametersFactory {
     private MicroBenchmarkParametersFactory() {
     }
 
-    public static MicroBenchmarkParameters makeParams(BaseOptions options, Method method) {
+    public static MicroBenchmarkParameters makeParams(BaseOptions options, BenchmarkRecord benchmark, Method method) {
         boolean shouldSynchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
-        IterationParams measurement = getMeasurement(options, method);
-        IterationParams warmup = getWarmup(options, method);
+        IterationParams measurement = getMeasurement(options, benchmark, method);
+        IterationParams warmup = getWarmup(options, benchmark, method);
 
         List<Integer> threadCount = options.getThreadCounts();
         if (!threadCount.isEmpty()) {
@@ -85,8 +86,8 @@ public class MicroBenchmarkParametersFactory {
         }
     }
 
-    private static IterationParams getWarmup(BaseOptions options, Method method) {
-        boolean isSingleShot = method.getAnnotation(MicroBenchmark.class).value() == Mode.SingleShotTime;
+    private static IterationParams getWarmup(BaseOptions options, BenchmarkRecord benchmark, Method method) {
+        boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Warmup warAnn = method.getAnnotation(Warmup.class);
         int iters = (warAnn == null) ? -1 : warAnn.iterations();
         if (isSingleShot) {
@@ -106,8 +107,8 @@ public class MicroBenchmarkParametersFactory {
         }
     }
 
-    private static IterationParams getMeasurement(BaseOptions options, Method method) {
-        boolean isSingleShot = method.getAnnotation(MicroBenchmark.class).value() == Mode.SingleShotTime;
+    private static IterationParams getMeasurement(BaseOptions options, BenchmarkRecord benchmark, Method method) {
+        boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Measurement meAnn = method.getAnnotation(Measurement.class);
         int iters = (meAnn == null) ? -1 : meAnn.iterations();
         if (isSingleShot) {

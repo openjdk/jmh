@@ -70,7 +70,7 @@ public abstract class BaseRunner {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
-            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, method);
+            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
             MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(outputHandler, benchmark, clazz, method, executionParams, options);
 
             outputHandler.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());

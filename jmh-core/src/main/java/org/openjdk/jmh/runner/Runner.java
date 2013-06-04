@@ -435,7 +435,7 @@ public class Runner extends BaseRunner {
             Class<?> clazz = ClassUtils.loadClass(className);
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, methodName);
 
-            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, method);
+            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
             MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(outputHandler, benchmark, clazz, method, executionParams, options);
             if (warmup) {
                 executionParams = executionParams.warmupToIteration();

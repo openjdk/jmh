@@ -29,7 +29,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.MicroBenchmark;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -112,7 +114,8 @@ public class TestOptions {
         String[] argv = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v", "-i", "11", "-r", "100s", "-t", "2", "-sc", "false"};
         HarnessOptions options = getOptions(argv);
 
-        MicroBenchmarkParameters mbp = MicroBenchmarkParametersFactory.makeParams(options, this.getClass().getMethod("dummyMethod"));
+        BenchmarkRecord br = new BenchmarkRecord(this.getClass().getName() + "dummyMethod2", this.getClass().getName() + "dummyMethod2", Mode.Throughput);
+        MicroBenchmarkParameters mbp = MicroBenchmarkParametersFactory.makeParams(options, br, this.getClass().getMethod("dummyMethod"));
 
         assertEquals(options.getIterations(), mbp.getIteration().getCount());
         assertFalse(options.shouldScale());
@@ -122,7 +125,7 @@ public class TestOptions {
         String[] argv2 = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v"};
         options = getOptions(argv2);
 
-        mbp = MicroBenchmarkParametersFactory.makeParams(options, this.getClass().getMethod("dummyMethod"));
+        mbp = MicroBenchmarkParametersFactory.makeParams(options, br, this.getClass().getMethod("dummyMethod"));
 
         assertTrue(options.getIterations() != mbp.getIteration().getCount());
         assertTrue(options.getThreads() != mbp.getMaxThreads());
@@ -134,7 +137,8 @@ public class TestOptions {
         String[] argv = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v", "-i", "11", "-r", "100s", "-sc"};
         HarnessOptions options = getOptions(argv);
 
-        MicroBenchmarkParameters mbp = MicroBenchmarkParametersFactory.makeParams(options, this.getClass().getMethod("dummyMethod2"));
+        BenchmarkRecord br = new BenchmarkRecord(this.getClass().getName() + "dummyMethod2", this.getClass().getName() + "dummyMethod2", Mode.Throughput);
+        MicroBenchmarkParameters mbp = MicroBenchmarkParametersFactory.makeParams(options, br, this.getClass().getMethod("dummyMethod2"));
 
         assertEquals(Runtime.getRuntime().availableProcessors(), mbp.getMaxThreads());
     }
@@ -185,13 +189,11 @@ public class TestOptions {
     @Threads(100)
     @Measurement(iterations = 100, time = 3)
     @Fork(jvmArgs = "apa")
-    @MicroBenchmark
     public void dummyMethod() {
     }
 
     @Measurement(iterations = 100, time = 3)
     @Fork(jvmArgs = "apa")
-    @MicroBenchmark
     public void dummyMethod2() {
     }
 

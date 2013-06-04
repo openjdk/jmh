@@ -52,7 +52,7 @@ public class MicroBenchmarkHandlers {
     public static Method findBenchmarkMethod(Class<?> clazz, String methodName) {
         Method method = null;
         for (Method m : ClassUtils.enumerateMethods(clazz)) {
-            if (m.getName().equals(methodName) && (m.getAnnotation(MicroBenchmark.class) != null)) {
+            if (m.getName().equals(methodName)) {
                 if (isValidBenchmarkSignature(m)) {
                     if (method != null) {
                         throw new IllegalArgumentException("Ambiguous methods: \n" + method + "\n and \n" + m + "\n, which one to execute?");
@@ -70,8 +70,7 @@ public class MicroBenchmarkHandlers {
     }
 
     public static MicroBenchmarkHandler getInstance(OutputFormat outputHandler, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
-        MicroBenchmark mb = method.getAnnotation(MicroBenchmark.class);
-        if(mb.value() == Mode.SingleShotTime) {
+        if(microbenchmark.getMode() == Mode.SingleShotTime) {
             return new ShotMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
         } else {
             return new LoopMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
@@ -85,10 +84,6 @@ public class MicroBenchmarkHandlers {
      * @return
      */
     private static boolean isValidBenchmarkSignature(Method m) {
-        MicroBenchmark mb = m.getAnnotation(MicroBenchmark.class);
-        if (mb == null) {
-            return false;
-        }
         if (m.getReturnType() != Result.class) {
             return false;
         }

@@ -412,7 +412,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + SampleTimePerOp.class.getName() + ';');
         writer.println("import " + SingleShotTime.class.getName() + ';');
         writer.println("import " + SampleBuffer.class.getName() + ';');
-        writer.println("import " + MicroBenchmark.class.getName() + ';');
         writer.println("import " + Mode.class.getName() + ';');
         writer.println("import " + Fork.class.getName() + ';');
         writer.println("import " + Measurement.class.getName() + ';');
@@ -671,15 +670,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return null;
     }
 
-    private static String generateMBAnnotation(Mode kind) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("@").append(MicroBenchmark.class.getSimpleName());
-        if (kind != Mode.Throughput) {
-            sb.append("(Mode.").append(kind).append(')');
-        }
-        return sb.toString();
-    }
-
     private List<String> generateMethodAnnotations(Mode kind, MethodGroup methodGroup) {
         int totalThreads = 0;
         String warmupAnn = null;
@@ -694,7 +684,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
 
         List<String> annotations = new ArrayList<String>();
-        annotations.add(generateMBAnnotation(kind));
         annotations.add("@" + Threads.class.getSimpleName() + "(" + totalThreads + ")");
         annotations = CollectionUtils.addIfNotNull(annotations, warmupAnn);
         annotations = CollectionUtils.addIfNotNull(annotations, measurementAnn);
