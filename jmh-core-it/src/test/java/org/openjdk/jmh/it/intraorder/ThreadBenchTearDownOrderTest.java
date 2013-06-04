@@ -122,7 +122,7 @@ public class ThreadBenchTearDownOrderTest {
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.All)
+    @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

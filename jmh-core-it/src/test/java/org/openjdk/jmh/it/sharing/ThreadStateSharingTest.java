@@ -51,7 +51,7 @@ public class ThreadStateSharingTest {
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.All)
+    @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

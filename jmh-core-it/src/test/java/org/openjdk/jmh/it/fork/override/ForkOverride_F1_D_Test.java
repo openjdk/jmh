@@ -27,7 +27,7 @@ package org.openjdk.jmh.it.fork.override;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -47,7 +47,7 @@ public class ForkOverride_F1_D_Test {
     private static volatile boolean sameVM;
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.All)
+    @BenchmarkMode(Mode.All)
     @Fork(1)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)

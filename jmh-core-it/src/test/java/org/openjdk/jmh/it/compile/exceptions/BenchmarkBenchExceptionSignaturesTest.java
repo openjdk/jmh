@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.it.compile.exceptions;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
 @State(Scope.Benchmark)
-@BenchmarkMode(BenchmarkType.All)
+@BenchmarkMode(Mode.All)
 public class BenchmarkBenchExceptionSignaturesTest {
 
     @Setup(Level.Trial)

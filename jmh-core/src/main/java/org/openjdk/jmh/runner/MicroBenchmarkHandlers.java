@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.MicroBenchmark;
 import org.openjdk.jmh.logic.Loop;
 import org.openjdk.jmh.logic.results.Result;
@@ -71,7 +71,7 @@ public class MicroBenchmarkHandlers {
 
     public static MicroBenchmarkHandler getInstance(OutputFormat outputHandler, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
         MicroBenchmark mb = method.getAnnotation(MicroBenchmark.class);
-        if(mb.value() == BenchmarkType.SingleShotTime) {
+        if(mb.value() == Mode.SingleShotTime) {
             return new ShotMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
         } else {
             return new LoopMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);

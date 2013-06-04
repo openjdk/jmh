@@ -34,7 +34,7 @@ import java.util.List;
  * @author Sergey Kuksenko
  * @author Aleksey Shipilev
  */
-public enum BenchmarkType {
+public enum Mode {
 
     /**
      * Operations per unit of time,
@@ -69,7 +69,7 @@ public enum BenchmarkType {
     private final String shortLabel;
     private final String longLabel;
 
-    BenchmarkType(String shortLabel, String longLabel) {
+    Mode(String shortLabel, String longLabel) {
         this.shortLabel = shortLabel;
         this.longLabel = longLabel;
     }
@@ -82,12 +82,12 @@ public enum BenchmarkType {
         return longLabel;
     }
 
-    public static BenchmarkType deepValueOf(String name) {
+    public static Mode deepValueOf(String name) {
         try {
-            return BenchmarkType.valueOf(name);
+            return Mode.valueOf(name);
         } catch (IllegalArgumentException iae) {
-            BenchmarkType inferred = null;
-            for (BenchmarkType type : values()) {
+            Mode inferred = null;
+            for (Mode type : values()) {
                 if (type.shortLabel().startsWith(name)) {
                     if (inferred == null) {
                         inferred = type;
@@ -108,10 +108,10 @@ public enum BenchmarkType {
 
     public static List<String> getKnown() {
         List<String> res = new ArrayList<String>();
-        for (BenchmarkType type : BenchmarkType.values()) {
+        for (Mode type : Mode.values()) {
             res.add(type.toString());
         }
-        for (BenchmarkType type : BenchmarkType.values()) {
+        for (Mode type : Mode.values()) {
             res.add(type.shortLabel());
         }
         return res;

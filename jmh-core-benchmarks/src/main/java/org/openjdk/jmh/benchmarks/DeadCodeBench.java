@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.benchmarks;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-@BenchmarkMode(BenchmarkType.AverageTimePerOp)
+@BenchmarkMode(Mode.AverageTimePerOp)
 public class DeadCodeBench {
 
     public int x = 1;

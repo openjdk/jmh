@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -105,13 +105,13 @@ public class JMHSample_07_FixtureLevelInvocation {
      */
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTimePerOp)
     public double measureHot(NormalState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTimePerOp)
     public double measureCold(LaggingState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }

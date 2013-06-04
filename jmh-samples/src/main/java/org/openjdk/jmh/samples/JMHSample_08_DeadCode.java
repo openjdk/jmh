@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
-@BenchmarkMode(BenchmarkType.AverageTimePerOp)
+@BenchmarkMode(Mode.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_08_DeadCode {
 

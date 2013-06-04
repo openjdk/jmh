@@ -217,7 +217,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         // enforce the default value
         for (MethodGroup group : result.values()) {
             if (group.getMode() == null) {
-                group.setMode(BenchmarkType.OpsPerTimeUnit);
+                group.setMode(Mode.OpsPerTimeUnit);
             }
         }
 
@@ -248,7 +248,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return String.valueOf(result);
     }
 
-    private String packageNameByType(BenchmarkType bt) {
+    private String packageNameByType(Mode bt) {
         switch (bt) {
             case OpsPerTimeUnit:
                 return "throughput";
@@ -311,8 +311,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     }
                 }
 
-                for (BenchmarkType benchmarkKind : BenchmarkType.values()) {
-                    if (benchmarkKind == BenchmarkType.All) continue;
+                for (Mode benchmarkKind : Mode.values()) {
+                    if (benchmarkKind == Mode.All) continue;
                     generateMethod(benchmarkKind, writer, info.methodGroups.get(groupName), states);
                 }
                 states.clearArgs();
@@ -413,7 +413,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + SingleShotTime.class.getName() + ';');
         writer.println("import " + SampleBuffer.class.getName() + ';');
         writer.println("import " + MicroBenchmark.class.getName() + ';');
-        writer.println("import " + BenchmarkType.class.getName() + ';');
+        writer.println("import " + Mode.class.getName() + ';');
         writer.println("import " + Fork.class.getName() + ';');
         writer.println("import " + Measurement.class.getName() + ';');
         writer.println("import " + Threads.class.getName() + ';');
@@ -502,7 +502,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * @param writer
      * @param methodGroup
      */
-    private void generateMethod(BenchmarkType benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
+    private void generateMethod(Mode benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println();
         for (String ann : generateMethodAnnotations(benchmarkKind, methodGroup)) {
             writer.println("    " + ann);
@@ -581,7 +581,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return map;
     }
 
-    private static String generateWarmupAnnotation(Element method, BenchmarkType kind) {
+    private static String generateWarmupAnnotation(Element method, Mode kind) {
         Map<String, String> map = warmupToMap(null, method.getAnnotation(Warmup.class));
         map = warmupToMap(map, method.getEnclosingElement().getAnnotation(Warmup.class));
         if (map != null && !map.isEmpty()) {
@@ -599,7 +599,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return map;
     }
 
-    private static String generateMeasurementAnnotation(Element method, BenchmarkType kind) {
+    private static String generateMeasurementAnnotation(Element method, Mode kind) {
         Map<String, String> map = measurementToMap(null, method.getAnnotation(Measurement.class));
         map = measurementToMap(map, method.getEnclosingElement().getAnnotation(Measurement.class));
         if (map != null && !map.isEmpty()) {
@@ -608,8 +608,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return null;
     }
 
-    private static String generateThreadsAnnotation(Element method, BenchmarkType kind) {
-        if (kind != BenchmarkType.SingleShotTime) {
+    private static String generateThreadsAnnotation(Element method, Mode kind) {
+        if (kind != Mode.SingleShotTime) {
             Threads tAnnotation = method.getAnnotation(Threads.class);
             if (tAnnotation != null && tAnnotation.value() >= 0) {
                 return "@" + Threads.class.getSimpleName() + "(" + tAnnotation.value() + ")";
@@ -645,7 +645,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return map;
     }
 
-    private static String generateForkAnnotation(Element method, BenchmarkType kind) {
+    private static String generateForkAnnotation(Element method, Mode kind) {
         Fork forkAnnotation = method.getAnnotation(Fork.class);
         Fork upperForkAnnotation = method.getEnclosingElement().getAnnotation(Fork.class);
         if (forkAnnotation != null || upperForkAnnotation != null) {
@@ -671,16 +671,16 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return null;
     }
 
-    private static String generateMBAnnotation(BenchmarkType kind) {
+    private static String generateMBAnnotation(Mode kind) {
         StringBuilder sb = new StringBuilder();
         sb.append("@").append(MicroBenchmark.class.getSimpleName());
-        if (kind != BenchmarkType.OpsPerTimeUnit) {
-            sb.append("(BenchmarkType.").append(kind).append(')');
+        if (kind != Mode.OpsPerTimeUnit) {
+            sb.append("(Mode.").append(kind).append(')');
         }
         return sb.toString();
     }
 
-    private List<String> generateMethodAnnotations(BenchmarkType kind, MethodGroup methodGroup) {
+    private List<String> generateMethodAnnotations(Mode kind, MethodGroup methodGroup) {
         int totalThreads = 0;
         String warmupAnn = null;
         String measurementAnn = null;
@@ -715,7 +715,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateOpsPerTimeUnit(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateOpsPerTimeUnit(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
         writer.println();
 
@@ -812,7 +812,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateAverageTime(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
@@ -925,7 +925,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateTimeDistribution(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateTimeDistribution(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
         writer.println();
 
@@ -1033,7 +1033,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateSingleShot(PrintWriter writer, BenchmarkType benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateSingleShot(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
 
         methodProlog(writer, methodGroup);

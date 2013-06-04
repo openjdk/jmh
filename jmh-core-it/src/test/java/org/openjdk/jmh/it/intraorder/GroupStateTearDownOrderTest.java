@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
@@ -134,7 +134,7 @@ public class GroupStateTearDownOrderTest {
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.All)
+    @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     public void test(MyState state) {

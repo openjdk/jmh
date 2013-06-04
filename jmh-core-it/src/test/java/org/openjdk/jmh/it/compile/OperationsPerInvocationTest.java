@@ -25,11 +25,11 @@
 package org.openjdk.jmh.it.compile;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 
-@BenchmarkMode(BenchmarkType.All)
+@BenchmarkMode(Mode.All)
 public class OperationsPerInvocationTest {
 
     @GenerateMicroBenchmark

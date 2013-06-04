@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @State(Scope.Group)
-@BenchmarkMode(BenchmarkType.AverageTimePerOp)
+@BenchmarkMode(Mode.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_15_Asymmetric {
 

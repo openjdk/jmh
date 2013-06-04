@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@BenchmarkMode(BenchmarkType.All)
+@BenchmarkMode(Mode.All)
 public class ForkedTest {
 
     private static volatile boolean test1executed;

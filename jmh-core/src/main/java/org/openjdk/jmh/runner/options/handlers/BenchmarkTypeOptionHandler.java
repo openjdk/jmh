@@ -30,15 +30,12 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.OptionHandler;
 import org.kohsuke.args4j.spi.Parameters;
 import org.kohsuke.args4j.spi.Setter;
-import org.openjdk.jmh.annotations.BenchmarkType;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.openjdk.jmh.annotations.Mode;
 
 /**
- * OptionHandler for BenchmarkType options.
+ * OptionHandler for Mode options.
  */
-public class BenchmarkTypeOptionHandler extends OptionHandler<BenchmarkType> {
+public class BenchmarkTypeOptionHandler extends OptionHandler<Mode> {
 
     /**
      * Constructor
@@ -47,7 +44,7 @@ public class BenchmarkTypeOptionHandler extends OptionHandler<BenchmarkType> {
      * @param option Run-time copy of the Option
      * @param setter Setter to feed back the value
      */
-    public BenchmarkTypeOptionHandler(CmdLineParser parser, OptionDef option, Setter<BenchmarkType> setter) {
+    public BenchmarkTypeOptionHandler(CmdLineParser parser, OptionDef option, Setter<Mode> setter) {
         super(parser, option, setter);
     }
 
@@ -56,7 +53,7 @@ public class BenchmarkTypeOptionHandler extends OptionHandler<BenchmarkType> {
         if (params.size() > 0) {
             String param = params.getParameter(0);
             try {
-                BenchmarkType value = BenchmarkType.deepValueOf(param);
+                Mode value = Mode.deepValueOf(param);
                 setter.addValue(value);
                 return 1;
             } catch (Exception e) {

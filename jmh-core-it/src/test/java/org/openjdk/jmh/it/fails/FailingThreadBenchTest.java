@@ -27,7 +27,7 @@ package org.openjdk.jmh.it.fails;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -47,7 +47,7 @@ import org.openjdk.jmh.it.Fixtures;
 public class FailingThreadBenchTest {
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.All)
+    @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Threads(4)

@@ -25,7 +25,7 @@
 package org.openjdk.jmh.runner.options;
 
 import org.kohsuke.args4j.Option;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.options.handlers.BenchmarkTypeOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
@@ -82,7 +82,7 @@ public class BaseOptions {
     protected TimeValue warmupTime = null;
 
     @Option(name = "-bt", aliases = {"--type"}, metaVar = "TYPE", usage = "Benchmark type", handler = BenchmarkTypeOptionHandler.class)
-    protected BenchmarkType benchType = null;
+    protected Mode benchType = null;
 
     @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" or 0 will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
     protected int threads = -1;
@@ -185,7 +185,7 @@ public class BaseOptions {
         if (TimeValue.class.equals(t)) {
             return timeValueFieldToString(f);
         }
-        if (BenchmarkType.class.equals(t)) {
+        if (Mode.class.equals(t)) {
             return benchTypeFieldToString(f);
         }
         throw new IllegalArgumentException("Unknown forwarding field type, field="+f.toString());
@@ -296,7 +296,7 @@ public class BaseOptions {
     private String benchTypeFieldToString(Field f) {
         try {
             Object value = f.get(this);
-            if (value != null && value instanceof BenchmarkType) {
+            if (value != null && value instanceof Mode) {
                 return f.getAnnotation(Option.class).name() + " " + value;
             } else {
                 return null;
@@ -468,7 +468,7 @@ public class BaseOptions {
         return profilers;
     }
 
-    public BenchmarkType getBenchType() {
+    public Mode getBenchType() {
         return benchType;
     }
 }

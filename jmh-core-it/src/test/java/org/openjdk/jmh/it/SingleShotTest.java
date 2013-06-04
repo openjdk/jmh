@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@BenchmarkMode(BenchmarkType.SingleShotTime)
+@BenchmarkMode(Mode.SingleShotTime)
 public class SingleShotTest {
 
     private static final AtomicInteger test1executed = new AtomicInteger();

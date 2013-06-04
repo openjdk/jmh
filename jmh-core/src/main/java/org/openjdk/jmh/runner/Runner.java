@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.internal.RunResult;
@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -182,9 +181,9 @@ public class Runner extends BaseRunner {
         // clone with all the modes
         List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
         for (BenchmarkRecord br : benchmarks) {
-            if (br.getMode() == BenchmarkType.All) {
-                for (BenchmarkType mode : BenchmarkType.values()) {
-                    if (mode == BenchmarkType.All) continue;
+            if (br.getMode() == Mode.All) {
+                for (Mode mode : Mode.values()) {
+                    if (mode == Mode.All) continue;
                     newBenchmarks.add(br.cloneWith(mode));
                 }
             } else {

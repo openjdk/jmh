@@ -27,7 +27,7 @@ package org.openjdk.jmh.it.fails.inherit;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Scope;
@@ -42,7 +42,7 @@ import org.openjdk.jmh.it.Fixtures;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@BenchmarkMode(BenchmarkType.All)
+@BenchmarkMode(Mode.All)
 @State(Scope.Group)
 public class AbstractGroupBenchTearDownTest extends AbstractTearDownBase {
 

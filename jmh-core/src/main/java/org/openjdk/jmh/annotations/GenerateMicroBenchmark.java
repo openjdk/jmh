@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * Annotation processors will translate methods marked with this annotation
  * to correct {@link MicroBenchmark}-annotated classes.
  * <p>
- * This annotation only accepts parameters affecting the workload generation, now only {@link BenchmarkType}.
+ * This annotation only accepts parameters affecting the workload generation, now only {@link Mode}.
  * Other parameters for run control are available as separate annotations
  * (e.g. {@link Measurement}, {@link Threads}, and {@link Fork}),
  * which can be used both for concrete {@link GenerateMicroBenchmark}-annotated methods,

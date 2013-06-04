@@ -46,8 +46,8 @@ public @interface MicroBenchmark {
 
     /**
      * Type of benchmark.
-     * See {@link BenchmarkType} for available benchmark types.
+     * See {@link Mode} for available benchmark types.
      */
-    public BenchmarkType value() default BenchmarkType.OpsPerTimeUnit;
+    public Mode value() default Mode.OpsPerTimeUnit;
 
 }

@@ -29,6 +29,6 @@ package org.openjdk.jmh.annotations;
  */
 public @interface BenchmarkMode {
 
-    BenchmarkType value();
+    Mode value();
 
 }

@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.logic.BlackHole;
 
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(BenchmarkType.AverageTimePerOp)
+@BenchmarkMode(Mode.AverageTimePerOp)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
 public class JMHSample_09_Blackholes {

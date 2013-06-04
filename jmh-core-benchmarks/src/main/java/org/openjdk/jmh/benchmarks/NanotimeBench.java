@@ -25,7 +25,7 @@
 package org.openjdk.jmh.benchmarks;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -40,13 +40,13 @@ public class NanotimeBench {
     private long last;
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTimePerOp)
     public long latency_avg() {
         return System.nanoTime();
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTimePerOp)
     public long granularity_avg() {
         long lst = last;
         long cur;
@@ -58,7 +58,7 @@ public class NanotimeBench {
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.SampleTimePerOp)
+    @BenchmarkMode(Mode.SampleTimePerOp)
     public long granularity() {
         long lst = last;
         long cur;

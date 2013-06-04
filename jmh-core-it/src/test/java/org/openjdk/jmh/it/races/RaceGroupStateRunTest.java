@@ -58,7 +58,7 @@ public class RaceGroupStateRunTest {
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.All)
+    @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(4)

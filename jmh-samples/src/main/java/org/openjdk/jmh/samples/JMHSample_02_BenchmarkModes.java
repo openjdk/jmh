@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 
@@ -58,7 +58,7 @@ public class JMHSample_02_BenchmarkModes {
 
     @OutputTimeUnit(TimeUnit.SECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.OpsPerTimeUnit)
+    @BenchmarkMode(Mode.OpsPerTimeUnit)
     public void measureThroughput() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -71,7 +71,7 @@ public class JMHSample_02_BenchmarkModes {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTimePerOp)
     public void measureAvgTime() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -88,7 +88,7 @@ public class JMHSample_02_BenchmarkModes {
      */
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.SampleTimePerOp)
+    @BenchmarkMode(Mode.SampleTimePerOp)
     public void measureSamples() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -101,7 +101,7 @@ public class JMHSample_02_BenchmarkModes {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(BenchmarkType.SingleShotTime)
+    @BenchmarkMode(Mode.SingleShotTime)
     public void measureSingleShot() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }

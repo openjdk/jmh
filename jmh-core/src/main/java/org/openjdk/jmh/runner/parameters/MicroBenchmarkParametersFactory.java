@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner.parameters;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.MicroBenchmark;
 import org.openjdk.jmh.annotations.Threads;
@@ -86,7 +86,7 @@ public class MicroBenchmarkParametersFactory {
     }
 
     private static IterationParams getWarmup(BaseOptions options, Method method) {
-        boolean isSingleShot = method.getAnnotation(MicroBenchmark.class).value() == BenchmarkType.SingleShotTime;
+        boolean isSingleShot = method.getAnnotation(MicroBenchmark.class).value() == Mode.SingleShotTime;
         Warmup warAnn = method.getAnnotation(Warmup.class);
         int iters = (warAnn == null) ? -1 : warAnn.iterations();
         if (isSingleShot) {
@@ -107,7 +107,7 @@ public class MicroBenchmarkParametersFactory {
     }
 
     private static IterationParams getMeasurement(BaseOptions options, Method method) {
-        boolean isSingleShot = method.getAnnotation(MicroBenchmark.class).value() == BenchmarkType.SingleShotTime;
+        boolean isSingleShot = method.getAnnotation(MicroBenchmark.class).value() == Mode.SingleShotTime;
         Measurement meAnn = method.getAnnotation(Measurement.class);
         int iters = (meAnn == null) ? -1 : meAnn.iterations();
         if (isSingleShot) {

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 
 import javax.lang.model.element.Element;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
     private final Set<MethodInvocation> methods;
     private boolean strictFP;
-    private BenchmarkType mode;
+    private Mode mode;
 
     MethodGroup(String name) {
         this.name = name;
@@ -106,7 +106,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return strictFP;
     }
 
-    public void setMode(BenchmarkType eMode) {
+    public void setMode(Mode eMode) {
         if (mode == null) {
             mode = eMode;
         } else {
@@ -116,7 +116,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
         }
     }
 
-    public BenchmarkType getMode() {
+    public Mode getMode() {
         return mode;
     }
 }

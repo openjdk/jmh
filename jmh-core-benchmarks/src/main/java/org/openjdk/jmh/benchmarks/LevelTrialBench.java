@@ -25,7 +25,7 @@
 package org.openjdk.jmh.benchmarks;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -36,7 +36,7 @@ import org.openjdk.jmh.annotations.TearDown;
 
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(BenchmarkType.All)
+@BenchmarkMode(Mode.All)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class LevelTrialBench {
 

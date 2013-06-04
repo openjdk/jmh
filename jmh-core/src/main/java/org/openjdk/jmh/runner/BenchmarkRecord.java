@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.Mode;
 
 import java.io.Serializable;
 
@@ -32,9 +32,9 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     private final String userName;
     private final String generatedName;
-    private BenchmarkType mode;
+    private Mode mode;
 
-    private BenchmarkRecord(String userName, String generatedName, BenchmarkType mode) {
+    private BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -49,14 +49,14 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
         this.userName = args[0].trim();
         this.generatedName = args[1].trim();
-        this.mode = BenchmarkType.deepValueOf(args[2].trim());
+        this.mode = Mode.deepValueOf(args[2].trim());
     }
 
     public String toLine() {
         return userName + ", " + generatedName + ", " + mode;
     }
 
-    public BenchmarkRecord cloneWith(BenchmarkType mode) {
+    public BenchmarkRecord cloneWith(Mode mode) {
         return new BenchmarkRecord(userName, generatedName, mode);
     }
 
@@ -70,7 +70,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return mode.compareTo(o.mode);
     }
 
-    public String generatedTarget(BenchmarkType type) {
+    public String generatedTarget(Mode type) {
         return generatedName + "_" + type;
     }
 
@@ -92,11 +92,11 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return userName;
     }
 
-    public void setMode(BenchmarkType mode) {
+    public void setMode(Mode mode) {
         this.mode = mode;
     }
 
-    public BenchmarkType getMode() {
+    public Mode getMode() {
         return mode;
     }
 
