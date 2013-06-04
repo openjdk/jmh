@@ -30,6 +30,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.output.OutputFormatType;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
 
@@ -149,7 +150,7 @@ public class HarnessOptions extends BaseOptions {
      * @param port host VM port
      * @return the final command to execute
      */
-    public String[] getSeparateExecutionCommand(String benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
+    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
 
         Properties props = System.getProperties();
         String javaHome = (String) props.get("java.home");
@@ -230,7 +231,7 @@ public class HarnessOptions extends BaseOptions {
         // if user supplied micro flags, give those as well
         Collections.addAll(command, toCommandLine());
 
-        command.add(benchmark);
+        command.add(benchmark.toLine());
 
         command.add("--hostName");
         command.add(host);

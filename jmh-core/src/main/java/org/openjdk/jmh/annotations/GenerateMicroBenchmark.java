@@ -78,10 +78,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateMicroBenchmark {
 
-    /**
-     * The type of result to return from the generated microbenchmark.
-     * See {@link BenchmarkType} for available result types.
-     */
-    public BenchmarkType[] value() default { BenchmarkType.OpsPerTimeUnit };
-
 }

@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.util.ClassUtils;
@@ -52,22 +53,22 @@ import java.util.concurrent.TimeUnit;
 public class TextReportFormat extends PrettyPrintFormat {
 
     private final Multimap<BenchmarkIdentifier, IterationResult> benchmarkResults;
-    private final Map<String, IterationParams> benchmarkSettings;
+    private final Map<BenchmarkRecord, IterationParams> benchmarkSettings;
 
     public TextReportFormat(PrintStream out, boolean verbose) {
         super(out, verbose);
         benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationResult>();
-        benchmarkSettings = new TreeMap<String, IterationParams>();
+        benchmarkSettings = new TreeMap<BenchmarkRecord, IterationParams>();
     }
 
     @Override
-    public void startBenchmark(String name, MicroBenchmarkParameters mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
         super.startBenchmark(name, mbParams, verbose);
         benchmarkSettings.put(name, mbParams.getIteration());
     }
 
     @Override
-    public void iterationResult(String name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
         super.iterationResult(name, iteration, thread, result, profiles);
         benchmarkResults.put(new BenchmarkIdentifier(name, thread), result);
     }
@@ -97,7 +98,7 @@ public class TextReportFormat extends PrettyPrintFormat {
 
                     boolean onlyResult = runResult.getStatistics().size() <= 1;
                     for (String label : runResult.getStatistics().keySet()) {
-                        benchNames.add(key.benchmark + (onlyResult ? "" : ":" + label));
+                        benchNames.add(key.benchmark.getUsername() + (onlyResult ? "" : ":" + label));
                     }
                 }
             }
@@ -112,8 +113,8 @@ public class TextReportFormat extends PrettyPrintFormat {
         }
         nameLen += 2;
 
-        out.printf("%-" + nameLen + "s %3s %6s %4s %12s %12s %12s %8s%n",
-                "Benchmark", "Thr", "Cnt", "Sec",
+        out.printf("%-" + nameLen + "s %6s %3s %6s %4s %12s %12s %12s %8s%n",
+                "Benchmark", "Mode", "Thr", "Cnt", "Sec",
                 "Mean", "Mean error", "Var", "Units");
         for (BenchmarkIdentifier key : benchmarkResults.keys()) {
 
@@ -139,8 +140,10 @@ public class TextReportFormat extends PrettyPrintFormat {
                             interval = stats.getConfidenceInterval(0.01);
                         }
 
-                        out.printf("%-" + nameLen + "s %3d %6d %4d %12.3f %12.3f %12.3f %8s%n",
-                                benchPrefixes.get(key.benchmark + (onlyResult ? "" : ":" + label)), key.threads, stats.getN(),
+                        out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %12.3f %8s%n",
+                                benchPrefixes.get(key.benchmark.getUsername() + (onlyResult ? "" : ":" + label)),
+                                key.benchmark.getMode().shortLabel(),
+                                key.threads, stats.getN(),
                                 settings.getTime().convertTo(TimeUnit.SECONDS),
                                 stats.getMean(), (interval[1] - interval[0]) / 2,
                                 stats.getVariance(), runResult.getScoreUnit());
@@ -150,8 +153,10 @@ public class TextReportFormat extends PrettyPrintFormat {
             }
 
             if (!resultOK) {
-                out.printf("%-" + nameLen + "s %3d %6d %4d %12.3f %12.3f %12.3f %8s%n",
-                        benchPrefixes.get(key.benchmark), key.threads, 0,
+                out.printf("%-" + nameLen + "s %6s, %3d %6d %4d %12.3f %12.3f %12.3f %8s%n",
+                        benchPrefixes.get(key.benchmark.getUsername()),
+                        key.benchmark.getMode().shortLabel(),
+                        key.threads, 0,
                         settings.getTime().convertTo(TimeUnit.SECONDS),
                         Double.NaN, Double.NaN, Double.NaN,
                         "N/A");
@@ -163,10 +168,10 @@ public class TextReportFormat extends PrettyPrintFormat {
     }
 
     private static class BenchmarkIdentifier implements Comparable<BenchmarkIdentifier> {
-        final String benchmark;
+        final BenchmarkRecord benchmark;
         final int threads;
 
-        BenchmarkIdentifier(String benchmark, int threads) {
+        BenchmarkIdentifier(BenchmarkRecord benchmark, int threads) {
             this.benchmark = benchmark;
             this.threads = threads;
         }

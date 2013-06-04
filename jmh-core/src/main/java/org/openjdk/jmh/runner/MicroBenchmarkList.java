@@ -73,7 +73,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return A list of all benchmarks, excluding matched
      */
-    public Set<String> getAll(OutputFormat out, List<String> excludes) {
+    public Set<BenchmarkRecord> getAll(OutputFormat out, List<String> excludes) {
         return find(out, ".*", excludes);
     }
 
@@ -84,7 +84,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches the include and NOT matching excludes
      */
-    public Set<String> find(OutputFormat out, String regexp, List<String> excludes) {
+    public Set<BenchmarkRecord> find(OutputFormat out, String regexp, List<String> excludes) {
         return find(out, Collections.singletonList(regexp), excludes);
     }
 
@@ -95,7 +95,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches includes and NOT matching excludes
      */
-    public Set<String> find(OutputFormat out, List<String> regexps, List<String> excludes) {
+    public Set<BenchmarkRecord> find(OutputFormat out, List<String> regexps, List<String> excludes) {
 
         // compile all patterns
         List<Pattern> includePatterns = new ArrayList<Pattern>(regexps.size());
@@ -108,7 +108,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
         }
 
         // find all benchmarks matching pattern
-        Set<String> result = new TreeSet<String>();
+        Set<BenchmarkRecord> result = new TreeSet<BenchmarkRecord>();
         try {
             for (Reader r : getReaders()) {
                 BufferedReader reader = new BufferedReader(r);
@@ -122,14 +122,16 @@ public class MicroBenchmarkList extends AbstractResourceReader {
                         continue;
                     }
 
+                    BenchmarkRecord br = new BenchmarkRecord(line);
+
                     for (Pattern pattern : includePatterns) {
-                        if (pattern.matcher(line).matches()) {
+                        if (pattern.matcher(br.getUsername()).matches()) {
                             boolean exclude = false;
 
                             // excludes override
                             for (Pattern excludePattern : excludePatterns) {
                                 if (excludePattern.matcher(line).matches()) {
-                                    out.verbosePrintln("Excluding " + line + ", matches " + excludePattern);
+                                    out.verbosePrintln("Excluding " + br.getUsername() + ", matches " + excludePattern);
 
                                     exclude = true;
                                     break;
@@ -137,11 +139,11 @@ public class MicroBenchmarkList extends AbstractResourceReader {
                             }
 
                             if (!exclude) {
-                                result.add(line);
+                                result.add(br);
                             }
                             break;
                         } else {
-                            out.verbosePrintln("Excluding: " + line + ", does not match " + pattern);
+                            out.verbosePrintln("Excluding: " + br.getUsername() + ", does not match " + pattern);
                         }
                     }
                 }

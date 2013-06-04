@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -51,7 +52,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(String name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
         out.print(name + DELIMITER + iteration + DELIMITER);
         for (Result r : result.getResult().values()) {
             out.print(convertDouble(r.getScore()) + DELIMITER);
@@ -64,7 +65,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startBenchmark(String name, MicroBenchmarkParameters mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
         if (!headerPrinted) {
             headerPrinted = true;
 
@@ -80,7 +81,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endBenchmark(String name, RunResult result) {
+    public void endBenchmark(BenchmarkRecord name, RunResult result) {
         // don't print anything
     }
 
@@ -95,7 +96,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(String benchmark, int iteration, int threads, TimeValue runTime) {
+    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue runTime) {
         // don't print anything
     }
 
@@ -109,12 +110,12 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void warmupIteration(String benchmark, int iteration, int threads, TimeValue warmupTime) {
+    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime) {
         // don't print anything
     }
 
     @Override
-    public void warmupIterationResult(String benchmark, int iteration, int thread, IterationResult result) {
+    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
         // don't print anything
     }
 
@@ -123,7 +124,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(String name, int iteration, int threads, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results) {
         int count = 0;
 
         for (Result result : results.getSubresults().values()) {
@@ -141,7 +142,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void threadSubStatistics(String name, int threads, RunResult result) {
+    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result) {
 
     }
 

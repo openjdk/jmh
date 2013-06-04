@@ -27,6 +27,7 @@ package org.openjdk.jmh.output.format;
 import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -53,27 +54,27 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void warmupIteration(String benchmark, int iteration, int threads, TimeValue warmupTime) {
+    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime) {
 
     }
 
     @Override
-    public void startBenchmark(String name, MicroBenchmarkParameters mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
 
     }
 
     @Override
-    public void endBenchmark(String name, RunResult result) {
+    public void endBenchmark(BenchmarkRecord name, RunResult result) {
 
     }
 
     @Override
-    public void detailedResults(String name, int iteration, int threads, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results) {
 
     }
 
     @Override
-    public void iteration(String benchmark, int iteration, int threads, TimeValue runTime) {
+    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue runTime) {
 
     }
 
@@ -86,16 +87,16 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(String name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
 
     }
 
     @Override
-    public void warmupIterationResult(String benchmark, int iteration, int thread, IterationResult result) {
+    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
     }
 
     @Override
-    public void threadSubStatistics(String name, int threads, RunResult results) {
+    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult results) {
 
     }
 

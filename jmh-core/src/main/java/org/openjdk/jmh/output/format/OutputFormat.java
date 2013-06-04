@@ -27,6 +27,7 @@ package org.openjdk.jmh.output.format;
 import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -51,7 +52,7 @@ public interface OutputFormat {
      * @param threads   Number of threads we executed on
      * @param warmupTime Time to spend per iteration
      */
-    public void warmupIteration(String benchmark, int iteration, int threads, TimeValue warmupTime);
+    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime);
 
     /**
      * Format for end-of-warmup-iteration.
@@ -61,7 +62,7 @@ public interface OutputFormat {
      * @param thread    amount of threads used
      * @param result    result of iteration
      */
-    public void warmupIterationResult(String benchmark, int iteration, int thread, IterationResult result);
+    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result);
 
     /**
      * Format for iteration start.
@@ -71,7 +72,7 @@ public interface OutputFormat {
      * @param threads threads to run
      * @param runTime time to spend per iteration
      */
-    public void iteration(String benchmark, int iteration, int threads, TimeValue runTime);
+    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue runTime);
 
     /**
      * Format for end-of-iteration.
@@ -82,14 +83,14 @@ public interface OutputFormat {
      * @param result    result of iteration
      * @param profiles  profiler results
      */
-    public void iterationResult(String name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles);
+    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles);
 
     /**
      * Format for start-of-benchmark output.
      *
      * @param verbose Should we output verbose info?
      */
-    public void startBenchmark(String name, MicroBenchmarkParameters mbParams, boolean verbose);
+    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose);
 
     /**
      * Format for end-of-benchmark.
@@ -97,7 +98,7 @@ public interface OutputFormat {
      * @param name       benchmark name
      * @param result statistics of the run
      */
-    public void endBenchmark(String name, RunResult result);
+    public void endBenchmark(BenchmarkRecord name, RunResult result);
 
     /**
      * Format for start-of-benchmark output.
@@ -121,7 +122,7 @@ public interface OutputFormat {
      * @param threads   thread count
      * @param results   AggregatedResults with detailed run results
      */
-    public void detailedResults(String name, int iteration, int threads, IterationResult results);
+    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results);
 
     /**
      * Format for sub-thread statistics.
@@ -130,7 +131,7 @@ public interface OutputFormat {
      * @param threads   thread count
      * @param result    result of iterations of the current threadcount
      */
-    public void threadSubStatistics(String name, int threads, RunResult result);
+    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result);
 
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 

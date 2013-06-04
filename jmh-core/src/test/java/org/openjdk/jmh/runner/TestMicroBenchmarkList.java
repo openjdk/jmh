@@ -60,7 +60,7 @@ public class TestMicroBenchmarkList {
         // make sure we get nothing
         excludes.clear();
         excludes.add(".*");
-        Set<String> micros = list.getAll(out, excludes);
+        Set<BenchmarkRecord> micros = list.getAll(out, excludes);
         assertEquals(0, micros.size());
     }
 
@@ -68,7 +68,7 @@ public class TestMicroBenchmarkList {
     public void testListGetAll() throws Exception {
         excludes.clear();
         // make sure we get em all
-        Set<String> micros = list.getAll(out, excludes);
+        Set<BenchmarkRecord> micros = list.getAll(out, excludes);
         assertEquals(20, micros.size());
     }
 
@@ -76,7 +76,7 @@ public class TestMicroBenchmarkList {
     public void testListFindSingle() throws Exception {
         // check find without excldues
         excludes.clear();
-        Set<String> micros = list.find(out, ".*Hash.*", excludes);
+        Set<BenchmarkRecord> micros = list.find(out, ".*Hash.*", excludes);
         assertEquals(7, micros.size());
     }
 
@@ -85,7 +85,7 @@ public class TestMicroBenchmarkList {
         // check find with excludes
         excludes.clear();
         excludes.add(".*Int.*");
-        Set<String> micros = list.find(out, ".*Hash.*", excludes);
+        Set<BenchmarkRecord> micros = list.find(out, ".*Hash.*", excludes);
         assertEquals(2, micros.size());
     }
 
@@ -94,16 +94,16 @@ public class TestMicroBenchmarkList {
         // micros should be sorted
         excludes.clear();
         excludes.add(".*Int.*");
-        Set<String> micros = list.find(out, ".*Hash.*", excludes);
-        String first = micros.iterator().next();
-        assertTrue("oracle.micro.benchmarks.api.java.util.concurrent.GeneratedMaps.testConcurrentHashMap".equals(first));
+        Set<BenchmarkRecord> micros = list.find(out, ".*Hash.*", excludes);
+        BenchmarkRecord first = micros.iterator().next();
+        assertTrue("oracle.micro.benchmarks.api.java.util.concurrent.GeneratedMaps.testConcurrentHashMap".equals(first.getUsername()));
     }
 
     @Test
     public void testListGetWithIncludesAndExcludes() throws Exception {
         excludes.clear();
         excludes.add(".*Int.*");
-        Set<String> micros = list.find(out, ".*Concurrent.*", excludes);
+        Set<BenchmarkRecord> micros = list.find(out, ".*Concurrent.*", excludes);
         assertEquals(2, micros.size());
     }
 }

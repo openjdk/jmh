@@ -25,7 +25,9 @@
 package org.openjdk.jmh.runner.options;
 
 import org.kohsuke.args4j.Option;
+import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.runner.options.handlers.BenchmarkTypeOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
@@ -78,6 +80,9 @@ public class BaseOptions {
 
     @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms; defaults to " + Defaults.WARMUP_TIME_SECS + "", handler = TimeValueOptionHandler.class)
     protected TimeValue warmupTime = null;
+
+    @Option(name = "-bt", aliases = {"--type"}, metaVar = "TYPE", usage = "Benchmark type", handler = BenchmarkTypeOptionHandler.class)
+    protected BenchmarkType benchType = null;
 
     @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" or 0 will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
     protected int threads = -1;
@@ -180,6 +185,9 @@ public class BaseOptions {
         if (TimeValue.class.equals(t)) {
             return timeValueFieldToString(f);
         }
+        if (BenchmarkType.class.equals(t)) {
+            return benchTypeFieldToString(f);
+        }
         throw new IllegalArgumentException("Unknown forwarding field type, field="+f.toString());
     }
 
@@ -276,6 +284,19 @@ public class BaseOptions {
         try {
             Object value = f.get(this);
             if (value != null && value instanceof TimeValue) {
+                return f.getAnnotation(Option.class).name() + " " + value;
+            } else {
+                return null;
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalAccessError("Caused by: " + e.getMessage());
+        }
+    }
+
+    private String benchTypeFieldToString(Field f) {
+        try {
+            Object value = f.get(this);
+            if (value != null && value instanceof BenchmarkType) {
                 return f.getAnnotation(Option.class).name() + " " + value;
             } else {
                 return null;
@@ -447,5 +468,7 @@ public class BaseOptions {
         return profilers;
     }
 
-
+    public BenchmarkType getBenchType() {
+        return benchType;
+    }
 }

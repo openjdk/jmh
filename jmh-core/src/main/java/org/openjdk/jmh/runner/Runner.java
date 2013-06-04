@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.internal.RunResult;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -145,13 +147,13 @@ public class Runner extends BaseRunner {
             outputHandler = createOutputHandler(options);
         }
 
-        Set<String> benchmarks;
+        Set<BenchmarkRecord> benchmarks;
 
         // get a list of benchmarks
         if (options.getRegexps().isEmpty()) {
             outputHandler.println("No regexp to match against benchmarks was given. Use -h for help or \".*\" for every benchmark.");
             outputHandler.flush();
-            benchmarks = Collections.<String>emptySet();
+            benchmarks = Collections.<BenchmarkRecord>emptySet();
         } else {
             benchmarks = list.find(outputHandler, options.getRegexps(), options.getExcludes());
         }
@@ -165,10 +167,34 @@ public class Runner extends BaseRunner {
             outputHandler.println("Benchmarks: ");
 
             // list microbenchmarks if -l and/or -v
-            for (String benchmark : benchmarks) {
-                outputHandler.println(benchmark);
+            for (BenchmarkRecord benchmark : benchmarks) {
+                outputHandler.println(benchmark.getUsername());
             }
         }
+
+        // override the benchmark type
+        if (options.getBenchType() != null) {
+            for (BenchmarkRecord br : benchmarks) {
+                br.setMode(options.getBenchType());
+            }
+        }
+
+        // clone with all the modes
+        List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
+        for (BenchmarkRecord br : benchmarks) {
+            if (br.getMode() == BenchmarkType.All) {
+                for (BenchmarkType mode : BenchmarkType.values()) {
+                    if (mode == BenchmarkType.All) continue;
+                    newBenchmarks.add(br.cloneWith(mode));
+                }
+            } else {
+                newBenchmarks.add(br);
+            }
+        }
+
+        benchmarks.clear();
+        benchmarks.addAll(newBenchmarks);
+
         // exit if list only, else run benchmarks
         if (!options.shouldList() && !benchmarks.isEmpty()) {
             switch (ExecutionMode.getExecutionMode(options)) {
@@ -196,13 +222,13 @@ public class Runner extends BaseRunner {
      * @param benchmarks
      * @param list
      */
-    private void runBulkWarmupBenchmarks(Set<String> benchmarks, MicroBenchmarkList list) {
+    private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks, MicroBenchmarkList list) {
         // Attention: Here is violation of outputHandler.startRun/endRun contract,
         // but because of such code was done before me,
         // I won't touch this in order do not crash output parsers. (SK)
 
         // list of micros executed before iteration
-        Set<String> warmupMicros = new TreeSet<String>();
+        Set<BenchmarkRecord> warmupMicros = new TreeSet<BenchmarkRecord>();
 
         List<String> warmupMicrosRegexp = options.getWarmupMicros();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
@@ -222,7 +248,7 @@ public class Runner extends BaseRunner {
             // increased variance.
             // currently valid only for non-external JVM runs
             outputHandler.startRun("Warmup Section");
-            for (String benchmark : warmupMicros) {
+            for (BenchmarkRecord benchmark : warmupMicros) {
                 runBulkWarmupModeMicroBenchmark(benchmark, true);
             }
             outputHandler.endRun(null);
@@ -230,7 +256,7 @@ public class Runner extends BaseRunner {
         // run microbenchmarks
         //
         outputHandler.startRun("Measurement Section");
-        for (String benchmark : benchmarks) {
+        for (BenchmarkRecord benchmark : benchmarks) {
             runBulkWarmupModeMicroBenchmark(benchmark, false);
         }
         outputHandler.endRun(null);
@@ -248,12 +274,12 @@ public class Runner extends BaseRunner {
         }
     }
 
-    private void runBenchmarks(Set<String> benchmarks) {
-        Set<String> embedded = new TreeSet<String>();
-        Set<String> forked = new TreeSet<String>();
+    private void runBenchmarks(Set<BenchmarkRecord> benchmarks) {
+        Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
+        Set<BenchmarkRecord> forked = new TreeSet<BenchmarkRecord>();
 
         outputHandler.startRun("Measurement Section");
-        for (String benchmark : benchmarks) {
+        for (BenchmarkRecord benchmark : benchmarks) {
             int f = decideForks(options.getForkCount(), benchForks(benchmark));
             if (f > 0) {
                 forked.add(benchmark);
@@ -262,7 +288,7 @@ public class Runner extends BaseRunner {
             }
         }
 
-        for (String benchmark : embedded) {
+        for (BenchmarkRecord benchmark : embedded) {
             runClassicBenchmark(benchmark);
         }
 
@@ -270,11 +296,11 @@ public class Runner extends BaseRunner {
         outputHandler.endRun(null);
     }
 
-    private void runSeparate(Set<String> benchmarksToFork) {
+    private void runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
         BinaryOutputFormatReader reader = null;
         try {
             reader = new BinaryOutputFormatReader(outputHandler);
-            for (String benchmark : benchmarksToFork) {
+            for (BenchmarkRecord benchmark : benchmarksToFork) {
                 runSeparateMicroBenchmark(reader, benchmark, reader.getHost(), reader.getPort());
             }
         } catch (IOException e) {
@@ -291,7 +317,7 @@ public class Runner extends BaseRunner {
      * @param benchmark
      * @return
      */
-    private int benchForks(String benchmark) {
+    private int benchForks(BenchmarkRecord benchmark) {
         Method m = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
         Fork fork = m.getAnnotation(Fork.class);
         return (fork != null) ? fork.value() : -1;
@@ -304,7 +330,7 @@ public class Runner extends BaseRunner {
      * @param host host VM host
      * @param port host VM port
      */
-    private void runSeparateMicroBenchmark(BinaryOutputFormatReader reader, String benchmark, String host, int port) {
+    private void runSeparateMicroBenchmark(BinaryOutputFormatReader reader, BenchmarkRecord benchmark, String host, int port) {
 
         /*
          * Running microbenchmark in separate JVM requires to read some options from annotations.
@@ -399,12 +425,13 @@ public class Runner extends BaseRunner {
      *
      * @param benchmark benchmark to run
      */
-    private List<IterationData> runBulkWarmupModeMicroBenchmark(String benchmark, boolean warmup) {
+    private List<IterationData> runBulkWarmupModeMicroBenchmark(BenchmarkRecord benchmark, boolean warmup) {
         List<IterationData> allResults = new ArrayList<IterationData>();
         try {
-            int index = benchmark.lastIndexOf('.');
-            String className = benchmark.substring(0, index);
-            String methodName = benchmark.substring(index + 1);
+            String benchName = benchmark.generatedTarget();
+            int index = benchName.lastIndexOf('.');
+            String className = benchName.substring(0, index);
+            String methodName = benchName.substring(index + 1);
 
             Class<?> clazz = ClassUtils.loadClass(className);
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, methodName);
@@ -414,7 +441,7 @@ public class Runner extends BaseRunner {
             if (warmup) {
                 executionParams = executionParams.warmupToIteration();
             }
-            outputHandler.startBenchmark(handler.getName(), executionParams, options.isVerbose());
+            outputHandler.startBenchmark(handler.getBenchmark(), executionParams, options.isVerbose());
             int iteration = 0;
             final Collection<ThreadIterationParams> threadIterationSequence = executionParams.getThreadIterationSequence();
             for (ThreadIterationParams tip : threadIterationSequence) {
@@ -425,7 +452,7 @@ public class Runner extends BaseRunner {
             // only print end-of-run output if we have actual results
             if (!allResults.isEmpty()) {
                 RunResult result = aggregateIterationData(allResults);
-                outputHandler.endBenchmark(handler.getName(), result);
+                outputHandler.endBenchmark(handler.getBenchmark(), result);
             }
 
             handler.shutdown();

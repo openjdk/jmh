@@ -33,6 +33,7 @@ import org.openjdk.jmh.logic.results.RawResultPair;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.SampleTimePerOp;
 import org.openjdk.jmh.logic.results.SingleShotTime;
+import org.openjdk.jmh.runner.MicroBenchmarkList;
 import org.openjdk.jmh.util.internal.CollectionUtils;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 
@@ -49,7 +50,9 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -66,11 +69,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
+    private final Set<BenchmarkInfo> benchmarkInfos = new HashSet<BenchmarkInfo>();
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         return Collections.singleton(GenerateMicroBenchmark.class.getName());
     }
 
+    public static class BenchmarkInfo {
+        public final String userName;
+        public final String generatedName;
+        public final String generatedPackageName;
+        public final String generatedClassName;
+        public final Map<String, MethodGroup> methodGroups;
+
+        public BenchmarkInfo(String userName, String generatedPackageName, String generatedClassName, Map<String, MethodGroup> methods) {
+            this.userName = userName;
+            this.generatedPackageName = generatedPackageName;
+            this.generatedClassName = generatedClassName;
+            this.generatedName = generatedPackageName + "." + generatedClassName;
+            this.methodGroups = methods;
+        }
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -83,8 +103,26 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     // Generate code for all found Classes and Methods
                     for (Map.Entry<TypeElement, Set<? extends Element>> typeElementSetEntry : clazzes.entrySet()) {
                         TypeElement clazz = typeElementSetEntry.getKey();
-                        generateClass(clazz, validateAndSplit(clazz, typeElementSetEntry.getValue()));
+                        BenchmarkInfo info = validateAndSplit(clazz, typeElementSetEntry.getValue());
+                        generateClass(clazz, info);
+                        benchmarkInfos.add(info);
                     }
+                }
+            } else {
+                // Processing completed, final round. Print all added methods to file
+                try {
+                    FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
+                            MicroBenchmarkList.MICROBENCHMARK_LIST.substring(1));
+                    PrintWriter writer = new PrintWriter(file.openWriter());
+                    for (BenchmarkInfo info : benchmarkInfos) {
+                        for (String method : info.methodGroups.keySet()) {
+                            MethodGroup group = info.methodGroups.get(method);
+                            writer.println(info.userName + "." + method + ", " + info.generatedName + "." + method + ", " + group.getMode());
+                        }
+                    }
+                    writer.close();
+                } catch (IOException ex) {
+                    processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing MicroBenchmark list " + ex);
                 }
             }
         } catch (Throwable t) {
@@ -129,7 +167,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * @param methods
      * @return
      */
-    private Map<String, MethodGroup> validateAndSplit(TypeElement clazz, Set<? extends Element> methods) {
+    private BenchmarkInfo validateAndSplit(TypeElement clazz, Set<? extends Element> methods) {
         // validate against rogue fields
         if (clazz.getAnnotation(State.class) == null || clazz.getModifiers().contains(Modifier.ABSTRACT)) {
             for (VariableElement field : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
@@ -153,34 +191,48 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             boolean methodStrictFP = method.getModifiers().contains(Modifier.STRICTFP);
 
-            BenchmarkType type = BenchmarkType.OpsPerTimeUnit;
-            DefaultMode mbAn = method.getAnnotation(DefaultMode.class);
+            Group groupAnn = method.getAnnotation(Group.class);
+            String groupName = (groupAnn != null) ? groupAnn.value() : method.getSimpleName().toString();
+            MethodGroup group = result.get(groupName);
+            if (group == null) {
+                group = new MethodGroup(convertToJavaIdentfier(groupName));
+                result.put(groupName, group);
+            }
+
+            BenchmarkMode mbAn = method.getAnnotation(BenchmarkMode.class);
             if (mbAn != null) {
-                type = mbAn.value();
+                group.setMode(mbAn.value());
             } else {
-                mbAn = method.getEnclosingElement().getAnnotation(DefaultMode.class);
+                mbAn = method.getEnclosingElement().getAnnotation(BenchmarkMode.class);
                 if (mbAn != null) {
-                    type = mbAn.value();
+                    group.setMode(mbAn.value());
                 }
             }
 
-            MethodGroup group = getMethodGroup(result, method, type);
             group.addStrictFP(classStrictFP);
             group.addStrictFP(methodStrictFP);
             group.addMethod(method, getThreads(method));
         }
-        return result;
-    }
 
-    private MethodGroup getMethodGroup(Map<String, MethodGroup> groups, Element method, BenchmarkType defaultMode) {
-        Group groupAnn = method.getAnnotation(Group.class);
-        String groupName = (groupAnn != null) ? groupAnn.value() : method.getSimpleName().toString();
-        MethodGroup methodGroup = groups.get(groupName);
-        if (methodGroup == null) {
-            methodGroup = new MethodGroup(convertToJavaIdentfier(groupName), defaultMode);
-            groups.put(groupName, methodGroup);
+        // enforce the default value
+        for (MethodGroup group : result.values()) {
+            if (group.getMode() == null) {
+                group.setMode(BenchmarkType.OpsPerTimeUnit);
+            }
         }
-        return methodGroup;
+
+        String sourcePackage = packageName(clazz);
+        if (sourcePackage.isEmpty()) {
+            processingEnv.getMessager().printMessage(Kind.ERROR,
+                    "Microbenchmark should have package other than default (" + clazz + ")");
+            return null;
+        }
+
+        // Build package name and class name for the Class to generate
+        String generatedPackageName = sourcePackage + ".generated";
+        String generatedClassName = clazz.getSimpleName().toString();
+
+        return new BenchmarkInfo(clazz.getQualifiedName().toString(), generatedPackageName, generatedClassName, result);
     }
 
     public static String convertToJavaIdentfier(String id) {
@@ -216,33 +268,21 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * Create and generate Java code for a class and it's methods
      *
      * @param clazz
-     * @param methods
      */
-    private void generateClass(TypeElement clazz, Map<String, MethodGroup> methods) {
+    private void generateClass(TypeElement clazz, BenchmarkInfo info) {
         try {
-            String sourcePackage = packageName(clazz);
-            if (sourcePackage.isEmpty()) {
-                processingEnv.getMessager().printMessage(Kind.ERROR,
-                        "Microbenchmark should have package other than default (" + clazz + ")");
-                return;
-            }
-
-            // Build package name and class name for the Class to generate
-            String generatedPackageName = sourcePackage + ".generated";
-            String generatedClassName = clazz.getSimpleName().toString();
-
             // Create file and open an outputstream
-            JavaFileObject jof = processingEnv.getFiler().createSourceFile(generatedPackageName + "." + generatedClassName, clazz);
+            JavaFileObject jof = processingEnv.getFiler().createSourceFile(info.generatedName, clazz);
             PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(jof.openOutputStream()), 64*1024), false);
 
             // Write package and imports
-            writer.println("package " + generatedPackageName + ';');
+            writer.println("package " + info.generatedPackageName + ';');
             writer.println();
 
             generateImport(writer);
             // Write class header
-            writer.println(generateClassAnnotation(methods.keySet()));
-            writer.println("public final class " + generatedClassName + " {");
+            writer.println(generateClassAnnotation(info.methodGroups.keySet()));
+            writer.println("public final class " + info.generatedClassName + " {");
             writer.println();
             generatePadding(writer);
 
@@ -257,8 +297,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             states.bindImplicit(processingEnv.getElementUtils().getTypeElement(BlackHole.class.getCanonicalName()), "blackhole", Scope.Thread);
 
             // Write all methods
-            for (String groupName : methods.keySet()) {
-                for (Element method : methods.get(groupName).methods()) {
+            for (String groupName : info.methodGroups.keySet()) {
+                for (Element method : info.methodGroups.get(groupName).methods()) {
                     // Final checks...
                     verifyAnnotations(method);
 
@@ -272,8 +312,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                 }
 
                 for (BenchmarkType benchmarkKind : BenchmarkType.values()) {
-                    if (benchmarkKind == BenchmarkType.All) continue; // FIXME: This mode should be EOL'ed
-                    generateMethod(benchmarkKind, writer, methods.get(groupName), states);
+                    if (benchmarkKind == BenchmarkType.All) continue;
+                    generateMethod(benchmarkKind, writer, info.methodGroups.get(groupName), states);
                 }
                 states.clearArgs();
             }
@@ -345,12 +385,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                             + " annotation only supports methods with @State-bearing typed parameters, "
                             + clazz + '.' + method);
         }
-        if (method.getAnnotation(GenerateMicroBenchmark.class).value().length == 0) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
-                    "The " + GenerateMicroBenchmark.class.getSimpleName()
-                            + " annotation should have one or more " + BenchmarkType.class.getSimpleName() + " parameters, "
-                            + clazz + '.' + method);
-        }
     }
 
     private void generatePadding(PrintWriter writer) {
@@ -384,7 +418,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + Measurement.class.getName() + ';');
         writer.println("import " + Threads.class.getName() + ';');
         writer.println("import " + Warmup.class.getName() + ';');
-        writer.println("import " + DefaultMode.class.getName() + ';');
+        writer.println("import " + BenchmarkMode.class.getName() + ';');
         writer.println("import " + RawResultPair.class.getName() + ';');
         writer.println();
     }

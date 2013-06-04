@@ -24,6 +24,9 @@
  */
 package org.openjdk.jmh.annotations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Benchmark type.
  *
@@ -36,30 +39,82 @@ public enum BenchmarkType {
     /**
      * Operations per unit of time,
      * {@link org.openjdk.jmh.logic.results.OpsPerTimeUnit}. */
-    OpsPerTimeUnit,
+    OpsPerTimeUnit("thrpt", "Throughput, ops/time"),
 
     /**
      * Average time per operation
      * {@link org.openjdk.jmh.logic.results.AverageTimePerOp}.
      */
-    AverageTimePerOp,
+    AverageTimePerOp("avgt", "Average time, time/op"),
 
     /**
      * Time distribution, percentile estimation
      * {@link org.openjdk.jmh.logic.results.SampleTimePerOp}.
      */
-    SampleTimePerOp,
+    SampleTimePerOp("sample", "Sampling time"),
 
     /**
      * Time the single execution
      * {@link org.openjdk.jmh.logic.results.SingleShotTime}.
      */
-    SingleShotTime,
+    SingleShotTime("ss", "Single shot invocation time"),
 
     /**
      * Meta-mode: all the modes.
      * This is mostly useful for testing.
      */
-    All,
+    All("all", "TEST MODE"),
+
+    ;
+    private final String shortLabel;
+    private final String longLabel;
+
+    BenchmarkType(String shortLabel, String longLabel) {
+        this.shortLabel = shortLabel;
+        this.longLabel = longLabel;
+    }
+
+    public String shortLabel() {
+        return shortLabel;
+    }
+
+    public String longLabel() {
+        return longLabel;
+    }
+
+    public static BenchmarkType deepValueOf(String name) {
+        try {
+            return BenchmarkType.valueOf(name);
+        } catch (IllegalArgumentException iae) {
+            BenchmarkType inferred = null;
+            for (BenchmarkType type : values()) {
+                if (type.shortLabel().startsWith(name)) {
+                    if (inferred == null) {
+                        inferred = type;
+                    } else {
+                        throw new IllegalStateException("Unable to parse benchmark mode, ambiguous prefix given: \"" + name + "\"\n" +
+                                "Known values are " + getKnown());
+                    }
+                }
+            }
+            if (inferred != null) {
+                return inferred;
+            } else {
+                throw new IllegalStateException("Unable to parse benchmark mode: \"" + name + "\"\n" +
+                        "Known values are " + getKnown());
+            }
+        }
+    }
+
+    public static List<String> getKnown() {
+        List<String> res = new ArrayList<String>();
+        for (BenchmarkType type : BenchmarkType.values()) {
+            res.add(type.toString());
+        }
+        for (BenchmarkType type : BenchmarkType.values()) {
+            res.add(type.shortLabel());
+        }
+        return res;
+    }
 
 }

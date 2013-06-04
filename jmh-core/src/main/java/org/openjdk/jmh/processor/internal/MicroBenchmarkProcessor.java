@@ -51,8 +51,6 @@ import java.util.TreeSet;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class MicroBenchmarkProcessor extends AbstractProcessor {
 
-    private final Set<String> methods = new TreeSet<String>();
-
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         return Collections.singleton(MicroBenchmark.class.getName());
@@ -70,32 +68,11 @@ public class MicroBenchmarkProcessor extends AbstractProcessor {
                 // Still processing add all annotated methods to the set
                 for (TypeElement annotation : annotations) {
                     for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                        // Check that Method has the correct
-                        if (!(element instanceof ExecutableElement)
-                                || !validMethodSignature((ExecutableElement) element)) {
-                            processingEnv.getMessager().printMessage(Kind.ERROR,
-                                    "The " + MicroBenchmark.class.getSimpleName()
-                                            + " annotation only supports methods return type " + Result.class.getName()
-                                            + " and a single " + Loop.class.getName() + " parameter. "
-                                            + element.getEnclosingElement() + '.' + element.toString());
-                        } else {
-                            methods.add(element.getEnclosingElement() + "." + element.getSimpleName());
-                        }
+                        processingEnv.getMessager().printMessage(Kind.MANDATORY_WARNING,
+                                "The " + MicroBenchmark.class.getSimpleName()
+                                        + " is detected. This is not the supported API anymore."
+                                        + element.getEnclosingElement() + '.' + element.toString());
                     }
-
-                }
-            } else {
-                // Processing completed, final round. Print all added methods to file
-                try {
-                    FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
-                            MicroBenchmarkList.MICROBENCHMARK_LIST.substring(1));
-                    PrintWriter writer = new PrintWriter(file.openWriter());
-                    for (String method : methods) {
-                        writer.println(method);
-                    }
-                    writer.close();
-                } catch (IOException ex) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing MicroBenchmark list " + ex);
                 }
             }
         } catch (Throwable t) {
@@ -105,27 +82,4 @@ public class MicroBenchmarkProcessor extends AbstractProcessor {
         return true;
     }
 
-    /**
-     * Check that the method signature is correct for MicroBenchmark methods
-     *
-     * @param element The annotated method
-     * @return True iff the method has the correct signature
-     */
-    public static boolean validMethodSignature(ExecutableElement element) {
-        if (!element.getReturnType().toString().equals(Result.class.getName())) {
-            return false;
-        }
-
-        List<? extends VariableElement> variables = element.getParameters();
-
-        if (variables.size() != 1) {
-            return false;
-        }
-
-        if (!variables.get(0).asType().toString().equals(Loop.class.getName())) {
-            return false;
-        }
-
-        return true;
-    }
 }

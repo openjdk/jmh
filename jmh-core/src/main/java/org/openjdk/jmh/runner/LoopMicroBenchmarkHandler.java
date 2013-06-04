@@ -75,7 +75,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      * @param options      Options from the command line
      * @param executionParams
      */
-    LoopMicroBenchmarkHandler(OutputFormat format, String microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
+    LoopMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldSynchIterations = executionParams.shouldSynchIterations();

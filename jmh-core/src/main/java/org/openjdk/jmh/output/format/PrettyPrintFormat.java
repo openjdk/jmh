@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.HashMultimap;
@@ -52,7 +53,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(String name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
         boolean firstProfiler = true;
         out.print(String.format("%s", result.toPrintable()));
         for (ProfilerResult profRes : profiles) {
@@ -75,7 +76,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
 
     @Override
-    public void startBenchmark(String name, MicroBenchmarkParameters mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
         if (verbose) {
             out.println("# Starting run at: " + new Date());
         }
@@ -97,13 +98,14 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
             out.println("# Threads will synchronize iterations");
         }
 
-        out.println("# Running: " + name);
+        out.println("# Benchmark mode: " + name.getMode().longLabel());
+        out.println("# Running: " + name.getUsername());
     }
 
-    private final Multimap<String, RunResult> benchmarkResults = new HashMultimap<String, RunResult>();
+    private final Multimap<BenchmarkRecord, RunResult> benchmarkResults = new HashMultimap<BenchmarkRecord, RunResult>();
 
     @Override
-    public void endBenchmark(String name, RunResult result) {
+    public void endBenchmark(BenchmarkRecord name, RunResult result) {
         benchmarkResults.put(name, result);
 
         out.println();
@@ -120,7 +122,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
     @Override
     public void endRun(String message) {
-        for (String key : benchmarkResults.keys()) {
+        for (BenchmarkRecord key : benchmarkResults.keys()) {
             Collection<RunResult> forkedResults = benchmarkResults.get(key);
             if (forkedResults.size() > 1) {
                 out.println(key + ", aggregate over forked runs:");
@@ -139,27 +141,27 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(String benchmark, int iteration, int threads, TimeValue timeValue) {
+    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue timeValue) {
         out.print(String.format("Iteration %3d (%s in %d %s): ", iteration,
                 timeValue, threads, getThreadsString(threads)));
         out.flush();
     }
 
     @Override
-    public void warmupIteration(String benchmark, int iteration, int threads, TimeValue timeValue) {
+    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue timeValue) {
         out.print(String.format("# Warmup Iteration %3d (%s in %d %s): ", iteration,
                 timeValue, threads, getThreadsString(threads)));
         out.flush();
     }
 
     @Override
-    public void warmupIterationResult(String benchmark, int iteration, int thread, IterationResult result) {
+    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
         out.println(String.format("%s", result.toPrintable()));
         out.flush();
     }
 
     @Override
-    public void detailedResults(String name, int iteration, int threads, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results) {
         out.print("Results per thread: [");
 
         boolean first = true;
@@ -180,7 +182,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void threadSubStatistics(String name, int threads, RunResult result) {
+    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result) {
         out.println();
 
         for (String label : result.getStatistics().keySet()) {

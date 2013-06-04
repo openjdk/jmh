@@ -66,7 +66,7 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      * @param options      Options from the command line
      * @param executionParams
      */
-    ShotMicroBenchmarkHandler(OutputFormat format, String microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
+    ShotMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldFailOnError = options.shouldFailOnError();

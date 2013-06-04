@@ -34,14 +34,13 @@ import java.util.Set;
 
 public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
-    private final BenchmarkType defaultMode;
     private final Set<MethodInvocation> methods;
     private boolean strictFP;
+    private BenchmarkType mode;
 
-    MethodGroup(String name, BenchmarkType defaultMode) {
+    MethodGroup(String name) {
         this.name = name;
         this.methods = new LinkedHashSet<MethodInvocation>();
-        this.defaultMode = defaultMode;
     }
 
     @Override
@@ -105,5 +104,19 @@ public class MethodGroup implements Comparable<MethodGroup> {
 
     public boolean isStrictFP() {
         return strictFP;
+    }
+
+    public void setMode(BenchmarkType eMode) {
+        if (mode == null) {
+            mode = eMode;
+        } else {
+            if (mode != eMode) {
+                throw new IllegalStateException("Clashing benchmark modes: mode = " + mode + ", trying to set = " + eMode);
+            }
+        }
+    }
+
+    public BenchmarkType getMode() {
+        return mode;
     }
 }

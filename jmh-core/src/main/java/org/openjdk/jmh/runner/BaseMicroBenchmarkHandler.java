@@ -49,7 +49,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     /**
      * Name of micro benchmark
      */
-    protected final String microbenchmark;
+    protected final BenchmarkRecord microbenchmark;
 
     /**
      * Thread-pool for threads executing the benchmark tasks
@@ -63,10 +63,10 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
     private final List<Profiler> registeredProfilers;
 
-    public BaseMicroBenchmarkHandler(OutputFormat format, String microbenchmark, final Class<?> clazz, BaseOptions options, MicroBenchmarkParameters executionParams) {
+    public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, BaseOptions options, MicroBenchmarkParameters executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
-        this.executor = createExecutor(executionParams.getMaxThreads(), microbenchmark);
+        this.executor = createExecutor(executionParams.getMaxThreads(), microbenchmark.getUsername());
         this.threadLocal = new ThreadLocal<InstanceProvider>() {
             @Override
             protected InstanceProvider initialValue() {
@@ -204,7 +204,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
      * {@inheritDoc}
      */
     @Override
-    public String getName() {
+    public BenchmarkRecord getBenchmark() {
         return microbenchmark;
     }
 

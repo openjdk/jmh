@@ -59,7 +59,7 @@ public interface MicroBenchmarkHandler {
      * returns benchmark name.
      * @return
      */
-    public String getName();
+    public BenchmarkRecord getBenchmark();
 }
 
 

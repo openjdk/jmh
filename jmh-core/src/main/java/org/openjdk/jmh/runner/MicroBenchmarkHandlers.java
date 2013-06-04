@@ -44,13 +44,9 @@ public class MicroBenchmarkHandlers {
     private MicroBenchmarkHandlers() {
     }
 
-    public static Method findBenchmarkMethod(String benchmark) {
-        int index = benchmark.lastIndexOf('.');
-        String className = benchmark.substring(0, index);
-        String methodName = benchmark.substring(index + 1);
-
-        Class<?> clazz = ClassUtils.loadClass(className);
-        return findBenchmarkMethod(clazz, methodName);
+    public static Method findBenchmarkMethod(BenchmarkRecord benchmark) {
+        Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
+        return findBenchmarkMethod(clazz, benchmark.generatedMethod());
     }
 
     public static Method findBenchmarkMethod(Class<?> clazz, String methodName) {
@@ -73,7 +69,7 @@ public class MicroBenchmarkHandlers {
         return method;
     }
 
-    public static MicroBenchmarkHandler getInstance(OutputFormat outputHandler, String microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
+    public static MicroBenchmarkHandler getInstance(OutputFormat outputHandler, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
         MicroBenchmark mb = method.getAnnotation(MicroBenchmark.class);
         if(mb.value() == BenchmarkType.SingleShotTime) {
             return new ShotMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);

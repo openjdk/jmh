@@ -47,17 +47,19 @@ public class ForkedRunner extends BaseRunner {
             // override output handler
             outputHandler = OutputFormatFactory.createBinaryHook(options.getHostName(), options.getHostPort());
         }
-        String benchmark = options.getBenchmark();
+
+        // expect the tuple from the parent process
+        BenchmarkRecord benchmark = new BenchmarkRecord(options.getBenchmark());
         if (options.isVerbose()) {
             outputHandler.println("Benchmarks: ");
-            outputHandler.println(benchmark);
+            outputHandler.println(benchmark.getUsername());
         }
         runForkedBenchmarks(benchmark);
         outputHandler.flush();
         outputHandler.close();
     }
 
-    private void runForkedBenchmarks(String benchmark) {
+    private void runForkedBenchmarks(BenchmarkRecord benchmark) {
         outputHandler.startRun("Measurement Section");
         runClassicBenchmark(benchmark);
         outputHandler.endRun(null);

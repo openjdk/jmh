@@ -27,7 +27,7 @@ package org.openjdk.jmh.annotations;
 /**
  * Annotations declares the default mode in which benchmark should be run.
  */
-public @interface DefaultMode {
+public @interface BenchmarkMode {
 
     BenchmarkType value();
 

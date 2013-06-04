@@ -64,20 +64,16 @@ public abstract class BaseRunner {
      * The method manages both warmup and measurements iterations
      * @param benchmark benchmark to run
      */
-    void runClassicBenchmark(String benchmark) {
+    void runClassicBenchmark(BenchmarkRecord benchmark) {
         List<IterationData> allResults = new ArrayList<IterationData>();
         try {
-            int index = benchmark.lastIndexOf('.');
-            String className = benchmark.substring(0, index);
-            String methodName = benchmark.substring(index + 1);
-
-            Class<?> clazz = ClassUtils.loadClass(className);
-            Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, methodName);
+            Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
+            Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
             MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, method);
             MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(outputHandler, benchmark, clazz, method, executionParams, options);
 
-            outputHandler.startBenchmark(handler.getName(), executionParams, this.options.isVerbose());
+            outputHandler.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
 
             int iteration = 0;
             final Collection<ThreadIterationParams> threadIterationSequence = executionParams.getThreadIterationSequence();
@@ -96,7 +92,7 @@ public abstract class BaseRunner {
             // only print end-of-run output if we have actual results
             if (!allResults.isEmpty()) {
                 RunResult result = aggregateIterationData(allResults);
-                outputHandler.endBenchmark(handler.getName(), result);
+                outputHandler.endBenchmark(handler.getBenchmark(), result);
             }
 
             handler.shutdown();
@@ -122,7 +118,7 @@ public abstract class BaseRunner {
             }
 
             // run benchmark iteration
-            outputHandler.iteration(handler.getName(), startIterNum + i, tip.getThreads(), tip.getTime());
+            outputHandler.iteration(handler.getBenchmark(), startIterNum + i, tip.getThreads(), tip.getTime());
 
             boolean isLastIteration = (i == tip.getCount());
             IterationData iterData = handler.runIteration(tip.getThreads(), tip.getTime(), isLastIteration);
@@ -135,12 +131,12 @@ public abstract class BaseRunner {
                 results.add(iterData);
 
                 // print out score for this iteration
-                outputHandler.iterationResult(handler.getName(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                outputHandler.iterationResult(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
 
                 // detailed output
                 if (showDetailedResults) {
                     // print (or not) detailed per-thread results
-                    outputHandler.detailedResults(handler.getName(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult());
+                    outputHandler.detailedResults(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult());
                 }
 
             }
@@ -151,7 +147,7 @@ public abstract class BaseRunner {
             // if threads and the next iteration will change the count,
             // OR if we're finished iterating
             RunResult aggregatedResult = aggregateIterationData(results);
-            outputHandler.threadSubStatistics(handler.getName(), tip.getThreads(), aggregatedResult);
+            outputHandler.threadSubStatistics(handler.getBenchmark(), tip.getThreads(), aggregatedResult);
         }
         return results;
     }
@@ -178,10 +174,10 @@ public abstract class BaseRunner {
                 outputHandler.verbosePrintln("System.gc() executed");
             }
 
-            outputHandler.warmupIteration(handler.getName(), i, warmup.getThreads(), warmup.getTime());
+            outputHandler.warmupIteration(handler.getBenchmark(), i, warmup.getThreads(), warmup.getTime());
             boolean isLastIteration = false; // warmup is never the last iteration
             IterationData iterData = handler.runIteration(warmup.getThreads(), warmup.getTime(), isLastIteration).setWarmup();
-            outputHandler.warmupIterationResult(handler.getName(), i, warmup.getThreads(), iterData.getAggregatedResult());
+            outputHandler.warmupIterationResult(handler.getBenchmark(), i, warmup.getThreads(), iterData.getAggregatedResult());
         }
     }
 

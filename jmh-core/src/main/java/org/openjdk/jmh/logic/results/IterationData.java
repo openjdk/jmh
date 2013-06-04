@@ -26,6 +26,7 @@ package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.profile.ProfilerResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 public class IterationData {
 
-    private final String benchmark;
+    private final BenchmarkRecord benchmark;
     private final List<Result> perThreadResults;
     private final List<ProfilerResult> profilerResults;
     private final int numThreads;
@@ -46,7 +47,7 @@ public class IterationData {
     private IterationResult aggregated;
     private boolean isWarmup;
 
-    public IterationData(String benchmark, int threadCount, TimeValue runTime) {
+    public IterationData(BenchmarkRecord benchmark, int threadCount, TimeValue runTime) {
         this.benchmark = benchmark;
         this.numThreads = threadCount;
         this.runTime = runTime;
@@ -95,7 +96,7 @@ public class IterationData {
         return this;
     }
 
-    public String getBenchmark() {
+    public BenchmarkRecord getBenchmark() {
         return benchmark;
     }
 
