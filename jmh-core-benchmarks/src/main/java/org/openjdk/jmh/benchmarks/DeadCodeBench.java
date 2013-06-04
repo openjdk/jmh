@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-@BenchmarkMode(Mode.AverageTimePerOp)
+@BenchmarkMode(Mode.AverageTime)
 public class DeadCodeBench {
 
     public int x = 1;

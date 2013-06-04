@@ -105,13 +105,13 @@ public class JMHSample_07_FixtureLevelInvocation {
      */
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTime)
     public double measureHot(NormalState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTime)
     public double measureCold(LaggingState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }

@@ -58,7 +58,7 @@ public class JMHSample_02_BenchmarkModes {
 
     @OutputTimeUnit(TimeUnit.SECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.OpsPerTimeUnit)
+    @BenchmarkMode(Mode.Throughput)
     public void measureThroughput() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -71,7 +71,7 @@ public class JMHSample_02_BenchmarkModes {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTime)
     public void measureAvgTime() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -88,7 +88,7 @@ public class JMHSample_02_BenchmarkModes {
      */
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.SampleTimePerOp)
+    @BenchmarkMode(Mode.SampleTime)
     public void measureSamples() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }

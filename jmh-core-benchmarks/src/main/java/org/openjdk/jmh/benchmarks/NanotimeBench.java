@@ -40,13 +40,13 @@ public class NanotimeBench {
     private long last;
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTime)
     public long latency_avg() {
         return System.nanoTime();
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTimePerOp)
+    @BenchmarkMode(Mode.AverageTime)
     public long granularity_avg() {
         long lst = last;
         long cur;
@@ -58,7 +58,7 @@ public class NanotimeBench {
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.SampleTimePerOp)
+    @BenchmarkMode(Mode.SampleTime)
     public long granularity() {
         long lst = last;
         long cur;

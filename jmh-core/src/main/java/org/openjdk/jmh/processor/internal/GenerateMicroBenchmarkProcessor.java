@@ -217,7 +217,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         // enforce the default value
         for (MethodGroup group : result.values()) {
             if (group.getMode() == null) {
-                group.setMode(Mode.OpsPerTimeUnit);
+                group.setMode(Mode.Throughput);
             }
         }
 
@@ -250,11 +250,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
     private String packageNameByType(Mode bt) {
         switch (bt) {
-            case OpsPerTimeUnit:
+            case Throughput:
                 return "throughput";
-            case AverageTimePerOp:
+            case AverageTime:
                 return "avgtime";
-            case SampleTimePerOp:
+            case SampleTime:
                 return "sampletime";
             case SingleShotTime:
                 return "oneshot";
@@ -509,13 +509,13 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
         final TimeUnit timeUnit = findTimeUnit(methodGroup);
         switch (benchmarkKind) {
-            case OpsPerTimeUnit:
+            case Throughput:
                 generateOpsPerTimeUnit(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
                 break;
-            case AverageTimePerOp:
+            case AverageTime:
                 generateAverageTime(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
                 break;
-            case SampleTimePerOp:
+            case SampleTime:
                 generateTimeDistribution(writer, benchmarkKind, methodGroup, timeUnit, states);
                 break;
             case SingleShotTime:
@@ -674,7 +674,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private static String generateMBAnnotation(Mode kind) {
         StringBuilder sb = new StringBuilder();
         sb.append("@").append(MicroBenchmark.class.getSimpleName());
-        if (kind != Mode.OpsPerTimeUnit) {
+        if (kind != Mode.Throughput) {
             sb.append("(Mode.").append(kind).append(')');
         }
         return sb.toString();
