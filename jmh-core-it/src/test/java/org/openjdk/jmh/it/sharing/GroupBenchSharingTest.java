@@ -48,7 +48,8 @@ public class GroupBenchSharingTest {
         Assert.assertEquals("All the threads have visited this state", 4, visitors.size());
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)
@@ -58,7 +59,8 @@ public class GroupBenchSharingTest {
         visitors.add(Thread.currentThread());
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

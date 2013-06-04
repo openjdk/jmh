@@ -27,6 +27,7 @@ package org.openjdk.jmh.it;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
@@ -34,7 +35,6 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -57,7 +57,8 @@ public class IterationCountCmdTest {
         Assert.assertEquals("Single iteration expected", 1, count.get());
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     public void test() {
         Fixtures.work();
     }

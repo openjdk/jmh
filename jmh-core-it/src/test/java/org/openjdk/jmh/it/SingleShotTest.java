@@ -27,10 +27,10 @@ package org.openjdk.jmh.it;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,19 +38,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
+@BenchmarkMode(BenchmarkType.SingleShotTime)
 public class SingleShotTest {
 
     private static final AtomicInteger test1executed = new AtomicInteger();
     private static final AtomicInteger test2executed = new AtomicInteger();
 
-    @GenerateMicroBenchmark(BenchmarkType.SingleShotTime)
+    @GenerateMicroBenchmark
     public void test1() {
         Fixtures.work();
         Assert.assertEquals(1, test1executed.incrementAndGet());
         Assert.assertEquals(0, test2executed.get());
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.SingleShotTime)
+    @GenerateMicroBenchmark
     public void test2() {
         Fixtures.work();
         Assert.assertEquals(1, test2executed.incrementAndGet());

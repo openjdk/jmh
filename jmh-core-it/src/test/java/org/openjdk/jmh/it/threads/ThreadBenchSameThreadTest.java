@@ -106,7 +106,8 @@ public class ThreadBenchSameThreadTest {
         Assert.assertEquals("test != teardownInvocation", testInvocationThread, tearDownInvocationThread);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(4)

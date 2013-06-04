@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -40,9 +41,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
+@BenchmarkMode(BenchmarkType.All)
 public class ForkedJvmAppendPrependArgsTest {
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgs = "-Dreplaced", jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
@@ -53,7 +55,7 @@ public class ForkedJvmAppendPrependArgsTest {
         Assert.assertNull(System.getProperty("prepended"));
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
@@ -64,7 +66,7 @@ public class ForkedJvmAppendPrependArgsTest {
         Assert.assertNotNull(System.getProperty("prepended"));
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsPrepend = "-Dprepended")
@@ -75,7 +77,7 @@ public class ForkedJvmAppendPrependArgsTest {
         Assert.assertNotNull(System.getProperty("prepended"));
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsAppend = "-Dappended")

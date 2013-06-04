@@ -26,6 +26,7 @@ package org.openjdk.jmh.it.fails.inherit;
 
 import org.junit.Test;
 import org.openjdk.jmh.Main;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -35,20 +36,19 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Baseline test:
  * Checks if assertions are propagated back to integration tests.
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
+@BenchmarkMode(BenchmarkType.All)
 public class AbstractGroupStateSetupTest {
 
     @State(Scope.Group)
     public static class MyState extends AbstractSetupBase {}
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Threads(4)

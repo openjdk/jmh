@@ -50,7 +50,8 @@ public class GroupStateSharingTest {
         }
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)
@@ -60,7 +61,8 @@ public class GroupStateSharingTest {
         s.visitors.add(Thread.currentThread());
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

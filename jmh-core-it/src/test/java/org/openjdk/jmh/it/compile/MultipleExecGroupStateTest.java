@@ -24,11 +24,14 @@
  */
 package org.openjdk.jmh.it.compile;
 
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.BenchmarkType;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
+@BenchmarkMode(BenchmarkType.All)
 public class MultipleExecGroupStateTest {
 
     @State(Scope.Group)

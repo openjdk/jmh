@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Scope;
@@ -36,8 +37,6 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Baseline test:
@@ -53,7 +52,8 @@ public class FailingThreadBenchTearDownTest {
         Assert.fail();
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Threads(4)

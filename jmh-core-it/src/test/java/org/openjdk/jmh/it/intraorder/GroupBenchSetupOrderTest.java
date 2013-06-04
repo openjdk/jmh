@@ -121,7 +121,8 @@ public class GroupBenchSetupOrderTest {
         Assert.assertTrue("Invoc(2) < Invoc(3)", invoc2 < invoc3);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

@@ -25,12 +25,14 @@
 package org.openjdk.jmh.it.compile.blackhole;
 
 import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.logic.BlackHole;
 
 @State(Scope.Thread)
+@BenchmarkMode(BenchmarkType.All)
 public class BlackholeTypesTest {
 
     public byte b;
@@ -44,97 +46,97 @@ public class BlackholeTypesTest {
     public Object o;
     public Object[] os;
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void baseline() {
         // do nothing
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public byte implicit_testByte() {
         return b;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public boolean implicit_testBoolean() {
         return bool;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public char implicit_testChar() {
         return c;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public int implicit_testInt() {
         return i;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public long implicit_testLong() {
         return l;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public float implicit_testFloat() {
         return f;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public double implicit_testDouble() {
         return d;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public Object implicit_testObject() {
         return o;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public Object[] implicit_testArray() {
         return os;
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testByte(BlackHole bh) {
         bh.consume(b);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testBoolean(BlackHole bh) {
         bh.consume(bool);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testChar(BlackHole bh) {
         bh.consume(c);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testInt(BlackHole bh) {
         bh.consume(i);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testLong(BlackHole bh) {
         bh.consume(l);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testFloat(BlackHole bh) {
         bh.consume(f);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testDouble(BlackHole bh) {
         bh.consume(d);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testObject(BlackHole bh) {
         bh.consume(o);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
     public void explicit_testArray(BlackHole bh) {
         bh.consume(os);
     }

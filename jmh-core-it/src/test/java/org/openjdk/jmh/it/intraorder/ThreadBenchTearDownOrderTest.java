@@ -27,15 +27,7 @@ package org.openjdk.jmh.it.intraorder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
-import org.openjdk.jmh.annotations.BenchmarkType;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 
 import java.util.concurrent.TimeUnit;
@@ -129,7 +121,8 @@ public class ThreadBenchTearDownOrderTest {
         Assert.assertTrue("Invoc(2) < Invoc(3)", invoc2 < invoc3);
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

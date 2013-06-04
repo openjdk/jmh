@@ -138,7 +138,8 @@ public class GroupStateHelperTimesTest {
 
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

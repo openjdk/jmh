@@ -134,7 +134,8 @@ public class BenchmarkBenchHelperTimesTest {
 //        Assert.assertEquals("TearDown6 = invocation count", countInvocations.get(), countTearDownInvocation2.get());
     }
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Threads(2)

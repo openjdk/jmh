@@ -28,6 +28,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkType;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Scope;
@@ -45,7 +46,8 @@ import org.openjdk.jmh.it.Fixtures;
 @State(Scope.Thread)
 public class FailingThreadBenchTest {
 
-    @GenerateMicroBenchmark(BenchmarkType.All)
+    @GenerateMicroBenchmark
+    @BenchmarkMode(BenchmarkType.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Threads(4)
