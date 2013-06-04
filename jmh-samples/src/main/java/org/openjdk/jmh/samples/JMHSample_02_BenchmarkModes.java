@@ -56,9 +56,9 @@ public class JMHSample_02_BenchmarkModes {
      * although you can use the default.
      */
 
-    @OutputTimeUnit(TimeUnit.SECONDS)
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.SECONDS)
     public void measureThroughput() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -69,9 +69,9 @@ public class JMHSample_02_BenchmarkModes {
      * There are workloads where measuring times is more convenient though.
      */
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureAvgTime() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -86,9 +86,9 @@ public class JMHSample_02_BenchmarkModes {
      * JMH also tries to auto-adjust sampling frequency: if the method
      * is long enough, you will end up capturing all the samples.
      */
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.SampleTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureSamples() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
@@ -99,10 +99,22 @@ public class JMHSample_02_BenchmarkModes {
      * do not want to call the benchmark method continuously.
      */
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.SingleShotTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureSingleShot() throws InterruptedException {
+        TimeUnit.MILLISECONDS.sleep(100);
+    }
+
+    /*
+     * We can also ask for multiple benchmark modes at once. All the tests
+     * above can be replaced with just a single test like this:
+     */
+
+    @GenerateMicroBenchmark
+    @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime, Mode.SingleShotTime})
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void measureAll() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
 

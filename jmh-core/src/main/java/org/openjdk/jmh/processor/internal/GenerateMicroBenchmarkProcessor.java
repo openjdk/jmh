@@ -117,7 +117,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     for (BenchmarkInfo info : benchmarkInfos) {
                         for (String method : info.methodGroups.keySet()) {
                             MethodGroup group = info.methodGroups.get(method);
-                            writer.println(info.userName + "." + method + ", " + info.generatedName + "." + method + ", " + group.getMode());
+                            for (Mode m : group.getModes()) {
+                                writer.println(info.userName + "." + method + ", " + info.generatedName + "." + method + ", " + m);
+                            }
                         }
                     }
                     writer.close();
@@ -201,11 +203,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             BenchmarkMode mbAn = method.getAnnotation(BenchmarkMode.class);
             if (mbAn != null) {
-                group.setMode(mbAn.value());
+                group.addModes(mbAn.value());
             } else {
                 mbAn = method.getEnclosingElement().getAnnotation(BenchmarkMode.class);
                 if (mbAn != null) {
-                    group.setMode(mbAn.value());
+                    group.addModes(mbAn.value());
                 }
             }
 
@@ -216,8 +218,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // enforce the default value
         for (MethodGroup group : result.values()) {
-            if (group.getMode() == null) {
-                group.setMode(Mode.Throughput);
+            if (group.getModes().isEmpty()) {
+                group.addModes(Mode.Throughput);
             }
         }
 

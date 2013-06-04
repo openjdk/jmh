@@ -29,6 +29,8 @@ import org.openjdk.jmh.annotations.Mode;
 import javax.lang.model.element.Element;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -36,11 +38,12 @@ public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
     private final Set<MethodInvocation> methods;
     private boolean strictFP;
-    private Mode mode;
+    private EnumSet<Mode> modes;
 
     MethodGroup(String name) {
         this.name = name;
         this.methods = new LinkedHashSet<MethodInvocation>();
+        this.modes = EnumSet.noneOf(Mode.class);
     }
 
     @Override
@@ -106,17 +109,15 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return strictFP;
     }
 
-    public void setMode(Mode eMode) {
-        if (mode == null) {
-            mode = eMode;
-        } else {
-            if (mode != eMode) {
-                throw new IllegalStateException("Clashing benchmark modes: mode = " + mode + ", trying to set = " + eMode);
-            }
-        }
+    public void addModes(Mode eMode) {
+        modes.add(eMode);
     }
 
-    public Mode getMode() {
-        return mode;
+    public void addModes(Mode[] eModes) {
+        Collections.addAll(modes, eModes);
+    }
+
+    public Set<Mode> getModes() {
+        return modes;
     }
 }

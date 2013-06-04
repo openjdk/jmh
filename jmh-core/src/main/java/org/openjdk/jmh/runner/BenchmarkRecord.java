@@ -62,12 +62,12 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     @Override
     public int compareTo(BenchmarkRecord o) {
-        int v = userName.compareTo(o.userName);
+        int v = mode.compareTo(o.mode);
         if (v != 0) {
             return v;
         }
 
-        return mode.compareTo(o.mode);
+        return userName.compareTo(o.userName);
     }
 
     public String generatedTarget(Mode type) {

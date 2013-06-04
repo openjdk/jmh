@@ -173,20 +173,21 @@ public class Runner extends BaseRunner {
 
         // override the benchmark types;
         // this may yield new benchmark records
-        List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
         if (options.getBenchModes() != null) {
+            List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
             for (BenchmarkRecord br : benchmarks) {
                 for (Mode m : options.getBenchModes()) {
                     newBenchmarks.add(br.cloneWith(m));
                 }
 
             }
+
+            benchmarks.clear();
+            benchmarks.addAll(newBenchmarks);
         }
 
-        benchmarks.clear();
-        benchmarks.addAll(newBenchmarks);
-
         // clone with all the modes
+        List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
         for (BenchmarkRecord br : benchmarks) {
             if (br.getMode() == Mode.All) {
                 for (Mode mode : Mode.values()) {
