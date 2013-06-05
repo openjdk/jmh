@@ -113,9 +113,9 @@ public class TextReportFormat extends PrettyPrintFormat {
         }
         nameLen += 2;
 
-        out.printf("%-" + nameLen + "s %6s %3s %6s %4s %12s %12s %12s %8s%n",
+        out.printf("%-" + nameLen + "s %6s %3s %6s %4s %12s %12s %8s%n",
                 "Benchmark", "Mode", "Thr", "Cnt", "Sec",
-                "Mean", "Mean error", "Var", "Units");
+                "Mean", "Mean error", "Units");
         for (BenchmarkIdentifier key : benchmarkResults.keys()) {
 
             double[] interval = new double[]{Double.NaN, Double.NaN};
@@ -140,25 +140,25 @@ public class TextReportFormat extends PrettyPrintFormat {
                             interval = stats.getConfidenceInterval(0.01);
                         }
 
-                        out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %12.3f %8s%n",
+                        out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
                                 benchPrefixes.get(key.benchmark.getUsername() + (onlyResult ? "" : ":" + label)),
                                 key.benchmark.getMode().shortLabel(),
                                 key.threads, stats.getN(),
                                 settings.getTime().convertTo(TimeUnit.SECONDS),
                                 stats.getMean(), (interval[1] - interval[0]) / 2,
-                                stats.getVariance(), runResult.getScoreUnit());
+                                runResult.getScoreUnit());
                     }
                     resultOK = true;
                 }
             }
 
             if (!resultOK) {
-                out.printf("%-" + nameLen + "s %6s, %3d %6d %4d %12.3f %12.3f %12.3f %8s%n",
+                out.printf("%-" + nameLen + "s %6s, %3d %6d %4d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.benchmark.getUsername()),
                         key.benchmark.getMode().shortLabel(),
                         key.threads, 0,
                         settings.getTime().convertTo(TimeUnit.SECONDS),
-                        Double.NaN, Double.NaN, Double.NaN,
+                        Double.NaN, Double.NaN,
                         "N/A");
             }
 
