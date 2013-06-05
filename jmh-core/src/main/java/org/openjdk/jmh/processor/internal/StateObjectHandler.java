@@ -498,7 +498,7 @@ public class StateObjectHandler {
     public Collection<StateObject> getControls() {
         Collection<StateObject> s = new ArrayList<StateObject>();
         for (StateObject so : cons(args.values())) {
-            if (so.type.equals(Control.class.getName())) {
+            if (so.userType.equals(Control.class.getName())) {
                 s.add(so);
             }
         }
