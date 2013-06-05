@@ -201,6 +201,29 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                 result.put(groupName, group);
             }
 
+            // backward compatibility
+            GenerateMicroBenchmark gmb = method.getAnnotation(GenerateMicroBenchmark.class);
+            if (!Arrays.deepEquals(gmb.value(), new BenchmarkType[] { BenchmarkType.OpsPerTimeUnit })) {
+                for (BenchmarkType t : gmb.value()) {
+                    switch (t) {
+                        case AverageTimePerOp:
+                            group.addModes(Mode.AverageTime);
+                            break;
+                        case OpsPerTimeUnit:
+                            group.addModes(Mode.Throughput);
+                            break;
+                        case SampleTimePerOp:
+                            group.addModes(Mode.SampleTime);
+                            break;
+                        case SingleShotTime:
+                            group.addModes(Mode.SingleShotTime);
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown BenchmarkType: " + t);
+                    }
+                }
+            }
+
             BenchmarkMode mbAn = method.getAnnotation(BenchmarkMode.class);
             if (mbAn != null) {
                 group.addModes(mbAn.value());

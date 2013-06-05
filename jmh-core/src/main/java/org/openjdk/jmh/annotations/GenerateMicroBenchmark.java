@@ -78,4 +78,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateMicroBenchmark {
 
+    /**
+     * This value is deprecated.
+     * Use {@link BenchmarkMode} instead.
+     */
+    @Deprecated
+    public BenchmarkType[] value() default { BenchmarkType.OpsPerTimeUnit };
+
+
 }
