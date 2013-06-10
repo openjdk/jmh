@@ -40,6 +40,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -87,7 +88,7 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // create tasks
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, new Loop(numThreads, TimeValue.NONE, preSetupBarrier, preTearDownBarrier, last, false));
+            runners[i] = new BenchmarkTask(threadLocal, new Loop(numThreads, TimeValue.NONE, preSetupBarrier, preTearDownBarrier, last, false, timeUnit));
         }
 
         // submit tasks to threadpool

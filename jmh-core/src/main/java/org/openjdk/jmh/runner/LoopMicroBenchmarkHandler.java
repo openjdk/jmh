@@ -96,7 +96,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, new Loop(numThreads, runtime, preSetupBarrier, preTearDownBarrier, last, shouldSynchIterations));
+            runners[i] = new BenchmarkTask(threadLocal, new Loop(numThreads, runtime, preSetupBarrier, preTearDownBarrier, last, shouldSynchIterations, timeUnit));
         }
 
         // submit tasks to threadpool

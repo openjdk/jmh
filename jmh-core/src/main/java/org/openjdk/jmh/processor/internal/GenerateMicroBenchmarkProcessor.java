@@ -769,7 +769,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new OpsPerTimeUnit(\"" + method.getSimpleName() + "\", res.operations, res.time, TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new OpsPerTimeUnit(\"" + method.getSimpleName() + "\", res.operations, res.time, (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -862,7 +862,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new AverageTimePerOp(\"" + method.getSimpleName() + "\", res.operations, res.time, TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new AverageTimePerOp(\"" + method.getSimpleName() + "\", res.operations, res.time, (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -1013,7 +1013,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 4, method, states, true);
 
             writer.println("        } while(!loop.isDone);");
-            writer.println("        return new SampleTimePerOp(\"" + method.getSimpleName() + "\", buffer, TimeUnit." + timeUnit + ");");
+            writer.println("        return new SampleTimePerOp(\"" + method.getSimpleName() + "\", buffer, (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println("    }");
             writer.println();
         }
@@ -1049,7 +1049,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new SingleShotTime(\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new SingleShotTime(\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");

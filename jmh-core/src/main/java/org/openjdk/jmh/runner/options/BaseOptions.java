@@ -32,6 +32,7 @@ import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadsOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.TimeUnitOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeValueOptionHandler;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -44,6 +45,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class that handles options which are omni-present everywhere.
@@ -121,6 +123,8 @@ public class BaseOptions {
     @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listprofilers to list available profilers", handler = ProfilersOptionHandler.class)
     protected Set<ProfilerFactory.Profilers> profilers = EnumSet.noneOf(ProfilerFactory.Profilers.class);
 
+    @Option(name = "-tu", aliases = {"--timeunit"}, usage = "Output time unit. Available values: m, s, ms, us, ns", handler = TimeUnitOptionHandler.class)
+    protected TimeUnit timeUnit = null;
 
     /**
      * returns canonical command line containing all options (differ than default value)
@@ -185,6 +189,9 @@ public class BaseOptions {
         }
         if (TimeValue.class.equals(t)) {
             return timeValueFieldToString(f);
+        }
+        if (TimeUnit.class.equals(t)) {
+            return timeUnitFieldToString(f);
         }
         if (Mode.class.equals(t)) {
             return benchTypeFieldToString(f);
@@ -286,6 +293,19 @@ public class BaseOptions {
             Object value = f.get(this);
             if (value != null && value instanceof TimeValue) {
                 return f.getAnnotation(Option.class).name() + " " + value;
+            } else {
+                return null;
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalAccessError("Caused by: " + e.getMessage());
+        }
+    }
+
+    private String timeUnitFieldToString(Field f) {
+        try {
+            Object value = f.get(this);
+            if (value != null && value instanceof TimeUnit) {
+                return f.getAnnotation(Option.class).name() + " " + TimeUnitOptionHandler.toString((TimeUnit)value);
             } else {
                 return null;
             }
@@ -406,6 +426,14 @@ public class BaseOptions {
         return verbose;
     }
 
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
 
     /**
      * Getter

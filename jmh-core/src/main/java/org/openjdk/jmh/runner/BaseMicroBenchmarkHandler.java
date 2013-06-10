@@ -60,6 +60,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     protected final ThreadLocal<InstanceProvider> threadLocal;
 
     protected final OutputFormat format;
+    protected final TimeUnit timeUnit;
 
     private final List<Profiler> registeredProfilers;
 
@@ -74,6 +75,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
             }
         };
         this.format = format;
+        this.timeUnit = options.getTimeUnit();
     }
 
     private static List<Profiler> createProfilers(BaseOptions options) {

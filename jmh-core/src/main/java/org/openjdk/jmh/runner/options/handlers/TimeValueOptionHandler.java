@@ -65,6 +65,6 @@ public class TimeValueOptionHandler extends OptionHandler<TimeValue> {
 
     @Override
     public String getDefaultMetaVariable() {
-        return "TIME";
+        return "TimeUnit";
     }
 }

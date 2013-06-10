@@ -67,11 +67,11 @@ public class Loop extends LoopL4 {
      * @param loopTime How long we should loop
      */
     public Loop(TimeValue loopTime) {
-        this(1, loopTime, null, null, false, false);
+        this(1, loopTime, null, null, false, false, null);
     }
 
-    public Loop(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
+    public Loop(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations, TimeUnit timeUnit) {
+        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations, timeUnit);
     }
 
 
@@ -292,8 +292,9 @@ class LoopL2 extends LoopL1 {
     public final AtomicInteger warmupVisited, warmdownVisited;
     public volatile boolean warmupShouldWait, warmdownShouldWait;
 
+    public final TimeUnit timeUnit;
 
-    public LoopL2(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
+    public LoopL2(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations, TimeUnit timeUnit) {
         this.threads = threads;
         this.preSetup = preSetup;
         this.preTearDown = preTearDown;
@@ -309,8 +310,8 @@ class LoopL2 extends LoopL1 {
         }
 
         this.syncIterations = syncIterations;
+        this.timeUnit = timeUnit;
     }
-
 }
 
 class LoopL3 extends LoopL2 {
@@ -319,16 +320,16 @@ class LoopL3 extends LoopL2 {
     public int e21, e22, e23, e24, e25, e26, e27, e28;
     public int e31, e32, e33, e34, e35, e36, e37, e38;
 
-    public LoopL3(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
+    public LoopL3(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations, TimeUnit timeUnit) {
+        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations, timeUnit);
     }
 }
 
 class LoopL4 extends LoopL3 {
     public int marker;
 
-    public LoopL4(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations) {
-        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations);
+    public LoopL4(int threads, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, boolean syncIterations, TimeUnit timeUnit) {
+        super(threads, loopTime, preSetup, preTearDown, lastIteration, syncIterations, timeUnit);
     }
 }
 
