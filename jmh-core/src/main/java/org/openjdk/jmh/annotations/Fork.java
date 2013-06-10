@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.annotations;
 
+import org.openjdk.jmh.util.AnnotationUtils;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,19 +42,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Fork {
 
-    static final String PARAM_NOT_SET = "NOT_SET_20122012"; // random String marking the not set value
-
     /** specifies number of times harness should fork, zero means "no fork" */
     public int value() default 1;
 
     /** enforce strict JVM args, replaces any implicit jvm args */
-    public String jvmArgs() default PARAM_NOT_SET;
+    public String jvmArgs() default AnnotationUtils.PARAM_NOT_SET;
 
     /** prepend these arguments in the command line */
-    public String jvmArgsPrepend() default PARAM_NOT_SET;
+    public String jvmArgsPrepend() default AnnotationUtils.PARAM_NOT_SET;
 
     /** append these arguments in the command line */
-    public String jvmArgsAppend() default PARAM_NOT_SET;
+    public String jvmArgsAppend() default AnnotationUtils.PARAM_NOT_SET;
 
     /** ignore results first warmups forks */
     public int warmups() default 0;

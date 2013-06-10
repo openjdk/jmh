@@ -34,6 +34,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.SampleTimePerOp;
 import org.openjdk.jmh.logic.results.SingleShotTime;
 import org.openjdk.jmh.runner.MicroBenchmarkList;
+import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.internal.CollectionUtils;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 
@@ -643,9 +644,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
     private static Map<String, String> forkToMap(Map<String, String> map, Fork fAnnotation) {
         if (fAnnotation != null) {
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, !fAnnotation.jvmArgs().trim().isEmpty(), "jvmArgs", fAnnotation.jvmArgs().trim());
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, !fAnnotation.jvmArgsAppend().trim().isEmpty(), "jvmArgsAppend", fAnnotation.jvmArgsAppend().trim());
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, !fAnnotation.jvmArgsPrepend().trim().isEmpty(), "jvmArgsPrepend", fAnnotation.jvmArgsPrepend().trim());
+            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsentAndQuote(map, AnnotationUtils.isSet(fAnnotation.jvmArgs()),        "jvmArgs", fAnnotation.jvmArgs());
+            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsentAndQuote(map, AnnotationUtils.isSet(fAnnotation.jvmArgsAppend()),  "jvmArgsAppend", fAnnotation.jvmArgsAppend());
+            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsentAndQuote(map, AnnotationUtils.isSet(fAnnotation.jvmArgsPrepend()), "jvmArgsPrepend", fAnnotation.jvmArgsPrepend());
             map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, fAnnotation.value() != 1, "value", Integer.toString(fAnnotation.value()));
             map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, fAnnotation.warmups() > 0, "warmups", Integer.toString(fAnnotation.warmups()));
         }
@@ -660,18 +661,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             map = forkToMap(map, upperForkAnnotation);
             if (map == null || map.isEmpty()) {
                 return "@" + Fork.class.getSimpleName();
-            }
-            if (map.containsKey("value")) {
-                map.put("value", map.get("value"));
-            }
-            if (map.containsKey("jvmArgs")) {
-                map.put("jvmArgs", "\"" + map.get("jvmArgs") + "\"");
-            }
-            if (map.containsKey("jvmArgsAppend")) {
-                map.put("jvmArgsAppend", "\"" + map.get("jvmArgsAppend") + "\"");
-            }
-            if (map.containsKey("jvmArgsPrepend")) {
-                map.put("jvmArgsPrepend", "\"" + map.get("jvmArgsPrepend") + "\"");
             }
             return "@" + Fork.class.getSimpleName() + "(" + annotationMapToString(map) + ")";
         }

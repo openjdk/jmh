@@ -36,6 +36,7 @@ import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.runner.parameters.ThreadIterationParams;
+import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 
@@ -347,17 +348,17 @@ public class Runner extends BaseRunner {
         Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
 
         String annJvmArgs = null;
-        if (forkAnnotation != null && !forkAnnotation.jvmArgs().equals(Fork.PARAM_NOT_SET)) {
+        if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgs())) {
             annJvmArgs = forkAnnotation.jvmArgs().trim();
         }
 
         String annJvmArgsAppend = null;
-        if (forkAnnotation != null && !forkAnnotation.jvmArgsAppend().equals(Fork.PARAM_NOT_SET)) {
+        if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsAppend())) {
             annJvmArgsAppend = forkAnnotation.jvmArgsAppend().trim();
         }
 
         String annJvmArgsPrepend = null;
-        if (forkAnnotation != null && !forkAnnotation.jvmArgsPrepend().equals(Fork.PARAM_NOT_SET)) {
+        if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsPrepend())) {
             annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
         }
 
@@ -365,7 +366,7 @@ public class Runner extends BaseRunner {
 
         int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
         int warmupForkCount = forkAnnotation != null ? forkAnnotation.warmups() : 0;
-        if( warmupForkCount>0) {
+        if (warmupForkCount > 0) {
             String[] warmupForkCheat = concat(commandString, new String[]{"-wi", "1", "-i", "0"});
             if (warmupForkCount == 1) {
                 outputHandler.verbosePrintln("Warmup forking using command: " + Arrays.toString(warmupForkCheat));

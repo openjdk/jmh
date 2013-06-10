@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.util.internal;
 
+import org.openjdk.jmh.util.AnnotationUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +80,18 @@ public class CollectionUtils {
                 map.put(key, value);
             } else if (!map.containsKey(key)) {
                 map.put(key, value);
+            }
+        }
+        return map;
+    }
+
+    public static <K> Map<K, String> conditionalPutAndCreateTreeMapIfAbsentAndQuote(Map<K, String> map, boolean cond, K key, String value) {
+        if (cond) {
+            if (map == null) {
+                map = new TreeMap<K, String>();
+                map.put(key, "\"" + value + "\"");
+            } else if (!map.containsKey(key)) {
+                map.put(key, "\"" + value + "\"");
             }
         }
         return map;
