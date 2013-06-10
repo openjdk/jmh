@@ -282,6 +282,14 @@ public class Runner extends BaseRunner {
         }
     }
 
+    private int decideWarmupForks(int optionWarmupForks, Fork forkAnnotation) {
+        if (optionWarmupForks == -1) {
+            return (forkAnnotation != null) ? forkAnnotation.warmups() : 0;
+        } else {
+            return optionWarmupForks;
+        }
+    }
+
     private void runBenchmarks(Set<BenchmarkRecord> benchmarks) {
         Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
         Set<BenchmarkRecord> forked = new TreeSet<BenchmarkRecord>();
@@ -365,7 +373,7 @@ public class Runner extends BaseRunner {
         String[] commandString = options.getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, host, port);
 
         int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
-        int warmupForkCount = forkAnnotation != null ? forkAnnotation.warmups() : 0;
+        int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
         if (warmupForkCount > 0) {
             String[] warmupForkCheat = concat(commandString, new String[]{"-wi", "1", "-i", "0"});
             if (warmupForkCount == 1) {

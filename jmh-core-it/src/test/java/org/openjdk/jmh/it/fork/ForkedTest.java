@@ -75,4 +75,9 @@ public class ForkedTest {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 1");
     }
 
+    @Test
+    public void invokeWF() {
+        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 1 -wf 2");
+    }
+
 }

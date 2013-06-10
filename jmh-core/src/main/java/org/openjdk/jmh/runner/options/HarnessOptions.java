@@ -64,6 +64,9 @@ public class HarnessOptions extends BaseOptions {
     @Option(name = "-f", aliases = {"--fork"}, metaVar = "{ INT }", usage = "Start each benchmark in new JVM, forking from the same JDK unless --jvm is set. Optional parameter specifies number of times harness should fork. Zero forks means \"no fork\", also \"false\" is accepted", handler = ForkOptionHandler.class)
     protected int fork = -1;
 
+    @Option(name = "-wf", aliases = {"--warmupfork"}, metaVar = "{ INT }", usage = "Number of warmup fork executions. (warmup fork execution results are ignored).")
+    protected int warmupFork = -1;
+
     @Option(name = "-o", aliases = {"--output"}, metaVar = "FILE", usage = "Redirect output to FILE")
     protected String output = null;
 
@@ -321,6 +324,15 @@ public class HarnessOptions extends BaseOptions {
      */
     public int getForkCount() {
         return fork;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    public int getWarmupForkCount() {
+        return warmupFork;
     }
 
     /**
