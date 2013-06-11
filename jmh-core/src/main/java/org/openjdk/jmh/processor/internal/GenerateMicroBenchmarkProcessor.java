@@ -723,12 +723,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationProlog(writer, 3, method, states);
 
-
-            // synchronize iterations prolog: first peeled iteration
-            invocationProlog(writer, 3, method, states, false);
-            writer.println(ident(3) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 3, method, states, false);
-
             // synchronize iterations prolog: announce ready
             writer.println(ident(3) + "global.announceWarmupReady();");
 
@@ -817,11 +811,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(2) + "if (" + loId + " <= siblingId && siblingId < " + hiId + ") { ");
 
             iterationProlog(writer, 3, method, states);
-
-            // synchronize iterations prolog: first peeled iteration
-            invocationProlog(writer, 3, method, states, false);
-            writer.println(ident(3) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 3, method, states, false);
 
             // synchronize iterations prolog: announce ready
             writer.println(ident(3) + "global.announceWarmupReady();");
@@ -932,11 +921,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(2) + "if (" + loId + " <= siblingId && siblingId < " + hiId + ") { ");
 
             iterationProlog(writer, 3, method, states);
-
-            // synchronize iterations prolog: first peeled iteration
-            invocationProlog(writer, 3, method, states, false);
-            writer.println(ident(3) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 3, method, states, false);
 
             // synchronize iterations prolog: announce ready
             writer.println(ident(3) + "global.announceWarmupReady();");
