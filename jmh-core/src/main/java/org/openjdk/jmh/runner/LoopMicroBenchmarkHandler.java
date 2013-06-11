@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.Loop;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
@@ -36,14 +37,11 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -77,7 +75,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
     LoopMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
-        this.shouldSynchIterations = executionParams.shouldSynchIterations();
+        this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
         this.shouldFailOnError = options.shouldFailOnError();
     }
 
@@ -199,16 +197,18 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 loop.preSetupForce();
                 loop.preTearDownForce();
 
-                try {
-                    loop.announceWarmupReady();
-                } catch (Exception e1) {
-                    // more threads than expected
-                }
+                if (shouldSynchIterations) {
+                    try {
+                        loop.announceWarmupReady();
+                    } catch (Exception e1) {
+                        // more threads than expected
+                    }
 
-                try {
-                    loop.announceWarmdownReady();
-                } catch (Exception e1) {
-                    // more threads than expected
+                    try {
+                        loop.announceWarmdownReady();
+                    } catch (Exception e1) {
+                        // more threads than expected
+                    }
                 }
 
                 throw new Exception(e); // wrapping Throwable

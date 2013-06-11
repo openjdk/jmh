@@ -70,11 +70,7 @@ public class MicroBenchmarkHandlers {
     }
 
     public static MicroBenchmarkHandler getInstance(OutputFormat outputHandler, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
-        if(microbenchmark.getMode() == Mode.SingleShotTime) {
-            return new ShotMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
-        } else {
-            return new LoopMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
-        }
+        return new LoopMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
     }
 
     /**
