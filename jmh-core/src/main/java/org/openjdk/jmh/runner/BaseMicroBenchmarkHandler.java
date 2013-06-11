@@ -67,7 +67,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, BaseOptions options, MicroBenchmarkParameters executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
-        this.executor = createExecutor(executionParams.getMaxThreads(), microbenchmark.getUsername());
+        this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getMaxThreads(), microbenchmark.getUsername());
         this.threadLocal = new ThreadLocal<InstanceProvider>() {
             @Override
             protected InstanceProvider initialValue() {
@@ -94,51 +94,69 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         /**
          * Use Executors.newCachedThreadPool
          */
-        CACHED_TPE,
+        CACHED_TPE {
+            @Override
+            ExecutorService createExecutor(int maxThreads, String prefix) {
+                return Executors.newCachedThreadPool(new HarnessThreadFactory(prefix));
+            }
+        },
 
         /**
          * Use Executors.newFixedThreadPool
          */
-        FIXED_TPE,
+        FIXED_TPE {
+            @Override
+            ExecutorService createExecutor(int maxThreads, String prefix) {
+                return Executors.newFixedThreadPool(maxThreads, new HarnessThreadFactory(prefix));
+            }
+        },
 
         /**
          * Use new ForkJoinPool (JDK 7+)
          */
-        FJP,
-
-        /**
-         * Use ForkJoinUtils.getDefaultFJPool (JDK 8+)
-         */
-        FJP_SINGLE_UTILS,
-    }
-
-    static ExecutorService createExecutor(int maxThreads, String prefix) {
-
-        // (Aleksey):
-        // requires some of the reflection magic to untie from JDK 7/8 compile-time dependencies
-
-        switch (EXECUTOR_TYPE) {
-            case CACHED_TPE:
-                return Executors.newCachedThreadPool(new HarnessThreadFactory(prefix));
-            case FIXED_TPE:
-                return Executors.newFixedThreadPool(maxThreads, new HarnessThreadFactory(prefix));
-            case FJP:
+        FJP {
+            @Override
+            ExecutorService createExecutor(int maxThreads, String prefix) {
                 try {
+                    // (Aleksey):
+                    // requires some of the reflection magic to untie from JDK 7 compile-time dependencies
                     Constructor<?> c = Class.forName("java.util.concurrent.ForkJoinPool").getConstructor(int.class);
                     return (ExecutorService) c.newInstance(maxThreads);
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
-            case FJP_SINGLE_UTILS:
+            }
+        },
+
+        /**
+         * Use ForkJoinPool.commonPool (JDK 8+)
+         */
+        FJP_COMMON {
+            @Override
+            ExecutorService createExecutor(int maxThreads, String prefix) {
                 try {
-                    Method m = Class.forName("java.util.concurrent.ForkJoinUtils").getMethod("defaultFJPool");
+                    // (Aleksey):
+                    // requires some of the reflection magic to untie from JDK 8 compile-time dependencies
+                    Method m = Class.forName("java.util.concurrent.ForkJoinPool").getMethod("commonPool");
                     return (ExecutorService) m.invoke(null);
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
-        }
+            }
 
-        throw new IllegalStateException("Can not instantiate executor service");
+            @Override
+            boolean shutdownAllowed() {
+                // this is a system-wide executor, don't shutdown
+                return false;
+            }
+
+        };
+
+        abstract ExecutorService createExecutor(int maxThreads, String prefix);
+
+        boolean shutdownAllowed() {
+            return true;
+        }
     }
 
     /**
@@ -149,15 +167,9 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
      * @param executor service to shutdown
      */
     static void shutdownExecutor(ExecutorService executor) {
-        if (EXECUTOR_TYPE == ExecutorType.FJP_SINGLE_UTILS) {
-            // this is a system-wide executor, don't shutdown
+        if (!EXECUTOR_TYPE.shutdownAllowed() || (executor == null)) {
             return;
         }
-
-        if (executor == null) {
-            return;
-        }
-
         while (true) {
             executor.shutdown();
 
