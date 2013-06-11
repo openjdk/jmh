@@ -26,6 +26,7 @@ package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.logic.Global;
 import org.openjdk.jmh.logic.Loop;
 import org.openjdk.jmh.logic.results.AverageTimePerOp;
 import org.openjdk.jmh.logic.results.OpsPerTimeUnit;
@@ -431,6 +432,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + Generated.class.getName() + ';');
         writer.println();
         writer.println("import " + Loop.class.getName() + ';');
+        writer.println("import " + Global.class.getName() + ';');
         writer.println("import " + BlackHole.class.getName() + ';');
         writer.println("import " + Result.class.getName() + ';');
         writer.println("import " + OpsPerTimeUnit.class.getName() + ';');
@@ -728,10 +730,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, false);
 
             // synchronize iterations prolog: announce ready
-            writer.println(ident(3) + "loop.announceWarmupReady();");
+            writer.println(ident(3) + "global.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
+            writer.println(ident(3) + "while (global.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -755,10 +757,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // synchronize iterations epilog: announce ready
-            writer.println(ident(3) + "loop.announceWarmdownReady();");
+            writer.println(ident(3) + "global.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (global.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -822,10 +824,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, false);
 
             // synchronize iterations prolog: announce ready
-            writer.println(ident(3) + "loop.announceWarmupReady();");
+            writer.println(ident(3) + "global.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
+            writer.println(ident(3) + "while (global.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -849,10 +851,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // synchronize iterations epilog: announce ready
-            writer.println(ident(3) + "loop.announceWarmdownReady();");
+            writer.println(ident(3) + "global.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (global.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -901,6 +903,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println(ident(2) + "int groupId = threadId / groupThreadCount;");
         writer.println(ident(2) + "int siblingId = threadId % groupThreadCount;");
         writer.println();
+        writer.println(ident(2) + "Global global = loop.global;");
+        writer.println();
     }
 
     private String prefix(String argList) {
@@ -935,10 +939,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, false);
 
             // synchronize iterations prolog: announce ready
-            writer.println(ident(3) + "loop.announceWarmupReady();");
+            writer.println(ident(3) + "global.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
+            writer.println(ident(3) + "while (global.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -961,10 +965,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // synchronize iterations epilog: announce ready
-            writer.println(ident(3) + "loop.announceWarmdownReady();");
+            writer.println(ident(3) + "global.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (global.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');

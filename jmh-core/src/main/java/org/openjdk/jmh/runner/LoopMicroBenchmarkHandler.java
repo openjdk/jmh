@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.logic.Global;
 import org.openjdk.jmh.logic.Loop;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
@@ -88,11 +89,13 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         CountDownLatch preSetupBarrier = new CountDownLatch(numThreads);
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
+        Global global = new Global(numThreads, shouldSynchIterations);
+
         IterationData iterationResults = new IterationData(microbenchmark, numThreads, runtime);
 
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, new Loop(numThreads, runtime, preSetupBarrier, preTearDownBarrier, last, shouldSynchIterations, timeUnit));
+            runners[i] = new BenchmarkTask(threadLocal, new Loop(global, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit));
         }
 
         // submit tasks to threadpool
@@ -199,13 +202,13 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
                 if (shouldSynchIterations) {
                     try {
-                        loop.announceWarmupReady();
+                        loop.global.announceWarmupReady();
                     } catch (Exception e1) {
                         // more threads than expected
                     }
 
                     try {
-                        loop.announceWarmdownReady();
+                        loop.global.announceWarmdownReady();
                     } catch (Exception e1) {
                         // more threads than expected
                     }
