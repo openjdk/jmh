@@ -31,17 +31,17 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Field;
 
 /*
-    See the rationale for L1..L4 classes below.
+    See the rationale for BlackHoleL1..BlackHoleL4 classes below.
  */
 
-class L1 {
+class BlackholeL1 {
     public int p01, p02, p03, p04, p05, p06, p07, p08;
     public int p11, p12, p13, p14, p15, p16, p17, p18;
     public int p21, p22, p23, p24, p25, p26, p27, p28;
     public int p31, p32, p33, p34, p35, p36, p37, p38;
 }
 
-class L2 extends L1 {
+class BlackHoleL2 extends BlackholeL1 {
     public volatile byte b1 = 1, b2 = 2;
     public volatile boolean bool1 = false, bool2 = true;
     public volatile char c1 = 'A', c2 = 'B';
@@ -52,19 +52,19 @@ class L2 extends L1 {
     public volatile double d1 = 1.0d, d2 = 2.0d;
     public volatile Object obj1 = new Object();
     public volatile Object[] objs1 = new Object[]{new Object()};
-    public volatile L2 nullBait = null;
+    public volatile BlackHoleL2 nullBait = null;
     public long tlr = System.nanoTime();
     public long tlrMask = 1;
 }
 
-class L3 extends L2 {
+class BlackHoleL3 extends BlackHoleL2 {
     public int e01, e02, e03, e04, e05, e06, e07, e08;
     public int e11, e12, e13, e14, e15, e16, e17, e18;
     public int e21, e22, e23, e24, e25, e26, e27, e28;
     public int e31, e32, e33, e34, e35, e36, e37, e38;
 }
 
-class L4 extends L3 {
+class BlackHoleL4 extends BlackHoleL3 {
     public int marker;
 }
 
@@ -78,7 +78,7 @@ class L4 extends L3 {
  * @author aleksey.shipilev@oracle.com
  */
 @State(Scope.Thread) // Blackholes are always acting like a thread-local state
-public class BlackHole extends L4 {
+public class BlackHole extends BlackHoleL4 {
 
     /**
      * IMPLEMENTATION NOTES:
@@ -188,7 +188,7 @@ public class BlackHole extends L4 {
 
     static long getOffset(String fieldName) {
         try {
-            Field f = L4.class.getField(fieldName);
+            Field f = BlackHoleL4.class.getField(fieldName);
             return U.objectFieldOffset(f);
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
