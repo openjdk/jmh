@@ -202,38 +202,6 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
     }
 
-    @Override
-    public void traceStartIteration() {
-        if (verbose) {
-            out.println("# Iteration   started at " + new Date() + " in " + Thread.currentThread());
-            out.flush();
-        }
-    }
-
-    @Override
-    public void traceEndIteration() {
-        if (verbose) {
-            out.println("# Iteration completed at " + new Date() + " in " + Thread.currentThread());
-            out.flush();
-        }
-    }
-
-    @Override
-    public void traceHarnessMethodInvoked(String methodName) {
-        if (verbose) {
-            out.println("# Invoking " + methodName + " in " + Thread.currentThread());
-            out.flush();
-        }
-    }
-
-    @Override
-    public void traceHarnessMethodReturned(String methodName) {
-        if (verbose) {
-            out.println("# Returned from " + methodName + " in " + Thread.currentThread());
-            out.flush();
-        }
-    }
-
     protected static String getThreadsString(int t) {
         if (t > 1) {
             return "threads";

@@ -135,30 +135,6 @@ public interface OutputFormat {
 
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 
-    /**
-     * Format for tracing iteration start time.
-     */
-    public void traceStartIteration();
-
-    /**
-     * Format for tracing iteration end time.
-     */
-    public void traceEndIteration();
-
-    /**
-     * Format for harness method invocation diagnostic output.
-     *
-     * @param methodName method name
-     */
-    public void traceHarnessMethodInvoked(String methodName);
-
-    /**
-     * Format for harness method return diagnostic output.
-     *
-     * @param methodName method name
-     */
-    public void traceHarnessMethodReturned(String methodName);
-
     void exception(Throwable ex);
 
     /* ------------- RAW OUTPUT METHODS ------------------- */

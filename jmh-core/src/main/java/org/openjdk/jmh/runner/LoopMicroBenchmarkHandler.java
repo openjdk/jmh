@@ -64,7 +64,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
     /* output options */
     private final boolean shouldFailOnError;
-    private final boolean shouldTraceBenchmarkStartStop;
 
     /**
      * Constructor
@@ -80,7 +79,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         this.method = method;
         this.shouldSynchIterations = executionParams.shouldSynchIterations();
         this.shouldFailOnError = options.shouldFailOnError();
-        this.shouldTraceBenchmarkStartStop =  options.shouldTraceBenchmarkStartStop();
     }
 
     /**
@@ -229,10 +227,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         private Result invokeBenchmark(Object instance, Loop loop) throws Throwable {
             Result result;
-            if (shouldTraceBenchmarkStartStop) {
-                format.traceStartIteration();
-            }
-
             if (method != null) {
                 try {
                     result = (Result) method.invoke(instance, loop);
@@ -244,11 +238,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             } else {
                 throw new IllegalStateException("Unable to find method to run");
             }
-
-            if (shouldTraceBenchmarkStartStop) {
-                format.traceEndIteration();
-            }
-
             return result;
         }
 

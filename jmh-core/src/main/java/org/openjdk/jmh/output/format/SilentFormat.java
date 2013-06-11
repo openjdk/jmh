@@ -79,14 +79,6 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void traceStartIteration() {
-    }
-
-    @Override
-    public void traceEndIteration() {
-    }
-
-    @Override
     public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
 
     }
@@ -100,12 +92,5 @@ public class SilentFormat extends AbstractOutputFormat {
 
     }
 
-    @Override
-    public void traceHarnessMethodInvoked(String methodName) {
-    }
-
-    @Override
-    public void traceHarnessMethodReturned(String methodName) {
-    }
 
 }

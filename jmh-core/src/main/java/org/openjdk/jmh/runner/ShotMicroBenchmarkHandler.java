@@ -56,7 +56,6 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
     /* output options */
     private final boolean shouldFailOnError;
-    private final boolean shouldTraceBenchmarkStartStop;
 
     /**
      * Constructor
@@ -71,7 +70,6 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldFailOnError = options.shouldFailOnError();
-        this.shouldTraceBenchmarkStartStop =  options.shouldTraceBenchmarkStartStop();
     }
 
     /**
@@ -202,9 +200,6 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
          */
         private Result invokeBenchmark(Object instance) throws Throwable {
             Result result;
-            if (shouldTraceBenchmarkStartStop) {
-                format.traceStartIteration();
-            }
 
             if (method != null) {
                 try {
@@ -216,10 +211,6 @@ public class ShotMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 }
             } else {
                 throw new IllegalStateException("Unable to find method to run");
-            }
-
-            if (shouldTraceBenchmarkStartStop) {
-                format.traceEndIteration();
             }
 
             return result;

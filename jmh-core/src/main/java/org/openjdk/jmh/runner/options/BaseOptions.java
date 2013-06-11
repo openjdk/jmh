@@ -464,24 +464,6 @@ public class BaseOptions {
     }
 
     /**
-     * returns true if harness should trace benchmark start/stop
-     *
-     * @return the value
-     */
-    public boolean shouldTraceBenchmarkStartStop() {
-        return traceLevel > 0;
-    }
-
-    /**
-     * return true if harness should trace Setup/tearDown
-     *
-     * @return the value
-     */
-    public boolean shouldTraceSetupTeardown() {
-        return traceLevel > 1;
-    }
-
-    /**
      * Should fail the harness on test error?
      * @return the value
      */

@@ -101,15 +101,6 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void traceStartIteration() {
-        // don't print anything
-    }
-
-    @Override
-    public void traceEndIteration() {
-    }
-
-    @Override
     public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime) {
         // don't print anything
     }
@@ -145,13 +136,4 @@ public class CsvFormat extends AbstractOutputFormat {
     public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result) {
 
     }
-
-    @Override
-    public void traceHarnessMethodInvoked(String methodName) {
-    }
-
-    @Override
-    public void traceHarnessMethodReturned(String methodName) {
-    }
-
 }
