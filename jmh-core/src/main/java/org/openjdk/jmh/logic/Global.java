@@ -57,13 +57,8 @@ class GlobalL2 extends GlobalL1 {
         this.warmupVisited = new AtomicInteger();
         this.warmdownVisited = new AtomicInteger();
 
-        if (!syncIterations) {
-            warmupShouldWait = false;
-            warmdownShouldWait = false;
-        } else {
-            warmupShouldWait = true;
-            warmdownShouldWait = true;
-        }
+        warmupShouldWait = syncIterations;
+        warmdownShouldWait = syncIterations;
     }
 
     public void announceWarmupReady() {
