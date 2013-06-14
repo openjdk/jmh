@@ -25,31 +25,23 @@
 package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.MicroBenchmark;
-import org.openjdk.jmh.logic.Loop;
-import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.runner.MicroBenchmarkList;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic.Kind;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /** @author staffan.friberg@oracle.com */
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class MicroBenchmarkProcessor extends AbstractProcessor {
+
+    public static final Set<String> COLLECTED_MICROBENCHMARKS = new HashSet<String>();
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -70,8 +62,10 @@ public class MicroBenchmarkProcessor extends AbstractProcessor {
                     for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
                         processingEnv.getMessager().printMessage(Kind.MANDATORY_WARNING,
                                 "The " + MicroBenchmark.class.getSimpleName()
-                                        + " is detected. This is not the supported API anymore."
+                                        + " is detected. This is not the supported API anymore. \n"
                                         + element.getEnclosingElement() + '.' + element.toString());
+                        TypeElement klass = (TypeElement) element.getEnclosingElement();
+                        COLLECTED_MICROBENCHMARKS.add(klass.getQualifiedName().toString() + "." + element.getSimpleName().toString());
                     }
                 }
             }

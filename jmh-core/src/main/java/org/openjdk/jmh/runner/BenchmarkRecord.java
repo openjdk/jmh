@@ -71,7 +71,11 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     }
 
     public String generatedTarget(Mode type) {
-        return generatedName + "_" + type;
+        if (mode != Mode.Legacy) {
+            return generatedName + "_" + type;
+        } else {
+            return generatedName;
+        }
     }
 
     public String generatedTarget() {

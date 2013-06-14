@@ -78,22 +78,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return Collections.singleton(GenerateMicroBenchmark.class.getName());
     }
 
-    public static class BenchmarkInfo {
-        public final String userName;
-        public final String generatedName;
-        public final String generatedPackageName;
-        public final String generatedClassName;
-        public final Map<String, MethodGroup> methodGroups;
-
-        public BenchmarkInfo(String userName, String generatedPackageName, String generatedClassName, Map<String, MethodGroup> methods) {
-            this.userName = userName;
-            this.generatedPackageName = generatedPackageName;
-            this.generatedClassName = generatedClassName;
-            this.generatedName = generatedPackageName + "." + generatedClassName;
-            this.methodGroups = methods;
-        }
-    }
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
@@ -124,6 +108,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                             }
                         }
                     }
+
+                    // hack: collect @Microbenchmarks as well
+                    for (String bench : MicroBenchmarkProcessor.COLLECTED_MICROBENCHMARKS) {
+                        writer.println(bench + ", " + bench + ", " + Mode.Legacy);
+                    }
+
                     writer.close();
                 } catch (IOException ex) {
                     processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing MicroBenchmark list " + ex);
@@ -513,6 +503,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * @param methodGroup
      */
     private void generateMethod(Mode benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
+        if (benchmarkKind == Mode.Legacy) return;
+
         writer.println();
         for (String ann : generateMethodAnnotations(benchmarkKind, methodGroup)) {
             writer.println("    " + ann);

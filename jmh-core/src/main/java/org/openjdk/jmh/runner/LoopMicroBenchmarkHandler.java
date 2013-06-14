@@ -64,6 +64,8 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
     /* output options */
     private final boolean shouldFailOnError;
 
+    private final Mode mode;
+
     /**
      * Constructor
      *
@@ -78,6 +80,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         this.method = method;
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
         this.shouldFailOnError = options.shouldFailOnError();
+        this.mode = microbenchmark.getMode();
     }
 
     /**
@@ -104,22 +107,24 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             resultList.add(executor.submit(runner));
         }
 
-        // wait for all threads to start executing
-        try {
-            preSetupBarrier.await();
-        } catch (InterruptedException ex) {
-            log(ex);
-        }
-        startProfilers();
+        // legacy mode has no knowledge about setup/teardown barriers
+        if (mode != Mode.Legacy) {
+            // wait for all threads to start executing
+            try {
+                preSetupBarrier.await();
+            } catch (InterruptedException ex) {
+                log(ex);
+            }
+            startProfilers();
 
-
-        // wait for all threads to stop executing
-        try {
-            preTearDownBarrier.await();
-        } catch (InterruptedException ex) {
-            log(ex);
+            // wait for all threads to stop executing
+            try {
+                preTearDownBarrier.await();
+            } catch (InterruptedException ex) {
+                log(ex);
+            }
+            stopProfilers(iterationResults);
         }
-        stopProfilers(iterationResults);
 
         // wait for the result, continuously polling the worker threads.
         //

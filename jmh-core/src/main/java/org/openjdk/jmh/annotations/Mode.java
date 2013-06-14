@@ -65,6 +65,12 @@ public enum Mode {
      */
     All("all", "TEST MODE"),
 
+    /**
+     * Legacy mode: don't use directly.
+     * This is used notably to support legacy {@link MicroBenchmark} annotation.
+     */
+    Legacy("legacy", "Legacy mode")
+
     ;
     private final String shortLabel;
     private final String longLabel;
