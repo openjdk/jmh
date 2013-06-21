@@ -33,6 +33,7 @@ import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
+import org.openjdk.jmh.util.internal.CollectionUtils;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -192,9 +193,9 @@ public class HarnessOptions extends BaseOptions {
         }
 
         if (getJvmArgs() != null) { // use supplied jvm args if given in cmd line
-            command.addAll(Arrays.asList(getJvmArgs().split(" ")));
+            command.addAll(Arrays.asList(getJvmArgs().split("[ ]+")));
         } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
-            command.addAll(Arrays.asList(annJvmArgs.split(" ")));
+            command.addAll(Arrays.asList(annJvmArgs.split("[ ]+")));
         } else {
             // else use same jvm args given to this runner
             RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();

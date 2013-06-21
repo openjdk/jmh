@@ -137,9 +137,7 @@ public class BaseOptions {
         for (Field f : fields) {
             String opImage = fieldToCommandLineImage(f);
             if (opImage != null && !opImage.isEmpty()) {
-                for (String s : opImage.split(" ")) {
-                    sb.add(s);
-                }
+                Collections.addAll(sb, opImage.split("[ ]+"));
             }
         }
         return sb.toArray(new String[sb.size()]);
