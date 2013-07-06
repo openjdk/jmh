@@ -706,7 +706,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
 
             // determine the sibling bounds
-            int threads = methodGroup.getMethodThreads(method);
+            int threads = Math.max(1, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -795,7 +795,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
 
             // determine the sibling bounds
-            int threads = methodGroup.getMethodThreads(method);
+            int threads = Math.max(1, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -880,7 +880,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println(ident(2) + "    threadId_inited = true;");
         writer.println(ident(2) + "}");
 
-        writer.println(ident(2) + "int groupThreadCount = " + methodGroup.getTotalThreadCount() + ";");
+        writer.println(ident(2) + "int groupThreadCount = " + Math.max(1, methodGroup.getTotalThreadCount()) + ";");
         writer.println(ident(2) + "int groupId = threadId / groupThreadCount;");
         writer.println(ident(2) + "int siblingId = threadId % groupThreadCount;");
         writer.println();
@@ -905,7 +905,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         int threadTally = 0;
         for (Element method : methodGroup.methods()) {
             // determine the sibling bounds
-            int threads = methodGroup.getMethodThreads(method);
+            int threads = Math.max(1, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -1010,7 +1010,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
 
             // determine the sibling bounds
-            int threads = methodGroup.getMethodThreads(method);
+            int threads = Math.max(1, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
