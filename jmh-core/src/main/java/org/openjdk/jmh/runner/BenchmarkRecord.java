@@ -70,6 +70,26 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return userName.compareTo(o.userName);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BenchmarkRecord that = (BenchmarkRecord) o;
+
+        if (mode != that.mode) return false;
+        if (!userName.equals(that.userName)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userName.hashCode();
+        result = 31 * result + mode.hashCode();
+        return result;
+    }
+
     public String generatedTarget(Mode type) {
         if (mode != Mode.Legacy) {
             return generatedName + "_" + type;

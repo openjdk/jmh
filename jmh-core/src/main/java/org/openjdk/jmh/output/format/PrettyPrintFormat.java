@@ -31,9 +31,9 @@ import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.Statistics;
+import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         out.println("# Running: " + name.getUsername());
     }
 
-    private final Multimap<BenchmarkRecord, RunResult> benchmarkResults = new HashMultimap<BenchmarkRecord, RunResult>();
+    private final Multimap<BenchmarkRecord, RunResult> benchmarkResults = new TreeMultimap<BenchmarkRecord, RunResult>();
 
     @Override
     public void endBenchmark(BenchmarkRecord name, RunResult result) {
@@ -125,7 +125,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         for (BenchmarkRecord key : benchmarkResults.keys()) {
             Collection<RunResult> forkedResults = benchmarkResults.get(key);
             if (forkedResults.size() > 1) {
-                out.println(key + ", aggregate over forked runs:");
+                out.println("\"" + key.getUsername() + "\", aggregate over forked runs:");
 
                 List<Result> iResults = new ArrayList<Result>();
                 for (RunResult res : forkedResults) {
