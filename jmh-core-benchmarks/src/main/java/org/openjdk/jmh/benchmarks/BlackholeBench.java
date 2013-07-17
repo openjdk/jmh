@@ -65,6 +65,9 @@ public class BlackholeBench {
     public Object o;
     public Object[] os;
 
+    public boolean trueBoolean = true;
+    public boolean falseBoolean = false;
+
     @GenerateMicroBenchmark
     public void baseline() {
         // do nothing
@@ -78,6 +81,26 @@ public class BlackholeBench {
     @GenerateMicroBenchmark
     public boolean implicit_testBoolean() {
         return bool;
+    }
+
+    @GenerateMicroBenchmark
+    public boolean implicit_testBoolean_true() {
+        return true;
+    }
+
+    @GenerateMicroBenchmark
+    public boolean implicit_testBoolean_false() {
+        return false;
+    }
+
+    @GenerateMicroBenchmark
+    public boolean implicit_testBoolean_trueF() {
+        return trueBoolean;
+    }
+
+    @GenerateMicroBenchmark
+    public boolean implicit_testBoolean_falseF() {
+        return falseBoolean;
     }
 
     @GenerateMicroBenchmark
