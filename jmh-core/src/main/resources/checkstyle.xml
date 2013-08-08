@@ -199,7 +199,7 @@
 
     </module>
 
-    <module name="StrictDuplicateCode"/>
+    <!--<module name="StrictDuplicateCode"/>-->
     <module name="FileTabCharacter" />
     <module name="NewlineAtEndOfFile"/>
     <module name="SuppressionCommentFilter"/>
