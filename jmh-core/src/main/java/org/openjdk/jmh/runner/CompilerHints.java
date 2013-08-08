@@ -33,7 +33,7 @@ import java.util.TreeSet;
 public class CompilerHints extends AbstractResourceReader {
 
     public static final String LIST = "/META-INF/CompilerHints";
-    public static CompilerHints defaultList = null;
+    private static volatile CompilerHints defaultList;
 
     private final Set<String> hints;
 

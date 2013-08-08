@@ -53,34 +53,6 @@ public class ClassUtils {
     }
 
     /**
-     * Helper method for adding a URL to the given URLClassLoader. Uses reflection and Method.setAccessible.
-     *
-     * @param classLoader URLClassLoader to add a URL to
-     * @param urls        URLs to add
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     */
-    private static void addURLsToClassLoader(URLClassLoader classLoader, URL... urls) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        // addURL is a protected method, but we can use reflection to call it
-        Class<?>[] paraTypes = new Class[1];
-        paraTypes[0] = URL.class;
-        Method method;
-
-        method = URLClassLoader.class.getDeclaredMethod("addURL", paraTypes);
-
-        // change access to true, otherwise, it will throw exception
-        method.setAccessible(true);
-
-        for (URL url : urls) {
-            method.invoke(classLoader, url);
-        }
-
-    }
-
-    /**
      * Enumerates all methods in hierarchy. Note that is different from both Class.getDeclaredMethods() and
      * Class.getMethods().
      *

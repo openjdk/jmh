@@ -265,22 +265,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return String.valueOf(result);
     }
 
-    private String packageNameByType(Mode bt) {
-        switch (bt) {
-            case Throughput:
-                return "throughput";
-            case AverageTime:
-                return "avgtime";
-            case SampleTime:
-                return "sampletime";
-            case SingleShotTime:
-                return "oneshot";
-            default:
-                processingEnv.getMessager().printMessage(Kind.ERROR, "Unknown type of method to process - " + bt);
-                throw new AssertionError("Shouldn't be here");
-        }
-    }
-
     /**
      * Create and generate Java code for a class and it's methods
      *
@@ -606,20 +590,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         map = measurementToMap(map, method.getEnclosingElement().getAnnotation(Measurement.class));
         if (map != null && !map.isEmpty()) {
             return "@" + Measurement.class.getSimpleName() + "(" + annotationMapToString(map) + ")";
-        }
-        return null;
-    }
-
-    private static String generateThreadsAnnotation(Element method, Mode kind) {
-        if (kind != Mode.SingleShotTime) {
-            Threads tAnnotation = method.getAnnotation(Threads.class);
-            if (tAnnotation != null && tAnnotation.value() >= 0) {
-                return "@" + Threads.class.getSimpleName() + "(" + tAnnotation.value() + ")";
-            }
-            tAnnotation = method.getEnclosingElement().getAnnotation(Threads.class);
-            if (tAnnotation != null && tAnnotation.value() >= 0) {
-                return "@" + Threads.class.getSimpleName() + "(" + tAnnotation.value() + ")";
-            }
         }
         return null;
     }

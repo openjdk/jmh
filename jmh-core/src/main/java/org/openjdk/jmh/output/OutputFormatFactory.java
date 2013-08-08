@@ -47,9 +47,7 @@ public class OutputFormatFactory {
         // force verbose if non-default trace level is requested
         if (traceLevel > 0) { verbose = true; }
 
-        if (format == null) {
-            throw new AssertionError("Format: " + format + " is null");
-        }
+        assert (format != null) : "format is not null";
 
         switch (format) {
             case Pretty:
