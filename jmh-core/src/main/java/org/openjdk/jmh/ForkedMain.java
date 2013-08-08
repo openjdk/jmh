@@ -54,8 +54,6 @@ public class ForkedMain {
                 runner.run();
             } catch (CmdLineException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
-            } catch (RunnerException e) {
-                throw new IllegalArgumentException(e.getMessage());
             }
         }
     }

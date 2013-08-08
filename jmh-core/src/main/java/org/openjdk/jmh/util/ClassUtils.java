@@ -108,10 +108,10 @@ public class ClassUtils {
             maxLen = Math.max(maxLen, s.length());
         }
 
-        String[] prefix = null;
+        String[] prefix = new String[0];
         for (String s : src) {
             String[] names = s.split("\\.");
-            if (prefix == null) {
+            if (prefix.length == 0) {
                 prefix = names;
                 continue;
             }

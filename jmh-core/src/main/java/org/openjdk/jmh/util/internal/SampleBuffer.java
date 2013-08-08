@@ -35,8 +35,8 @@ import java.util.Arrays;
 public class SampleBuffer implements Serializable {
 
     private final long[] samples;
+    private final int size;
     private int index;
-    private int size;
 
     private boolean full;
 

@@ -108,7 +108,7 @@ public abstract class BaseRunner {
     /**
      * Run "iterations" iterations for a micro benchmark with numThreads threads
      */
-    List<IterationData> runMicroBenchmark(MicroBenchmarkHandler handler, int startIterNum, ThreadIterationParams tip, boolean showDetailedResults, boolean showSubStatistic) throws Exception {
+    List<IterationData> runMicroBenchmark(MicroBenchmarkHandler handler, int startIterNum, ThreadIterationParams tip, boolean showDetailedResults, boolean showSubStatistic) {
         List<IterationData> results = new ArrayList<IterationData>();
 
         for (int i = 1; i <= tip.getCount(); i++) {

@@ -153,7 +153,7 @@ public class Runner extends BaseRunner {
         if (options.getRegexps().isEmpty()) {
             outputHandler.println("No regexp to match against benchmarks was given. Use -h for help or \".*\" for every benchmark.");
             outputHandler.flush();
-            benchmarks = Collections.<BenchmarkRecord>emptySet();
+            benchmarks = Collections.emptySet();
         } else {
             benchmarks = list.find(outputHandler, options.getRegexps(), options.getExcludes());
         }

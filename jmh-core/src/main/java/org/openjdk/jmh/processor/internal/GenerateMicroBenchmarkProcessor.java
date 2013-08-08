@@ -460,7 +460,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
 
     private TimeUnit findTimeUnit(MethodGroup methodGroup) {
-        OutputTimeUnit ann = methodGroup.methods().iterator().next().getEnclosingElement().getAnnotation(OutputTimeUnit.class);;
+        OutputTimeUnit ann = methodGroup.methods().iterator().next().getEnclosingElement().getAnnotation(OutputTimeUnit.class);
         for (Element method : methodGroup.methods()) {
             ann = guardedSet(ann, method.getAnnotation(OutputTimeUnit.class));
         }
@@ -490,7 +490,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         if (benchmarkKind == Mode.Legacy) return;
 
         writer.println();
-        for (String ann : generateMethodAnnotations(benchmarkKind, methodGroup)) {
+        for (String ann : generateMethodAnnotations(methodGroup)) {
             writer.println("    " + ann);
         }
         final TimeUnit timeUnit = findTimeUnit(methodGroup);
@@ -567,7 +567,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return map;
     }
 
-    private static String generateWarmupAnnotation(Element method, Mode kind) {
+    private static String generateWarmupAnnotation(Element method) {
         Map<String, String> map = warmupToMap(null, method.getAnnotation(Warmup.class));
         map = warmupToMap(map, method.getEnclosingElement().getAnnotation(Warmup.class));
         if (map != null && !map.isEmpty()) {
@@ -585,7 +585,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return map;
     }
 
-    private static String generateMeasurementAnnotation(Element method, Mode kind) {
+    private static String generateMeasurementAnnotation(Element method) {
         Map<String, String> map = measurementToMap(null, method.getAnnotation(Measurement.class));
         map = measurementToMap(map, method.getEnclosingElement().getAnnotation(Measurement.class));
         if (map != null && !map.isEmpty()) {
@@ -617,7 +617,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return map;
     }
 
-    private static String generateForkAnnotation(Element method, Mode kind) {
+    private static String generateForkAnnotation(Element method) {
         Fork forkAnnotation = method.getAnnotation(Fork.class);
         Fork upperForkAnnotation = method.getEnclosingElement().getAnnotation(Fork.class);
         if (forkAnnotation != null || upperForkAnnotation != null) {
@@ -631,7 +631,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return null;
     }
 
-    private List<String> generateMethodAnnotations(Mode kind, MethodGroup methodGroup) {
+    private List<String> generateMethodAnnotations(MethodGroup methodGroup) {
         int totalThreads = 0;
         String warmupAnn = null;
         String measurementAnn = null;
@@ -639,9 +639,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         for (Element method : methodGroup.methods()) {
             totalThreads += getThreads(method);
-            warmupAnn = guardedSet(warmupAnn, generateWarmupAnnotation(method, kind));
-            measurementAnn = guardedSet(measurementAnn, generateMeasurementAnnotation(method, kind));
-            forkAnn = guardedSet(forkAnn, generateForkAnnotation(method, kind));
+            warmupAnn = guardedSet(warmupAnn, generateWarmupAnnotation(method));
+            measurementAnn = guardedSet(measurementAnn, generateMeasurementAnnotation(method));
+            forkAnn = guardedSet(forkAnn, generateForkAnnotation(method));
         }
 
         List<String> annotations = new ArrayList<String>();

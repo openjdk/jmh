@@ -37,8 +37,8 @@ import java.util.Set;
 public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
     private final Set<MethodInvocation> methods;
+    private final EnumSet<Mode> modes;
     private boolean strictFP;
-    private EnumSet<Mode> modes;
 
     MethodGroup(String name) {
         this.name = name;

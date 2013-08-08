@@ -42,7 +42,7 @@ public class ForkedRunner extends BaseRunner {
         this.outputHandler = null;
     }
 
-    public void run() throws RunnerException  {
+    public void run() {
         if (outputHandler == null) {
             // override output handler
             outputHandler = OutputFormatFactory.createBinaryHook(options.getHostName(), options.getHostPort());

@@ -85,7 +85,7 @@ public @interface CompilerControl {
          */
         COMPILE_ONLY("compileonly"),;
 
-        private String command;
+        private final String command;
 
         Mode(String command) {
             this.command = command;

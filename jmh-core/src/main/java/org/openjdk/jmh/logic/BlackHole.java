@@ -139,7 +139,7 @@ public class BlackHole extends BlackHoleL4 {
      * to evade that effect.
      */
 
-    private static Unsafe U;
+    private static final Unsafe U;
 
     static {
         try {

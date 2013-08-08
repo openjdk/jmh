@@ -46,7 +46,7 @@ import java.util.Set;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class CompilerControlProcessor extends AbstractProcessor {
 
-    private List<String> lines = new ArrayList<String>();
+    private final List<String> lines = new ArrayList<String>();
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {

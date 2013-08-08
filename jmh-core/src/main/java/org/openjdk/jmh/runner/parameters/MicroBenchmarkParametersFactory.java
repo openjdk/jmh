@@ -270,10 +270,10 @@ public class MicroBenchmarkParametersFactory {
             assert threads > 0;
             assert iterations >= 0;
             if (iterations == 0) {
-                return Collections.<Integer>emptyList();
+                return Collections.emptyList();
             }
             if (iterations == 1) {
-                return Collections.<Integer>singletonList(threads);
+                return Collections.singletonList(threads);
             }
             List<Integer> result = new ArrayList<Integer>(iterations);
             if (iterations > threads) {
@@ -328,7 +328,7 @@ public class MicroBenchmarkParametersFactory {
 
         @Override
         public List<Integer> getThreadCounts() {
-            return Collections.<Integer>nCopies(getIteration().getCount(), threads);
+            return Collections.nCopies(getIteration().getCount(), threads);
         }
 
         @Override
@@ -343,7 +343,7 @@ public class MicroBenchmarkParametersFactory {
 
         @Override
         public List<ThreadIterationParams> getThreadIterationSequence() {
-            return Collections.<ThreadIterationParams>singletonList(getIteration().addThreads(threads));
+            return Collections.singletonList(getIteration().addThreads(threads));
         }
 
         @Override
@@ -359,7 +359,7 @@ public class MicroBenchmarkParametersFactory {
 
     private static List<ThreadIterationParams> compressRawList(List<Integer> rawThreadCount, TimeValue timeValue) {
         if (rawThreadCount == null || rawThreadCount.isEmpty()) {
-            return Collections.<ThreadIterationParams>emptyList();
+            return Collections.emptyList();
         }
         List<ThreadIterationParams> res = new ArrayList<ThreadIterationParams>();
         int prevThreads = -1;
