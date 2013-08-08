@@ -145,17 +145,17 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
             }
 
             @Override
-            boolean shutdownAllowed() {
+            boolean shutdownForbidden() {
                 // this is a system-wide executor, don't shutdown
-                return false;
+                return true;
             }
 
         };
 
         abstract ExecutorService createExecutor(int maxThreads, String prefix);
 
-        boolean shutdownAllowed() {
-            return true;
+        boolean shutdownForbidden() {
+            return false;
         }
     }
 
@@ -167,7 +167,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
      * @param executor service to shutdown
      */
     static void shutdownExecutor(ExecutorService executor) {
-        if (!EXECUTOR_TYPE.shutdownAllowed() || (executor == null)) {
+        if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
             return;
         }
         while (true) {
