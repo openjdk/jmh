@@ -43,19 +43,19 @@ import java.lang.annotation.Target;
 public @interface Fork {
 
     /** specifies number of times harness should fork, zero means "no fork" */
-    public int value() default 1;
+    int value() default 1;
 
     /** enforce strict JVM args, replaces any implicit jvm args */
-    public String jvmArgs() default AnnotationUtils.PARAM_NOT_SET;
+    String jvmArgs() default AnnotationUtils.PARAM_NOT_SET;
 
     /** prepend these arguments in the command line */
-    public String jvmArgsPrepend() default AnnotationUtils.PARAM_NOT_SET;
+    String jvmArgsPrepend() default AnnotationUtils.PARAM_NOT_SET;
 
     /** append these arguments in the command line */
-    public String jvmArgsAppend() default AnnotationUtils.PARAM_NOT_SET;
+    String jvmArgsAppend() default AnnotationUtils.PARAM_NOT_SET;
 
     /** ignore results first warmups forks */
-    public int warmups() default 0;
+    int warmups() default 0;
 
 }
 

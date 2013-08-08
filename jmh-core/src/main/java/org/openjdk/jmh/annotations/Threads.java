@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
 public @interface Threads {
 
     /** Amount of threads */
-    public int value() default 1;
+    int value() default 1;
 
 }
 

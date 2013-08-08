@@ -38,6 +38,6 @@ import java.lang.annotation.Target;
 public @interface TearDown {
 
     /** Level of this method. @see Level. Default is Trial.*/
-    public Level value() default Level.Trial;
+    Level value() default Level.Trial;
 
 }

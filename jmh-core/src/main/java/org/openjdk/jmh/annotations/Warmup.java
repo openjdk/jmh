@@ -42,12 +42,12 @@ import java.util.concurrent.TimeUnit;
 public @interface Warmup {
 
     /** Amount of iterations */
-    public int iterations() default -1;
+    int iterations() default -1;
 
     /** time of each iteration */
-    public long time() default -1L;
+    long time() default -1L;
 
-    public TimeUnit timeUnit() default TimeUnit.SECONDS;
+    TimeUnit timeUnit() default TimeUnit.SECONDS;
 
 }
 

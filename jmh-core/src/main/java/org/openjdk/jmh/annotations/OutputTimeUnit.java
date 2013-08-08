@@ -41,7 +41,7 @@ public @interface OutputTimeUnit {
 
     /**
      * What time unit to use in the result type of the generated method. */
-    public TimeUnit value() default TimeUnit.MILLISECONDS;
+    TimeUnit value() default TimeUnit.MILLISECONDS;
 
 }
 

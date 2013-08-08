@@ -83,7 +83,7 @@ public @interface GenerateMicroBenchmark {
      * Use {@link BenchmarkMode} instead.
      */
     @Deprecated
-    public BenchmarkType[] value() default { BenchmarkType.OpsPerTimeUnit };
+    BenchmarkType[] value() default { BenchmarkType.OpsPerTimeUnit };
 
 
 }
