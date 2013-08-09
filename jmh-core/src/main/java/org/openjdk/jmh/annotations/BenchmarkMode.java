@@ -24,9 +24,12 @@
  */
 package org.openjdk.jmh.annotations;
 
+import java.lang.annotation.Inherited;
+
 /**
  * Annotations declares the default mode in which benchmark should be run.
  */
+@Inherited
 public @interface BenchmarkMode {
 
     Mode[] value();
