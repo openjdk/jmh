@@ -37,17 +37,11 @@ public class ForkedRunner extends BaseRunner {
     private final ForkedOptions options;
 
     public ForkedRunner(ForkedOptions options) {
-        super(options);
+        super(options, OutputFormatFactory.createBinaryHook(options.getHostName(), options.getHostPort()));
         this.options = options;
-        this.outputHandler = null;
     }
 
     public void run() {
-        if (outputHandler == null) {
-            // override output handler
-            outputHandler = OutputFormatFactory.createBinaryHook(options.getHostName(), options.getHostPort());
-        }
-
         // expect the tuple from the parent process
         BenchmarkRecord benchmark = new BenchmarkRecord(options.getBenchmark());
         if (options.isVerbose()) {

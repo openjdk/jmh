@@ -53,10 +53,11 @@ public abstract class BaseRunner {
     /** Class holding all our runtime options/arguments */
     private final BaseOptions options;
 
-    OutputFormat outputHandler = null;
+    protected final OutputFormat outputHandler;
 
-    public BaseRunner(BaseOptions options) {
+    public BaseRunner(BaseOptions options, OutputFormat handler) {
         this.options = options;
+        this.outputHandler = handler;
     }
 
     /**

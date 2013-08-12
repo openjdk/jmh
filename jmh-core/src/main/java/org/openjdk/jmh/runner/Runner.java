@@ -71,23 +71,11 @@ public class Runner extends BaseRunner {
 
     /**
      * Main constructor.
-     *
-     * @param options Option instance with options to use
+     * @param options
      */
     public Runner(HarnessOptions options) {
-        super(options);
+        super(options, createOutputHandler(options));
         this.options = options;
-    }
-
-    /**
-     * Auxiliary constructor, used from test which are required custom outputHandler.
-     * @param options
-     * @param handler - custom outputHandler
-     */
-    public Runner(HarnessOptions options, OutputFormat handler) {
-        super(options);
-        this.options = options;
-        this.outputHandler = handler;
     }
 
     public enum ExecutionMode {
@@ -122,7 +110,7 @@ public class Runner extends BaseRunner {
     }
 
     /** Setup helper method, creates OutputHandler according to argv options. */
-    public static OutputFormat createOutputHandler(HarnessOptions options) throws RunnerException {
+    public static OutputFormat createOutputHandler(HarnessOptions options) {
         PrintStream out;
         // setup OutputHandler singleton
         if (options.getOutput() == null) {
@@ -133,7 +121,7 @@ public class Runner extends BaseRunner {
                 System.setOut(out); // override to print everything to file
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Runner.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                throw new RunnerException(ex);
+                throw new IllegalStateException(ex);
             }
         }
 
@@ -142,11 +130,6 @@ public class Runner extends BaseRunner {
 
     /** Main entry point */
     public void run(MicroBenchmarkList list) throws RunnerException {
-        if (outputHandler == null) {
-            // setup our output handler
-            outputHandler = createOutputHandler(options);
-        }
-
         Set<BenchmarkRecord> benchmarks;
 
         // get a list of benchmarks
