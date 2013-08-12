@@ -74,7 +74,7 @@ public class Runner extends BaseRunner {
      * @param options
      */
     public Runner(HarnessOptions options) {
-        super(options, createOutputHandler(options));
+        super(options, createOutputFormat(options));
         this.options = options;
     }
 
@@ -109,10 +109,10 @@ public class Runner extends BaseRunner {
         }
     }
 
-    /** Setup helper method, creates OutputHandler according to argv options. */
-    public static OutputFormat createOutputHandler(HarnessOptions options) {
+    /** Setup helper method, creates OutputFormat according to argv options. */
+    public static OutputFormat createOutputFormat(HarnessOptions options) {
         PrintStream out;
-        // setup OutputHandler singleton
+        // setup OutputFormat singleton
         if (options.getOutput() == null) {
             out = System.out;
         } else {
@@ -134,24 +134,24 @@ public class Runner extends BaseRunner {
 
         // get a list of benchmarks
         if (options.getRegexps().isEmpty()) {
-            outputHandler.println("No regexp to match against benchmarks was given. Use -h for help or \".*\" for every benchmark.");
-            outputHandler.flush();
+            out.println("No regexp to match against benchmarks was given. Use -h for help or \".*\" for every benchmark.");
+            out.flush();
             benchmarks = Collections.emptySet();
         } else {
-            benchmarks = list.find(outputHandler, options.getRegexps(), options.getExcludes());
+            benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
         }
 
         if (benchmarks.isEmpty() && !options.getRegexps().isEmpty()) {
-            outputHandler.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
-            outputHandler.flush();
+            out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
+            out.flush();
         }
 
         if (options.shouldList() || options.isVerbose()) {
-            outputHandler.println("Benchmarks: ");
+            out.println("Benchmarks: ");
 
             // list microbenchmarks if -l and/or -v
             for (BenchmarkRecord benchmark : benchmarks) {
-                outputHandler.println(benchmark.getUsername());
+                out.println(benchmark.getUsername());
             }
         }
 
@@ -203,8 +203,8 @@ public class Runner extends BaseRunner {
             }
         }
 
-        outputHandler.flush();
-        outputHandler.close();
+        out.flush();
+        out.close();
     }
 
     /**
@@ -215,7 +215,7 @@ public class Runner extends BaseRunner {
      * @param list
      */
     private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks, MicroBenchmarkList list) {
-        // Attention: Here is violation of outputHandler.startRun/endRun contract,
+        // Attention: Here is violation of out.startRun/endRun contract,
         // but because of such code was done before me,
         // I won't touch this in order do not crash output parsers. (SK)
 
@@ -224,7 +224,7 @@ public class Runner extends BaseRunner {
 
         List<String> warmupMicrosRegexp = options.getWarmupMicros();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
-            warmupMicros.addAll(list.find(outputHandler, warmupMicrosRegexp, Collections.<String>emptyList()));
+            warmupMicros.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
         if (options.getWarmupMode() == HarnessOptions.WarmupMode.BEFOREANY) {
             warmupMicros.addAll(benchmarks);
@@ -239,19 +239,19 @@ public class Runner extends BaseRunner {
             // during measurement iteration causing a performance shift or simply
             // increased variance.
             // currently valid only for non-external JVM runs
-            outputHandler.startRun("Warmup Section");
+            out.startRun("Warmup Section");
             for (BenchmarkRecord benchmark : warmupMicros) {
                 runBulkWarmupModeMicroBenchmark(benchmark, true);
             }
-            outputHandler.endRun(null);
+            out.endRun(null);
         }
         // run microbenchmarks
         //
-        outputHandler.startRun("Measurement Section");
+        out.startRun("Measurement Section");
         for (BenchmarkRecord benchmark : benchmarks) {
             runBulkWarmupModeMicroBenchmark(benchmark, false);
         }
-        outputHandler.endRun(null);
+        out.endRun(null);
     }
 
     private int decideForks(int optionForks, int benchForks) {
@@ -278,7 +278,7 @@ public class Runner extends BaseRunner {
         Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
         Set<BenchmarkRecord> forked = new TreeSet<BenchmarkRecord>();
 
-        outputHandler.startRun("Measurement Section");
+        out.startRun("Measurement Section");
         for (BenchmarkRecord benchmark : benchmarks) {
             int f = decideForks(options.getForkCount(), benchForks(benchmark));
             if (f > 0) {
@@ -293,13 +293,13 @@ public class Runner extends BaseRunner {
         }
 
         runSeparate(forked);
-        outputHandler.endRun(null);
+        out.endRun(null);
     }
 
     private void runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
         BinaryOutputFormatReader reader = null;
         try {
-            reader = new BinaryOutputFormatReader(outputHandler);
+            reader = new BinaryOutputFormatReader(out);
             for (BenchmarkRecord benchmark : benchmarksToFork) {
                 runSeparateMicroBenchmark(reader, benchmark, reader.getHost(), reader.getPort());
             }
@@ -361,18 +361,18 @@ public class Runner extends BaseRunner {
         if (warmupForkCount > 0) {
             String[] warmupForkCheat = concat(commandString, new String[]{"-wi", "1", "-i", "0"});
             if (warmupForkCount == 1) {
-                outputHandler.verbosePrintln("Warmup forking using command: " + Arrays.toString(warmupForkCheat));
+                out.verbosePrintln("Warmup forking using command: " + Arrays.toString(warmupForkCheat));
             } else {
-                outputHandler.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
+                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
             }
             for (int i = 0; i < warmupForkCount; i++) {
                 doFork(reader, warmupForkCheat);
             }
         }
         if (forkCount == 1) {
-            outputHandler.verbosePrintln("Forking using command: " + Arrays.toString(commandString));
+            out.verbosePrintln("Forking using command: " + Arrays.toString(commandString));
         } else {
-            outputHandler.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
+            out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
         }
         for (int i = 0; i < forkCount; i++) { // TODO should we report fork number somehow?
             doFork(reader, commandString);
@@ -407,16 +407,16 @@ public class Runner extends BaseRunner {
             reader.waitFinish();
 
             if (ecode != 0) {
-                outputHandler.println("WARNING: Forked process returned code: " + ecode);
+                out.println("WARNING: Forked process returned code: " + ecode);
                 if (options.shouldFailOnError()) {
                     throw new IllegalStateException("WARNING: Forked process returned code: " + ecode);
                 }
             }
 
         } catch (IOException ex) {
-            outputHandler.exception(ex);
+            out.exception(ex);
         } catch (InterruptedException ex) {
-            outputHandler.exception(ex);
+            out.exception(ex);
         }
     }
 
@@ -437,11 +437,11 @@ public class Runner extends BaseRunner {
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, methodName);
 
             MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
-            MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(outputHandler, benchmark, clazz, method, executionParams, options);
+            MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
             if (warmup) {
                 executionParams = executionParams.warmupToIteration();
             }
-            outputHandler.startBenchmark(handler.getBenchmark(), executionParams, options.isVerbose());
+            out.startBenchmark(handler.getBenchmark(), executionParams, options.isVerbose());
             int iteration = 0;
             final Collection<ThreadIterationParams> threadIterationSequence = executionParams.getThreadIterationSequence();
             for (ThreadIterationParams tip : threadIterationSequence) {
@@ -452,13 +452,13 @@ public class Runner extends BaseRunner {
             // only print end-of-run output if we have actual results
             if (!allResults.isEmpty()) {
                 RunResult result = aggregateIterationData(allResults);
-                outputHandler.endBenchmark(handler.getBenchmark(), result);
+                out.endBenchmark(handler.getBenchmark(), result);
             }
 
             handler.shutdown();
 
         } catch (Throwable ex) {
-            outputHandler.exception(ex);
+            out.exception(ex);
             if (options.shouldFailOnError()) {
                 throw new IllegalStateException(ex.getMessage(), ex);
             }

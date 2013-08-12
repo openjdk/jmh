@@ -53,11 +53,11 @@ public abstract class BaseRunner {
     /** Class holding all our runtime options/arguments */
     private final BaseOptions options;
 
-    protected final OutputFormat outputHandler;
+    protected final OutputFormat out;
 
     public BaseRunner(BaseOptions options, OutputFormat handler) {
         this.options = options;
-        this.outputHandler = handler;
+        this.out = handler;
     }
 
     /**
@@ -72,9 +72,9 @@ public abstract class BaseRunner {
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
             MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
-            MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(outputHandler, benchmark, clazz, method, executionParams, options);
+            MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
-            outputHandler.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
+            out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
 
             int iteration = 0;
             final Collection<ThreadIterationParams> threadIterationSequence = executionParams.getThreadIterationSequence();
@@ -93,13 +93,13 @@ public abstract class BaseRunner {
             // only print end-of-run output if we have actual results
             if (!allResults.isEmpty()) {
                 RunResult result = aggregateIterationData(allResults);
-                outputHandler.endBenchmark(handler.getBenchmark(), result);
+                out.endBenchmark(handler.getBenchmark(), result);
             }
 
             handler.shutdown();
 
         } catch (Throwable ex) {
-            outputHandler.exception(ex);
+            out.exception(ex);
             if (this.options.shouldFailOnError()) {
                 throw new IllegalStateException(ex.getMessage(), ex);
             }
@@ -115,29 +115,29 @@ public abstract class BaseRunner {
         for (int i = 1; i <= tip.getCount(); i++) {
             // will run system gc if we should
             if (runSystemGC()) {
-                outputHandler.verbosePrintln("System.gc() executed");
+                out.verbosePrintln("System.gc() executed");
             }
 
             // run benchmark iteration
-            outputHandler.iteration(handler.getBenchmark(), startIterNum + i, tip.getThreads(), tip.getTime());
+            out.iteration(handler.getBenchmark(), startIterNum + i, tip.getThreads(), tip.getTime());
 
             boolean isLastIteration = (i == tip.getCount());
             IterationData iterData = handler.runIteration(tip.getThreads(), tip.getTime(), isLastIteration);
 
             // might get an exception above, in which case the results list will be empty
             if (iterData.isResultsEmpty()) {
-                outputHandler.println("WARNING: No results returned, benchmark payload threw exception?");
+                out.println("WARNING: No results returned, benchmark payload threw exception?");
             } else {
                 // non-empty list => output and aggregate results
                 results.add(iterData);
 
                 // print out score for this iteration
-                outputHandler.iterationResult(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                out.iterationResult(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
 
                 // detailed output
                 if (showDetailedResults) {
                     // print (or not) detailed per-thread results
-                    outputHandler.detailedResults(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult());
+                    out.detailedResults(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult());
                 }
 
             }
@@ -148,7 +148,7 @@ public abstract class BaseRunner {
             // if threads and the next iteration will change the count,
             // OR if we're finished iterating
             RunResult aggregatedResult = aggregateIterationData(results);
-            outputHandler.threadSubStatistics(handler.getBenchmark(), tip.getThreads(), aggregatedResult);
+            out.threadSubStatistics(handler.getBenchmark(), tip.getThreads(), aggregatedResult);
         }
         return results;
     }
@@ -172,13 +172,13 @@ public abstract class BaseRunner {
         for (int i = 1; i <= warmup.getCount(); i++) {
             // will run system gc if we should
             if (runSystemGC()) {
-                outputHandler.verbosePrintln("System.gc() executed");
+                out.verbosePrintln("System.gc() executed");
             }
 
-            outputHandler.warmupIteration(handler.getBenchmark(), i, warmup.getThreads(), warmup.getTime());
+            out.warmupIteration(handler.getBenchmark(), i, warmup.getThreads(), warmup.getTime());
             boolean isLastIteration = false; // warmup is never the last iteration
             IterationData iterData = handler.runIteration(warmup.getThreads(), warmup.getTime(), isLastIteration).setWarmup();
-            outputHandler.warmupIterationResult(handler.getBenchmark(), i, warmup.getThreads(), iterData.getAggregatedResult());
+            out.warmupIterationResult(handler.getBenchmark(), i, warmup.getThreads(), iterData.getAggregatedResult());
         }
     }
 
@@ -210,7 +210,7 @@ public abstract class BaseRunner {
             final int MAX_WAIT_MSEC = 20 * 1000;
 
             if (enabledBeans.isEmpty()) {
-                outputHandler.println("WARNING: MXBeans can not report GC info. System.gc() invoked, pessimistically waiting " + MAX_WAIT_MSEC + " msecs");
+                out.println("WARNING: MXBeans can not report GC info. System.gc() invoked, pessimistically waiting " + MAX_WAIT_MSEC + " msecs");
                 try {
                     TimeUnit.MILLISECONDS.sleep(MAX_WAIT_MSEC);
                 } catch (InterruptedException e) {
@@ -237,7 +237,7 @@ public abstract class BaseRunner {
                 }
             }
 
-            outputHandler.println("WARNING: System.gc() was invoked but couldn't detect a GC occuring, is System.gc() disabled?");
+            out.println("WARNING: System.gc() was invoked but couldn't detect a GC occuring, is System.gc() disabled?");
             return false;
         }
         return false;

@@ -45,18 +45,18 @@ public class ForkedRunner extends BaseRunner {
         // expect the tuple from the parent process
         BenchmarkRecord benchmark = new BenchmarkRecord(options.getBenchmark());
         if (options.isVerbose()) {
-            outputHandler.println("Benchmarks: ");
-            outputHandler.println(benchmark.getUsername());
+            out.println("Benchmarks: ");
+            out.println(benchmark.getUsername());
         }
         runForkedBenchmarks(benchmark);
-        outputHandler.flush();
-        outputHandler.close();
+        out.flush();
+        out.close();
     }
 
     private void runForkedBenchmarks(BenchmarkRecord benchmark) {
-        outputHandler.startRun("Measurement Section");
+        out.startRun("Measurement Section");
         runClassicBenchmark(benchmark);
-        outputHandler.endRun(null);
+        out.endRun(null);
     }
 
 }

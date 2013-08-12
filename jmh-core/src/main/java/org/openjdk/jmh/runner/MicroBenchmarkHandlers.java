@@ -69,8 +69,8 @@ public class MicroBenchmarkHandlers {
         return method;
     }
 
-    public static MicroBenchmarkHandler getInstance(OutputFormat outputHandler, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
-        return new LoopMicroBenchmarkHandler(outputHandler, microbenchmark, clazz, method, options, executionParams);
+    public static MicroBenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
+        return new LoopMicroBenchmarkHandler(out, microbenchmark, clazz, method, options, executionParams);
     }
 
     /**
