@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.MicroBenchmark;
 import org.openjdk.jmh.logic.Loop;
 import org.openjdk.jmh.logic.results.Result;

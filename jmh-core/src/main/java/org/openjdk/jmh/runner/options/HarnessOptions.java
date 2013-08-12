@@ -33,7 +33,6 @@ import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
-import org.openjdk.jmh.util.internal.CollectionUtils;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;

@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.util.internal;
 
-import org.openjdk.jmh.util.AnnotationUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

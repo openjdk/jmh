@@ -27,11 +27,11 @@ package org.openjdk.jmh.it.fork;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 

@@ -24,9 +24,8 @@
  */
 package org.openjdk.jmh.runner.parameters;
 
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.MicroBenchmark;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.BenchmarkRecord;

@@ -26,7 +26,6 @@ package org.openjdk.jmh;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.openjdk.jmh.runner.ForkedRunner;
-import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.ForkedOptions;
 
 /**

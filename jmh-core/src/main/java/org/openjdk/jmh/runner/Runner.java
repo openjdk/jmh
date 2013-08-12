@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;

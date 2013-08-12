@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.it.compile;
 
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Mode;
 
 @BenchmarkMode(Mode.All)
 public strictfp class StrictFPClassTest {
