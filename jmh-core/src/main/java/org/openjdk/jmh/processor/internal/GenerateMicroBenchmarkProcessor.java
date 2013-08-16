@@ -722,6 +722,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
+                writer.println(ident(3) + so.localIdentifier + ".iterationTime = loop.getDuration();");
             }
 
             // measurement loop call
@@ -811,6 +812,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
+                writer.println(ident(3) + so.localIdentifier + ".iterationTime = loop.getDuration();");
             }
 
             // measurement loop call
@@ -921,6 +923,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
+                writer.println(ident(3) + so.localIdentifier + ".iterationTime = loop.getDuration();");
             }
 
             // measurement loop call

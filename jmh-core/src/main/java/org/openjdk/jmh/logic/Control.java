@@ -29,6 +29,10 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
+/**
+ * Control object, used to communicate significant information from JMH to the benchmark.
+ * WARNING: The API for this class is considered unstable, and can be changed without notice.
+ */
 @State(Scope.Benchmark)
 public class Control {
 
@@ -47,5 +51,10 @@ public class Control {
      * Transitions to "true", once JMH is stopping the measurement for the current iteration
      */
     public volatile boolean stopMeasurement;
+
+    /**
+     * Iteration time
+     */
+    public volatile long iterationTime;
 
 }

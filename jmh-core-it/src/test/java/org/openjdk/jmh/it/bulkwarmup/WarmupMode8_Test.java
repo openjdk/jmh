@@ -22,20 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.it.generated;
+package org.openjdk.jmh.it.bulkwarmup;
 
 
 import org.junit.Test;
 import org.openjdk.jmh.Main;
-import org.openjdk.jmh.annotations.MicroBenchmark;
+import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.logic.Loop;
-import org.openjdk.jmh.logic.results.AverageTimePerOp;
-import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.Control;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -48,41 +49,43 @@ import static junit.framework.Assert.assertEquals;
  *
  * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
-public class GeneratedWarmupModeTest3 {
+@State(Scope.Thread)
+public class WarmupMode8_Test {
 
     private static Queue<String> testSequence = new ConcurrentLinkedQueue<String>();
 
-    @MicroBenchmark
-    public Result testBig(Loop loop) {
-        if (loop.getDuration() == 1000) { // warmup
-            testSequence.add("W");
-        } else if (loop.getDuration() == 2000) {  // iteration
-            testSequence.add("I");
-        }
-        loop.start();
-        while (!loop.done()) {
-            Fixtures.work();
-        }
+    boolean recorded;
 
-        return new AverageTimePerOp("test", 1, 42, TimeUnit.NANOSECONDS);
+    @Setup(Level.Iteration)
+    public void oneShot() {
+        recorded = false;
     }
 
-
-    @MicroBenchmark
-    public Result testSmall(Loop loop) {
-        if (loop.getDuration() == 1000) { // warmup
-            testSequence.add("w");
-        } else if (loop.getDuration() == 2000) {  // iteration
-            testSequence.add("i");
+    @GenerateMicroBenchmark
+    public void testBig(Control cnt) {
+        if (!recorded) {
+            recorded = true;
+            if (cnt.iterationTime == 1000) { // warmup
+                testSequence.add("W");
+            } else if (cnt.iterationTime == 2000) {  // iteration
+                testSequence.add("I");
+            }
         }
-        loop.start();
-        while (!loop.done()) {
-            Fixtures.work();
-        }
-
-        return new AverageTimePerOp("test", 1, 42, TimeUnit.NANOSECONDS);
+        Fixtures.work();
     }
 
+    @GenerateMicroBenchmark
+    public void testSmall(Control cnt) {
+        if (!recorded) {
+            recorded = true;
+            if (cnt.iterationTime == 1000) { // warmup
+                testSequence.add("w");
+            } else if (cnt.iterationTime == 2000) {  // iteration
+                testSequence.add("i");
+            }
+        }
+        Fixtures.work();
+    }
 
     private static String getSequence() {
         StringBuilder sb = new StringBuilder();
@@ -93,9 +96,10 @@ public class GeneratedWarmupModeTest3 {
     }
 
     @Test
-    public void invoke3() {
+    public void invoke8() {
         testSequence.clear();
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -w 1 -r 2 -t 2 -i 1 -wi 2 -f false");
-        assertEquals("WWWWIIwwwwii", getSequence());
+        Main.testMain(Fixtures.getTestMask(this.getClass()) + ".testBig.* -foe -w 1 -r 2 -tc 1,2,3 -i 1 -wi 2 -frw -f false -si false");
+        assertEquals("WWIWWWWIIWWWWWWIII", getSequence());
     }
+
 }
