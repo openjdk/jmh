@@ -130,11 +130,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                         }
                     }
 
-                    // hack: collect @Microbenchmarks as well
-                    for (String bench : MicroBenchmarkProcessor.COLLECTED_MICROBENCHMARKS) {
-                        writer.println(bench + ", " + bench + ", " + Mode.Legacy);
-                    }
-
                     writer.close();
                 } catch (IOException ex) {
                     processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing MicroBenchmark list " + ex);
@@ -508,8 +503,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * @param methodGroup
      */
     private void generateMethod(Mode benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
-        if (benchmarkKind == Mode.Legacy) return;
-
         writer.println();
         for (String ann : generateMethodAnnotations(methodGroup)) {
             writer.println("    " + ann);

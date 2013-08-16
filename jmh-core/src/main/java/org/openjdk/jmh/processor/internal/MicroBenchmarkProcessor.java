@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.processor.internal;
 
+import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.MicroBenchmark;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -40,8 +41,6 @@ import java.util.Set;
 /** @author staffan.friberg@oracle.com */
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class MicroBenchmarkProcessor extends AbstractProcessor {
-
-    public static final Set<String> COLLECTED_MICROBENCHMARKS = new HashSet<String>();
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -60,12 +59,11 @@ public class MicroBenchmarkProcessor extends AbstractProcessor {
                 // Still processing add all annotated methods to the set
                 for (TypeElement annotation : annotations) {
                     for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                        processingEnv.getMessager().printMessage(Kind.MANDATORY_WARNING,
+                        processingEnv.getMessager().printMessage(Kind.ERROR,
                                 "The " + MicroBenchmark.class.getSimpleName()
-                                        + " is detected. This is not the supported API anymore. \n"
+                                        + " annotation is detected. This is not the supported API anymore. \n"
+                                        + "Please migrate to @" + GenerateMicroBenchmark.class.getSimpleName() + ".\n"
                                         + element.getEnclosingElement() + '.' + element.toString());
-                        TypeElement klass = (TypeElement) element.getEnclosingElement();
-                        COLLECTED_MICROBENCHMARKS.add(klass.getQualifiedName().toString() + "." + element.getSimpleName().toString());
                     }
                 }
             }

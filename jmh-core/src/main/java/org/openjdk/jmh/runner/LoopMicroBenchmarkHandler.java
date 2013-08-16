@@ -107,24 +107,21 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             resultList.add(executor.submit(runner));
         }
 
-        // legacy mode has no knowledge about setup/teardown barriers
-        if (mode != Mode.Legacy) {
-            // wait for all threads to start executing
-            try {
-                preSetupBarrier.await();
-            } catch (InterruptedException ex) {
-                log(ex);
-            }
-            startProfilers();
-
-            // wait for all threads to stop executing
-            try {
-                preTearDownBarrier.await();
-            } catch (InterruptedException ex) {
-                log(ex);
-            }
-            stopProfilers(iterationResults);
+        // wait for all threads to start executing
+        try {
+            preSetupBarrier.await();
+        } catch (InterruptedException ex) {
+            log(ex);
         }
+        startProfilers();
+
+        // wait for all threads to stop executing
+        try {
+            preTearDownBarrier.await();
+        } catch (InterruptedException ex) {
+            log(ex);
+        }
+        stopProfilers(iterationResults);
 
         // wait for the result, continuously polling the worker threads.
         //

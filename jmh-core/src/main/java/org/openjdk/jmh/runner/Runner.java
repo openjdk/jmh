@@ -176,7 +176,6 @@ public class Runner extends BaseRunner {
             if (br.getMode() == Mode.All) {
                 for (Mode mode : Mode.values()) {
                     if (mode == Mode.All) continue;
-                    if (mode == Mode.Legacy) continue;
                     newBenchmarks.add(br.cloneWith(mode));
                 }
             } else {
