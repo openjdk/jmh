@@ -130,18 +130,9 @@ public class Runner extends BaseRunner {
 
     /** Main entry point */
     public void run(MicroBenchmarkList list) throws RunnerException {
-        Set<BenchmarkRecord> benchmarks;
+        Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
 
-        // get a list of benchmarks
-        if (options.getRegexps().isEmpty()) {
-            out.println("No regexp to match against benchmarks was given. Use -h for help or \".*\" for every benchmark.");
-            out.flush();
-            benchmarks = Collections.emptySet();
-        } else {
-            benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
-        }
-
-        if (benchmarks.isEmpty() && !options.getRegexps().isEmpty()) {
+        if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
             out.flush();
         }

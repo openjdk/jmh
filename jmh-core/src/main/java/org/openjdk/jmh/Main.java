@@ -47,63 +47,59 @@ public class Main {
     public static void main(String[] argv) {
         HarnessOptions cmdOptions = HarnessOptions.newInstance();
 
-        if (argv.length == 0) {
-            cmdOptions.printUsage("Print help");
-        } else {
-            try {
-                cmdOptions.parseArguments(argv);
+        try {
+            cmdOptions.parseArguments(argv);
 
-                // list output formats?
-                if (cmdOptions.shouldListFormats()) {
-                    StringBuilder sb = new StringBuilder();
+            // list output formats?
+            if (cmdOptions.shouldListFormats()) {
+                StringBuilder sb = new StringBuilder();
 
-                    for (OutputFormatType f : OutputFormatType.values()) {
-                        sb.append(f.toString().toLowerCase());
-                        sb.append(", ");
-                    }
-                    sb.setLength(sb.length() - 2);
-
-                    System.out.println("Available formats: " + sb.toString());
-                    return;
+                for (OutputFormatType f : OutputFormatType.values()) {
+                    sb.append(f.toString().toLowerCase());
+                    sb.append(", ");
                 }
+                sb.setLength(sb.length() - 2);
 
-                // list available profilers?
-                if (cmdOptions.shouldListProfilers()) {
-                    StringBuilder sb = new StringBuilder();
-                    for (String s : ProfilerFactory.getAvailableProfilers()) {
-                        if (ProfilerFactory.isSupported(s)) {
-                            sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
-                        }
-                    }
-                    if (!sb.toString().isEmpty()) {
-                        System.out.println("Supported profilers:\n" + sb.toString());
-                    }
-
-                    sb = new StringBuilder();
-                    for (String s : ProfilerFactory.getAvailableProfilers()) {
-                        if (!ProfilerFactory.isSupported(s)) {
-                            sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
-                        }
-                    }
-
-                    if (!sb.toString().isEmpty()) {
-                        System.out.println("Unsupported profilers:\n" + sb.toString());
-                    }
-                    return;
-                }
-
-                if (cmdOptions.shouldHelp()) {
-                    cmdOptions.printUsage("Displaying help");
-                    return;
-                }
-
-                Runner runner = new Runner(cmdOptions);
-                runner.run(MicroBenchmarkList.defaultList());
-            } catch (CmdLineException ex) {
-                cmdOptions.printUsage(ex.getMessage());
-            } catch (RunnerException e) {
-                cmdOptions.printUsage(e.getMessage());
+                System.out.println("Available formats: " + sb.toString());
+                return;
             }
+
+            // list available profilers?
+            if (cmdOptions.shouldListProfilers()) {
+                StringBuilder sb = new StringBuilder();
+                for (String s : ProfilerFactory.getAvailableProfilers()) {
+                    if (ProfilerFactory.isSupported(s)) {
+                        sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
+                    }
+                }
+                if (!sb.toString().isEmpty()) {
+                    System.out.println("Supported profilers:\n" + sb.toString());
+                }
+
+                sb = new StringBuilder();
+                for (String s : ProfilerFactory.getAvailableProfilers()) {
+                    if (!ProfilerFactory.isSupported(s)) {
+                        sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
+                    }
+                }
+
+                if (!sb.toString().isEmpty()) {
+                    System.out.println("Unsupported profilers:\n" + sb.toString());
+                }
+                return;
+            }
+
+            if (cmdOptions.shouldHelp()) {
+                cmdOptions.printUsage("Displaying help");
+                return;
+            }
+
+            Runner runner = new Runner(cmdOptions);
+            runner.run(MicroBenchmarkList.defaultList());
+        } catch (CmdLineException ex) {
+            cmdOptions.printUsage(ex.getMessage());
+        } catch (RunnerException e) {
+            cmdOptions.printUsage(e.getMessage());
         }
     }
 

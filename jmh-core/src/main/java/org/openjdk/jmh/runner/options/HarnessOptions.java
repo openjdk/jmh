@@ -132,7 +132,7 @@ public class HarnessOptions extends BaseOptions {
      */
     public void printUsage(String message) {
         System.err.println(message);
-        System.err.println("Usage: [options] <benchmark regexp> <benchmark regexp>");
+        System.err.println("Usage: [options] [benchmark regexp]*");
         parser.printUsage(System.err);
     }
 
@@ -260,7 +260,12 @@ public class HarnessOptions extends BaseOptions {
      * @return the value
      */
     public List<String> getRegexps() {
-        return regexps;
+        if (!regexps.isEmpty()) {
+            return regexps;
+        } else {
+            // assume user requested all benchmarks
+            return Collections.singletonList(".*");
+        }
     }
 
     /**

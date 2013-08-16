@@ -54,21 +54,6 @@ public class TestMain {
         baos.close();
     }
 
-
-    @Test
-    public void testNoArgs() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream tmp = System.err;
-
-        System.setErr(new PrintStream(baos));
-        Main.main(new String[] {});
-        System.setErr(tmp);
-
-        String s = baos.toString();
-        assertTrue(s, s.contains("Usage: [options]"));
-        baos.close();
-    }
-
     @Test
     public void testHelp() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
