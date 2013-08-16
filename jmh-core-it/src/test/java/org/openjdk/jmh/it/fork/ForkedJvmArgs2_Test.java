@@ -42,75 +42,50 @@ import java.util.concurrent.TimeUnit;
  * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @BenchmarkMode(Mode.All)
-@Fork(jvmArgsAppend = "-DappendedUp", jvmArgsPrepend = "-DprependedUp")
-public class ForkedJvmAppendPrependArgsTest2 {
+@Fork(jvmArgs = "-DtestUpper")
+public class ForkedJvmArgs2_Test {
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dreplaced", jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
+    @Fork(jvmArgs = "-Dtest1")
     public void test1() {
         Fixtures.work();
-        Assert.assertNotNull(System.getProperty("replaced"));
-        Assert.assertNull(System.getProperty("appended"));
-        Assert.assertNull(System.getProperty("prepended"));
-        Assert.assertNull(System.getProperty("appendedUp"));
-        Assert.assertNull(System.getProperty("prependedUp"));
+        Assert.assertNotNull(System.getProperty("test1"));
+        Assert.assertNull(System.getProperty("test2"));
+        Assert.assertNull(System.getProperty("testUpper"));
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
+    @Fork(jvmArgs = "-Dtest2")
     public void test2() {
         Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNotNull(System.getProperty("appended"));
-        Assert.assertNotNull(System.getProperty("prepended"));
-        Assert.assertNull(System.getProperty("appendedUp"));
-        Assert.assertNull(System.getProperty("prependedUp"));
+        Assert.assertNull(System.getProperty("test1"));
+        Assert.assertNotNull(System.getProperty("test2"));
+        Assert.assertNull(System.getProperty("testUpper"));
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgsPrepend = "-Dprepended")
-    public void test3() {
+    @Fork
+    public void testUpper() {
         Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNull(System.getProperty("appended"));
-        Assert.assertNotNull(System.getProperty("prepended"));
-        Assert.assertNotNull(System.getProperty("appendedUp"));
-        Assert.assertNull(System.getProperty("prependedUp"));
-
+        Assert.assertNull(System.getProperty("test1"));
+        Assert.assertNull(System.getProperty("test2"));
+        Assert.assertNotNull(System.getProperty("testUpper"));
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgsAppend = "-Dappended")
-    public void test4() {
+    public void testNone() {
         Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNotNull(System.getProperty("appended"));
-        Assert.assertNull(System.getProperty("prepended"));
-        Assert.assertNull(System.getProperty("appendedUp"));
-        Assert.assertNotNull(System.getProperty("prependedUp"));
-
-    }
-
-    @GenerateMicroBenchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork()
-    public void test5() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNull(System.getProperty("appended"));
-        Assert.assertNull(System.getProperty("prepended"));
-        Assert.assertNotNull(System.getProperty("appendedUp"));
-        Assert.assertNotNull(System.getProperty("prependedUp"));
-
+        Assert.assertNull(System.getProperty("test1"));
+        Assert.assertNull(System.getProperty("test2"));
+        Assert.assertNotNull(System.getProperty("testUpper"));
     }
 
     @Test

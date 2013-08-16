@@ -38,39 +38,59 @@ import org.openjdk.jmh.it.Fixtures;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Tests if harness had indeed executed different tests in different JVMs.
  *
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
+ * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @BenchmarkMode(Mode.All)
-public class AnnotatedForkedTest2 {
-
-    private static volatile boolean test1executed;
-    private static volatile boolean test2executed;
+public class ForkedJvmAppendPrependArgs1_Test {
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork()
+    @Fork(jvmArgs = "-Dreplaced", jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
     public void test1() {
         Fixtures.work();
-        test1executed = true;
-        Assert.assertFalse(test2executed);
+        Assert.assertNotNull(System.getProperty("replaced"));
+        Assert.assertNull(System.getProperty("appended"));
+        Assert.assertNull(System.getProperty("prepended"));
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(value = 2, warmups = 1)
+    @Fork(jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
     public void test2() {
         Fixtures.work();
-        test2executed = true;
-        Assert.assertFalse(test1executed);
+        Assert.assertNull(System.getProperty("replaced"));
+        Assert.assertNotNull(System.getProperty("appended"));
+        Assert.assertNotNull(System.getProperty("prepended"));
+    }
+
+    @GenerateMicroBenchmark
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Fork(jvmArgsPrepend = "-Dprepended")
+    public void test3() {
+        Fixtures.work();
+        Assert.assertNull(System.getProperty("replaced"));
+        Assert.assertNull(System.getProperty("appended"));
+        Assert.assertNotNull(System.getProperty("prepended"));
+    }
+
+    @GenerateMicroBenchmark
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Fork(jvmArgsAppend = "-Dappended")
+    public void test4() {
+        Fixtures.work();
+        Assert.assertNull(System.getProperty("replaced"));
+        Assert.assertNotNull(System.getProperty("appended"));
+        Assert.assertNull(System.getProperty("prepended"));
     }
 
     @Test
     public void invoke() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe");
+        Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
     }
 
 }

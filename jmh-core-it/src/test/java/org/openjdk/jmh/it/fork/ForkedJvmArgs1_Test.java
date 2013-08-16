@@ -42,50 +42,26 @@ import java.util.concurrent.TimeUnit;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @BenchmarkMode(Mode.All)
-public class ForkedJvmAppendPrependArgsTest {
+public class ForkedJvmArgs1_Test {
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dreplaced", jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
+    @Fork(jvmArgs = "-Dtest1")
     public void test1() {
         Fixtures.work();
-        Assert.assertNotNull(System.getProperty("replaced"));
-        Assert.assertNull(System.getProperty("appended"));
-        Assert.assertNull(System.getProperty("prepended"));
+        Assert.assertNotNull(System.getProperty("test1"));
+        Assert.assertNull(System.getProperty("test2"));
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
+    @Fork(jvmArgs = "-Dtest2")
     public void test2() {
         Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNotNull(System.getProperty("appended"));
-        Assert.assertNotNull(System.getProperty("prepended"));
-    }
-
-    @GenerateMicroBenchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgsPrepend = "-Dprepended")
-    public void test3() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNull(System.getProperty("appended"));
-        Assert.assertNotNull(System.getProperty("prepended"));
-    }
-
-    @GenerateMicroBenchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgsAppend = "-Dappended")
-    public void test4() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("replaced"));
-        Assert.assertNotNull(System.getProperty("appended"));
-        Assert.assertNull(System.getProperty("prepended"));
+        Assert.assertNull(System.getProperty("test1"));
+        Assert.assertNotNull(System.getProperty("test2"));
     }
 
     @Test

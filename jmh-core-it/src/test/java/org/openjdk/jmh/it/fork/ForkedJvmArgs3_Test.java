@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @BenchmarkMode(Mode.All)
-public class ForkedJvmArgsTest3 {
+public class ForkedJvmArgs3_Test {
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)

@@ -38,35 +38,43 @@ import org.openjdk.jmh.it.Fixtures;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Tests if harness had indeed executed different tests in different JVMs.
  *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
+ * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @BenchmarkMode(Mode.All)
-public class ForkedJvmArgsTest {
+public class AnnotatedForked1_Test {
+
+    private static volatile boolean test1executed;
+    private static volatile boolean test2executed;
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest1")
     public void test1() {
         Fixtures.work();
-        Assert.assertNotNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
+        test1executed = true;
+        Assert.assertFalse(test2executed);
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest2")
+    @Fork(2)
     public void test2() {
         Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNotNull(System.getProperty("test2"));
+        test2executed = true;
+        Assert.assertFalse(test1executed);
     }
 
     @Test
     public void invoke() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
+        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe");
+    }
+
+    @Test
+    public void invoke5() {
+        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f");
     }
 
 }

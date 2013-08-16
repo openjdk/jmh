@@ -38,59 +38,39 @@ import org.openjdk.jmh.it.Fixtures;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Tests if harness had indeed executed different tests in different JVMs.
  *
  * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @BenchmarkMode(Mode.All)
-@Fork(jvmArgs = "-DtestUpper")
-public class ForkedJvmArgsTest2 {
+public class AnnotatedForked2_Test {
+
+    private static volatile boolean test1executed;
+    private static volatile boolean test2executed;
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest1")
+    @Fork()
     public void test1() {
         Fixtures.work();
-        Assert.assertNotNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNull(System.getProperty("testUpper"));
+        test1executed = true;
+        Assert.assertFalse(test2executed);
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest2")
+    @Fork(value = 2, warmups = 1)
     public void test2() {
         Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNotNull(System.getProperty("test2"));
-        Assert.assertNull(System.getProperty("testUpper"));
-    }
-
-    @GenerateMicroBenchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork
-    public void testUpper() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNotNull(System.getProperty("testUpper"));
-    }
-
-    @GenerateMicroBenchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public void testNone() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNotNull(System.getProperty("testUpper"));
+        test2executed = true;
+        Assert.assertFalse(test1executed);
     }
 
     @Test
     public void invoke() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
+        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe");
     }
 
 }
