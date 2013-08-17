@@ -88,6 +88,10 @@ public class TimeValue implements Serializable {
         }
     }
 
+    public String toCommandLine() {
+        return String.valueOf(time) + timeUnitString();
+    }
+
     private String timeUnitString() {
         switch(timeUnit) {
             case SECONDS:

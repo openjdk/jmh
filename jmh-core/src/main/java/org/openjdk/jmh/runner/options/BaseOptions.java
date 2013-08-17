@@ -290,7 +290,7 @@ public class BaseOptions {
         try {
             Object value = f.get(this);
             if (value != null && value instanceof TimeValue) {
-                return f.getAnnotation(Option.class).name() + " " + value;
+                return f.getAnnotation(Option.class).name() + " " + ((TimeValue) value).toCommandLine();
             } else {
                 return null;
             }
