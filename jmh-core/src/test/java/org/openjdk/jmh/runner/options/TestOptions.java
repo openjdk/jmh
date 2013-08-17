@@ -199,16 +199,6 @@ public class TestOptions {
     public void dummyMethod2() {
     }
 
-//    @MicroBenchmark(iterations = 100, jvmArgs = "apa", share = false, threads = 100, time = 3)
-//    public Result dummyMethod(Loop loop) {
-//        return null;
-//    }
-//
-//    @MicroBenchmark(iterations = 100, jvmArgs = "apa", share = false, time = 3)
-//    public Result dummyMethod2(Loop loop) {
-//        return null;
-//    }
-
     @Test
     public void testWarmupWithArg() throws Exception {
         String[] argv = {"-w", "100"};

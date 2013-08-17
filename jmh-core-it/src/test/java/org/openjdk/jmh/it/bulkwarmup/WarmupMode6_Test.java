@@ -29,19 +29,14 @@ import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.MicroBenchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.logic.Control;
-import org.openjdk.jmh.logic.Loop;
-import org.openjdk.jmh.logic.results.AverageTimePerOp;
-import org.openjdk.jmh.logic.results.Result;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 

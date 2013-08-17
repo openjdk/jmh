@@ -33,8 +33,6 @@ import java.lang.annotation.Target;
 /**
  * Annotation specifies how much to increase the operations count for each invocation of the test-method.
  * <p>
- * Example that show how each call to {@code convert(char)} is counted as
- * an operation instead of each call to {@code testCharConversion()}.
  * <blockquote><pre>
  * &#64;GenerateMicroBenchmark
  * &#64;OperationsPerInvocation(10)
@@ -42,20 +40,6 @@ import java.lang.annotation.Target;
  *      for (char i = 0; i < 10; i++) {
  *          dummy = convert(i);
  *      }
- * }
- *
- * ==>
- *
- * &#64;MicroBenchmark()
- * public Result testCharConversion(Loop loop) throws Exception {
- *      long operations = 0;
- *      loop.start();
- *      while(!loop.done()) {
- *          testCharConversion();
- *          operations += 10;
- *      }
- *      loop.end();
- *      return new OpsPerTimeUnit(operations, loop.getTime(), TimeUnit.MILLISECONDS);
  * }
  * </pre></blockquote></p>
  */

@@ -34,11 +34,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The Loop logic class. Controls if we should iterate another lap in the benchmark loop via calls to done();
+ * The InfraControl logic class.
+ * This is the rendezvous class for benchmark handler and JMH.
  *
  * @author staffan.friberg@oracle.com, anders.astrand@oracle.com, aleksey.shipilev@oracle.com
  */
-public class Loop extends LoopL4 {
+public class InfraControl extends InfraControlL4 {
 
     /** Timers */
     private static final ScheduledExecutorService timers = Executors.newScheduledThreadPool(1, new ThreadFactory() {
@@ -52,7 +53,7 @@ public class Loop extends LoopL4 {
         }
     });
 
-    public Loop(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+    public InfraControl(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
 
@@ -118,7 +119,7 @@ public class Loop extends LoopL4 {
     }
 }
 
-class LoopL1 {
+class InfraControl_L1 {
     public int p01, p02, p03, p04, p05, p06, p07, p08;
     public int p11, p12, p13, p14, p15, p16, p17, p18;
     public int p21, p22, p23, p24, p25, p26, p27, p28;
@@ -128,7 +129,7 @@ class LoopL1 {
 /**
  * @see BlackHole for rationale
  */
-class LoopL2 extends LoopL1 {
+class InfraControlL2 extends InfraControl_L1 {
     /* Flag for if we are done or not.
      * This is specifically the public field, so to spare one virtual call.
      */
@@ -147,7 +148,7 @@ class LoopL2 extends LoopL1 {
     public final AtomicInteger warmupVisited, warmdownVisited;
     public volatile boolean warmupShouldWait, warmdownShouldWait;
 
-    public LoopL2(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+    public InfraControlL2(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         this.threads = threads;
         this.syncIterations = syncIterations;
         this.warmupVisited = new AtomicInteger();
@@ -188,21 +189,21 @@ class LoopL2 extends LoopL1 {
 
 }
 
-class LoopL3 extends LoopL2 {
+class InfraControlL3 extends InfraControlL2 {
     public int e01, e02, e03, e04, e05, e06, e07, e08;
     public int e11, e12, e13, e14, e15, e16, e17, e18;
     public int e21, e22, e23, e24, e25, e26, e27, e28;
     public int e31, e32, e33, e34, e35, e36, e37, e38;
 
-    public LoopL3(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+    public InfraControlL3(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
 }
 
-class LoopL4 extends LoopL3 {
+class InfraControlL4 extends InfraControlL3 {
     public int marker;
 
-    public LoopL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+    public InfraControlL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
 }

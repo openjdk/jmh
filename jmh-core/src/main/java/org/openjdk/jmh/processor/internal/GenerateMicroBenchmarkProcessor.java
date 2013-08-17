@@ -38,7 +38,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.logic.BlackHole;
-import org.openjdk.jmh.logic.Loop;
+import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.AverageTimePerOp;
 import org.openjdk.jmh.logic.results.OpsPerTimeUnit;
 import org.openjdk.jmh.logic.results.RawResultPair;
@@ -420,7 +420,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + TimeUnit.class.getName() + ';');
         writer.println("import " + Generated.class.getName() + ';');
         writer.println();
-        writer.println("import " + Loop.class.getName() + ';');
+        writer.println("import " + InfraControl.class.getName() + ';');
         writer.println("import " + BlackHole.class.getName() + ';');
         writer.println("import " + Result.class.getName() + ';');
         writer.println("import " + OpsPerTimeUnit.class.getName() + ';');
@@ -678,7 +678,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateOpsPerTimeUnit(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -698,10 +698,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationProlog(writer, 3, method, states);
 
             // synchronize iterations prolog: announce ready
-            writer.println(ident(3) + "loop.announceWarmupReady();");
+            writer.println(ident(3) + "control.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
+            writer.println(ident(3) + "while (control.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -713,11 +713,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-                writer.println(ident(3) + so.localIdentifier + ".iterationTime = loop.getDuration();");
+                writer.println(ident(3) + so.localIdentifier + ".iterationTime = control.getDuration();");
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -725,10 +725,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // synchronize iterations epilog: announce ready
-            writer.println(ident(3) + "loop.announceWarmdownReady();");
+            writer.println(ident(3) + "control.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (control.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -739,7 +739,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new OpsPerTimeUnit(\"" + method.getSimpleName() + "\", res.operations, res.time, (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new OpsPerTimeUnit(\"" + method.getSimpleName() + "\", res.operations, res.time, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -749,7 +749,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        long startTime = System.nanoTime();");
@@ -760,7 +760,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, true);
 
             writer.println("            operations++;");
-            writer.println("        } while(!loop.isDone);");
+            writer.println("        } while(!control.isDone);");
             writer.println("        long stopTime = System.nanoTime();");
             writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (stopTime - startTime));");
             writer.println("    }");
@@ -769,7 +769,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
 
@@ -787,10 +787,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationProlog(writer, 3, method, states);
 
             // synchronize iterations prolog: announce ready
-            writer.println(ident(3) + "loop.announceWarmupReady();");
+            writer.println(ident(3) + "control.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
+            writer.println(ident(3) + "while (control.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -802,11 +802,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-                writer.println(ident(3) + so.localIdentifier + ".iterationTime = loop.getDuration();");
+                writer.println(ident(3) + so.localIdentifier + ".iterationTime = control.getDuration();");
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -814,10 +814,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // synchronize iterations epilog: announce ready
-            writer.println(ident(3) + "loop.announceWarmdownReady();");
+            writer.println(ident(3) + "control.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (control.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -827,7 +827,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new AverageTimePerOp(\"" + method.getSimpleName() + "\", res.operations, res.time, (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new AverageTimePerOp(\"" + method.getSimpleName() + "\", res.operations, res.time, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -837,7 +837,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        long start = System.nanoTime();");
@@ -848,7 +848,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationEpilog(writer, 3, method, states, true);
 
             writer.println("            operations++;");
-            writer.println("        } while(!loop.isDone);");
+            writer.println("        } while(!control.isDone);");
             writer.println("        long end = System.nanoTime();");
             writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (end - start));");
             writer.println("    }");
@@ -877,7 +877,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateTimeDistribution(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -895,10 +895,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationProlog(writer, 3, method, states);
 
             // synchronize iterations prolog: announce ready
-            writer.println(ident(3) + "loop.announceWarmupReady();");
+            writer.println(ident(3) + "control.announceWarmupReady();");
 
             // synchronize iterations prolog: catchup loop
-            writer.println(ident(3) + "while (loop.warmupShouldWait) {");
+            writer.println(ident(3) + "while (control.warmupShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -910,11 +910,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-                writer.println(ident(3) + so.localIdentifier + ".iterationTime = loop.getDuration();");
+                writer.println(ident(3) + so.localIdentifier + ".iterationTime = control.getDuration();");
             }
 
             // measurement loop call
-            writer.println(ident(3) + "Result res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(loop, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "Result res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -922,10 +922,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // synchronize iterations epilog: announce ready
-            writer.println(ident(3) + "loop.announceWarmdownReady();");
+            writer.println(ident(3) + "control.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (loop.warmdownShouldWait) {");
+            writer.println(ident(3) + "while (control.warmdownShouldWait) {");
 
             invocationProlog(writer, 4, method, states, false);
             writer.println(ident(4) + emitCall(method, states) + ';');
@@ -945,7 +945,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(Loop loop, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        SampleBuffer buffer = new SampleBuffer();");
             writer.println("        long realTime = 0;");
             writer.println("        long rnd = System.nanoTime();");
@@ -972,15 +972,15 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             invocationEpilog(writer, 4, method, states, true);
 
-            writer.println("        } while(!loop.isDone);");
-            writer.println("        return new SampleTimePerOp(\"" + method.getSimpleName() + "\", buffer, (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println("        } while(!control.isDone);");
+            writer.println("        return new SampleTimePerOp(\"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println("    }");
             writer.println();
         }
     }
 
     private void generateSingleShot(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(Loop loop) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
 
@@ -1009,7 +1009,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return new SingleShotTime(\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (loop.timeUnit != null) ? loop.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new SingleShotTime(\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -1043,19 +1043,19 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (String s : states.getStateGetters(method)) writer.println(ident(prefix) + s);
         writer.println();
 
-        writer.println(ident(prefix) + "loop.preSetup();");
+        writer.println(ident(prefix) + "control.preSetup();");
 
         for (String s : states.getIterationSetups(method)) writer.println(ident(prefix) + s);
         writer.println();
     }
 
     private void iterationEpilog(PrintWriter writer, int prefix, Element method, StateObjectHandler states) {
-        writer.println(ident(prefix) + "loop.preTearDown();");
+        writer.println(ident(prefix) + "control.preTearDown();");
 
         for (String s : states.getIterationTearDowns(method)) writer.println(ident(prefix) + s);
         writer.println();
 
-        writer.println(ident(prefix) + "if (loop.isLastIteration()) {");
+        writer.println(ident(prefix) + "if (control.isLastIteration()) {");
         for (String s : states.getRunTearDowns(method)) writer.println(ident(prefix + 1) + s);
         writer.println(ident(prefix) + "}");
     }

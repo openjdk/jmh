@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner;
 
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.logic.Loop;
+import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -45,7 +45,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Handler for a single micro benchmark (with Loop).
+ * Handler for a single micro benchmark (with InfraControl).
  * Handles name and execution information (# iterations, et c). Executes the
  * benchmark according to above parameters.
  *
@@ -93,12 +93,12 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         IterationData iterationResults = new IterationData(microbenchmark, numThreads, runtime);
 
-        Loop loop = new Loop(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit);
+        InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit);
 
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
 
-            runners[i] = new BenchmarkTask(threadLocal, loop);
+            runners[i] = new BenchmarkTask(threadLocal, control);
         }
 
         // submit tasks to threadpool
@@ -115,7 +115,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         }
         startProfilers();
 
-        loop.enable();
+        control.enable();
 
         // wait for all threads to stop executing
         try {
@@ -177,42 +177,42 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
          */
         private final ThreadLocal<InstanceProvider> invocationHandler;
         /**
-         * Loop variable
+         * InfraControl variable
          */
-        private final Loop loop;
+        private final InfraControl control;
 
         /**
          * Constructor
          *
          * @param invocationHandler    instance to execute on
-         * @param loop       Loop variable
+         * @param control       InfraControl variable
          */
-        BenchmarkTask(ThreadLocal<InstanceProvider> invocationHandler, Loop loop) {
+        BenchmarkTask(ThreadLocal<InstanceProvider> invocationHandler, InfraControl control) {
             this.invocationHandler = invocationHandler;
-            this.loop = loop;
+            this.control = control;
         }
 
         @Override
         public Result call() throws Exception {
             Result r;
             try {
-                r = invokeBenchmark(invocationHandler.get().getInstance(), loop);
+                r = invokeBenchmark(invocationHandler.get().getInstance(), control);
 
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
-                loop.preSetupForce();
-                loop.preTearDownForce();
+                control.preSetupForce();
+                control.preTearDownForce();
 
                 if (shouldSynchIterations) {
                     try {
-                        loop.announceWarmupReady();
+                        control.announceWarmupReady();
                     } catch (Exception e1) {
                         // more threads than expected
                     }
 
                     try {
-                        loop.announceWarmdownReady();
+                        control.announceWarmdownReady();
                     } catch (Exception e1) {
                         // more threads than expected
                     }
@@ -227,16 +227,16 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         /**
          * Helper method for running the benchmark in a given instance.
          *
-         * @param loop      Loop logic instance
+         * @param control      InfraControl logic instance
          * @return the Result of the execution
          * @throws Exception if something went wrong
          */
 
-        private Result invokeBenchmark(Object instance, Loop loop) throws Throwable {
+        private Result invokeBenchmark(Object instance, InfraControl control) throws Throwable {
             Result result;
             if (method != null) {
                 try {
-                    result = (Result) method.invoke(instance, loop);
+                    result = (Result) method.invoke(instance, control);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Can't invoke " + method.getDeclaringClass().getName() + "." + method.getName(), e);
                 } catch (InvocationTargetException e) {

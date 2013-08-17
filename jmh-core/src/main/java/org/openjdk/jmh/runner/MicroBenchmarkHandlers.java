@@ -25,7 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.MicroBenchmark;
-import org.openjdk.jmh.logic.Loop;
+import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.BaseOptions;
@@ -88,7 +88,7 @@ public class MicroBenchmarkHandlers {
             return false;
         }
 
-        if (parameterTypes[0] != Loop.class) {
+        if (parameterTypes[0] != InfraControl.class) {
             return false;
         }
 
