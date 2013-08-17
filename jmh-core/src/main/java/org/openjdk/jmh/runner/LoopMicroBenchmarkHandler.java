@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner;
 
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.logic.Global;
 import org.openjdk.jmh.logic.Loop;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
@@ -92,13 +91,14 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         CountDownLatch preSetupBarrier = new CountDownLatch(numThreads);
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
-        Global global = new Global(numThreads, shouldSynchIterations);
-
         IterationData iterationResults = new IterationData(microbenchmark, numThreads, runtime);
+
+        Loop loop = new Loop(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit);
 
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, new Loop(global, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit));
+
+            runners[i] = new BenchmarkTask(threadLocal, loop);
         }
 
         // submit tasks to threadpool
@@ -114,6 +114,8 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             log(ex);
         }
         startProfilers();
+
+        loop.enable();
 
         // wait for all threads to stop executing
         try {
@@ -204,13 +206,13 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
                 if (shouldSynchIterations) {
                     try {
-                        loop.global.announceWarmupReady();
+                        loop.announceWarmupReady();
                     } catch (Exception e1) {
                         // more threads than expected
                     }
 
                     try {
-                        loop.global.announceWarmdownReady();
+                        loop.announceWarmdownReady();
                     } catch (Exception e1) {
                         // more threads than expected
                     }

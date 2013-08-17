@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Loop logic class. Controls if we should iterate another lap in the benchmark loop via calls to done();
@@ -51,39 +52,9 @@ public class Loop extends LoopL4 {
         }
     });
 
-    /**
-     * Constructor
-     *
-     * @param duration How long we should loop
-     */
-    public Loop(long duration) {
-        this(new TimeValue(duration, TimeUnit.MILLISECONDS));
+    public Loop(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
-
-    /**
-     * Constructor
-     *
-     * @param loopTime How long we should loop
-     */
-    public Loop(TimeValue loopTime) {
-        this(null, loopTime, null, null, false, null);
-    }
-
-    public Loop(Global global, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
-        super(global, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
-    }
-
-
-    /** Start timer and record start time */
-    @Deprecated // GMB generator emits the proper code instead
-    public void start() {
-        enable();
-
-        assert start == 0;
-        assert end == 0;
-        start = System.nanoTime();
-    }
-
 
     public void enable() {
         assert !isDone;
@@ -95,82 +66,6 @@ public class Loop extends LoopL4 {
                 isDone = true;
             }
         }, duration, TimeUnit.NANOSECONDS);
-    }
-
-    /**
-     * Temporary pause the timing measurement, does NOT affect the iteration time for the loop completion
-     * <p/>
-     * To continue timing call resume()
-     */
-    @Deprecated // GMB generator emits the proper code instead
-    public void pauseMeasurement() {
-        assert pauseStart == 0;
-        pauseStart = System.nanoTime();
-    }
-
-    /** Resume a paused timing */
-    @Deprecated // GMB generator emits the proper code instead
-    public void resumeMeasurement() {
-        assert pauseStart != 0;
-        totalPause += System.nanoTime() - pauseStart;
-        pauseStart = 0;
-    }
-
-    /** End timer and record the end time */
-    @Deprecated // GMB generator emits the proper code instead
-    public void end() {
-        assert isDone;
-        end = System.nanoTime();
-    }
-
-    /**
-     * Check if the timed duration has been completed
-     *
-     * @return if we are done
-     */
-    @Deprecated // GMB generator emits the proper code instead
-    public boolean done() {
-        assert start != 0;
-        return isDone;
-    }
-
-    /**
-     * The measured time a benchmark iteration took in nanoseconds
-     * <p/>
-     * If the measurement was paused and resumed during the benchmark the time spent between these calls are deducted
-     * from the iteration time
-     *
-     * @return the time the iteration took
-     */
-    public long getTime() {
-        assert start != 0;
-        assert end != 0;
-        assert isDone;
-        return (end - start - totalPause);
-    }
-
-    /**
-     * Get the total time spent with paused timing
-     *
-     * @return The total pause time in nanoseconds
-     */
-    public long getTotalPausetime() {
-        assert start != 0;
-        assert end != 0;
-        assert isDone;
-        return totalPause;
-    }
-
-    /**
-     * Get the total time an iteration took without including any pauses
-     *
-     * @return The total iteration run time including pauses in nanoseconds
-     */
-    public long getTotalRuntime() {
-        assert start != 0;
-        assert end != 0;
-        assert isDone;
-        return (end - start);
     }
 
     /**
@@ -241,31 +136,56 @@ class LoopL2 extends LoopL1 {
 
     /** How long we should loop */
     public final long duration;
-    /** Start timestamp */
-    public long start;
-    /** End timestamp */
-    public long end;
-    /** Start of pause */
-    public long pauseStart;
-    /** Total pause time */
-    public long totalPause;
 
     public final CountDownLatch preSetup;
     public final CountDownLatch preTearDown;
     public final boolean lastIteration;
-
-    public final Global global;
-
     public final TimeUnit timeUnit;
+    public final int threads;
+    public final boolean syncIterations;
 
-    public LoopL2(Global global, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+    public final AtomicInteger warmupVisited, warmdownVisited;
+    public volatile boolean warmupShouldWait, warmdownShouldWait;
+
+    public LoopL2(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+        this.threads = threads;
+        this.syncIterations = syncIterations;
+        this.warmupVisited = new AtomicInteger();
+        this.warmdownVisited = new AtomicInteger();
+
+        warmupShouldWait = syncIterations;
+        warmdownShouldWait = syncIterations;
         this.preSetup = preSetup;
         this.preTearDown = preTearDown;
         this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
         this.lastIteration = lastIteration;
         this.timeUnit = timeUnit;
-        this.global = global;
     }
+
+    public void announceWarmupReady() {
+        if (!syncIterations) return;
+        int v = warmupVisited.incrementAndGet();
+        if (v == threads) {
+            warmupShouldWait = false;
+        }
+
+        if (v > threads) {
+            throw new IllegalStateException("More threads than expected");
+        }
+    }
+
+    public void announceWarmdownReady() {
+        if (!syncIterations) return;
+        int v = warmdownVisited.incrementAndGet();
+        if (v == threads) {
+            warmdownShouldWait = false;
+        }
+
+        if (v > threads) {
+            throw new IllegalStateException("More threads than expected");
+        }
+    }
+
 }
 
 class LoopL3 extends LoopL2 {
@@ -274,16 +194,16 @@ class LoopL3 extends LoopL2 {
     public int e21, e22, e23, e24, e25, e26, e27, e28;
     public int e31, e32, e33, e34, e35, e36, e37, e38;
 
-    public LoopL3(Global global, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
-        super(global, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
+    public LoopL3(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
 }
 
 class LoopL4 extends LoopL3 {
     public int marker;
 
-    public LoopL4(Global global, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
-        super(global, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
+    public LoopL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
+        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
 }
 
