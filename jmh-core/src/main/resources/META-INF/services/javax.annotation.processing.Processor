@@ -21,7 +21,6 @@
 #    or visit www.oracle.com if you need additional information or have any
 #    questions.
 #
-org.openjdk.jmh.processor.internal.MicroBenchmarkProcessor
 org.openjdk.jmh.processor.internal.GenerateMicroBenchmarkProcessor
 org.openjdk.jmh.processor.internal.HelperMethodValidationProcessor
 org.openjdk.jmh.processor.internal.CompilerControlProcessor

@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.annotations.MicroBenchmark;
 import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -58,7 +57,7 @@ public class MicroBenchmarkHandlers {
                     }
                     method = m;
                 } else {
-                    throw new IllegalArgumentException("MicroBenchmark parameters does not match the signature contract, see the " + MicroBenchmark.class + " documentation");
+                    throw new IllegalArgumentException("MicroBenchmark parameters does not match the signature contract.");
                 }
             }
         }
