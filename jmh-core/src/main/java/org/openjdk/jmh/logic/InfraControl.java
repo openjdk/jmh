@@ -57,10 +57,7 @@ public class InfraControl extends InfraControlL4 {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
     }
 
-    public void enable() {
-        assert !isDone;
-        isDone = false;
-
+    public void enableTimer() {
         timers.schedule(new Runnable() {
             @Override
             public void run() {

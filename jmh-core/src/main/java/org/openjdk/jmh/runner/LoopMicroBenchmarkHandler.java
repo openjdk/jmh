@@ -57,29 +57,14 @@ import java.util.concurrent.TimeoutException;
 public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
     private final Method method;
-
     private final boolean shouldSynchIterations;
-
-    /* output options */
     private final boolean shouldFailOnError;
 
-    private final Mode mode;
-
-    /**
-     * Constructor
-     *
-     * @param microbenchmark  Name of micro benchmark
-     * @param clazz
-     * @param method
-     * @param options      Options from the command line
-     * @param executionParams
-     */
     LoopMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
         this.shouldFailOnError = options.shouldFailOnError();
-        this.mode = microbenchmark.getMode();
     }
 
     /**
@@ -87,49 +72,54 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      */
     @Override
     public IterationData runIteration(int numThreads, TimeValue runtime, boolean last) {
-        // bring up the barrier
         CountDownLatch preSetupBarrier = new CountDownLatch(numThreads);
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
+        // result object to accumulate the results in
         IterationData iterationResults = new IterationData(microbenchmark, numThreads, runtime);
 
         InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit);
 
+        // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-
             runners[i] = new BenchmarkTask(threadLocal, control);
         }
 
         // submit tasks to threadpool
-        List<Future<Result>> resultList = new ArrayList<Future<Result>>(numThreads);
+        List<Future<Result>> results = new ArrayList<Future<Result>>(numThreads);
         for (BenchmarkTask runner : runners) {
-            resultList.add(executor.submit(runner));
+            results.add(executor.submit(runner));
         }
 
-        // wait for all threads to start executing
+        // wait for all workers to initialize and ready to go
         try {
             preSetupBarrier.await();
         } catch (InterruptedException ex) {
             log(ex);
         }
+
+        // profilers start when iteration starts
         startProfilers();
 
-        control.enable();
+        // enable the timers
+        control.enableTimer();
 
-        // wait for all threads to stop executing
+        // wait for all workers to complete run and ready to proceed
         try {
             preTearDownBarrier.await();
         } catch (InterruptedException ex) {
             log(ex);
         }
+
+        // profilers stop when iteration ends
         stopProfilers(iterationResults);
 
-        // wait for the result, continuously polling the worker threads.
-        //
+        // Wait for the result, continuously polling the worker threads.
+        // The abrupt exception in any worker will float up here.
         int expected = numThreads;
         while (expected > 0) {
-            for (Future<Result> fr : resultList) {
+            for (Future<Result> fr : results) {
                 try {
                     fr.get(runtime.getTime() * 2, runtime.getTimeUnit());
                     expected--;
@@ -151,8 +141,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             }
         }
 
-        // get the results
-        for (Future<Result> fr : resultList) {
+        // Get the results.
+        // Should previous loop allow us to get to this point, we can fully expect
+        // all the results ready without the exceptions.
+        for (Future<Result> fr : results) {
             try {
                 iterationResults.addResult(fr.get());
             } catch (InterruptedException ex) {
@@ -166,27 +158,13 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
     }
 
     /**
-     * Task to submit to the ExecutorService. Will execute one iteration and return the Result.
-     *
-     * @author anders.astrand@oracle.com
+     * Worker body.
      */
     class BenchmarkTask implements Callable<Result> {
 
-        /**
-         * Microbenchmark instance to execute on
-         */
         private final ThreadLocal<InstanceProvider> invocationHandler;
-        /**
-         * InfraControl variable
-         */
         private final InfraControl control;
 
-        /**
-         * Constructor
-         *
-         * @param invocationHandler    instance to execute on
-         * @param control       InfraControl variable
-         */
         BenchmarkTask(ThreadLocal<InstanceProvider> invocationHandler, InfraControl control) {
             this.invocationHandler = invocationHandler;
             this.control = control;
@@ -194,10 +172,8 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         @Override
         public Result call() throws Exception {
-            Result r;
             try {
-                r = invokeBenchmark(invocationHandler.get().getInstance(), control);
-
+                return invokeBenchmark(invocationHandler.get().getInstance(), control);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
@@ -220,18 +196,11 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
                 throw new Exception(e); // wrapping Throwable
             }
-
-            return r;
         }
 
         /**
          * Helper method for running the benchmark in a given instance.
-         *
-         * @param control      InfraControl logic instance
-         * @return the Result of the execution
-         * @throws Exception if something went wrong
          */
-
         private Result invokeBenchmark(Object instance, InfraControl control) throws Throwable {
             Result result;
             if (method != null) {
@@ -247,7 +216,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             }
             return result;
         }
-
 
     }
 
