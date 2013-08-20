@@ -265,7 +265,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         try {
             // Create file and open an outputstream
             JavaFileObject jof = processingEnv.getFiler().createSourceFile(info.generatedName, clazz);
-            PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(jof.openOutputStream()), 64*1024), false);
+            PrintWriter writer = new PrintWriter(jof.openWriter(), false);
 
             // Write package and imports
             writer.println("package " + info.generatedPackageName + ';');
