@@ -25,7 +25,9 @@
 package org.openjdk.jmh.logic;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,6 +42,46 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author staffan.friberg@oracle.com, anders.astrand@oracle.com, aleksey.shipilev@oracle.com
  */
 public class InfraControl extends InfraControlL4 {
+
+    private static final Unsafe U;
+
+    static {
+        try {
+            Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafe.setAccessible(true);
+            U = (Unsafe) unsafe.get(null);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+
+        consistencyCheck();
+    }
+
+    static void consistencyCheck() {
+        // checking the fields are not reordered
+        check("isDone");
+    }
+
+    static void check(String fieldName) {
+        final long requiredGap = 128;
+        long markerBegin = getOffset("markerBegin");
+        long markerEnd = getOffset("markerEnd");
+        long off = getOffset(fieldName);
+        if (markerEnd - off < requiredGap || off - markerBegin < requiredGap) {
+            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerBegin = " + markerBegin + ", markerEnd = " + markerEnd);
+        }
+    }
+
+    static long getOffset(String fieldName) {
+        try {
+            Field f = InfraControl.class.getField(fieldName);
+            return U.objectFieldOffset(f);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     public InfraControl(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
@@ -95,7 +137,11 @@ public class InfraControl extends InfraControlL4 {
     }
 }
 
-class InfraControlL1 {
+class InfraControlL0 {
+    public int markerBegin;
+}
+
+class InfraControlL1 extends InfraControlL0 {
     public int p01, p02, p03, p04, p05, p06, p07, p08;
     public int p11, p12, p13, p14, p15, p16, p17, p18;
     public int p21, p22, p23, p24, p25, p26, p27, p28;
@@ -177,7 +223,7 @@ class InfraControlL3 extends InfraControlL2 {
 }
 
 class InfraControlL4 extends InfraControlL3 {
-    public int marker;
+    public int markerEnd;
 
     public InfraControlL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);

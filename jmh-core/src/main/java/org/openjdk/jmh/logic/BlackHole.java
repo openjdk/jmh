@@ -34,14 +34,18 @@ import java.lang.reflect.Field;
     See the rationale for BlackHoleL1..BlackHoleL4 classes below.
  */
 
-class BlackholeL1 {
+class BlackHoleL0 {
+    public int markerBegin;
+}
+
+class BlackHoleL1 extends BlackHoleL0 {
     public int p01, p02, p03, p04, p05, p06, p07, p08;
     public int p11, p12, p13, p14, p15, p16, p17, p18;
     public int p21, p22, p23, p24, p25, p26, p27, p28;
     public int p31, p32, p33, p34, p35, p36, p37, p38;
 }
 
-class BlackHoleL2 extends BlackholeL1 {
+class BlackHoleL2 extends BlackHoleL1 {
     public volatile byte b1 = 1, b2 = 2;
     public volatile boolean bool1 = false, bool2 = true;
     public volatile char c1 = 'A', c2 = 'B';
@@ -65,7 +69,7 @@ class BlackHoleL3 extends BlackHoleL2 {
 }
 
 class BlackHoleL4 extends BlackHoleL3 {
-    public int marker;
+    public int markerEnd;
 }
 
 /**
@@ -179,16 +183,17 @@ public class BlackHole extends BlackHoleL4 {
 
     static void check(String fieldName) {
         final long requiredGap = 128;
-        long markerOff = getOffset("marker");
+        long markerBegin = getOffset("markerBegin");
+        long markerEnd = getOffset("markerEnd");
         long off = getOffset(fieldName);
-        if (markerOff - off < requiredGap) {
-            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerOff = " + markerOff);
+        if (markerEnd - off < requiredGap || off - markerBegin < requiredGap) {
+            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerBegin = " + markerBegin + ", markerEnd = " + markerEnd);
         }
     }
 
     static long getOffset(String fieldName) {
         try {
-            Field f = BlackHoleL4.class.getField(fieldName);
+            Field f = BlackHole.class.getField(fieldName);
             return U.objectFieldOffset(f);
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
