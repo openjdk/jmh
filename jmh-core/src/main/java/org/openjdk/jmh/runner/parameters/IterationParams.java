@@ -41,9 +41,15 @@ public class IterationParams implements Serializable {
      */
     private final TimeValue timeValue;
 
-    public IterationParams(int count, TimeValue time) {
+    /**
+     * Thread count
+     */
+    private final int threads;
+
+    public IterationParams(int count, TimeValue time, int threads) {
         this.count = count;
         this.timeValue = time;
+        this.threads = threads;
     }
 
     public int getCount() {
@@ -54,14 +60,11 @@ public class IterationParams implements Serializable {
         return timeValue;
     }
 
-    public ThreadIterationParams addThreads(int threads) {
-        return new ThreadIterationParams(threads, this);
-    }
-
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 83 * hash + this.count;
+        hash = 83 * hash + this.threads;
         hash = 83 * hash + (this.timeValue != null ? this.timeValue.hashCode() : 0);
         return hash;
     }
@@ -78,6 +81,9 @@ public class IterationParams implements Serializable {
         if (this.count != other.count) {
             return false;
         }
+        if (this.threads != other.threads) {
+            return false;
+        }
         if (this.timeValue != other.timeValue && (this.timeValue == null || !this.timeValue.equals(other.timeValue))) {
             return false;
         }
@@ -87,5 +93,9 @@ public class IterationParams implements Serializable {
     @Override
     public String toString() {
         return "IterationParams("+ getCount()+", "+ getTime()+")";
+    }
+
+    public int getThreads() {
+        return threads;
     }
 }

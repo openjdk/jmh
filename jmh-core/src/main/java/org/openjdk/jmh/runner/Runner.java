@@ -37,7 +37,6 @@ import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
-import org.openjdk.jmh.runner.parameters.ThreadIterationParams;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -51,7 +50,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -442,17 +440,17 @@ public class Runner extends BaseRunner {
                     }
 
                     // run benchmark iteration
-                    out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, executionParams.getThreads(), p.getTime());
+                    out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, p.getThreads(), p.getTime());
 
                     boolean isLastIteration = (i == p.getCount());
-                    IterationData iterData = handler.runIteration(executionParams.getThreads(), p.getTime(), isLastIteration);
+                    IterationData iterData = handler.runIteration(p.getThreads(), p.getTime(), isLastIteration);
 
                     // might get an exception above, in which case the results list will be empty
                     if (iterData.isResultsEmpty()) {
                         out.println("WARNING: No results returned, benchmark payload threw exception?");
                     } else {
                         // print out score for this iteration
-                        out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, executionParams.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                        out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, p.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
                     }
                 }
             } else {
@@ -464,10 +462,10 @@ public class Runner extends BaseRunner {
                     }
 
                     // run benchmark iteration
-                    out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, executionParams.getThreads(), p.getTime());
+                    out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, p.getThreads(), p.getTime());
 
                     boolean isLastIteration = (i == p.getCount());
-                    IterationData iterData = handler.runIteration(executionParams.getThreads(), p.getTime(), isLastIteration);
+                    IterationData iterData = handler.runIteration(p.getThreads(), p.getTime(), isLastIteration);
 
                     // might get an exception above, in which case the results list will be empty
                     if (iterData.isResultsEmpty()) {

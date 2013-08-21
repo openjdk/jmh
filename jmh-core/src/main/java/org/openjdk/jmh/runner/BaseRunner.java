@@ -33,7 +33,6 @@ import org.openjdk.jmh.runner.options.BaseOptions;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
-import org.openjdk.jmh.runner.parameters.ThreadIterationParams;
 import org.openjdk.jmh.util.ClassUtils;
 
 import java.lang.management.GarbageCollectorMXBean;
@@ -80,40 +79,40 @@ public abstract class BaseRunner {
             // execute the appropriate number of warmup iterations
             // before the corresponding measurement interations.
 
-            IterationParams warmupParams = executionParams.getWarmup();
-            for (int i = 1; i <= warmupParams.getCount(); i++) {
+            IterationParams wp = executionParams.getWarmup();
+            for (int i = 1; i <= wp.getCount(); i++) {
                 // will run system gc if we should
                 if (runSystemGC()) {
                     out.verbosePrintln("System.gc() executed");
                 }
 
-                out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, executionParams.getThreads(), warmupParams.getTime());
+                out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, wp.getThreads(), wp.getTime());
                 boolean isLastIteration = false; // warmup is never the last iteration
-                IterationData iterData = handler.runIteration(executionParams.getThreads(), warmupParams.getTime(), isLastIteration).setWarmup();
+                IterationData iterData = handler.runIteration(wp.getThreads(), wp.getTime(), isLastIteration).setWarmup();
                 out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
             }
 
-            IterationParams measureParams = executionParams.getIteration();
-            for (int i = 1; i <= measureParams.getCount(); i++) {
+            IterationParams mp = executionParams.getIteration();
+            for (int i = 1; i <= mp.getCount(); i++) {
                 // will run system gc if we should
                 if (runSystemGC()) {
                     out.verbosePrintln("System.gc() executed");
                 }
 
                 // run benchmark iteration
-                out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, executionParams.getThreads(), measureParams.getTime());
+                out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), mp.getTime());
 
-                boolean isLastIteration = (i == measureParams.getCount());
-                IterationData iterData = handler.runIteration(executionParams.getThreads(), measureParams.getTime(), isLastIteration);
+                boolean isLastIteration = (i == mp.getCount());
+                IterationData iterData = handler.runIteration(mp.getThreads(), mp.getTime(), isLastIteration);
 
                 // might get an exception above, in which case the results list will be empty
                 if (iterData.isResultsEmpty()) {
                     out.println("WARNING: No results returned, benchmark payload threw exception?");
                 } else {
-                    out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, executionParams.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                    out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
 
                     if (options.shouldOutputDetailedResults()) {
-                        out.detailedResults(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult());
+                        out.detailedResults(handler.getBenchmark(), i, mp.getThreads(), iterData.getAggregatedResult());
                     }
 
                     allResults.add(iterData);

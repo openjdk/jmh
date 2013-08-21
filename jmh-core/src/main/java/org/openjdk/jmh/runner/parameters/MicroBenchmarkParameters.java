@@ -44,11 +44,6 @@ public interface MicroBenchmarkParameters {
 
     public IterationParams getIteration();
 
-    /**
-     * Getter for max amount of threads to use.
-     *
-     * @return amount of threads
-     */
     public int getThreads();
 
     /**

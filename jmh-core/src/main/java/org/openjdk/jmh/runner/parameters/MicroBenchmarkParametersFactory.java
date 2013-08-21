@@ -41,27 +41,30 @@ public class MicroBenchmarkParametersFactory {
 
     public static MicroBenchmarkParameters makeParams(BaseOptions options, BenchmarkRecord benchmark, Method method) {
         boolean shouldSynchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
-        IterationParams measurement = getMeasurement(options, benchmark, method);
-        IterationParams warmup = getWarmup(options, benchmark, method);
 
         int threads = getThreads(options, method);
         if (threads == 0) {
             threads = Runtime.getRuntime().availableProcessors();
         }
+
+        IterationParams measurement = getMeasurement(options, benchmark, method, threads);
+        IterationParams warmup = getWarmup(options, benchmark, method, threads);
+
         return new SameThreadParameters(
                 shouldSynchIterations,
                 warmup, measurement,
                 threads);
     }
 
-    private static IterationParams getWarmup(BaseOptions options, BenchmarkRecord benchmark, Method method) {
+    private static IterationParams getWarmup(BaseOptions options, BenchmarkRecord benchmark, Method method, int threads) {
         boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Warmup warAnn = method.getAnnotation(Warmup.class);
         int iters = (warAnn == null) ? -1 : warAnn.iterations();
         if (isSingleShot) {
             return new IterationParams(
                     getInteger(options.getWarmupIterations(), iters, Defaults.SINGLE_SHOT_WARMUP_COUNT),
-                    TimeValue.NONE);
+                    TimeValue.NONE,
+                    threads);
         } else {
             TimeValue timeValue = options.getWarmupTime();
             if (timeValue == null || timeValue.getTime() == -1) {
@@ -71,18 +74,19 @@ public class MicroBenchmarkParametersFactory {
                     timeValue = Defaults.WARMUP_TIME;
                 }
             }
-            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_COUNT),timeValue);
+            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_COUNT),timeValue, threads);
         }
     }
 
-    private static IterationParams getMeasurement(BaseOptions options, BenchmarkRecord benchmark, Method method) {
+    private static IterationParams getMeasurement(BaseOptions options, BenchmarkRecord benchmark, Method method, int threads) {
         boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Measurement meAnn = method.getAnnotation(Measurement.class);
         int iters = (meAnn == null) ? -1 : meAnn.iterations();
         if (isSingleShot) {
             return new IterationParams(
                     getInteger(options.getIterations(), iters, Defaults.SINGLE_SHOT_ITERATION_COUNT),
-                    TimeValue.NONE);
+                    TimeValue.NONE,
+                    threads);
 
         } else {
             TimeValue timeValue = options.getRuntime();
@@ -94,7 +98,7 @@ public class MicroBenchmarkParametersFactory {
                 }
             }
             return new IterationParams(
-                    getInteger(options.getIterations(), iters, Defaults.ITERATION_COUNT), timeValue);
+                    getInteger(options.getIterations(), iters, Defaults.ITERATION_COUNT), timeValue, threads);
         }
     }
 
