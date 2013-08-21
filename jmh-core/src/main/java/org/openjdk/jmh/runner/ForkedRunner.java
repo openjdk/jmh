@@ -48,15 +48,11 @@ public class ForkedRunner extends BaseRunner {
             out.println("Benchmarks: ");
             out.println(benchmark.getUsername());
         }
-        runForkedBenchmarks(benchmark);
-        out.flush();
-        out.close();
-    }
-
-    private void runForkedBenchmarks(BenchmarkRecord benchmark) {
         out.startRun("Measurement Section");
         runClassicBenchmark(benchmark);
         out.endRun(null);
+        out.flush();
+        out.close();
     }
 
 }
