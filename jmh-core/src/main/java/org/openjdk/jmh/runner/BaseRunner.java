@@ -60,70 +60,15 @@ public abstract class BaseRunner {
         this.out = handler;
     }
 
-    /**
-     * Run a micro benchmark in classic execution mode
-     * The method manages both warmup and measurements iterations
-     * @param benchmark benchmark to run
-     */
-    void runClassicBenchmark(BenchmarkRecord benchmark) {
-        List<IterationData> allResults = new ArrayList<IterationData>();
+    void runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
-            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
+            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method, doWarmup, doMeasurement);
             MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
-            out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
-
-            // execute the appropriate number of warmup iterations
-            // before the corresponding measurement interations.
-
-            IterationParams wp = executionParams.getWarmup();
-            for (int i = 1; i <= wp.getCount(); i++) {
-                // will run system gc if we should
-                if (runSystemGC()) {
-                    out.verbosePrintln("System.gc() executed");
-                }
-
-                out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, wp.getThreads(), wp.getTime());
-                boolean isLastIteration = false; // warmup is never the last iteration
-                IterationData iterData = handler.runIteration(wp.getThreads(), wp.getTime(), isLastIteration).setWarmup();
-                out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
-            }
-
-            IterationParams mp = executionParams.getIteration();
-            for (int i = 1; i <= mp.getCount(); i++) {
-                // will run system gc if we should
-                if (runSystemGC()) {
-                    out.verbosePrintln("System.gc() executed");
-                }
-
-                // run benchmark iteration
-                out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), mp.getTime());
-
-                boolean isLastIteration = (i == mp.getCount());
-                IterationData iterData = handler.runIteration(mp.getThreads(), mp.getTime(), isLastIteration);
-
-                // might get an exception above, in which case the results list will be empty
-                if (iterData.isResultsEmpty()) {
-                    out.println("WARNING: No results returned, benchmark payload threw exception?");
-                } else {
-                    out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
-
-                    if (options.shouldOutputDetailedResults()) {
-                        out.detailedResults(handler.getBenchmark(), i, mp.getThreads(), iterData.getAggregatedResult());
-                    }
-
-                    allResults.add(iterData);
-                }
-            }
-
-            // only print end-of-run output if we have actual results
-            if (!allResults.isEmpty()) {
-                RunResult result = aggregateIterationData(allResults);
-                out.endBenchmark(handler.getBenchmark(), result);
-            }
+            runBenchmark(executionParams, handler);
 
             handler.shutdown();
 
@@ -132,6 +77,60 @@ public abstract class BaseRunner {
             if (this.options.shouldFailOnError()) {
                 throw new IllegalStateException(ex.getMessage(), ex);
             }
+        }
+    }
+
+    protected void runBenchmark(MicroBenchmarkParameters executionParams, MicroBenchmarkHandler handler) {
+        List<IterationData> allResults = new ArrayList<IterationData>();
+
+        out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
+
+        // warmup
+        IterationParams wp = executionParams.getWarmup();
+        for (int i = 1; i <= wp.getCount(); i++) {
+            // will run system gc if we should
+            if (runSystemGC()) {
+                out.verbosePrintln("System.gc() executed");
+            }
+
+            out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, wp.getThreads(), wp.getTime());
+            boolean isLastIteration = (executionParams.getIteration().getCount() == 0);
+            IterationData iterData = handler.runIteration(wp.getThreads(), wp.getTime(), isLastIteration).setWarmup();
+            out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+        }
+
+        // measurement
+        IterationParams mp = executionParams.getIteration();
+        for (int i = 1; i <= mp.getCount(); i++) {
+            // will run system gc if we should
+            if (runSystemGC()) {
+                out.verbosePrintln("System.gc() executed");
+            }
+
+            // run benchmark iteration
+            out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), mp.getTime());
+
+            boolean isLastIteration = (i == mp.getCount());
+            IterationData iterData = handler.runIteration(mp.getThreads(), mp.getTime(), isLastIteration);
+
+            // might get an exception above, in which case the results list will be empty
+            if (iterData.isResultsEmpty()) {
+                out.println("WARNING: No results returned, benchmark payload threw exception?");
+            } else {
+                out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+
+                if (options.shouldOutputDetailedResults()) {
+                    out.detailedResults(handler.getBenchmark(), i, mp.getThreads(), iterData.getAggregatedResult());
+                }
+
+                allResults.add(iterData);
+            }
+        }
+
+        // only print end-of-run output if we have actual results
+        if (!allResults.isEmpty()) {
+            RunResult result = aggregateIterationData(allResults);
+            out.endBenchmark(handler.getBenchmark(), result);
         }
     }
 

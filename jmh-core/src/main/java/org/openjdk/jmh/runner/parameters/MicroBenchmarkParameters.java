@@ -46,10 +46,4 @@ public interface MicroBenchmarkParameters {
 
     public int getThreads();
 
-    /**
-     * returns MicroBenchmarkParameters where warmup parameters pushed to iteration
-     * parameters. Used by bulk warmup mode.
-     * @return
-     */
-    public MicroBenchmarkParameters warmupToIteration();
 }

@@ -39,7 +39,7 @@ public class MicroBenchmarkParametersFactory {
     private MicroBenchmarkParametersFactory() {
     }
 
-    public static MicroBenchmarkParameters makeParams(BaseOptions options, BenchmarkRecord benchmark, Method method) {
+    public static MicroBenchmarkParameters makeParams(BaseOptions options, BenchmarkRecord benchmark, Method method, boolean doWarmup, boolean doMeasurement) {
         boolean shouldSynchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
 
         int threads = getThreads(options, method);
@@ -47,8 +47,13 @@ public class MicroBenchmarkParametersFactory {
             threads = Runtime.getRuntime().availableProcessors();
         }
 
-        IterationParams measurement = getMeasurement(options, benchmark, method, threads);
-        IterationParams warmup = getWarmup(options, benchmark, method, threads);
+        IterationParams measurement = doMeasurement ?
+                getMeasurement(options, benchmark, method, threads) :
+                new IterationParams(0, TimeValue.NONE, 1);
+
+        IterationParams warmup = doWarmup ?
+                getWarmup(options, benchmark, method, threads) :
+                new IterationParams(0, TimeValue.NONE, 1);
 
         return new SameThreadParameters(
                 shouldSynchIterations,
@@ -151,14 +156,6 @@ public class MicroBenchmarkParametersFactory {
             return threads;
         }
 
-        @Override
-        public MicroBenchmarkParameters warmupToIteration() {
-            return new SameThreadParameters(
-                    this.shouldSynchIterations(),
-                    this.getWarmup(),
-                    this.getWarmup(),
-                    this.getThreads());
-        }
     }
 
     private static boolean getBoolean(Boolean value, boolean defaultValue) {

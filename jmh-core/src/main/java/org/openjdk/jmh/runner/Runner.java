@@ -27,14 +27,11 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.results.IterationData;
-import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
 import org.openjdk.jmh.runner.options.HarnessOptions;
 import org.openjdk.jmh.runner.parameters.Defaults;
-import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.util.AnnotationUtils;
@@ -231,7 +228,7 @@ public class Runner extends BaseRunner {
             // currently valid only for non-external JVM runs
             out.startRun("Warmup Section");
             for (BenchmarkRecord benchmark : warmupMicros) {
-                runBulkWarmupModeMicroBenchmark(benchmark, true);
+                runBenchmark(benchmark, true, false);
             }
             out.endRun(null);
         }
@@ -239,7 +236,7 @@ public class Runner extends BaseRunner {
         //
         out.startRun("Measurement Section");
         for (BenchmarkRecord benchmark : benchmarks) {
-            runBulkWarmupModeMicroBenchmark(benchmark, false);
+            runBenchmark(benchmark, false, true);
         }
         out.endRun(null);
     }
@@ -279,7 +276,7 @@ public class Runner extends BaseRunner {
         }
 
         for (BenchmarkRecord benchmark : embedded) {
-            runClassicBenchmark(benchmark);
+            runBenchmark(benchmark, true, true);
         }
 
         runSeparate(forked);
@@ -408,92 +405,6 @@ public class Runner extends BaseRunner {
         } catch (InterruptedException ex) {
             out.exception(ex);
         }
-    }
-
-    /**
-     * Run a micro benchmark in bulk warmup mode
-     *
-     * @param benchmark benchmark to run
-     */
-    private List<IterationData> runBulkWarmupModeMicroBenchmark(BenchmarkRecord benchmark, boolean warmup) {
-        List<IterationData> allResults = new ArrayList<IterationData>();
-        try {
-            String benchName = benchmark.generatedTarget();
-            int index = benchName.lastIndexOf('.');
-            String className = benchName.substring(0, index);
-            String methodName = benchName.substring(index + 1);
-
-            Class<?> clazz = ClassUtils.loadClass(className);
-            Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, methodName);
-
-            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
-            MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
-
-            out.startBenchmark(handler.getBenchmark(), executionParams, options.isVerbose());
-
-            if (warmup) {
-                IterationParams p = executionParams.getWarmup();
-                for (int i = 1; i <= p.getCount(); i++) {
-                    // will run system gc if we should
-                    if (runSystemGC()) {
-                        out.verbosePrintln("System.gc() executed");
-                    }
-
-                    // run benchmark iteration
-                    out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, p.getThreads(), p.getTime());
-
-                    boolean isLastIteration = (i == p.getCount());
-                    IterationData iterData = handler.runIteration(p.getThreads(), p.getTime(), isLastIteration);
-
-                    // might get an exception above, in which case the results list will be empty
-                    if (iterData.isResultsEmpty()) {
-                        out.println("WARNING: No results returned, benchmark payload threw exception?");
-                    } else {
-                        // print out score for this iteration
-                        out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, p.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
-                    }
-                }
-            } else {
-                IterationParams p = executionParams.getIteration();
-                for (int i = 1; i <= p.getCount(); i++) {
-                    // will run system gc if we should
-                    if (runSystemGC()) {
-                        out.verbosePrintln("System.gc() executed");
-                    }
-
-                    // run benchmark iteration
-                    out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, p.getThreads(), p.getTime());
-
-                    boolean isLastIteration = (i == p.getCount());
-                    IterationData iterData = handler.runIteration(p.getThreads(), p.getTime(), isLastIteration);
-
-                    // might get an exception above, in which case the results list will be empty
-                    if (iterData.isResultsEmpty()) {
-                        out.println("WARNING: No results returned, benchmark payload threw exception?");
-                    } else {
-                        // non-empty list => output and aggregate results
-                        allResults.add(iterData);
-
-                        // print out score for this iteration
-                        out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
-                    }
-                }
-            }
-            // only print end-of-run output if we have actual results
-            if (!allResults.isEmpty()) {
-                RunResult result = aggregateIterationData(allResults);
-                out.endBenchmark(handler.getBenchmark(), result);
-            }
-
-            handler.shutdown();
-
-        } catch (Throwable ex) {
-            out.exception(ex);
-            if (options.shouldFailOnError()) {
-                throw new IllegalStateException(ex.getMessage(), ex);
-            }
-        }
-        return allResults;
     }
 
 }
