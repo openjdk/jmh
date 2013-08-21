@@ -132,8 +132,4 @@ public class CsvFormat extends AbstractOutputFormat {
         out.println(DELIMITER);
     }
 
-    @Override
-    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result) {
-
-    }
 }

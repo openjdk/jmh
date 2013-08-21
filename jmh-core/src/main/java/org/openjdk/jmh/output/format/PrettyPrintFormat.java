@@ -172,27 +172,6 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         out.println();
     }
 
-    @Override
-    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result) {
-        out.println();
-
-        for (String label : result.getStatistics().keySet()) {
-            Statistics statistics = result.getStatistics().get(label);
-            String prefix = "Thread sub-statistics for " + threads + ' ' + getThreadsString(threads) + ", label = " + label;
-            if (statistics.getN() > 2) {
-                double[] interval95 = statistics.getConfidenceInterval(0.05);
-                double[] interval99 = statistics.getConfidenceInterval(0.01);
-                out.println(String.format("%s: %.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f",
-                        prefix, (interval95[0] + interval95[1]) / 2,
-                        (interval95[1] - interval95[0]) / 2, (interval99[1] - interval99[0]) / 2));
-            } else {
-                out.println(String.format("%s: %.3f (<= 2 iterations)", prefix, statistics.getMean()));
-            }
-            out.println();
-        }
-
-    }
-
     protected static String getThreadsString(int t) {
         if (t > 1) {
             return "threads";

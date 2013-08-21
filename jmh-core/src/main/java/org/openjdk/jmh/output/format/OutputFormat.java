@@ -124,15 +124,6 @@ public interface OutputFormat {
      */
     public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results);
 
-    /**
-     * Format for sub-thread statistics.
-     *
-     * @param name      benchmark name
-     * @param threads   thread count
-     * @param result    result of iterations of the current threadcount
-     */
-    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult result);
-
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 
     void exception(Throwable ex);

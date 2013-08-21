@@ -87,10 +87,4 @@ public class SilentFormat extends AbstractOutputFormat {
     public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
     }
 
-    @Override
-    public void threadSubStatistics(BenchmarkRecord name, int threads, RunResult results) {
-
-    }
-
-
 }
