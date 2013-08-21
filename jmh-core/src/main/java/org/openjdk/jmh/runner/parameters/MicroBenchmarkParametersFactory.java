@@ -33,10 +33,6 @@ import org.openjdk.jmh.runner.options.BaseOptions;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
 
 public class MicroBenchmarkParametersFactory {
 
@@ -48,41 +44,14 @@ public class MicroBenchmarkParametersFactory {
         IterationParams measurement = getMeasurement(options, benchmark, method);
         IterationParams warmup = getWarmup(options, benchmark, method);
 
-        List<Integer> threadCount = options.getThreadCounts();
-        if (!threadCount.isEmpty()) {
-            // -tc was set => -t & -sc are not working
-            ListIterator<Integer> it = threadCount.listIterator();
-            while (it.hasNext()) {
-                int listValue = it.next();
-                if (listValue == 0) {
-                    it.set(Runtime.getRuntime().availableProcessors());
-                } else if (listValue < 0) {
-                    throw new IllegalArgumentException("-tc values shouldn't be negative");
-                }
-            }
-            return new ThreadCountParameters(
-                    shouldSynchIterations,
-                    warmup, measurement,
-                    threadCount);
-        }
         int threads = getThreads(options, method);
-        if (options.shouldScale()) {
-            if(threads == 0 || threads == 1) { // that was written before me (c) SK
-                threads = Runtime.getRuntime().availableProcessors();
-            }
-            return new ScaleParameters(
-                    shouldSynchIterations,
-                    warmup, measurement,
-                    threads);
-        } else {
-            if(threads == 0) {
-                threads = Runtime.getRuntime().availableProcessors();
-            }
-            return new SameThreadParameters(
-                    shouldSynchIterations,
-                    warmup, measurement,
-                    threads);
+        if (threads == 0) {
+            threads = Runtime.getRuntime().availableProcessors();
         }
+        return new SameThreadParameters(
+                shouldSynchIterations,
+                warmup, measurement,
+                threads);
     }
 
     private static IterationParams getWarmup(BaseOptions options, BenchmarkRecord benchmark, Method method) {
@@ -164,158 +133,6 @@ public class MicroBenchmarkParametersFactory {
         }
     }
 
-    static class ThreadCountParameters extends AbstractParameters  {
-
-        private final int maxThreads;
-        private final List<Integer> threadCount;
-        private List<ThreadIterationParams> threadSequence = null;
-
-        public ThreadCountParameters(boolean synchIterations, IterationParams warmup, IterationParams iteration, List<Integer> threadCount) {
-            super(synchIterations, warmup, new IterationParams(threadCount.size(), iteration.getTime()));
-            this.threadCount = threadCount;
-            this.maxThreads = Collections.max(threadCount);
-        }
-
-        @Override
-        public List<Integer> getThreadCounts() {
-            return threadCount;
-        }
-
-        @Override
-        public boolean shouldScale() {
-            return false;
-        }
-
-        @Override
-        public int getMaxThreads() {
-            return maxThreads;
-        }
-
-        @Override
-        public List<ThreadIterationParams> getThreadIterationSequence() {
-            if (threadSequence == null) {
-                threadSequence = compressRawList(getThreadCounts(), getIteration().getTime());
-            }
-            return threadSequence;
-        }
-
-        @Override
-        public MicroBenchmarkParameters warmupToIteration() {
-            return new ThreadCountParameters(
-                    this.shouldSynchIterations(),
-                    this.getWarmup(),
-                    this.getWarmup(),
-                    this.getThreadCounts());
-        }
-    }
-
-    static class ScaleParameters extends AbstractParameters {
-
-        private final int threads;
-
-        // lazy set in getThreadCount - not thread safe.
-        private List<Integer> threadCount = null;
-        private List<ThreadIterationParams> threadSequence = null;
-
-        public ScaleParameters(boolean synchIterations, IterationParams warmup, IterationParams iteration, int threads) {
-            super(synchIterations, warmup, iteration);
-            this.threads = threads;
-        }
-
-        @Override
-        public List<Integer> getThreadCounts() {
-            if (threadCount == null) {
-                threadCount = makeScaledThreadSequence(threads, getIteration().getCount());
-            }
-            return threadCount;
-        }
-
-        @Override
-        public boolean shouldScale() {
-            return true;
-        }
-
-        @Override
-        public int getMaxThreads() {
-            return threads;
-        }
-
-        @Override
-        public List<ThreadIterationParams> getThreadIterationSequence() {
-            if (threadSequence == null) {
-                threadSequence = compressRawList(getThreadCounts(), getIteration().getTime());
-            }
-            return threadSequence ;
-        }
-
-        @Override
-        public MicroBenchmarkParameters warmupToIteration() {
-            return new ScaleParameters(
-                    this.shouldSynchIterations(),
-                    this.getWarmup(),
-                    this.getWarmup(),
-                    this.getMaxThreads());
-        }
-
-        /**
-         * Returns a list of "threadcounts", one count per iteration. Where each count is the number of concurrent threads
-         * that should execute the workload for the given iteration. Position 'i' in list == iteration i.
-         * <p/>
-         * Thanks to aleksey.shipilev@oracle.com for this idea!
-         *
-         * @return a list of threadcounts
-         */
-        private static List<Integer> makeScaledThreadSequence(int threads, int iterations) {
-            assert threads > 0;
-            assert iterations >= 0;
-            if (iterations == 0) {
-                return Collections.emptyList();
-            }
-            if (iterations == 1) {
-                return Collections.singletonList(threads);
-            }
-            List<Integer> result = new ArrayList<Integer>(iterations);
-            if (iterations > threads) {
-                int step = Math.round((float) iterations / (float) threads);
-                int t = 1;
-
-                for (int i = 0; i < iterations - 1; i++) {
-                    result.add(t);
-                    // increase threadcount every step'd iteration
-                    // example: 12 iterations, 4 threads:
-                    // 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4
-                    if ((i + 1) % step == 0) {
-                        t++;
-                    }
-                }
-            } else {
-                int step;
-                int t;
-                // handle special case
-                if (threads == iterations) {
-                    step = 1;
-                    t = 2;
-                } else {
-                    // general
-                    step = Math.round((float) threads / ((float) iterations - 1));
-                    t = step;
-                }
-                // first round always == 1 in this case
-                result.add(1);
-                for (int i = 1; i < iterations - 1; i++) {
-                    result.add(t);
-                    // just plain interpolate
-                    // example: 5 iterations, 64 threads:
-                    // 1 16 32 48 64
-                    t += step;
-                }
-            }
-            // add last iteration, always == getThreads()
-            result.add(threads);
-            return result;
-        }
-    }
-
     static class SameThreadParameters extends AbstractParameters {
 
         private final int threads;
@@ -326,23 +143,8 @@ public class MicroBenchmarkParametersFactory {
         }
 
         @Override
-        public List<Integer> getThreadCounts() {
-            return Collections.nCopies(getIteration().getCount(), threads);
-        }
-
-        @Override
-        public boolean shouldScale() {
-            return false;
-        }
-
-        @Override
-        public int getMaxThreads() {
+        public int getThreads() {
             return threads;
-        }
-
-        @Override
-        public List<ThreadIterationParams> getThreadIterationSequence() {
-            return Collections.singletonList(getIteration().addThreads(threads));
         }
 
         @Override
@@ -351,34 +153,8 @@ public class MicroBenchmarkParametersFactory {
                     this.shouldSynchIterations(),
                     this.getWarmup(),
                     this.getWarmup(),
-                    this.getMaxThreads());
+                    this.getThreads());
         }
-    }
-
-
-    private static List<ThreadIterationParams> compressRawList(List<Integer> rawThreadCount, TimeValue timeValue) {
-        if (rawThreadCount == null || rawThreadCount.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<ThreadIterationParams> res = new ArrayList<ThreadIterationParams>();
-        int prevThreads = -1;
-        int iterCount = 0;
-        for (int threads : rawThreadCount) {
-            assert threads > 0 : "thread count should be positive ";
-            if (threads == prevThreads) {
-                iterCount++;
-            } else {
-                if (prevThreads > 0) {
-                    res.add(new ThreadIterationParams(prevThreads, iterCount, timeValue));
-                }
-                prevThreads = threads;
-                iterCount = 1;
-            }
-        }
-        if (prevThreads > 0) {
-            res.add(new ThreadIterationParams(prevThreads, iterCount, timeValue));
-        }
-        return res;
     }
 
     private static boolean getBoolean(Boolean value, boolean defaultValue) {

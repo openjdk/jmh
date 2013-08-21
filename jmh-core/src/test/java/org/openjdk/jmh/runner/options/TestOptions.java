@@ -88,20 +88,20 @@ public class TestOptions {
         assertEquals("-v true", getForked(argv5));
 
 
-        String[] argv6 = {".*Apa.*", ".*SPECjbb2006.*", "-sc", "-f", "-v", "-o", "SPECjbb2006"};
-        assertEquals("-sc true -v true", getForked(argv6));
+        String[] argv6 = {".*Apa.*", ".*SPECjbb2006.*", "-f", "-v", "-o", "SPECjbb2006"};
+        assertEquals("-v true", getForked(argv6));
 
 
-        String[] argv7 = {".*Apa.*", ".*SPECjbb2007.*", "-w", "100", "-sc", "-f", "-v", "-o", "SPECjbb2007"};
-        assertEquals("-sc true -v true -w 100s", getForked(argv7));
+        String[] argv7 = {".*Apa.*", ".*SPECjbb2007.*", "-w", "100", "-f", "-v", "-o", "SPECjbb2007"};
+        assertEquals("-v true -w 100s", getForked(argv7));
 
 
-        String[] argv8 = {".*Apa.*", ".*SPECjbb2008.*", "-w", "100", "-sc", "-l", "-f", "-v", "-o", "SPECjbb2008"};
-        assertEquals("-sc true -v true -w 100s", getForked(argv8));
+        String[] argv8 = {".*Apa.*", ".*SPECjbb2008.*", "-w", "100", "-l", "-f", "-v", "-o", "SPECjbb2008"};
+        assertEquals("-v true -w 100s", getForked(argv8));
 
 
-        String[] argv9 = {"-i", "10", "-r", "10", "-w", "10", "-t", "10", "-sc", "true", "-tc", "1,2,3,4", "-si", "-l", "-v", "-o", "SPECjbb2005", "-of", "csv"};
-        assertEquals("-i 10 -r 10s -sc true -si true -t 10 -tc 1,2,3,4 -v true -w 10s", getForked(argv9));
+        String[] argv9 = {"-i", "10", "-r", "10", "-w", "10", "-t", "10", "-si", "-l", "-v", "-o", "SPECjbb2005", "-of", "csv"};
+        assertEquals("-i 10 -r 10s -si true -t 10 -v true -w 10s", getForked(argv9));
     }
 
 
@@ -112,52 +112,10 @@ public class TestOptions {
     }
 
     @Test
-    public void testGetBenchmarkSpecificInstance() throws Exception {
-        String[] argv = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v", "-i", "11", "-r", "100s", "-t", "2", "-sc", "false"};
-        HarnessOptions options = getOptions(argv);
-
-        BenchmarkRecord br = new BenchmarkRecord(this.getClass().getName() + "dummyMethod2", this.getClass().getName() + "dummyMethod2", Mode.Throughput);
-        MicroBenchmarkParameters mbp = MicroBenchmarkParametersFactory.makeParams(options, br, this.getClass().getMethod("dummyMethod"));
-
-        assertEquals(options.getIterations(), mbp.getIteration().getCount());
-        assertFalse(options.shouldScale());
-        assertFalse(mbp.shouldScale());
-        assertEquals(options.getThreads(), mbp.getMaxThreads());
-
-        String[] argv2 = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v"};
-        options = getOptions(argv2);
-
-        mbp = MicroBenchmarkParametersFactory.makeParams(options, br, this.getClass().getMethod("dummyMethod"));
-
-        assertTrue(options.getIterations() != mbp.getIteration().getCount());
-        assertTrue(options.getThreads() != mbp.getMaxThreads());
-
-    }
-
-    @Test
-    public void testAutoNumberOfThreads() throws Exception {
-        String[] argv = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v", "-i", "11", "-r", "100s", "-sc"};
-        HarnessOptions options = getOptions(argv);
-
-        BenchmarkRecord br = new BenchmarkRecord(this.getClass().getName() + "dummyMethod2", this.getClass().getName() + "dummyMethod2", Mode.Throughput);
-        MicroBenchmarkParameters mbp = MicroBenchmarkParametersFactory.makeParams(options, br, this.getClass().getMethod("dummyMethod2"));
-
-        assertEquals(Runtime.getRuntime().availableProcessors(), mbp.getMaxThreads());
-    }
-
-    @Test
     public void testThreadsMax() throws Exception {
         String[] argv = {"-t", "max"};
         HarnessOptions options = getOptions(argv);
         assertEquals(0, options.getThreads());
-    }
-
-    @Test
-    public void testThreadCounts() throws Exception {
-        String[] argv = {"-tc", "1,2,3,4,5"};
-        HarnessOptions options = getOptions(argv);
-        List<Integer> expected = Arrays.asList(1,2,3,4,5);
-        assertTrue(expected.equals(options.getThreadCounts()));
     }
 
     @Test
@@ -172,20 +130,6 @@ public class TestOptions {
         }
 
         fail("Did not get the expected CmdLineException when given a faulty -t parameter");
-    }
-
-    @Test
-    public void testThreadCountssWrong() throws Exception {
-        String parameter = "lol";
-        String[] argv = {"-tc", parameter};
-        try {
-            HarnessOptions options = getOptions(argv);
-        } catch (CmdLineException e) {
-            assertTrue("Exception message did not contain parameter value", e.getMessage().contains(parameter));
-            return;
-        }
-
-        fail("Did not get the expected CmdLineException when given a faulty -tc parameter");
     }
 
     @Threads(100)
@@ -225,16 +169,4 @@ public class TestOptions {
         }
     }
 
-    @Test
-    public void testForceReWarmup() throws Exception {
-        String[] argv = {"-frw", ".*Hash.*"};
-        HarnessOptions options = getOptions(argv);
-
-        assertTrue(options.shouldForceReWarmup());
-
-        String[] argv2 = {".*Hash.*"};
-        options = getOptions(argv2);
-
-        assertFalse(options.shouldForceReWarmup());
-    }
 }

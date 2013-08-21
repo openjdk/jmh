@@ -44,18 +44,12 @@ public interface MicroBenchmarkParameters {
 
     public IterationParams getIteration();
 
-    public List<Integer> getThreadCounts();
-
-    public boolean shouldScale();
-
     /**
      * Getter for max amount of threads to use.
      *
      * @return amount of threads
      */
-    public int getMaxThreads();
-
-    public List<ThreadIterationParams> getThreadIterationSequence();
+    public int getThreads();
 
     /**
      * returns MicroBenchmarkParameters where warmup parameters pushed to iteration

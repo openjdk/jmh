@@ -67,7 +67,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, BaseOptions options, MicroBenchmarkParameters executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
-        this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getMaxThreads(), microbenchmark.getUsername());
+        this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
         this.threadLocal = new ThreadLocal<InstanceProvider>() {
             @Override
             protected InstanceProvider initialValue() {

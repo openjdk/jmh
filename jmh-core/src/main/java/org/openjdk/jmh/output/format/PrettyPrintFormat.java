@@ -83,16 +83,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
         out.println("# Runtime (per iteration): " + mbParams.getIteration().getTime());
         out.println("# Iterations: " + mbParams.getIteration().getCount());
-
-        if (!mbParams.getThreadCounts().isEmpty()) {
-            out.print("# Thread counts (concurrent threads per iteration): " + mbParams.getThreadCounts());
-        }
-
-        if (mbParams.shouldScale()) {
-            out.print(" (scaling 1 -> " + mbParams.getMaxThreads() + ')');
-        }
-
-        out.println();
+        out.println("# Thread count: " + mbParams.getThreads());
 
         if (mbParams.shouldSynchIterations()) {
             out.println("# Threads will synchronize iterations");

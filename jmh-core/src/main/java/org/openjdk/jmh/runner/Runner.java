@@ -33,6 +33,7 @@ import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
 import org.openjdk.jmh.runner.options.HarnessOptions;
 import org.openjdk.jmh.runner.parameters.Defaults;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.runner.parameters.ThreadIterationParams;
@@ -428,16 +429,56 @@ public class Runner extends BaseRunner {
 
             MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method);
             MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
-            if (warmup) {
-                executionParams = executionParams.warmupToIteration();
-            }
+
             out.startBenchmark(handler.getBenchmark(), executionParams, options.isVerbose());
-            int iteration = 0;
-            final Collection<ThreadIterationParams> threadIterationSequence = executionParams.getThreadIterationSequence();
-            for (ThreadIterationParams tip : threadIterationSequence) {
-                List<IterationData> ticResults = runMicroBenchmark(handler, iteration, tip, options.shouldOutputDetailedResults(), options.shouldOutputThreadSubStatistics() && threadIterationSequence.size() > 1);
-                allResults.addAll(ticResults);
-                iteration += tip.getCount();
+
+            if (warmup) {
+                IterationParams p = executionParams.getWarmup();
+                for (int i = 1; i <= p.getCount(); i++) {
+                    // will run system gc if we should
+                    if (runSystemGC()) {
+                        out.verbosePrintln("System.gc() executed");
+                    }
+
+                    // run benchmark iteration
+                    out.warmupIteration(handler.getBenchmark(), i, executionParams.getThreads(), p.getTime());
+
+                    boolean isLastIteration = (i == p.getCount());
+                    IterationData iterData = handler.runIteration(executionParams.getThreads(), p.getTime(), isLastIteration);
+
+                    // might get an exception above, in which case the results list will be empty
+                    if (iterData.isResultsEmpty()) {
+                        out.println("WARNING: No results returned, benchmark payload threw exception?");
+                    } else {
+                        // print out score for this iteration
+                        out.warmupIterationResult(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult());
+                    }
+                }
+            } else {
+                IterationParams p = executionParams.getIteration();
+                for (int i = 1; i <= p.getCount(); i++) {
+                    // will run system gc if we should
+                    if (runSystemGC()) {
+                        out.verbosePrintln("System.gc() executed");
+                    }
+
+                    // run benchmark iteration
+                    out.iteration(handler.getBenchmark(), i, executionParams.getThreads(), p.getTime());
+
+                    boolean isLastIteration = (i == p.getCount());
+                    IterationData iterData = handler.runIteration(executionParams.getThreads(), p.getTime(), isLastIteration);
+
+                    // might get an exception above, in which case the results list will be empty
+                    if (iterData.isResultsEmpty()) {
+                        out.println("WARNING: No results returned, benchmark payload threw exception?");
+                    } else {
+                        // non-empty list => output and aggregate results
+                        allResults.add(iterData);
+
+                        // print out score for this iteration
+                        out.iterationResult(handler.getBenchmark(), i, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                    }
+                }
             }
             // only print end-of-run output if we have actual results
             if (!allResults.isEmpty()) {

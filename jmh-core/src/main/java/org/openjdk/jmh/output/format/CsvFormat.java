@@ -71,7 +71,7 @@ public class CsvFormat extends AbstractOutputFormat {
 
             out.print("Benchmark" + DELIMITER + "Iteration" + DELIMITER + "Score" + DELIMITER + "Threads" + DELIMITER + "Unit");
 
-            for (int i = 1; i < mbParams.getMaxThreads() + 1; i++) {
+            for (int i = 1; i < mbParams.getThreads() + 1; i++) {
                 out.print(DELIMITER + "Thread " + i);
             }
 

@@ -29,6 +29,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.BaseOptions;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.runner.parameters.ThreadIterationParams;
@@ -38,7 +39,6 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -76,20 +76,49 @@ public abstract class BaseRunner {
 
             out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
 
-            int iteration = 0;
-            final Collection<ThreadIterationParams> threadIterationSequence = executionParams.getThreadIterationSequence();
-            for (ThreadIterationParams tip : threadIterationSequence) {
-                // always do warmup-check for the first iteration
-                // also check if we should force a re-warmup if new thread count requested:
-                // give a chance for JIT/VM/OS to readapt
-                //
-                if (iteration == 0 || options.shouldForceReWarmup()) {
-                    runWarmup(handler, executionParams.getWarmup().addThreads(tip.getThreads()));
+            // execute the appropriate number of warmup iterations
+            // before the corresponding measurement interations.
+
+            IterationParams warmupParams = executionParams.getWarmup();
+            for (int i = 1; i <= warmupParams.getCount(); i++) {
+                // will run system gc if we should
+                if (runSystemGC()) {
+                    out.verbosePrintln("System.gc() executed");
                 }
-                List<IterationData> ticResults = runMicroBenchmark(handler, iteration, tip, options.shouldOutputDetailedResults(), options.shouldOutputThreadSubStatistics() && threadIterationSequence.size()>1);
-                allResults.addAll(ticResults);
-                iteration += tip.getCount();
+
+                out.warmupIteration(handler.getBenchmark(), i, executionParams.getThreads(), warmupParams.getTime());
+                boolean isLastIteration = false; // warmup is never the last iteration
+                IterationData iterData = handler.runIteration(executionParams.getThreads(), warmupParams.getTime(), isLastIteration).setWarmup();
+                out.warmupIterationResult(handler.getBenchmark(), i, options.getThreads(), iterData.getAggregatedResult());
             }
+
+            IterationParams measureParams = executionParams.getIteration();
+            for (int i = 1; i <= measureParams.getCount(); i++) {
+                // will run system gc if we should
+                if (runSystemGC()) {
+                    out.verbosePrintln("System.gc() executed");
+                }
+
+                // run benchmark iteration
+                out.iteration(handler.getBenchmark(), i, executionParams.getThreads(), measureParams.getTime());
+
+                boolean isLastIteration = (i == measureParams.getCount());
+                IterationData iterData = handler.runIteration(executionParams.getThreads(), measureParams.getTime(), isLastIteration);
+
+                // might get an exception above, in which case the results list will be empty
+                if (iterData.isResultsEmpty()) {
+                    out.println("WARNING: No results returned, benchmark payload threw exception?");
+                } else {
+                    out.iterationResult(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+
+                    if (options.shouldOutputDetailedResults()) {
+                        out.detailedResults(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult());
+                    }
+
+                    allResults.add(iterData);
+                }
+            }
+
             // only print end-of-run output if we have actual results
             if (!allResults.isEmpty()) {
                 RunResult result = aggregateIterationData(allResults);
@@ -103,82 +132,6 @@ public abstract class BaseRunner {
             if (this.options.shouldFailOnError()) {
                 throw new IllegalStateException(ex.getMessage(), ex);
             }
-        }
-    }
-
-    /**
-     * Run "iterations" iterations for a micro benchmark with numThreads threads
-     */
-    List<IterationData> runMicroBenchmark(MicroBenchmarkHandler handler, int startIterNum, ThreadIterationParams tip, boolean showDetailedResults, boolean showSubStatistic) {
-        List<IterationData> results = new ArrayList<IterationData>();
-
-        for (int i = 1; i <= tip.getCount(); i++) {
-            // will run system gc if we should
-            if (runSystemGC()) {
-                out.verbosePrintln("System.gc() executed");
-            }
-
-            // run benchmark iteration
-            out.iteration(handler.getBenchmark(), startIterNum + i, tip.getThreads(), tip.getTime());
-
-            boolean isLastIteration = (i == tip.getCount());
-            IterationData iterData = handler.runIteration(tip.getThreads(), tip.getTime(), isLastIteration);
-
-            // might get an exception above, in which case the results list will be empty
-            if (iterData.isResultsEmpty()) {
-                out.println("WARNING: No results returned, benchmark payload threw exception?");
-            } else {
-                // non-empty list => output and aggregate results
-                results.add(iterData);
-
-                // print out score for this iteration
-                out.iterationResult(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
-
-                // detailed output
-                if (showDetailedResults) {
-                    // print (or not) detailed per-thread results
-                    out.detailedResults(handler.getBenchmark(), startIterNum + i, tip.getThreads(), iterData.getAggregatedResult());
-                }
-
-            }
-        }
-        assert tip.getCount()==results.size();
-        if (showSubStatistic && (tip.getCount() > 1)) {
-            // if we've executed more than 1 iteration with the same amount
-            // if threads and the next iteration will change the count,
-            // OR if we're finished iterating
-            RunResult aggregatedResult = aggregateIterationData(results);
-            out.threadSubStatistics(handler.getBenchmark(), tip.getThreads(), aggregatedResult);
-        }
-        return results;
-    }
-
-
-    private void runWarmup(MicroBenchmarkHandler handler, ThreadIterationParams warmup) {
-        // This is the in-measurement phase warmup option. The legacy code
-        // provides for only one warmup iteration prior to the measurement
-        // iterations. The new code allows the developer (through annotation)
-        // or the user (through command line option) to specify the number
-        // of warmup iterations to run. This is added because the HotSpot JIT
-        // compiler reguarly needs more than one call to a method before
-        // getting fulling warmed up code (and even then certain branches
-        // or exception paths might not get fully compiled until invocation
-        // counters on those paths get triggered).
-        //
-
-        // execute the appropriate number of warmup iterations
-        // before the corresponding measurement interations.
-        //
-        for (int i = 1; i <= warmup.getCount(); i++) {
-            // will run system gc if we should
-            if (runSystemGC()) {
-                out.verbosePrintln("System.gc() executed");
-            }
-
-            out.warmupIteration(handler.getBenchmark(), i, warmup.getThreads(), warmup.getTime());
-            boolean isLastIteration = false; // warmup is never the last iteration
-            IterationData iterData = handler.runIteration(warmup.getThreads(), warmup.getTime(), isLastIteration).setWarmup();
-            out.warmupIterationResult(handler.getBenchmark(), i, warmup.getThreads(), iterData.getAggregatedResult());
         }
     }
 
