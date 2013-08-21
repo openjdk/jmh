@@ -61,21 +61,23 @@ public abstract class BaseRunner {
     }
 
     void runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
+        MicroBenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
             MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method, doWarmup, doMeasurement);
-            MicroBenchmarkHandler handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
+            handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
             runBenchmark(executionParams, handler);
-
-            handler.shutdown();
-
         } catch (Throwable ex) {
             out.exception(ex);
             if (this.options.shouldFailOnError()) {
                 throw new IllegalStateException(ex.getMessage(), ex);
+            }
+        } finally {
+            if (handler != null) {
+                handler.shutdown();
             }
         }
     }
