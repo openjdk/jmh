@@ -41,29 +41,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class InfraControl extends InfraControlL4 {
 
-    /** Timers */
-    private static final ScheduledExecutorService timers = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r);
-            t.setPriority(Thread.MAX_PRIORITY);
-            t.setDaemon(true);
-            t.setName("LoopTimer");
-            return t;
-        }
-    });
-
     public InfraControl(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {
         super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit);
-    }
-
-    public void enableTimer() {
-        timers.schedule(new Runnable() {
-            @Override
-            public void run() {
-                isDone = true;
-            }
-        }, duration, TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -116,7 +95,7 @@ public class InfraControl extends InfraControlL4 {
     }
 }
 
-class InfraControl_L1 {
+class InfraControlL1 {
     public int p01, p02, p03, p04, p05, p06, p07, p08;
     public int p11, p12, p13, p14, p15, p16, p17, p18;
     public int p21, p22, p23, p24, p25, p26, p27, p28;
@@ -126,7 +105,7 @@ class InfraControl_L1 {
 /**
  * @see BlackHole for rationale
  */
-class InfraControlL2 extends InfraControl_L1 {
+class InfraControlL2 extends InfraControlL1 {
     /* Flag for if we are done or not.
      * This is specifically the public field, so to spare one virtual call.
      */

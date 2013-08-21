@@ -135,4 +135,8 @@ public class TimeValue implements Serializable {
     public long convertTo(TimeUnit unit) {
         return unit.convert(time, timeUnit);
     }
+
+    public void sleep() throws InterruptedException {
+        timeUnit.sleep(time);
+    }
 }

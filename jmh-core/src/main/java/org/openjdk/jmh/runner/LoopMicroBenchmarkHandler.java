@@ -102,8 +102,13 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // profilers start when iteration starts
         startProfilers();
 
-        // enable the timers
-        control.enableTimer();
+        // wait for the iteration time to expire, then set the termination flag
+        try {
+            runtime.sleep();
+        } catch (InterruptedException e) {
+            // regardless...
+        }
+        control.isDone = true;
 
         // wait for all workers to complete run and ready to proceed
         try {
