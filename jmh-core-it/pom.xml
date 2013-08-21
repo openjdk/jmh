@@ -100,15 +100,6 @@ questions.
                                     <mainClass>org.openjdk.jmh.Main</mainClass>
                                 </transformer>
                             </transformers>
-                            <filters>
-                                <!-- Remove annotation processor files -->
-                                <filter>
-                                    <artifact>oracle.micro:MicroBenchmarkAnnotationProcessor</artifact>
-                                    <excludes>
-                                        <exclude>*/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>
