@@ -45,26 +45,6 @@ import java.util.Collection;
 public interface OutputFormat {
 
     /**
-     * Format for warmup output.
-     *
-     * @param benchmark benchmark name
-     * @param iteration Warmup Iteration Number (1..N)
-     * @param threads   Number of threads we executed on
-     * @param warmupTime Time to spend per iteration
-     */
-    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime);
-
-    /**
-     * Format for end-of-warmup-iteration.
-     *
-     * @param benchmark benchmark name
-     * @param iteration iteration-number
-     * @param thread    amount of threads used
-     * @param result    result of iteration
-     */
-    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result);
-
-    /**
      * Format for iteration start.
      *
      * @param benchmark benchmark name
@@ -72,7 +52,7 @@ public interface OutputFormat {
      * @param threads threads to run
      * @param runTime time to spend per iteration
      */
-    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue runTime);
+    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue runTime);
 
     /**
      * Format for end-of-iteration.
@@ -83,7 +63,7 @@ public interface OutputFormat {
      * @param result    result of iteration
      * @param profiles  profiler results
      */
-    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles);
+    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles);
 
     /**
      * Format for start-of-benchmark output.

@@ -52,7 +52,9 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+        if (type != IterationType.MEASUREMENT) return;
+
         out.print(name + DELIMITER + iteration + DELIMITER);
         for (Result r : result.getResult().values()) {
             out.print(convertDouble(r.getScore()) + DELIMITER);
@@ -96,17 +98,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue runTime) {
-        // don't print anything
-    }
-
-    @Override
-    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime) {
-        // don't print anything
-    }
-
-    @Override
-    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
+    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue runTime) {
         // don't print anything
     }
 

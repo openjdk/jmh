@@ -53,24 +53,28 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
-        boolean firstProfiler = true;
-        out.print(String.format("%s", result.toPrintable()));
-        for (ProfilerResult profRes : profiles) {
-            if (profRes.hasData()) {
-                if (firstProfiler) {
-                    out.println("");
-                    firstProfiler = false;
+    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+        out.println(String.format("%s", result.toPrintable()));
+
+        if (type == IterationType.MEASUREMENT) {
+            boolean firstProfiler = true;
+            out.print(String.format("%s", result.toPrintable()));
+            for (ProfilerResult profRes : profiles) {
+                if (profRes.hasData()) {
+                    if (firstProfiler) {
+                        out.println("");
+                        firstProfiler = false;
+                    }
+                    String prefix = profRes.getProfilerName();
+                    for (String line : profRes.toString().split("\n")) {
+                        out.print(String.format("%12s | %s\n", prefix, line));
+                        prefix = "";
+                    }
+                    out.print(String.format("%12s |\n", ""));
                 }
-                String prefix = profRes.getProfilerName();
-                for (String line : profRes.toString().split("\n")) {
-                    out.print(String.format("%12s | %s\n", prefix, line));
-                    prefix = "";
-                }
-                out.print(String.format("%12s |\n", ""));
             }
+            out.println("");
         }
-        out.println("");
         out.flush();
     }
 
@@ -132,22 +136,19 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue timeValue) {
-        out.print(String.format("Iteration %3d (%s in %d %s): ", iteration,
-                timeValue, threads, getThreadsString(threads)));
-        out.flush();
-    }
-
-    @Override
-    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue timeValue) {
-        out.print(String.format("# Warmup Iteration %3d (%s in %d %s): ", iteration,
-                timeValue, threads, getThreadsString(threads)));
-        out.flush();
-    }
-
-    @Override
-    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
-        out.println(String.format("%s", result.toPrintable()));
+    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue timeValue) {
+        switch (type) {
+            case WARMUP:
+                out.print(String.format("# Warmup Iteration %3d (%s in %d %s): ", iteration,
+                        timeValue, threads, getThreadsString(threads)));
+                break;
+            case MEASUREMENT:
+                out.print(String.format("Iteration %3d (%s in %d %s): ", iteration,
+                        timeValue, threads, getThreadsString(threads)));
+                break;
+            default:
+                throw new IllegalStateException("Unknown iteration type: " + type);
+        }
         out.flush();
     }
 

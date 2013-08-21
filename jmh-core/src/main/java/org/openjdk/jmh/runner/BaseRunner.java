@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.BaseOptions;
 import org.openjdk.jmh.runner.parameters.IterationParams;
@@ -86,10 +87,10 @@ public abstract class BaseRunner {
                     out.verbosePrintln("System.gc() executed");
                 }
 
-                out.warmupIteration(handler.getBenchmark(), i, executionParams.getThreads(), warmupParams.getTime());
+                out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, executionParams.getThreads(), warmupParams.getTime());
                 boolean isLastIteration = false; // warmup is never the last iteration
                 IterationData iterData = handler.runIteration(executionParams.getThreads(), warmupParams.getTime(), isLastIteration).setWarmup();
-                out.warmupIterationResult(handler.getBenchmark(), i, options.getThreads(), iterData.getAggregatedResult());
+                out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
             }
 
             IterationParams measureParams = executionParams.getIteration();
@@ -100,7 +101,7 @@ public abstract class BaseRunner {
                 }
 
                 // run benchmark iteration
-                out.iteration(handler.getBenchmark(), i, executionParams.getThreads(), measureParams.getTime());
+                out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, executionParams.getThreads(), measureParams.getTime());
 
                 boolean isLastIteration = (i == measureParams.getCount());
                 IterationData iterData = handler.runIteration(executionParams.getThreads(), measureParams.getTime(), isLastIteration);
@@ -109,7 +110,7 @@ public abstract class BaseRunner {
                 if (iterData.isResultsEmpty()) {
                     out.println("WARNING: No results returned, benchmark payload threw exception?");
                 } else {
-                    out.iterationResult(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                    out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, executionParams.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
 
                     if (options.shouldOutputDetailedResults()) {
                         out.detailedResults(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult());

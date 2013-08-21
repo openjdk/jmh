@@ -54,11 +54,6 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void warmupIteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue warmupTime) {
-
-    }
-
-    @Override
     public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
 
     }
@@ -74,17 +69,13 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, int iteration, int threads, TimeValue runTime) {
+    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue runTime) {
 
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
 
-    }
-
-    @Override
-    public void warmupIterationResult(BenchmarkRecord benchmark, int iteration, int thread, IterationResult result) {
     }
 
 }

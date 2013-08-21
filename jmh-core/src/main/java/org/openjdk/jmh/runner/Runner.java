@@ -29,6 +29,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
+import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
 import org.openjdk.jmh.runner.options.HarnessOptions;
@@ -441,7 +442,7 @@ public class Runner extends BaseRunner {
                     }
 
                     // run benchmark iteration
-                    out.warmupIteration(handler.getBenchmark(), i, executionParams.getThreads(), p.getTime());
+                    out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, executionParams.getThreads(), p.getTime());
 
                     boolean isLastIteration = (i == p.getCount());
                     IterationData iterData = handler.runIteration(executionParams.getThreads(), p.getTime(), isLastIteration);
@@ -451,7 +452,7 @@ public class Runner extends BaseRunner {
                         out.println("WARNING: No results returned, benchmark payload threw exception?");
                     } else {
                         // print out score for this iteration
-                        out.warmupIterationResult(handler.getBenchmark(), i, executionParams.getThreads(), iterData.getAggregatedResult());
+                        out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, executionParams.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
                     }
                 }
             } else {
@@ -463,7 +464,7 @@ public class Runner extends BaseRunner {
                     }
 
                     // run benchmark iteration
-                    out.iteration(handler.getBenchmark(), i, executionParams.getThreads(), p.getTime());
+                    out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, executionParams.getThreads(), p.getTime());
 
                     boolean isLastIteration = (i == p.getCount());
                     IterationData iterData = handler.runIteration(executionParams.getThreads(), p.getTime(), isLastIteration);
@@ -476,7 +477,7 @@ public class Runner extends BaseRunner {
                         allResults.add(iterData);
 
                         // print out score for this iteration
-                        out.iterationResult(handler.getBenchmark(), i, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                        out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
                     }
                 }
             }

@@ -68,9 +68,11 @@ public class TextReportFormat extends PrettyPrintFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, int iteration, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
-        super.iterationResult(name, iteration, thread, result, profiles);
-        benchmarkResults.put(new BenchmarkIdentifier(name, thread), result);
+    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+        super.iterationResult(name, iteration, type, thread, result, profiles);
+        if (type == IterationType.MEASUREMENT) {
+            benchmarkResults.put(new BenchmarkIdentifier(name, thread), result);
+        }
     }
 
     @Override
