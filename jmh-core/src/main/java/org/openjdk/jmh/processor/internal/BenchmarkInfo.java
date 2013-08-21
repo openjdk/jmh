@@ -40,4 +40,21 @@ public class BenchmarkInfo {
         this.generatedName = generatedPackageName + "." + generatedClassName;
         this.methodGroups = methods;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BenchmarkInfo that = (BenchmarkInfo) o;
+
+        if (!userName.equals(that.userName)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return userName.hashCode();
+    }
 }
