@@ -82,17 +82,13 @@ public interface OutputFormat {
 
     /**
      * Format for start-of-benchmark output.
-     *
-     * @param message message to dump
      */
-    public void startRun(String message);
+    public void startRun();
 
     /**
      * Format for end-of-benchmark.
-     *
-     * @param message message to dump
      */
-    public void endRun(String message);
+    public void endRun();
 
     /**
      * Format for detailed results output.

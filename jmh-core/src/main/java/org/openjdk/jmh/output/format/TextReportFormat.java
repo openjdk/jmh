@@ -76,8 +76,8 @@ public class TextReportFormat extends PrettyPrintFormat {
     }
 
     @Override
-    public void endRun(String message) {
-        super.endRun(null);
+    public void endRun() {
+        super.endRun();
 
         // generate the full report
         //

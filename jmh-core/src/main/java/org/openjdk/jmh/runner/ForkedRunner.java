@@ -48,9 +48,9 @@ public class ForkedRunner extends BaseRunner {
             out.println("Benchmarks: ");
             out.println(benchmark.getUsername());
         }
-        out.startRun("Measurement Section");
+        out.startRun();
         runBenchmark(benchmark, true, true);
-        out.endRun(null);
+        out.endRun();
         out.flush();
         out.close();
     }

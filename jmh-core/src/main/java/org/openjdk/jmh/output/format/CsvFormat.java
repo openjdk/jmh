@@ -88,12 +88,12 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startRun(String message) {
+    public void startRun() {
         // don't print anything
     }
 
     @Override
-    public void endRun(String message) {
+    public void endRun() {
         // don't print anything
     }
 

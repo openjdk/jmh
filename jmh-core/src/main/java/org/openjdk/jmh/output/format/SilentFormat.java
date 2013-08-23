@@ -46,11 +46,11 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startRun(String message) {
+    public void startRun() {
     }
 
     @Override
-    public void endRun(String message) {
+    public void endRun() {
     }
 
     @Override

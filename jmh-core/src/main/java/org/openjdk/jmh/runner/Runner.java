@@ -202,9 +202,7 @@ public class Runner extends BaseRunner {
      * @param list
      */
     private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks, MicroBenchmarkList list) {
-        // Attention: Here is violation of out.startRun/endRun contract,
-        // but because of such code was done before me,
-        // I won't touch this in order do not crash output parsers. (SK)
+        out.startRun();
 
         // list of micros executed before iteration
         Set<BenchmarkRecord> warmupMicros = new TreeSet<BenchmarkRecord>();
@@ -226,19 +224,17 @@ public class Runner extends BaseRunner {
             // during measurement iteration causing a performance shift or simply
             // increased variance.
             // currently valid only for non-external JVM runs
-            out.startRun("Warmup Section");
+
             for (BenchmarkRecord benchmark : warmupMicros) {
                 runBenchmark(benchmark, true, false);
             }
-            out.endRun(null);
         }
         // run microbenchmarks
         //
-        out.startRun("Measurement Section");
         for (BenchmarkRecord benchmark : benchmarks) {
             runBenchmark(benchmark, false, true);
         }
-        out.endRun(null);
+        out.endRun();
     }
 
     private int decideForks(int optionForks, int benchForks) {
@@ -265,7 +261,7 @@ public class Runner extends BaseRunner {
         Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
         Set<BenchmarkRecord> forked = new TreeSet<BenchmarkRecord>();
 
-        out.startRun("Measurement Section");
+        out.startRun();
         for (BenchmarkRecord benchmark : benchmarks) {
             int f = decideForks(options.getForkCount(), benchForks(benchmark));
             if (f > 0) {
@@ -280,7 +276,7 @@ public class Runner extends BaseRunner {
         }
 
         runSeparate(forked);
-        out.endRun(null);
+        out.endRun();
     }
 
     private void runSeparate(Set<BenchmarkRecord> benchmarksToFork) {

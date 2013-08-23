@@ -111,12 +111,12 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startRun(String message) {
-        out.println("# " + message);
+    public void startRun() {
+        // do nothing
     }
 
     @Override
-    public void endRun(String message) {
+    public void endRun() {
         for (BenchmarkRecord key : benchmarkResults.keys()) {
             Collection<RunResult> forkedResults = benchmarkResults.get(key);
             if (forkedResults.size() > 1) {
