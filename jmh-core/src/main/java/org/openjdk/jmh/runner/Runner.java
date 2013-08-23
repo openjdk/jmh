@@ -33,6 +33,7 @@ import org.openjdk.jmh.runner.options.HarnessOptions;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -62,17 +63,13 @@ public class Runner extends BaseRunner {
     /** Class holding all our runtime options/arguments */
     private final HarnessOptions options;
 
-    /**
-     * Main constructor.
-     * @param options
-     */
     public Runner(HarnessOptions options) {
         super(options, createOutputFormat(options));
         this.options = options;
     }
 
     /** Setup helper method, creates OutputFormat according to argv options. */
-    public static OutputFormat createOutputFormat(HarnessOptions options) {
+    private static OutputFormat createOutputFormat(HarnessOptions options) {
         PrintStream out;
         // setup OutputFormat singleton
         if (options.getOutput() == null) {
@@ -154,11 +151,8 @@ public class Runner extends BaseRunner {
     }
 
     /**
-     * Run specified warmup microbenchmarks prior to running
-     * any requested mircobenchmarks.
-     * currently valid only for non-external JVM runs
-     * @param benchmarks
-     * @param list
+     * Run specified warmup microbenchmarks prior to running any requested mircobenchmarks.
+     * TODO: Currently valid only for non-external JVM runs
      */
     private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks, MicroBenchmarkList list) {
         out.startRun();
@@ -255,9 +249,7 @@ public class Runner extends BaseRunner {
     }
 
     /**
-     * tests if the benchmark has the mandatory fork annotation
-     * @param benchmark
-     * @return
+     * Tests if the benchmark has the fork annotation
      */
     private int benchForks(BenchmarkRecord benchmark) {
         Method m = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
@@ -274,9 +266,7 @@ public class Runner extends BaseRunner {
      */
     private void runSeparateMicroBenchmark(BinaryOutputFormatReader reader, BenchmarkRecord benchmark, String host, int port) {
 
-        /*
-         * Running microbenchmark in separate JVM requires to read some options from annotations.
-         */
+        // Running microbenchmark in separate JVM requires to read some options from annotations.
 
         final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
         Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
@@ -301,31 +291,18 @@ public class Runner extends BaseRunner {
         int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
         int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
         if (warmupForkCount > 0) {
-            String[] warmupForkCheat = concat(commandString, new String[]{"-wi", "1", "-i", "0"});
-            if (warmupForkCount == 1) {
-                out.verbosePrintln("Warmup forking using command: " + Arrays.toString(warmupForkCheat));
-            } else {
-                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
-            }
+            String[] warmupForkCheat = Utils.concat(commandString, new String[]{"-wi", "1", "-i", "0"});
+            out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
             for (int i = 0; i < warmupForkCount; i++) {
                 doFork(reader, warmupForkCheat);
             }
         }
-        if (forkCount == 1) {
-            out.verbosePrintln("Forking using command: " + Arrays.toString(commandString));
-        } else {
-            out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
-        }
-        for (int i = 0; i < forkCount; i++) { // TODO should we report fork number somehow?
+
+        // TODO: should we report fork number somehow?
+        out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
+        for (int i = 0; i < forkCount; i++) {
             doFork(reader, commandString);
         }
-    }
-
-    public String[] concat(String[] t1, String[] t2) {
-        String[] r = new String[t1.length + t2.length];
-        System.arraycopy(t1, 0, r, 0, t1.length);
-        System.arraycopy(t2, 0, r, t1.length, t2.length);
-        return r;
     }
 
     private void doFork(BinaryOutputFormatReader reader, String[] commandString) {
