@@ -54,11 +54,11 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
     @Override
     public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
-        out.println(String.format("%s", result.toPrintable()));
+        out.print(String.format("%s", result.toPrintable()));
 
+        // also print out profiler information
         if (type == IterationType.MEASUREMENT) {
             boolean firstProfiler = true;
-            out.print(String.format("%s", result.toPrintable()));
             for (ProfilerResult profRes : profiles) {
                 if (profRes.hasData()) {
                     if (firstProfiler) {
@@ -73,8 +73,9 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
                     out.print(String.format("%12s |\n", ""));
                 }
             }
-            out.println("");
         }
+
+        out.println("");
         out.flush();
     }
 
