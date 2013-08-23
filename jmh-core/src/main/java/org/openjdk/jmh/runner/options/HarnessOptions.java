@@ -283,7 +283,11 @@ public class HarnessOptions extends BaseOptions {
      * @return the value
      */
     public List<String> getWarmupMicros() {
-        return warmupMicros;
+        if (warmupMicros == null) {
+            return Collections.emptyList();
+        } else {
+            return warmupMicros;
+        }
     }
 
     /**

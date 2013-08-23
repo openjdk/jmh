@@ -26,16 +26,12 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
 import org.openjdk.jmh.runner.options.HarnessOptions;
 import org.openjdk.jmh.runner.parameters.Defaults;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.util.AnnotationUtils;
-import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 
 import java.io.BufferedOutputStream;
@@ -73,37 +69,6 @@ public class Runner extends BaseRunner {
     public Runner(HarnessOptions options) {
         super(options, createOutputFormat(options));
         this.options = options;
-    }
-
-    public enum ExecutionMode {
-        /**
-         * classic mode:
-         *   - single JVM for all microbenchmarks (unless benchmark requires forked JVM itself),
-         *   - warmup performed before each microbenchmark
-         *   - -frw options will exec additional warmup on increasing amount of threads
-         */
-        CLASSIC,
-        /**
-         * - exec bulk warmup micrbenchmarks using --warmupmicrobenchmarks option or -warmupmode beforeAny
-         * - there is no any kind of warmup when iteration started
-         */
-        BULK_WARMUP,
-        /**
-         *   Fork JVM for each benchmark.
-         *   Child harness (forked) is running in CLASSIC mode.
-         */
-        FORK_ALL;
-
-        public static ExecutionMode getExecutionMode(HarnessOptions options) {
-            if (options.getForkCount() > 0) {
-                return FORK_ALL;
-            } else if ((options.getWarmupMicros() != null && !options.getWarmupMicros().isEmpty()) ||
-                       (options.getWarmupMode() == HarnessOptions.WarmupMode.BEFOREANY)) {
-                return BULK_WARMUP;
-            } else {
-                return CLASSIC;
-            }
-        }
     }
 
     /** Setup helper method, creates OutputFormat according to argv options. */
@@ -175,18 +140,12 @@ public class Runner extends BaseRunner {
         benchmarks.addAll(newBenchmarks);
 
         // exit if list only, else run benchmarks
-        if (!options.shouldList() && !benchmarks.isEmpty()) {
-            switch (ExecutionMode.getExecutionMode(options)) {
-                case CLASSIC:
-                case FORK_ALL:
-                    runBenchmarks(benchmarks);
-                    break;
-                case BULK_WARMUP:
-                    runBulkWarmupBenchmarks(benchmarks, list);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Internal error: unknown execution mode");
-
+        if (!options.shouldList()) {
+            if ((!options.getWarmupMicros().isEmpty()) ||
+                    (options.getWarmupMode() == HarnessOptions.WarmupMode.BEFOREANY)) {
+                runBulkWarmupBenchmarks(benchmarks, list);
+            } else {
+                runBenchmarks(benchmarks);
             }
         }
 
