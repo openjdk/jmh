@@ -88,7 +88,7 @@ public class Runner extends BaseRunner {
             }
         }
 
-        return OutputFormatFactory.createFormatInstance(out, options.getOutputFormat(), options.getTraceLevel(), options.isVerbose());
+        return OutputFormatFactory.createFormatInstance(out, options.getOutputFormat(), options.isVerbose());
     }
 
     /** Main entry point */

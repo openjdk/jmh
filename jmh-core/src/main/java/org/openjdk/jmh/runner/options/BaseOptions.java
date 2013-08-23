@@ -99,9 +99,6 @@ public class BaseOptions {
     @Option(name = "-v", aliases = {"--verbose"}, usage = "Verbose mode, default off", handler = BooleanOptionHandler.class)
     protected boolean verbose = false;
 
-    @Option(name = "-tl", aliases = {"--tracelevel"}, usage = "Trace level, default 0")
-    protected int traceLevel = -1;
-
     @Option(name = "-odr", aliases = {"--outputdetailedresults"}, usage = "Output detailed results. Default is false", handler = BooleanOptionHandler.class)
     protected boolean outputDetailedResults = false;
 
@@ -401,15 +398,6 @@ public class BaseOptions {
      */
     public boolean shouldOutputDetailedResults() {
         return outputDetailedResults;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    public int getTraceLevel() {
-        return traceLevel;
     }
 
     /**

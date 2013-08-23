@@ -43,10 +43,7 @@ public class OutputFormatFactory {
      * @param format Format enum to use
      * @return a new OutputFormat instance of given type
      */
-    public static OutputFormat createFormatInstance(PrintStream out, OutputFormatType format, int traceLevel, boolean verbose) {
-        // force verbose if non-default trace level is requested
-        if (traceLevel > 0) { verbose = true; }
-
+    public static OutputFormat createFormatInstance(PrintStream out, OutputFormatType format, boolean verbose) {
         assert (format != null) : "format is not null";
 
         switch (format) {
@@ -82,7 +79,7 @@ public class OutputFormatFactory {
     }
 
     public static OutputFormat createFormatInstance(boolean verbose) {
-        return createFormatInstance(System.out, OutputFormatType.Pretty, 0, verbose);
+        return createFormatInstance(System.out, OutputFormatType.Pretty, verbose);
     }
 
 }
