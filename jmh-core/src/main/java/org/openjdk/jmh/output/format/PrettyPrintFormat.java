@@ -32,7 +32,6 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.Statistics;
 import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.PrintStream;
@@ -105,7 +104,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         benchmarkResults.put(name, result);
 
         out.println();
-        for (Result r : result.getResult().values()) {
+        for (Result r : result.getResults().values()) {
             out.println(r.extendedInfo());
         }
         out.println();
@@ -125,11 +124,11 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
                 List<Result> iResults = new ArrayList<Result>();
                 for (RunResult res : forkedResults) {
-                    iResults.addAll(res.getResult().values());
+                    iResults.addAll(res.getResults().values());
                 }
                 RunResult runResult = new RunResult(iResults);
 
-                for (Result r : runResult.getResult().values()) {
+                for (Result r : runResult.getResults().values()) {
                     out.println(r.extendedInfo());
                 }
             }

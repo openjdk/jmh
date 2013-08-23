@@ -92,7 +92,7 @@ public class RunResult implements Serializable {
         return r;
     }
 
-    public Map<String, Result> getResult() {
+    public Map<String, Result> getResults() {
         return result;
     }
 
