@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
@@ -63,8 +64,11 @@ public class Runner extends BaseRunner {
     /** Class holding all our runtime options/arguments */
     private final HarnessOptions options;
 
+    private final MicroBenchmarkList list;
+
     public Runner(HarnessOptions options) {
         super(options, createOutputFormat(options));
+        this.list = MicroBenchmarkList.defaultList();
         this.options = options;
     }
 
@@ -88,7 +92,7 @@ public class Runner extends BaseRunner {
     }
 
     /** Main entry point */
-    public void run(MicroBenchmarkList list) throws RunnerException {
+    public void run() throws RunnerException {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
@@ -140,7 +144,7 @@ public class Runner extends BaseRunner {
         if (!options.shouldList()) {
             if ((!options.getWarmupMicros().isEmpty()) ||
                     (options.getWarmupMode() == HarnessOptions.WarmupMode.BEFOREANY)) {
-                runBulkWarmupBenchmarks(benchmarks, list);
+                runBulkWarmupBenchmarks(benchmarks);
             } else {
                 runBenchmarks(benchmarks);
             }
@@ -154,7 +158,7 @@ public class Runner extends BaseRunner {
      * Run specified warmup microbenchmarks prior to running any requested mircobenchmarks.
      * TODO: Currently valid only for non-external JVM runs
      */
-    private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks, MicroBenchmarkList list) {
+    private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks) {
         out.startRun();
 
         // list of micros executed before iteration

@@ -95,7 +95,7 @@ public class Main {
             }
 
             Runner runner = new Runner(cmdOptions);
-            runner.run(MicroBenchmarkList.defaultList());
+            runner.run();
         } catch (CmdLineException ex) {
             cmdOptions.printUsage(ex.getMessage());
         } catch (RunnerException e) {
