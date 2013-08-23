@@ -98,6 +98,8 @@ public class Runner extends BaseRunner {
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
             out.flush();
+            out.close();
+            return;
         }
 
         if (options.shouldList() || options.isVerbose()) {
