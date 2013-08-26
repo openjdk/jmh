@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.ForkedOptions;
+import org.openjdk.jmh.runner.options.Options;
 
 /**
  * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
@@ -34,9 +35,9 @@ import org.openjdk.jmh.runner.options.ForkedOptions;
  */
 public class ForkedRunner extends BaseRunner {
 
-    private final ForkedOptions options;
+    private final Options options;
 
-    public ForkedRunner(ForkedOptions options) {
+    public ForkedRunner(Options options) {
         super(options, OutputFormatFactory.createBinaryHook(options.getHostName(), options.getHostPort()));
         this.options = options;
     }

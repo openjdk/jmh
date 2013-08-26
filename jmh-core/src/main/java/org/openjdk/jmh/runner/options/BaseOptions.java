@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author sergey.kuksenko@oracle.com
  */
-public class BaseOptions {
+public abstract class BaseOptions implements Options {
 
 
     /*
@@ -315,6 +315,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public int getIterations() {
         return iterations;
     }
@@ -324,6 +325,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public TimeValue getRuntime() {
         return runTime;
     }
@@ -333,6 +335,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public TimeValue getWarmupTime() {
         return warmupTime;
     }
@@ -342,6 +345,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public int getWarmupIterations() {
         return warmupIterations;
     }
@@ -351,6 +355,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public int getThreads() {
         return threads;
     }
@@ -360,6 +365,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public boolean shouldDoGC() {
         return gcEachIteration;
     }
@@ -369,6 +375,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public Boolean getSynchIterations() {
         return synchIterations;
     }
@@ -378,6 +385,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public boolean isVerbose() {
         return verbose;
     }
@@ -387,6 +395,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public TimeUnit getTimeUnit() {
         return timeUnit;
     }
@@ -396,6 +405,7 @@ public class BaseOptions {
      *
      * @return the value
      */
+    @Override
     public boolean shouldOutputDetailedResults() {
         return outputDetailedResults;
     }
@@ -404,6 +414,7 @@ public class BaseOptions {
      * Should fail the harness on test error?
      * @return the value
      */
+    @Override
     public boolean shouldFailOnError() {
         return failOnError;
     }
@@ -412,10 +423,12 @@ public class BaseOptions {
      * Getter
      * @return the value
      */
+    @Override
     public Set<ProfilerFactory.Profilers> getProfilers() {
         return profilers;
     }
 
+    @Override
     public Collection<Mode> getBenchModes() {
         return benchMode;
     }

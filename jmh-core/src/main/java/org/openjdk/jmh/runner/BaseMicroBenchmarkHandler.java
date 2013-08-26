@@ -28,7 +28,7 @@ import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
-import org.openjdk.jmh.runner.options.BaseOptions;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 
 import java.lang.reflect.Constructor;
@@ -64,7 +64,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
     private final List<Profiler> registeredProfilers;
 
-    public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, BaseOptions options, MicroBenchmarkParameters executionParams) {
+    public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, MicroBenchmarkParameters executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
         this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
@@ -78,7 +78,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         this.timeUnit = options.getTimeUnit();
     }
 
-    private static List<Profiler> createProfilers(BaseOptions options) {
+    private static List<Profiler> createProfilers(Options options) {
         List<Profiler> list = new ArrayList<Profiler>();
         // register the profilers
         for (ProfilerFactory.Profilers prof : options.getProfilers()) {

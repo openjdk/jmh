@@ -27,7 +27,7 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.runner.options.BaseOptions;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.util.ClassUtils;
 
@@ -67,7 +67,7 @@ public class MicroBenchmarkHandlers {
         return method;
     }
 
-    public static MicroBenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, BaseOptions options) {
+    public static MicroBenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, MicroBenchmarkParameters executionParams, Options options) {
         return new LoopMicroBenchmarkHandler(out, microbenchmark, clazz, method, options, executionParams);
     }
 

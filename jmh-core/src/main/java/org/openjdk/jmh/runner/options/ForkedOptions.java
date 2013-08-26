@@ -28,6 +28,9 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.openjdk.jmh.output.OutputFormatType;
+
+import java.util.List;
 
 /**
  * Class that handles options and arguments for forked JVM
@@ -70,15 +73,79 @@ public class ForkedOptions extends BaseOptions {
         parser.parseArgument(argv);
     }
 
+    @Override
     public String getBenchmark() {
         return benchmark;
     }
 
+    @Override
     public int getHostPort() {
         return hostPort;
     }
 
+    @Override
     public String getHostName() {
         return hostName;
     }
+
+    @Override
+    public String getOutput() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public OutputFormatType getOutputFormat() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public List<String> getRegexps() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public List<String> getExcludes() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public boolean shouldList() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public List<String> getWarmupMicros() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public WarmupMode getWarmupMode() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public int getForkCount() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public int getWarmupForkCount() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public String getJvmClassPath() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public String getJvm() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
+    @Override
+    public String getJvmArgs() {
+        throw new UnsupportedOperationException("Asking for harness option");
+    }
+
 }

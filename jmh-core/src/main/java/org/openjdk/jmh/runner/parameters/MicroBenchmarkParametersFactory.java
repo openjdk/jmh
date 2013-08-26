@@ -29,7 +29,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.options.BaseOptions;
+import org.openjdk.jmh.runner.options.Options;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -39,7 +39,7 @@ public class MicroBenchmarkParametersFactory {
     private MicroBenchmarkParametersFactory() {
     }
 
-    public static MicroBenchmarkParameters makeParams(BaseOptions options, BenchmarkRecord benchmark, Method method, boolean doWarmup, boolean doMeasurement) {
+    public static MicroBenchmarkParameters makeParams(Options options, BenchmarkRecord benchmark, Method method, boolean doWarmup, boolean doMeasurement) {
         boolean shouldSynchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
 
         int threads = getThreads(options, method);
@@ -61,7 +61,7 @@ public class MicroBenchmarkParametersFactory {
                 threads);
     }
 
-    private static IterationParams getWarmup(BaseOptions options, BenchmarkRecord benchmark, Method method, int threads) {
+    private static IterationParams getWarmup(Options options, BenchmarkRecord benchmark, Method method, int threads) {
         boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Warmup warAnn = method.getAnnotation(Warmup.class);
         int iters = (warAnn == null) ? -1 : warAnn.iterations();
@@ -83,7 +83,7 @@ public class MicroBenchmarkParametersFactory {
         }
     }
 
-    private static IterationParams getMeasurement(BaseOptions options, BenchmarkRecord benchmark, Method method, int threads) {
+    private static IterationParams getMeasurement(Options options, BenchmarkRecord benchmark, Method method, int threads) {
         boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Measurement meAnn = method.getAnnotation(Measurement.class);
         int iters = (meAnn == null) ? -1 : meAnn.iterations();
@@ -107,7 +107,7 @@ public class MicroBenchmarkParametersFactory {
         }
     }
 
-    private static int getThreads(BaseOptions options, Method method) {
+    private static int getThreads(Options options, Method method) {
         Threads threadsAnn = method.getAnnotation(Threads.class);
         return getInteger(options.getThreads(), (threadsAnn == null) ? -1 : threadsAnn.value(), Defaults.THREADS);
 

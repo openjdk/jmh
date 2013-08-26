@@ -29,7 +29,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.runner.options.BaseOptions;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
@@ -51,11 +51,11 @@ import java.util.concurrent.TimeUnit;
 public abstract class BaseRunner {
 
     /** Class holding all our runtime options/arguments */
-    private final BaseOptions options;
+    private final Options options;
 
     protected final OutputFormat out;
 
-    public BaseRunner(BaseOptions options, OutputFormat handler) {
+    public BaseRunner(Options options, OutputFormat handler) {
         this.options = options;
         this.out = handler;
     }

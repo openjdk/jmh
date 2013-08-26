@@ -28,21 +28,12 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.output.OutputFormatType;
-import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Class that handles all the options and arguments specific to the harness JVM.
@@ -105,13 +96,6 @@ public class HarnessOptions extends BaseOptions {
     protected boolean listProfilers = false;
 
     /**
-     * Warmup Mode enum
-     */
-    public enum WarmupMode {
-        BEFOREANY, BEFOREEACH
-    }
-
-    /**
      * Kawaguchi's parser
      */
     private CmdLineParser parser;
@@ -146,110 +130,11 @@ public class HarnessOptions extends BaseOptions {
     }
 
     /**
-     * Helper method for assembling the command to execute the forked JVM with
-     *
-     * @param benchmark benchmark to execute
-     * @param host host VM host
-     * @param port host VM port
-     * @return the final command to execute
-     */
-    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
-
-        Properties props = System.getProperties();
-        String javaHome = (String) props.get("java.home");
-        String separator = File.separator;
-        String osName = props.getProperty("os.name");
-        boolean isOnWindows = osName.contains("indows");
-        String platformSpecificBinaryPostfix = isOnWindows ? ".exe" : "";
-
-        String classPath;
-
-        if (getJvmClassPath() != null) {
-            classPath = getJvmClassPath();
-        } else {
-            classPath = (String) props.get("java.class.path");
-        }
-
-        if (isOnWindows) {
-            classPath = '"' + classPath + '"';
-        }
-
-        List<String> command = new ArrayList<String>();
-
-        // use supplied jvm if given
-        if (getJvm() != null) {
-            command.add(getJvm());
-        } else {
-            // else find out which one parent is and use that
-            StringBuilder javaExecutable = new StringBuilder();
-            javaExecutable.append(javaHome);
-            javaExecutable.append(separator);
-            javaExecutable.append("bin");
-            javaExecutable.append(separator);
-            javaExecutable.append("java");
-            javaExecutable.append(platformSpecificBinaryPostfix);
-            command.add(javaExecutable.toString());
-        }
-
-        if (getJvmArgs() != null) { // use supplied jvm args if given in cmd line
-            command.addAll(Arrays.asList(getJvmArgs().split("[ ]+")));
-        } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
-            command.addAll(Arrays.asList(annJvmArgs.split("[ ]+")));
-        } else {
-            // else use same jvm args given to this runner
-            RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
-            List<String> args = RuntimemxBean.getInputArguments();
-
-            // prepend jvm args
-            if (annJvmArgsPrepend != null) {
-                command.addAll(Arrays.asList(annJvmArgsPrepend.split(" ")));
-            }
-
-            for (String arg : args) {
-                command.add(arg);
-            }
-
-            // append jvm args
-            if (annJvmArgsAppend != null) {
-                command.addAll(Arrays.asList(annJvmArgsAppend.split(" ")));
-            }
-        }
-
-        // add any compiler oracle hints
-        {
-            Set<String> hints = CompilerHints.defaultList().get();
-            if (!hints.isEmpty()) {
-                command.add("-XX:CompileCommand=quiet ");
-            }
-            for (String l : hints) {
-                command.add("-XX:CompileCommand=" + l);
-            }
-        }
-
-        // assemble final process command
-        command.add("-cp");
-        command.add(classPath);
-        command.add(ForkedMain.class.getName());
-
-        // if user supplied micro flags, give those as well
-        Collections.addAll(command, toCommandLine());
-
-        command.add(benchmark.toLine());
-
-        command.add("--hostName");
-        command.add(host);
-        command.add("--hostPort");
-        command.add(String.valueOf(port));
-
-        return command.toArray(new String[command.size()]);
-    }
-
-
-    /**
      * Getter
      *
      * @return the value
      */
+    @Override
     public WarmupMode getWarmupMode() {
         return warmupMode;
     }
@@ -259,6 +144,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public List<String> getRegexps() {
         if (!regexps.isEmpty()) {
             return regexps;
@@ -273,6 +159,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public List<String> getExcludes() {
         return excludes;
     }
@@ -282,6 +169,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public List<String> getWarmupMicros() {
         if (warmupMicros == null) {
             return Collections.emptyList();
@@ -295,6 +183,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public boolean shouldList() {
         return list;
     }
@@ -304,6 +193,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public String getJvm() {
         return jvm;
     }
@@ -313,6 +203,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public String getJvmArgs() {
         return jvmArgs;
     }
@@ -322,6 +213,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public String getJvmClassPath() {
         return jvmClassPath;
     }
@@ -331,6 +223,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public int getForkCount() {
         return fork;
     }
@@ -340,6 +233,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public int getWarmupForkCount() {
         return warmupFork;
     }
@@ -349,6 +243,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public String getOutput() {
         return output;
     }
@@ -358,6 +253,7 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
+    @Override
     public OutputFormatType getOutputFormat() {
         return outputFormat;
     }
@@ -388,6 +284,21 @@ public class HarnessOptions extends BaseOptions {
      */
     public boolean shouldListProfilers() {
         return listProfilers;
+    }
+
+    @Override
+    public String getHostName() {
+        throw new UnsupportedOperationException("Asking for forked VM options");
+    }
+
+    @Override
+    public int getHostPort() {
+        throw new UnsupportedOperationException("Asking for forked VM options");
+    }
+
+    @Override
+    public String getBenchmark() {
+        throw new UnsupportedOperationException("Asking for forked VM options");
     }
 
 }

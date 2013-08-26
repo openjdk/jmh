@@ -22,17 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh;
+package org.openjdk.jmh.runner.options;
 
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.DefaultBuilder;
-import org.openjdk.jmh.runner.options.Options;
-
-public class SimpleTest {
-
-    public static void main(String[] args) throws RunnerException {
-        Options opts = DefaultBuilder.start().addBenchmark(".*").shouldBeVerbose(true).end();
-        new Runner(opts).run();
-    }
+/**
+ * Warmup Mode enum
+ */
+public enum WarmupMode {
+    BEFOREANY, BEFOREEACH
 }

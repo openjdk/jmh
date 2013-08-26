@@ -30,7 +30,7 @@ import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.runner.options.BaseOptions;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -60,7 +60,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
     private final boolean shouldSynchIterations;
     private final boolean shouldFailOnError;
 
-    LoopMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BaseOptions options, MicroBenchmarkParameters executionParams) {
+    LoopMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, Options options, MicroBenchmarkParameters executionParams) {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();

@@ -24,13 +24,14 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
-import org.openjdk.jmh.runner.options.HarnessOptions;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.WarmupMode;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -42,11 +43,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -62,18 +66,18 @@ import java.util.logging.Logger;
 public class Runner extends BaseRunner {
 
     /** Class holding all our runtime options/arguments */
-    private final HarnessOptions options;
+    private final Options options;
 
     private final MicroBenchmarkList list;
 
-    public Runner(HarnessOptions options) {
+    public Runner(Options options) {
         super(options, createOutputFormat(options));
         this.list = MicroBenchmarkList.defaultList();
         this.options = options;
     }
 
     /** Setup helper method, creates OutputFormat according to argv options. */
-    private static OutputFormat createOutputFormat(HarnessOptions options) {
+    private static OutputFormat createOutputFormat(Options options) {
         PrintStream out;
         // setup OutputFormat singleton
         if (options.getOutput() == null) {
@@ -145,7 +149,7 @@ public class Runner extends BaseRunner {
         // exit if list only, else run benchmarks
         if (!options.shouldList()) {
             if ((!options.getWarmupMicros().isEmpty()) ||
-                    (options.getWarmupMode() == HarnessOptions.WarmupMode.BEFOREANY)) {
+                    (options.getWarmupMode() == WarmupMode.BEFOREANY)) {
                 runBulkWarmupBenchmarks(benchmarks);
             } else {
                 runBenchmarks(benchmarks);
@@ -170,7 +174,7 @@ public class Runner extends BaseRunner {
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
             warmupMicros.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
-        if (options.getWarmupMode() == HarnessOptions.WarmupMode.BEFOREANY) {
+        if (options.getWarmupMode() == WarmupMode.BEFOREANY) {
             warmupMicros.addAll(benchmarks);
         }
 
@@ -292,7 +296,7 @@ public class Runner extends BaseRunner {
             annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
         }
 
-        String[] commandString = options.getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, host, port);
+        String[] commandString = getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, host, port);
 
         int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
         int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
@@ -344,5 +348,105 @@ public class Runner extends BaseRunner {
             out.exception(ex);
         }
     }
+
+    /**
+     * Helper method for assembling the command to execute the forked JVM with
+     *
+     * @param benchmark benchmark to execute
+     * @param host host VM host
+     * @param port host VM port
+     * @return the final command to execute
+     */
+    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
+
+        Properties props = System.getProperties();
+        String javaHome = (String) props.get("java.home");
+        String separator = File.separator;
+        String osName = props.getProperty("os.name");
+        boolean isOnWindows = osName.contains("indows");
+        String platformSpecificBinaryPostfix = isOnWindows ? ".exe" : "";
+
+        String classPath;
+
+        if (options.getJvmClassPath() != null) {
+            classPath = options.getJvmClassPath();
+        } else {
+            classPath = (String) props.get("java.class.path");
+        }
+
+        if (isOnWindows) {
+            classPath = '"' + classPath + '"';
+        }
+
+        List<String> command = new ArrayList<String>();
+
+        // use supplied jvm if given
+        if (options.getJvm() != null) {
+            command.add(options.getJvm());
+        } else {
+            // else find out which one parent is and use that
+            StringBuilder javaExecutable = new StringBuilder();
+            javaExecutable.append(javaHome);
+            javaExecutable.append(separator);
+            javaExecutable.append("bin");
+            javaExecutable.append(separator);
+            javaExecutable.append("java");
+            javaExecutable.append(platformSpecificBinaryPostfix);
+            command.add(javaExecutable.toString());
+        }
+
+        if (options.getJvmArgs() != null) { // use supplied jvm args if given in cmd line
+            command.addAll(Arrays.asList(options.getJvmArgs().split("[ ]+")));
+        } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
+            command.addAll(Arrays.asList(annJvmArgs.split("[ ]+")));
+        } else {
+            // else use same jvm args given to this runner
+            RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
+            List<String> args = RuntimemxBean.getInputArguments();
+
+            // prepend jvm args
+            if (annJvmArgsPrepend != null) {
+                command.addAll(Arrays.asList(annJvmArgsPrepend.split(" ")));
+            }
+
+            for (String arg : args) {
+                command.add(arg);
+            }
+
+            // append jvm args
+            if (annJvmArgsAppend != null) {
+                command.addAll(Arrays.asList(annJvmArgsAppend.split(" ")));
+            }
+        }
+
+        // add any compiler oracle hints
+        {
+            Set<String> hints = CompilerHints.defaultList().get();
+            if (!hints.isEmpty()) {
+                command.add("-XX:CompileCommand=quiet ");
+            }
+            for (String l : hints) {
+                command.add("-XX:CompileCommand=" + l);
+            }
+        }
+
+        // assemble final process command
+        command.add("-cp");
+        command.add(classPath);
+        command.add(ForkedMain.class.getName());
+
+        // if user supplied micro flags, give those as well
+        Collections.addAll(command, options.toCommandLine());
+
+        command.add(benchmark.toLine());
+
+        command.add("--hostName");
+        command.add(host);
+        command.add("--hostPort");
+        command.add(String.valueOf(port));
+
+        return command.toArray(new String[command.size()]);
+    }
+
 
 }

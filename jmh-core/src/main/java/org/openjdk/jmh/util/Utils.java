@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.util;
 
+import java.util.Collection;
+
 public class Utils {
 
     private Utils() {
@@ -35,5 +37,19 @@ public class Utils {
         System.arraycopy(t1, 0, r, 0, t1.length);
         System.arraycopy(t2, 0, r, t1.length, t2.length);
         return r;
+    }
+
+    public static String join(Collection<String> src, String delim) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String s : src) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(delim);
+            }
+            sb.append(s);
+        }
+        return sb.toString();
     }
 }
