@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
-import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.ArrayList;
@@ -149,16 +149,16 @@ public class DefaultBuilder implements Options, OptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private EnumSet<ProfilerFactory.Profilers> profilers = EnumSet.noneOf(ProfilerFactory.Profilers.class);
+    private EnumSet<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
 
     @Override
-    public OptionsBuilder addProfiler(ProfilerFactory.Profilers prof) {
+    public OptionsBuilder addProfiler(ProfilerType prof) {
         this.profilers.add(prof);
         return this;
     }
 
     @Override
-    public Set<ProfilerFactory.Profilers> getProfilers() {
+    public Set<ProfilerType> getProfilers() {
         return profilers;
     }
 

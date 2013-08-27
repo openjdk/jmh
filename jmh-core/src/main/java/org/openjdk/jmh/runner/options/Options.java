@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
-import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.Collection;
@@ -75,10 +75,9 @@ public interface Options {
 
     /**
      * Profilers to use for the run.
-     * TODO: Rework Profilers enum
      * @return profilers to use; empty set if no profilers are required
      */
-    Collection<ProfilerFactory.Profilers> getProfilers();
+    Collection<ProfilerType> getProfilers();
 
     /**
      * Should be extra verbose?

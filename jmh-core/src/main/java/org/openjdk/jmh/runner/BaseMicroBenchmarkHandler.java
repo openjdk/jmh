@@ -27,7 +27,7 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.profile.Profiler;
-import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 
@@ -81,7 +81,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     private static List<Profiler> createProfilers(Options options) {
         List<Profiler> list = new ArrayList<Profiler>();
         // register the profilers
-        for (ProfilerFactory.Profilers prof : options.getProfilers()) {
+        for (ProfilerType prof : options.getProfilers()) {
             list.add(prof.createInstance(options.isVerbose()));
         }
         return list;

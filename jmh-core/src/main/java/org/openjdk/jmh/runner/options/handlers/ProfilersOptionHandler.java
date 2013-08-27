@@ -31,6 +31,7 @@ import org.kohsuke.args4j.spi.OptionHandler;
 import org.kohsuke.args4j.spi.Parameters;
 import org.kohsuke.args4j.spi.Setter;
 import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.profile.ProfilerType;
 
 import java.util.EnumSet;
 
@@ -39,7 +40,7 @@ import java.util.EnumSet;
  *
  * @author sergey.kuksenko@oracle.com
  */
-public class ProfilersOptionHandler extends OptionHandler<EnumSet<ProfilerFactory.Profilers>> {
+public class ProfilersOptionHandler extends OptionHandler<EnumSet<ProfilerType>> {
 
     /**
      * Constructor
@@ -48,7 +49,7 @@ public class ProfilersOptionHandler extends OptionHandler<EnumSet<ProfilerFactor
      * @param option Run-time copy of the Option
      * @param setter Setter to feed back the value
      */
-    public ProfilersOptionHandler(CmdLineParser parser, OptionDef option, Setter<? super EnumSet<ProfilerFactory.Profilers>> setter) {
+    public ProfilersOptionHandler(CmdLineParser parser, OptionDef option, Setter<? super EnumSet<ProfilerType>> setter) {
         super(parser, option, setter);
     }
 
@@ -56,9 +57,9 @@ public class ProfilersOptionHandler extends OptionHandler<EnumSet<ProfilerFactor
     public int parseArguments(Parameters params) throws CmdLineException {
         String param = params.getParameter(0);
         String[] possibleProfilers = param.split(",");
-        EnumSet<ProfilerFactory.Profilers> profSet = EnumSet.noneOf(ProfilerFactory.Profilers.class);
+        EnumSet<ProfilerType> profSet = EnumSet.noneOf(ProfilerType.class);
         for (String s : possibleProfilers) {
-            ProfilerFactory.Profilers prof = ProfilerFactory.getProfiler(s);
+            ProfilerType prof = ProfilerFactory.getProfiler(s);
             if (prof == null) {
                 throw new CmdLineException(owner, param + "; unknown profiler: '" + s + '\'');
             }

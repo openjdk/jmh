@@ -26,11 +26,10 @@ package org.openjdk.jmh.runner.options;
 
 import org.kohsuke.args4j.Option;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeUnitOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeValueOptionHandler;
@@ -106,7 +105,7 @@ public abstract class BaseOptions implements Options {
     protected boolean failOnError = false;
 
     @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listprofilers to list available profilers", handler = ProfilersOptionHandler.class)
-    protected Set<ProfilerFactory.Profilers> profilers = EnumSet.noneOf(ProfilerFactory.Profilers.class);
+    protected Set<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
 
     @Option(name = "-tu", aliases = {"--timeunit"}, usage = "Output time unit. Available values: m, s, ms, us, ns", handler = TimeUnitOptionHandler.class)
     protected TimeUnit timeUnit = null;
@@ -255,8 +254,8 @@ public abstract class BaseOptions implements Options {
                     if (isTail) {
                         sb.append(',');
                     }
-                    if( o instanceof ProfilerFactory.Profilers) {
-                        sb.append(((ProfilerFactory.Profilers) o).id());
+                    if( o instanceof ProfilerType) {
+                        sb.append(((ProfilerType) o).id());
                     } else {
                         sb.append(o);
                     }
@@ -424,7 +423,7 @@ public abstract class BaseOptions implements Options {
      * @return the value
      */
     @Override
-    public Set<ProfilerFactory.Profilers> getProfilers() {
+    public Set<ProfilerType> getProfilers() {
         return profilers;
     }
 

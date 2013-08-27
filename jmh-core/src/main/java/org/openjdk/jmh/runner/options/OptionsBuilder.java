@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
-import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.TimeUnit;
@@ -46,7 +46,7 @@ public interface OptionsBuilder {
 
     OptionsBuilder shouldList(boolean value);
 
-    OptionsBuilder addProfiler(ProfilerFactory.Profilers prof);
+    OptionsBuilder addProfiler(ProfilerType prof);
 
     OptionsBuilder shouldBeVerbose(boolean value);
 
