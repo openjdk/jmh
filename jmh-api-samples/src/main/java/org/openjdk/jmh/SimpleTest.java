@@ -26,13 +26,14 @@ package org.openjdk.jmh;
 
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.DefaultBuilder;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 public class SimpleTest {
 
     public static void main(String[] args) throws RunnerException {
-        Options opts = DefaultBuilder.start().addBenchmark(".*").shouldBeVerbose(true).jvmArgs("-server").end();
+        Options opts = new OptionsBuilder().include(".*").warmupTime(TimeValue.seconds(1)).jvmArgs("-server").build();
         new Runner(opts).run();
     }
 }

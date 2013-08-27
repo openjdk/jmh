@@ -36,6 +36,35 @@ public class TimeValue implements Serializable {
 
     public static final TimeValue NONE = new TimeValue(0, TimeUnit.SECONDS);
 
+
+    public static TimeValue days(long v) {
+        return new TimeValue(v, TimeUnit.DAYS);
+    }
+
+    public static TimeValue hours(long v) {
+        return new TimeValue(v, TimeUnit.HOURS);
+    }
+
+    public static TimeValue microseconds(long v) {
+        return new TimeValue(v, TimeUnit.MICROSECONDS);
+    }
+
+    public static TimeValue milliseconds(long v) {
+        return new TimeValue(v, TimeUnit.MILLISECONDS);
+    }
+
+    public static TimeValue minutes(long v) {
+        return new TimeValue(v, TimeUnit.MINUTES);
+    }
+
+    public static TimeValue nanoseconds(long v) {
+        return new TimeValue(v, TimeUnit.NANOSECONDS);
+    }
+
+    public static TimeValue seconds(long v) {
+        return new TimeValue(v, TimeUnit.SECONDS);
+    }
+
     private final long time;
 
     private final TimeUnit timeUnit;

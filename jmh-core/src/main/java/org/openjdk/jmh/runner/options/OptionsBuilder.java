@@ -29,57 +29,391 @@ import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public interface OptionsBuilder {
-    Options end();
+public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
-    OptionsBuilder addBenchmark(String regexp);
+    private boolean finalized;
 
-    OptionsBuilder addExclude(String regexp);
+    private void checkFinalized() {
+        if (finalized) {
+            throw new IllegalStateException("The builder is already finalized");
+        }
+    }
 
-    OptionsBuilder outputFormat(OutputFormatType type);
+    @Override
+    public Options build() {
+        finalized = true;
+        return this;
+    }
 
-    OptionsBuilder setOutput(String filename);
+    // ---------------------------------------------------------------------------
 
-    OptionsBuilder shouldDoGC(boolean value);
+    private final List<String> regexps = new ArrayList<String>();
 
-    OptionsBuilder addProfiler(ProfilerType prof);
+    @Override
+    public ChainedOptionsBuilder include(String regexp) {
+        checkFinalized();
+        regexps.add(regexp);
+        return this;
+    }
 
-    OptionsBuilder shouldBeVerbose(boolean value);
+    @Override
+    public List<String> getRegexps() {
+        return regexps;
+    }
 
-    OptionsBuilder shouldFailOnError(boolean value);
+    // ---------------------------------------------------------------------------
 
-    OptionsBuilder shouldOutputDetails(boolean value);
+    private final List<String> excludes = new ArrayList<String>();
 
-    OptionsBuilder threads(int count);
+    @Override
+    public ChainedOptionsBuilder exclude(String regexp) {
+        excludes.add(regexp);
+        return this;
+    }
 
-    OptionsBuilder shouldSyncIterations(boolean value);
+    @Override
+    public List<String> getExcludes() {
+        return excludes;
+    }
 
-    OptionsBuilder warmupIterations(int value);
+    // ---------------------------------------------------------------------------
 
-    OptionsBuilder warmupTime(TimeValue value);
+    private OutputFormatType ofType = OutputFormatType.defaultType();
 
-    OptionsBuilder warmupMode(WarmupMode mode);
+    @Override
+    public ChainedOptionsBuilder outputFormat(OutputFormatType type) {
+        ofType = type;
+        return this;
+    }
 
-    OptionsBuilder addWarmupMicro(String regexp);
+    @Override
+    public OutputFormatType getOutputFormat() {
+        return ofType;
+    }
 
-    OptionsBuilder iterations(int count);
+    // ---------------------------------------------------------------------------
 
-    OptionsBuilder measurementTime(TimeValue value);
+    private String output;
 
-    OptionsBuilder addMode(Mode mode);
+    @Override
+    public ChainedOptionsBuilder output(String filename) {
+        this.output = filename;
+        return this;
+    }
 
-    OptionsBuilder setTimeUnit(TimeUnit tu);
+    @Override
+    public String getOutput() {
+        return output;
+    }
 
-    OptionsBuilder forks(int value);
+    // ---------------------------------------------------------------------------
 
-    OptionsBuilder warmupForks(int value);
+    private boolean shouldDoGC;
 
-    OptionsBuilder classpath(String value);
+    @Override
+    public ChainedOptionsBuilder shouldDoGC(boolean value) {
+        shouldDoGC = value;
+        return this;
+    }
 
-    OptionsBuilder jvmBinary(String path);
+    @Override
+    public boolean shouldDoGC() {
+        return shouldDoGC;
+    }
 
-    OptionsBuilder jvmArgs(String value);
+    // ---------------------------------------------------------------------------
+
+    private EnumSet<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
+
+    @Override
+    public ChainedOptionsBuilder addProfiler(ProfilerType prof) {
+        this.profilers.add(prof);
+        return this;
+    }
+
+    @Override
+    public Set<ProfilerType> getProfilers() {
+        return profilers;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private boolean isVerbose;
+
+    @Override
+    public ChainedOptionsBuilder verbose(boolean value) {
+        isVerbose = value;
+        return this;
+    }
+
+    @Override
+    public boolean isVerbose() {
+        return isVerbose;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private boolean shouldFailOnError;
+
+    @Override
+    public ChainedOptionsBuilder failOnError(boolean value) {
+        shouldFailOnError = value;
+        return this;
+    }
+
+    @Override
+    public boolean shouldFailOnError() {
+        return shouldFailOnError;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private boolean shouldOutputDetails;
+
+    @Override
+    public ChainedOptionsBuilder outputDetails(boolean value) {
+        shouldOutputDetails = value;
+        return this;
+    }
+
+    @Override
+    public boolean shouldOutputDetailedResults() {
+        return shouldOutputDetails;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private int threads = -1;
+
+    @Override
+    public ChainedOptionsBuilder threads(int count) {
+        this.threads = count;
+        return this;
+    }
+
+    @Override
+    public int getThreads() {
+        return threads;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private Boolean syncIterations;
+
+    @Override
+    public ChainedOptionsBuilder syncIterations(boolean value) {
+        this.syncIterations = value;
+        return this;
+    }
+
+    @Override
+    public Boolean getSynchIterations() {
+        return syncIterations;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private int warmupIterations = -1;
+
+    @Override
+    public ChainedOptionsBuilder warmupIterations(int value) {
+        this.warmupIterations = value;
+        return this;
+    }
+
+    @Override
+    public int getWarmupIterations() {
+        return warmupIterations;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private TimeValue warmupTime;
+
+    @Override
+    public ChainedOptionsBuilder warmupTime(TimeValue value) {
+        this.warmupTime = value;
+        return this;
+    }
+
+    @Override
+    public TimeValue getWarmupTime() {
+        return warmupTime;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private WarmupMode warmupMode = WarmupMode.defaultMode();
+
+    @Override
+    public ChainedOptionsBuilder warmupMode(WarmupMode mode) {
+        this.warmupMode = mode;
+        return this;
+    }
+
+    @Override
+    public WarmupMode getWarmupMode() {
+        return warmupMode;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private final List<String> warmupMicros = new ArrayList<String>();
+
+    @Override
+    public ChainedOptionsBuilder includeWarmup(String regexp) {
+        warmupMicros.add(regexp);
+        return this;
+    }
+
+    @Override
+    public List<String> getWarmupMicros() {
+        return warmupMicros;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private int iterations = -1;
+
+    @Override
+    public ChainedOptionsBuilder measurementIterations(int count) {
+        this.iterations = count;
+        return this;
+    }
+
+    @Override
+    public int getIterations() {
+        return iterations;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private TimeValue measurementTime;
+
+    @Override
+    public ChainedOptionsBuilder measurementTime(TimeValue value) {
+        this.measurementTime = value;
+        return this;
+    }
+
+    @Override
+    public TimeValue getRuntime() {
+        return measurementTime;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private EnumSet<Mode> benchModes;
+
+    @Override
+    public ChainedOptionsBuilder mode(Mode mode) {
+        if (benchModes == null) {
+            benchModes = EnumSet.noneOf(Mode.class);
+        }
+        benchModes.add(mode);
+        return this;
+    }
+
+    @Override
+    public Collection<Mode> getBenchModes() {
+        return benchModes;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private TimeUnit timeUnit;
+
+    @Override
+    public ChainedOptionsBuilder timeUnit(TimeUnit tu) {
+        this.timeUnit = tu;
+        return this;
+    }
+
+    @Override
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private int forks = -1;
+
+    @Override
+    public ChainedOptionsBuilder forks(int value) {
+        this.forks = value;
+        return this;
+    }
+
+    @Override
+    public int getForkCount() {
+        return forks;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private int warmupForks = -1;
+
+    @Override
+    public ChainedOptionsBuilder warmupForks(int value) {
+        this.warmupForks = value;
+        return this;
+    }
+
+    @Override
+    public int getWarmupForkCount() {
+        return warmupForks;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private String jvmClassPath;
+
+    @Override
+    public ChainedOptionsBuilder jvmClasspath(String value) {
+        this.jvmClassPath = value;
+        return this;
+    }
+
+    @Override
+    public String getJvmClassPath() {
+        return jvmClassPath;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private String jvmBinary;
+
+    @Override
+    public ChainedOptionsBuilder jvm(String path) {
+        this.jvmBinary = path;
+        return this;
+    }
+
+    @Override
+    public String getJvm() {
+        return jvmBinary;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private String jvmArgs;
+
+    @Override
+    public ChainedOptionsBuilder jvmArgs(String value) {
+        this.jvmArgs = value;
+        return this;
+    }
+
+    @Override
+    public String getJvmArgs() {
+        return jvmArgs;
+    }
 
 }
