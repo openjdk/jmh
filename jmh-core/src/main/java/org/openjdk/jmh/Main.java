@@ -27,10 +27,9 @@ package org.openjdk.jmh;
 import org.kohsuke.args4j.CmdLineException;
 import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.profile.ProfilerFactory;
-import org.openjdk.jmh.runner.MicroBenchmarkList;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.HarnessOptions;
+import org.openjdk.jmh.runner.options.CommandLineOptions;
 
 /**
  * Main program entry point
@@ -45,7 +44,7 @@ public class Main {
      * @param argv Command line arguments
      */
     public static void main(String[] argv) {
-        HarnessOptions cmdOptions = HarnessOptions.newInstance();
+        CommandLineOptions cmdOptions = CommandLineOptions.newInstance();
 
         try {
             cmdOptions.parseArguments(argv);

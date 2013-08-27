@@ -53,7 +53,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     }
 
     public String toLine() {
-        return userName + ", " + generatedName + ", " + mode;
+        return userName + "," + generatedName + "," + mode;
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {

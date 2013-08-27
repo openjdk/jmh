@@ -420,34 +420,4 @@ public class DefaultBuilder implements Options, OptionsBuilder {
         return jvmArgs;
     }
 
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public String[] toCommandLine() {
-        // FIXME: Need to convert to proper representation
-        List<String> results = new ArrayList<String>();
-
-        return results.toArray(new String[results.size()]);
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public String getHostName() {
-        throw new UnsupportedOperationException();
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public int getHostPort() {
-        throw new UnsupportedOperationException();
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public String getBenchmark() {
-        throw new UnsupportedOperationException();
-    }
 }

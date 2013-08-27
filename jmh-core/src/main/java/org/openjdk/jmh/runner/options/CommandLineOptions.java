@@ -28,29 +28,96 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
+import org.openjdk.jmh.profile.ProfilerType;
+import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.ThreadsOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.TimeUnitOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.TimeValueOptionHandler;
+import org.openjdk.jmh.runner.parameters.Defaults;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class that handles all the options and arguments specific to the harness JVM.
  *
+ * Boolean/boolean options getters name conventions:
+ *   - method name is prefixed by "is" or "should" when the Option class gives exact answer
+ *   - method name is prefixed by "get" when the method is just a getter and meaning of the option clarified somewhere else
+ *
  * @author anders.astrand@oracle.com
  * @author sergey.kuksenko@oracle.com
  */
-public class HarnessOptions extends BaseOptions {
+public class CommandLineOptions implements Options {
 
+        /*
+     *  Conventions for options processing (unless otherwise specified):
+     *  - int options:
+     *              negative value means unset
+     *  - Boolean options:
+     *              null means unset, TRUE/FALSE means true/false;
+     *              default values should be processed explicitly
+     *  - boolean options:
+     *              may be used only for options with false default value
+     *              may be set to true in cmdLine, can't be set to false explicitly
+     *
+     */
+
+    @Option(name = "-i", aliases = {"--iterations"}, metaVar = "INT", usage = "Number of iterations.")
+    protected int iterations = -1;
+
+    @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms; defaults to " + Defaults.ITERATION_TIME_SECS + "s", handler = TimeValueOptionHandler.class)
+    protected TimeValue runTime = null;
+
+    @Option(name = "-wi", aliases = {"--warmupiterations"}, metaVar = "INT", usage = "Number of warmup iterations to run.")
+    protected int warmupIterations = -1;
+
+    @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms; defaults to " + Defaults.WARMUP_TIME_SECS + "", handler = TimeValueOptionHandler.class)
+    protected TimeValue warmupTime = null;
+
+    @Option(name = "-bm", aliases = {"--mode"}, multiValued = false, metaVar = "MODE", usage = "Benchmark mode", handler = BenchmarkModeTypeOptionHandler.class)
+    protected List<Mode> benchMode = null;
+
+    @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" or 0 will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
+    protected int threads = -1;
+
+    @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work? Default is " + Defaults.SHOULD_SYNCH_ITERATIONS, handler = BooleanOptionHandler.class)
+    protected Boolean synchIterations = null; // true
+
+    @Option(name = "-gc", usage = "Should do System.gc() between iterations?", handler = BooleanOptionHandler.class)
+    protected boolean gcEachIteration = false;
+
+    @Option(name = "-v", aliases = {"--verbose"}, usage = "Verbose mode, default off", handler = BooleanOptionHandler.class)
+    protected boolean verbose = false;
+
+    @Option(name = "-odr", aliases = {"--outputdetailedresults"}, usage = "Output detailed results. Default is false", handler = BooleanOptionHandler.class)
+    protected boolean outputDetailedResults = false;
+
+    @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
+    protected boolean failOnError = false;
+
+    @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listprofilers to list available profilers", handler = ProfilersOptionHandler.class)
+    protected Set<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
+
+    @Option(name = "-tu", aliases = {"--timeunit"}, usage = "Output time unit. Available values: m, s, ms, us, ns", handler = TimeUnitOptionHandler.class)
+    protected TimeUnit timeUnit = null;
 
     // test selection options
     @Argument(metaVar = "REGEXP", usage = "Microbenchmarks to run. Regexp filtering out classes or methods which are MicroBenchmarks.")
     protected List<String> regexps = new ArrayList<String>();
 
     // micro options
-    // the following list of options are not forwarding into forked JVM.
-    // "forwarding option should be declared in BaseOptions class" (c) capt. O.
 
     @Option(name = "-f", aliases = {"--fork"}, metaVar = "{ INT }", usage = "Start each benchmark in new JVM, forking from the same JDK unless --jvm is set. Optional parameter specifies number of times harness should fork. Zero forks means \"no fork\", also \"false\" is accepted", handler = ForkOptionHandler.class)
     protected int fork = -1;
@@ -98,15 +165,15 @@ public class HarnessOptions extends BaseOptions {
     /**
      * Kawaguchi's parser
      */
-    private CmdLineParser parser;
+    private transient CmdLineParser parser;
 
-    public static HarnessOptions newInstance() {
-        HarnessOptions opts = new HarnessOptions();
+    public static CommandLineOptions newInstance() {
+        CommandLineOptions opts = new CommandLineOptions();
         opts.parser = new CmdLineParser(opts);
         return opts;
     }
 
-    protected HarnessOptions() {
+    protected CommandLineOptions() {
     }
 
     /**
@@ -285,19 +352,128 @@ public class HarnessOptions extends BaseOptions {
         return listProfilers;
     }
 
+    /**
+     * Getter
+     *
+     * @return the value
+     */
     @Override
-    public String getHostName() {
-        throw new UnsupportedOperationException("Asking for forked VM options");
+    public int getIterations() {
+        return iterations;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public TimeValue getRuntime() {
+        return runTime;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public TimeValue getWarmupTime() {
+        return warmupTime;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public int getWarmupIterations() {
+        return warmupIterations;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public int getThreads() {
+        return threads;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public boolean shouldDoGC() {
+        return gcEachIteration;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public Boolean getSynchIterations() {
+        return synchIterations;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public boolean shouldOutputDetailedResults() {
+        return outputDetailedResults;
+    }
+
+    /**
+     * Should fail the harness on test error?
+     * @return the value
+     */
+    @Override
+    public boolean shouldFailOnError() {
+        return failOnError;
+    }
+
+    /**
+     * Getter
+     * @return the value
+     */
+    @Override
+    public Set<ProfilerType> getProfilers() {
+        return profilers;
     }
 
     @Override
-    public int getHostPort() {
-        throw new UnsupportedOperationException("Asking for forked VM options");
+    public Collection<Mode> getBenchModes() {
+        return benchMode;
     }
 
-    @Override
-    public String getBenchmark() {
-        throw new UnsupportedOperationException("Asking for forked VM options");
-    }
 
 }

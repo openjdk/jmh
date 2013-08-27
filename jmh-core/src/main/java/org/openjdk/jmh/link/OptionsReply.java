@@ -22,22 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.format.internal;
+package org.openjdk.jmh.link;
+
+import org.openjdk.jmh.runner.options.Options;
 
 import java.io.Serializable;
 
-/**
- * Call info:
- *   - method name
- *   - arguments (assumed to be serializable)
- */
-public class CallInfo implements Serializable {
-    private static final long serialVersionUID = -7151852354574635295L;
-    public final String method;
-    public final Object[] args;
+public class OptionsReply implements Serializable {
 
-    public CallInfo(String method, Object[] args) {
-        this.method = method;
-        this.args = args;
+    private final Options opts;
+
+    public OptionsReply(Options opts) {
+        this.opts = opts;
+    }
+
+    public Options getOpts() {
+        return opts;
     }
 }

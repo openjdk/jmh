@@ -28,15 +28,9 @@ import org.junit.Test;
 import org.kohsuke.args4j.CmdLineException;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -52,61 +46,8 @@ public class TestOptions {
 
     public static final String ORACLE_FORKED_MAIN_CLASS = "org.openjdk.jmh.ForkedMain";
 
-    private static String getForked(String[] argv) throws Exception{
-        HarnessOptions options =  HarnessOptions.newInstance();
-        options.parseArguments(argv);
-        StringBuilder sb = new StringBuilder();
-        for (String l : options.toCommandLine()) {
-            sb.append(l).append(' ');
-        }
-        // with sweet love from Sweden: remove final delimiter
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1);
-        }
-        return sb.toString();
-    }
-
-    @Test
-    public void testGetForkArguments() throws Exception {
-        String[] argv = {"-e", ".*Apa.*", ".*SPECjbb2005.*", "-f", "-v"};
-        assertEquals("-v true", getForked(argv));
-
-
-        String[] argv2 = {".*Hash.*", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v", "-i", "10", "-r", "100", "-t", "2"};
-        assertEquals("-i 10 -r 100s -t 2 -v true", getForked(argv2));
-
-
-        String[] argv3 = {"--jvmargs", "\"-Xmx31337g -Xms31337g\"", "--jvm", "/opt/java/konrad/bin/java", "-l", "-e", ".*Apa.*", "-f", "-e", ".*a.*", "-v", "-i", "10", "-r", "100", "-t", "2", ".*Hash.*"};
-        assertEquals("-i 10 -r 100s -t 2 -v true", getForked(argv3));
-
-
-        String[] argv4 = {"-f"};
-        assertEquals("", getForked(argv4));
-
-
-        String[] argv5 = {"-e", ".*Apa.*", ".*SPECjbb2005.*", "-f", "-v", "-o", "SPECjbb2005"};
-        assertEquals("-v true", getForked(argv5));
-
-
-        String[] argv6 = {".*Apa.*", ".*SPECjbb2006.*", "-f", "-v", "-o", "SPECjbb2006"};
-        assertEquals("-v true", getForked(argv6));
-
-
-        String[] argv7 = {".*Apa.*", ".*SPECjbb2007.*", "-w", "100", "-f", "-v", "-o", "SPECjbb2007"};
-        assertEquals("-v true -w 100s", getForked(argv7));
-
-
-        String[] argv8 = {".*Apa.*", ".*SPECjbb2008.*", "-w", "100", "-l", "-f", "-v", "-o", "SPECjbb2008"};
-        assertEquals("-v true -w 100s", getForked(argv8));
-
-
-        String[] argv9 = {"-i", "10", "-r", "10", "-w", "10", "-t", "10", "-si", "-l", "-v", "-o", "SPECjbb2005", "-of", "csv"};
-        assertEquals("-i 10 -r 10s -si true -t 10 -v true -w 10s", getForked(argv9));
-    }
-
-
-    private static HarnessOptions getOptions(String[] argv) throws Exception {
-        HarnessOptions opts = HarnessOptions.newInstance();
+    private static CommandLineOptions getOptions(String[] argv) throws Exception {
+        CommandLineOptions opts = CommandLineOptions.newInstance();
         opts.parseArguments(argv);
         return opts;
     }
@@ -114,7 +55,7 @@ public class TestOptions {
     @Test
     public void testThreadsMax() throws Exception {
         String[] argv = {"-t", "max"};
-        HarnessOptions options = getOptions(argv);
+        CommandLineOptions options = getOptions(argv);
         assertEquals(0, options.getThreads());
     }
 
@@ -123,7 +64,7 @@ public class TestOptions {
         String parameter = "maxx";
         String[] argv = {"-t", parameter};
         try {
-            HarnessOptions options = getOptions(argv);
+            CommandLineOptions options = getOptions(argv);
         } catch (CmdLineException e) {
             assertTrue("Exception message did not contain parameter value", e.getMessage().contains(parameter));
             return;
@@ -146,7 +87,7 @@ public class TestOptions {
     @Test
     public void testWarmupWithArg() throws Exception {
         String[] argv = {"-w", "100"};
-        HarnessOptions options = getOptions(argv);
+        CommandLineOptions options = getOptions(argv);
 
         assertEquals(new TimeValue(100, TimeUnit.SECONDS), options.getWarmupTime());
 

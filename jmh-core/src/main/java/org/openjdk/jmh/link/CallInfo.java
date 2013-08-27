@@ -22,20 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.format.internal;
+package org.openjdk.jmh.link;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
 
-public class ClassConventions {
+/**
+ * Call info:
+ *   - method name
+ *   - arguments (assumed to be serializable)
+ */
+public class CallInfo implements Serializable {
+    private static final long serialVersionUID = -7151852354574635295L;
+    public final String method;
+    public final Object[] args;
 
-    public static String getMethodName(Method m) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(m.getName());
-        for (Class<?> paramType : m.getParameterTypes()) {
-            builder.append(paramType.getName());
-            builder.append(",");
-        }
-        return builder.toString();
+    public CallInfo(String method, Object[] args) {
+        this.method = method;
+        this.args = args;
     }
-
 }

@@ -22,37 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.link;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
+import java.lang.reflect.Method;
 
-/**
- * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
- */
-public class ForkedRunner extends BaseRunner {
+public class ClassConventions {
 
-    private final Options options;
-
-    public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
-        this.options = options;
-    }
-
-    public void run(BenchmarkRecord benchmark) {
-        // expect the tuple from the parent process
-        if (options.isVerbose()) {
-            out.println("Benchmarks: ");
-            out.println(benchmark.getUsername());
+    public static String getMethodName(Method m) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(m.getName());
+        for (Class<?> paramType : m.getParameterTypes()) {
+            builder.append(paramType.getName());
+            builder.append(",");
         }
-        out.startRun();
-        runBenchmark(benchmark, true, true);
-        out.endRun();
-        out.flush();
-        out.close();
+        return builder.toString();
     }
 
 }

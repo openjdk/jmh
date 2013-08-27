@@ -24,9 +24,12 @@
  */
 package org.openjdk.jmh;
 
-import org.kohsuke.args4j.CmdLineException;
+import org.openjdk.jmh.link.BinaryLinkClient;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.ForkedRunner;
-import org.openjdk.jmh.runner.options.ForkedOptions;
+import org.openjdk.jmh.runner.options.Options;
+
+import java.io.IOException;
 
 /**
  * Main program entry point for forked JVM instance
@@ -41,17 +44,21 @@ public class ForkedMain {
      * @param argv Command line arguments
      */
     public static void main(String[] argv) {
-        ForkedOptions options = ForkedOptions.newInstance();
-
         if (argv.length == 0) {
             throw new IllegalArgumentException("Empty arguments for forked VM");
         } else {
             try {
-                options.parseArguments(argv);
+                String hostname = argv[0];
+                int hostPort = Integer.valueOf(argv[1]);
+                BenchmarkRecord benchmark = new BenchmarkRecord(argv[2]);
 
-                ForkedRunner runner = new ForkedRunner(options);
-                runner.run();
-            } catch (CmdLineException ex) {
+                BinaryLinkClient link = new BinaryLinkClient(hostname, hostPort);
+                Options options = link.requestOptions();
+                ForkedRunner runner = new ForkedRunner(options, link);
+                runner.run(benchmark);
+            } catch (IOException ex) {
+                throw new IllegalArgumentException(ex.getMessage());
+            } catch (ClassNotFoundException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
             }
         }

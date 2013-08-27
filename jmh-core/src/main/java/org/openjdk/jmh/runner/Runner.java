@@ -29,7 +29,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.output.format.internal.BinaryOutputFormatReader;
+import org.openjdk.jmh.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.WarmupMode;
 import org.openjdk.jmh.runner.parameters.Defaults;
@@ -245,9 +245,9 @@ public class Runner extends BaseRunner {
     }
 
     private void runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
-        BinaryOutputFormatReader reader = null;
+        BinaryLinkServer reader = null;
         try {
-            reader = new BinaryOutputFormatReader(out);
+            reader = new BinaryLinkServer(options, out);
             for (BenchmarkRecord benchmark : benchmarksToFork) {
                 runSeparateMicroBenchmark(reader, benchmark, reader.getHost(), reader.getPort());
             }
@@ -276,7 +276,7 @@ public class Runner extends BaseRunner {
      * @param host host VM host
      * @param port host VM port
      */
-    private void runSeparateMicroBenchmark(BinaryOutputFormatReader reader, BenchmarkRecord benchmark, String host, int port) {
+    private void runSeparateMicroBenchmark(BinaryLinkServer reader, BenchmarkRecord benchmark, String host, int port) {
 
         // Running microbenchmark in separate JVM requires to read some options from annotations.
 
@@ -317,7 +317,7 @@ public class Runner extends BaseRunner {
         }
     }
 
-    private void doFork(BinaryOutputFormatReader reader, String[] commandString) {
+    private void doFork(BinaryLinkServer reader, String[] commandString) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
@@ -437,15 +437,10 @@ public class Runner extends BaseRunner {
         command.add(classPath);
         command.add(ForkedMain.class.getName());
 
-        // if user supplied micro flags, give those as well
-        Collections.addAll(command, options.toCommandLine());
+        command.add(host);
+        command.add(String.valueOf(port));
 
         command.add(benchmark.toLine());
-
-        command.add("--hostName");
-        command.add(host);
-        command.add("--hostPort");
-        command.add(String.valueOf(port));
 
         return command.toArray(new String[command.size()]);
     }

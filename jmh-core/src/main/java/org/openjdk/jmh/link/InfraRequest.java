@@ -22,37 +22,24 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.link;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
+import java.io.Serializable;
 
-/**
- * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
- */
-public class ForkedRunner extends BaseRunner {
+public class InfraRequest implements Serializable {
 
-    private final Options options;
+    private final Type type;
 
-    public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
-        this.options = options;
+    public InfraRequest(Type type) {
+        this.type = type;
     }
 
-    public void run(BenchmarkRecord benchmark) {
-        // expect the tuple from the parent process
-        if (options.isVerbose()) {
-            out.println("Benchmarks: ");
-            out.println(benchmark.getUsername());
-        }
-        out.startRun();
-        runBenchmark(benchmark, true, true);
-        out.endRun();
-        out.flush();
-        out.close();
+    public Type getType() {
+        return type;
+    }
+
+    public enum Type {
+        OPTIONS_REQUEST,
     }
 
 }

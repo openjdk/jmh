@@ -22,15 +22,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.format.internal;
+package org.openjdk.jmh.link;
 
 import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -50,16 +53,18 @@ import java.util.Set;
 /**
  * Accepts the OutputFormat calls from the network and forwards those to given local OutputFormat
  */
-public class BinaryOutputFormatReader {
+public class BinaryLinkServer {
 
+    private final Options opts;
     private final OutputFormat out;
     private final Map<String, Method> methods;
     private final Set<String> forbidden;
     private final Set<String> finishing;
     private final Acceptor acceptor;
-    private final List<Reader> registeredReaders;
+    private final List<Handler> registeredHandlers;
 
-    public BinaryOutputFormatReader(OutputFormat out) throws IOException {
+    public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
+        this.opts = opts;
         this.out = out;
         this.methods = new HashMap<String, Method>();
         this.forbidden = new HashSet<String>();
@@ -82,7 +87,7 @@ public class BinaryOutputFormatReader {
             }
         }
 
-        registeredReaders = Collections.synchronizedList(new ArrayList<Reader>());
+        registeredHandlers = Collections.synchronizedList(new ArrayList<Handler>());
 
         acceptor = new Acceptor();
         acceptor.start();
@@ -91,13 +96,13 @@ public class BinaryOutputFormatReader {
     public void terminate() {
         acceptor.close();
 
-        for (Reader r : registeredReaders) {
+        for (Handler r : registeredHandlers) {
             r.close();
         }
 
         try {
             acceptor.join();
-            for (Reader r : registeredReaders) {
+            for (Handler r : registeredHandlers) {
                 r.join();
             }
         } catch (InterruptedException e) {
@@ -106,8 +111,8 @@ public class BinaryOutputFormatReader {
     }
 
     public void waitFinish() {
-        for (Iterator<Reader> iterator = registeredReaders.iterator(); iterator.hasNext(); ) {
-            Reader r = iterator.next();
+        for (Iterator<Handler> iterator = registeredHandlers.iterator(); iterator.hasNext(); ) {
+            Handler r = iterator.next();
             try {
                 r.join();
                 iterator.remove();
@@ -130,8 +135,8 @@ public class BinaryOutputFormatReader {
             try {
                 while (!Thread.interrupted()) {
                     Socket clientSocket = server.accept();
-                    Reader r = new Reader(clientSocket);
-                    registeredReaders.add(r);
+                    Handler r = new Handler(clientSocket);
+                    registeredHandlers.add(r);
                     r.start();
                 }
             } catch (SocketException e) {
@@ -172,14 +177,17 @@ public class BinaryOutputFormatReader {
         return acceptor.getPort();
     }
 
-    private final class Reader extends Thread {
+    private final class Handler extends Thread {
         private final InputStream is;
         private final Socket socket;
         private ObjectInputStream ois;
+        private final OutputStream os;
+        private ObjectOutputStream oos;
 
-        public Reader(Socket socket) throws IOException {
+        public Handler(Socket socket) throws IOException {
             this.socket = socket;
             this.is = socket.getInputStream();
+            this.os = socket.getOutputStream();
         }
 
         @Override
@@ -187,27 +195,41 @@ public class BinaryOutputFormatReader {
             try {
                 // late OIS initialization, otherwise we'll block reading the header
                 ois = new ObjectInputStream(is);
+                oos = new ObjectOutputStream(os);
 
                 Object obj;
                 while ((obj = ois.readObject()) != null) {
-                    CallInfo frame = (CallInfo) obj;
+                    if (obj instanceof CallInfo) {
+                        CallInfo frame = (CallInfo) obj;
 
-                    Method m = methods.get(frame.method);
+                        Method m = methods.get(frame.method);
 
-                    if (finishing.contains(frame.method)) {
-                        break;
+                        if (finishing.contains(frame.method)) {
+                            break;
+                        }
+
+                        if (forbidden.contains(frame.method)) {
+                            continue;
+                        }
+
+                        if (m == null) {
+                            out.println("WARNING: Unknown method to forward: " + frame.method);
+                            continue;
+                        }
+
+                        m.invoke(out, frame.args);
                     }
 
-                    if (forbidden.contains(frame.method)) {
-                        continue;
+                    if (obj instanceof InfraRequest) {
+                        switch (((InfraRequest) obj).getType()) {
+                            case OPTIONS_REQUEST:
+                                oos.writeObject(new OptionsReply(opts));
+                                oos.flush();
+                                break;
+                            default:
+                                throw new IllegalStateException("Unknown infrastructure request: " + obj);
+                        }
                     }
-
-                    if (m == null) {
-                        out.println("WARNING: Unknown method to forward: " + frame.method);
-                        continue;
-                    }
-
-                    m.invoke(out, frame.args);
                 }
             } catch (ObjectStreamException e) {
                 throw new IllegalStateException(e);

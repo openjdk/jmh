@@ -22,22 +22,38 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.format.internal;
+package org.openjdk.jmh.link;
+
+import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
-public final class BinaryOutputFormatWriter implements InvocationHandler {
+public final class BinaryLinkClient implements InvocationHandler {
 
-    private final ObjectOutputStream oos;
     private final Socket clientSocket;
 
-    public BinaryOutputFormatWriter(String hostName, int hostPort) throws IOException {
+    private final ObjectOutputStream oos;
+    private final ObjectInputStream ois;
+
+    public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.clientSocket = new Socket(hostName, hostPort);
         this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        this.ois = new ObjectInputStream(clientSocket.getInputStream());
+    }
+
+    public Options requestOptions() throws IOException, ClassNotFoundException {
+        oos.writeObject(new InfraRequest(InfraRequest.Type.OPTIONS_REQUEST));
+        Object reply = ois.readObject();
+        if (reply instanceof OptionsReply) {
+            return (((OptionsReply) reply).getOpts());
+        } else {
+            throw new IllegalStateException("Got the erroneous reply: " + reply);
+        }
     }
 
     @Override

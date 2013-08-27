@@ -29,11 +29,12 @@ import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public interface Options {
+public interface Options extends Serializable {
 
     /**
      * Which benchmarks to execute?
@@ -180,28 +181,4 @@ public interface Options {
      */
     String getJvmArgs();
 
-    /**
-     * Convert options to command line.
-     * TODO: Rework and deprecate this
-     * @return the array of command line elements.
-     */
-    String[] toCommandLine();
-
-    /**
-     * Forked VM specific: get the address of control VM
-     * @return address of the host VM
-     */
-    String getHostName();
-
-    /**
-     * Forked VM specific: get the port for control VM
-     * @return control VM port
-     */
-    int getHostPort();
-
-    /**
-     * Forked VM specific: get the benchmark info to invoke
-     * @return which benchmark to execute
-     */
-    String getBenchmark();
 }

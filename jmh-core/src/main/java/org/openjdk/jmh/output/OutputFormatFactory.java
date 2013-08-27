@@ -29,7 +29,7 @@ import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.PrettyPrintFormat;
 import org.openjdk.jmh.output.format.SilentFormat;
 import org.openjdk.jmh.output.format.TextReportFormat;
-import org.openjdk.jmh.output.format.internal.BinaryOutputFormatWriter;
+import org.openjdk.jmh.link.BinaryLinkClient;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -62,20 +62,14 @@ public class OutputFormatFactory {
 
     /**
      * Factory method - returns output format for forked JVM.
-     * @param hostName
-     * @param hostPort
      * @return
      */
-    public static OutputFormat createBinaryHook(String hostName, int hostPort) {
-        try {
-            return (OutputFormat) Proxy.newProxyInstance(
-                    Thread.currentThread().getContextClassLoader(),
-                    new Class[]{OutputFormat.class},
-                    new BinaryOutputFormatWriter(hostName, hostPort)
-            );
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+    public static OutputFormat createBinaryHook(BinaryLinkClient link) {
+        return (OutputFormat) Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class[]{OutputFormat.class},
+                link
+        );
     }
 
     public static OutputFormat createFormatInstance(boolean verbose) {

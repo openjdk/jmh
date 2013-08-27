@@ -32,7 +32,7 @@ import org.openjdk.jmh.runner.options.Options;
 public class SimpleTest {
 
     public static void main(String[] args) throws RunnerException {
-        Options opts = DefaultBuilder.start().addBenchmark(".*").shouldBeVerbose(true).end();
+        Options opts = DefaultBuilder.start().addBenchmark(".*").shouldBeVerbose(true).jvmArgs("-server").end();
         new Runner(opts).run();
     }
 }
