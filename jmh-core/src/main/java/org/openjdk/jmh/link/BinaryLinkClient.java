@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.link;
 
+import org.openjdk.jmh.link.frames.FinishingFrame;
+import org.openjdk.jmh.link.frames.InfraFrame;
+import org.openjdk.jmh.link.frames.OptionsFrame;
+import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
@@ -33,7 +37,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
-public final class BinaryLinkClient implements InvocationHandler {
+public final class BinaryLinkClient {
 
     private final Socket clientSocket;
 
@@ -47,26 +51,30 @@ public final class BinaryLinkClient implements InvocationHandler {
     }
 
     public Options requestOptions() throws IOException, ClassNotFoundException {
-        oos.writeObject(new InfraRequest(InfraRequest.Type.OPTIONS_REQUEST));
+        oos.writeObject(new InfraFrame(InfraFrame.Type.OPTIONS_REQUEST));
         Object reply = ois.readObject();
-        if (reply instanceof OptionsReply) {
-            return (((OptionsReply) reply).getOpts());
+        if (reply instanceof OptionsFrame) {
+            return (((OptionsFrame) reply).getOpts());
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }
     }
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        oos.writeObject(new CallInfo(ClassConventions.getMethodName(method), args));
+    public InvocationHandler getOutputFormatHandler() {
+        return new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                oos.writeObject(new OutputFormatFrame(ClassConventions.getMethodName(method), args));
+                oos.flush();
+                return null; // expect null
+            }
+        };
+    }
+
+    public void close() throws IOException {
+        oos.writeObject(new FinishingFrame());
         oos.flush();
-
-        if (method.getName().equals("close")) {
-            // other side is notified, close ourselves
-            oos.close();
-            clientSocket.close();
-        }
-
-        return null; // expect null
+        oos.close();
+        clientSocket.close();
     }
 }

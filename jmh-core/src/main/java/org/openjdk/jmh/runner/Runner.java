@@ -245,17 +245,17 @@ public class Runner extends BaseRunner {
     }
 
     private void runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
-        BinaryLinkServer reader = null;
+        BinaryLinkServer server = null;
         try {
-            reader = new BinaryLinkServer(options, out);
+            server = new BinaryLinkServer(options, out);
             for (BenchmarkRecord benchmark : benchmarksToFork) {
-                runSeparateMicroBenchmark(reader, benchmark, reader.getHost(), reader.getPort());
+                runSeparateMicroBenchmark(server, benchmark, server.getHost(), server.getPort());
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);
         } finally {
-            if (reader != null) {
-                reader.terminate();
+            if (server != null) {
+                server.terminate();
             }
         }
     }
@@ -437,9 +437,12 @@ public class Runner extends BaseRunner {
         command.add(classPath);
         command.add(ForkedMain.class.getName());
 
+        // Forked VM assumes the exact order of arguments:
+        //   1) host name to back-connect
+        //   2) host port to back-connect
+        //   3) benchmark to execute (saves benchmark lookup via Options)
         command.add(host);
         command.add(String.valueOf(port));
-
         command.add(benchmark.toLine());
 
         return command.toArray(new String[command.size()]);

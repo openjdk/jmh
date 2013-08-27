@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.link;
 
+import org.openjdk.jmh.link.frames.FinishingFrame;
+import org.openjdk.jmh.link.frames.InfraFrame;
+import org.openjdk.jmh.link.frames.OptionsFrame;
+import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 
@@ -59,7 +63,6 @@ public class BinaryLinkServer {
     private final OutputFormat out;
     private final Map<String, Method> methods;
     private final Set<String> forbidden;
-    private final Set<String> finishing;
     private final Acceptor acceptor;
     private final List<Handler> registeredHandlers;
 
@@ -68,7 +71,6 @@ public class BinaryLinkServer {
         this.out = out;
         this.methods = new HashMap<String, Method>();
         this.forbidden = new HashSet<String>();
-        this.finishing = new HashSet<String>();
 
         // enumerate methods
         for (Method m : out.getClass().getMethods()) {
@@ -76,9 +78,6 @@ public class BinaryLinkServer {
             // start/end run callbacks are banned, since their effects are enforced by parent instead
             if (m.getName().equals("startRun")) { forbidden.add(ClassConventions.getMethodName(m)); }
             if (m.getName().equals("endRun"))   { forbidden.add(ClassConventions.getMethodName(m)); }
-
-            // receiving close has a special meaning
-            if (m.getName().equals("close"))    { finishing.add(ClassConventions.getMethodName(m)); }
 
             Method prev = methods.put(ClassConventions.getMethodName(m), m);
             if (prev != null) {
@@ -199,36 +198,15 @@ public class BinaryLinkServer {
 
                 Object obj;
                 while ((obj = ois.readObject()) != null) {
-                    if (obj instanceof CallInfo) {
-                        CallInfo frame = (CallInfo) obj;
-
-                        Method m = methods.get(frame.method);
-
-                        if (finishing.contains(frame.method)) {
-                            break;
-                        }
-
-                        if (forbidden.contains(frame.method)) {
-                            continue;
-                        }
-
-                        if (m == null) {
-                            out.println("WARNING: Unknown method to forward: " + frame.method);
-                            continue;
-                        }
-
-                        m.invoke(out, frame.args);
+                    if (obj instanceof OutputFormatFrame) {
+                        handleOutputFormat((OutputFormatFrame) obj);
                     }
-
-                    if (obj instanceof InfraRequest) {
-                        switch (((InfraRequest) obj).getType()) {
-                            case OPTIONS_REQUEST:
-                                oos.writeObject(new OptionsReply(opts));
-                                oos.flush();
-                                break;
-                            default:
-                                throw new IllegalStateException("Unknown infrastructure request: " + obj);
-                        }
+                    if (obj instanceof InfraFrame) {
+                        handleInfra((InfraFrame) obj);
+                    }
+                    if (obj instanceof FinishingFrame) {
+                        // close the streams
+                        break;
                     }
                 }
             } catch (ObjectStreamException e) {
@@ -246,6 +224,33 @@ public class BinaryLinkServer {
             } finally {
                 close();
             }
+        }
+
+        private void handleInfra(InfraFrame req) throws IOException {
+            switch (req.getType()) {
+                case OPTIONS_REQUEST:
+                    oos.writeObject(new OptionsFrame(opts));
+                    oos.flush();
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown infrastructure request: " + req);
+            }
+        }
+
+        private boolean handleOutputFormat(OutputFormatFrame frame) throws IllegalAccessException, InvocationTargetException {
+            Method m = methods.get(frame.method);
+
+            if (m == null) {
+                out.println("WARNING: Unknown method to forward: " + frame.method);
+                return true;
+            }
+
+            if (forbidden.contains(frame.method)) {
+                return true;
+            }
+
+            m.invoke(out, frame.args);
+            return false;
         }
 
         public void close() {

@@ -68,7 +68,7 @@ public class OutputFormatFactory {
         return (OutputFormat) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{OutputFormat.class},
-                link
+                link.getOutputFormatHandler()
         );
     }
 

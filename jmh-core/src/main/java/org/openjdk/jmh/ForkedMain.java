@@ -47,19 +47,35 @@ public class ForkedMain {
         if (argv.length == 0) {
             throw new IllegalArgumentException("Empty arguments for forked VM");
         } else {
+            BinaryLinkClient link = null;
             try {
-                String hostname = argv[0];
+                // This assumes the exact order of arguments:
+                //   1) host name to back-connect
+                //   2) host port to back-connect
+                //   3) benchmark to execute (saves benchmark lookup via Options)
+                String hostName = argv[0];
                 int hostPort = Integer.valueOf(argv[1]);
                 BenchmarkRecord benchmark = new BenchmarkRecord(argv[2]);
 
-                BinaryLinkClient link = new BinaryLinkClient(hostname, hostPort);
+                // establish the link to host VM and pull the options
+                link = new BinaryLinkClient(hostName, hostPort);
                 Options options = link.requestOptions();
+
+                // run!
                 ForkedRunner runner = new ForkedRunner(options, link);
                 runner.run(benchmark);
             } catch (IOException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
             } catch (ClassNotFoundException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
+            } finally {
+                if (link != null) {
+                    try {
+                        link.close();
+                    } catch (IOException e) {
+                        // swallow
+                    }
+                }
             }
         }
     }
