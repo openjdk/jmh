@@ -49,7 +49,6 @@ public interface Options {
 
     /**
      * Output format to use
-     * TODO: Rework for null => default
      * @return format type
      */
     OutputFormatType getOutputFormat();

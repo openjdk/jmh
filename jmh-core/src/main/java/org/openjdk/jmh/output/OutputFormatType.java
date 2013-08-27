@@ -26,5 +26,13 @@ package org.openjdk.jmh.output;
 
 /** Format enum */
 public enum OutputFormatType {
-    Pretty, CSV, Silent, TextReport
+    Pretty,
+    CSV,
+    Silent,
+    TextReport,
+    ;
+
+    public static OutputFormatType defaultType() {
+        return TextReport;
+    }
 }

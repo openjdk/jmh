@@ -89,7 +89,7 @@ public class DefaultBuilder implements Options, OptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private OutputFormatType ofType = OutputFormatType.Pretty;
+    private OutputFormatType ofType = OutputFormatType.defaultType();
 
     @Override
     public OptionsBuilder outputFormat(OutputFormatType type) {
@@ -254,7 +254,7 @@ public class DefaultBuilder implements Options, OptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private WarmupMode warmupMode = WarmupMode.BEFOREEACH;
+    private WarmupMode warmupMode = WarmupMode.defaultMode();
 
     @Override
     public OptionsBuilder warmupMode(WarmupMode mode) {

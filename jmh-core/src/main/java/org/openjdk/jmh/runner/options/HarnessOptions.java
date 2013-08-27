@@ -62,7 +62,7 @@ public class HarnessOptions extends BaseOptions {
     protected String output = null;
 
     @Option(name = "-of", aliases = {"--outputformat"}, metaVar = "FORMAT", usage = "Format to use for output, use --listformats to list available formats")
-    protected OutputFormatType outputFormat = OutputFormatType.TextReport;
+    protected OutputFormatType outputFormat = OutputFormatType.defaultType();
 
     @Option(name = "--jvm", metaVar = "JVM", usage = "Custom JVM to use with fork.")
     protected String jvm = null;
