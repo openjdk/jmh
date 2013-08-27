@@ -174,7 +174,6 @@ public interface Options {
 
     /**
      * Additional JVM classpath
-     * TODO: Deprecate this?
      * @return additional JVM classpath to add to forked VM
      */
     String getJvmClassPath();
