@@ -28,5 +28,20 @@ package org.openjdk.jmh.runner.options;
  * Warmup Mode enum
  */
 public enum WarmupMode {
-    BEFOREANY, BEFOREEACH
+
+    /**
+     * Warmup everything before any benchmark starts.
+     */
+    BEFOREANY,
+
+    /**
+     * Warmup each benchmark before benchmark starts.
+     */
+    BEFOREEACH,
+
+    ;
+
+    static WarmupMode defaultMode() {
+        return BEFOREEACH;
+    }
 }

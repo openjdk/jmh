@@ -77,7 +77,7 @@ public class HarnessOptions extends BaseOptions {
     protected List<String> excludes = new ArrayList<String>();
 
     @Option(name = "-wm", aliases = {"--warmupmode"}, usage = "Warmup mode for warming up selected micro benchmarks. Warmup modes are BeforeAny (measurements) or BeforeEach (measurement) (original mode)")
-    protected WarmupMode warmupMode = WarmupMode.BEFOREEACH;
+    protected WarmupMode warmupMode = WarmupMode.defaultMode();
 
     @Option(name = "-wmb", aliases = {"--warmupmicrobenchmarks"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to run for warmup before running any other benchmarks. These micros may be different from the target micros to warm up the harness or other parts of the JVM prior to running the target micro benchmarks. Regexp filtering out classes or methods which are MicroBenchmarks.")
     protected List<String> warmupMicros = new ArrayList<String>();

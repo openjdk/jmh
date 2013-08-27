@@ -125,7 +125,6 @@ public interface Options {
 
     /**
      * Warmup mode.
-     * TODO: null for "default"
      * @return warmup mode
      */
     WarmupMode getWarmupMode();
