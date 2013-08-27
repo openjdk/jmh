@@ -134,21 +134,6 @@ public class DefaultBuilder implements Options, OptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private boolean shouldList;
-
-    @Override
-    public OptionsBuilder shouldList(boolean value) {
-        shouldList = value;
-        return this;
-    }
-
-    @Override
-    public boolean shouldList() {
-        return shouldList;
-    }
-
-    // ---------------------------------------------------------------------------
-
     private EnumSet<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
 
     @Override

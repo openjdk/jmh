@@ -95,6 +95,15 @@ public class Runner extends BaseRunner {
         return OutputFormatFactory.createFormatInstance(out, options.getOutputFormat(), options.isVerbose());
     }
 
+    public void list() {
+        Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
+
+        out.println("Benchmarks: ");
+        for (BenchmarkRecord benchmark : benchmarks) {
+            out.println(benchmark.getUsername());
+        }
+    }
+
     /** Main entry point */
     public void run() throws RunnerException {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
@@ -106,13 +115,9 @@ public class Runner extends BaseRunner {
             return;
         }
 
-        if (options.shouldList() || options.isVerbose()) {
-            out.println("Benchmarks: ");
-
-            // list microbenchmarks if -l and/or -v
-            for (BenchmarkRecord benchmark : benchmarks) {
-                out.println(benchmark.getUsername());
-            }
+        // list microbenchmarks if -v
+        if (options.isVerbose()) {
+            list();
         }
 
         // override the benchmark types;
@@ -146,14 +151,11 @@ public class Runner extends BaseRunner {
         benchmarks.clear();
         benchmarks.addAll(newBenchmarks);
 
-        // exit if list only, else run benchmarks
-        if (!options.shouldList()) {
-            if ((!options.getWarmupMicros().isEmpty()) ||
-                    (options.getWarmupMode() == WarmupMode.BEFOREANY)) {
-                runBulkWarmupBenchmarks(benchmarks);
-            } else {
-                runBenchmarks(benchmarks);
-            }
+        if ((!options.getWarmupMicros().isEmpty()) ||
+                (options.getWarmupMode() == WarmupMode.BEFOREANY)) {
+            runBulkWarmupBenchmarks(benchmarks);
+        } else {
+            runBenchmarks(benchmarks);
         }
 
         out.flush();
@@ -447,6 +449,5 @@ public class Runner extends BaseRunner {
 
         return command.toArray(new String[command.size()]);
     }
-
 
 }

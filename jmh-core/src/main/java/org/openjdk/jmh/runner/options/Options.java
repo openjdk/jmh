@@ -67,13 +67,6 @@ public interface Options {
     boolean shouldDoGC();
 
     /**
-     * Should list benchmarks?
-     * TODO: Deprecate
-     * @return should list?
-     */
-    boolean shouldList();
-
-    /**
      * Profilers to use for the run.
      * @return profilers to use; empty set if no profilers are required
      */

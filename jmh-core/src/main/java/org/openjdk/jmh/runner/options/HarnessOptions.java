@@ -183,7 +183,6 @@ public class HarnessOptions extends BaseOptions {
      *
      * @return the value
      */
-    @Override
     public boolean shouldList() {
         return list;
     }

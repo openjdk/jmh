@@ -44,8 +44,6 @@ public interface OptionsBuilder {
 
     OptionsBuilder shouldDoGC(boolean value);
 
-    OptionsBuilder shouldList(boolean value);
-
     OptionsBuilder addProfiler(ProfilerType prof);
 
     OptionsBuilder shouldBeVerbose(boolean value);

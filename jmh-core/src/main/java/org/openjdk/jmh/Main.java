@@ -95,6 +95,12 @@ public class Main {
             }
 
             Runner runner = new Runner(cmdOptions);
+
+            if (cmdOptions.shouldList()) {
+                runner.list();
+                return;
+            }
+
             runner.run();
         } catch (CmdLineException ex) {
             cmdOptions.printUsage(ex.getMessage());

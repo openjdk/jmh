@@ -109,11 +109,6 @@ public class ForkedOptions extends BaseOptions {
     }
 
     @Override
-    public boolean shouldList() {
-        throw new UnsupportedOperationException("Asking for harness option");
-    }
-
-    @Override
     public List<String> getWarmupMicros() {
         throw new UnsupportedOperationException("Asking for harness option");
     }
