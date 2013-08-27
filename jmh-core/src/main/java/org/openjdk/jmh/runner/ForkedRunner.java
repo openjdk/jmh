@@ -35,11 +35,8 @@ import org.openjdk.jmh.runner.options.Options;
  */
 public class ForkedRunner extends BaseRunner {
 
-    private final Options options;
-
     public ForkedRunner(Options options, BinaryLinkClient link) {
         super(options, OutputFormatFactory.createBinaryHook(link));
-        this.options = options;
     }
 
     public void run(BenchmarkRecord benchmark) {

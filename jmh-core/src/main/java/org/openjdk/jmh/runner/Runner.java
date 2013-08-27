@@ -65,15 +65,11 @@ import java.util.logging.Logger;
  */
 public class Runner extends BaseRunner {
 
-    /** Class holding all our runtime options/arguments */
-    private final Options options;
-
     private final MicroBenchmarkList list;
 
     public Runner(Options options) {
         super(options, createOutputFormat(options));
         this.list = MicroBenchmarkList.defaultList();
-        this.options = options;
     }
 
     /** Setup helper method, creates OutputFormat according to argv options. */

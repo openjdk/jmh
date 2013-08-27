@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class BaseRunner {
 
     /** Class holding all our runtime options/arguments */
-    private final Options options;
+    protected final Options options;
 
     protected final OutputFormat out;
 
