@@ -38,6 +38,10 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -143,8 +147,17 @@ public class ThreadStateSetupOrderTest {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
+    }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .build();
+        new Runner(opt).run();
     }
 
 }

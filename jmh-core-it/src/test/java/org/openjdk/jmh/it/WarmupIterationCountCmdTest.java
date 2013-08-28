@@ -32,6 +32,11 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,8 +66,22 @@ public class WarmupIterationCountCmdTest {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -v -w 1 -r 1 -i 1 -wi 3");
     }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .warmupTime(TimeValue.seconds(1))
+                .measurementTime(TimeValue.seconds(1))
+                .measurementIterations(1)
+                .warmupIterations(3)
+                .build();
+        new Runner(opt).run();
+    }
+
 
 }

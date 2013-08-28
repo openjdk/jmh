@@ -38,6 +38,10 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -75,13 +79,31 @@ public class ZeroThreadCountTest {
     }
 
     @Test
-    public void invoke1() {
+    public void invokeCLI_1() {
         Main.testMain(Fixtures.getTestMask(this.getClass())+".*test1" + " -foe");
     }
 
     @Test
-    public void invoke2() {
+    public void invokeCLI_2() {
         Main.testMain(Fixtures.getTestMask(this.getClass())+ ".*test2" + " -foe -t 0");
     }
 
+    @Test
+    public void invokeAPI_1() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass())+".*test1")
+                .failOnError(true)
+                .build();
+        new Runner(opt).run();
+    }
+
+    @Test
+    public void invokeAPI_2() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass())+".*test2")
+                .failOnError(true)
+                .threads(0)
+                .build();
+        new Runner(opt).run();
+    }
 }

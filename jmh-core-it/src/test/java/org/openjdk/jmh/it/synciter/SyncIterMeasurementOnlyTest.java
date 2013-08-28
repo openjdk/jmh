@@ -34,6 +34,10 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -60,8 +64,18 @@ public class SyncIterMeasurementOnlyTest {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -si false");
+    }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .syncIterations(false)
+                .build();
+        new Runner(opt).run();
     }
 
 }

@@ -33,6 +33,10 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -66,18 +70,49 @@ public class ForkedTest {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f");
     }
 
     @Test
-    public void invoke1() {
+    public void invokeCLI_1() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 1");
     }
 
     @Test
-    public void invokeWF() {
+    public void invokeCLI_WF() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 1 -wf 2");
+    }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(1)
+                .build();
+        new Runner(opt).run();
+    }
+
+    @Test
+    public void invokeAPI_1() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(1)
+                .build();
+        new Runner(opt).run();
+    }
+
+    @Test
+    public void invokeAPI_WF() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(1)
+                .warmupForks(2)
+                .build();
+        new Runner(opt).run();
     }
 
 }

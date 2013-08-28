@@ -33,6 +33,10 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -55,10 +59,22 @@ public class ForkOverride_D_F0_Test {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -f 0");
 
         // should execute in the same VM.
+        Assert.assertEquals(true, sameVM);
+    }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(0)
+                .build();
+        new Runner(opt).run();
+
         Assert.assertEquals(true, sameVM);
     }
 

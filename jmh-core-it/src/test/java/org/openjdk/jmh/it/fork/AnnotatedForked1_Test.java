@@ -34,6 +34,10 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -68,13 +72,32 @@ public class AnnotatedForked1_Test {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe");
     }
 
     @Test
-    public void invoke5() {
+    public void invokeF_CLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f");
+    }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .build();
+        new Runner(opt).run();
+    }
+
+    @Test
+    public void invokeF_API() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(1)
+                .build();
+        new Runner(opt).run();
     }
 
 }

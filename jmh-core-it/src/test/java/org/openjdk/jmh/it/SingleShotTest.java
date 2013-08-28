@@ -30,6 +30,10 @@ import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,13 +63,33 @@ public class SingleShotTest {
     }
 
     @Test
-    public void invoke() {
+    public void invokeCLI() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f");
     }
 
     @Test
-    public void invoke1() {
+    public void invokeCLI_1() {
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 2");
+    }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(1)
+                .build();
+        new Runner(opt).run();
+    }
+
+    @Test
+    public void invokeAPI_1() throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .forks(2)
+                .build();
+        new Runner(opt).run();
     }
 
 }

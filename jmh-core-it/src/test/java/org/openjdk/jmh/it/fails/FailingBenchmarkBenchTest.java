@@ -36,6 +36,10 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 /**
  * Baseline test:
@@ -60,7 +64,7 @@ public class FailingBenchmarkBenchTest {
     public void invoke() {
         boolean failed;
         try {
-            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -v -w 1 -r 1");
+            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
             failed = false;
         } catch (Throwable t) {
             failed = true;
@@ -68,5 +72,19 @@ public class FailingBenchmarkBenchTest {
         Assert.assertTrue("Should have failed", failed);
     }
 
+    @Test
+    public void invokeAPI() throws RunnerException {
+        try {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .failOnError(true)
+                    .build();
+            new Runner(opt).run();
+
+            org.junit.Assert.fail("Should have failed");
+        } catch (Throwable t) {
+            // expected
+        }
+    }
 
 }

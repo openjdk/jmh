@@ -34,6 +34,12 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.logic.Control;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.WarmupMode;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -96,9 +102,31 @@ public class WarmupMode6_Test {
     }
 
     @Test
-    public void invoke6() {
+    public void invokeCLI() {
         testSequence.clear();
         Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -w 1 -r 2 -t 1 -i 1 -wi 2 -wm beforeany -f false -si false");
         assertEquals("WWwwIi", getSequence());
     }
+
+    @Test
+    public void invokeAPI() throws RunnerException {
+        testSequence.clear();
+
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .failOnError(true)
+                .warmupIterations(2)
+                .warmupTime(TimeValue.seconds(1))
+                .measurementIterations(1)
+                .measurementTime(TimeValue.seconds(2))
+                .threads(1)
+                .forks(0)
+                .syncIterations(false)
+                .warmupMode(WarmupMode.BEFOREANY)
+                .build();
+        new Runner(opt).run();
+
+        assertEquals("WWwwIi", getSequence());
+    }
+
 }
