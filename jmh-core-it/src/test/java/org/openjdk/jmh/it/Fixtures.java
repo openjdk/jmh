@@ -35,7 +35,7 @@ public class Fixtures {
     public static void work() {
         // courtesy for parallel-running tests
         try {
-            TimeUnit.MILLISECONDS.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(100);
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }

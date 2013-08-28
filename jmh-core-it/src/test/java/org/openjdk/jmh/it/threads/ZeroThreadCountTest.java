@@ -69,6 +69,7 @@ public class ZeroThreadCountTest {
     @Threads(0)
     public void test1() {
         threads.add(Thread.currentThread());
+        Fixtures.work();
     }
 
     @GenerateMicroBenchmark
@@ -76,6 +77,7 @@ public class ZeroThreadCountTest {
     @Warmup(iterations = 0)
     public void test2() {
         threads.add(Thread.currentThread());
+        Fixtures.work();
     }
 
     @Test
