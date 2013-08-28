@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.link.BinaryLinkServer;
@@ -50,8 +51,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -101,14 +104,14 @@ public class Runner extends BaseRunner {
     }
 
     /** Main entry point */
-    public void run() throws RunnerException {
+    public Map<BenchmarkRecord, RunResult> run() throws RunnerException {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
             out.flush();
             out.close();
-            return;
+            return null;
         }
 
         // list microbenchmarks if -v
@@ -147,22 +150,25 @@ public class Runner extends BaseRunner {
         benchmarks.clear();
         benchmarks.addAll(newBenchmarks);
 
+        Map<BenchmarkRecord, RunResult> results;
         if ((!options.getWarmupMicros().isEmpty()) ||
                 (options.getWarmupMode() == WarmupMode.BEFOREANY)) {
-            runBulkWarmupBenchmarks(benchmarks);
+            results = runBulkWarmupBenchmarks(benchmarks);
         } else {
-            runBenchmarks(benchmarks);
+            results = runBenchmarks(benchmarks);
         }
 
         out.flush();
         out.close();
+
+        return results;
     }
 
     /**
      * Run specified warmup microbenchmarks prior to running any requested mircobenchmarks.
      * TODO: Currently valid only for non-external JVM runs
      */
-    private void runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks) {
+    private Map<BenchmarkRecord, RunResult> runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks) {
         out.startRun();
 
         // list of micros executed before iteration
@@ -192,10 +198,14 @@ public class Runner extends BaseRunner {
         }
         // run microbenchmarks
         //
+        Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord benchmark : benchmarks) {
-            runBenchmark(benchmark, false, true);
+            RunResult result = runBenchmark(benchmark, false, true);
+            results.put(benchmark, result);
         }
         out.endRun();
+
+        return results;
     }
 
     private int decideForks(int optionForks, int benchForks) {
@@ -218,7 +228,7 @@ public class Runner extends BaseRunner {
         }
     }
 
-    private void runBenchmarks(Set<BenchmarkRecord> benchmarks) {
+    private Map<BenchmarkRecord, RunResult> runBenchmarks(Set<BenchmarkRecord> benchmarks) {
         Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
         Set<BenchmarkRecord> forked = new TreeSet<BenchmarkRecord>();
 
@@ -232,21 +242,29 @@ public class Runner extends BaseRunner {
             }
         }
 
+        Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord benchmark : embedded) {
-            runBenchmark(benchmark, true, true);
+            RunResult r = runBenchmark(benchmark, true, true);
+            results.put(benchmark, r);
         }
 
-        runSeparate(forked);
+
+        Map<BenchmarkRecord, RunResult> separateResults = runSeparate(forked);
+        results.putAll(separateResults);
+
         out.endRun();
+
+        return results;
     }
 
-    private void runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
+    private Map<BenchmarkRecord, RunResult> runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
         BinaryLinkServer server = null;
         try {
             server = new BinaryLinkServer(options, out);
             for (BenchmarkRecord benchmark : benchmarksToFork) {
                 runSeparateMicroBenchmark(server, benchmark, server.getHost(), server.getPort());
             }
+            return server.getResults();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         } finally {

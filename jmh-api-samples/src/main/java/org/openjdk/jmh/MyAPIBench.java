@@ -26,11 +26,13 @@ package org.openjdk.jmh;
 
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 
+import java.util.concurrent.TimeUnit;
+
 public class MyAPIBench {
 
     @GenerateMicroBenchmark
-    public void myTest() {
-
+    public void myTest() throws InterruptedException {
+        TimeUnit.MILLISECONDS.sleep(1);
     }
 
 }

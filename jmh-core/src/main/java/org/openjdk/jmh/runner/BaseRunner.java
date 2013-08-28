@@ -60,7 +60,7 @@ public abstract class BaseRunner {
         this.out = handler;
     }
 
-    void runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
+    RunResult runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
         MicroBenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
@@ -69,7 +69,7 @@ public abstract class BaseRunner {
             MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method, doWarmup, doMeasurement);
             handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
-            runBenchmark(executionParams, handler);
+            return runBenchmark(executionParams, handler);
         } catch (Throwable ex) {
             out.exception(ex);
             if (this.options.shouldFailOnError()) {
@@ -80,9 +80,11 @@ public abstract class BaseRunner {
                 handler.shutdown();
             }
         }
+        // FIXME: Better handling here!
+        return null;
     }
 
-    protected void runBenchmark(MicroBenchmarkParameters executionParams, MicroBenchmarkHandler handler) {
+    protected RunResult runBenchmark(MicroBenchmarkParameters executionParams, MicroBenchmarkHandler handler) {
         List<IterationData> allResults = new ArrayList<IterationData>();
 
         out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
@@ -133,6 +135,10 @@ public abstract class BaseRunner {
         if (!allResults.isEmpty()) {
             RunResult result = aggregateIterationData(allResults);
             out.endBenchmark(handler.getBenchmark(), result);
+            return result;
+        } else {
+            // FIXME: Better handling here!
+            return null;
         }
     }
 

@@ -28,7 +28,11 @@ import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
+import org.openjdk.jmh.link.frames.ResultsFrame;
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
@@ -53,6 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Accepts the OutputFormat calls from the network and forwards those to given local OutputFormat
@@ -65,6 +70,7 @@ public class BinaryLinkServer {
     private final Set<String> forbidden;
     private final Acceptor acceptor;
     private final List<Handler> registeredHandlers;
+    private final Map<BenchmarkRecord, RunResult> results;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -87,6 +93,7 @@ public class BinaryLinkServer {
         }
 
         registeredHandlers = Collections.synchronizedList(new ArrayList<Handler>());
+        results = Collections.synchronizedMap(new TreeMap<BenchmarkRecord, RunResult>());
 
         acceptor = new Acceptor();
         acceptor.start();
@@ -119,6 +126,10 @@ public class BinaryLinkServer {
                 // ignore
             }
         }
+    }
+
+    public Map<BenchmarkRecord, RunResult> getResults() {
+        return results;
     }
 
     private final class Acceptor extends Thread {
@@ -204,6 +215,9 @@ public class BinaryLinkServer {
                     if (obj instanceof InfraFrame) {
                         handleInfra((InfraFrame) obj);
                     }
+                    if (obj instanceof ResultsFrame) {
+                        handleResults((ResultsFrame)obj);
+                    }
                     if (obj instanceof FinishingFrame) {
                         // close the streams
                         break;
@@ -224,6 +238,10 @@ public class BinaryLinkServer {
             } finally {
                 close();
             }
+        }
+
+        private void handleResults(ResultsFrame obj) {
+            results.put(obj.getRecord(), obj.getResult());
         }
 
         private void handleInfra(InfraFrame req) throws IOException {

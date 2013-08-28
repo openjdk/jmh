@@ -22,43 +22,27 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.link.frames;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
 import org.openjdk.jmh.logic.results.internal.RunResult;
-import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 
-import java.io.IOException;
+import java.io.Serializable;
 
-/**
- * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
- */
-public class ForkedRunner extends BaseRunner {
+public class ResultsFrame implements Serializable {
+    private final BenchmarkRecord record;
+    private final RunResult result;
 
-    private final BinaryLinkClient link;
-
-    public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
-        this.link = link;
+    public ResultsFrame(BenchmarkRecord record, RunResult result) {
+        this.record = record;
+        this.result = result;
     }
 
-    public void run(BenchmarkRecord benchmark) throws IOException {
-        // expect the tuple from the parent process
-        if (options.isVerbose()) {
-            out.println("Benchmarks: ");
-            out.println(benchmark.getUsername());
-        }
-        out.startRun();
-
-        RunResult result = runBenchmark(benchmark, true, true);
-        link.pushResults(benchmark, result);
-
-        out.endRun();
-        out.flush();
-        out.close();
+    public BenchmarkRecord getRecord() {
+        return record;
     }
 
+    public RunResult getResult() {
+        return result;
+    }
 }
