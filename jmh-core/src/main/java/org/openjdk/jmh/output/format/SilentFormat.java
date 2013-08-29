@@ -28,7 +28,7 @@ import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.io.PrintStream;
@@ -54,7 +54,7 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams, boolean verbose) {
 
     }
 

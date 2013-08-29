@@ -29,8 +29,8 @@ import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.Statistics;
@@ -62,7 +62,7 @@ public class TextReportFormat extends PrettyPrintFormat {
     }
 
     @Override
-    public void startBenchmark(BenchmarkRecord name, MicroBenchmarkParameters mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams, boolean verbose) {
         super.startBenchmark(name, mbParams, verbose);
         benchmarkSettings.put(name, mbParams.getIteration());
     }

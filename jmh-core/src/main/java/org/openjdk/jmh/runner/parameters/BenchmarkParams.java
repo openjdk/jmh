@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner.parameters;
 
+
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
@@ -34,12 +35,9 @@ import org.openjdk.jmh.runner.options.Options;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-public class MicroBenchmarkParametersFactory {
+public class BenchmarkParams implements Serializable {
 
-    private MicroBenchmarkParametersFactory() {
-    }
-
-    public static MicroBenchmarkParameters makeParams(Options options, BenchmarkRecord benchmark, Method method, boolean doWarmup, boolean doMeasurement) {
+    public static BenchmarkParams makeParams(Options options, BenchmarkRecord benchmark, Method method, boolean doWarmup, boolean doMeasurement) {
         boolean shouldSynchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
 
         int threads = getThreads(options, method);
@@ -55,7 +53,7 @@ public class MicroBenchmarkParametersFactory {
                 getWarmup(options, benchmark, method, threads) :
                 new IterationParams(0, TimeValue.NONE, 1);
 
-        return new SameThreadParameters(
+        return new BenchmarkParams(
                 shouldSynchIterations,
                 warmup, measurement,
                 threads);
@@ -79,7 +77,7 @@ public class MicroBenchmarkParametersFactory {
                     timeValue = Defaults.WARMUP_TIME;
                 }
             }
-            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_COUNT),timeValue, threads);
+            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_COUNT), timeValue, threads);
         }
     }
 
@@ -113,53 +111,36 @@ public class MicroBenchmarkParametersFactory {
 
     }
 
-    static abstract class AbstractParameters implements MicroBenchmarkParameters, Serializable {
+    private final boolean synchIterations;
+    private final int threads;
+    private final IterationParams warmup;
+    private final IterationParams iteration;
 
-        private final boolean synchIterations;
-
-        private final IterationParams warmup;
-        private final IterationParams iteration;
-
-        public AbstractParameters(boolean synchIterations, IterationParams warmup, IterationParams iteration) {
-            this.synchIterations = synchIterations;
-            this.warmup = warmup;
-            this.iteration = iteration;
-        }
-
-        @Override
-        public boolean shouldSynchIterations() {
-            return synchIterations;
-        }
-
-        @Override
-        public IterationParams getWarmup() {
-            return warmup;
-        }
-
-        @Override
-        public IterationParams getIteration() {
-            return iteration;
-        }
+    public BenchmarkParams(boolean synchIterations, IterationParams warmup, IterationParams iteration, int threads) {
+        this.synchIterations = synchIterations;
+        this.warmup = warmup;
+        this.iteration = iteration;
+        this.threads = threads;
     }
 
-    static class SameThreadParameters extends AbstractParameters {
+    public boolean shouldSynchIterations() {
+        return synchIterations;
+    }
 
-        private final int threads;
+    public IterationParams getWarmup() {
+        return warmup;
+    }
 
-        public SameThreadParameters(boolean synchIterations, IterationParams warmup, IterationParams iteration, int threads) {
-            super(synchIterations, warmup, iteration);
-            this.threads = threads;
-        }
+    public IterationParams getIteration() {
+        return iteration;
+    }
 
-        @Override
-        public int getThreads() {
-            return threads;
-        }
-
+    public int getThreads() {
+        return threads;
     }
 
     private static boolean getBoolean(Boolean value, boolean defaultValue) {
-        return value==null ? defaultValue : value;
+        return value == null ? defaultValue : value;
     }
 
     private static int getInteger(int first, int second, int third) {

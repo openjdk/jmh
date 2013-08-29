@@ -29,7 +29,7 @@ import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -64,7 +64,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
     private final List<Profiler> registeredProfilers;
 
-    public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, MicroBenchmarkParameters executionParams) {
+    public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
         this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());

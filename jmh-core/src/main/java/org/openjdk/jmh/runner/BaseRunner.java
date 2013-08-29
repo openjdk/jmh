@@ -31,9 +31,8 @@ import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParameters;
-import org.openjdk.jmh.runner.parameters.MicroBenchmarkParametersFactory;
 import org.openjdk.jmh.util.ClassUtils;
 
 import java.lang.management.GarbageCollectorMXBean;
@@ -67,7 +66,7 @@ public abstract class BaseRunner {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
-            MicroBenchmarkParameters executionParams = MicroBenchmarkParametersFactory.makeParams(options, benchmark, method, doWarmup, doMeasurement);
+            BenchmarkParams executionParams = BenchmarkParams.makeParams(options, benchmark, method, doWarmup, doMeasurement);
             handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
             return runBenchmark(executionParams, handler);
@@ -85,7 +84,7 @@ public abstract class BaseRunner {
         return null;
     }
 
-    protected RunResult runBenchmark(MicroBenchmarkParameters executionParams, MicroBenchmarkHandler handler) {
+    protected RunResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
         List<IterationData> allResults = new ArrayList<IterationData>();
 
         out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
