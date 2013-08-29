@@ -241,7 +241,8 @@ public class BinaryLinkServer {
         }
 
         private void handleResults(ResultsFrame obj) {
-            results.put(obj.getRecord(), obj.getResult());
+            BenchmarkRecord bench = obj.getRecord();
+            results.put(bench, RunResult.merge(results.get(bench), obj.getResult()));
         }
 
         private void handleInfra(InfraFrame req) throws IOException {

@@ -144,7 +144,7 @@ public class TestStatistics {
      */
     @Test
     public strictfp void testToString() {
-        String expResult = "Mean: 51.03316951740001 Min: 2.34517545 Max: 96.66786311 StdDev: 28.582874479178013";
+        String expResult = "N:25 Mean: 51.03316951740001 Min: 2.34517545 Max: 96.66786311 StdDev: 28.582874479178013";
         String result = instance.toString();
         assertEquals(expResult, result);
     }

@@ -109,7 +109,7 @@ public class Statistics implements Serializable {
 
     @Override
     public String toString() {
-        return "Mean: " + getMean()
+        return "N:" + getN() + " Mean: " + getMean()
                 + " Min: " + getMin() + " Max: " + getMax()
                 + " StdDev: " + getStandardDeviation();
     }

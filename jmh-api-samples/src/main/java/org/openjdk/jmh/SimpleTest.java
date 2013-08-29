@@ -48,6 +48,7 @@ public class SimpleTest {
                 .warmupTime(TimeValue.milliseconds(100))
                 .measurementTime(TimeValue.milliseconds(100))
                 .jvmArgs("-server")
+                .forks(5)
                 .outputFormat(OutputFormatType.TextReport)
                 .build();
 
@@ -55,7 +56,7 @@ public class SimpleTest {
         RunResult runResult = extractSingleResult(results);
         Result result = runResult.getPrimaryResult();
 
-        System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit());
+        System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit() + " " + runResult.getPrimaryStatistics());
     }
 
     public static RunResult extractSingleResult(Map<BenchmarkRecord, RunResult> results) {

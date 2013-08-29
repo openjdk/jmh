@@ -128,4 +128,13 @@ public class RunResult implements Serializable {
         }
         return answer;
     }
+
+    public static RunResult merge(RunResult... rrs) {
+        List<IterationResult> rs = new ArrayList<IterationResult>();
+        for (RunResult rr : rrs) {
+            if (rr == null) continue;
+            rs.addAll(rr.getRawIterationResults());
+        }
+        return new RunResult(rs);
+    }
 }

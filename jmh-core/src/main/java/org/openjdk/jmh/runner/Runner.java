@@ -201,7 +201,7 @@ public class Runner extends BaseRunner {
         Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord benchmark : benchmarks) {
             RunResult result = runBenchmark(benchmark, false, true);
-            results.put(benchmark, result);
+            results.put(benchmark, RunResult.merge(results.get(benchmark), result));
         }
         out.endRun();
 
@@ -245,12 +245,13 @@ public class Runner extends BaseRunner {
         Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord benchmark : embedded) {
             RunResult r = runBenchmark(benchmark, true, true);
-            results.put(benchmark, r);
+            results.put(benchmark, RunResult.merge(results.get(benchmark), r));
         }
 
-
         Map<BenchmarkRecord, RunResult> separateResults = runSeparate(forked);
-        results.putAll(separateResults);
+        for (Map.Entry<BenchmarkRecord, RunResult> e : separateResults.entrySet()) {
+            results.put(e.getKey(), RunResult.merge(results.get(e.getKey()), e.getValue()));
+        }
 
         out.endRun();
 
