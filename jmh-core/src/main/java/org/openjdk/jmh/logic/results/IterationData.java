@@ -32,6 +32,7 @@ import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -76,16 +77,30 @@ public class IterationData implements Serializable {
         }
     }
 
-    public List<Result> getPrimaryResults() {
+    public List<Result> getRawPrimaryResults() {
         return primaryResults;
     }
 
-    public Result getPrimaryResult() {
-        Multimap<String, Result> results = new TreeMultimap<String, Result>();
-        for (Result r : primaryResults) {
-            results.put(r.getLabel(), r);
-        }
+    public Multimap<String, Result> getRawSecondaryResults() {
+        return secondaryResults;
+    }
 
+    public Map<String, Result> getSecondaryResults() {
+        Map<String, Result> answer = new TreeMap<String, Result>();
+        for (String label : secondaryResults.keys()) {
+            Collection<Result> results = secondaryResults.get(label);
+
+            Result next = results.iterator().next();
+
+            @SuppressWarnings("unchecked")
+            Aggregator<Result> aggregator = next.getIterationAggregator();
+            Result result = aggregator.aggregate(results);
+            answer.put(label, result);
+        }
+        return answer;
+    }
+
+    public Result getPrimaryResult() {
         Result next = primaryResults.iterator().next();
 
         @SuppressWarnings("unchecked")
@@ -119,38 +134,6 @@ public class IterationData implements Serializable {
 
     public String getScoreUnit() {
         return scoreUnit;
-    }
-
-    public String toPrintable() {
-        return getPrimaryResult().toString();
-//        if (primaryResults.size() > 1) {
-//            boolean first = true;
-//            StringBuilder sb = new StringBuilder();
-//            String unit = "";
-//            for (Map.Entry<String, Result> res : primaryResults.entrySet()) {
-//                if (!first) {
-//                    sb.append(", ");
-//                }
-//                first = false;
-//
-//                // rough estimate
-//                int threads = primaryResults.get(res.getKey()).size();
-//
-//                sb.append(res.getKey());
-//                sb.append("{t=").append(threads).append("}");
-//                sb.append(" = ");
-//                sb.append(res.getValue().toPrintableScore());
-//
-//                unit = res.getValue().getScoreUnit();
-//            }
-//            sb.append(" ");
-//            sb.append(unit);
-//            return sb.toString();
-//        } else if (result.size() == 1) {
-//            return result.values().iterator().next().toString();
-//        } else {
-//            return "N/A";
-//        }
     }
 
 }

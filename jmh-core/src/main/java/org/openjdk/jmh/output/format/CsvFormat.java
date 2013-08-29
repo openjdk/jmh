@@ -59,7 +59,7 @@ public class CsvFormat extends AbstractOutputFormat {
         out.print(convertDouble(data.getPrimaryResult().getScore()) + DELIMITER);
         out.print(params.getThreads() + DELIMITER + data.getScoreUnit() + DELIMITER);
 
-        for (Result r : data.getPrimaryResults()) {
+        for (Result r : data.getRawPrimaryResults()) {
             out.print(convertDouble(r.getScore()) + DELIMITER);
         }
         out.println();
@@ -109,7 +109,7 @@ public class CsvFormat extends AbstractOutputFormat {
     public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data) {
         int count = 0;
 
-        for (Result result : data.getPrimaryResults()) {
+        for (Result result : data.getRawPrimaryResults()) {
             out.print(convertDouble(result.getScore()));
             out.print(DELIMITER);
             count++;

@@ -92,7 +92,7 @@ public class TextReportFormat extends PrettyPrintFormat {
             if (results != null) {
                 List<Result> iResults = new ArrayList<Result>();
                 for (IterationData res : results) {
-                    iResults.addAll(res.getPrimaryResults());
+                    iResults.addAll(res.getRawPrimaryResults());
                 }
 
                 if (!iResults.isEmpty()) {
@@ -129,7 +129,7 @@ public class TextReportFormat extends PrettyPrintFormat {
             if (results != null) {
                 List<Result> iResults = new ArrayList<Result>();
                 for (IterationData res : results) {
-                    iResults.addAll(res.getPrimaryResults());
+                    iResults.addAll(res.getRawPrimaryResults());
                 }
 
                 if (!iResults.isEmpty()) {

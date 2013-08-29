@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * PrettyPrint implementation of OutputFormat.
@@ -53,7 +54,30 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
 
     @Override
     public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
-        out.print(String.format("%s", data.toPrintable()));
+        StringBuilder sb = new StringBuilder();
+        sb.append(data.getPrimaryResult().toString());
+
+        if (type == IterationType.MEASUREMENT) {
+            int prefixLen = String.format("Iteration %3d (%s in %d %s): ", iteration,
+                    params.getTime(), params.getThreads(), getThreadsString(params.getThreads())).length();
+
+            Map<String, Result> secondary = data.getSecondaryResults();
+            if (!secondary.isEmpty()) {
+                sb.append("\n");
+                for (Map.Entry<String, Result> res : secondary.entrySet()) {
+                    // rough estimate
+                    int threads = data.getRawSecondaryResults().get(res.getKey()).size();
+
+                    sb.append(String.format("%" + prefixLen + "s", ""));
+                    sb.append("  \"").append(res.getKey()).append("\": ");
+                    sb.append(res.getValue().toString());
+                    sb.append(" (").append(threads).append(" threads)");
+                    sb.append("\n");
+                }
+            }
+        }
+
+        out.print(String.format("%s", sb.toString()));
 
         // also print out profiler information
         if (type == IterationType.MEASUREMENT) {
@@ -157,7 +181,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         out.print("Results per thread: [");
 
         boolean first = true;
-        for (Result result : data.getPrimaryResults()) {
+        for (Result result : data.getRawPrimaryResults()) {
             if (!first) {
                 out.print(", ");
             }
