@@ -85,19 +85,19 @@ public class SingleShotTime extends Result {
     public static class AveragingAggregator implements Aggregator<SingleShotTime> {
         @Override
         public Result aggregate(Collection<SingleShotTime> results) {
-            ResultRole mode = null;
+            ResultRole role = null;
             String label = null;
             Statistics stat = new Statistics();
             long duration = 0;
             TimeUnit tu = null;
             for (SingleShotTime r : results) {
-                mode = r.mode;
+                role = r.role;
                 tu = r.outputTimeUnit;
                 label = r.label;
                 duration += r.duration;
                 stat.addValue(r.getScore());
             }
-            return new SingleShotTime(mode, label, duration / results.size(), tu, stat);
+            return new SingleShotTime(role, label, duration / results.size(), tu, stat);
         }
 
     }

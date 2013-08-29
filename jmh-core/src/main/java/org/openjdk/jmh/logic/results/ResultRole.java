@@ -39,11 +39,11 @@ public enum ResultRole {
         this.secondary = secondary;
     }
 
-    public boolean primary() {
+    public boolean isPrimary() {
         return primary;
     }
 
-    public boolean secondary() {
+    public boolean isSecondary() {
         return secondary;
     }
 

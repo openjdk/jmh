@@ -90,20 +90,20 @@ public class AverageTimePerOp extends Result {
         @Override
         public AverageTimePerOp aggregate(Collection<AverageTimePerOp> results) {
             Statistics stat = new Statistics();
-            ResultRole mode = null;
+            ResultRole role = null;
             String label = null;
             long operations = 0;
             long duration = 0;
             TimeUnit tu = null;
             for (AverageTimePerOp r : results) {
-                mode = r.mode;
+                role = r.role;
                 label = r.label;
                 tu = r.outputTimeUnit;
                 operations += r.operations;
                 duration += r.durationNs;
                 stat.addValue(r.getScore());
             }
-            return new AverageTimePerOp(mode, label, operations, duration, tu, stat);
+            return new AverageTimePerOp(role, label, operations, duration, tu, stat);
         }
     }
 

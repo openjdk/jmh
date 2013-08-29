@@ -49,8 +49,8 @@ public class OpsPerTimeUnit extends Result {
      * @param operations Total number of operations during iteration
      * @param durationNs   Duration of iteration in NanoSeconds
      */
-    public OpsPerTimeUnit(ResultRole treat, String label, long operations, long durationNs) {
-        this(treat, label, operations, durationNs, TimeUnit.MILLISECONDS);
+    public OpsPerTimeUnit(ResultRole role, String label, long operations, long durationNs) {
+        this(role, label, operations, durationNs, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -60,12 +60,12 @@ public class OpsPerTimeUnit extends Result {
      * @param durationNs       Duration of iteration in NanoSeconds
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
-    public OpsPerTimeUnit(ResultRole treat, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
-        this(treat, label, operations, durationNs, outputTimeUnit, null);
+    public OpsPerTimeUnit(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
+        this(role, label, operations, durationNs, outputTimeUnit, null);
     }
 
-    OpsPerTimeUnit(ResultRole treat, String label, long operations, long durationNs, TimeUnit outputTimeUnit, Statistics stats) {
-        super(treat, label, stats);
+    OpsPerTimeUnit(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit, Statistics stats) {
+        super(role, label, stats);
         this.operations = operations;
         this.durationNs = durationNs;
         this.outputTimeUnit = outputTimeUnit;
@@ -101,7 +101,7 @@ public class OpsPerTimeUnit extends Result {
                 long operations = 0;
                 TimeUnit tu = null;
                 for (OpsPerTimeUnit r : results) {
-                    mode = r.mode;
+                    mode = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
 
@@ -127,12 +127,12 @@ public class OpsPerTimeUnit extends Result {
 
                 final long normalizedDuration = TimeUnit.MINUTES.toNanos(1);
 
-                ResultRole mode = null;
+                ResultRole role = null;
                 String label = null;
                 long operations = 0;
                 TimeUnit tu = null;
                 for (OpsPerTimeUnit r : results) {
-                    mode = r.mode;
+                    role = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
 
@@ -141,7 +141,7 @@ public class OpsPerTimeUnit extends Result {
                 }
                 operations /= results.size();
 
-                return new OpsPerTimeUnit(mode, label, operations, normalizedDuration, tu, stat);
+                return new OpsPerTimeUnit(role, label, operations, normalizedDuration, tu, stat);
             }
         };
     }

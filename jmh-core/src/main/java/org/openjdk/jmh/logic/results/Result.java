@@ -39,12 +39,12 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
 
-    protected final ResultRole mode;
+    protected final ResultRole role;
     protected final String label;
     protected final Statistics statistics;
 
-    public Result(ResultRole mode, String label, Statistics statistics) {
-        this.mode = mode;
+    public Result(ResultRole role, String label, Statistics statistics) {
+        this.role = role;
         this.label = label;
         this.statistics = statistics == null ? new Statistics() : statistics;
     }
@@ -142,7 +142,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return label;
     }
 
-    public ResultRole getMode() {
-        return mode;
+    public ResultRole getRole() {
+        return role;
     }
 }

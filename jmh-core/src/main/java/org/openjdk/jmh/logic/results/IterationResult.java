@@ -36,7 +36,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class contains all info returned by microbenchmark iteration or/and collected during microbenchmark iteration.
@@ -61,7 +60,7 @@ public class IterationResult implements Serializable {
     }
 
     public void addResult(Result result) {
-        if (result.getMode().primary()) {
+        if (result.getRole().isPrimary()) {
             if (scoreUnit == null) {
                 scoreUnit = result.getScoreUnit();
             } else {
@@ -72,7 +71,7 @@ public class IterationResult implements Serializable {
             primaryResults.add(result);
         }
 
-        if (result.getMode().secondary()) {
+        if (result.getRole().isSecondary()) {
             secondaryResults.put(result.getLabel(), result);
         }
     }
