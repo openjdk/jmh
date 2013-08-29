@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -52,12 +52,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class TextReportFormat extends PrettyPrintFormat {
 
-    private final Multimap<BenchmarkIdentifier, IterationResult> benchmarkResults;
+    private final Multimap<BenchmarkIdentifier, IterationData> benchmarkResults;
     private final Map<BenchmarkRecord, IterationParams> benchmarkSettings;
 
     public TextReportFormat(PrintStream out, boolean verbose) {
         super(out, verbose);
-        benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationResult>();
+        benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationData>();
         benchmarkSettings = new TreeMap<BenchmarkRecord, IterationParams>();
     }
 
@@ -68,10 +68,10 @@ public class TextReportFormat extends PrettyPrintFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles) {
-        super.iterationResult(name, params, iteration, type, result, profiles);
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
+        super.iterationResult(name, params, iteration, type, data, profiles);
         if (type == IterationType.MEASUREMENT) {
-            benchmarkResults.put(new BenchmarkIdentifier(name, params.getThreads()), result);
+            benchmarkResults.put(new BenchmarkIdentifier(name, params.getThreads()), data);
         }
     }
 
@@ -88,11 +88,11 @@ public class TextReportFormat extends PrettyPrintFormat {
 
         Collection<String> benchNames = new ArrayList<String>();
         for (BenchmarkIdentifier key : benchmarkResults.keys()) {
-            Collection<IterationResult> results = benchmarkResults.get(key);
+            Collection<IterationData> results = benchmarkResults.get(key);
             if (results != null) {
                 List<Result> iResults = new ArrayList<Result>();
-                for (IterationResult res : results) {
-                    iResults.addAll(res.getResult().values());
+                for (IterationData res : results) {
+                    iResults.addAll(res.getPrimaryResults());
                 }
 
                 if (!iResults.isEmpty()) {
@@ -123,13 +123,13 @@ public class TextReportFormat extends PrettyPrintFormat {
             double[] interval = new double[]{Double.NaN, Double.NaN};
 
             IterationParams settings = benchmarkSettings.get(key.benchmark);
-            Collection<IterationResult> results = benchmarkResults.get(key);
+            Collection<IterationData> results = benchmarkResults.get(key);
 
             boolean resultOK = false;
             if (results != null) {
                 List<Result> iResults = new ArrayList<Result>();
-                for (IterationResult res : results) {
-                    iResults.addAll(res.getResult().values());
+                for (IterationData res : results) {
+                    iResults.addAll(res.getPrimaryResults());
                 }
 
                 if (!iResults.isEmpty()) {

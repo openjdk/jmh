@@ -95,22 +95,8 @@ public class AverageTimePerOp extends Result {
             long duration = 0;
             TimeUnit tu = null;
             for (AverageTimePerOp r : results) {
-                if (tu != null) {
-                    if (!tu.equals(r.outputTimeUnit)) {
-                        throw new IllegalStateException("Aggregating the results with different TUs");
-                    }
-                } else {
-                    tu = r.outputTimeUnit;
-                }
-
-                if (label != null) {
-                    if (!label.equals(r.label)) {
-                        throw new IllegalStateException("Aggregating the results with different labels");
-                    }
-                } else {
-                    label = r.label;
-                }
-
+                label = r.label;
+                tu = r.outputTimeUnit;
                 operations += r.operations;
                 duration += r.durationNs;
                 stat.addValue(r.getScore());

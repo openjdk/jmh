@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
-import org.openjdk.jmh.logic.results.internal.IterationResult;
+import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -64,7 +64,7 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data) {
 
     }
 
@@ -74,7 +74,7 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
 
     }
 

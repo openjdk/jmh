@@ -100,21 +100,8 @@ public class OpsPerTimeUnit extends Result {
                 long operations = 0;
                 TimeUnit tu = null;
                 for (OpsPerTimeUnit r : results) {
-                    if (tu != null) {
-                        if (!tu.equals(r.outputTimeUnit)) {
-                            throw new IllegalStateException("Aggregating the results with different TUs");
-                        }
-                    } else {
-                        tu = r.outputTimeUnit;
-                    }
-
-                    if (label != null) {
-                        if (!label.equals(r.label)) {
-                            throw new IllegalStateException("Aggregating the results with different labels");
-                        }
-                    } else {
-                        label = r.label;
-                    }
+                    tu = r.outputTimeUnit;
+                    label = r.label;
 
                     // care about long overflow
                     operations += Math.round(r.operations * (1.0 * normalizedDuration / r.durationNs));
@@ -142,21 +129,8 @@ public class OpsPerTimeUnit extends Result {
                 long operations = 0;
                 TimeUnit tu = null;
                 for (OpsPerTimeUnit r : results) {
-                    if (tu != null) {
-                        if (!tu.equals(r.outputTimeUnit)) {
-                            throw new IllegalStateException("Aggregating the results with different TUs");
-                        }
-                    } else {
-                        tu = r.outputTimeUnit;
-                    }
-
-                    if (label != null) {
-                        if (!label.equals(r.label)) {
-                            throw new IllegalStateException("Aggregating the results with different labels");
-                        }
-                    } else {
-                        label = r.label;
-                    }
+                    tu = r.outputTimeUnit;
+                    label = r.label;
 
                     // care about long overflow
                     operations += Math.round(r.operations * (1.0 * normalizedDuration / r.durationNs));

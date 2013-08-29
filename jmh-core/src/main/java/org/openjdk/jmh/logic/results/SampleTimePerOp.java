@@ -196,22 +196,8 @@ public class SampleTimePerOp extends Result {
             SampleBuffer buffer = new SampleBuffer(size);
             TimeUnit tu = null;
             for (SampleTimePerOp r : results) {
-                if (tu != null) {
-                    if (!tu.equals(r.outputTimeUnit)) {
-                        throw new IllegalStateException("Aggregating the results with different TUs");
-                    }
-                } else {
-                    tu = r.outputTimeUnit;
-                }
-
-                if (label != null) {
-                    if (!label.equals(r.label)) {
-                        throw new IllegalStateException("Aggregating the results with different labels");
-                    }
-                } else {
-                    label = r.label;
-                }
-
+                tu = r.outputTimeUnit;
+                label = r.label;
                 buffer.addAll(r.buffer.getSamples());
             }
 

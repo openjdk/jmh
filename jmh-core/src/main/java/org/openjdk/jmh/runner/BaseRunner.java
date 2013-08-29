@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -100,8 +99,7 @@ public abstract class BaseRunner {
             out.iteration(handler.getBenchmark(), wp, i, IterationType.WARMUP);
             boolean isLastIteration = (executionParams.getIteration().getCount() == 0);
             IterationData iterData = handler.runIteration(wp, isLastIteration);
-            IterationResult iterResult = new IterationResult(iterData.getRawResults());
-            out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterResult, iterData.getProfilerResults());
+            out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterData, iterData.getProfilerResults());
         }
 
         // measurement
@@ -122,11 +120,10 @@ public abstract class BaseRunner {
             if (iterData.isResultsEmpty()) {
                 out.println("WARNING: No results returned, benchmark payload threw exception?");
             } else {
-                IterationResult iterResult = new IterationResult(iterData.getRawResults());
-                out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterResult, iterData.getProfilerResults());
+                out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData, iterData.getProfilerResults());
 
                 if (options.shouldOutputDetailedResults()) {
-                    out.detailedResults(handler.getBenchmark(), mp, i, iterResult);
+                    out.detailedResults(handler.getBenchmark(), mp, i, iterData);
                 }
 
                 allResults.add(iterData);
@@ -208,8 +205,7 @@ public abstract class BaseRunner {
     protected static RunResult aggregateIterationData(List<IterationData> results) {
         List<Result> res = new ArrayList<Result>(results.size());
         for (IterationData itData : results) {
-            IterationResult iterResult = new IterationResult(itData.getRawResults());
-            res.addAll(iterResult.getResult().values());
+            res.add(itData.getPrimaryResult());
         }
         return new RunResult(res);
     }

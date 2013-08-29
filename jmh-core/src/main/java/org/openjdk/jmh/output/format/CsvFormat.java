@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -52,15 +52,14 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
         if (type != IterationType.MEASUREMENT) return;
 
         out.print(name + DELIMITER + iteration + DELIMITER);
-        for (Result r : result.getResult().values()) {
-            out.print(convertDouble(r.getScore()) + DELIMITER);
-        }
-        out.print(params.getThreads() + DELIMITER + result.getScoreUnit() + DELIMITER);
-        for (Result r : result.getSubresults().values()) {
+        out.print(convertDouble(data.getPrimaryResult().getScore()) + DELIMITER);
+        out.print(params.getThreads() + DELIMITER + data.getScoreUnit() + DELIMITER);
+
+        for (Result r : data.getPrimaryResults()) {
             out.print(convertDouble(r.getScore()) + DELIMITER);
         }
         out.println();
@@ -107,10 +106,10 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data) {
         int count = 0;
 
-        for (Result result : results.getSubresults().values()) {
+        for (Result result : data.getPrimaryResults()) {
             out.print(convertDouble(result.getScore()));
             out.print(DELIMITER);
             count++;

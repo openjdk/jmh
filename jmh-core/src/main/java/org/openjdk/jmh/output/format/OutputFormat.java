@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
-import org.openjdk.jmh.logic.results.internal.IterationResult;
+import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -59,10 +59,10 @@ public interface OutputFormat {
      * @param name      name of benchmark
      * @param params
      * @param iteration iteration-number
-     * @param result    result of iteration
+     * @param data    result of iteration
      * @param profiles  profiler results
      */
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles);
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles);
 
     /**
      * Format for start-of-benchmark output.
@@ -95,9 +95,9 @@ public interface OutputFormat {
      * @param name      benchmark name
      * @param params
      * @param iteration iteration number
-     * @param results   AggregatedResults with detailed run results
+     * @param data   AggregatedResults with detailed run results
      */
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results);
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data);
 
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 

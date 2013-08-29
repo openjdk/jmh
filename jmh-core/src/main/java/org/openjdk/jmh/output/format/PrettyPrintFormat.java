@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -52,8 +52,8 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles) {
-        out.print(String.format("%s", result.toPrintable()));
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
+        out.print(String.format("%s", data.toPrintable()));
 
         // also print out profiler information
         if (type == IterationType.MEASUREMENT) {
@@ -153,20 +153,17 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data) {
         out.print("Results per thread: [");
 
         boolean first = true;
-        Multimap<String, Result> subresults = results.getSubresults();
-        for (String label : subresults.keys()) {
-            for (Result result : subresults.get(label)) {
-                if (!first) {
-                    out.print(", ");
-                }
-
-                out.printf("%.1f", result.getScore());
-                first = false;
+        for (Result result : data.getPrimaryResults()) {
+            if (!first) {
+                out.print(", ");
             }
+
+            out.printf("%.1f", result.getScore());
+            first = false;
         }
 
         out.println("]");

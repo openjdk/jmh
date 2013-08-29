@@ -26,10 +26,10 @@ package org.openjdk.jmh.logic.results;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openjdk.jmh.logic.results.internal.IterationResult;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.parameters.IterationParams;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,22 +41,20 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestAggregateResult {
 
-    private static IterationResult result;
+    private static IterationData result;
     private static final double[] values = {10.0, 20.0, 30.0, 40.0, 50.0};
 
     @BeforeClass
     public static void setupClass() {
-        List<Result> results = new ArrayList<Result>();
+        result = new IterationData(new BenchmarkRecord("blah,blah," + Mode.AverageTime), new IterationParams(1, TimeValue.days(1), 1));
         for (double d : values) {
-            results.add(new OpsPerTimeUnit("test1", (long) d, 10 * 1000 * 1000));
+            result.addResult(new OpsPerTimeUnit("test1", (long) d, 10 * 1000 * 1000));
         }
-
-        result = new IterationResult(results);
     }
 
     @Test
     public void testScore() throws Exception {
-        assertEquals(15.0, result.getScore().get("test1"), 0.00001);
+        assertEquals(15.0, result.getPrimaryResult().getScore(), 0.00001);
     }
 
     @Test
