@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.logic.results.IterationData;
 import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -99,8 +100,9 @@ public abstract class BaseRunner {
 
             out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, wp.getThreads(), wp.getTime());
             boolean isLastIteration = (executionParams.getIteration().getCount() == 0);
-            IterationData iterData = handler.runIteration(wp.getThreads(), wp.getTime(), isLastIteration).setWarmup();
-            out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+            IterationData iterData = handler.runIteration(wp, isLastIteration);
+            IterationResult iterResult = new IterationResult(iterData.getRawResults());
+            out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterResult, iterData.getProfilerResults());
         }
 
         // measurement
@@ -115,16 +117,17 @@ public abstract class BaseRunner {
             out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), mp.getTime());
 
             boolean isLastIteration = (i == mp.getCount());
-            IterationData iterData = handler.runIteration(mp.getThreads(), mp.getTime(), isLastIteration);
+            IterationData iterData = handler.runIteration(mp, isLastIteration);
 
             // might get an exception above, in which case the results list will be empty
             if (iterData.isResultsEmpty()) {
                 out.println("WARNING: No results returned, benchmark payload threw exception?");
             } else {
-                out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), iterData.getAggregatedResult(), iterData.getProfilerResults());
+                IterationResult iterResult = new IterationResult(iterData.getRawResults());
+                out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), iterResult, iterData.getProfilerResults());
 
                 if (options.shouldOutputDetailedResults()) {
-                    out.detailedResults(handler.getBenchmark(), i, mp.getThreads(), iterData.getAggregatedResult());
+                    out.detailedResults(handler.getBenchmark(), i, mp.getThreads(), iterResult);
                 }
 
                 allResults.add(iterData);
@@ -206,7 +209,8 @@ public abstract class BaseRunner {
     protected static RunResult aggregateIterationData(List<IterationData> results) {
         List<Result> res = new ArrayList<Result>(results.size());
         for (IterationData itData : results) {
-            res.addAll(itData.getAggregatedResult().getResult().values());
+            IterationResult iterResult = new IterationResult(itData.getRawResults());
+            res.addAll(iterResult.getResult().values());
         }
         return new RunResult(res);
     }

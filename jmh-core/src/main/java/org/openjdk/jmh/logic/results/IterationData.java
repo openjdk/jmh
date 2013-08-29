@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.logic.results;
 
-import org.openjdk.jmh.logic.results.internal.IterationResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.ArrayList;
@@ -40,24 +40,19 @@ import java.util.List;
 public class IterationData {
 
     private final BenchmarkRecord benchmark;
+    private final IterationParams params;
     private final List<Result> perThreadResults;
     private final List<ProfilerResult> profilerResults;
-    private final int numThreads;
-    private final TimeValue runTime;
-    private IterationResult aggregated;
-    private boolean isWarmup;
 
-    public IterationData(BenchmarkRecord benchmark, int threadCount, TimeValue runTime) {
+    public IterationData(BenchmarkRecord benchmark, IterationParams params) {
         this.benchmark = benchmark;
-        this.numThreads = threadCount;
-        this.runTime = runTime;
-        this.perThreadResults = new ArrayList<Result>(threadCount);
+        this.params = params;
+        this.perThreadResults = new ArrayList<Result>(params.getThreads());
         this.profilerResults = new ArrayList<ProfilerResult>();
     }
 
     public void addResult(Result result) {
         perThreadResults.add(result);
-        aggregated = null;
     }
 
     public List<Result> getRawResults() {
@@ -68,36 +63,16 @@ public class IterationData {
         return perThreadResults.isEmpty();
     }
 
-    public IterationResult getAggregatedResult() {
-        if (aggregated == null) {
-            aggregated = new IterationResult(perThreadResults);
-        }
-        return aggregated;
-    }
-
-    public int getNumThreads() {
-        return numThreads;
-    }
-
-    public TimeValue getRuntime() {
-        return runTime;
-    }
-
     public void clearResults() {
         perThreadResults.clear();
     }
 
-    public boolean isWarmup() {
-        return isWarmup;
-    }
-
-    public IterationData setWarmup() {
-        isWarmup = true;
-        return this;
-    }
-
     public BenchmarkRecord getBenchmark() {
         return benchmark;
+    }
+
+    public IterationParams getParams() {
+        return params;
     }
 
     public void addProfileResult(ProfilerResult profilerResult) {
