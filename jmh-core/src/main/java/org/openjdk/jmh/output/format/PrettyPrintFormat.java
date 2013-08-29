@@ -30,7 +30,7 @@ import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.TreeMultimap;
 
@@ -52,7 +52,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles) {
         out.print(String.format("%s", result.toPrintable()));
 
         // also print out profiler information
@@ -136,15 +136,15 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue timeValue) {
+    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
         switch (type) {
             case WARMUP:
                 out.print(String.format("# Warmup Iteration %3d (%s in %d %s): ", iteration,
-                        timeValue, threads, getThreadsString(threads)));
+                        params.getTime(), params.getThreads(), getThreadsString(params.getThreads())));
                 break;
             case MEASUREMENT:
                 out.print(String.format("Iteration %3d (%s in %d %s): ", iteration,
-                        timeValue, threads, getThreadsString(threads)));
+                        params.getTime(), params.getThreads(), getThreadsString(params.getThreads())));
                 break;
             default:
                 throw new IllegalStateException("Unknown iteration type: " + type);
@@ -153,7 +153,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results) {
         out.print("Results per thread: [");
 
         boolean first = true;

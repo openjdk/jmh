@@ -29,7 +29,7 @@ import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.PrintStream;
 import java.util.Collection;
@@ -64,17 +64,17 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results) {
 
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue runTime) {
+    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
 
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles) {
 
     }
 

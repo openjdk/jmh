@@ -29,7 +29,7 @@ import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -48,22 +48,21 @@ public interface OutputFormat {
      * Format for iteration start.
      *
      * @param benchmark benchmark name
+     * @param params
      * @param iteration iteration-number
-     * @param threads threads to run
-     * @param runTime time to spend per iteration
      */
-    public void iteration(BenchmarkRecord benchmark, int iteration, IterationType type, int threads, TimeValue runTime);
+    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type);
 
     /**
      * Format for end-of-iteration.
      *
      * @param name      name of benchmark
+     * @param params
      * @param iteration iteration-number
-     * @param thread    amount of threads used
      * @param result    result of iteration
      * @param profiles  profiler results
      */
-    public void iterationResult(BenchmarkRecord name, int iteration, IterationType type, int thread, IterationResult result, Collection<ProfilerResult> profiles);
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult result, Collection<ProfilerResult> profiles);
 
     /**
      * Format for start-of-benchmark output.
@@ -94,11 +93,11 @@ public interface OutputFormat {
      * Format for detailed results output.
      *
      * @param name      benchmark name
+     * @param params
      * @param iteration iteration number
-     * @param threads   thread count
      * @param results   AggregatedResults with detailed run results
      */
-    public void detailedResults(BenchmarkRecord name, int iteration, int threads, IterationResult results);
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult results);
 
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 

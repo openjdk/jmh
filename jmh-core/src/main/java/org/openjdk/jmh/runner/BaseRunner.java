@@ -97,11 +97,11 @@ public abstract class BaseRunner {
                 out.verbosePrintln("System.gc() executed");
             }
 
-            out.iteration(handler.getBenchmark(), i, IterationType.WARMUP, wp.getThreads(), wp.getTime());
+            out.iteration(handler.getBenchmark(), wp, i, IterationType.WARMUP);
             boolean isLastIteration = (executionParams.getIteration().getCount() == 0);
             IterationData iterData = handler.runIteration(wp, isLastIteration);
             IterationResult iterResult = new IterationResult(iterData.getRawResults());
-            out.iterationResult(handler.getBenchmark(), i, IterationType.WARMUP, options.getThreads(), iterResult, iterData.getProfilerResults());
+            out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterResult, iterData.getProfilerResults());
         }
 
         // measurement
@@ -113,7 +113,7 @@ public abstract class BaseRunner {
             }
 
             // run benchmark iteration
-            out.iteration(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), mp.getTime());
+            out.iteration(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT);
 
             boolean isLastIteration = (i == mp.getCount());
             IterationData iterData = handler.runIteration(mp, isLastIteration);
@@ -123,10 +123,10 @@ public abstract class BaseRunner {
                 out.println("WARNING: No results returned, benchmark payload threw exception?");
             } else {
                 IterationResult iterResult = new IterationResult(iterData.getRawResults());
-                out.iterationResult(handler.getBenchmark(), i, IterationType.MEASUREMENT, mp.getThreads(), iterResult, iterData.getProfilerResults());
+                out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterResult, iterData.getProfilerResults());
 
                 if (options.shouldOutputDetailedResults()) {
-                    out.detailedResults(handler.getBenchmark(), i, mp.getThreads(), iterResult);
+                    out.detailedResults(handler.getBenchmark(), mp, i, iterResult);
                 }
 
                 allResults.add(iterData);
