@@ -24,9 +24,8 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.logic.results.IterationData;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
 
 /**
  * Handler for a single micro benchmark. Handles name and execution information (# iterations, et c). Executes the
@@ -44,9 +43,9 @@ public interface MicroBenchmarkHandler {
      *
      * @param params  Iteration parameters
      * @param last    Should this iteration considered to be the last
-     * @return IterationData
+     * @return IterationResult
      */
-    public IterationData runIteration(IterationParams params, boolean last);
+    public IterationResult runIteration(IterationParams params, boolean last);
 
     /**
      * Do required shutdown actions. Actions may be:

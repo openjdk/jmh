@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.logic.results.IterationData;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerType;
@@ -187,7 +187,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         }
     }
 
-    protected void stopProfilers(IterationData iterationResults) {
+    protected void stopProfilers(IterationResult iterationResults) {
         // stop profilers
         for (Profiler prof : registeredProfilers) {
             try {

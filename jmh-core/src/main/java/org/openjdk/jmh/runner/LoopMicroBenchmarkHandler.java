@@ -27,7 +27,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.InfraControl;
-import org.openjdk.jmh.logic.results.IterationData;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
@@ -72,7 +72,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      * {@inheritDoc}
      */
     @Override
-    public IterationData runIteration(IterationParams params, boolean last) {
+    public IterationResult runIteration(IterationParams params, boolean last) {
         int numThreads = params.getThreads();
         TimeValue runtime = params.getTime();
 
@@ -80,7 +80,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
         // result object to accumulate the results in
-        IterationData iterationResults = new IterationData(microbenchmark, params);
+        IterationResult iterationResults = new IterationResult(microbenchmark, params);
 
         InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit);
 

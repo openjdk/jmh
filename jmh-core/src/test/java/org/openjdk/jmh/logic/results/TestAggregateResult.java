@@ -41,12 +41,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestAggregateResult {
 
-    private static IterationData result;
+    private static IterationResult result;
     private static final double[] values = {10.0, 20.0, 30.0, 40.0, 50.0};
 
     @BeforeClass
     public static void setupClass() {
-        result = new IterationData(new BenchmarkRecord("blah,blah," + Mode.AverageTime), new IterationParams(1, TimeValue.days(1), 1));
+        result = new IterationResult(new BenchmarkRecord("blah,blah," + Mode.AverageTime), new IterationParams(1, TimeValue.days(1), 1));
         for (double d : values) {
             result.addResult(new OpsPerTimeUnit(ResultRole.BOTH, "test1", (long) d, 10 * 1000 * 1000));
         }

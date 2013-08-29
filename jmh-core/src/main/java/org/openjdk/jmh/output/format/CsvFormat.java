@@ -24,16 +24,14 @@
  */
 package org.openjdk.jmh.output.format;
 
-import org.openjdk.jmh.logic.results.IterationData;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
-import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.PrintStream;
-import java.util.Collection;
 
 /**
  * CSV implementation of OutputFormat.
@@ -52,7 +50,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data) {
         if (type != IterationType.MEASUREMENT) return;
 
         out.print(name + DELIMITER + iteration + DELIMITER);
@@ -106,7 +104,7 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data) {
         int count = 0;
 
         for (Result result : data.getRawPrimaryResults()) {

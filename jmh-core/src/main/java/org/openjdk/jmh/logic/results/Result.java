@@ -86,7 +86,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return statistics;
     }
 
-    public String extendedInfo() {
+    public String extendedInfo(String label) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 

@@ -24,8 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.logic.results.IterationData;
-import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -84,7 +83,7 @@ public abstract class BaseRunner {
     }
 
     protected RunResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
-        List<IterationData> allResults = new ArrayList<IterationData>();
+        List<IterationResult> allResults = new ArrayList<IterationResult>();
 
         out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
 
@@ -98,8 +97,8 @@ public abstract class BaseRunner {
 
             out.iteration(handler.getBenchmark(), wp, i, IterationType.WARMUP);
             boolean isLastIteration = (executionParams.getIteration().getCount() == 0);
-            IterationData iterData = handler.runIteration(wp, isLastIteration);
-            out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterData, iterData.getProfilerResults());
+            IterationResult iterData = handler.runIteration(wp, isLastIteration);
+            out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterData);
         }
 
         // measurement
@@ -114,13 +113,13 @@ public abstract class BaseRunner {
             out.iteration(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT);
 
             boolean isLastIteration = (i == mp.getCount());
-            IterationData iterData = handler.runIteration(mp, isLastIteration);
+            IterationResult iterData = handler.runIteration(mp, isLastIteration);
 
             // might get an exception above, in which case the results list will be empty
             if (iterData.isResultsEmpty()) {
                 out.println("WARNING: No results returned, benchmark payload threw exception?");
             } else {
-                out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData, iterData.getProfilerResults());
+                out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData);
 
                 if (options.shouldOutputDetailedResults()) {
                     out.detailedResults(handler.getBenchmark(), mp, i, iterData);
@@ -132,7 +131,7 @@ public abstract class BaseRunner {
 
         // only print end-of-run output if we have actual results
         if (!allResults.isEmpty()) {
-            RunResult result = aggregateIterationData(allResults);
+            RunResult result = new RunResult(allResults);
             out.endBenchmark(handler.getBenchmark(), result);
             return result;
         } else {
@@ -200,14 +199,6 @@ public abstract class BaseRunner {
             return false;
         }
         return false;
-    }
-
-    protected static RunResult aggregateIterationData(List<IterationData> results) {
-        List<Result> res = new ArrayList<Result>(results.size());
-        for (IterationData itData : results) {
-            res.add(itData.getPrimaryResult());
-        }
-        return new RunResult(res);
     }
 
 }

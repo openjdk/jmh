@@ -120,7 +120,7 @@ public class SampleTimePerOp extends Result {
     }
 
     @Override
-    public String extendedInfo() {
+    public String extendedInfo(String label) {
 
         Statistics stats = new Statistics();
         for (long l : buffer.getSamples()) {

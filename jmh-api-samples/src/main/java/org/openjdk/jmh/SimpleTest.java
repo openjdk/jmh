@@ -53,17 +53,9 @@ public class SimpleTest {
 
         Map<BenchmarkRecord, RunResult> results = new Runner(opts).run();
         RunResult runResult = extractSingleResult(results);
-        Result result = extractSingleMetric(runResult);
+        Result result = runResult.getPrimaryResult();
 
         System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit());
-    }
-
-    private static Result extractSingleMetric(RunResult result) {
-        Map<String,Result> results = result.getResults();
-        if (results.size() != 1) {
-            throw new IllegalArgumentException("More than one metric: " + results);
-        }
-        return results.values().iterator().next();
     }
 
     public static RunResult extractSingleResult(Map<BenchmarkRecord, RunResult> results) {

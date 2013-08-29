@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author sergey.kuksenko@oracle.com
  */
-public class IterationData implements Serializable {
+public class IterationResult implements Serializable {
 
     private final BenchmarkRecord benchmark;
     private final IterationParams params;
@@ -52,7 +52,7 @@ public class IterationData implements Serializable {
     private final List<ProfilerResult> profilerResults;
     private String scoreUnit;
 
-    public IterationData(BenchmarkRecord benchmark, IterationParams params) {
+    public IterationResult(BenchmarkRecord benchmark, IterationParams params) {
         this.benchmark = benchmark;
         this.params = params;
         this.primaryResults = new ArrayList<Result>(params.getThreads());
@@ -77,7 +77,7 @@ public class IterationData implements Serializable {
         }
     }
 
-    public List<Result> getRawPrimaryResults() {
+    public Collection<Result> getRawPrimaryResults() {
         return primaryResults;
     }
 
@@ -128,7 +128,7 @@ public class IterationData implements Serializable {
         profilerResults.add(profilerResult);
     }
 
-    public List<ProfilerResult> getProfilerResults() {
+    public Collection<ProfilerResult> getProfilerResults() {
         return profilerResults;
     }
 

@@ -25,12 +25,16 @@
 package org.openjdk.jmh.logic.results.internal;
 
 import org.openjdk.jmh.logic.results.Aggregator;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.Statistics;
-import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -46,57 +50,82 @@ public class RunResult implements Serializable {
 
     private static final long serialVersionUID = 6467912427356048369L;
 
-    /** Original list of Result */
-    private final Multimap<String, Result> results;
+    private final Collection<IterationResult> iterationResults;
 
-    /** Aggregated result */
-    private final Map<String, Result> result;
+    public RunResult(Collection<IterationResult> data) {
+        this.iterationResults = data;
+    }
 
-    /**
-     * Constructor
-     *
-     * @param rrs Results from the threads
-     */
-    public RunResult(List<Result> rrs) {
-        if (rrs.isEmpty()) {
-            throw new IllegalArgumentException("Empty lists makes no sense");
-        }
+    public Collection<IterationResult> getRawIterationResults() {
+        return iterationResults;
+    }
 
-
-        this.results = new TreeMultimap<String, Result>();
-        for (Result r : rrs) {
-            results.put(r.getLabel(), r);
-        }
-
-        Result next = rrs.iterator().next();
+    public Result getPrimaryResult() {
+        Result next = iterationResults.iterator().next().getPrimaryResult();
 
         @SuppressWarnings("unchecked")
         Aggregator<Result> aggregator = next.getRunAggregator();
-
-        this.result = new TreeMap<String, Result>();
-        for (String k : results.keys()) {
-            Result r = aggregator.aggregate(results.get(k));
-            result.put(r.getLabel(), r);
-        }
+        return aggregator.aggregate(getRawPrimaryResults());
     }
 
-    /**
-     * Statistics object
-     * @return the Statistics object with score
-     */
-    public Map<String, Statistics> getStatistics() {
-        Map<String, Statistics> r = new TreeMap<String, Statistics>();
-        for (String k : result.keySet()) {
-            r.put(k, result.get(k).getStatistics());
+    public Collection<Result> getRawPrimaryResults() {
+        Collection<Result> rs = new ArrayList<Result>();
+        for (IterationResult k : iterationResults) {
+            rs.add(k.getPrimaryResult());
         }
-        return r;
+        return rs;
     }
 
-    public Map<String, Result> getResults() {
-        return result;
+    public Multimap<String, Result> getRawSecondaryResults() {
+        Multimap<String, Result> rs = new HashMultimap<String, Result>();
+        for (IterationResult k : iterationResults) {
+            for (Map.Entry<String, Result> r : k.getSecondaryResults().entrySet()) {
+                rs.put(r.getKey(), r.getValue());
+            }
+        }
+        return rs;
+    }
+
+    public Map<String, Result> getSecondaryResults() {
+        Multimap<String, Result> rs = getRawSecondaryResults();
+
+        Map<String, Result> answers = new TreeMap<String, Result>();
+        for (String k : rs.keys()) {
+            Collection<Result> results = rs.get(k);
+            Result next = results.iterator().next();
+
+            @SuppressWarnings("unchecked")
+            Aggregator<Result> aggregator = next.getRunAggregator();
+            answers.put(k, aggregator.aggregate(results));
+        }
+
+        return answers;
     }
 
     public String getScoreUnit() {
-        return results.values().iterator().next().getScoreUnit();
+        return getPrimaryResult().getScoreUnit();
+    }
+
+    public Statistics getPrimaryStatistics() {
+        Statistics s = new Statistics();
+        for (IterationResult d : iterationResults) {
+            s.addValue(d.getPrimaryResult().getScore());
+        }
+        return s;
+    }
+
+    public Map<String, Statistics> getSecondaryStatistics() {
+        Map<String, Statistics> answer = new HashMap<String, Statistics>();
+        for (IterationResult d : iterationResults) {
+            for (Map.Entry<String, Result> e : d.getSecondaryResults().entrySet()) {
+                Statistics s = answer.get(e.getKey());
+                if (s == null) {
+                    s = new Statistics();
+                    answer.put(e.getKey(), s);
+                }
+                s.addValue(e.getValue().getScore());
+            }
+        }
+        return answer;
     }
 }

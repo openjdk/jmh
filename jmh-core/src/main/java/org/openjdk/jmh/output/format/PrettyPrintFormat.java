@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
-import org.openjdk.jmh.logic.results.IterationData;
+import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
@@ -53,7 +53,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationData data, Collection<ProfilerResult> profiles) {
+    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data) {
         StringBuilder sb = new StringBuilder();
         sb.append(data.getPrimaryResult().toString());
 
@@ -82,7 +82,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         // also print out profiler information
         if (type == IterationType.MEASUREMENT) {
             boolean firstProfiler = true;
-            for (ProfilerResult profRes : profiles) {
+            for (ProfilerResult profRes : data.getProfilerResults()) {
                 if (profRes.hasData()) {
                     if (firstProfiler) {
                         out.println("");
@@ -128,8 +128,9 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         benchmarkResults.put(name, result);
 
         out.println();
-        for (Result r : result.getResults().values()) {
-            out.println(r.extendedInfo());
+        out.println(result.getPrimaryResult().extendedInfo("***"));
+        for (Result r : result.getSecondaryResults().values()) {
+            out.println(r.extendedInfo(r.getLabel()));
         }
         out.println();
     }
@@ -146,14 +147,15 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
             if (forkedResults.size() > 1) {
                 out.println("\"" + key.getUsername() + "\", aggregate over forked runs:");
 
-                List<Result> iResults = new ArrayList<Result>();
+                List<IterationResult> iResults = new ArrayList<IterationResult>();
                 for (RunResult res : forkedResults) {
-                    iResults.addAll(res.getResults().values());
+                    iResults.addAll(res.getRawIterationResults());
                 }
                 RunResult runResult = new RunResult(iResults);
 
-                for (Result r : runResult.getResults().values()) {
-                    out.println(r.extendedInfo());
+                out.println(runResult.getPrimaryResult().extendedInfo("***"));
+                for (Result r : runResult.getSecondaryResults().values()) {
+                    out.println(r.extendedInfo(r.getLabel()));
                 }
             }
         }
@@ -177,7 +179,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationData data) {
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data) {
         out.print("Results per thread: [");
 
         boolean first = true;
