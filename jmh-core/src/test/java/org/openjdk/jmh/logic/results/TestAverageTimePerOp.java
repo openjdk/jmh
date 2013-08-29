@@ -39,8 +39,8 @@ public class TestAverageTimePerOp {
 
     @Test
     public void testRunAggregator1() {
-        AverageTimePerOp r1 = new AverageTimePerOp("test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimePerOp r2 = new AverageTimePerOp("test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r1 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r2 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
@@ -49,8 +49,8 @@ public class TestAverageTimePerOp {
 
     @Test
     public void testRunAggregator2() {
-        AverageTimePerOp r1 = new AverageTimePerOp("test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimePerOp r2 = new AverageTimePerOp("test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r1 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r2 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.0, result.getScore());
@@ -59,8 +59,8 @@ public class TestAverageTimePerOp {
 
     @Test
     public void testIterationAggregator1() {
-        AverageTimePerOp r1 = new AverageTimePerOp("test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimePerOp r2 = new AverageTimePerOp("test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r1 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r2 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.0, result.getScore());
@@ -69,8 +69,8 @@ public class TestAverageTimePerOp {
 
     @Test
     public void testIterationAggregator2() {
-        AverageTimePerOp r1 = new AverageTimePerOp("test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimePerOp r2 = new AverageTimePerOp("test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r1 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimePerOp r2 = new AverageTimePerOp(ResultRole.BOTH, "test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());

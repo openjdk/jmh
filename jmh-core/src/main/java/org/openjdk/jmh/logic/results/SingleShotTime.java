@@ -47,12 +47,12 @@ public class SingleShotTime extends Result {
      * @param duration       Duration of iteration in NanoSeconds
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
-    public SingleShotTime(String label, long duration, TimeUnit outputTimeUnit) {
-        this(label, duration, outputTimeUnit, null);
+    public SingleShotTime(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit) {
+        this(mode, label, duration, outputTimeUnit, null);
     }
 
-    SingleShotTime(String label, long duration, TimeUnit outputTimeUnit, Statistics stat) {
-        super(label, stat);
+    SingleShotTime(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit, Statistics stat) {
+        super(mode, label, stat);
         this.duration = duration;
         this.outputTimeUnit = outputTimeUnit;
     }
@@ -85,17 +85,19 @@ public class SingleShotTime extends Result {
     public static class AveragingAggregator implements Aggregator<SingleShotTime> {
         @Override
         public Result aggregate(Collection<SingleShotTime> results) {
+            ResultRole mode = null;
             String label = null;
             Statistics stat = new Statistics();
             long duration = 0;
             TimeUnit tu = null;
             for (SingleShotTime r : results) {
+                mode = r.mode;
                 tu = r.outputTimeUnit;
                 label = r.label;
                 duration += r.duration;
                 stat.addValue(r.getScore());
             }
-            return new SingleShotTime(label, duration / results.size(), tu, stat);
+            return new SingleShotTime(mode, label, duration / results.size(), tu, stat);
         }
 
     }

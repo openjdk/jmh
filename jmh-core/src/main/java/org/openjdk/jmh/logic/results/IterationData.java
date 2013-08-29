@@ -47,6 +47,7 @@ public class IterationData implements Serializable {
     private final BenchmarkRecord benchmark;
     private final IterationParams params;
     private final List<Result> primaryResults;
+    private final Multimap<String, Result> secondaryResults;
     private final List<ProfilerResult> profilerResults;
     private String scoreUnit;
 
@@ -55,28 +56,24 @@ public class IterationData implements Serializable {
         this.params = params;
         this.primaryResults = new ArrayList<Result>(params.getThreads());
         this.profilerResults = new ArrayList<ProfilerResult>();
+        this.secondaryResults = new TreeMultimap<String, Result>();
     }
 
     public void addResult(Result result) {
-        if (scoreUnit == null) {
-            scoreUnit = result.getScoreUnit();
-        } else {
-            if (!scoreUnit.equals(result.getScoreUnit())) {
-                throw new IllegalStateException("Adding the result with another score unit!");
+        if (result.getMode().primary()) {
+            if (scoreUnit == null) {
+                scoreUnit = result.getScoreUnit();
+            } else {
+                if (!scoreUnit.equals(result.getScoreUnit())) {
+                    throw new IllegalStateException("Adding the result with another score unit!");
+                }
             }
+            primaryResults.add(result);
         }
 
-//        if (label != null) {
-//            if (!label.equals(result.getLabel())) {
-//                throw new IllegalStateException("Aggregating the results with different labels");
-//            }
-//        } else {
-//            label = r.label;
-//        }
-
-        primaryResults.add(result);
-
-        // FIXME: Take care of secondary results and separate them by label
+        if (result.getMode().secondary()) {
+            secondaryResults.put(result.getLabel(), result);
+        }
     }
 
     public List<Result> getPrimaryResults() {

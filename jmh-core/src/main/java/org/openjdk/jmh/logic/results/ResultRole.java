@@ -24,37 +24,27 @@
  */
 package org.openjdk.jmh.logic.results;
 
-import org.junit.Test;
+public enum ResultRole {
+    PRIMARY(true, false),
+    SECONDARY(false, true),
+    BOTH(true, true),
 
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+    ;
 
-import static junit.framework.Assert.assertEquals;
+    private final boolean primary;
+    private final boolean secondary;
 
-/**
- *
- * @author aleksey.shipilev@oracle.com
- */
-public class TestSingleShotTime {
-
-    @Test
-    public void testRunAggregator1() {
-        SingleShotTime r1 = new SingleShotTime(ResultRole.BOTH, "Test1", 1000L, TimeUnit.MICROSECONDS);
-        SingleShotTime r2 = new SingleShotTime(ResultRole.BOTH, "Test1", 2000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(1.5, result.getScore());
-        assertEquals("usecs", result.getScoreUnit());
+    ResultRole(boolean primary, boolean secondary) {
+        this.primary = primary;
+        this.secondary = secondary;
     }
 
-    @Test
-    public void testIterationAggregator1() {
-        SingleShotTime r1 = new SingleShotTime(ResultRole.BOTH, "Test1", 1000L, TimeUnit.MICROSECONDS);
-        SingleShotTime r2 = new SingleShotTime(ResultRole.BOTH, "Test1", 2000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
+    public boolean primary() {
+        return primary;
+    }
 
-        assertEquals(1.5, result.getScore());
-        assertEquals("usecs", result.getScoreUnit());
+    public boolean secondary() {
+        return secondary;
     }
 
 }

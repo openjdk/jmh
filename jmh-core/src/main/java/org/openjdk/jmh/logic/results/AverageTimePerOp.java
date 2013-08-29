@@ -50,12 +50,12 @@ public class AverageTimePerOp extends Result {
      * @param durationNs       Duration of iteration in NanoSeconds
      * @param tu The TimeUnit to use when calculating the score
      */
-    public AverageTimePerOp(String label, long operations, long durationNs, TimeUnit tu) {
-        this(label, operations, durationNs, tu, null);
+    public AverageTimePerOp(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
+        this(mode, label, operations, durationNs, tu, null);
     }
 
-    AverageTimePerOp(String label, long operations, long durationNs, TimeUnit tu, Statistics stat) {
-        super(label, stat);
+    AverageTimePerOp(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu, Statistics stat) {
+        super(mode, label, stat);
         this.operations = operations;
         this.durationNs = durationNs;
         this.outputTimeUnit = tu;
@@ -90,18 +90,20 @@ public class AverageTimePerOp extends Result {
         @Override
         public AverageTimePerOp aggregate(Collection<AverageTimePerOp> results) {
             Statistics stat = new Statistics();
+            ResultRole mode = null;
             String label = null;
             long operations = 0;
             long duration = 0;
             TimeUnit tu = null;
             for (AverageTimePerOp r : results) {
+                mode = r.mode;
                 label = r.label;
                 tu = r.outputTimeUnit;
                 operations += r.operations;
                 duration += r.durationNs;
                 stat.addValue(r.getScore());
             }
-            return new AverageTimePerOp(label, operations, duration, tu, stat);
+            return new AverageTimePerOp(mode, label, operations, duration, tu, stat);
         }
     }
 

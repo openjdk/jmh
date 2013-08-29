@@ -44,8 +44,8 @@ public class SampleTimePerOp extends Result {
     private final TimeUnit outputTimeUnit;
 
     /** Sets up the result with the default output unit MilliSeconds */
-    public SampleTimePerOp(String label, SampleBuffer buffer) {
-        this(label, buffer, TimeUnit.MILLISECONDS);
+    public SampleTimePerOp(ResultRole mode, String label, SampleBuffer buffer) {
+        this(mode, label, buffer, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -53,8 +53,8 @@ public class SampleTimePerOp extends Result {
      *
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
-    public SampleTimePerOp(String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
-        super(label, null);
+    public SampleTimePerOp(ResultRole mode, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
+        super(mode, label, null);
         this.buffer = buffer;
         this.outputTimeUnit = outputTimeUnit;
     }
@@ -192,6 +192,7 @@ public class SampleTimePerOp extends Result {
             }
 
             // generate new sample buffer
+            ResultRole mode = null;
             String label = null;
             SampleBuffer buffer = new SampleBuffer(size);
             TimeUnit tu = null;
@@ -201,7 +202,7 @@ public class SampleTimePerOp extends Result {
                 buffer.addAll(r.buffer.getSamples());
             }
 
-            return new SampleTimePerOp(label, buffer, tu);
+            return new SampleTimePerOp(mode, label, buffer, tu);
         }
     }
 

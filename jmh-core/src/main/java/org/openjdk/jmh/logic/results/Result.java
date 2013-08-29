@@ -39,10 +39,12 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
 
+    protected final ResultRole mode;
     protected final String label;
     protected final Statistics statistics;
 
-    public Result(String label, Statistics statistics) {
+    public Result(ResultRole mode, String label, Statistics statistics) {
+        this.mode = mode;
         this.label = label;
         this.statistics = statistics == null ? new Statistics() : statistics;
     }
@@ -140,12 +142,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return label;
     }
 
-    public String toPrintableScore() {
-        NumberFormat nf = NumberFormat.getInstance();
-        nf.setMaximumFractionDigits(3);
-        nf.setMinimumFractionDigits(3);
-        nf.setGroupingUsed(false);
-
-        return nf.format(getScore());
+    public ResultRole getMode() {
+        return mode;
     }
 }
