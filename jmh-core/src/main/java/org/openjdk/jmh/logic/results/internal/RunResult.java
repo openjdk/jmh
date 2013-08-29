@@ -106,29 +106,6 @@ public class RunResult implements Serializable {
         return getPrimaryResult().getScoreUnit();
     }
 
-    public Statistics getPrimaryStatistics() {
-        Statistics s = new Statistics();
-        for (IterationResult d : iterationResults) {
-            s.addValue(d.getPrimaryResult().getScore());
-        }
-        return s;
-    }
-
-    public Map<String, Statistics> getSecondaryStatistics() {
-        Map<String, Statistics> answer = new HashMap<String, Statistics>();
-        for (IterationResult d : iterationResults) {
-            for (Map.Entry<String, Result> e : d.getSecondaryResults().entrySet()) {
-                Statistics s = answer.get(e.getKey());
-                if (s == null) {
-                    s = new Statistics();
-                    answer.put(e.getKey(), s);
-                }
-                s.addValue(e.getValue().getScore());
-            }
-        }
-        return answer;
-    }
-
     public static RunResult merge(RunResult... rrs) {
         List<IterationResult> rs = new ArrayList<IterationResult>();
         for (RunResult rr : rrs) {

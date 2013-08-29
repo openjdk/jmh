@@ -53,7 +53,7 @@ public class SimpleTest {
         Result result = runResult.getPrimaryResult();
 
         System.out.println();
-        System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit() + " over " + runResult.getPrimaryStatistics().getN() + " iterations");
+        System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit() + " over " + result.getStatistics().getN() + " iterations");
     }
 
 }

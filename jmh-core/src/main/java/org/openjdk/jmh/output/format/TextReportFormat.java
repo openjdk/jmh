@@ -119,7 +119,7 @@ public class TextReportFormat extends PrettyPrintFormat {
                 RunResult runResult = new RunResult(results);
 
                 {
-                    Statistics stats = runResult.getPrimaryStatistics();
+                    Statistics stats = runResult.getPrimaryResult().getStatistics();
                     if (stats.getN() > 2) {
                         interval = stats.getConfidenceInterval(0.01);
                     }
@@ -133,8 +133,8 @@ public class TextReportFormat extends PrettyPrintFormat {
                             runResult.getScoreUnit());
                 }
 
-                for (String label : runResult.getSecondaryStatistics().keySet()) {
-                    Statistics stats = runResult.getSecondaryStatistics().get(label);
+                for (String label : runResult.getSecondaryResults().keySet()) {
+                    Statistics stats = runResult.getSecondaryResults().get(label).getStatistics();
                     if (stats.getN() > 2) {
                         interval = stats.getConfidenceInterval(0.01);
                     }
