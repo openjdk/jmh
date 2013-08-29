@@ -27,14 +27,11 @@ package org.openjdk.jmh;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.internal.RunResult;
 import org.openjdk.jmh.output.OutputFormatType;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-
-import java.util.Map;
 
 public class SimpleTest {
 
@@ -52,18 +49,11 @@ public class SimpleTest {
                 .outputFormat(OutputFormatType.TextReport)
                 .build();
 
-        Map<BenchmarkRecord, RunResult> results = new Runner(opts).run();
-        RunResult runResult = extractSingleResult(results);
+        RunResult runResult = new Runner(opts).runSingle();
         Result result = runResult.getPrimaryResult();
 
-        System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit() + " " + runResult.getPrimaryStatistics());
+        System.out.println();
+        System.out.println("API replied benchmark score: " + result.getScore() + " " + result.getScoreUnit() + " over " + runResult.getPrimaryStatistics().getN() + " iterations");
     }
 
-    public static RunResult extractSingleResult(Map<BenchmarkRecord, RunResult> results) {
-        if (results.size() != 1) {
-            throw new IllegalArgumentException("More than one result: " + results);
-        }
-
-        return results.values().iterator().next();
-    }
 }

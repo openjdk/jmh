@@ -103,7 +103,29 @@ public class Runner extends BaseRunner {
         }
     }
 
-    /** Main entry point */
+    /**
+     * Shortcut method for the single benchmark execution.
+     * This method is handy when Options describe only the single benchmark to run.
+     *
+     * @return benchmark result
+     * @throws IllegalStateException if more than one benchmark is found
+     */
+    public RunResult runSingle() throws RunnerException {
+        Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
+
+        if (benchmarks.size() == 1) {
+            Map<BenchmarkRecord, RunResult> rs = run();
+            return rs.values().iterator().next();
+        } else {
+            throw new IllegalStateException("More than single benchmark is matching the options");
+        }
+    }
+
+    /**
+     * Run benchmarks.
+     *
+     * @return map of benchmark results
+     */
     public Map<BenchmarkRecord, RunResult> run() throws RunnerException {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
 
