@@ -93,15 +93,13 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         if (statistics.getN() > 2) {
             double[] interval95 = statistics.getConfidenceInterval(0.05);
             double[] interval99 = statistics.getConfidenceInterval(0.01);
-            pw.println(String.format("Run result \"%s\": %.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s",
-                    label,
+            pw.println(String.format("Result%s: %.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s",
+                    (label == null) ? "" : "\"" + label + "\"",
                     (interval95[0] + interval95[1]) / 2, (interval95[1] - interval95[0]) / 2, (interval99[1] - interval99[0]) / 2,
                     getScoreUnit()));
-            pw.println(String.format("Run statistics \"%s\": min = %.3f, avg = %.3f, max = %.3f, stdev = %.3f",
-                    label,
+            pw.println(String.format("  Statistics: (min, avg, max) = (%.3f, %.3f, %.3f), stdev = %.3f",
                     statistics.getMin(), statistics.getMean(), statistics.getMax(), statistics.getStandardDeviation()));
-            pw.println(String.format("Run confidence intervals \"%s\": 95%% [%.3f, %.3f], 99%% [%.3f, %.3f]",
-                    label,
+            pw.println(String.format("  Confidence intervals: 95%% [%.3f, %.3f], 99%% [%.3f, %.3f]",
                     interval95[0], interval95[1], interval99[0], interval99[1]));
         } else {
             pw.println(String.format("Run result: %.2f (<= 2 iterations)", statistics.getMean()));
@@ -110,32 +108,6 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return sw.toString();
     }
 
-    /**
-     * Converts timeunit to stringly representation.
-     *
-     * @param timeUnit timeunit to convert
-     * @return string representation
-     */
-    public static String tuToString(TimeUnit timeUnit) {
-        switch (timeUnit) {
-            case DAYS:
-                return "day";
-            case HOURS:
-                return "hour";
-            case MICROSECONDS:
-                return "usec";
-            case MILLISECONDS:
-                return "msec";
-            case MINUTES:
-                return "min";
-            case NANOSECONDS:
-                return "nsec";
-            case SECONDS:
-                return "sec";
-            default:
-                return "?";
-        }
-    }
 
 
     public String getLabel() {

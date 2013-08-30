@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.util.Collection;
@@ -60,7 +61,7 @@ public class SingleShotTime extends Result {
     /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
-        return tuToString(outputTimeUnit)+"s";
+        return TimeValue.tuToString(outputTimeUnit);
     }
 
     /** {@inheritDoc} */

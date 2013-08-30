@@ -214,14 +214,18 @@ public class Runner extends BaseRunner {
             // increased variance.
             // currently valid only for non-external JVM runs
 
+            int count = 0;
             for (BenchmarkRecord benchmark : warmupMicros) {
+                out.println("# Fork: N/A, bulk warmup in progress, " + (++count) + " of " + warmupMicros.size());
                 runBenchmark(benchmark, true, false);
+                out.println("");
             }
         }
         // run microbenchmarks
         //
         Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord benchmark : benchmarks) {
+            out.println("# Fork: N/A, test runs in same VM");
             RunResult result = runBenchmark(benchmark, false, true);
             results.put(benchmark, RunResult.merge(results.get(benchmark), result));
         }
@@ -266,6 +270,7 @@ public class Runner extends BaseRunner {
 
         Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord benchmark : embedded) {
+            out.println("# Fork: N/A, test runs in same VM");
             RunResult r = runBenchmark(benchmark, true, true);
             results.put(benchmark, RunResult.merge(results.get(benchmark), r));
         }
@@ -343,13 +348,14 @@ public class Runner extends BaseRunner {
             String[] warmupForkCheat = Utils.concat(commandString, new String[]{"-wi", "1", "-i", "0"});
             out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
             for (int i = 0; i < warmupForkCount; i++) {
+                out.println("# Warmup Fork: " + (i+1) + " of " + forkCount);
                 doFork(reader, warmupForkCheat);
             }
         }
 
-        // TODO: should we report fork number somehow?
         out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
         for (int i = 0; i < forkCount; i++) {
+            out.println("# Fork: " + (i+1) + " of " + forkCount);
             doFork(reader, commandString);
         }
     }

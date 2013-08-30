@@ -113,28 +113,34 @@ public class TimeValue implements Serializable {
         if (time == 0) {
             return "single-shot";
         } else {
-            return String.valueOf(time) + timeUnitString();
+            return String.valueOf(time) + " " + tuToString(timeUnit);
         }
     }
 
-    public String toCommandLine() {
-        return String.valueOf(time) + timeUnitString();
-    }
-
-    private String timeUnitString() {
-        switch(timeUnit) {
-            case SECONDS:
-                return "s";
-            case MILLISECONDS:
-                return "ms";
+    /**
+     * Converts timeunit to stringly representation.
+     *
+     * @param timeUnit timeunit to convert
+     * @return string representation
+     */
+    public static String tuToString(TimeUnit timeUnit) {
+        switch (timeUnit) {
+            case DAYS:
+                return "day";
+            case HOURS:
+                return "hr";
             case MICROSECONDS:
                 return "us";
+            case MILLISECONDS:
+                return "ms";
+            case MINUTES:
+                return "min";
             case NANOSECONDS:
                 return "ns";
-            case MINUTES:
-                return "m";
-            default:
+            case SECONDS:
                 return "s";
+            default:
+                return "?";
         }
     }
 

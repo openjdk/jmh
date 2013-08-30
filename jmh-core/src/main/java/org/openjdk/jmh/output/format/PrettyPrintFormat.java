@@ -56,8 +56,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         sb.append(data.getPrimaryResult().toString());
 
         if (type == IterationType.MEASUREMENT) {
-            int prefixLen = String.format("Iteration %3d (%s in %d %s): ", iteration,
-                    params.getTime(), params.getThreads(), getThreadsString(params.getThreads())).length();
+            int prefixLen = String.format("Iteration %3d: ", iteration).length();
 
             Map<String, Result> secondary = data.getSecondaryResults();
             if (!secondary.isEmpty()) {
@@ -107,14 +106,9 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
             out.println("# Starting run at: " + new Date());
         }
 
-        out.println("# Runtime (per iteration): " + mbParams.getIteration().getTime());
-        out.println("# Iterations: " + mbParams.getIteration().getCount());
-        out.println("# Thread count: " + mbParams.getThreads());
-
-        if (mbParams.shouldSynchIterations()) {
-            out.println("# Threads will synchronize iterations");
-        }
-
+        out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " + mbParams.getWarmup().getTime() + " each");
+        out.println("# Measurement: " + mbParams.getIteration().getCount() + " iterations, " + mbParams.getIteration().getTime() + " each");
+        out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Running: " + name.getUsername());
     }
@@ -126,7 +120,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
         benchmarkResults.put(name, result);
 
         out.println();
-        out.println(result.getPrimaryResult().extendedInfo("***"));
+        out.println(result.getPrimaryResult().extendedInfo(null));
         for (Result r : result.getSecondaryResults().values()) {
             out.println(r.extendedInfo(r.getLabel()));
         }
@@ -144,10 +138,11 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
             Collection<RunResult> forkedResults = benchmarkResults.get(key);
             if (forkedResults.size() > 1) {
                 out.println("\"" + key.getUsername() + "\", aggregate over forked runs:");
+                out.println();
 
                 RunResult runResult = RunResult.merge(forkedResults);
 
-                out.println(runResult.getPrimaryResult().extendedInfo("***"));
+                out.println(runResult.getPrimaryResult().extendedInfo(null));
                 for (Result r : runResult.getSecondaryResults().values()) {
                     out.println(r.extendedInfo(r.getLabel()));
                 }
@@ -159,12 +154,10 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
     public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
         switch (type) {
             case WARMUP:
-                out.print(String.format("# Warmup Iteration %3d (%s in %d %s): ", iteration,
-                        params.getTime(), params.getThreads(), getThreadsString(params.getThreads())));
+                out.print(String.format("# Warmup Iteration %3d: ", iteration));
                 break;
             case MEASUREMENT:
-                out.print(String.format("Iteration %3d (%s in %d %s): ", iteration,
-                        params.getTime(), params.getThreads(), getThreadsString(params.getThreads())));
+                out.print(String.format("Iteration %3d: ", iteration));
                 break;
             default:
                 throw new IllegalStateException("Unknown iteration type: " + type);

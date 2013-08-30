@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.util.Collection;
@@ -74,7 +75,7 @@ public class OpsPerTimeUnit extends Result {
     /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
-        return "ops/" + tuToString(outputTimeUnit);
+        return "ops/" + TimeValue.tuToString(outputTimeUnit);
     }
 
     /** {@inheritDoc} */

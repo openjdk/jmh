@@ -53,7 +53,7 @@ public class TestSampleTimePerOp {
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(2.5, result.getScore());
-        assertEquals("usec/op", result.getScoreUnit());
+        assertEquals("us/op", result.getScoreUnit());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class TestSampleTimePerOp {
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(2.5, result.getScore());
-        assertEquals("usec/op", result.getScoreUnit());
+        assertEquals("us/op", result.getScoreUnit());
     }
 
 }

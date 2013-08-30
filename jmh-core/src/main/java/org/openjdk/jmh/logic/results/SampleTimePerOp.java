@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.BootstrappedStatistics;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 import org.openjdk.jmh.util.internal.Statistics;
@@ -62,7 +63,7 @@ public class SampleTimePerOp extends Result {
     /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
-        return tuToString(outputTimeUnit) + "/op";
+        return TimeValue.tuToString(outputTimeUnit) + "/op";
     }
 
     /** {@inheritDoc} */

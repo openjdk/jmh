@@ -58,7 +58,7 @@ public class TestOpsPerTimeUnit {
 
         OpsPerTimeUnit instanceh = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.HOURS);
         assertEquals(3600000000.0000005D, instanceh.getScore(), 0.0);
-        assertEquals("ops/hour", instanceh.getScoreUnit());
+        assertEquals("ops/hr", instanceh.getScoreUnit());
 
         OpsPerTimeUnit instancem = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MINUTES);
         assertEquals(60000000, instancem.getScore(), 0.0);
@@ -66,19 +66,19 @@ public class TestOpsPerTimeUnit {
 
         OpsPerTimeUnit instance = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
         assertEquals(1000000, instance.getScore(), 0.0);
-        assertEquals("ops/sec", instance.getScoreUnit());
+        assertEquals("ops/s", instance.getScoreUnit());
 
         OpsPerTimeUnit instance2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MILLISECONDS);
         assertEquals(1000, instance2.getScore(), 0.0);
-        assertEquals("ops/msec", instance2.getScoreUnit());
+        assertEquals("ops/ms", instance2.getScoreUnit());
 
         OpsPerTimeUnit instance3 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
         assertEquals(1, instance3.getScore(), 0.0);
-        assertEquals("ops/usec", instance3.getScoreUnit());
+        assertEquals("ops/us", instance3.getScoreUnit());
 
         OpsPerTimeUnit instance4 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.NANOSECONDS);
         assertEquals(0.001, instance4.getScore(), 0.0);
-        assertEquals("ops/nsec", instance4.getScoreUnit());
+        assertEquals("ops/ns", instance4.getScoreUnit());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class TestOpsPerTimeUnit {
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(150.0, result.getScore());
-        assertEquals("ops/msec", result.getScoreUnit());
+        assertEquals("ops/ms", result.getScoreUnit());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class TestOpsPerTimeUnit {
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(100.0, result.getScore());
-        assertEquals("ops/msec", result.getScoreUnit());
+        assertEquals("ops/ms", result.getScoreUnit());
     }
 
     @Test // regression test, check for overflow
@@ -108,7 +108,7 @@ public class TestOpsPerTimeUnit {
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(100000000.0, result.getScore());
-        assertEquals("ops/msec", result.getScoreUnit());
+        assertEquals("ops/ms", result.getScoreUnit());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class TestOpsPerTimeUnit {
         OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals("ops/msec", result.getScoreUnit());
+        assertEquals("ops/ms", result.getScoreUnit());
         assertEquals(300.0, result.getScore());
     }
 
@@ -127,7 +127,7 @@ public class TestOpsPerTimeUnit {
         OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals("ops/msec", result.getScoreUnit());
+        assertEquals("ops/ms", result.getScoreUnit());
         assertEquals(200.0, result.getScore());
     }
 
@@ -137,7 +137,7 @@ public class TestOpsPerTimeUnit {
         OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals("ops/msec", result.getScoreUnit());
+        assertEquals("ops/ms", result.getScoreUnit());
         assertEquals(200000000.0, result.getScore());
     }
 }
