@@ -29,8 +29,8 @@ import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 public class SimpleTest {

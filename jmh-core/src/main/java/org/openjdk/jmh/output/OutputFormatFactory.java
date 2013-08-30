@@ -24,14 +24,13 @@
  */
 package org.openjdk.jmh.output;
 
+import org.openjdk.jmh.link.BinaryLinkClient;
 import org.openjdk.jmh.output.format.CsvFormat;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.PrettyPrintFormat;
 import org.openjdk.jmh.output.format.SilentFormat;
 import org.openjdk.jmh.output.format.TextReportFormat;
-import org.openjdk.jmh.link.BinaryLinkClient;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Proxy;
 
