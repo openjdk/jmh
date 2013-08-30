@@ -33,6 +33,7 @@ import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -107,6 +108,10 @@ public class RunResult implements Serializable {
     }
 
     public static RunResult merge(RunResult... rrs) {
+        return merge(Arrays.asList(rrs));
+    }
+
+    public static RunResult merge(Collection<RunResult> rrs) {
         List<IterationResult> rs = new ArrayList<IterationResult>();
         for (RunResult rr : rrs) {
             if (rr == null) continue;

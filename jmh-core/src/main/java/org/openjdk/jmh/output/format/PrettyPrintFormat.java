@@ -147,11 +147,7 @@ public class PrettyPrintFormat extends AbstractOutputFormat {
             if (forkedResults.size() > 1) {
                 out.println("\"" + key.getUsername() + "\", aggregate over forked runs:");
 
-                List<IterationResult> iResults = new ArrayList<IterationResult>();
-                for (RunResult res : forkedResults) {
-                    iResults.addAll(res.getRawIterationResults());
-                }
-                RunResult runResult = new RunResult(iResults);
+                RunResult runResult = RunResult.merge(forkedResults);
 
                 out.println(runResult.getPrimaryResult().extendedInfo("***"));
                 for (Result r : runResult.getSecondaryResults().values()) {
