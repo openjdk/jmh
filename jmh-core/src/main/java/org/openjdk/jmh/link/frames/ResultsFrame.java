@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.link.frames;
 
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 
 import java.io.Serializable;

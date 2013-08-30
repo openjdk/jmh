@@ -25,7 +25,7 @@
 package org.openjdk.jmh.output.format;
 
 import org.openjdk.jmh.logic.results.IterationResult;
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;

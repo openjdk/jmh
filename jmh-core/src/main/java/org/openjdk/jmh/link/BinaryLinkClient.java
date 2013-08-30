@@ -29,7 +29,7 @@ import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
 

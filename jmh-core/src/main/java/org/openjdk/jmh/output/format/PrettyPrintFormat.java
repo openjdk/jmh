@@ -26,7 +26,7 @@ package org.openjdk.jmh.output.format;
 
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
@@ -35,10 +35,8 @@ import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**

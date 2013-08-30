@@ -25,7 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
 

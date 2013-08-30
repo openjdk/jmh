@@ -22,20 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.logic.results.internal;
+package org.openjdk.jmh.logic.results;
 
-import org.openjdk.jmh.logic.results.Aggregator;
-import org.openjdk.jmh.logic.results.IterationResult;
-import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;

@@ -25,7 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.logic.results.IterationResult;
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;

@@ -25,7 +25,7 @@
 package org.openjdk.jmh;
 
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.internal.RunResult;
+import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
