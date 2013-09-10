@@ -54,29 +54,59 @@ public class BlackholePipelineBench {
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1)
-    public void test_1(BlackHole bh) {
-        doTest(bh, 1);
+    public void test_Obj_1(BlackHole bh) {
+        doTestObj(bh, 1);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(10)
-    public void test_10(BlackHole bh) {
-        doTest(bh, 10);
+    public void test_Obj_10(BlackHole bh) {
+        doTestObj(bh, 10);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(100)
-    public void test_100(BlackHole bh) {
-        doTest(bh, 100);
+    public void test_Obj_100(BlackHole bh) {
+        doTestObj(bh, 100);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1000)
-    public void test_1000(BlackHole bh) {
-        doTest(bh, 1000);
+    public void test_Obj_1000(BlackHole bh) {
+        doTestObj(bh, 1000);
     }
 
-    public void doTest(BlackHole bh, int count) {
+    @GenerateMicroBenchmark
+    @OperationsPerInvocation(1)
+    public void test_Int_1(BlackHole bh) {
+        doTestInt(bh, 1);
+    }
+
+    @GenerateMicroBenchmark
+    @OperationsPerInvocation(10)
+    public void test_Int_10(BlackHole bh) {
+        doTestInt(bh, 10);
+    }
+
+    @GenerateMicroBenchmark
+    @OperationsPerInvocation(100)
+    public void test_Int_100(BlackHole bh) {
+        doTestInt(bh, 100);
+    }
+
+    @GenerateMicroBenchmark
+    @OperationsPerInvocation(1000)
+    public void test_Int_1000(BlackHole bh) {
+        doTestInt(bh, 1000);
+    }
+
+    public void doTestObj(BlackHole bh, int count) {
+        for (int c = 0; c < count; c++) {
+            bh.consume(data[c]);
+        }
+    }
+
+    public void doTestInt(BlackHole bh, int count) {
         for (int c = 0; c < count; c++) {
             bh.consume(data[c].intValue());
         }
