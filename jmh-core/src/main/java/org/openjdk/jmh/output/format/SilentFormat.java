@@ -76,4 +76,13 @@ public class SilentFormat extends AbstractOutputFormat {
 
     }
 
+    @Override
+    public void println(String s) {
+
+    }
+
+    @Override
+    public void verbosePrintln(String s) {
+
+    }
 }
