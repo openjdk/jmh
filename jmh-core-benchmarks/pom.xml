@@ -107,7 +107,7 @@ questions.
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jmh.benchmarks.MainValidation</mainClass>
+                                    <mainClass>org.openjdk.jmh.MainValidation</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
