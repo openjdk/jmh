@@ -26,39 +26,30 @@ package org.openjdk.jmh.benchmarks;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-public class NanotimeBench {
+@BenchmarkMode(Mode.AverageTime)
+@Warmup(iterations = 5, time = 1)
+@Measurement(iterations = 5, time = 1)
+public class NanoTimerBench {
 
     private long last;
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public long latency_avg() {
+    public long latency() {
         return System.nanoTime();
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public long granularity_avg() {
-        long lst = last;
-        long cur;
-        do {
-            cur = System.nanoTime();
-        } while (cur == lst);
-        last = cur;
-        return cur;
-    }
-
-    @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.SampleTime)
     public long granularity() {
         long lst = last;
         long cur;
@@ -68,5 +59,4 @@ public class NanotimeBench {
         last = cur;
         return cur;
     }
-
 }

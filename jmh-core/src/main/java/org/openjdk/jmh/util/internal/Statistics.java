@@ -79,6 +79,11 @@ public class Statistics implements Serializable {
         return interval;
     }
 
+    public double getMeanError(double alpha) {
+        double ip = getStudentT(1 - alpha / 2.0, getN() - 1);
+        return ip * (getStandardDeviation() / Math.sqrt(getN()));
+    }
+
     private double getStudentT(double alpha, int n) {
         if (n <= 1) throw new IllegalStateException();
 

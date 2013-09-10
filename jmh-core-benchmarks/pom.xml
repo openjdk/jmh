@@ -81,6 +81,7 @@ questions.
                 <version>2.0</version>
                 <executions>
                     <execution>
+                        <id>microbenchmarks</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -91,6 +92,22 @@ questions.
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jmh.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>validation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>validation</finalName>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jmh.benchmarks.MainValidation</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
