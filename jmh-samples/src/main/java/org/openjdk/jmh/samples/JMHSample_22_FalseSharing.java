@@ -26,17 +26,15 @@ package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
@@ -51,118 +49,126 @@ public class JMHSample_22_FalseSharing {
      * cache line. This can yield significant (artificial) slowdowns.
      *
      * JMH helps you to alleviate this: @States are automatically padded.
-     * This padding does not extend to any referenced objects though,
+     * This padding does not extend to the State internals though,
      * as we will see in this example. You have to take care of this on
      * your own.
      */
 
     /*
-     * Suppose we have the array of integer counters:
+     * Suppose we have two threads:
+     *   a) innocious reader which blindly reads its own field
+     *   b) furious writer which updates its own field
+     *
+     * Because of the false sharing, both reader and writer will experience
+     * penalties.
      */
 
-    @State(Scope.Benchmark)
-    public static class Shared {
-        int[] cs;
+    @State(Scope.Group)
+    public static class StateDense {
+        int readOnly;
+        int writeOnly;
+    }
 
-        @Setup
-        public void prepare() {
-            cs = new int[4096]; // should be enough
-        }
+    @GenerateMicroBenchmark
+    @Group("dense")
+    public int reader(StateDense s) {
+        return s.readOnly;
+    }
+
+    @GenerateMicroBenchmark
+    @Group("dense")
+    public void writer(StateDense s) {
+        s.writeOnly++;
     }
 
     /*
-     * ...and each thread gets it's own index in the shared array, either
-     * dense index, or sparse index:
+     * We can try to alleviate some of the effects with padding:
      */
 
-    @State(Scope.Thread)
-    public static class LocalDense {
-        private static final AtomicInteger COUNTER = new AtomicInteger();
-        private int index = COUNTER.incrementAndGet();
+    @State(Scope.Group)
+    public static class StatePadded {
+        int readOnly;
+        int p01, p02, p03, p04, p05, p06, p07, p08;
+        int p11, p12, p13, p14, p15, p16, p17, p18;
+        int writeOnly;
+        int q01, q02, q03, q04, q05, q06, q07, q08;
+        int q11, q12, q13, q14, q15, q16, q17, q18;
     }
 
-    @State(Scope.Thread)
-    public static class LocalSparse {
-        private static final int CACHE_LINE_SIZE = 64;
-        private static final AtomicInteger COUNTER = new AtomicInteger();
-        private int index = COUNTER.addAndGet(CACHE_LINE_SIZE);
+    @GenerateMicroBenchmark
+    @Group("padded")
+    public int reader(StatePadded s) {
+        return s.readOnly;
+    }
+
+    @GenerateMicroBenchmark
+    @Group("padded")
+    public void writer(StatePadded s) {
+        s.writeOnly++;
     }
 
     /*
-     * Then, running with different amount of threads, we can clearly see
-     * the difference between dense and sparse cases:
+     * Or with the class hierarchy trick:
      */
 
-    @GenerateMicroBenchmark
-    @Threads(1)
-    public void test_dense_01(Shared s, LocalDense l) {
-        s.cs[l.index]++;
+    public static class StateHierarchy_1 {
+        int readOnly;
+    }
+
+    public static class StateHierarchy_2 extends StateHierarchy_1 {
+        int p01, p02, p03, p04, p05, p06, p07, p08;
+        int p11, p12, p13, p14, p15, p16, p17, p18;
+    }
+
+    public static class StateHierarchy_3 extends StateHierarchy_2 {
+        int writeOnly;
+    }
+
+    public static class StateHierarchy_4 extends StateHierarchy_3 {
+        int q01, q02, q03, q04, q05, q06, q07, q08;
+        int q11, q12, q13, q14, q15, q16, q17, q18;
+    }
+
+    @State(Scope.Group)
+    public static class StateHierarchy extends StateHierarchy_4 {
     }
 
     @GenerateMicroBenchmark
-    @Threads(2)
-    public void test_dense_02(Shared s, LocalDense l) {
-        s.cs[l.index]++;
+    @Group("hierarchy")
+    public int reader(StateHierarchy s) {
+        return s.readOnly;
     }
 
     @GenerateMicroBenchmark
-    @Threads(4)
-    public void test_dense_04(Shared s, LocalDense l) {
-        s.cs[l.index]++;
+    @Group("hierarchy")
+    public void writer(StateHierarchy s) {
+        s.writeOnly++;
+    }
+
+    /*
+     * Or with @Contended (since JDK 8):
+     *  Uncomment the annotation if building with JDK 8.
+     *  Remember to flip -XX:-RestrictContended to enable.
+     */
+
+    @State(Scope.Group)
+    public static class StateContended {
+        int readOnly;
+
+//        @sun.misc.Contended
+        int writeOnly;
     }
 
     @GenerateMicroBenchmark
-    @Threads(8)
-    public void test_dense_08(Shared s, LocalDense l) {
-        s.cs[l.index]++;
+    @Group("contended")
+    public int reader(StateContended s) {
+        return s.readOnly;
     }
 
     @GenerateMicroBenchmark
-    @Threads(16)
-    public void test_dense_16(Shared s, LocalDense l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(32)
-    public void test_dense_32(Shared s, LocalDense l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(1)
-    public void test_sparse_01(Shared s, LocalSparse l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(2)
-    public void test_sparse_02(Shared s, LocalSparse l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(4)
-    public void test_sparse_04(Shared s, LocalSparse l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(8)
-    public void test_sparse_08(Shared s, LocalSparse l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(16)
-    public void test_sparse_16(Shared s, LocalSparse l) {
-        s.cs[l.index]++;
-    }
-
-    @GenerateMicroBenchmark
-    @Threads(32)
-    public void test_sparse_32(Shared s, LocalSparse l) {
-        s.cs[l.index]++;
+    @Group("contended")
+    public void writer(StateContended s) {
+        s.writeOnly++;
     }
 
     /*
