@@ -70,9 +70,24 @@ public class Runner extends BaseRunner {
 
     private final MicroBenchmarkList list;
 
-    public Runner(Options options) {
-        super(options, createOutputFormat(options));
+    /**
+     * THIS IS AN EXPERIMENTAL API.
+     *
+     * Create runner with the custom OutputFormat
+     * @param options options to use
+     * @param format OutputFormat to use
+     */
+    public Runner(Options options, OutputFormat format) {
+        super(options, format);
         this.list = MicroBenchmarkList.defaultList();
+    }
+
+    /**
+     * Create Runner with the given options.
+     * @param options options to use.
+     */
+    public Runner(Options options) {
+        this(options, createOutputFormat(options));
     }
 
     /** Setup helper method, creates OutputFormat according to argv options. */
