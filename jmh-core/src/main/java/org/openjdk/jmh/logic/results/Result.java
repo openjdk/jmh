@@ -93,7 +93,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         if (statistics.getN() > 2) {
             double[] interval95 = statistics.getConfidenceInterval(0.05);
             double[] interval99 = statistics.getConfidenceInterval(0.01);
-            pw.println(String.format("Result%s: %.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s",
+            pw.println(String.format("Result %s: %.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s",
                     (label == null) ? "" : "\"" + label + "\"",
                     (interval95[0] + interval95[1]) / 2, (interval95[1] - interval95[0]) / 2, (interval99[1] - interval99[0]) / 2,
                     getScoreUnit()));
