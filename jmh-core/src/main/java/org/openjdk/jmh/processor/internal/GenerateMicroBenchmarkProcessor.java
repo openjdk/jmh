@@ -200,9 +200,16 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             Group groupAnn = method.getAnnotation(Group.class);
             String groupName = (groupAnn != null) ? groupAnn.value() : method.getSimpleName().toString();
+
+            if (!checkJavaIdentifier(groupName)) {
+                processingEnv.getMessager().printMessage(Kind.ERROR,
+                        "Group name should be the legal Java identifier. (" + clazz + ")", method);
+                return null;
+            }
+
             MethodGroup group = result.get(groupName);
             if (group == null) {
-                group = new MethodGroup(convertToJavaIdentfier(groupName));
+                group = new MethodGroup(groupName);
                 result.put(groupName, group);
             }
 
@@ -242,17 +249,14 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return new BenchmarkInfo(clazz.getQualifiedName().toString(), generatedPackageName, generatedClassName, result);
     }
 
-    public static String convertToJavaIdentfier(String id) {
-        char[] result = new char[id.length()];
-        for (int i = 0; i < result.length; i++) {
+    public static boolean checkJavaIdentifier(String id) {
+        for (int i = 0; i < id.length(); i++) {
             char c = id.charAt(i);
-            if (Character.isJavaIdentifierPart(c)) {
-                result[i] = c;
-            } else {
-                result[i] = '_';
+            if (!Character.isJavaIdentifierPart(c)) {
+                return false;
             }
         }
-        return String.valueOf(result);
+        return true;
     }
 
     /**

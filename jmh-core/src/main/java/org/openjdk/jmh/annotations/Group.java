@@ -42,6 +42,7 @@ public @interface Group {
 
     /**
      * Group tag.
+     * Should be valid Java identifier.
      */
     String value() default "";
 }
