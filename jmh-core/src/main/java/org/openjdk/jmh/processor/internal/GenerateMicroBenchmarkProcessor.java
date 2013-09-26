@@ -507,6 +507,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             if (operationsPerInvocation != null && operationsPerInvocation.value() > 1) {
                 ann = guardedSet(ann, operationsPerInvocation);
             }
+
+            ann = guardedSet(ann, method.getEnclosingElement().getAnnotation(OperationsPerInvocation.class));
         }
         return (ann != null) ? ann.value() : 1;
     }
