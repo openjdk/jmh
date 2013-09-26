@@ -661,12 +661,13 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         methodProlog(writer, methodGroup);
 
+        boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int threadTally = 0;
 
         for (Element method : methodGroup.methods()) {
 
             // determine the sibling bounds
-            int threads = Math.max(1, methodGroup.getMethodThreads(method));
+            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -717,7 +718,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = (methodGroup.methods().size() == 1) ? ResultRole.PRIMARY : ResultRole.BOTH;
+            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
             writer.println(ident(3) + "return new OpsPerTimeUnit(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.operations, res.time, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
@@ -752,11 +753,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         methodProlog(writer, methodGroup);
 
+        boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int threadTally = 0;
         for (Element method : methodGroup.methods()) {
 
             // determine the sibling bounds
-            int threads = Math.max(1, methodGroup.getMethodThreads(method));
+            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -806,7 +808,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = (methodGroup.methods().size() == 1) ? ResultRole.PRIMARY : ResultRole.BOTH;
+            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
             writer.println(ident(3) + "return new AverageTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.operations, res.time, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
@@ -862,10 +864,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         methodProlog(writer, methodGroup);
 
+        boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int threadTally = 0;
         for (Element method : methodGroup.methods()) {
             // determine the sibling bounds
-            int threads = Math.max(1, methodGroup.getMethodThreads(method));
+            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -954,7 +957,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             writer.println("        } while(!control.isDone);");
 
-            ResultRole mode = (methodGroup.methods().size() == 1) ? ResultRole.PRIMARY : ResultRole.BOTH;
+            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
             writer.println("        return new SampleTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println("    }");
             writer.println();
@@ -968,11 +971,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         writer.println(ident(2) + "long realTime = 0;");
 
+        boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int threadTally = 0;
         for (Element method : methodGroup.methods()) {
 
             // determine the sibling bounds
-            int threads = Math.max(1, methodGroup.getMethodThreads(method));
+            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
             int loId = threadTally;
             int hiId = threadTally + threads;
             threadTally = hiId;
@@ -991,7 +995,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = (methodGroup.methods().size() == 1) ? ResultRole.PRIMARY : ResultRole.BOTH;
+            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
             writer.println(ident(3) + "return new SingleShotTime(ResultRole." + mode + ",\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
