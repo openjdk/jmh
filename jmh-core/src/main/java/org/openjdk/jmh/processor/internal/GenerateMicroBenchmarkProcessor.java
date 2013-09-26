@@ -586,11 +586,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
     private static int getThreads(Element method) {
         Threads tAnnotation = method.getAnnotation(Threads.class);
-        if (tAnnotation != null && tAnnotation.value() >= 0) {
+        if (tAnnotation != null && tAnnotation.value() > Integer.MIN_VALUE) {
             return tAnnotation.value();
         }
         tAnnotation = method.getEnclosingElement().getAnnotation(Threads.class);
-        if (tAnnotation != null && tAnnotation.value() >= 0) {
+        if (tAnnotation != null && tAnnotation.value() > Integer.MIN_VALUE) {
             return tAnnotation.value();
         }
         return 1;

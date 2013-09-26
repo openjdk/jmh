@@ -30,6 +30,7 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 import org.kohsuke.args4j.spi.Parameters;
 import org.kohsuke.args4j.spi.Setter;
+import org.openjdk.jmh.annotations.Threads;
 
 /**
  * OptionHandler for the -t/--threads option. Will parse the special value "max" and assign
@@ -54,7 +55,7 @@ public class ThreadsOptionHandler extends IntOptionHandler {
     @Override
     public int parseArguments(Parameters params) throws CmdLineException {
         if ("max".equals(params.getParameter(0))) {
-            setter.addValue(0);
+            setter.addValue(Threads.MAX);
             return 1;
         } else {
             return super.parseArguments(params);

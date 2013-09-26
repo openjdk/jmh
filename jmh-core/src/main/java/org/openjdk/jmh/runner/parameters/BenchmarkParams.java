@@ -41,7 +41,7 @@ public class BenchmarkParams implements Serializable {
         boolean shouldSynchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
 
         int threads = getThreads(options, method);
-        if (threads == 0) {
+        if (threads == Threads.MAX) {
             threads = Runtime.getRuntime().availableProcessors();
         }
 
@@ -107,8 +107,9 @@ public class BenchmarkParams implements Serializable {
 
     private static int getThreads(Options options, Method method) {
         Threads threadsAnn = method.getAnnotation(Threads.class);
-        return getInteger(options.getThreads(), (threadsAnn == null) ? -1 : threadsAnn.value(), Defaults.THREADS);
-
+        return options.getThreads() > Integer.MIN_VALUE ?
+                options.getThreads() :
+                (threadsAnn != null ? threadsAnn.value() : Defaults.THREADS);
     }
 
     private final boolean synchIterations;

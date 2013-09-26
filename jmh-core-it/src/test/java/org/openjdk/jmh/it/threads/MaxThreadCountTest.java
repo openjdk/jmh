@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
  */
 @BenchmarkMode(Mode.All)
 @State(Scope.Benchmark)
-public class ZeroThreadCountTest {
+public class MaxThreadCountTest {
 
     private Set<Thread> threads = Collections.synchronizedSet(new HashSet<Thread>());
 
@@ -66,7 +66,7 @@ public class ZeroThreadCountTest {
     @GenerateMicroBenchmark
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Warmup(iterations = 0)
-    @Threads(0)
+    @Threads(Threads.MAX)
     public void test1() {
         threads.add(Thread.currentThread());
         Fixtures.work();
@@ -87,7 +87,7 @@ public class ZeroThreadCountTest {
 
     @Test
     public void invokeCLI_2() {
-        Main.testMain(Fixtures.getTestMask(this.getClass())+ ".*test2" + " -foe -t 0");
+        Main.testMain(Fixtures.getTestMask(this.getClass())+ ".*test2" + " -foe -t max");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class ZeroThreadCountTest {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass())+".*test2")
                 .failOnError(true)
-                .threads(0)
+                .threads(Threads.MAX)
                 .build();
         new Runner(opt).run();
     }

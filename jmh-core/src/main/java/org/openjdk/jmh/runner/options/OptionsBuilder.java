@@ -190,7 +190,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private int threads = -1;
+    private int threads = Integer.MIN_VALUE;
 
     @Override
     public ChainedOptionsBuilder threads(int count) {

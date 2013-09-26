@@ -42,6 +42,12 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Threads {
 
+    /**
+     * The magic value for MAX threads.
+     *  This means Runtime.getRuntime().availableProcessors() threads.
+     */
+    public static int MAX = -1;
+
     /** Amount of threads */
     int value() default 1;
 

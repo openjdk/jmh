@@ -89,8 +89,8 @@ public class CommandLineOptions implements Options {
     @Option(name = "-bm", aliases = {"--mode"}, multiValued = false, metaVar = "MODE", usage = "Benchmark mode", handler = BenchmarkModeTypeOptionHandler.class)
     protected List<Mode> benchMode = null;
 
-    @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" or 0 will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
-    protected int threads = -1;
+    @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
+    protected int threads = Integer.MIN_VALUE;
 
     @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work? Default is " + Defaults.SHOULD_SYNCH_ITERATIONS, handler = BooleanOptionHandler.class)
     protected Boolean synchIterations = null; // true

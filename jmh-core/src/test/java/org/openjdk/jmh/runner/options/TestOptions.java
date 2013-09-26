@@ -55,7 +55,7 @@ public class TestOptions {
     public void testThreadsMax() throws Exception {
         String[] argv = {"-t", "max"};
         CommandLineOptions options = getOptions(argv);
-        assertEquals(0, options.getThreads());
+        assertEquals(Threads.MAX, options.getThreads());
     }
 
     @Test
