@@ -185,14 +185,14 @@ public class Statistics implements Serializable {
     }
 
     public double getPercentile(double rank) {
-        if (getN() == 0) {
-            return Double.NaN;
-        }
-
         return getPercentile(getValues(), rank);
     }
 
     static double getPercentile(double[] values, double rank) {
+        if (values.length == 0) {
+            return Double.NaN;
+        }
+
         Arrays.sort(values);
 
         int n1 = (int) Math.floor(rank / 100.0D * values.length);
