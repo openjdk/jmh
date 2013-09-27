@@ -936,7 +936,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        SampleBuffer buffer = new SampleBuffer();");
             writer.println("        long realTime = 0;");
             writer.println("        long rnd = System.nanoTime();");
-            writer.println("        long rndMask = 1;");
+            writer.println("        long rndMask = 0;");
             writer.println("        long time = 0;");
             writer.println("        do {");
 
