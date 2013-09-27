@@ -129,7 +129,7 @@ public class SampleTimePerOp extends Result {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Run result \"").append(label).append("\": \n");
+        sb.append("Run result ").append((label == null) ? "" : "\"" + label + "\"").append(": \n");
         sb.append("  samples = ").append(stats.getN()).append("\n");
 
         if (stats.getN() > 2) {
