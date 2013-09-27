@@ -26,7 +26,7 @@ package org.openjdk.jmh.util.internal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -189,10 +189,14 @@ public class Statistics implements Serializable {
             return Double.NaN;
         }
 
-        Collections.sort(values);
+        return getPercentile(getValues(), rank);
+    }
 
-        int n1 = (int) Math.floor(rank / 100.0D * getN());
-        int n2 = (int) Math.ceil(rank / 100.D * getN());
+    static double getPercentile(double[] values, double rank) {
+        Arrays.sort(values);
+
+        int n1 = (int) Math.floor(rank / 100.0D * values.length);
+        int n2 = (int) Math.ceil(rank / 100.D * values.length);
 
         if (n1 < 0) {
             n1 = 0;
@@ -202,16 +206,16 @@ public class Statistics implements Serializable {
             n2 = 0;
         }
 
-        if (n1 >= getN()) {
-            n1 = getN() - 1;
+        if (n1 >= values.length) {
+            n1 = values.length - 1;
         }
 
-        if (n2 >= getN()) {
-            n2 = getN() - 1;
+        if (n2 >= values.length) {
+            n2 = values.length - 1;
         }
 
-        double v1 = values.get(n1);
-        double v2 = values.get(n2);
+        double v1 = values[n1];
+        double v2 = values[n2];
 
         return v1 + (v2 - v1) / 2;
     }

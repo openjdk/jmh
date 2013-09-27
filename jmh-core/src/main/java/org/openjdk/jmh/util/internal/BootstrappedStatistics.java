@@ -68,8 +68,7 @@ public class BootstrappedStatistics extends Statistics {
             for (int i = 0; i < values.length; i++) {
                 newValues[i] = values[rnd.nextInt(values.length)];
             }
-            Statistics s = new Statistics(newValues);
-            r.addValue(s.getPercentile(p));
+            r.addValue(Statistics.getPercentile(newValues, p));
         }
 
         return r;
