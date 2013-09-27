@@ -41,7 +41,7 @@ public class SampleBuffer implements Serializable {
     private boolean full;
 
     public SampleBuffer() {
-        this(10000);
+        this(1000);
     }
 
     public SampleBuffer(int size) {
