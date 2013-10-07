@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -64,6 +65,7 @@ public class WarmupIterationCountCmdTest {
 
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.All)
+    @Fork(1)
     public void test() {
         Fixtures.work();
     }

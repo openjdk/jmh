@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.Runner;
@@ -49,6 +50,7 @@ public class SingleShotTest {
     private static final AtomicInteger test2executed = new AtomicInteger();
 
     @GenerateMicroBenchmark
+    @Fork(1)
     public void test1() {
         Fixtures.work();
         Assert.assertEquals(1, test1executed.incrementAndGet());
@@ -56,6 +58,7 @@ public class SingleShotTest {
     }
 
     @GenerateMicroBenchmark
+    @Fork(1)
     public void test2() {
         Fixtures.work();
         Assert.assertEquals(1, test2executed.incrementAndGet());

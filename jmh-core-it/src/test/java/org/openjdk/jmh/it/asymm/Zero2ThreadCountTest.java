@@ -28,6 +28,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Measurement;
@@ -52,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 0)
 @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
+@Fork(1)
 public class Zero2ThreadCountTest {
 
     private Set<Thread> test1threads = Collections.synchronizedSet(new HashSet<Thread>());

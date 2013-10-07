@@ -28,6 +28,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
@@ -66,6 +67,7 @@ public class MaxThreadCountTest {
     @GenerateMicroBenchmark
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Warmup(iterations = 0)
+    @Fork(1)
     @Threads(Threads.MAX)
     public void test1() {
         threads.add(Thread.currentThread());
@@ -75,6 +77,7 @@ public class MaxThreadCountTest {
     @GenerateMicroBenchmark
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Warmup(iterations = 0)
+    @Fork(1)
     public void test2() {
         threads.add(Thread.currentThread());
         Fixtures.work();
