@@ -77,7 +77,7 @@ public class BenchmarkParams implements Serializable {
                     timeValue = Defaults.WARMUP_TIME;
                 }
             }
-            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_COUNT), timeValue, threads);
+            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_ITERATION_COUNT), timeValue, threads);
         }
     }
 
@@ -101,7 +101,7 @@ public class BenchmarkParams implements Serializable {
                 }
             }
             return new IterationParams(
-                    getInteger(options.getIterations(), iters, Defaults.ITERATION_COUNT), timeValue, threads);
+                    getInteger(options.getIterations(), iters, Defaults.MEASUREMENT_ITERATION_COUNT), timeValue, threads);
         }
     }
 

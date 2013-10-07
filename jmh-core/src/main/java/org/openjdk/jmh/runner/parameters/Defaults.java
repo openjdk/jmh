@@ -37,23 +37,21 @@ public class Defaults {
     public static final List<String> TRUE_VALUES  = Collections.unmodifiableList(Arrays.asList("true", "on", "yes"));
     public static final List<String> FALSE_VALUES = Collections.unmodifiableList(Arrays.asList("false", "off", "no"));
 
-    //--- has annotation
-    public static final int ITERATION_TIME_SECS = 5;  // seconds
-    public static final int ITERATION_COUNT = 20;
+    public static final int MEASUREMENT_TIME_SECS = 1;
+    public static final int MEASUREMENT_ITERATION_COUNT = 20;
     public static final int SINGLE_SHOT_ITERATION_COUNT = 1;
 
-    public static final int WARMUP_TIME_SECS = 3;     // seconds
-    public static final int WARMUP_COUNT = 5;
+    public static final int WARMUP_TIME_SECS = 1;
+    public static final int WARMUP_ITERATION_COUNT = 20;
     public static final int SINGLE_SHOT_WARMUP_COUNT = 0;
 
     public static final TimeValue WARMUP_TIME = new TimeValue(WARMUP_TIME_SECS, TimeUnit.SECONDS);
-    public static final TimeValue ITERATION_TIME = new TimeValue(ITERATION_TIME_SECS, TimeUnit.SECONDS);
+    public static final TimeValue ITERATION_TIME = new TimeValue(MEASUREMENT_TIME_SECS, TimeUnit.SECONDS);
 
     public static final int THREADS = 1;
 
-    public static final int DEFAULT_FORK_TIMES = 1;
+    public static final int DEFAULT_FORK_TIMES = 10;
 
-//--- no annotation
     public static final boolean SHOULD_SYNCH_ITERATIONS = true;
 
 }

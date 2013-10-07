@@ -77,7 +77,7 @@ public class CommandLineOptions implements Options {
     @Option(name = "-i", aliases = {"--iterations"}, metaVar = "INT", usage = "Number of iterations.")
     protected int iterations = -1;
 
-    @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms; defaults to " + Defaults.ITERATION_TIME_SECS + "s", handler = TimeValueOptionHandler.class)
+    @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms; defaults to " + Defaults.MEASUREMENT_TIME_SECS + "s", handler = TimeValueOptionHandler.class)
     protected TimeValue runTime = null;
 
     @Option(name = "-wi", aliases = {"--warmupiterations"}, metaVar = "INT", usage = "Number of warmup iterations to run.")
