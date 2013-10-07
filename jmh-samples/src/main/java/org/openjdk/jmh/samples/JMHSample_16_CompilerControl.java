@@ -108,8 +108,8 @@ public class JMHSample_16_CompilerControl {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_16.*" -wi 1 -i 3 -r 1s
-     *    (we requested 1 warmup iterations, 3 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_16.*" -wi 1 -i 3 -f 1
+     *    (we requested 1 warmup iterations, 3 iterations, single fork)
      *
      * Note the performance of the baseline, blank, and inline methods are the same.
      * dontinline differs a bit, because we are making the proper call.

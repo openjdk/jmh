@@ -113,7 +113,7 @@ public class JMHSample_21_ConsumeCPU {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_21.*" -w 1 -r 1 -i 5
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_21.*" -w 1 -i 5 -f 1
      *
      * Note the single token is just a few cycles, and the more tokens
      * you request, then more work is spent (almost linerarly)

@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -50,6 +51,7 @@ public class JMHSample_20_Annotations {
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Fork(1)
     public double measure() {
         return Math.log(x1);
     }

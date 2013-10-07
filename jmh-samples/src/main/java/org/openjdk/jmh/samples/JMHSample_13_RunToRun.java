@@ -93,8 +93,8 @@ public class JMHSample_13_RunToRun {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_13.*" -wi 0 -i 3 -r 1s
-     *    (we requested no warmup, 3 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_13.*" -wi 0 -i 3
+     *    (we requested no warmup, 3 measurement iterations)
      *
      * Note the baseline is random within [0..1000] msec; and both forked runs
      * are estimating the average 500 msec with some confidence.

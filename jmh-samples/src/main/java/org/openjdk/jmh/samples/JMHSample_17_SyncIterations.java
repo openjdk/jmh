@@ -84,8 +84,8 @@ public class JMHSample_17_SyncIterations {
      * You can run this test with:
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_17.*" \
-     *        -i 20 -r 1s -wi 1 -t ${CPU*16} -si {true|false}
-     *    (we requested 1 warmup iterations, 20 iterations, 1 sec each,
+     *        -i 20 -wi 1 -f 1 -t ${CPU*16} -si {true|false}
+     *    (we requested 1 warmup iterations, 20 iterations, single fork,
      *     lots of threads, and changeable "synchronize iterations" option)
      *
      * Note the performance of -si false version is more flaky, even

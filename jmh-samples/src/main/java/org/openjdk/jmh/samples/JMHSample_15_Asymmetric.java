@@ -90,8 +90,8 @@ public class JMHSample_15_Asymmetric {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_15.*" -i 5 -r 1s
-     *    (we requested 5 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_15.*" -i 5 -f 1
+     *    (we requested 5 iterations, single fork)
      *
      * You will have the distinct metrics for inc() and get() from this run.
      */

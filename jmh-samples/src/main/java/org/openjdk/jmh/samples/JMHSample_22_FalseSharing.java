@@ -176,7 +176,7 @@ public class JMHSample_22_FalseSharing {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_22.*"
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_22.*" -f 1
      *
      * Note the slowdowns.
      */

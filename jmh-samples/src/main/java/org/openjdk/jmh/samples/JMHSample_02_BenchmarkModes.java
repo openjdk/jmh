@@ -123,8 +123,8 @@ public class JMHSample_02_BenchmarkModes {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_02.*" -i 5 -r 1s
-     *    (we requested 5 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_02.*" -i 5 -f 1
+     *    (we requested 5 iterations, single fork)
      *
      * You are expected to see the different run modes for the same benchmark.
      * Note the units are different, scores are consistent with each other.

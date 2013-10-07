@@ -50,8 +50,8 @@ public class JMHSample_04_DefaultState {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_04.*" -i 5 -r 1s
-     *    (we requested 5 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_04.*" -i 5 -f 1
+     *    (we requested 5 iterations, single fork)
      *
      * You can see the benchmark runs as usual.
      */

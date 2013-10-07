@@ -90,8 +90,8 @@ public class JMHSample_03_States {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_03.*" -i 5 -r 1s -t 4
-     *    (we requested 5 iterations, 1 sec each, with 4 threads)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_03.*" -i 5 -t 4 -f 1
+     *    (we requested 5 iterations, with 4 threads, single fork)
      *
      * You are expected to see the drastic difference in shared and unshared cases,
      * because you either contend for single memory location, or not. This effect

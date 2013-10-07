@@ -124,8 +124,8 @@ public class JMHSample_11_Loops {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_11.*" -i 5 -r 1s
-     *    (we requested 5 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_11.*" -i 5 -f 1
+     *    (we requested 5 iterations, single fork)
      *
      * You might notice the larger the repetitions count, the lower the "perceived"
      * cost of the operation being measured. Up to the point we do each addition with 1/20 ns,

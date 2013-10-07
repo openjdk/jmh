@@ -156,8 +156,8 @@ public class JMHSample_12_Forking {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_12.*" -i 5 -r 1s
-     *    (we requested 5 iterations, 1 sec each)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_12.*" -i 5
+     *    (we requested 5 iterations)
      *
      * Note that C1 is faster, C2 is slower, but the C1 is slow again! This is because
      * the profiles for C1 and C2 had merged together. Notice how flawless the measurement

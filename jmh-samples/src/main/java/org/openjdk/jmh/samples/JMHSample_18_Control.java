@@ -72,8 +72,8 @@ public class JMHSample_18_Control {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_18.*" -wi 1 -i 5 -r 1s -t 2
-     *    (we requested 1 warmup iterations, 5 iterations, 1 sec each, and two threads)
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_18.*" -wi 1 -i 5 -t 2 -f 1
+     *    (we requested 1 warmup iterations, 5 iterations, 2 threads, and single fork)
      */
 
 }
