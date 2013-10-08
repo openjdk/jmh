@@ -71,10 +71,10 @@ public class BenchmarkParams implements Serializable {
         } else {
             TimeValue timeValue = options.getWarmupTime();
             if (timeValue == null || timeValue.getTime() == -1) {
-                if (warAnn != null) {
-                    timeValue = new TimeValue(warAnn.time(), warAnn.timeUnit());
-                } else {
+                if (warAnn == null || warAnn.time() == -1) {
                     timeValue = Defaults.WARMUP_TIME;
+                } else {
+                    timeValue = new TimeValue(warAnn.time(), warAnn.timeUnit());
                 }
             }
             return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_ITERATION_COUNT), timeValue, threads);
@@ -94,10 +94,10 @@ public class BenchmarkParams implements Serializable {
         } else {
             TimeValue timeValue = options.getRuntime();
             if (timeValue == null || timeValue.getTime() == -1) {
-                if (meAnn != null) {
-                    timeValue = new TimeValue(meAnn.time(), meAnn.timeUnit());
-                } else {
+                if (meAnn == null || meAnn.time() == -1) {
                     timeValue = Defaults.ITERATION_TIME;
+                } else {
+                    timeValue = new TimeValue(meAnn.time(), meAnn.timeUnit());
                 }
             }
             return new IterationParams(

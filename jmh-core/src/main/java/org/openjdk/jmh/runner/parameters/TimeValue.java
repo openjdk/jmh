@@ -70,6 +70,9 @@ public class TimeValue implements Serializable {
     private final TimeUnit timeUnit;
 
     public TimeValue(long time, TimeUnit timeUnit) {
+        if (time < 0) {
+            throw new IllegalArgumentException("Time should be greater or equal to zero: " + time);
+        }
         this.time = time;
         this.timeUnit = timeUnit;
     }
