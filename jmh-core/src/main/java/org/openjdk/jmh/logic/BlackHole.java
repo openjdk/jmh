@@ -210,7 +210,7 @@ public class BlackHole extends BlackHoleL4 {
         long tlr = this.tlr;
         long tlrMask = this.tlrMask;
 
-        this.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        this.tlr = (tlr * 6364136223846793005L + 1442695040888963407L);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.tlrMask = (tlrMask << 1) + 1;
@@ -228,7 +228,7 @@ public class BlackHole extends BlackHoleL4 {
         long tlr = this.tlr;
         long tlrMask = this.tlrMask;
 
-        this.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        this.tlr = (tlr * 6364136223846793005L + 1442695040888963407L);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.tlrMask = (tlrMask << 1) + 1;
