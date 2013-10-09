@@ -213,9 +213,7 @@ public class BlackHole extends BlackHoleL4 {
         this.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            if (tlrMask != 0x7FFFFFFFFFFFFFFFL) {
-                this.tlrMask = (tlrMask << 1) + 1;
-            }
+            this.tlrMask = (tlrMask << 1) + 1;
             this.obj1 = obj;
         }
     }
@@ -233,9 +231,7 @@ public class BlackHole extends BlackHoleL4 {
         this.tlr = (tlr * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            if (tlrMask != 0x7FFFFFFFFFFFFFFFL) {
-                this.tlrMask = (tlrMask << 1) + 1;
-            }
+            this.tlrMask = (tlrMask << 1) + 1;
             this.objs1 = objs;
         }
     }
