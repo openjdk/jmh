@@ -38,10 +38,8 @@ public class SampleBuffer implements Serializable {
     private final int size;
     private int index;
 
-    private boolean full;
-
     public SampleBuffer() {
-        this(1000);
+        this(1024);
     }
 
     public SampleBuffer(int size) {
@@ -50,18 +48,18 @@ public class SampleBuffer implements Serializable {
     }
 
     public boolean add(long sample) {
-        samples[index++] = sample;
-
-        if (index >= size) {
+        if (index == size) {
+            samples[0] = sample;
             index = 0;
-            full = true;
             return true;
+        } else {
+            samples[index++] = sample;
+            return false;
         }
-        return false;
     }
 
     public long[] getSamples() {
-        return full ? Arrays.copyOf(samples, size) : Arrays.copyOf(samples, index);
+        return Arrays.copyOf(samples, index);
     }
 
     public void addAll(long[] samples) {
