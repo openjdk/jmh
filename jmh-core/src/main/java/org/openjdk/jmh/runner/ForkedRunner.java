@@ -25,7 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
 
@@ -51,12 +51,10 @@ public class ForkedRunner extends BaseRunner {
             out.println("Benchmarks: ");
             out.println(benchmark.getUsername());
         }
-        out.startRun();
 
-        RunResult result = runBenchmark(benchmark, true, true);
+        BenchResult result = runBenchmark(benchmark, true, true);
         link.pushResults(benchmark, result);
 
-        out.endRun();
         out.flush();
         out.close();
     }

@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
-import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
@@ -58,7 +58,7 @@ public abstract class BaseRunner {
         this.out = handler;
     }
 
-    RunResult runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
+    BenchResult runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
         MicroBenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
@@ -82,7 +82,7 @@ public abstract class BaseRunner {
         return null;
     }
 
-    protected RunResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
+    protected BenchResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
         List<IterationResult> allResults = new ArrayList<IterationResult>();
 
         out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
@@ -127,7 +127,7 @@ public abstract class BaseRunner {
 
         // only print end-of-run output if we have actual results
         if (!allResults.isEmpty()) {
-            RunResult result = new RunResult(allResults);
+            BenchResult result = new BenchResult(allResults);
             out.endBenchmark(handler.getBenchmark(), result);
             return result;
         } else {

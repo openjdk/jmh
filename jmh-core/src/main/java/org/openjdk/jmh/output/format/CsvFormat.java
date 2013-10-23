@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
@@ -32,6 +33,7 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.PrintStream;
+import java.util.Map;
 
 /**
  * CSV implementation of OutputFormat.
@@ -80,8 +82,8 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endBenchmark(BenchmarkRecord name, RunResult result) {
-        // don't print anything
+    public void endBenchmark(BenchmarkRecord name, BenchResult result) {
+        // do nothing
     }
 
     @Override
@@ -90,8 +92,8 @@ public class CsvFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endRun() {
-        // don't print anything
+    public void endRun(Map<BenchmarkRecord, RunResult> result) {
+        // do nothing
     }
 
     @Override

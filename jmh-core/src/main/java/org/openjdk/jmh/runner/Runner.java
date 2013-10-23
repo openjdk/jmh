@@ -28,6 +28,7 @@ import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.link.BinaryLinkServer;
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -37,6 +38,8 @@ import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -49,6 +52,7 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -238,15 +242,16 @@ public class Runner extends BaseRunner {
         }
         // run microbenchmarks
         //
-        Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
+        Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
         for (BenchmarkRecord benchmark : benchmarks) {
             out.println("# Fork: N/A, test runs in same VM");
-            RunResult result = runBenchmark(benchmark, false, true);
-            results.put(benchmark, RunResult.merge(results.get(benchmark), result));
+            BenchResult result = runBenchmark(benchmark, false, true);
+            results.put(benchmark, result);
         }
-        out.endRun();
 
-        return results;
+        Map<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
+        out.endRun(runResults);
+        return runResults;
     }
 
     private int decideForks(int optionForks, int benchForks) {
@@ -283,24 +288,34 @@ public class Runner extends BaseRunner {
             }
         }
 
-        Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
+        Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
         for (BenchmarkRecord benchmark : embedded) {
             out.println("# Fork: N/A, test runs in same VM");
-            RunResult r = runBenchmark(benchmark, true, true);
-            results.put(benchmark, RunResult.merge(results.get(benchmark), r));
+            BenchResult r = runBenchmark(benchmark, true, true);
+            results.put(benchmark, r);
         }
 
-        Map<BenchmarkRecord, RunResult> separateResults = runSeparate(forked);
-        for (Map.Entry<BenchmarkRecord, RunResult> e : separateResults.entrySet()) {
-            results.put(e.getKey(), RunResult.merge(results.get(e.getKey()), e.getValue()));
+        Multimap<BenchmarkRecord, BenchResult> separateResults = runSeparate(forked);
+        for (BenchmarkRecord k : separateResults.keys()) {
+            Collection<BenchResult> rs = separateResults.get(k);
+            results.putAll(k, rs);
         }
 
-        out.endRun();
-
-        return results;
+        Map<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
+        out.endRun(runResults);
+        return runResults;
     }
 
-    private Map<BenchmarkRecord, RunResult> runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
+    private Map<BenchmarkRecord, RunResult> mergeRunResults(Multimap<BenchmarkRecord, BenchResult> results) {
+        Map<BenchmarkRecord, RunResult> result = new TreeMap<BenchmarkRecord, RunResult>();
+        for (BenchmarkRecord key : results.keys()) {
+            Collection<BenchResult> rs = results.get(key);
+            result.put(key, new RunResult(rs));
+        }
+        return result;
+    }
+
+    private Multimap<BenchmarkRecord, BenchResult> runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
         BinaryLinkServer server = null;
         try {
             server = new BinaryLinkServer(options, out);

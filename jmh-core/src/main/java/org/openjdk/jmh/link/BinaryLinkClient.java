@@ -29,7 +29,7 @@ import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
 
@@ -81,7 +81,7 @@ public final class BinaryLinkClient {
         clientSocket.close();
     }
 
-    public void pushResults(BenchmarkRecord record, RunResult result) throws IOException {
+    public void pushResults(BenchmarkRecord record, BenchResult result) throws IOException {
         oos.writeObject(new ResultsFrame(record, result));
         oos.flush();
     }

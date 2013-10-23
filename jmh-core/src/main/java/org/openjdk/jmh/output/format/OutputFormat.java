@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -31,6 +32,7 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Internal interface for OutputFormat.
@@ -74,7 +76,7 @@ public interface OutputFormat {
      * @param name       benchmark name
      * @param result statistics of the run
      */
-    public void endBenchmark(BenchmarkRecord name, RunResult result);
+    public void endBenchmark(BenchmarkRecord name, BenchResult result);
 
     /**
      * Format for start-of-benchmark output.
@@ -84,7 +86,7 @@ public interface OutputFormat {
     /**
      * Format for end-of-benchmark.
      */
-    public void endRun();
+    public void endRun(Map<BenchmarkRecord, RunResult> result);
 
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 

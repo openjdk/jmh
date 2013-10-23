@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -31,6 +32,7 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.PrintStream;
+import java.util.Map;
 
 /**
  * Silent format, does nothing.
@@ -48,7 +50,7 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endRun() {
+    public void endRun(Map<BenchmarkRecord, RunResult> results) {
     }
 
     @Override
@@ -57,7 +59,7 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endBenchmark(BenchmarkRecord name, RunResult result) {
+    public void endBenchmark(BenchmarkRecord name, BenchResult result) {
 
     }
 

@@ -29,10 +29,12 @@ import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +58,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Accepts the OutputFormat calls from the network and forwards those to given local OutputFormat
@@ -69,7 +70,7 @@ public class BinaryLinkServer {
     private final Set<String> forbidden;
     private final Acceptor acceptor;
     private final List<Handler> registeredHandlers;
-    private final Map<BenchmarkRecord, RunResult> results;
+    private final Multimap<BenchmarkRecord, BenchResult> results;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -92,7 +93,9 @@ public class BinaryLinkServer {
         }
 
         registeredHandlers = Collections.synchronizedList(new ArrayList<Handler>());
-        results = Collections.synchronizedMap(new TreeMap<BenchmarkRecord, RunResult>());
+        synchronized (this) {
+            results = new TreeMultimap<BenchmarkRecord, BenchResult>();
+        }
 
         acceptor = new Acceptor();
         acceptor.start();
@@ -127,8 +130,10 @@ public class BinaryLinkServer {
         }
     }
 
-    public Map<BenchmarkRecord, RunResult> getResults() {
-        return results;
+    public Multimap<BenchmarkRecord, BenchResult> getResults() {
+        synchronized (this) {
+            return results;
+        }
     }
 
     private final class Acceptor extends Thread {
@@ -240,8 +245,9 @@ public class BinaryLinkServer {
         }
 
         private void handleResults(ResultsFrame obj) {
-            BenchmarkRecord bench = obj.getRecord();
-            results.put(bench, RunResult.merge(results.get(bench), obj.getResult()));
+            synchronized (this) {
+                results.put(obj.getRecord(), obj.getResult());
+            }
         }
 
         private void handleInfra(InfraFrame req) throws IOException {

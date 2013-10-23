@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.logic.results;
 
-import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 
@@ -35,28 +34,27 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Complete run result.
- * Contains the iteration results.
+ * Benchmark result.
+ * Contains iteration results.
  *
- * @author anders.astrand@oracle.com
- * @author aleksey.shipilev@oracle.com
+ * @author Aleksey Shipilev
  */
-public class RunResult implements Serializable {
+public class BenchResult implements Serializable {
 
     private static final long serialVersionUID = 6467912427356048369L;
 
-    private final Collection<BenchResult> benchResults;
+    private final Collection<IterationResult> iterationResults;
 
-    public RunResult(Collection<BenchResult> data) {
-        this.benchResults = data;
+    public BenchResult(Collection<IterationResult> data) {
+        this.iterationResults = data;
     }
 
-    public Collection<BenchResult> getRawBenchResults() {
-        return benchResults;
+    public Collection<IterationResult> getRawIterationResults() {
+        return iterationResults;
     }
 
     public Result getPrimaryResult() {
-        Result next = benchResults.iterator().next().getPrimaryResult();
+        Result next = iterationResults.iterator().next().getPrimaryResult();
 
         @SuppressWarnings("unchecked")
         Aggregator<Result> aggregator = next.getRunAggregator();
@@ -65,21 +63,17 @@ public class RunResult implements Serializable {
 
     public Collection<Result> getRawPrimaryResults() {
         Collection<Result> rs = new ArrayList<Result>();
-        for (BenchResult br : benchResults) {
-            for (IterationResult ir : br.getRawIterationResults()) {
-                rs.add(ir.getPrimaryResult());
-            }
+        for (IterationResult k : iterationResults) {
+            rs.add(k.getPrimaryResult());
         }
         return rs;
     }
 
     public Multimap<String, Result> getRawSecondaryResults() {
         Multimap<String, Result> rs = new HashMultimap<String, Result>();
-        for (BenchResult br : benchResults) {
-            for (IterationResult ir : br.getRawIterationResults()) {
-                for (Map.Entry<String, Result> r : ir.getSecondaryResults().entrySet()) {
-                    rs.put(r.getKey(), r.getValue());
-                }
+        for (IterationResult k : iterationResults) {
+            for (Map.Entry<String, Result> r : k.getSecondaryResults().entrySet()) {
+                rs.put(r.getKey(), r.getValue());
             }
         }
         return rs;
@@ -103,14 +97,6 @@ public class RunResult implements Serializable {
 
     public String getScoreUnit() {
         return getPrimaryResult().getScoreUnit();
-    }
-
-    public int getThreads() {
-        return getRawBenchResults().iterator().next().getRawIterationResults().iterator().next().getParams().getThreads();
-    }
-
-    public TimeValue getTime() {
-        return getRawBenchResults().iterator().next().getRawIterationResults().iterator().next().getParams().getTime();
     }
 
 }

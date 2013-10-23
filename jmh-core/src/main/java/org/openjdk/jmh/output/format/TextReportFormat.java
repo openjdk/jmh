@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
@@ -31,17 +32,15 @@ import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.ClassUtils;
-import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.Statistics;
-import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,15 +51,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TextReportFormat extends AbstractOutputFormat {
 
-    private final Map<BenchmarkRecord, IterationParams> benchmarkSettings;
-    private final Multimap<BenchmarkIdentifier, IterationResult> benchmarkResults;
-    private final Multimap<BenchmarkIdentifier, RunResult> benchmarkRunResults;
-
     public TextReportFormat(PrintStream out, boolean verbose) {
         super(out, verbose);
-        benchmarkSettings = new TreeMap<BenchmarkRecord, IterationParams>();
-        benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationResult>();
-        benchmarkRunResults = new TreeMultimap<BenchmarkIdentifier, RunResult>();
     }
 
     @Override
@@ -74,8 +66,6 @@ public class TextReportFormat extends AbstractOutputFormat {
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Running: " + name.getUsername());
-
-        benchmarkSettings.put(name, mbParams.getIteration());
     }
 
     @Override
@@ -148,16 +138,10 @@ public class TextReportFormat extends AbstractOutputFormat {
 
         out.println("");
         out.flush();
-        if (type == IterationType.MEASUREMENT) {
-            benchmarkResults.put(new BenchmarkIdentifier(name, params.getThreads()), data);
-        }
     }
 
     @Override
-    public void endBenchmark(BenchmarkRecord name, RunResult result) {
-        IterationParams params = benchmarkSettings.get(name);
-        benchmarkRunResults.put(new BenchmarkIdentifier(name, params.getThreads()), result);
-
+    public void endBenchmark(BenchmarkRecord name, BenchResult result) {
         out.println();
         out.println(result.getPrimaryResult().extendedInfo(null));
         for (Result r : result.getSecondaryResults().values()) {
@@ -172,39 +156,13 @@ public class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endRun() {
-        for (BenchmarkIdentifier key1 : benchmarkRunResults.keys()) {
-            Collection<RunResult> forkedResults = benchmarkRunResults.get(key1);
-            if (forkedResults.size() > 1) {
-                out.println("\"" + key1.benchmark.getUsername() + "\", aggregate over forked runs:");
-                out.println();
-
-                RunResult runResult1 = RunResult.merge(forkedResults);
-
-                out.println(runResult1.getPrimaryResult().extendedInfo(null));
-                for (Result r : runResult1.getSecondaryResults().values()) {
-                    out.println(r.extendedInfo(r.getLabel()));
-                }
-            }
-        }
-
-        // generate the full report
-        //
-
-        if (benchmarkResults.isEmpty()) {
-            return;
-        }
-
+    public void endRun(Map<BenchmarkRecord, RunResult> runResults) {
         Collection<String> benchNames = new ArrayList<String>();
-        for (BenchmarkIdentifier key : benchmarkResults.keys()) {
-            Collection<IterationResult> results = benchmarkResults.get(key);
-            if (results != null && !results.isEmpty()) {
-                RunResult runResult = new RunResult(results);
-
-                benchNames.add(key.benchmark.getUsername());
-                for (String label : runResult.getSecondaryResults().keySet()) {
-                    benchNames.add(key.benchmark.getUsername() + ":" + label);
-                }
+        for (BenchmarkRecord key : runResults.keySet()) {
+            RunResult runResult = runResults.get(key);
+            benchNames.add(key.getUsername());
+            for (String label : runResult.getSecondaryResults().keySet()) {
+                benchNames.add(key.getUsername() + ":" + label);
             }
         }
 
@@ -220,111 +178,45 @@ public class TextReportFormat extends AbstractOutputFormat {
         out.printf("%-" + nameLen + "s %6s %3s %6s %4s %12s %12s %8s%n",
                 "Benchmark", "Mode", "Thr", "Cnt", "Sec",
                 "Mean", "Mean error", "Units");
-        for (BenchmarkIdentifier key : benchmarkResults.keys()) {
-
+        for (BenchmarkRecord key : runResults.keySet()) {
             double[] interval = new double[]{Double.NaN, Double.NaN};
 
-            IterationParams settings = benchmarkSettings.get(key.benchmark);
-            Collection<IterationResult> results = benchmarkResults.get(key);
+            RunResult res = runResults.get(key);
 
-            if (results != null && !results.isEmpty()) {
-                RunResult runResult = new RunResult(results);
+            int threads = res.getThreads();
+            TimeValue runTime = res.getTime();
 
-                {
-                    Statistics stats = runResult.getPrimaryResult().getStatistics();
-                    if (stats.getN() > 2) {
-                        interval = stats.getConfidenceInterval(0.01);
-                    }
-
-                    out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
-                            benchPrefixes.get(key.benchmark.getUsername()),
-                            key.benchmark.getMode().shortLabel(),
-                            key.threads, stats.getN(),
-                            settings.getTime().convertTo(TimeUnit.SECONDS),
-                            stats.getMean(), (interval[1] - interval[0]) / 2,
-                            runResult.getScoreUnit());
+            {
+                Statistics stats = res.getPrimaryResult().getStatistics();
+                if (stats.getN() > 2) {
+                    interval = stats.getConfidenceInterval(0.01);
                 }
 
-                for (String label : runResult.getSecondaryResults().keySet()) {
-                    Statistics stats = runResult.getSecondaryResults().get(label).getStatistics();
-                    if (stats.getN() > 2) {
-                        interval = stats.getConfidenceInterval(0.01);
-                    }
+                out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
+                        benchPrefixes.get(key.getUsername()),
+                        key.getMode().shortLabel(),
+                        threads, stats.getN(),
+                        runTime.convertTo(TimeUnit.SECONDS),
+                        stats.getMean(), (interval[1] - interval[0]) / 2,
+                        res.getScoreUnit());
+            }
 
-                    out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
-                            benchPrefixes.get(key.benchmark.getUsername() + ":" + label),
-                            key.benchmark.getMode().shortLabel(),
-                            key.threads, stats.getN(),
-                            settings.getTime().convertTo(TimeUnit.SECONDS),
-                            stats.getMean(), (interval[1] - interval[0]) / 2,
-                            runResult.getScoreUnit());
+            for (String label : res.getSecondaryResults().keySet()) {
+                Statistics stats = res.getSecondaryResults().get(label).getStatistics();
+                if (stats.getN() > 2) {
+                    interval = stats.getConfidenceInterval(0.01);
                 }
-            } else {
-                out.printf("%-" + nameLen + "s %6s, %3d %6d %4d %12.3f %12.3f %8s%n",
-                        benchPrefixes.get(key.benchmark.getUsername()),
-                        key.benchmark.getMode().shortLabel(),
-                        key.threads, 0,
-                        settings.getTime().convertTo(TimeUnit.SECONDS),
-                        Double.NaN, Double.NaN,
-                        "N/A");
-            }
 
-        }
-        benchmarkResults.clear();
-        benchmarkSettings.clear();
-    }
-
-    private static class BenchmarkIdentifier implements Comparable<BenchmarkIdentifier> {
-        final BenchmarkRecord benchmark;
-        final int threads;
-
-        BenchmarkIdentifier(BenchmarkRecord benchmark, int threads) {
-            this.benchmark = benchmark;
-            this.threads = threads;
-        }
-
-        public BenchmarkIdentifier(BenchmarkIdentifier copy) {
-            this.benchmark = copy.benchmark;
-            this.threads = copy.threads;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            BenchmarkIdentifier that = (BenchmarkIdentifier) o;
-
-            if (threads != that.threads) {
-                return false;
-            }
-            if (benchmark != null ? !benchmark.equals(that.benchmark) : that.benchmark != null) {
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = benchmark != null ? benchmark.hashCode() : 0;
-            result = 31 * result + threads;
-            return result;
-        }
-
-        @Override
-        public int compareTo(BenchmarkIdentifier o) {
-            int c1 = benchmark.compareTo(o.benchmark);
-            if (c1 == 0) {
-                return ((Integer) threads).compareTo(o.threads);
-            } else {
-                return c1;
+                out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
+                        benchPrefixes.get(key.getUsername() + ":" + label),
+                        key.getMode().shortLabel(),
+                        threads, stats.getN(),
+                        runTime.convertTo(TimeUnit.SECONDS),
+                        stats.getMean(), (interval[1] - interval[0]) / 2,
+                        res.getScoreUnit());
             }
         }
     }
+
 
 }

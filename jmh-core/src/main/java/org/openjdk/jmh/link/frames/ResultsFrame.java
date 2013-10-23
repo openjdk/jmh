@@ -24,16 +24,16 @@
  */
 package org.openjdk.jmh.link.frames;
 
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 
 import java.io.Serializable;
 
 public class ResultsFrame implements Serializable {
     private final BenchmarkRecord record;
-    private final RunResult result;
+    private final BenchResult result;
 
-    public ResultsFrame(BenchmarkRecord record, RunResult result) {
+    public ResultsFrame(BenchmarkRecord record, BenchResult result) {
         this.record = record;
         this.result = result;
     }
@@ -42,7 +42,7 @@ public class ResultsFrame implements Serializable {
         return record;
     }
 
-    public RunResult getResult() {
+    public BenchResult getResult() {
         return result;
     }
 }
