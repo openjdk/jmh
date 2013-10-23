@@ -25,7 +25,9 @@
 package org.openjdk.jmh.output.format;
 
 import org.openjdk.jmh.logic.results.IterationResult;
+import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
@@ -37,6 +39,7 @@ import org.openjdk.jmh.util.internal.TreeMultimap;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -47,34 +50,160 @@ import java.util.concurrent.TimeUnit;
  * @author Brian Doherty
  * @author Aleksey Shipilev
  */
-public class TextReportFormat extends PrettyPrintFormat {
+public class TextReportFormat extends AbstractOutputFormat {
 
-    private final Multimap<BenchmarkIdentifier, IterationResult> benchmarkResults;
     private final Map<BenchmarkRecord, IterationParams> benchmarkSettings;
+    private final Multimap<BenchmarkIdentifier, IterationResult> benchmarkResults;
+    private final Multimap<BenchmarkRecord, RunResult> benchmarkRunResults;
 
     public TextReportFormat(PrintStream out, boolean verbose) {
         super(out, verbose);
-        benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationResult>();
         benchmarkSettings = new TreeMap<BenchmarkRecord, IterationParams>();
+        benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationResult>();
+        benchmarkRunResults = new TreeMultimap<BenchmarkRecord, RunResult>();
     }
 
     @Override
     public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams, boolean verbose) {
-        super.startBenchmark(name, mbParams, verbose);
+        if (verbose) {
+            out.println("# Starting run at: " + new Date());
+        }
+
+        out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " + mbParams.getWarmup().getTime() + " each");
+        out.println("# Measurement: " + mbParams.getIteration().getCount() + " iterations, " + mbParams.getIteration().getTime() + " each");
+        out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
+        out.println("# Benchmark mode: " + name.getMode().longLabel());
+        out.println("# Running: " + name.getUsername());
+
         benchmarkSettings.put(name, mbParams.getIteration());
     }
 
     @Override
+    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
+        switch (type) {
+            case WARMUP:
+                out.print(String.format("# Warmup Iteration %3d: ", iteration));
+                break;
+            case MEASUREMENT:
+                out.print(String.format("Iteration %3d: ", iteration));
+                break;
+            default:
+                throw new IllegalStateException("Unknown iteration type: " + type);
+        }
+        out.flush();
+    }
+
+    @Override
+    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data) {
+        out.print("Results per thread: [");
+
+        boolean first = true;
+        for (Result result : data.getRawPrimaryResults()) {
+            if (!first) {
+                out.print(", ");
+            }
+
+            out.printf("%.1f", result.getScore());
+            first = false;
+        }
+
+        out.println("]");
+        out.println();
+    }
+
+    protected static String getThreadsString(int t) {
+        if (t > 1) {
+            return "threads";
+        } else {
+            return "thread";
+        }
+    }
+
+    @Override
     public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data) {
-        super.iterationResult(name, params, iteration, type, data);
+        StringBuilder sb = new StringBuilder();
+        sb.append(data.getPrimaryResult().toString());
+
+        if (type == IterationType.MEASUREMENT) {
+            int prefixLen = String.format("Iteration %3d: ", iteration).length();
+
+            Map<String, Result> secondary = data.getSecondaryResults();
+            if (!secondary.isEmpty()) {
+                sb.append("\n");
+                for (Map.Entry<String, Result> res : secondary.entrySet()) {
+                    // rough estimate
+                    int threads = data.getRawSecondaryResults().get(res.getKey()).size();
+
+                    sb.append(String.format("%" + prefixLen + "s", ""));
+                    sb.append("  \"").append(res.getKey()).append("\": ");
+                    sb.append(res.getValue().toString());
+                    sb.append(" (").append(threads).append(" threads)");
+                    sb.append("\n");
+                }
+            }
+        }
+
+        out.print(String.format("%s", sb.toString()));
+
+        // also print out profiler information
+        if (type == IterationType.MEASUREMENT) {
+            boolean firstProfiler = true;
+            for (ProfilerResult profRes : data.getProfilerResults()) {
+                if (profRes.hasData()) {
+                    if (firstProfiler) {
+                        out.println("");
+                        firstProfiler = false;
+                    }
+                    String prefix = profRes.getProfilerName();
+                    for (String line : profRes.toString().split("\n")) {
+                        out.print(String.format("%12s | %s\n", prefix, line));
+                        prefix = "";
+                    }
+                    out.print(String.format("%12s |\n", ""));
+                }
+            }
+        }
+
+        out.println("");
+        out.flush();
         if (type == IterationType.MEASUREMENT) {
             benchmarkResults.put(new BenchmarkIdentifier(name, params.getThreads()), data);
         }
     }
 
     @Override
+    public void endBenchmark(BenchmarkRecord name, RunResult result) {
+        benchmarkRunResults.put(name, result);
+
+        out.println();
+        out.println(result.getPrimaryResult().extendedInfo(null));
+        for (Result r : result.getSecondaryResults().values()) {
+            out.println(r.extendedInfo(r.getLabel()));
+        }
+        out.println();
+    }
+
+    @Override
+    public void startRun() {
+        // do nothing
+    }
+
+    @Override
     public void endRun() {
-        super.endRun();
+        for (BenchmarkRecord key1 : benchmarkRunResults.keys()) {
+            Collection<RunResult> forkedResults = benchmarkRunResults.get(key1);
+            if (forkedResults.size() > 1) {
+                out.println("\"" + key1.getUsername() + "\", aggregate over forked runs:");
+                out.println();
+
+                RunResult runResult1 = RunResult.merge(forkedResults);
+
+                out.println(runResult1.getPrimaryResult().extendedInfo(null));
+                for (Result r : runResult1.getSecondaryResults().values()) {
+                    out.println(r.extendedInfo(r.getLabel()));
+                }
+            }
+        }
 
         // generate the full report
         //
