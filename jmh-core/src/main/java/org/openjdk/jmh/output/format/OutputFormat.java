@@ -86,16 +86,6 @@ public interface OutputFormat {
      */
     public void endRun();
 
-    /**
-     * Format for detailed results output.
-     *
-     * @param name      benchmark name
-     * @param params
-     * @param iteration iteration number
-     * @param data   AggregatedResults with detailed run results
-     */
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data);
-
     /* ------------- SPECIAL TRACING METHODS -------------------- */
 
     void exception(Throwable ex);

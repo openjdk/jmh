@@ -121,10 +121,6 @@ public abstract class BaseRunner {
             } else {
                 out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData);
 
-                if (options.shouldOutputDetailedResults()) {
-                    out.detailedResults(handler.getBenchmark(), mp, i, iterData);
-                }
-
                 allResults.add(iterData);
             }
         }

@@ -175,21 +175,6 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private boolean shouldOutputDetails;
-
-    @Override
-    public ChainedOptionsBuilder outputDetails(boolean value) {
-        shouldOutputDetails = value;
-        return this;
-    }
-
-    @Override
-    public boolean shouldOutputDetailedResults() {
-        return shouldOutputDetails;
-    }
-
-    // ---------------------------------------------------------------------------
-
     private int threads = Integer.MIN_VALUE;
 
     @Override

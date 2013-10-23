@@ -101,9 +101,6 @@ public class CommandLineOptions implements Options {
     @Option(name = "-v", aliases = {"--verbose"}, usage = "Verbose mode, default off", handler = BooleanOptionHandler.class)
     protected boolean verbose = false;
 
-    @Option(name = "-odr", aliases = {"--outputdetailedresults"}, usage = "Output detailed results. Default is false", handler = BooleanOptionHandler.class)
-    protected boolean outputDetailedResults = false;
-
     @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
     protected boolean failOnError = false;
 
@@ -440,16 +437,6 @@ public class CommandLineOptions implements Options {
     @Override
     public TimeUnit getTimeUnit() {
         return timeUnit;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    @Override
-    public boolean shouldOutputDetailedResults() {
-        return outputDetailedResults;
     }
 
     /**

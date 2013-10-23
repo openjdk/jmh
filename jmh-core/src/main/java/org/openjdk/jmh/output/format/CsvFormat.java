@@ -103,22 +103,4 @@ public class CsvFormat extends AbstractOutputFormat {
         return String.format("\"%.3f\"", d);
     }
 
-    @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data) {
-        int count = 0;
-
-        for (Result result : data.getRawPrimaryResults()) {
-            out.print(convertDouble(result.getScore()));
-            out.print(DELIMITER);
-            count++;
-        }
-
-        // print tail
-        for (int i = count; i < params.getThreads(); i++) {
-            out.print(DELIMITER);
-        }
-
-        out.println(DELIMITER);
-    }
-
 }

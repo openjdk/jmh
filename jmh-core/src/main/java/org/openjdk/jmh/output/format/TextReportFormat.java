@@ -93,24 +93,6 @@ public class TextReportFormat extends AbstractOutputFormat {
         out.flush();
     }
 
-    @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data) {
-        out.print("Results per thread: [");
-
-        boolean first = true;
-        for (Result result : data.getRawPrimaryResults()) {
-            if (!first) {
-                out.print(", ");
-            }
-
-            out.printf("%.1f", result.getScore());
-            first = false;
-        }
-
-        out.println("]");
-        out.println();
-    }
-
     protected static String getThreadsString(int t) {
         if (t > 1) {
             return "threads";

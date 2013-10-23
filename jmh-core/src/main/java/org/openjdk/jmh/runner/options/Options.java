@@ -85,12 +85,6 @@ public interface Options extends Serializable {
     boolean shouldFailOnError();
 
     /**
-     * Should harness output extra details for the run?
-     * @return should it?
-     */
-    boolean shouldOutputDetailedResults();
-
-    /**
      * Number of threads to run
      * @return number of threads; 0 to use maximum number of threads; -1 to use default
      */

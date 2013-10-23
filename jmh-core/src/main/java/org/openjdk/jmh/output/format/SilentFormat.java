@@ -62,11 +62,6 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void detailedResults(BenchmarkRecord name, IterationParams params, int iteration, IterationResult data) {
-
-    }
-
-    @Override
     public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
 
     }

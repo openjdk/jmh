@@ -100,13 +100,6 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder failOnError(boolean value);
 
     /**
-     * Output extra details?
-     * @param value flag
-     * @return builder
-     */
-    ChainedOptionsBuilder outputDetails(boolean value);
-
-    /**
      * Number of threads to run the benchmark in
      * @param count number of threads
      * @return builder
