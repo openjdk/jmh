@@ -54,13 +54,13 @@ public class TextReportFormat extends AbstractOutputFormat {
 
     private final Map<BenchmarkRecord, IterationParams> benchmarkSettings;
     private final Multimap<BenchmarkIdentifier, IterationResult> benchmarkResults;
-    private final Multimap<BenchmarkRecord, RunResult> benchmarkRunResults;
+    private final Multimap<BenchmarkIdentifier, RunResult> benchmarkRunResults;
 
     public TextReportFormat(PrintStream out, boolean verbose) {
         super(out, verbose);
         benchmarkSettings = new TreeMap<BenchmarkRecord, IterationParams>();
         benchmarkResults = new TreeMultimap<BenchmarkIdentifier, IterationResult>();
-        benchmarkRunResults = new TreeMultimap<BenchmarkRecord, RunResult>();
+        benchmarkRunResults = new TreeMultimap<BenchmarkIdentifier, RunResult>();
     }
 
     @Override
@@ -173,7 +173,8 @@ public class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void endBenchmark(BenchmarkRecord name, RunResult result) {
-        benchmarkRunResults.put(name, result);
+        IterationParams params = benchmarkSettings.get(name);
+        benchmarkRunResults.put(new BenchmarkIdentifier(name, params.getThreads()), result);
 
         out.println();
         out.println(result.getPrimaryResult().extendedInfo(null));
@@ -190,10 +191,10 @@ public class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void endRun() {
-        for (BenchmarkRecord key1 : benchmarkRunResults.keys()) {
+        for (BenchmarkIdentifier key1 : benchmarkRunResults.keys()) {
             Collection<RunResult> forkedResults = benchmarkRunResults.get(key1);
             if (forkedResults.size() > 1) {
-                out.println("\"" + key1.getUsername() + "\", aggregate over forked runs:");
+                out.println("\"" + key1.benchmark.getUsername() + "\", aggregate over forked runs:");
                 out.println();
 
                 RunResult runResult1 = RunResult.merge(forkedResults);
