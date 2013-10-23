@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 
@@ -44,9 +46,32 @@ public class BenchResult implements Serializable {
     private static final long serialVersionUID = 6467912427356048369L;
 
     private final Collection<IterationResult> iterationResults;
+    private final BenchmarkRecord benchmark;
+    private final IterationParams params;
 
     public BenchResult(Collection<IterationResult> data) {
         this.iterationResults = data;
+
+        BenchmarkRecord myRecord = null;
+        IterationParams myParams = null;
+
+        for (IterationResult ir : data) {
+            BenchmarkRecord record = ir.getBenchmark();
+            IterationParams params = ir.getParams();
+            if (myRecord != null && !record.equals(myRecord)) {
+                throw new IllegalStateException("Aggregating the iteration results from different benchmarks");
+            } else {
+                myRecord = record;
+            }
+
+            if (myParams != null && !params.equals(myParams)) {
+                throw new IllegalStateException("Aggregating the iteration results from different benchmarks");
+            } else {
+                myParams = params;
+            }
+        }
+        this.benchmark = myRecord;
+        this.params = myParams;
     }
 
     public Collection<IterationResult> getRawIterationResults() {
@@ -99,4 +124,11 @@ public class BenchResult implements Serializable {
         return getPrimaryResult().getScoreUnit();
     }
 
+    public BenchmarkRecord getBenchmark() {
+        return benchmark;
+    }
+
+    public IterationParams getParams() {
+        return params;
+    }
 }

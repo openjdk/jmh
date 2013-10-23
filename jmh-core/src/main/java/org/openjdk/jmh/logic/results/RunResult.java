@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -46,9 +48,34 @@ public class RunResult implements Serializable {
     private static final long serialVersionUID = 6467912427356048369L;
 
     private final Collection<BenchResult> benchResults;
+    private final BenchmarkRecord benchmark;
+    private final IterationParams params;
 
     public RunResult(Collection<BenchResult> data) {
         this.benchResults = data;
+
+        BenchmarkRecord myRecord = null;
+        IterationParams myParams = null;
+
+        for (BenchResult br : data) {
+            BenchmarkRecord record = br.getBenchmark();
+            IterationParams params = br.getParams();
+
+            if (myRecord != null && !record.equals(myRecord)) {
+                throw new IllegalStateException("Aggregating the benchmark results from different benchmarks");
+            } else {
+                myRecord = record;
+            }
+
+            if (myParams != null && !params.equals(myParams)) {
+                throw new IllegalStateException("Aggregating the benchmark results from different benchmarks");
+            } else {
+                myParams = params;
+            }
+        }
+
+        this.benchmark = myRecord;
+        this.params = myParams;
     }
 
     public Collection<BenchResult> getRawBenchResults() {
@@ -106,11 +133,14 @@ public class RunResult implements Serializable {
     }
 
     public int getThreads() {
-        return getRawBenchResults().iterator().next().getRawIterationResults().iterator().next().getParams().getThreads();
+        return params.getThreads();
     }
 
     public TimeValue getTime() {
-        return getRawBenchResults().iterator().next().getRawIterationResults().iterator().next().getParams().getTime();
+        return params.getTime();
     }
 
+    public BenchmarkRecord getBenchmark() {
+        return benchmark;
+    }
 }
