@@ -44,6 +44,13 @@ public interface Multimap<K, V> {
     void put(K key, V value);
 
     /**
+     * Put multiple pairs.
+     * @param k key
+     * @param vs values
+     */
+    void putAll(K k, Collection<V> vs);
+
+    /**
      * Get all values associated with the key
      * @param key key
      * @return collection of values

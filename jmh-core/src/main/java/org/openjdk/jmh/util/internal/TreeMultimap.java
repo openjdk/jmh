@@ -50,6 +50,16 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
     }
 
     @Override
+    public void putAll(K key, Collection<V> vvs) {
+        Collection<V> vs = map.get(key);
+        if (vs == null) {
+            vs = new ArrayList<V>();
+            map.put(key, vs);
+        }
+        vs.addAll(vvs);
+    }
+
+    @Override
     public Collection<V> get(K key) {
         Collection<V> vs = map.get(key);
         return (vs == null) ? Collections.<V>emptyList() : Collections.unmodifiableCollection(vs);

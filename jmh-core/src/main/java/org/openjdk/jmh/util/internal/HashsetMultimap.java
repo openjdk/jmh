@@ -51,6 +51,16 @@ public class HashsetMultimap<K, V> implements Multimap<K, V>, Serializable {
     }
 
     @Override
+    public void putAll(K key, Collection<V> values) {
+        Collection<V> vs = map.get(key);
+        if (vs == null) {
+            vs = new HashSet<V>();
+            map.put(key, vs);
+        }
+        vs.addAll(values);
+    }
+
+    @Override
     public Collection<V> get(K key) {
         Collection<V> vs = map.get(key);
         return (vs == null) ? Collections.<V>emptyList() : Collections.unmodifiableCollection(vs);
