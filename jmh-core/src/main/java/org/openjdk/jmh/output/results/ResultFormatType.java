@@ -28,6 +28,7 @@ public enum ResultFormatType {
 
     NONE,
     CSV,
+    JSON,
     ;
 
     public static ResultFormatType defaultType() {

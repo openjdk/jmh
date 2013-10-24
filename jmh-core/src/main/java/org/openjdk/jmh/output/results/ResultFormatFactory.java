@@ -34,6 +34,8 @@ public class ResultFormatFactory {
                 return new NoneResultFormat();
             case CSV:
                 return new CSVResultFormat(output);
+            case JSON:
+                return new JSONResultFormat(output);
             default:
                 throw new IllegalStateException("Unsupported result format: " + type);
         }
