@@ -32,6 +32,8 @@ import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.output.results.ResultFormat;
+import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.WarmupMode;
 import org.openjdk.jmh.runner.parameters.Defaults;
@@ -201,6 +203,9 @@ public class Runner extends BaseRunner {
 
         out.flush();
         out.close();
+
+        ResultFormat resultFormat = ResultFormatFactory.getInstance(options.getResultFormat(), options.getResult());
+        resultFormat.writeOut(results);
 
         return results;
     }

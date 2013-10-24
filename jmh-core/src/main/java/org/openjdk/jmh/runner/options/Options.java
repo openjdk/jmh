@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
+import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -59,6 +60,18 @@ public interface Options extends Serializable {
      * @return file name; null if not defined
      */
     String getOutput();
+
+    /**
+     * Result format to use
+     * @return format type
+     */
+    ResultFormatType getResultFormat();
+
+    /**
+     * Which file to use for dumping the result
+     * @return file name; null if not defined
+     */
+    String getResult();
 
     /**
      * Should force GC between iterations?

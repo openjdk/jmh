@@ -30,6 +30,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
+import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
@@ -104,7 +105,7 @@ public class CommandLineOptions implements Options {
     @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
     protected boolean failOnError = false;
 
-    @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listprofilers to list available profilers", handler = ProfilersOptionHandler.class)
+    @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listProfilers to list available profilers", handler = ProfilersOptionHandler.class)
     protected Set<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
 
     @Option(name = "-tu", aliases = {"--timeunit"}, usage = "Output time unit. Available values: m, s, ms, us, ns", handler = TimeUnitOptionHandler.class)
@@ -125,8 +126,14 @@ public class CommandLineOptions implements Options {
     @Option(name = "-o", aliases = {"--output"}, metaVar = "FILE", usage = "Redirect output to FILE")
     protected String output = null;
 
-    @Option(name = "-of", aliases = {"--outputformat"}, metaVar = "FORMAT", usage = "Format to use for output, use --listformats to list available formats")
+    @Option(name = "-rff", aliases = {"--result"}, metaVar = "FILE", usage = "Redirect results to FILE")
+    protected String result = Defaults.RESULT_FILE;
+
+    @Option(name = "-of", aliases = {"--outputformat"}, metaVar = "FORMAT", usage = "Format to use for output, use --listOutputFormats to list available formats")
     protected OutputFormatType outputFormat = OutputFormatType.defaultType();
+
+    @Option(name = "-rf", aliases = {"--resultformat"}, metaVar = "FORMAT", usage = "Format to use for results, use --listResultFormats to list available formats")
+    protected ResultFormatType resultFormat = ResultFormatType.defaultType();
 
     @Option(name = "--jvm", metaVar = "JVM", usage = "Custom JVM to use with fork.")
     protected String jvm = null;
@@ -150,13 +157,16 @@ public class CommandLineOptions implements Options {
     @Option(name = "-l", aliases = {"--list"}, usage = "List available microbenchmarks and exit. Filter using available regexps.")
     protected boolean list = false;
 
-    @Option(name = "--listformats", usage = "List available output formats")
-    protected boolean listFormats = false;
+    @Option(name = "--listOutputFormats", usage = "List available output formats")
+    protected boolean listOutputFormats = false;
+
+    @Option(name = "--listResultFormats", usage = "List available result formats")
+    protected boolean listResultFormats = false;
 
     @Option(name = "-h", aliases = {"--help"}, usage = "Display help")
     protected boolean help = false;
 
-    @Option(name = "--listprofilers", usage = "List available profilers")
+    @Option(name = "--listProfilers", usage = "List available profilers")
     protected boolean listProfilers = false;
 
     /**
@@ -321,13 +331,27 @@ public class CommandLineOptions implements Options {
         return outputFormat;
     }
 
+    @Override
+    public ResultFormatType getResultFormat() {
+        return resultFormat;
+    }
+
+    @Override
+    public String getResult() {
+        return result;
+    }
+
     /**
      * Getter
      *
      * @return the value
      */
-    public boolean shouldListFormats() {
-        return listFormats;
+    public boolean shouldListOutputFormats() {
+        return listOutputFormats;
+    }
+
+    public boolean shouldListResultFormats() {
+        return listResultFormats;
     }
 
     /**

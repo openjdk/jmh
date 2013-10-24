@@ -143,4 +143,8 @@ public class RunResult implements Serializable {
     public BenchmarkRecord getBenchmark() {
         return benchmark;
     }
+
+    public int getIterationCount() {
+        return params.getCount();
+    }
 }

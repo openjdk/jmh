@@ -26,7 +26,9 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
+import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
+import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.ArrayList;
@@ -111,6 +113,36 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     @Override
     public String getOutput() {
         return output;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private ResultFormatType rfType = ResultFormatType.defaultType();
+
+    @Override
+    public ChainedOptionsBuilder resultFormat(ResultFormatType type) {
+        rfType = type;
+        return this;
+    }
+
+    @Override
+    public ResultFormatType getResultFormat() {
+        return rfType;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private String result = Defaults.RESULT_FILE;
+
+    @Override
+    public ChainedOptionsBuilder result(String filename) {
+        this.result = filename;
+        return this;
+    }
+
+    @Override
+    public String getResult() {
+        return result;
     }
 
     // ---------------------------------------------------------------------------

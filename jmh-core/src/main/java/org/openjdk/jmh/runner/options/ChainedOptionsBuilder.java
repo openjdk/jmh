@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.OutputFormatType;
+import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -65,11 +66,25 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder outputFormat(OutputFormatType type);
 
     /**
+     * ResultFormatType to use in the run
+     * @param type resultformat type
+     * @return builder
+     */
+    ChainedOptionsBuilder resultFormat(ResultFormatType type);
+
+    /**
      * Output filename to write the run log to
      * @param filename file name
      * @return builder
      */
     ChainedOptionsBuilder output(String filename);
+
+    /**
+     * Output filename to write the result to
+     * @param filename file name
+     * @return builder
+     */
+    ChainedOptionsBuilder result(String filename);
 
     /**
      * Should do GC between measurementIterations?

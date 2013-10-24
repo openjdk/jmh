@@ -54,4 +54,5 @@ public class Defaults {
 
     public static final boolean SHOULD_SYNCH_ITERATIONS = true;
 
+    public static final String RESULT_FILE = "jmh.out";
 }
