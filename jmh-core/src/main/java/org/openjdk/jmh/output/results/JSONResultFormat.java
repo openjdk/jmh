@@ -69,7 +69,7 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("    'scoreUnit' : '" + runResult.getPrimaryResult().getScoreUnit() + "',");
                 pw.println("    'raw' : [");
                 for (Result r : runResult.getRawPrimaryResults()) {
-                    pw.println("      " + r.getScore());
+                    pw.println("      " + r.getScore() + ",");
                 }
                 pw.println("    ]");
                 pw.println("}");
