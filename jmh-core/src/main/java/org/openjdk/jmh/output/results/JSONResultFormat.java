@@ -24,12 +24,14 @@
  */
 package org.openjdk.jmh.output.results;
 
+import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Map;
 
 public class JSONResultFormat implements ResultFormat {
@@ -59,19 +61,41 @@ public class JSONResultFormat implements ResultFormat {
                 RunResult runResult = results.get(br);
 
                 pw.println("{");
-                pw.println("  'benchmark' : '" + br.getUsername() + "',");
-                pw.println("  'mode' : '" + br.getMode().shortLabel() + "',");
-                pw.println("  'threads' : " + runResult.getThreads() + ",");
-                pw.println("  'iterations' : " + runResult.getIterationCount() + ",");
-                pw.println("  'iterationTime' : '" + runResult.getTime() + "',");
-                pw.println("  'primaryMetric' : {");
-                pw.println("    'score' : " + runResult.getPrimaryResult().getScore() + ",");
-                pw.println("    'scoreUnit' : '" + runResult.getPrimaryResult().getScoreUnit() + "',");
-                pw.println("    'raw' : [");
-                for (Result r : runResult.getRawPrimaryResults()) {
-                    pw.println("      " + r.getScore() + ",");
+                pw.println("  \"benchmark\" : \"" + br.getUsername() + "\",");
+                pw.println("  \"mode\" : \"" + br.getMode().shortLabel() + "\",");
+                pw.println("  \"threads\" : " + runResult.getThreads() + ",");
+                pw.println("  \"iterations\" : " + runResult.getIterationCount() + ",");
+                pw.println("  \"iterationTime\" : \"" + runResult.getTime() + "\",");
+                pw.println("  \"primaryMetric\" : {");
+                pw.println("    \"score\" : " + runResult.getPrimaryResult().getScore() + ",");
+                pw.println("    \"scoreStdev\" : " + runResult.getPrimaryResult().getStatistics().getStandardDeviation() + ",");
+                pw.println("    \"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceInterval(0.95)) + ",");
+                pw.println("    \"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceInterval(0.99)) + ",");
+                pw.println("    \"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
+                pw.println("    \"rawData\" : [");
+
+                boolean firstBench = true;
+                for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                    if (firstBench) {
+                        firstBench = false;
+                    } else {
+                        pw.println(",");
+                    }
+                    pw.println("      [");
+                    boolean firstResult = true;
+                    for (Result r : benchResult.getRawPrimaryResults()) {
+                        if (firstResult) {
+                            firstResult = false;
+                        } else {
+                            pw.println(",");
+                        }
+                        pw.print("        " + r.getScore());
+                    }
+                    pw.println();
+                    pw.println("      ]");
                 }
                 pw.println("    ]");
+                pw.println("  }");
                 pw.println("}");
             }
             pw.println("]");
