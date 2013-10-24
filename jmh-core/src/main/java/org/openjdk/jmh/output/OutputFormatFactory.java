@@ -25,7 +25,6 @@
 package org.openjdk.jmh.output;
 
 import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.output.format.CsvFormat;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.SilentFormat;
 import org.openjdk.jmh.output.format.TextReportFormat;
@@ -45,8 +44,6 @@ public class OutputFormatFactory {
         assert (format != null) : "format is not null";
 
         switch (format) {
-            case CSV:
-                return new CsvFormat(out, verbose);
             case Silent:
                 return new SilentFormat(out, verbose);
             case TextReport:
