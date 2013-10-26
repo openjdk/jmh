@@ -71,6 +71,7 @@ public class BinaryLinkServer {
     private final Acceptor acceptor;
     private final List<Handler> registeredHandlers;
     private final Multimap<BenchmarkRecord, BenchResult> results;
+    private volatile boolean ignoreNextResult;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -134,6 +135,10 @@ public class BinaryLinkServer {
         synchronized (this) {
             return results;
         }
+    }
+
+    public void ignoreNextResult() {
+        ignoreNextResult = true;
     }
 
     private final class Acceptor extends Thread {
@@ -246,7 +251,11 @@ public class BinaryLinkServer {
 
         private void handleResults(ResultsFrame obj) {
             synchronized (this) {
-                results.put(obj.getRecord(), obj.getResult());
+                if (!ignoreNextResult) {
+                    results.put(obj.getRecord(), obj.getResult());
+                } else {
+                    ignoreNextResult = false;
+                }
             }
         }
 

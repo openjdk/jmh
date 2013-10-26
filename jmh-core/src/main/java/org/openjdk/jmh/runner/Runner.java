@@ -380,11 +380,11 @@ public class Runner extends BaseRunner {
         int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
         int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
         if (warmupForkCount > 0) {
-            String[] warmupForkCheat = Utils.concat(commandString, new String[]{"-wi", "1", "-i", "0"});
-            out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(warmupForkCheat));
+            out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < warmupForkCount; i++) {
                 out.println("# Warmup Fork: " + (i+1) + " of " + forkCount);
-                doFork(reader, warmupForkCheat);
+                reader.ignoreNextResult();
+                doFork(reader, commandString);
             }
         }
 
