@@ -25,7 +25,6 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.BootstrappedStatistics;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 import org.openjdk.jmh.util.internal.Statistics;
 
@@ -69,20 +68,12 @@ public class SampleTimePerOp extends Result {
     /** {@inheritDoc} */
     @Override
     public double getScore() {
-        Statistics stats = new Statistics();
-        for (long l : buffer.getSamples()) {
-            stats.addValue(l);
-        }
-        return convertNs(stats.getMean());
+        return convertNs(buffer.getStatistics().getMean());
     }
 
     @Override
     public Statistics getStatistics() {
-        Statistics stats = new Statistics();
-        for (long l : buffer.getSamples()) {
-            stats.addValue(convertNs(l));
-        }
-        return stats;
+        return buffer.getStatistics();
     }
 
     @Override
@@ -97,10 +88,7 @@ public class SampleTimePerOp extends Result {
 
     @Override
     public String toString() {
-        Statistics stats = new Statistics();
-        for (long l : buffer.getSamples()) {
-            stats.addValue(l);
-        }
+        Statistics stats = buffer.getStatistics();
 
         StringBuilder sb = new StringBuilder();
         sb.append("n = ").append(stats.getN()).append(", ");
@@ -122,11 +110,7 @@ public class SampleTimePerOp extends Result {
 
     @Override
     public String extendedInfo(String label) {
-
-        Statistics stats = new Statistics();
-        for (long l : buffer.getSamples()) {
-            stats.addValue(l);
-        }
+        Statistics stats = buffer.getStatistics();
 
         StringBuilder sb = new StringBuilder();
         sb.append("Run result ").append((label == null) ? "" : "\"" + label + "\"").append(": \n");
@@ -149,18 +133,10 @@ public class SampleTimePerOp extends Result {
 
         sb.append(String.format("        min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
 
-        BootstrappedStatistics boot = new BootstrappedStatistics(stats);
         for (double p : new double[] {Double.MIN_VALUE, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00}) {
-            Statistics bootedStat = boot.getBootPercentile(p*100);
-
-            double[] interval95 = bootedStat.getConfidenceInterval(0.05);
-            double[] interval99 = bootedStat.getConfidenceInterval(0.01);
-
-            sb.append(String.format("  %9s = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s\n",
+            sb.append(String.format("  %9s = %10.3f %s\n",
                     "p(" + String.format("%.4f", p) + ")",
-                    convertNs(bootedStat.getMean()),
-                    convertNs((interval95[1] - interval95[0]) / 2),
-                    convertNs((interval99[1] - interval99[0]) / 2),
+                    convertNs(stats.getPercentile(p*100)),
                     getScoreUnit()
             ));
         }
@@ -186,21 +162,15 @@ public class SampleTimePerOp extends Result {
 
         @Override
         public Result aggregate(Collection<SampleTimePerOp> results) {
-            // estimate size
-            int size = 0;
-            for (SampleTimePerOp r : results) {
-                size += r.buffer.getSamples().length;
-            }
-
             // generate new sample buffer
             ResultRole mode = null;
             String label = null;
-            SampleBuffer buffer = new SampleBuffer(size);
+            SampleBuffer buffer = new SampleBuffer();
             TimeUnit tu = null;
             for (SampleTimePerOp r : results) {
                 tu = r.outputTimeUnit;
                 label = r.label;
-                buffer.addAll(r.buffer.getSamples());
+                buffer.addAll(r.buffer);
             }
 
             return new SampleTimePerOp(mode, label, buffer, tu);

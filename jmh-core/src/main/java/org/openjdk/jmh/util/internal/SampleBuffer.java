@@ -25,7 +25,6 @@
 package org.openjdk.jmh.util.internal;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Sampling buffer accepts samples.
@@ -34,38 +33,56 @@ import java.util.Arrays;
  */
 public class SampleBuffer implements Serializable {
 
-    private final long[] samples;
-    private final int size;
-    private int index;
+    private static final int PRECISION_BITS = 10;
+    private static final int SIZE_LIMIT = 1000000;
+
+    private final int[][] hdr;
+
+    private int size;
 
     public SampleBuffer() {
-        this(1024);
+        hdr = new int[64][];
+        clear();
     }
 
-    public SampleBuffer(int size) {
-        this.size = size;
-        this.samples = new long[size];
+    private void clear() {
+        for (int p = 0; p < 64; p++) {
+            hdr[p] = new int[1 << PRECISION_BITS];
+        }
+        size = 0;
     }
 
     public boolean add(long sample) {
-        if (index == size) {
-            samples[0] = sample;
-            index = 0;
+        if (size++ > SIZE_LIMIT) {
+            clear();
             return true;
         } else {
-            samples[index++] = sample;
+            int msb = 64 - Long.numberOfLeadingZeros(sample);
+            int bucket = Math.max(0, msb - PRECISION_BITS);
+            int subBucket = (int) (sample >> bucket);
+            hdr[bucket][subBucket]++;
             return false;
         }
     }
 
-    public long[] getSamples() {
-        return Arrays.copyOf(samples, index);
+    public Statistics getStatistics() {
+        // TODO: This method is very memory-hungry, make the specialized Statistics
+        Statistics stat = new Statistics();
+        for (int i = 0; i < hdr.length; i++) {
+            for (int j = 0; j < hdr[i].length; j++) {
+                for (int c = 0; c < hdr[i][j]; c++) {
+                    stat.addValue(j << i);
+                }
+            }
+        }
+        return stat;
     }
 
-    public void addAll(long[] samples) {
-        for (long l : samples) {
-            add(l);
+    public void addAll(SampleBuffer other) {
+        for (int i = 0; i < other.hdr.length; i++) {
+            for (int j = 0; j < other.hdr[i].length; j++) {
+                hdr[i][j] += other.hdr[i][j];
+            }
         }
     }
-
 }
