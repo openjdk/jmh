@@ -1,0 +1,81 @@
+<!--
+Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+This code is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 only, as
+published by the Free Software Foundation.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the LICENSE file that accompanied this code.
+
+This code is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+version 2 for more details (a copy is included in the LICENSE file that
+accompanied this code).
+
+You should have received a copy of the GNU General Public License version
+2 along with this work; if not, write to the Free Software Foundation,
+Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+or visit www.oracle.com if you need additional information or have any
+questions.
+-->
+
+<project name="jmh-ant" default="jar" basedir=".">
+    <description>
+        Sample Ant build file for using JMH without Maven.
+        This is the unsupported way to run JMH, but still can be
+        useful to understand the ways JMH compiles and runs.
+    </description>
+
+    <!--
+        Point this to JMH JAR file. We default this to the result
+        of Maven build, but really, you can point it to the standalone JAR.
+    -->
+    <property name="jmh.jar" location="../jmh-core/target/jmh-core-1.0-SNAPSHOT.jar"/>
+
+    <!--
+        Point this to args4j dependency. Again, we default to the one
+        Maven already resolved for us, but you can point it elsewhere.
+    -->
+    <property name="args4j.jar" location="${user.home}/.m2/repository/args4j/args4j/2.0.16/args4j-2.0.16.jar"/>
+
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+
+    <!--
+        The workflow is as follows:
+          - Compile the benchmarks with JMH in classpath.
+              * Annotation processors will run and generate synthetic code.
+              * Annotation processors will create the list of discovered microbenchmarks.
+          - Pack the classes, generated code, microbenchmark lists in a JAR
+              * Bring the dependencies along in the JAR
+              * (You might be able to run JMH without the self-contained JAR,
+                take note of the META-INF/* files in that case)
+    -->
+    <target name="jar" description="Generate the self-contained JAR">
+        <delete dir="${build}"/>
+        <mkdir dir="${build}"/>
+
+        <javac srcdir="${src}" destdir="${build}" classpath="${jmh.jar}"/>
+
+        <delete dir="${dist} "/>
+        <mkdir dir="${dist}"/>
+
+        <jar jarfile="${dist}/microbenchmarks.jar" basedir="${build}">
+            <manifest>
+                <attribute name="Main-Class" value="org.openjdk.jmh.Main"/>
+            </manifest>
+            <zipgroupfileset file="${jmh.jar}" includes="**/*.jar" />
+            <zipgroupfileset file="${args4j.jar}" includes="**/*.jar" />
+        </jar>
+    </target>
+
+    <target name="clean" description="Clean">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>
