@@ -150,7 +150,22 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
                 return true;
             }
 
-        };
+        },
+
+        CUSTOM {
+            @Override
+            ExecutorService createExecutor(int maxThreads, String prefix) {
+                try {
+                    String className = System.getProperty("harness.executor.class");
+                    return (ExecutorService) Class.forName(className).getConstructor(int.class, String.class)
+                            .newInstance(maxThreads, prefix);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        },
+
+        ;
 
         abstract ExecutorService createExecutor(int maxThreads, String prefix);
 
