@@ -938,6 +938,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        long rnd = System.nanoTime();");
             writer.println("        long rndMask = 0;");
             writer.println("        long time = 0;");
+            writer.println("        int currentStride = 0;");
             writer.println("        do {");
 
             invocationProlog(writer, 4, method, states, true);
@@ -949,8 +950,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("            }");
             writer.println("            " + emitCall(method, states) + ';');
             writer.println("            if (sample) {");
-            writer.println("                boolean flipped = buffer.add(System.nanoTime() - time);");
-            writer.println("                if (flipped) {");
+            writer.println("                buffer.add(System.nanoTime() - time);");
+            writer.println("                if (currentStride++ > 1000000) {");
+            writer.println("                    buffer.half();");
+            writer.println("                    currentStride = 0;");
             writer.println("                    rndMask = (rndMask << 1) + 1;");
             writer.println("                }");
             writer.println("            }");

@@ -34,11 +34,8 @@ import java.io.Serializable;
 public class SampleBuffer implements Serializable {
 
     private static final int PRECISION_BITS = 10;
-    private static final int SIZE_LIMIT = 1000000;
 
     private final int[][] hdr;
-
-    private int size;
 
     public SampleBuffer() {
         hdr = new int[64][];
@@ -49,20 +46,21 @@ public class SampleBuffer implements Serializable {
         for (int p = 0; p < 64; p++) {
             hdr[p] = new int[1 << PRECISION_BITS];
         }
-        size = 0;
     }
 
-    public boolean add(long sample) {
-        if (size++ > SIZE_LIMIT) {
-            clear();
-            return true;
-        } else {
-            int msb = 64 - Long.numberOfLeadingZeros(sample);
-            int bucket = Math.max(0, msb - PRECISION_BITS);
-            int subBucket = (int) (sample >> bucket);
-            hdr[bucket][subBucket]++;
-            return false;
+    public void half() {
+        for (int i = 0; i < 64; i++) {
+            for (int j = 0; j < hdr[i].length; j++) {
+                hdr[i][j] = Math.max(hdr[i][j], hdr[i][j] / 2); // prevent halving to zero
+            }
         }
+    }
+
+    public void add(long sample) {
+        int msb = 64 - Long.numberOfLeadingZeros(sample);
+        int bucket = Math.max(0, msb - PRECISION_BITS);
+        int subBucket = (int) (sample >> bucket);
+        hdr[bucket][subBucket]++;
     }
 
     public Statistics getStatistics() {
