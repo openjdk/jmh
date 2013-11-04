@@ -175,8 +175,8 @@ public class TextReportFormat extends AbstractOutputFormat {
         }
         nameLen += 2;
 
-        out.printf("%-" + nameLen + "s %6s %3s %6s %4s %12s %12s %8s%n",
-                "Benchmark", "Mode", "Thr", "Cnt", "Sec",
+        out.printf("%-" + nameLen + "s %6s %3s %9s %4s %12s %12s %8s%n",
+                "Benchmark", "Mode", "Thr", "Count", "Sec",
                 "Mean", "Mean error", "Units");
         for (BenchmarkRecord key : runResults.keySet()) {
             double[] interval = new double[]{Double.NaN, Double.NaN};
@@ -192,7 +192,7 @@ public class TextReportFormat extends AbstractOutputFormat {
                     interval = stats.getConfidenceInterval(0.01);
                 }
 
-                out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
+                out.printf("%-" + nameLen + "s %6s %3d %9d %4d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.getUsername()),
                         key.getMode().shortLabel(),
                         threads, stats.getN(),
@@ -207,7 +207,7 @@ public class TextReportFormat extends AbstractOutputFormat {
                     interval = stats.getConfidenceInterval(0.01);
                 }
 
-                out.printf("%-" + nameLen + "s %6s %3d %6d %4d %12.3f %12.3f %8s%n",
+                out.printf("%-" + nameLen + "s %6s %3d %9d %4d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.getUsername() + ":" + label),
                         key.getMode().shortLabel(),
                         threads, stats.getN(),
