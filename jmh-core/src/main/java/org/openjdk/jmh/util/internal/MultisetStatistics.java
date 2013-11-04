@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.util.internal;
 
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class MultisetStatistics extends AbstractStatistics {
 
@@ -112,7 +112,7 @@ public class MultisetStatistics extends AbstractStatistics {
                     count--;
                     return val;
                 } else {
-                    return Collections.<Double>emptyIterator().next();
+                    throw new NoSuchElementException("No next element.");
                 }
             }
         };
