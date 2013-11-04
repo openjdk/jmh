@@ -114,34 +114,34 @@ public class SampleTimePerOp extends Result {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Run result ").append((label == null) ? "" : "\"" + label + "\"").append(": \n");
-        sb.append("  samples = ").append(stats.getN()).append("\n");
+        sb.append("    samples = ").append(stats.getN()).append("\n");
 
         if (stats.getN() > 2) {
             double[] interval95 = stats.getConfidenceInterval(0.05);
             double[] interval99 = stats.getConfidenceInterval(0.01);
-            sb.append(String.format("       mean = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f",
+            sb.append(String.format("        mean = %10.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f",
                     convertNs(stats.getMean()),
                     convertNs((interval95[1] - interval95[0]) / 2),
                     convertNs((interval99[1] - interval99[0]) / 2)
             ));
         } else {
-            sb.append(String.format("       mean = %10.3f (<= 2 iterations)",
+            sb.append(String.format("        mean = %10.3f (<= 2 iterations)",
                     convertNs(stats.getMean())
             ));
         }
         sb.append(" ").append(getScoreUnit()).append("\n");
 
-        sb.append(String.format("        min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
+        sb.append(String.format("         min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
 
-        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00}) {
+        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
             sb.append(String.format("  %9s = %10.3f %s\n",
-                    "p(" + String.format("%.4f", p) + ")",
+                    "p(" + String.format("%7.4f", p*100) + ")",
                     convertNs(stats.getPercentile(p*100)),
                     getScoreUnit()
             ));
         }
 
-        sb.append(String.format("        max = %10.3f %s\n",  convertNs(stats.getMax()), getScoreUnit()));
+        sb.append(String.format("         max = %10.3f %s\n",  convertNs(stats.getMax()), getScoreUnit()));
 
         return sb.toString();
     }
