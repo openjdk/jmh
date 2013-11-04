@@ -24,9 +24,6 @@
  */
 package org.openjdk.jmh.util.internal;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 public class MultisetStatistics extends AbstractStatistics {
 
     private final Multiset<Double> values;
@@ -86,35 +83,17 @@ public class MultisetStatistics extends AbstractStatistics {
     }
 
     @Override
-    protected DoubleIterator valuesIterator() {
-        return new DoubleIterator() {
-            private Iterator<Double> current = values.keys().iterator();
-            private int count;
-            private Double val;
-
-            private void ensureNonEmpty() {
-                while (count == 0 && current.hasNext()) {
-                    val = current.next();
-                    count = values.count(val);
-                }
+    public double getVariance() {
+        if (getN() > 0) {
+            double v = 0;
+            double m = getMean();
+            for (double d : values.keys()) {
+                v += Math.pow(d - m, 2) * values.count(d);
             }
-
-            @Override
-            public boolean hasNext() {
-                ensureNonEmpty();
-                return (count > 0);
-            }
-
-            @Override
-            public double next() {
-                ensureNonEmpty();
-                if (count > 0) {
-                    count--;
-                    return val;
-                } else {
-                    throw new NoSuchElementException("No next element.");
-                }
-            }
-        };
+            return v / (getN() - 1);
+        } else {
+            return Double.NaN;
+        }
     }
+
 }

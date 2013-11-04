@@ -194,20 +194,4 @@ public abstract class AbstractStatistics implements Statistics {
         return Math.sqrt(getVariance());
     }
 
-    @Override
-    public double getVariance() {
-        if (getN() > 0) {
-            double v = 0;
-            double m = getMean();
-            for (DoubleIterator it = valuesIterator(); it.hasNext(); ) {
-                double d = it.next();
-                v += Math.pow(d - m, 2);
-            }
-            return v / (getN() - 1);
-        } else {
-            return Double.NaN;
-        }
-    }
-
-    protected abstract DoubleIterator valuesIterator();
 }

@@ -26,7 +26,6 @@ package org.openjdk.jmh.util.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -140,19 +139,17 @@ public class ListStatistics extends AbstractStatistics {
     }
 
     @Override
-    protected DoubleIterator valuesIterator() {
-        return new DoubleIterator() {
-            private final Iterator<Double> backIterator = values.iterator();
-
-            @Override
-            public boolean hasNext() {
-                return backIterator.hasNext();
+    public double getVariance() {
+        if (getN() > 0) {
+            double v = 0;
+            double m = getMean();
+            for (double d : values) {
+                v += Math.pow(d - m, 2);
             }
-
-            @Override
-            public double next() {
-                return backIterator.next();
-            }
-        };
+            return v / (getN() - 1);
+        } else {
+            return Double.NaN;
+        }
     }
+
 }
