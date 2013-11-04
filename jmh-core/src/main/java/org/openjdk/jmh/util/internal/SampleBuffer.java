@@ -39,10 +39,6 @@ public class SampleBuffer implements Serializable {
 
     public SampleBuffer() {
         hdr = new int[64][];
-        clear();
-    }
-
-    private void clear() {
         for (int p = 0; p < 64; p++) {
             hdr[p] = new int[1 << PRECISION_BITS];
         }
@@ -51,7 +47,10 @@ public class SampleBuffer implements Serializable {
     public void half() {
         for (int i = 0; i < 64; i++) {
             for (int j = 0; j < hdr[i].length; j++) {
-                hdr[i][j] = Math.max(hdr[i][j], hdr[i][j] / 2); // prevent halving to zero
+                int nV = hdr[i][j] / 2;
+                if (nV != 0) { // prevent halving to zero
+                    hdr[i][j] = nV;
+                }
             }
         }
     }
