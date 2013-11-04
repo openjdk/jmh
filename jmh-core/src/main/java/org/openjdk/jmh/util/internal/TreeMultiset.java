@@ -27,16 +27,16 @@ package org.openjdk.jmh.util.internal;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class HashMultiset<T> implements Multiset<T>, Serializable {
+public class TreeMultiset<T extends Comparable<T>> implements Multiset<T>, Serializable {
 
     private final Map<T, Integer> map;
     private int size;
 
-    public HashMultiset() {
-        map = new HashMap<T, Integer>();
+    public TreeMultiset() {
+        map = new TreeMap<T, Integer>();
     }
 
     @Override

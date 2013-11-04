@@ -25,6 +25,7 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.ListStatistics;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.util.Collection;
@@ -88,7 +89,7 @@ public class SingleShotTime extends Result {
         public Result aggregate(Collection<SingleShotTime> results) {
             ResultRole role = null;
             String label = null;
-            Statistics stat = new Statistics();
+            ListStatistics stat = new ListStatistics();
             long duration = 0;
             TimeUnit tu = null;
             for (SingleShotTime r : results) {

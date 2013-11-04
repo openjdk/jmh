@@ -66,13 +66,10 @@ public class SampleBuffer implements Serializable {
     }
 
     public Statistics getStatistics() {
-        // TODO: This method is very memory-hungry, make the specialized Statistics
-        Statistics stat = new Statistics();
+        MultisetStatistics stat = new MultisetStatistics();
         for (int i = 0; i < hdr.length; i++) {
             for (int j = 0; j < hdr[i].length; j++) {
-                for (int c = 0; c < hdr[i][j]; c++) {
-                    stat.addValue(j << i);
-                }
+                stat.addValue((long) j << i, hdr[i][j]);
             }
         }
         return stat;

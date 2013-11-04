@@ -96,7 +96,7 @@ public class SampleTimePerOp extends Result {
                 convertNs(stats.getMean()),
                 getScoreUnit()));
         sb.append(String.format(", p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f %s",
-                convertNs(stats.getPercentile(Double.MIN_VALUE)),
+                convertNs(stats.getPercentile(0)),
                 convertNs(stats.getPercentile(50)),
                 convertNs(stats.getPercentile(90)),
                 convertNs(stats.getPercentile(95)),
@@ -133,7 +133,7 @@ public class SampleTimePerOp extends Result {
 
         sb.append(String.format("        min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
 
-        for (double p : new double[] {Double.MIN_VALUE, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00}) {
+        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00}) {
             sb.append(String.format("  %9s = %10.3f %s\n",
                     "p(" + String.format("%.4f", p) + ")",
                     convertNs(stats.getPercentile(p*100)),

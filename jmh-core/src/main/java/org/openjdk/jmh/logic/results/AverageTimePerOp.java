@@ -25,6 +25,7 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.ListStatistics;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.util.Collection;
@@ -90,7 +91,7 @@ public class AverageTimePerOp extends Result {
     public static class ResultAggregator implements Aggregator<AverageTimePerOp> {
         @Override
         public AverageTimePerOp aggregate(Collection<AverageTimePerOp> results) {
-            Statistics stat = new Statistics();
+            ListStatistics stat = new ListStatistics();
             ResultRole role = null;
             String label = null;
             long operations = 0;

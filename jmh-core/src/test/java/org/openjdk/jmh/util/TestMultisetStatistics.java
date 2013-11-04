@@ -26,7 +26,8 @@ package org.openjdk.jmh.util;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openjdk.jmh.util.internal.Statistics;
+import org.openjdk.jmh.util.internal.ListStatistics;
+import org.openjdk.jmh.util.internal.MultisetStatistics;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,7 +36,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
-public class TestStatistics {
+public class TestMultisetStatistics {
 
     private static final double[] VALUES = {
         60.89053178, 3.589312005, 42.73638635, 85.55397805, 96.66786311,
@@ -45,15 +46,12 @@ public class TestStatistics {
         36.99130073, 60.17648239, 33.1484382, 56.4605944, 93.67454206
     };
 
-    private static final Statistics instance = new Statistics();
-
-    public TestStatistics() {
-    }
+    private static final MultisetStatistics instance = new MultisetStatistics();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         for (double value : VALUES) {
-            instance.addValue(value);
+            instance.addValue(value, 1);
         }
     }
 
@@ -62,7 +60,7 @@ public class TestStatistics {
      */
     @Test
     public strictfp void testAdd_double() {
-        Statistics stats = new Statistics();
+        ListStatistics stats = new ListStatistics();
         stats.addValue(VALUES[0]);
         assertEquals(1, stats.getN());
         assertEquals(VALUES[0], stats.getSum(), 0.0);
@@ -144,7 +142,7 @@ public class TestStatistics {
      */
     @Test
     public strictfp void testToString() {
-        String expResult = "N:25 Mean: 51.03316951740001 Min: 2.34517545 Max: 96.66786311 StdDev: 28.582874479178013";
+        String expResult = "N:25 Mean: 51.033169517400005 Min: 2.34517545 Max: 96.66786311 StdDev: 28.582874479178017";
         String result = instance.toString();
         assertEquals(expResult, result);
     }

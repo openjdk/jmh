@@ -24,13 +24,13 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import org.openjdk.jmh.util.internal.ListStatistics;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.text.NumberFormat;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for all types of results that can be returned by a microbenchmark.
@@ -46,7 +46,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
     public Result(ResultRole role, String label, Statistics statistics) {
         this.role = role;
         this.label = label;
-        this.statistics = statistics == null ? new Statistics() : statistics;
+        this.statistics = statistics == null ? new ListStatistics() : statistics;
     }
 
     /**

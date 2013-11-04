@@ -42,6 +42,13 @@ public interface Multiset<T> {
     void add(T element);
 
     /**
+     * Add the element to the multiset
+     * @param element element to add
+     * @param count number of elements to add
+     */
+    void add(T element, int count);
+
+    /**
      * Count the elements in multiset
      * @param element element
      * @return number of matching elements in the set; zero, if no elements

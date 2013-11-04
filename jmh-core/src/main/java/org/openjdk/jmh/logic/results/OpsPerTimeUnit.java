@@ -25,6 +25,7 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.ListStatistics;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.util.Collection;
@@ -90,7 +91,7 @@ public class OpsPerTimeUnit extends Result {
         return new Aggregator<OpsPerTimeUnit>() {
             @Override
             public Result aggregate(Collection<OpsPerTimeUnit> results) {
-                Statistics stat = new Statistics();
+                ListStatistics stat = new ListStatistics();
                 for (OpsPerTimeUnit r : results) {
                     stat.addValue(r.getScore());
                 }
@@ -121,7 +122,7 @@ public class OpsPerTimeUnit extends Result {
         return new Aggregator<OpsPerTimeUnit>() {
             @Override
             public Result aggregate(Collection<OpsPerTimeUnit> results) {
-                Statistics stat = new Statistics();
+                ListStatistics stat = new ListStatistics();
                 for (OpsPerTimeUnit r : results) {
                     stat.addValue(r.getScore());
                 }
