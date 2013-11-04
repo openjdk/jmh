@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.util.internal;
 
-import java.util.Iterator;
-
 public abstract class AbstractStatistics implements Statistics {
     private static final double[][] STUDENT_T = {
             {3.078, 6.314, 12.706, 31.821, 63.657, 318.313},
@@ -201,7 +199,7 @@ public abstract class AbstractStatistics implements Statistics {
         if (getN() > 0) {
             double v = 0;
             double m = getMean();
-            for (Iterator<Double> it = valuesIterator(); it.hasNext(); ) {
+            for (DoubleIterator it = valuesIterator(); it.hasNext(); ) {
                 double d = it.next();
                 v += Math.pow(d - m, 2);
             }
@@ -211,5 +209,5 @@ public abstract class AbstractStatistics implements Statistics {
         }
     }
 
-    protected abstract Iterator<Double> valuesIterator();
+    protected abstract DoubleIterator valuesIterator();
 }

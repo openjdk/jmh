@@ -140,7 +140,19 @@ public class ListStatistics extends AbstractStatistics {
     }
 
     @Override
-    protected Iterator<Double> valuesIterator() {
-        return values.iterator();
+    protected DoubleIterator valuesIterator() {
+        return new DoubleIterator() {
+            private final Iterator<Double> backIterator = values.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return backIterator.hasNext();
+            }
+
+            @Override
+            public double next() {
+                return backIterator.next();
+            }
+        };
     }
 }

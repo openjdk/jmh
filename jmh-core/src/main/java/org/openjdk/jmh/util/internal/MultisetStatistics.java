@@ -86,8 +86,8 @@ public class MultisetStatistics extends AbstractStatistics {
     }
 
     @Override
-    protected Iterator<Double> valuesIterator() {
-        return new Iterator<Double>() {
+    protected DoubleIterator valuesIterator() {
+        return new DoubleIterator() {
             private Iterator<Double> current = values.keys().iterator();
             private int count;
             private Double val;
@@ -106,7 +106,7 @@ public class MultisetStatistics extends AbstractStatistics {
             }
 
             @Override
-            public Double next() {
+            public double next() {
                 ensureNonEmpty();
                 if (count > 0) {
                     count--;
@@ -114,11 +114,6 @@ public class MultisetStatistics extends AbstractStatistics {
                 } else {
                     return Collections.<Double>emptyIterator().next();
                 }
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("Nope.");
             }
         };
     }
