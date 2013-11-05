@@ -31,10 +31,7 @@ import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,17 +47,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Accepts the OutputFormat calls from the network and forwards those to given local OutputFormat
+ * Accepts the binary data from the forked VM and pushes it to parent VM
+ * as appropriate. This server assumes there is only the one and only
+ * client at any given point of time.
  */
 public class BinaryLinkServer {
 
@@ -69,9 +65,8 @@ public class BinaryLinkServer {
     private final Map<String, Method> methods;
     private final Set<String> forbidden;
     private final Acceptor acceptor;
-    private final List<Handler> registeredHandlers;
-    private final Multimap<BenchmarkRecord, BenchResult> results;
-    private volatile boolean ignoreNextResult;
+    private final AtomicReference<Handler> handler;
+    private final AtomicReference<BenchResult> result;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -93,26 +88,25 @@ public class BinaryLinkServer {
             }
         }
 
-        registeredHandlers = Collections.synchronizedList(new ArrayList<Handler>());
-        synchronized (this) {
-            results = new TreeMultimap<BenchmarkRecord, BenchResult>();
-        }
-
         acceptor = new Acceptor();
         acceptor.start();
+
+        handler = new AtomicReference<Handler>();
+        result = new AtomicReference<BenchResult>();
     }
 
     public void terminate() {
         acceptor.close();
 
-        for (Handler r : registeredHandlers) {
-            r.close();
+        Handler h = handler.getAndSet(null);
+        if (h != null) {
+            h.close();
         }
 
         try {
             acceptor.join();
-            for (Handler r : registeredHandlers) {
-                r.join();
+            if (h != null) {
+                h.join();
             }
         } catch (InterruptedException e) {
             // ignore
@@ -120,25 +114,23 @@ public class BinaryLinkServer {
     }
 
     public void waitFinish() {
-        for (Iterator<Handler> iterator = registeredHandlers.iterator(); iterator.hasNext(); ) {
-            Handler r = iterator.next();
+        Handler h = handler.getAndSet(null);
+        if (h != null) {
             try {
-                r.join();
-                iterator.remove();
+                h.join();
             } catch (InterruptedException e) {
                 // ignore
             }
         }
     }
 
-    public Multimap<BenchmarkRecord, BenchResult> getResults() {
-        synchronized (this) {
-            return results;
+    public BenchResult getResult() {
+        BenchResult res = result.getAndSet(null);
+        if (res != null) {
+            return res;
+        } else {
+            throw new IllegalStateException("Acquiring the null result");
         }
-    }
-
-    public void ignoreNextResult() {
-        ignoreNextResult = true;
     }
 
     private final class Acceptor extends Thread {
@@ -155,7 +147,9 @@ public class BinaryLinkServer {
                 while (!Thread.interrupted()) {
                     Socket clientSocket = server.accept();
                     Handler r = new Handler(clientSocket);
-                    registeredHandlers.add(r);
+                    if (!handler.compareAndSet(null, r)) {
+                        throw new IllegalStateException("The handler is already registered");
+                    }
                     r.start();
                 }
             } catch (SocketException e) {
@@ -250,12 +244,8 @@ public class BinaryLinkServer {
         }
 
         private void handleResults(ResultsFrame obj) {
-            synchronized (this) {
-                if (!ignoreNextResult) {
-                    results.put(obj.getRecord(), obj.getResult());
-                } else {
-                    ignoreNextResult = false;
-                }
+            if (!result.compareAndSet(null, obj.getResult())) {
+                throw new IllegalStateException("The result has been already set.");
             }
         }
 

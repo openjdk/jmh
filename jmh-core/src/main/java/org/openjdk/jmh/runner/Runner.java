@@ -39,7 +39,7 @@ import org.openjdk.jmh.runner.options.WarmupMode;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.TreeMultimap;
 
@@ -320,14 +320,56 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Multimap<BenchmarkRecord, BenchResult> runSeparate(Set<BenchmarkRecord> benchmarksToFork) {
+    private Multimap<BenchmarkRecord, BenchResult> runSeparate(Set<BenchmarkRecord> benchmarks) {
+        Multimap<BenchmarkRecord, BenchResult> results = new HashMultimap<BenchmarkRecord, BenchResult>();
+
+        if (benchmarks.isEmpty()) {
+            return results;
+        }
+
         BinaryLinkServer server = null;
         try {
             server = new BinaryLinkServer(options, out);
-            for (BenchmarkRecord benchmark : benchmarksToFork) {
-                runSeparateMicroBenchmark(server, benchmark, server.getHost(), server.getPort());
+
+            for (BenchmarkRecord benchmark : benchmarks) {
+                // Running microbenchmark in separate JVM requires to read some options from annotations.
+                final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
+                Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
+
+                String annJvmArgs = null;
+                if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgs())) {
+                    annJvmArgs = forkAnnotation.jvmArgs().trim();
+                }
+
+                String annJvmArgsAppend = null;
+                if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsAppend())) {
+                    annJvmArgsAppend = forkAnnotation.jvmArgsAppend().trim();
+                }
+
+                String annJvmArgsPrepend = null;
+                if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsPrepend())) {
+                    annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
+                }
+
+                String[] commandString = getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
+
+                int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
+                int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
+                if (warmupForkCount > 0) {
+                    out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
+                    for (int i = 0; i < warmupForkCount; i++) {
+                        out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
+                        doFork(server, commandString);
+                    }
+                }
+
+                out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
+                for (int i = 0; i < forkCount; i++) {
+                    out.println("# Fork: " + (i + 1) + " of " + forkCount);
+                    BenchResult result = doFork(server, commandString);
+                    results.put(benchmark, result);
+                }
             }
-            return server.getResults();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         } finally {
@@ -335,6 +377,8 @@ public class Runner extends BaseRunner {
                 server.terminate();
             }
         }
+
+        return results;
     }
 
     /**
@@ -346,56 +390,7 @@ public class Runner extends BaseRunner {
         return (fork != null) ? fork.value() : -1;
     }
 
-    /**
-     * Run the micro benchmark in a separate JVM process
-     *
-     * @param benchmark micro to run
-     * @param host host VM host
-     * @param port host VM port
-     */
-    private void runSeparateMicroBenchmark(BinaryLinkServer reader, BenchmarkRecord benchmark, String host, int port) {
-
-        // Running microbenchmark in separate JVM requires to read some options from annotations.
-
-        final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
-        Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
-
-        String annJvmArgs = null;
-        if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgs())) {
-            annJvmArgs = forkAnnotation.jvmArgs().trim();
-        }
-
-        String annJvmArgsAppend = null;
-        if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsAppend())) {
-            annJvmArgsAppend = forkAnnotation.jvmArgsAppend().trim();
-        }
-
-        String annJvmArgsPrepend = null;
-        if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsPrepend())) {
-            annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
-        }
-
-        String[] commandString = getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, host, port);
-
-        int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
-        int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
-        if (warmupForkCount > 0) {
-            out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
-            for (int i = 0; i < warmupForkCount; i++) {
-                out.println("# Warmup Fork: " + (i+1) + " of " + forkCount);
-                reader.ignoreNextResult();
-                doFork(reader, commandString);
-            }
-        }
-
-        out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
-        for (int i = 0; i < forkCount; i++) {
-            out.println("# Fork: " + (i+1) + " of " + forkCount);
-            doFork(reader, commandString);
-        }
-    }
-
-    private void doFork(BinaryLinkServer reader, String[] commandString) {
+    private BenchResult doFork(BinaryLinkServer reader, String[] commandString) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
@@ -427,6 +422,8 @@ public class Runner extends BaseRunner {
         } catch (InterruptedException ex) {
             out.exception(ex);
         }
+
+        return reader.getResult();
     }
 
     /**
