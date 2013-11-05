@@ -25,8 +25,8 @@ questions.
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>org.openjdk.jmh</groupId>
     <artifactId>jmh-parent</artifactId>
     <packaging>pom</packaging>
@@ -34,8 +34,26 @@ questions.
     <name>Java Microbenchmark Harness Parent</name>
 
     <description>
-        This is  a framework for writing and running Java Microbenchmarks.
+        JMH is the framework for writing and running Java nano/micro/millibenchmarks.
     </description>
+
+    <url>
+        http://openjdk.java.net/projects/code-tools/jmh/
+    </url>
+
+    <scm>
+        <url>http://hg.openjdk.java.net/code-tools/jmh/</url>
+        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jmh/</connection>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>shade</id>
+            <name>Aleksey Shipilev</name>
+            <organization>Oracle</organization>
+            <email>aleksey.shipilev@oracle.com</email>
+        </developer>
+    </developers>
 
     <prerequisites>
         <maven>3.0</maven>

@@ -27,16 +27,21 @@ questions.
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.openjdk.jmh</groupId>
-    <artifactId>jmh-simple-benchmark-archetype</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <parent>
+        <groupId>org.openjdk.jmh</groupId>
+        <artifactId>jmh-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <name>JMH Simple Benchmark Archetype</name>
+    <artifactId>jmh-simple-benchmark-archetype</artifactId>
+    <packaging>jar</packaging>
 
     <organization>
         <name>Oracle</name>
         <url>http://openjdk.java.net/</url>
     </organization>
+
     <inceptionYear>2012</inceptionYear>
 
     <description>
@@ -48,4 +53,3 @@ questions.
     </prerequisites>
 
 </project>
-
