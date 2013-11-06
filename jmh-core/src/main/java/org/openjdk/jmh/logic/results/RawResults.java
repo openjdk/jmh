@@ -24,13 +24,23 @@
  */
 package org.openjdk.jmh.logic.results;
 
-public class RawResultPair {
+public class RawResults {
 
-    public final long operations;
-    public final long time;
+    private final long opsPerInv;
+    public long operations;
+    public long realTime;
+    public long startTime;
+    public long stopTime;
 
-    public RawResultPair(long operations, long time) {
-        this.operations = operations;
-        this.time = time;
+    public long getOperations() {
+        return opsPerInv * operations;
+    }
+
+    public long getTime() {
+        return (realTime > 0) ? realTime : (stopTime - startTime);
+    }
+
+    public RawResults(long opsPerInv) {
+        this.opsPerInv = opsPerInv;
     }
 }

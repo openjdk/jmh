@@ -40,7 +40,7 @@ import org.openjdk.jmh.logic.BlackHole;
 import org.openjdk.jmh.logic.InfraControl;
 import org.openjdk.jmh.logic.results.AverageTimePerOp;
 import org.openjdk.jmh.logic.results.OpsPerTimeUnit;
-import org.openjdk.jmh.logic.results.RawResultPair;
+import org.openjdk.jmh.logic.results.RawResults;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
 import org.openjdk.jmh.logic.results.SampleTimePerOp;
@@ -409,7 +409,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + Threads.class.getName() + ';');
         writer.println("import " + Warmup.class.getName() + ';');
         writer.println("import " + BenchmarkMode.class.getName() + ';');
-        writer.println("import " + RawResultPair.class.getName() + ';');
+        writer.println("import " + RawResults.class.getName() + ';');
         writer.println("import " + ResultRole.class.getName() + ';');
         writer.println();
     }
@@ -696,7 +696,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "RawResults res = new RawResults(" + opsPerInv + "L);");
+            writer.println(ident(3) + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, res, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -719,7 +720,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new OpsPerTimeUnit(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.operations, res.time, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new OpsPerTimeUnit(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -729,10 +730,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            String methodName = method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop";
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults res, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("        RawResults result = res;");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
-            writer.println("        long startTime = System.nanoTime();");
+            writer.println("        result.startTime = System.nanoTime();");
             writer.println("        do {");
 
             invocationProlog(writer, 3, method, states, true);
@@ -741,8 +744,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             writer.println("            operations++;");
             writer.println("        } while(!control.isDone);");
-            writer.println("        long stopTime = System.nanoTime();");
-            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (stopTime - startTime));");
+            writer.println("        result.stopTime = System.nanoTime();");
+            writer.println("        result.realTime = realTime;");
+            writer.println("        result.operations = operations;");
             writer.println("    }");
             writer.println();
         }
@@ -787,7 +791,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResultPair res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "RawResults res = new RawResults(" + opsPerInv + "L);");
+            writer.println(ident(3) + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, res, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -809,7 +814,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new AverageTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.operations, res.time, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new AverageTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -819,10 +824,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " RawResultPair " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " void " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, RawResults res, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println("        RawResults result = res;");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
-            writer.println("        long start = System.nanoTime();");
+            writer.println("        result.startTime = System.nanoTime();");
             writer.println("        do {");
 
             invocationProlog(writer, 3, method, states, true);
@@ -831,8 +837,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             writer.println("            operations++;");
             writer.println("        } while(!control.isDone);");
-            writer.println("        long end = System.nanoTime();");
-            writer.println("        return new RawResultPair(operations * " + opsPerInv + "L,  (realTime > 0) ? realTime : (end - start));");
+            writer.println("        result.stopTime = System.nanoTime();");
+            writer.println("        result.realTime = realTime;");
+            writer.println("        result.operations = operations;");
             writer.println("    }");
             writer.println();
         }
@@ -897,7 +904,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "Result res = " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
+            writer.println(ident(3) + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -919,7 +927,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "return res;");
+            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
+            writer.println(ident(3) + "return new SampleTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -928,8 +937,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " Result " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
-            writer.println("        SampleBuffer buffer = new SampleBuffer();");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long realTime = 0;");
             writer.println("        long rnd = System.nanoTime();");
             writer.println("        long rndMask = 0;");
@@ -958,8 +966,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             writer.println("        } while(!control.isDone);");
 
-            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println("        return new SampleTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println("    }");
             writer.println();
         }
