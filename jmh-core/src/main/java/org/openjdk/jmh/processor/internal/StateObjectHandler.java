@@ -410,38 +410,9 @@ public class StateObjectHandler {
         for (StateObject so : cons(stateObjects)) {
             if (!visited.add(so.userType)) continue;
             result.add("static final class " + so.type + " extends " + so.userType + " {");
-            result.add("    private volatile int jmh_auto_generated_pad01;");
-            result.add("    private volatile int jmh_auto_generated_pad02;");
-            result.add("    private volatile int jmh_auto_generated_pad03;");
-            result.add("    private volatile int jmh_auto_generated_pad04;");
-            result.add("    private volatile int jmh_auto_generated_pad05;");
-            result.add("    private volatile int jmh_auto_generated_pad06;");
-            result.add("    private volatile int jmh_auto_generated_pad07;");
-            result.add("    private volatile int jmh_auto_generated_pad08;");
-            result.add("    private volatile int jmh_auto_generated_pad09;");
-            result.add("    private volatile int jmh_auto_generated_pad10;");
-            result.add("    private volatile int jmh_auto_generated_pad11;");
-            result.add("    private volatile int jmh_auto_generated_pad12;");
-            result.add("    private volatile int jmh_auto_generated_pad13;");
-            result.add("    private volatile int jmh_auto_generated_pad14;");
-            result.add("    private volatile int jmh_auto_generated_pad15;");
-            result.add("    private volatile int jmh_auto_generated_pad16;");
-            result.add("    private volatile int jmh_auto_generated_pad17;");
-            result.add("    private volatile int jmh_auto_generated_pad18;");
-            result.add("    private volatile int jmh_auto_generated_pad19;");
-            result.add("    private volatile int jmh_auto_generated_pad20;");
-            result.add("    private volatile int jmh_auto_generated_pad21;");
-            result.add("    private volatile int jmh_auto_generated_pad22;");
-            result.add("    private volatile int jmh_auto_generated_pad23;");
-            result.add("    private volatile int jmh_auto_generated_pad24;");
-            result.add("    private volatile int jmh_auto_generated_pad25;");
-            result.add("    private volatile int jmh_auto_generated_pad26;");
-            result.add("    private volatile int jmh_auto_generated_pad27;");
-            result.add("    private volatile int jmh_auto_generated_pad28;");
-            result.add("    private volatile int jmh_auto_generated_pad29;");
-            result.add("    private volatile int jmh_auto_generated_pad30;");
-            result.add("    private volatile int jmh_auto_generated_pad31;");
-            result.add("    private volatile int jmh_auto_generated_pad32;");
+            for (int p = 0; p < 128; p++) {
+                result.add("    private boolean jmh_auto_generated_pad" + p + ";");
+            }
             result.add("");
 
             switch (so.scope) {

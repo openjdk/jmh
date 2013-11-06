@@ -383,13 +383,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generatePadding(PrintWriter writer) {
-        // Generate padding
-        writer.println(
-                "    public volatile int pad01, pad02, pad03, pad04, pad05, pad06, pad07, pad08;\n" +
-                "    public volatile int pad11, pad12, pad13, pad24, pad15, pad16, pad17, pad18;\n" +
-                "    public volatile int pad21, pad22, pad23, pad34, pad25, pad26, pad27, pad28;\n" +
-                "    public volatile int pad31, pad32, pad33, pad44, pad35, pad36, pad37, pad38;\n" +
-                "    ");
+        for (int p = 0; p < 128; p++) {
+            writer.println("    private boolean jmh_auto_generated_pad" + p + ";");
+        }
     }
 
     private void generateImport(PrintWriter writer) {
