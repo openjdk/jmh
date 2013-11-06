@@ -83,15 +83,13 @@ public class JMHSample_09_Blackholes {
      * This demonstrates Option B:
      *
      * Use explicit Blackhole objects, and sink the values there.
-     * Caveat: you can use the Blackhole only once. Each distinct result should be fed
-     * into the distinct Blackhole. (Background: Blackhole is just another @State object,
-     * bundled with JMH).
+     * (Background: Blackhole is just another @State object, bundled with JMH).
      */
 
     @GenerateMicroBenchmark
-    public void measureRight_2(BlackHole bh1, BlackHole bh2) {
-        bh1.consume(Math.log(x1));
-        bh2.consume(Math.log(x2));
+    public void measureRight_2(BlackHole bh) {
+        bh.consume(Math.log(x1));
+        bh.consume(Math.log(x2));
     }
 
     /*
