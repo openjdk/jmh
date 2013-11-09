@@ -256,32 +256,38 @@ public class StateObjectHandler {
             if (!hasHelpers.contains(so)) continue;
 
             if (type == HelperType.SETUP) {
-                result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
-                result.add("    synchronized(" + so.localIdentifier + ") {");
-                result.add("        if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                result.add("while(!" + so.localIdentifier + ".setup" + helperLevel + "Mutex.compareAndSet(0, 1)) {");
+                result.add("    if (Thread.interrupted()) throw new InterruptedException();");
+                result.add("}");
+                result.add("try {");
+                result.add("    if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : helpersByState.get(so)) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
                         result.add("        " + so.localIdentifier + "." + mi.name + "();");
                     }
                 }
                 result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = true;");
-                result.add("        }");
                 result.add("    }");
+                result.add("} finally {");
+                result.add("    " + so.localIdentifier + ".setup" + helperLevel + "Mutex.set(0);");
                 result.add("}");
             }
 
             if (type == HelperType.TEARDOWN) {
-                result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
-                result.add("    synchronized(" + so.localIdentifier + ") {");
-                result.add("        if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                result.add("while(!" + so.localIdentifier + ".tear" + helperLevel + "Mutex.compareAndSet(0, 1)) {");
+                result.add("    if (Thread.interrupted()) throw new InterruptedException();");
+                result.add("}");
+                result.add("try {");
+                result.add("    if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : helpersByState.get(so)) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        result.add("            " + so.localIdentifier + "." + mi.name + "();");
+                        result.add("        " + so.localIdentifier + "." + mi.name + "();");
                     }
                 }
                 result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = false;");
-                result.add("        }");
                 result.add("    }");
+                result.add("} finally {");
+                result.add("    " + so.localIdentifier + ".tear" + helperLevel + "Mutex.set(0);");
                 result.add("}");
             }
         }
@@ -414,6 +420,12 @@ public class StateObjectHandler {
                 result.add("    private boolean jmh_auto_generated_pad" + p + ";");
             }
             result.add("");
+
+            for (Level level : Level.values()) {
+                result.add("    final AtomicInteger setup" + level + "Mutex = new AtomicInteger();");
+                result.add("    final AtomicInteger tear" + level + "Mutex = new AtomicInteger();");
+                result.add("");
+            }
 
             switch (so.scope) {
                 case Benchmark:
