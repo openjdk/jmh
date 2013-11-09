@@ -25,7 +25,6 @@
 package org.openjdk.jmh.logic.results;
 
 import org.junit.Test;
-import org.openjdk.jmh.util.internal.SampleBuffer;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -36,42 +35,26 @@ import static junit.framework.Assert.assertEquals;
  *
  * @author aleksey.shipilev@oracle.com
  */
-public class TestSampleTimePerOp {
+public class TestSingleShotResult {
 
     @Test
     public void testRunAggregator1() {
-        SampleBuffer b1 = new SampleBuffer();
-        b1.add(1000);
-        b1.add(2000);
-
-        SampleBuffer b2 = new SampleBuffer();
-        b2.add(3000);
-        b2.add(4000);
-
-        SampleTimePerOp r1 = new SampleTimePerOp(ResultRole.BOTH, "Test1", b1, TimeUnit.MICROSECONDS);
-        SampleTimePerOp r2 = new SampleTimePerOp(ResultRole.BOTH, "Test1", b2, TimeUnit.MICROSECONDS);
+        SingleShotResult r1 = new SingleShotResult(ResultRole.BOTH, "Test1", 1000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r2 = new SingleShotResult(ResultRole.BOTH, "Test1", 2000L, TimeUnit.MICROSECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(2.5, result.getScore());
-        assertEquals("us/op", result.getScoreUnit());
+        assertEquals(1.5, result.getScore());
+        assertEquals("us", result.getScoreUnit());
     }
 
     @Test
     public void testIterationAggregator1() {
-        SampleBuffer b1 = new SampleBuffer();
-        b1.add(1000);
-        b1.add(2000);
-
-        SampleBuffer b2 = new SampleBuffer();
-        b2.add(3000);
-        b2.add(4000);
-
-        SampleTimePerOp r1 = new SampleTimePerOp(ResultRole.BOTH, "Test1", b1, TimeUnit.MICROSECONDS);
-        SampleTimePerOp r2 = new SampleTimePerOp(ResultRole.BOTH, "Test1", b2, TimeUnit.MICROSECONDS);
+        SingleShotResult r1 = new SingleShotResult(ResultRole.BOTH, "Test1", 1000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r2 = new SingleShotResult(ResultRole.BOTH, "Test1", 2000L, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(2.5, result.getScore());
-        assertEquals("us/op", result.getScoreUnit());
+        assertEquals(1.5, result.getScore());
+        assertEquals("us", result.getScoreUnit());
     }
 
 }

@@ -38,13 +38,13 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.logic.BlackHole;
 import org.openjdk.jmh.logic.InfraControl;
-import org.openjdk.jmh.logic.results.AverageTimePerOp;
-import org.openjdk.jmh.logic.results.OpsPerTimeUnit;
+import org.openjdk.jmh.logic.results.AverageTimeResult;
 import org.openjdk.jmh.logic.results.RawResults;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
-import org.openjdk.jmh.logic.results.SampleTimePerOp;
-import org.openjdk.jmh.logic.results.SingleShotTime;
+import org.openjdk.jmh.logic.results.SampleTimeResult;
+import org.openjdk.jmh.logic.results.SingleShotResult;
+import org.openjdk.jmh.logic.results.ThroughputResult;
 import org.openjdk.jmh.runner.MicroBenchmarkList;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.internal.CollectionUtils;
@@ -398,10 +398,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + InfraControl.class.getName() + ';');
         writer.println("import " + BlackHole.class.getName() + ';');
         writer.println("import " + Result.class.getName() + ';');
-        writer.println("import " + OpsPerTimeUnit.class.getName() + ';');
-        writer.println("import " + AverageTimePerOp.class.getName() + ';');
-        writer.println("import " + SampleTimePerOp.class.getName() + ';');
-        writer.println("import " + SingleShotTime.class.getName() + ';');
+        writer.println("import " + ThroughputResult.class.getName() + ';');
+        writer.println("import " + AverageTimeResult.class.getName() + ';');
+        writer.println("import " + SampleTimeResult.class.getName() + ';');
+        writer.println("import " + SingleShotResult.class.getName() + ';');
         writer.println("import " + SampleBuffer.class.getName() + ';');
         writer.println("import " + Mode.class.getName() + ';');
         writer.println("import " + Fork.class.getName() + ';');
@@ -484,16 +484,16 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         final TimeUnit timeUnit = findTimeUnit(methodGroup);
         switch (benchmarkKind) {
             case Throughput:
-                generateOpsPerTimeUnit(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
+                generateThroughput(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
                 break;
             case AverageTime:
                 generateAverageTime(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
                 break;
             case SampleTime:
-                generateTimeDistribution(writer, benchmarkKind, methodGroup, timeUnit, states);
+                generateSampleTime(writer, benchmarkKind, methodGroup, timeUnit, states);
                 break;
             case SingleShotTime:
-                generateSingleShot(writer, benchmarkKind, methodGroup, timeUnit, states);
+                generateSingleShotTime(writer, benchmarkKind, methodGroup, timeUnit, states);
                 break;
             default:
                 throw new AssertionError("Shouldn't be here");
@@ -655,7 +655,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateOpsPerTimeUnit(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
         writer.println();
 
@@ -720,7 +720,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new OpsPerTimeUnit(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new ThroughputResult(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -814,7 +814,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new AverageTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new AverageTimeResult(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -865,7 +865,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateTimeDistribution(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
         writer.println();
 
@@ -928,7 +928,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new SampleTimePerOp(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new SampleTimeResult(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -971,7 +971,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateSingleShot(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
         writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
@@ -1003,7 +1003,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new SingleShotTime(ResultRole." + mode + ",\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "return new SingleShotResult(ResultRole." + mode + ",\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class AverageTimePerOp extends Result {
+public class AverageTimeResult extends Result {
 
     /** Total number of operations during iteration */
     private final long operations;
@@ -52,11 +52,11 @@ public class AverageTimePerOp extends Result {
      * @param durationNs       Duration of iteration in NanoSeconds
      * @param tu The TimeUnit to use when calculating the score
      */
-    public AverageTimePerOp(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
+    public AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
         this(mode, label, operations, durationNs, tu, null);
     }
 
-    AverageTimePerOp(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu, Statistics stat) {
+    AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu, Statistics stat) {
         super(mode, label, stat);
         this.operations = operations;
         this.durationNs = durationNs;
@@ -75,11 +75,11 @@ public class AverageTimePerOp extends Result {
         return (durationNs / (double) outputTimeUnit.toNanos(1)) / operations;
     }
 
-    public Aggregator<AverageTimePerOp> getIterationAggregator() {
+    public Aggregator<AverageTimeResult> getIterationAggregator() {
         return new ResultAggregator();
     }
 
-    public Aggregator<AverageTimePerOp> getRunAggregator() {
+    public Aggregator<AverageTimeResult> getRunAggregator() {
         return new ResultAggregator();
     }
 
@@ -88,16 +88,16 @@ public class AverageTimePerOp extends Result {
      * Regardless of aggregation, we need to compute the aggregate time as:
      *   average time = (all time) / (all operations)
      */
-    public static class ResultAggregator implements Aggregator<AverageTimePerOp> {
+    public static class ResultAggregator implements Aggregator<AverageTimeResult> {
         @Override
-        public AverageTimePerOp aggregate(Collection<AverageTimePerOp> results) {
+        public AverageTimeResult aggregate(Collection<AverageTimeResult> results) {
             ListStatistics stat = new ListStatistics();
             ResultRole role = null;
             String label = null;
             long operations = 0;
             long duration = 0;
             TimeUnit tu = null;
-            for (AverageTimePerOp r : results) {
+            for (AverageTimeResult r : results) {
                 role = r.role;
                 label = r.label;
                 tu = r.outputTimeUnit;
@@ -105,7 +105,7 @@ public class AverageTimePerOp extends Result {
                 duration += r.durationNs;
                 stat.addValue(r.getScore());
             }
-            return new AverageTimePerOp(role, label, operations, duration, tu, stat);
+            return new AverageTimeResult(role, label, operations, duration, tu, stat);
         }
     }
 

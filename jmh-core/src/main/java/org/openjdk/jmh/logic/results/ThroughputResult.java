@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
-public class OpsPerTimeUnit extends Result {
+public class ThroughputResult extends Result {
 
     /** Total number of operations during iteration */
     private final long operations;
@@ -51,7 +51,7 @@ public class OpsPerTimeUnit extends Result {
      * @param operations Total number of operations during iteration
      * @param durationNs   Duration of iteration in NanoSeconds
      */
-    public OpsPerTimeUnit(ResultRole role, String label, long operations, long durationNs) {
+    public ThroughputResult(ResultRole role, String label, long operations, long durationNs) {
         this(role, label, operations, durationNs, TimeUnit.MILLISECONDS);
     }
 
@@ -62,11 +62,11 @@ public class OpsPerTimeUnit extends Result {
      * @param durationNs       Duration of iteration in NanoSeconds
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
-    public OpsPerTimeUnit(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
+    public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
         this(role, label, operations, durationNs, outputTimeUnit, null);
     }
 
-    OpsPerTimeUnit(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit, Statistics stats) {
+    ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit, Statistics stats) {
         super(role, label, stats);
         this.operations = operations;
         this.durationNs = durationNs;
@@ -88,11 +88,11 @@ public class OpsPerTimeUnit extends Result {
     @Override
     public Aggregator getIterationAggregator() {
         // compute sum
-        return new Aggregator<OpsPerTimeUnit>() {
+        return new Aggregator<ThroughputResult>() {
             @Override
-            public Result aggregate(Collection<OpsPerTimeUnit> results) {
+            public Result aggregate(Collection<ThroughputResult> results) {
                 ListStatistics stat = new ListStatistics();
-                for (OpsPerTimeUnit r : results) {
+                for (ThroughputResult r : results) {
                     stat.addValue(r.getScore());
                 }
 
@@ -102,7 +102,7 @@ public class OpsPerTimeUnit extends Result {
                 String label = null;
                 long operations = 0;
                 TimeUnit tu = null;
-                for (OpsPerTimeUnit r : results) {
+                for (ThroughputResult r : results) {
                     mode = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
@@ -111,7 +111,7 @@ public class OpsPerTimeUnit extends Result {
                     operations += Math.round(r.operations * (1.0 * normalizedDuration / r.durationNs));
                 }
 
-                return new OpsPerTimeUnit(mode, label, operations, normalizedDuration, tu, stat);
+                return new ThroughputResult(mode, label, operations, normalizedDuration, tu, stat);
             }
         };
     }
@@ -119,11 +119,11 @@ public class OpsPerTimeUnit extends Result {
     @Override
     public Aggregator getRunAggregator() {
         // compute mean
-        return new Aggregator<OpsPerTimeUnit>() {
+        return new Aggregator<ThroughputResult>() {
             @Override
-            public Result aggregate(Collection<OpsPerTimeUnit> results) {
+            public Result aggregate(Collection<ThroughputResult> results) {
                 ListStatistics stat = new ListStatistics();
-                for (OpsPerTimeUnit r : results) {
+                for (ThroughputResult r : results) {
                     stat.addValue(r.getScore());
                 }
 
@@ -133,7 +133,7 @@ public class OpsPerTimeUnit extends Result {
                 String label = null;
                 long operations = 0;
                 TimeUnit tu = null;
-                for (OpsPerTimeUnit r : results) {
+                for (ThroughputResult r : results) {
                     role = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
@@ -143,7 +143,7 @@ public class OpsPerTimeUnit extends Result {
                 }
                 operations /= results.size();
 
-                return new OpsPerTimeUnit(role, label, operations, normalizedDuration, tu, stat);
+                return new ThroughputResult(role, label, operations, normalizedDuration, tu, stat);
             }
         };
     }

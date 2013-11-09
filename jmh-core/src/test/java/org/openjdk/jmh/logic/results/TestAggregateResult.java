@@ -48,7 +48,7 @@ public class TestAggregateResult {
     public static void setupClass() {
         result = new IterationResult(new BenchmarkRecord("blah,blah," + Mode.AverageTime), new IterationParams(1, TimeValue.days(1), 1));
         for (double d : values) {
-            result.addResult(new OpsPerTimeUnit(ResultRole.BOTH, "test1", (long) d, 10 * 1000 * 1000));
+            result.addResult(new ThroughputResult(ResultRole.BOTH, "test1", (long) d, 10 * 1000 * 1000));
         }
     }
 
@@ -59,7 +59,7 @@ public class TestAggregateResult {
 
     @Test
     public void testScoreUnit() throws Exception {
-        assertEquals((new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1, 1)).getScoreUnit(), result.getScoreUnit());
+        assertEquals((new ThroughputResult(ResultRole.BOTH, "test1", 1, 1)).getScoreUnit(), result.getScoreUnit());
     }
 
 }

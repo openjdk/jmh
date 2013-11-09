@@ -38,24 +38,24 @@ public enum Mode {
 
     /**
      * Operations per unit of time,
-     * {@link org.openjdk.jmh.logic.results.OpsPerTimeUnit}. */
+     * {@link org.openjdk.jmh.logic.results.ThroughputResult}. */
     Throughput("thrpt", "Throughput, ops/time"),
 
     /**
      * Average time per operation
-     * {@link org.openjdk.jmh.logic.results.AverageTimePerOp}.
+     * {@link org.openjdk.jmh.logic.results.AverageTimeResult}.
      */
     AverageTime("avgt", "Average time, time/op"),
 
     /**
      * Time distribution, percentile estimation
-     * {@link org.openjdk.jmh.logic.results.SampleTimePerOp}.
+     * {@link org.openjdk.jmh.logic.results.SampleTimeResult}.
      */
     SampleTime("sample", "Sampling time"),
 
     /**
      * Time the single execution
-     * {@link org.openjdk.jmh.logic.results.SingleShotTime}.
+     * {@link org.openjdk.jmh.logic.results.SingleShotResult}.
      */
     SingleShotTime("ss", "Single shot invocation time"),
 

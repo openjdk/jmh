@@ -35,56 +35,56 @@ import static junit.framework.Assert.assertEquals;
  *
  * @author staffan.friberg@oracle.com
  */
-public class TestOpsPerTimeUnit {
+public class TestThroughputResult {
 
     /**
-     * Test of getScore method, of class OpsPerTimeUnit.
+     * Test of getScore method, of class ThroughputResult.
      */
     @Test
     public void testGetScore() {
-        OpsPerTimeUnit instance = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L);
+        ThroughputResult instance = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L);
         assertEquals(1000, instance.getScore(), 0.0);
-        OpsPerTimeUnit instance2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
+        ThroughputResult instance2 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
         assertEquals(1000000, instance2.getScore(), 0.0);
-        OpsPerTimeUnit instance3 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000L);
+        ThroughputResult instance3 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000L);
         assertEquals(1000 / (1000 / (double) 1000000), instance3.getScore(), 0.0);
     }
 
     @Test
     public void testTimeUnits() {
-        OpsPerTimeUnit instanced = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.DAYS);
+        ThroughputResult instanced = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.DAYS);
         assertEquals(86400000000D, instanced.getScore(), 0.0);
         assertEquals("ops/day", instanced.getScoreUnit());
 
-        OpsPerTimeUnit instanceh = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.HOURS);
+        ThroughputResult instanceh = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.HOURS);
         assertEquals(3600000000.0000005D, instanceh.getScore(), 0.0);
         assertEquals("ops/hr", instanceh.getScoreUnit());
 
-        OpsPerTimeUnit instancem = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MINUTES);
+        ThroughputResult instancem = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MINUTES);
         assertEquals(60000000, instancem.getScore(), 0.0);
         assertEquals("ops/min", instancem.getScoreUnit());
 
-        OpsPerTimeUnit instance = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
+        ThroughputResult instance = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
         assertEquals(1000000, instance.getScore(), 0.0);
         assertEquals("ops/s", instance.getScoreUnit());
 
-        OpsPerTimeUnit instance2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult instance2 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MILLISECONDS);
         assertEquals(1000, instance2.getScore(), 0.0);
         assertEquals("ops/ms", instance2.getScoreUnit());
 
-        OpsPerTimeUnit instance3 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        ThroughputResult instance3 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
         assertEquals(1, instance3.getScore(), 0.0);
         assertEquals("ops/us", instance3.getScoreUnit());
 
-        OpsPerTimeUnit instance4 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.NANOSECONDS);
+        ThroughputResult instance4 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 1000000L, TimeUnit.NANOSECONDS);
         assertEquals(0.001, instance4.getScore(), 0.0);
         assertEquals("ops/ns", instance4.getScoreUnit());
     }
 
     @Test
     public void testRunAggregator1() {
-        OpsPerTimeUnit r1 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.BOTH, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(150.0, result.getScore());
@@ -93,8 +93,8 @@ public class TestOpsPerTimeUnit {
 
     @Test
     public void testRunAggregator2() {
-        OpsPerTimeUnit r1 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.BOTH, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(100.0, result.getScore());
@@ -103,8 +103,8 @@ public class TestOpsPerTimeUnit {
 
     @Test // regression test, check for overflow
     public void testRunAggregator3() {
-        OpsPerTimeUnit r1 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
-        OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.BOTH, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.BOTH, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(100000000.0, result.getScore());
@@ -113,8 +113,8 @@ public class TestOpsPerTimeUnit {
 
     @Test
     public void testIterationAggregator1() {
-        OpsPerTimeUnit r1 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.BOTH, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
@@ -123,8 +123,8 @@ public class TestOpsPerTimeUnit {
 
     @Test
     public void testIterationAggregator2() {
-        OpsPerTimeUnit r1 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.BOTH, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.BOTH, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
@@ -133,8 +133,8 @@ public class TestOpsPerTimeUnit {
 
     @Test  // regression test, check for overflow
     public void testIterationAggregator3() {
-        OpsPerTimeUnit r1 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
-        OpsPerTimeUnit r2 = new OpsPerTimeUnit(ResultRole.BOTH, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.BOTH, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.BOTH, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());

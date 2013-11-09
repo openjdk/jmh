@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
-public class SingleShotTime extends Result {
+public class SingleShotResult extends Result {
 
     /** Duration of iteration in NanoSeconds */
     private final long duration;
@@ -49,11 +49,11 @@ public class SingleShotTime extends Result {
      * @param duration       Duration of iteration in NanoSeconds
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
-    public SingleShotTime(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit) {
+    public SingleShotResult(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit) {
         this(mode, label, duration, outputTimeUnit, null);
     }
 
-    SingleShotTime(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit, Statistics stat) {
+    SingleShotResult(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit, Statistics stat) {
         super(mode, label, stat);
         this.duration = duration;
         this.outputTimeUnit = outputTimeUnit;
@@ -84,22 +84,22 @@ public class SingleShotTime extends Result {
     /**
      * Averages the time on all levels.
      */
-    public static class AveragingAggregator implements Aggregator<SingleShotTime> {
+    public static class AveragingAggregator implements Aggregator<SingleShotResult> {
         @Override
-        public Result aggregate(Collection<SingleShotTime> results) {
+        public Result aggregate(Collection<SingleShotResult> results) {
             ResultRole role = null;
             String label = null;
             ListStatistics stat = new ListStatistics();
             long duration = 0;
             TimeUnit tu = null;
-            for (SingleShotTime r : results) {
+            for (SingleShotResult r : results) {
                 role = r.role;
                 tu = r.outputTimeUnit;
                 label = r.label;
                 duration += r.duration;
                 stat.addValue(r.getScore());
             }
-            return new SingleShotTime(role, label, duration / results.size(), tu, stat);
+            return new SingleShotResult(role, label, duration / results.size(), tu, stat);
         }
 
     }

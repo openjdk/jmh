@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class SampleTimePerOp extends Result {
+public class SampleTimeResult extends Result {
 
     /** Sample buffer */
     private final SampleBuffer buffer;
@@ -44,7 +44,7 @@ public class SampleTimePerOp extends Result {
     private final TimeUnit outputTimeUnit;
 
     /** Sets up the result with the default output unit MilliSeconds */
-    public SampleTimePerOp(ResultRole mode, String label, SampleBuffer buffer) {
+    public SampleTimeResult(ResultRole mode, String label, SampleBuffer buffer) {
         this(mode, label, buffer, TimeUnit.MILLISECONDS);
     }
 
@@ -53,7 +53,7 @@ public class SampleTimePerOp extends Result {
      *
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
-    public SampleTimePerOp(ResultRole mode, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
+    public SampleTimeResult(ResultRole mode, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
         super(mode, label, null);
         this.buffer = buffer;
         this.outputTimeUnit = outputTimeUnit;
@@ -158,22 +158,22 @@ public class SampleTimePerOp extends Result {
      * Always add up all the samples into final result.
      * This will allow aggregate result to achieve better accuracy.
      */
-    public static class JoiningAggregator implements Aggregator<SampleTimePerOp> {
+    public static class JoiningAggregator implements Aggregator<SampleTimeResult> {
 
         @Override
-        public Result aggregate(Collection<SampleTimePerOp> results) {
+        public Result aggregate(Collection<SampleTimeResult> results) {
             // generate new sample buffer
             ResultRole mode = null;
             String label = null;
             SampleBuffer buffer = new SampleBuffer();
             TimeUnit tu = null;
-            for (SampleTimePerOp r : results) {
+            for (SampleTimeResult r : results) {
                 tu = r.outputTimeUnit;
                 label = r.label;
                 buffer.addAll(r.buffer);
             }
 
-            return new SampleTimePerOp(mode, label, buffer, tu);
+            return new SampleTimeResult(mode, label, buffer, tu);
         }
     }
 
