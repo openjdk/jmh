@@ -46,15 +46,29 @@ public enum Level {
      *
      * To be executed for each benchmark method execution.
      *
-     * <p>WARNING #1: This level will bring the unwanted performance
-     * effects for the benchmark runs. The use is mostly warranted
-     * with the large benchmarks, when the overhead of making the
-     * timestamps for each invocation is negligible. It is almost
-     * never a good idea to use this otherwise.
+     * WARNING: HERE BE DRAGONS!
+     * MAKE SURE YOU UNDERSTAND THE REASONING AND THE IMPLICATIONS
+     * OF THE WARNINGS BELOW BEFORE EVEN CONSIDERING USING THIS LEVEL.
      *
-     * <p>WARNING #2: Because JMH can not afford synchronizing the
-     * state on which the Level.Invocation helper is being called,
-     * the helper method execution may overlap with the work itself.
+     * It is almost never a good idea to use this in nano- and micro-benchmarks.
+     *
+     * <p>WARNING #1: In order to subtract the helper time from the
+     * benchmark itself, we will have to have at least two timestamps
+     * per *each* benchmark invocation. If the benchmarked method is
+     * small, then we saturate the system with timestamp requests, which
+     * *both* make timestamp requests the critical part of the benchmark
+     * time, and inhibit workload scalability, introducing the artificial
+     * scalability bottleneck.
+     *
+     * <p>WARNING #2: In order to maintain the basic interference behavior
+     * of other Levels (e.g. the State(Scope.Benchmark) should only fire the
+     * helper method once per invocation, regardless of the thread count),
+     * we have to arbitrate the access to the state between worker thread,
+     * and do that on *critical path*, thus further offsetting the measurement.
+     *
+     * <p>WARNING #3: Current implementation in JMH allows the helper method
+     * execution to overlap with the benchmark method itself in order to simplify
+     * arbitrage. (To be redefined in future).
      */
     Invocation,
 }
