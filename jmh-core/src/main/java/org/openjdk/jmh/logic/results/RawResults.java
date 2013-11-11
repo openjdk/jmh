@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.logic.results;
 
+import java.util.concurrent.TimeUnit;
+
 public class RawResults {
 
     private final long opsPerInv;
@@ -43,4 +45,11 @@ public class RawResults {
     public RawResults(long opsPerInv) {
         this.opsPerInv = opsPerInv;
     }
+
+    public void printOut() {
+        System.err.printf("(stop-start)=%10d, real=%10d, ops=%10d, thr=%10d, thrReal=%10d%n",
+                TimeUnit.NANOSECONDS.toMicros(stopTime - startTime), TimeUnit.NANOSECONDS.toMicros(realTime),
+                operations, (operations*1000*1000/(stopTime - startTime)), (operations*1000*1000/realTime));
+    }
+
 }
