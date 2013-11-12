@@ -256,7 +256,7 @@ public class StateObjectHandler {
             if (!hasHelpers.contains(so)) continue;
 
             if (type == HelperType.SETUP) {
-                result.add("while(!" + so.localIdentifier + ".setup" + helperLevel + "Mutex.compareAndSet(0, 1)) {");
+                result.add("while(!" + so.type + ".setup" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
                 result.add("    if (Thread.interrupted()) throw new InterruptedException();");
                 result.add("}");
                 result.add("try {");
@@ -269,12 +269,12 @@ public class StateObjectHandler {
                 result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = true;");
                 result.add("    }");
                 result.add("} finally {");
-                result.add("    " + so.localIdentifier + ".setup" + helperLevel + "Mutex.set(0);");
+                result.add("    " + so.type + ".setup" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("}");
             }
 
             if (type == HelperType.TEARDOWN) {
-                result.add("while(!" + so.localIdentifier + ".tear" + helperLevel + "Mutex.compareAndSet(0, 1)) {");
+                result.add("while(!" + so.type + ".tear" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
                 result.add("    if (Thread.interrupted()) throw new InterruptedException();");
                 result.add("}");
                 result.add("try {");
@@ -287,7 +287,7 @@ public class StateObjectHandler {
                 result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = false;");
                 result.add("    }");
                 result.add("} finally {");
-                result.add("    " + so.localIdentifier + ".tear" + helperLevel + "Mutex.set(0);");
+                result.add("    " + so.type + ".tear" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("}");
             }
         }
@@ -421,9 +421,14 @@ public class StateObjectHandler {
             result.add("");
             result.add("static class " + so.type + "_B2 extends " + so.type + "_B1 {");
 
+
             for (Level level : Level.values()) {
-                result.add("    final AtomicInteger setup" + level + "Mutex = new AtomicInteger();");
-                result.add("    final AtomicInteger tear" + level + "Mutex = new AtomicInteger();");
+                result.add("    volatile int setup" + level + "Mutex;");
+                result.add("    volatile int tear" + level + "Mutex;");
+                result.add("    final static AtomicIntegerFieldUpdater setup" + level + "MutexUpdater = " +
+                        "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"setup" + level + "Mutex\");");
+                result.add("    final static AtomicIntegerFieldUpdater tear" + level + "MutexUpdater = " +
+                        "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"tear" + level + "Mutex\");");
                 result.add("");
             }
 

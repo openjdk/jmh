@@ -80,6 +80,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
  * @author staffan.friberg@oracle.com
@@ -397,6 +398,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private void generateImport(PrintWriter writer) {
         writer.println("import " + List.class.getName() + ';');
         writer.println("import " + AtomicInteger.class.getName() + ';');
+        writer.println("import " + AtomicIntegerFieldUpdater.class.getName() + ';');
         writer.println("import " + Arrays.class.getName() + ';');
         writer.println("import " + TimeUnit.class.getName() + ';');
         writer.println("import " + Generated.class.getName() + ';');
