@@ -423,11 +423,11 @@ public class StateObjectHandler {
 
 
             for (Level level : Level.values()) {
-                result.add("    volatile int setup" + level + "Mutex;");
-                result.add("    volatile int tear" + level + "Mutex;");
-                result.add("    final static AtomicIntegerFieldUpdater setup" + level + "MutexUpdater = " +
+                result.add("    public volatile int setup" + level + "Mutex;");
+                result.add("    public volatile int tear" + level + "Mutex;");
+                result.add("    public final static AtomicIntegerFieldUpdater setup" + level + "MutexUpdater = " +
                         "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"setup" + level + "Mutex\");");
-                result.add("    final static AtomicIntegerFieldUpdater tear" + level + "MutexUpdater = " +
+                result.add("    public final static AtomicIntegerFieldUpdater tear" + level + "MutexUpdater = " +
                         "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"tear" + level + "Mutex\");");
                 result.add("");
             }
@@ -436,12 +436,12 @@ public class StateObjectHandler {
                 case Benchmark:
                 case Group:
                     for (Level level : Level.values()) {
-                        result.add("    volatile boolean ready" + level + ";");
+                        result.add("    public volatile boolean ready" + level + ";");
                     }
                     break;
                 case Thread:
                     for (Level level : Level.values()) {
-                        result.add("    boolean ready" + level + ";");
+                        result.add("    public boolean ready" + level + ";");
                     }
                     break;
                 default:
@@ -479,9 +479,9 @@ public class StateObjectHandler {
 
     public Collection<String> getFields() {
         Collection<String> result = new ArrayList<String>();
-        result.add("private static final java.util.concurrent.atomic.AtomicInteger threadSelector = new java.util.concurrent.atomic.AtomicInteger();");
-        result.add("private int threadId = 0;");
-        result.add("private boolean threadId_inited = false;");
+        result.add("public static final java.util.concurrent.atomic.AtomicInteger threadSelector = new java.util.concurrent.atomic.AtomicInteger();");
+        result.add("public int threadId = 0;");
+        result.add("public boolean threadId_inited = false;");
         return result;
     }
 
