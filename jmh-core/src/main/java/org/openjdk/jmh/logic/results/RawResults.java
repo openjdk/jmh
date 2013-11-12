@@ -46,8 +46,11 @@ public class RawResults {
         this.opsPerInv = opsPerInv;
     }
 
+    private static long baseTime = System.nanoTime();
+
     public void printOut() {
-        System.err.printf("(stop-start)=%10d, real=%10d, ops=%10d, thr=%10d, thrReal=%10d%n",
+        System.err.printf("start=%10d, stop=%10d, (stop-start)=%10d, real=%10d, ops=%10d, thr=%10d, thrReal=%10d%n",
+                TimeUnit.NANOSECONDS.toMicros(startTime - baseTime), TimeUnit.NANOSECONDS.toMicros(stopTime - baseTime),
                 TimeUnit.NANOSECONDS.toMicros(stopTime - startTime), TimeUnit.NANOSECONDS.toMicros(realTime),
                 operations, (operations*1000*1000/(stopTime - startTime)), (operations*1000*1000/realTime));
     }
