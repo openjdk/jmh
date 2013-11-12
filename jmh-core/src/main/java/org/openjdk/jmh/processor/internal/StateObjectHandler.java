@@ -415,11 +415,11 @@ public class StateObjectHandler {
         List<String> result = new ArrayList<String>();
         for (StateObject so : cons(stateObjects)) {
             if (!visited.add(so.userType)) continue;
-            result.add("static final class " + so.type + " extends " + so.userType + " {");
-            for (int p = 0; p < 128; p++) {
-                result.add("    private boolean jmh_auto_generated_pad" + p + ";");
-            }
+            result.add("static class " + so.type + "_B1 extends " + so.userType + " {");
+            padding(result, "b1");
+            result.add("}");
             result.add("");
+            result.add("static class " + so.type + "_B2 extends " + so.type + "_B1 {");
 
             for (Level level : Level.values()) {
                 result.add("    final AtomicInteger setup" + level + "Mutex = new AtomicInteger();");
@@ -431,12 +431,12 @@ public class StateObjectHandler {
                 case Benchmark:
                 case Group:
                     for (Level level : Level.values()) {
-                        result.add("    private volatile boolean ready" + level + ";");
+                        result.add("    volatile boolean ready" + level + ";");
                     }
                     break;
                 case Thread:
                     for (Level level : Level.values()) {
-                        result.add("    private boolean ready" + level + ";");
+                        result.add("    boolean ready" + level + ";");
                     }
                     break;
                 default:
@@ -444,10 +444,29 @@ public class StateObjectHandler {
             }
 
             result.add("}");
+            result.add("");
+            result.add("static class " + so.type + "_B3 extends " + so.type + "_B2 {");
+            padding(result, "b3");
+            result.add("}");
+            result.add("");
+            result.add("static final class " + so.type + " extends " + so.type + "_B3 {");
+            result.add("}");
+            result.add("");
         }
         return result;
     }
 
+    public static void padding(List<String> lines, String suffix) {
+        for (int p = 0; p < 16; p++) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("    boolean jmh_b3_pad_").append(p);
+            for (int q = 1; q < 16; q++) {
+                sb.append(", jmh_b3_pad_").append(p).append("_").append(q);
+            }
+            sb.append(";");
+            lines.add(sb.toString());
+        }
+    }
 
     public void clearArgs() {
         args.clear();

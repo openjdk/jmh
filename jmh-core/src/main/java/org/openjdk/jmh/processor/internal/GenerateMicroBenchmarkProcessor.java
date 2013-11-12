@@ -383,8 +383,14 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generatePadding(PrintWriter writer) {
-        for (int p = 0; p < 128; p++) {
-            writer.println("    private boolean jmh_auto_generated_pad" + p + ";");
+        for (int p = 0; p < 16; p++) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("    boolean jmh_bench_pad_").append(p);
+            for (int q = 1; q < 16; q++) {
+                sb.append(", jmh_bench_pad_").append(p).append("_").append(q);
+            }
+            sb.append(";");
+            writer.println(sb.toString());
         }
     }
 
