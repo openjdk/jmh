@@ -174,7 +174,7 @@ public abstract class BaseRunner {
             }
 
             long start = System.nanoTime();
-            while (System.nanoTime() - start < MAX_WAIT_MSEC) {
+            while (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < MAX_WAIT_MSEC) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(200);
                 } catch (InterruptedException e) {
