@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>0.1</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
     <name>JMH Core Benchmarks</name>
@@ -47,7 +47,7 @@ questions.
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>0.1</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
