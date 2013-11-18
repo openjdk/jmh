@@ -60,6 +60,12 @@ public enum Level {
      * time, and inhibit workload scalability, introducing the artificial
      * scalability bottleneck.
      *
+     * Also, the hiccups in measurement can be hidden from these individual
+     * timing measurement, which can introduce inconsistent results. The largest
+     * caveat is measuring oversaturated system where the descheduling events
+     * will be missed, and the benchmark will perceive the fictionally large
+     * throughput.
+     *
      * <p>WARNING #2: In order to maintain the basic interference behavior
      * of other Levels (e.g. the State(Scope.Benchmark) should only fire the
      * helper method once per invocation, regardless of the thread count),
