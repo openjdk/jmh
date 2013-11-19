@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner.parameters;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * @author sergey.kuksenko@oracle.com
@@ -46,10 +47,16 @@ public class IterationParams implements Serializable {
      */
     private final int threads;
 
-    public IterationParams(int count, TimeValue time, int threads) {
+    /**
+     * Subgroups distribution
+     */
+    private final int[] threadGroups;
+
+    public IterationParams(int count, TimeValue time, int threads, int... threadGroups) {
         this.count = count;
         this.timeValue = time;
         this.threads = threads;
+        this.threadGroups = threadGroups;
     }
 
     public int getCount() {
@@ -61,33 +68,27 @@ public class IterationParams implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 83 * hash + this.count;
-        hash = 83 * hash + this.threads;
-        hash = 83 * hash + (this.timeValue != null ? this.timeValue.hashCode() : 0);
-        return hash;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IterationParams that = (IterationParams) o;
+
+        if (count != that.count) return false;
+        if (threads != that.threads) return false;
+        if (!Arrays.equals(threadGroups, that.threadGroups)) return false;
+        if (timeValue != null ? !timeValue.equals(that.timeValue) : that.timeValue != null) return false;
+
+        return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final IterationParams other = (IterationParams) obj;
-        if (this.count != other.count) {
-            return false;
-        }
-        if (this.threads != other.threads) {
-            return false;
-        }
-        if (this.timeValue != other.timeValue && (this.timeValue == null || !this.timeValue.equals(other.timeValue))) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        int result = count;
+        result = 31 * result + (timeValue != null ? timeValue.hashCode() : 0);
+        result = 31 * result + threads;
+        result = 31 * result + (threadGroups != null ? Arrays.hashCode(threadGroups) : 0);
+        return result;
     }
 
     @Override
@@ -97,5 +98,9 @@ public class IterationParams implements Serializable {
 
     public int getThreads() {
         return threads;
+    }
+
+    public int[] getThreadGroups() {
+        return threadGroups;
     }
 }

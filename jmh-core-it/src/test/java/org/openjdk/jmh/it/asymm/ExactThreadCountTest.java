@@ -31,12 +31,14 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
@@ -59,7 +61,13 @@ public class ExactThreadCountTest {
     private Set<Thread> test1threads = Collections.synchronizedSet(new HashSet<Thread>());
     private Set<Thread> test2threads = Collections.synchronizedSet(new HashSet<Thread>());
 
-    @TearDown
+    @Setup(Level.Iteration)
+    public void setup() {
+        test1threads.clear();
+        test2threads.clear();
+    }
+
+    @TearDown(Level.Iteration)
     public void check() {
         Assert.assertEquals(1, test1threads.size());
         Assert.assertEquals(2, test2threads.size());
@@ -67,7 +75,7 @@ public class ExactThreadCountTest {
 
     @GenerateMicroBenchmark
     @Group("test")
-    @Threads(1)
+    @GroupThreads(1)
     public void test1() {
         test1threads.add(Thread.currentThread());
         Fixtures.work();
@@ -75,7 +83,7 @@ public class ExactThreadCountTest {
 
     @GenerateMicroBenchmark
     @Group("test")
-    @Threads(2)
+    @GroupThreads(2)
     public void test2() {
         test2threads.add(Thread.currentThread());
         Fixtures.work();

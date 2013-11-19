@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
@@ -42,7 +42,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
 
     MethodGroup(String name) {
         this.name = name;
-        this.methods = new LinkedHashSet<MethodInvocation>();
+        this.methods = new TreeSet<MethodInvocation>();
         this.modes = EnumSet.noneOf(Mode.class);
     }
 
@@ -88,15 +88,6 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return threadCount;
     }
 
-    public int getMethodThreads(Element method) {
-        for (MethodInvocation m : methods) {
-            if (m.element.equals(method)) {
-                return m.threads;
-            }
-        }
-        throw new IllegalStateException("");
-    }
-
     public String getName() {
         return name;
     }
@@ -119,5 +110,14 @@ public class MethodGroup implements Comparable<MethodGroup> {
 
     public Set<Mode> getModes() {
         return modes;
+    }
+
+    public String getThreads() {
+        StringBuilder sb = new StringBuilder();
+        for (MethodInvocation mi : methods) {
+            sb.append(mi.threads);
+            sb.append("=");
+        }
+        return sb.toString();
     }
 }

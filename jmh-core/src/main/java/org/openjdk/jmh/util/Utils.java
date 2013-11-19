@@ -52,4 +52,20 @@ public class Utils {
         }
         return sb.toString();
     }
+
+    public static int sum(int[] arr) {
+        int sum = 0;
+        for (int i : arr) {
+            sum += i;
+        }
+        return sum;
+    }
+
+    public static int roundUp(int v, int quant) {
+        if ((v % quant) == 0) {
+            return v;
+        } else {
+            return ((v / quant) + 1)*quant;
+        }
+    }
 }

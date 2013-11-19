@@ -23,4 +23,5 @@
 #
 org.openjdk.jmh.processor.internal.GenerateMicroBenchmarkProcessor
 org.openjdk.jmh.processor.internal.HelperMethodValidationProcessor
+org.openjdk.jmh.processor.internal.GroupValidationProcessor
 org.openjdk.jmh.processor.internal.CompilerControlProcessor

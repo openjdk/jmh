@@ -41,6 +41,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -372,20 +373,23 @@ public class StateObjectHandler {
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(int groupId, " + so.type + " val) throws Throwable {");
-            result.add("    if (!" + so.fieldIdentifier + "_map.containsKey(groupId)) {");
-            result.add("        synchronized(this.getClass()) {");
-            result.add("            if (!" + so.fieldIdentifier + "_map.containsKey(groupId)) {");
+            result.add("    synchronized(this.getClass()) {");
+            result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(groupId);");
+            result.add("        if (local == null) {");
+            result.add("            " + so.fieldIdentifier + "_map.put(groupId, val);");
+            result.add("            local = val;");
+            result.add("        }");
+            result.add("        if (!local.ready" + Level.Trial + ") {");
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                result.add("                val." + hmi.name + "();");
+                result.add("            local." + hmi.name + "();");
             }
-            result.add("                " + "val.ready" + Level.Trial + " = true;");
-            result.add("                " + so.fieldIdentifier + "_map.put(groupId, val);");
-            result.add("            }");
+            result.add("            " + "local.ready" + Level.Trial + " = true;");
+            result.add("            " + so.fieldIdentifier + "_map.put(groupId, val);");
             result.add("        }");
+            result.add("        return local;");
             result.add("    }");
-            result.add("    return " + so.fieldIdentifier + "_map.get(groupId);");
             result.add("}");
         }
         return result;
@@ -400,7 +404,7 @@ public class StateObjectHandler {
                     result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(new " + so.type + "());");
                     break;
                 case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(groupId, new " + so.type + "());");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(threadControl.group, new " + so.type + "());");
                     break;
                 default:
                     throw new IllegalStateException("Unhandled scope: " + so.scope);
@@ -478,11 +482,7 @@ public class StateObjectHandler {
     }
 
     public Collection<String> getFields() {
-        Collection<String> result = new ArrayList<String>();
-        result.add("public static final java.util.concurrent.atomic.AtomicInteger threadSelector = new java.util.concurrent.atomic.AtomicInteger();");
-        result.add("public int threadId = 0;");
-        result.add("public boolean threadId_inited = false;");
-        return result;
+        return Collections.emptyList();
     }
 
     private String collapseTypeName(String e) {

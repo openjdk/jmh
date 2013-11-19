@@ -222,6 +222,21 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
+    private int[] threadGroups = new int[] {1};
+
+    @Override
+    public ChainedOptionsBuilder threadGroups(int... groups) {
+        this.threadGroups = groups;
+        return this;
+    }
+
+    @Override
+    public int[] getThreadGroups() {
+        return threadGroups;
+    }
+
+    // ---------------------------------------------------------------------------
+
     private Boolean syncIterations;
 
     @Override

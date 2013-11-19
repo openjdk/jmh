@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.InfraControl;
+import org.openjdk.jmh.logic.ThreadControl;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -86,8 +87,24 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
+
+        int[] groups = params.getThreadGroups();
+        int currentGroup = 0;
+        int currentSubgroup = 0;
+        int remainingSubgroupThreads = groups[currentSubgroup];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(threadLocal, control);
+            while (remainingSubgroupThreads == 0) {
+                currentSubgroup++;
+                if (currentSubgroup == groups.length) {
+                    currentSubgroup = 0;
+                    currentGroup++;
+                }
+                remainingSubgroupThreads = groups[currentSubgroup];
+            }
+            remainingSubgroupThreads--;
+
+            ThreadControl threadControl = new ThreadControl(currentGroup, currentSubgroup);
+            runners[i] = new BenchmarkTask(threadLocal, control, threadControl);
         }
 
         // submit tasks to threadpool
@@ -173,16 +190,18 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         private final ThreadLocal<InstanceProvider> invocationHandler;
         private final InfraControl control;
+        private final ThreadControl threadControl;
 
-        BenchmarkTask(ThreadLocal<InstanceProvider> invocationHandler, InfraControl control) {
+        BenchmarkTask(ThreadLocal<InstanceProvider> invocationHandler, InfraControl control, ThreadControl threadControl) {
             this.invocationHandler = invocationHandler;
             this.control = control;
+            this.threadControl = threadControl;
         }
 
         @Override
         public Result call() throws Exception {
             try {
-                return invokeBenchmark(invocationHandler.get().getInstance(), control);
+                return invokeBenchmark(invocationHandler.get().getInstance(), control, threadControl);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
@@ -210,11 +229,11 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         /**
          * Helper method for running the benchmark in a given instance.
          */
-        private Result invokeBenchmark(Object instance, InfraControl control) throws Throwable {
+        private Result invokeBenchmark(Object instance, InfraControl control, ThreadControl threadControl) throws Throwable {
             Result result;
             if (method != null) {
                 try {
-                    result = (Result) method.invoke(instance, control);
+                    result = (Result) method.invoke(instance, control, threadControl);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Can't invoke " + method.getDeclaringClass().getName() + "." + method.getName(), e);
                 } catch (InvocationTargetException e) {

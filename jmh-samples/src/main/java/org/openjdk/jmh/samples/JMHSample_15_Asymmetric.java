@@ -27,12 +27,12 @@ package org.openjdk.jmh.samples;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Threads;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,18 +48,19 @@ public class JMHSample_15_Asymmetric {
      * which can bind several methods together, and all the threads are distributed among
      * the test methods.
      *
-     * Each execution group consists of two or more threads. If more threads are requested
+     * Each execution group contains of two or more threads. If more threads are requested
      * to be run via the command line option, then more execution groups are created.
-     * The meaning of @Threads slightly changes with this mode: now, it marks how many threads
-     * are executing the method in the single execution group.
+     * JMH will always round up the actual thread count to the execution group size, this
+     * will only allow the full execution groups.
      *
      * Note that two state scopes: Scope.Benchmark and Scope.Thread are not covering all
      * the use cases here -- you either share everything in the state, or share nothing.
      * To break this, we have the middle ground Scope.Group, which marks the state to be
      * shared within the execution group, but not among the groups.
      *
-     * Putting this all together, if we want to run this with 8 threads, this example means:
-     *  a) make two execution groups, each having 4 threads
+     * Putting this all together, if we want to run this with 8 threads, the example below
+     * means:
+     *  a) make two execution groups, each having 4 threads (by default)
      *  b) each execution group has one benchmark instance to share (= share the $counter)
      *  c) each execution group has 3 thread executing inc().
      *  d) each execution group has 1 thread executing get().
@@ -74,13 +75,14 @@ public class JMHSample_15_Asymmetric {
 
     @GenerateMicroBenchmark
     @Group("g")
-    @Threads(3)
+    @GroupThreads(3)
     public int inc() {
         return counter.incrementAndGet();
     }
 
     @GenerateMicroBenchmark
     @Group("g")
+    @GroupThreads(1)
     public int get() {
         return counter.get();
     }

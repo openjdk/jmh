@@ -22,23 +22,23 @@
 #    questions.
 #
 
-oracle.micro.benchmarks.api.java.util.concurrent.NormalMaps.testConcurrentHashMap, xxx, AverageTime
-oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005HashMapGetInt, xxx, AverageTime
-oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005HashMapGetIntGC, xxx, AverageTime
-oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005HashMapGetInteger, xxx, AverageTime
-oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005ResizedHashMapGetInt, xxx, AverageTime
-oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005ResizedHashMapGetInteger, xxx, AverageTime
-oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64.printBase64Binary_128bytes, xxx, AverageTime
-oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64.printBase64Binary_32bytes, xxx, AverageTime
-oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64.printBase64Binary_512bytes, xxx, AverageTime
-oracle.micro.benchmarks.api.java.util.concurrent.GeneratedMaps.testConcurrentHashMap, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.dummy, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.dummyWarm, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.dummyWarmOnly, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.dummySetupPayload, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.boom_Exception, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.boom_Error, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.boom_Throwable, xxx, AverageTime
-org.openjdk.jmh.runner.TestMicro.blackholed, xxx, AverageTime
-org.openjdk.jmh.runner.TestBrokenMicro.dummyPayload, xxx, AverageTime
-org.openjdk.jmh.runner.TestExceptionThrowingMicro.ouch, xxx, AverageTime
+oracle.micro.benchmarks.api.java.util.concurrent.NormalMaps.testConcurrentHashMap, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005HashMapGetInt, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005HashMapGetIntGC, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005HashMapGetInteger, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005ResizedHashMapGetInt, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap.jbb2005ResizedHashMapGetInteger, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64.printBase64Binary_128bytes, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64.printBase64Binary_32bytes, xxx, AverageTime, 1=
+oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64.printBase64Binary_512bytes, xxx, AverageTime, 1=
+oracle.micro.benchmarks.api.java.util.concurrent.GeneratedMaps.testConcurrentHashMap, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.dummy, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.dummyWarm, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.dummyWarmOnly, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.dummySetupPayload, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.boom_Exception, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.boom_Error, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.boom_Throwable, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestMicro.blackholed, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestBrokenMicro.dummyPayload, xxx, AverageTime, 1=
+org.openjdk.jmh.runner.TestExceptionThrowingMicro.ouch, xxx, AverageTime, 1=

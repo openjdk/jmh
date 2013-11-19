@@ -122,6 +122,13 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder threads(int count);
 
     /**
+     * Subgroups thread distribution.
+     * @param groups thread distribution
+     * @return builder
+     */
+    ChainedOptionsBuilder threadGroups(int... groups);
+
+    /**
      * Should synchronize measurementIterations?
      * @param value flag
      * @return builder

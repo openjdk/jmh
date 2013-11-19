@@ -36,6 +36,7 @@ import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
+import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeUnitOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeValueOptionHandler;
@@ -92,6 +93,9 @@ public class CommandLineOptions implements Options {
 
     @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
     protected int threads = Integer.MIN_VALUE;
+
+    @Option(name = "-tg", aliases = {"--threadGroups"}, usage = "Thread group distribution", handler = ThreadCountsOptionHandler.class)
+    protected List<Integer> threadGroups = new ArrayList<Integer>();
 
     @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work? Default is " + Defaults.SHOULD_SYNCH_ITERATIONS, handler = BooleanOptionHandler.class)
     protected Boolean synchIterations = null; // true
@@ -421,6 +425,19 @@ public class CommandLineOptions implements Options {
     @Override
     public int getThreads() {
         return threads;
+    }
+
+    @Override
+    public int[] getThreadGroups() {
+        if (threadGroups.isEmpty()) {
+            return new int[] { 1 };
+        } else {
+            int[] r = new int[threadGroups.size()];
+            for (int c = 0; c < r.length; c++) {
+                r[c] = threadGroups.get(c);
+            }
+            return r;
+        }
     }
 
     /**

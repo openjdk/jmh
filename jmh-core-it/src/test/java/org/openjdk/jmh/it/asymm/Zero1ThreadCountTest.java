@@ -31,12 +31,12 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
@@ -67,7 +67,7 @@ public class Zero1ThreadCountTest {
 
     @GenerateMicroBenchmark
     @Group("test")
-    @Threads(0)
+    @GroupThreads(0)
     public void test1() {
         test1threads.add(Thread.currentThread());
         Fixtures.work();
@@ -75,7 +75,7 @@ public class Zero1ThreadCountTest {
 
     @GenerateMicroBenchmark
     @Group("test")
-    @Threads(2)
+    @GroupThreads(2)
     public void test2() {
         test2threads.add(Thread.currentThread());
         Fixtures.work();

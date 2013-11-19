@@ -31,6 +31,7 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -45,13 +46,16 @@ public class BenchmarkParams implements Serializable {
             threads = Runtime.getRuntime().availableProcessors();
         }
 
+        int[] threadGroups = getThreadGroups(options.getThreadGroups(), benchmark.getThreadGroups());
+        threads = Utils.roundUp(threads, Utils.sum(threadGroups));
+
         IterationParams measurement = doMeasurement ?
-                getMeasurement(options, benchmark, method, threads) :
-                new IterationParams(0, TimeValue.NONE, 1);
+                getMeasurement(options, benchmark, method, threads, threadGroups) :
+                new IterationParams(0, TimeValue.NONE, 1, 1);
 
         IterationParams warmup = doWarmup ?
-                getWarmup(options, benchmark, method, threads) :
-                new IterationParams(0, TimeValue.NONE, 1);
+                getWarmup(options, benchmark, method, threads, threadGroups) :
+                new IterationParams(0, TimeValue.NONE, 1, 1);
 
         return new BenchmarkParams(
                 shouldSynchIterations,
@@ -59,7 +63,7 @@ public class BenchmarkParams implements Serializable {
                 threads);
     }
 
-    private static IterationParams getWarmup(Options options, BenchmarkRecord benchmark, Method method, int threads) {
+    private static IterationParams getWarmup(Options options, BenchmarkRecord benchmark, Method method, int threads, int[] threadGroups) {
         boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Warmup warAnn = method.getAnnotation(Warmup.class);
         int iters = (warAnn == null) ? -1 : warAnn.iterations();
@@ -67,7 +71,8 @@ public class BenchmarkParams implements Serializable {
             return new IterationParams(
                     getInteger(options.getWarmupIterations(), iters, Defaults.SINGLE_SHOT_WARMUP_COUNT),
                     TimeValue.NONE,
-                    threads);
+                    threads,
+                    threadGroups);
         } else {
             TimeValue timeValue = options.getWarmupTime();
             if (timeValue == null || timeValue.getTime() == -1) {
@@ -77,11 +82,15 @@ public class BenchmarkParams implements Serializable {
                     timeValue = new TimeValue(warAnn.time(), warAnn.timeUnit());
                 }
             }
-            return new IterationParams(getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_ITERATION_COUNT), timeValue, threads);
+            return new IterationParams(
+                    getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_ITERATION_COUNT),
+                    timeValue,
+                    threads,
+                    threadGroups);
         }
     }
 
-    private static IterationParams getMeasurement(Options options, BenchmarkRecord benchmark, Method method, int threads) {
+    private static IterationParams getMeasurement(Options options, BenchmarkRecord benchmark, Method method, int threads, int[] threadGroups) {
         boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
         Measurement meAnn = method.getAnnotation(Measurement.class);
         int iters = (meAnn == null) ? -1 : meAnn.iterations();
@@ -89,7 +98,8 @@ public class BenchmarkParams implements Serializable {
             return new IterationParams(
                     getInteger(options.getIterations(), iters, Defaults.SINGLE_SHOT_ITERATION_COUNT),
                     TimeValue.NONE,
-                    threads);
+                    threads,
+                    threadGroups);
 
         } else {
             TimeValue timeValue = options.getRuntime();
@@ -101,7 +111,18 @@ public class BenchmarkParams implements Serializable {
                 }
             }
             return new IterationParams(
-                    getInteger(options.getIterations(), iters, Defaults.MEASUREMENT_ITERATION_COUNT), timeValue, threads);
+                    getInteger(options.getIterations(), iters, Defaults.MEASUREMENT_ITERATION_COUNT),
+                    timeValue,
+                    threads,
+                    threadGroups);
+        }
+    }
+
+    private static int[] getThreadGroups(int[] first, int[] second) {
+        if (first.length == 1 && first[0] == 1) {
+            return second;
+        } else {
+            return first;
         }
     }
 

@@ -33,31 +33,53 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final String userName;
     private final String generatedName;
     private final Mode mode;
+    private final int[] threadGroups;
 
-    public BenchmarkRecord(String userName, String generatedName, Mode mode) {
+    public BenchmarkRecord(String userName, String generatedName, Mode mode, int... threadGroups) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
+        this.threadGroups = threadGroups;
     }
 
     public BenchmarkRecord(String line) {
         String[] args = line.split(",");
 
-        if (args.length != 3) {
+        if (args.length != 4) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
         this.userName = args[0].trim();
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());
+        this.threadGroups = convert(args[3].split("="));
+    }
+
+    private int[] convert(String[] ss) {
+        int[] arr = new int[ss.length];
+        int cnt = 0;
+        for (String s : ss) {
+            arr[cnt] = Integer.valueOf(s.trim());
+            cnt++;
+        }
+        return arr;
+    }
+
+    private String convert(int[] arr) {
+        StringBuilder sb = new StringBuilder();
+        for (int i : arr) {
+            sb.append(i);
+            sb.append("=");
+        }
+        return sb.toString();
     }
 
     public String toLine() {
-        return userName + "," + generatedName + "," + mode;
+        return userName + "," + generatedName + "," + mode + "," + convert(threadGroups);
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {
-        return new BenchmarkRecord(userName, generatedName, mode);
+        return new BenchmarkRecord(userName, generatedName, mode, threadGroups);
     }
 
     @Override
@@ -114,6 +136,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     public Mode getMode() {
         return mode;
+    }
+
+    public int[] getThreadGroups() {
+        return threadGroups;
     }
 
     @Override

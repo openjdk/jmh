@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.logic.InfraControl;
+import org.openjdk.jmh.logic.ThreadControl;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
@@ -83,11 +84,15 @@ public class MicroBenchmarkHandlers {
         }
         final Class<?>[] parameterTypes = m.getParameterTypes();
 
-        if (parameterTypes.length != 1) {
+        if (parameterTypes.length != 2) {
             return false;
         }
 
         if (parameterTypes[0] != InfraControl.class) {
+            return false;
+        }
+
+        if (parameterTypes[1] != ThreadControl.class) {
             return false;
         }
 

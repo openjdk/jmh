@@ -22,21 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.processor.internal;
+package org.openjdk.jmh.annotations;
 
-import javax.lang.model.element.Element;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class MethodInvocation implements Comparable<MethodInvocation> {
-    public final Element element;
-    public final int threads;
+/**
+ * This annotation describes the default amount of threads
+ * for particular subgroup. See {@link Group} for more details.
+ */
+@Target({ElementType.METHOD,ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface GroupThreads {
 
-    public MethodInvocation(Element element, int threads) {
-        this.element = element;
-        this.threads = threads;
-    }
+    /** Number of threads in this subgroup. */
+    int value() default 1;
 
-    @Override
-    public int compareTo(MethodInvocation o) {
-        return element.getSimpleName().toString().compareTo(o.element.getSimpleName().toString());
-    }
 }
+

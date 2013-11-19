@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -38,6 +39,7 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.logic.BlackHole;
 import org.openjdk.jmh.logic.InfraControl;
+import org.openjdk.jmh.logic.ThreadControl;
 import org.openjdk.jmh.logic.results.AverageTimeResult;
 import org.openjdk.jmh.logic.results.RawResults;
 import org.openjdk.jmh.logic.results.Result;
@@ -123,7 +125,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                         for (String method : info.methodGroups.keySet()) {
                             MethodGroup group = info.methodGroups.get(method);
                             for (Mode m : group.getModes()) {
-                                writer.println(info.userName + "." + method + ", " + info.generatedName + "." + method + ", " + m);
+                                writer.println(info.userName + "." + method + ", " + info.generatedName + "." + method + ", " + m + ", " + group.getThreads());
                             }
                         }
                     }
@@ -226,7 +228,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             group.addStrictFP(classStrictFP);
             group.addStrictFP(methodStrictFP);
-            group.addMethod(method, getThreads(method));
+            group.addMethod(method, (method.getAnnotation(GroupThreads.class) != null) ? method.getAnnotation(GroupThreads.class).value() : 1);
         }
 
         // enforce the default value
@@ -404,6 +406,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + Generated.class.getName() + ';');
         writer.println();
         writer.println("import " + InfraControl.class.getName() + ';');
+        writer.println("import " + ThreadControl.class.getName() + ';');
         writer.println("import " + BlackHole.class.getName() + ';');
         writer.println("import " + Result.class.getName() + ';');
         writer.println("import " + ThroughputResult.class.getName() + ';');
@@ -643,7 +646,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
 
         List<String> annotations = new ArrayList<String>();
-        annotations.add("@" + Threads.class.getSimpleName() + "(" + totalThreads + ")");
+
+        if (methodGroup.methods().size() == 1) {
+            // only honor this setting for non-@Group benchmarks
+            annotations.add("@" + Threads.class.getSimpleName() + "(" + totalThreads + ")");
+        }
         annotations = CollectionUtils.addIfNotNull(annotations, warmupAnn);
         annotations = CollectionUtils.addIfNotNull(annotations, measurementAnn);
         annotations = CollectionUtils.addIfNotNull(annotations, forkAnn);
@@ -664,23 +671,17 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
         writer.println();
 
         methodProlog(writer, methodGroup);
 
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
-        int threadTally = 0;
-
+        int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            subGroup++;
 
-            // determine the sibling bounds
-            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
-            int loId = threadTally;
-            int hiId = threadTally + threads;
-            threadTally = hiId;
-
-            writer.println(ident(2) + "if (" + loId + " <= siblingId && siblingId < " + hiId + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
 
             iterationProlog(writer, 3, method, states);
 
@@ -761,21 +762,16 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
 
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
-        int threadTally = 0;
+        int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            subGroup++;
 
-            // determine the sibling bounds
-            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
-            int loId = threadTally;
-            int hiId = threadTally + threads;
-            threadTally = hiId;
-
-            writer.println(ident(2) + "if (" + loId + " <= siblingId && siblingId < " + hiId + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
 
             iterationProlog(writer, 3, method, states);
 
@@ -854,15 +850,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void methodProlog(PrintWriter writer, MethodGroup methodGroup) {
-        writer.println(ident(2) + "if (!threadId_inited) {");
-        writer.println(ident(2) + "    threadId = threadSelector.getAndIncrement();");
-        writer.println(ident(2) + "    threadId_inited = true;");
-        writer.println(ident(2) + "}");
-
-        writer.println(ident(2) + "int groupThreadCount = " + Math.max(1, methodGroup.getTotalThreadCount()) + ";");
-        writer.println(ident(2) + "int groupId = threadId / groupThreadCount;");
-        writer.println(ident(2) + "int siblingId = threadId % groupThreadCount;");
-        writer.println();
+        // do nothing
     }
 
     private String prefix(String argList) {
@@ -874,21 +862,17 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
         writer.println();
 
         methodProlog(writer, methodGroup);
 
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
-        int threadTally = 0;
+        int subGroup = -1;
         for (Element method : methodGroup.methods()) {
-            // determine the sibling bounds
-            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
-            int loId = threadTally;
-            int hiId = threadTally + threads;
-            threadTally = hiId;
+            subGroup++;
 
-            writer.println(ident(2) + "if (" + loId + " <= siblingId && siblingId < " + hiId + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
 
             iterationProlog(writer, 3, method, states);
 
@@ -980,23 +964,18 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
 
         methodProlog(writer, methodGroup);
 
         writer.println(ident(2) + "long realTime = 0;");
 
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
-        int threadTally = 0;
+        int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            subGroup++;
 
-            // determine the sibling bounds
-            int threads = Math.max(isSingleMethod ? 1 : 0, methodGroup.getMethodThreads(method));
-            int loId = threadTally;
-            int hiId = threadTally + threads;
-            threadTally = hiId;
-
-            writer.println(ident(2) + "if (" + loId + " <= siblingId && siblingId < " + hiId + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
 
             iterationProlog(writer, 3, method, states);
 

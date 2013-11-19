@@ -104,6 +104,12 @@ public interface Options extends Serializable {
     int getThreads();
 
     /**
+     * Thread subgroups distribution.
+     * @return array of thread ratios
+     */
+    int[] getThreadGroups();
+
+    /**
      * Should synchronize iterations?
      * TODO: Rework "null" interface?
      * @return should we? "null" if not defined
