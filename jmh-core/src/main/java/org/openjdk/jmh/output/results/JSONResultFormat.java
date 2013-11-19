@@ -69,8 +69,8 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("  \"primaryMetric\" : {");
                 pw.println("    \"score\" : " + runResult.getPrimaryResult().getScore() + ",");
                 pw.println("    \"scoreStdev\" : " + runResult.getPrimaryResult().getStatistics().getStandardDeviation() + ",");
-                pw.println("    \"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceInterval(0.95)) + ",");
-                pw.println("    \"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceInterval(0.99)) + ",");
+                pw.println("    \"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceInterval(0.05)) + ",");
+                pw.println("    \"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceInterval(0.01)) + ",");
                 pw.println("    \"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
                 pw.println("    \"rawData\" : [");
 
