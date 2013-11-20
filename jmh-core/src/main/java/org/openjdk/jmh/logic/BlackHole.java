@@ -24,8 +24,11 @@
  */
 package org.openjdk.jmh.logic;
 
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -222,6 +225,18 @@ public class BlackHole extends BlackHoleL4 {
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /*
+     * Need to clear the sinks to break the GC from keeping the
+     * consumed objects forever.
+     */
+
+    @Setup(Level.Iteration)
+    @TearDown(Level.Iteration)
+    public void clearSinks() {
+        obj1 = new Object();
+        objs1 = new Object[]{new Object()};
     }
 
     /**
