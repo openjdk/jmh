@@ -46,6 +46,13 @@ questions.
         <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jmh/</connection>
     </scm>
 
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), version 2, with the Classpath exception</name>
+            <url>http://openjdk.java.net/legal/gplv2+ce.html</url>
+        </license>
+    </licenses>
+
     <developers>
         <developer>
             <id>shade</id>
