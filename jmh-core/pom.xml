@@ -50,6 +50,13 @@ questions.
         targeting the JVM.
     </description>
 
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), version 2, with the Classpath exception</name>
+            <url>http://openjdk.java.net/legal/gplv2+ce.html</url>
+        </license>
+    </licenses>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
