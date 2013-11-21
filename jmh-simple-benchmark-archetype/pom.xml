@@ -52,4 +52,33 @@ questions.
         <maven>3.0</maven>
     </prerequisites>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <escapeString>\</escapeString>
+                </configuration>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>archetype-resources/pom.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>archetype-resources/pom.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
+
 </project>
