@@ -26,6 +26,8 @@ package org.openjdk.jmh.it.compile;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -43,16 +45,19 @@ public class MultipleGroupStateTest {
     public static class G3 {}
 
     @GenerateMicroBenchmark
+    @Group("T")
     public void test1(G1 g1) {
 
     }
 
     @GenerateMicroBenchmark
+    @Group("T")
     public void test2(G1 g1, G2 g2) {
 
     }
 
     @GenerateMicroBenchmark
+    @Group("T")
     public void test3(G1 g1, G2 g2, G3 g3) {
 
     }

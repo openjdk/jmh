@@ -239,6 +239,45 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
+        // check the @Group preconditions,
+        // ban some of the surprising configurations
+        //
+        for (MethodGroup group : result.values()) {
+            if (group.methods().size() == 1) {
+                ExecutableElement meth = (ExecutableElement) group.methods().iterator().next();
+                if (meth.getAnnotation(Group.class) == null) {
+                    for (VariableElement param : meth.getParameters()) {
+                        TypeElement stateType = (TypeElement) processingEnv.getTypeUtils().asElement(param.asType());
+                        State stateAnn = stateType.getAnnotation(State.class);
+                        if (stateAnn != null && stateAnn.value() == Scope.Group) {
+                            throw new GenerationException(
+                                    "Only @" + Group.class.getSimpleName() + " methods can reference @" + State.class.getSimpleName()
+                                            + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
+                                    meth);
+                        }
+                    }
+
+                    State stateAnn = meth.getEnclosingElement().getAnnotation(State.class);
+                    if (stateAnn != null && stateAnn.value() == Scope.Group) {
+                        throw new GenerationException(
+                                "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
+                                        + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
+                                meth);
+                    }
+                }
+            } else {
+                for (Element m : group.methods()) {
+                    if (m.getAnnotation(Group.class) == null) {
+                        throw new GenerationException(
+                                "Internal error: multiple methods per @" + Group.class.getSimpleName()
+                                        + ", but not all methods have @" + Group.class.getSimpleName(),
+                                m);
+                    }
+                }
+            }
+
+        }
+
         String sourcePackage = packageName(clazz);
         if (sourcePackage.isEmpty()) {
             throw new GenerationException("Microbenchmark should have package other than default (" + clazz + ")", clazz);

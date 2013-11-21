@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -75,7 +77,8 @@ public class RaceGroupStateInvocationTest {
     @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-    @Threads(4)
+    @Group("T")
+    @GroupThreads(4)
     public void test(MyState state) {
        // Useless to test this condition here, intrinsic races.
 //        Assert.assertEquals("Run", 1, state.value);

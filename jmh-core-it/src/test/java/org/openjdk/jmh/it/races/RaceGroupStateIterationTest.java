@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -75,7 +77,8 @@ public class RaceGroupStateIterationTest {
     @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 50, time = 10, timeUnit = TimeUnit.MILLISECONDS)
-    @Threads(4)
+    @Group("T")
+    @GroupThreads(4)
     public void test(MyState state) {
         Assert.assertEquals("Run", 1, state.value);
         Fixtures.work();

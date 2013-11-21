@@ -26,6 +26,7 @@ package org.openjdk.jmh.benchmarks;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -123,12 +124,15 @@ public class LevelTrialBench {
     public void benchmark_teardown(BenchmarkTeardown g) {}
 
     @GenerateMicroBenchmark
+    @Group("T1")
     public void group_setup_teardown(GroupSetupTeardown g) {}
 
     @GenerateMicroBenchmark
+    @Group("T2")
     public void group_setup(GroupSetup g) {}
 
     @GenerateMicroBenchmark
+    @Group("T3")
     public void group_teardown(GroupTeardown g) {}
 
     @GenerateMicroBenchmark
