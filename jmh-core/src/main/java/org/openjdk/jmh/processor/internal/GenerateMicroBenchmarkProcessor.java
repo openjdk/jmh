@@ -110,9 +110,13 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     // Generate code for all found Classes and Methods
                     for (Map.Entry<TypeElement, Set<? extends Element>> typeElementSetEntry : clazzes.entrySet()) {
                         TypeElement clazz = typeElementSetEntry.getKey();
-                        BenchmarkInfo info = validateAndSplit(clazz, typeElementSetEntry.getValue());
-                        generateClass(clazz, info);
-                        benchmarkInfos.add(info);
+                        try {
+                            BenchmarkInfo info = validateAndSplit(clazz, typeElementSetEntry.getValue());
+                            generateClass(clazz, info);
+                            benchmarkInfos.add(info);
+                        } catch (GenerationException ge) {
+                            processingEnv.getMessager().printMessage(Kind.ERROR, ge.getMessage(), ge.getElement());
+                        }
                     }
                 }
             } else {
@@ -182,13 +186,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         if (clazz.getAnnotation(State.class) == null || clazz.getModifiers().contains(Modifier.ABSTRACT)) {
             for (VariableElement field : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
                 // allow static fields
-                if (field.getModifiers().contains(Modifier.STATIC)) continue;
-
-                processingEnv.getMessager().printMessage(Kind.ERROR,
+                if (!field.getModifiers().contains(Modifier.STATIC)) {
+                    throw new GenerationException(
                         "Field \"" + field + "\" is declared within " +
                                 "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                "This can result in unspecified behavior, and prohibited.",
-                        field);
+                                "This can result in unspecified behavior, and prohibited.", field);
+                }
             }
         }
 
@@ -205,9 +208,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             String groupName = (groupAnn != null) ? groupAnn.value() : method.getSimpleName().toString();
 
             if (!checkJavaIdentifier(groupName)) {
-                processingEnv.getMessager().printMessage(Kind.ERROR,
-                        "Group name should be the legal Java identifier. (" + clazz + ")", method);
-                return null;
+                throw new GenerationException("Group name should be the legal Java identifier. (" + groupName + ")", method);
             }
 
             MethodGroup group = result.get(groupName);
@@ -240,9 +241,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         String sourcePackage = packageName(clazz);
         if (sourcePackage.isEmpty()) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
-                    "Microbenchmark should have package other than default (" + clazz + ")");
-            return null;
+            throw new GenerationException("Microbenchmark should have package other than default (" + clazz + ")", clazz);
         }
 
         // Build package name and class name for the Class to generate
@@ -340,22 +339,24 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             writer.close();
         } catch (IOException ex) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, ex.getMessage());
+            throw new GenerationException("IOException", ex, clazz);
         }
     }
 
     private void verifyState(TypeElement type) {
         if (!type.getModifiers().contains(Modifier.PUBLIC)) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            throw new GenerationException(
                     "The " + State.class.getSimpleName()
                             + " annotation only supports public classes, "
-                            + type, type);
+                            + type,
+                    type);
         }
         if (type.getNestingKind().isNested() && !type.getModifiers().contains(Modifier.STATIC)) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            throw new GenerationException(
                     "The " + State.class.getSimpleName()
                             + " annotation does not support inner classes, "
-                            + type, type);
+                            + type,
+                    type);
         }
 
         boolean hasDefaultConstructor = false;
@@ -364,7 +365,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
 
         if (!hasDefaultConstructor) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            throw new GenerationException(
                     "The " + State.class.getSimpleName()
                             + " annotation can only be applied to the classes having the default public constructor, "
                             + type, type);
@@ -378,10 +379,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private void validateSignature(TypeElement clazz, Element method) {
         if (!(method instanceof ExecutableElement)
                 || !validMethodSignature((ExecutableElement) method)) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            throw new GenerationException(
                     "The " + GenerateMicroBenchmark.class.getSimpleName()
                             + " annotation only supports methods with @State-bearing typed parameters, "
-                            + clazz + '.' + method);
+                            + clazz + '.' + method, method);
         }
     }
 
@@ -463,7 +464,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private TimeUnit findTimeUnit(MethodGroup methodGroup) {
         OutputTimeUnit ann = methodGroup.methods().iterator().next().getEnclosingElement().getAnnotation(OutputTimeUnit.class);
         for (Element method : methodGroup.methods()) {
-            ann = guardedSet(ann, method.getAnnotation(OutputTimeUnit.class));
+            ann = guardedSet(ann, method.getAnnotation(OutputTimeUnit.class), method);
         }
 
         if (ann == null) {
@@ -516,10 +517,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             OperationsPerInvocation operationsPerInvocation = method.getAnnotation(OperationsPerInvocation.class);
             if (operationsPerInvocation != null && operationsPerInvocation.value() > 1) {
-                ann = guardedSet(ann, operationsPerInvocation);
+                ann = guardedSet(ann, operationsPerInvocation, method);
             }
 
-            ann = guardedSet(ann, method.getEnclosingElement().getAnnotation(OperationsPerInvocation.class));
+            ann = guardedSet(ann, method.getEnclosingElement().getAnnotation(OperationsPerInvocation.class), method);
         }
         return (ann != null) ? ann.value() : 1;
     }
@@ -532,16 +533,18 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private void verifyAnnotations(Element method) {
         OperationsPerInvocation operationsPerInvocation = method.getAnnotation(OperationsPerInvocation.class);
         if (operationsPerInvocation != null && operationsPerInvocation.value() < 1) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            throw new GenerationException(
                     "The " + OperationsPerInvocation.class.getSimpleName()
                             + " needs to be greater than 0, "
-                            + method.getEnclosingElement() + '.' + method);
+                            + method.getEnclosingElement() + '.' + method,
+                    method);
         }
         if (!method.getModifiers().contains(Modifier.PUBLIC) && !method.getModifiers().contains(Modifier.PROTECTED)) {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            throw new GenerationException(
                     "benchmark method '" +
                             method.getEnclosingElement() + '.' + method +
-                            "' should be public or protected");
+                            "' should be public or protected",
+                    method);
         }
     }
 
@@ -640,9 +643,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         for (Element method : methodGroup.methods()) {
             totalThreads += getThreads(method);
-            warmupAnn = guardedSet(warmupAnn, generateWarmupAnnotation(method));
-            measurementAnn = guardedSet(measurementAnn, generateMeasurementAnnotation(method));
-            forkAnn = guardedSet(forkAnn, generateForkAnnotation(method));
+            warmupAnn = guardedSet(warmupAnn, generateWarmupAnnotation(method), method);
+            measurementAnn = guardedSet(measurementAnn, generateMeasurementAnnotation(method), method);
+            forkAnn = guardedSet(forkAnn, generateForkAnnotation(method), method);
         }
 
         List<String> annotations = new ArrayList<String>();
@@ -657,15 +660,14 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return annotations;
     }
 
-    private <T> T guardedSet(T prev, T cur) {
+    private <T> T guardedSet(T prev, T cur, Element element) {
         if (prev == null) {
             return cur;
         } else {
             if (cur == null || prev.equals(cur)) {
                 return prev;
             } else {
-                processingEnv.getMessager().printMessage(Kind.ERROR, "Colliding annotations: " + prev + " vs. " + cur);
-                return null; // unreachable anyway
+                throw new GenerationException("Colliding annotations: " + prev + " vs. " + cur, element);
             }
         }
     }
