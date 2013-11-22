@@ -91,16 +91,15 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         PrintWriter pw = new PrintWriter(sw);
 
         if (statistics.getN() > 2) {
-            double[] interval95 = statistics.getConfidenceInterval(0.05);
-            double[] interval99 = statistics.getConfidenceInterval(0.01);
-            pw.println(String.format("Result %s: %.3f \u00B1(95%%) %.3f \u00B1(99%%) %.3f %s",
+            double[] interval = statistics.getConfidenceInterval(0.999);
+            pw.println(String.format("Result %s: %.3f \u00B1(99.9%%) %.3f %s",
                     (label == null) ? "" : "\"" + label + "\"",
-                    (interval95[0] + interval95[1]) / 2, (interval95[1] - interval95[0]) / 2, (interval99[1] - interval99[0]) / 2,
+                    statistics.getMean(), (interval[1] - interval[0]) / 2,
                     getScoreUnit()));
-            pw.println(String.format("  Statistics: (min, avg, max) = (%.3f, %.3f, %.3f), stdev = %.3f",
-                    statistics.getMin(), statistics.getMean(), statistics.getMax(), statistics.getStandardDeviation()));
-            pw.println(String.format("  Confidence intervals: 95%% [%.3f, %.3f], 99%% [%.3f, %.3f]",
-                    interval95[0], interval95[1], interval99[0], interval99[1]));
+            pw.println(String.format("  Statistics: (min, avg, max) = (%.3f, %.3f, %.3f), stdev = %.3f%n" +
+                    "  Confidence interval (99.9%%): [%.3f, %.3f]",
+                    statistics.getMin(), statistics.getMean(), statistics.getMax(), statistics.getStandardDeviation(),
+                    interval[0], interval[1]));
         } else {
             pw.println(String.format("Run result: %.2f (<= 2 iterations)", statistics.getMean()));
         }

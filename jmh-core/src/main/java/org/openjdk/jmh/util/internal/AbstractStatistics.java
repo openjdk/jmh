@@ -133,28 +133,28 @@ public abstract class AbstractStatistics implements Statistics {
      * Returns the interval c1, c2 of which there's an 1-alpha
      * probability of the mean being within the interval.
      *
-     * @param alpha alpha parameter
+     * @param confidence level
      * @return the confidence interval
      */
     @Override
-    public double[] getConfidenceInterval(double alpha) {
+    public double[] getConfidenceInterval(double confidence) {
         double[] interval = new double[2];
 
-        double ip = getStudentT(1 - alpha / 2.0, getN() - 1);
+        double ip = getStudentT(1 - (1 - confidence)/2, getN() - 1);
         interval[0] = getMean() - ip * (getStandardDeviation() / Math.sqrt(getN()));
         interval[1] = getMean() + ip * (getStandardDeviation() / Math.sqrt(getN()));
 
         return interval;
     }
 
-    protected double getStudentT(double alpha, int n) {
+    protected double getStudentT(double confidence, int n) {
         if (n <= 1) throw new IllegalStateException();
 
         double[] indices = {0.90, 0.95, 0.975, 0.99, 0.995, 0.999};
 
         int index = indices.length - 1;
         for (int i = 0; i < indices.length - 1; i++) {
-            if (indices[i] <= alpha && alpha < indices[i + 1]) {
+            if (indices[i] <= confidence && confidence < indices[i + 1]) {
                 index = i;
                 break;
             }
@@ -168,8 +168,9 @@ public abstract class AbstractStatistics implements Statistics {
     }
 
     @Override
-    public double getMeanError(double alpha) {
-        double ip = getStudentT(1 - alpha / 2.0, getN() - 1);
+    public double getMeanError(double confidence) {
+        if (getN() < 2) return Double.NaN;
+        double ip = getStudentT(1 - (1 - confidence)/2, getN() - 1);
         return ip * (getStandardDeviation() / Math.sqrt(getN()));
     }
 

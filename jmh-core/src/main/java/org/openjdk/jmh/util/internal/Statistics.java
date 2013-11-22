@@ -28,9 +28,9 @@ import java.io.Serializable;
 
 public interface Statistics extends Serializable {
 
-    double[] getConfidenceInterval(double alpha);
+    double[] getConfidenceInterval(double confidence);
 
-    double getMeanError(double alpha);
+    double getMeanError(double confidence);
 
     double getStandardDeviation();
 

@@ -63,9 +63,7 @@ public class CSVResultFormat implements ResultFormat {
                 pw.print("\", ");
                 pw.print(runResult.getPrimaryResult().getStatistics().getMean());
                 pw.print(", ");
-                pw.print(runResult.getPrimaryResult().getStatistics().getMeanError(0.95));
-                pw.print(", ");
-                pw.print(runResult.getPrimaryResult().getStatistics().getMeanError(0.99));
+                pw.print(runResult.getPrimaryResult().getStatistics().getMeanError(0.999));
                 pw.print(", \"");
                 pw.print(runResult.getPrimaryResult().getScoreUnit());
                 pw.println("\"");

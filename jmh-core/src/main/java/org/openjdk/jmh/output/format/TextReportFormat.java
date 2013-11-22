@@ -179,8 +179,6 @@ public class TextReportFormat extends AbstractOutputFormat {
                 "Benchmark", "Mode", "Thr", "Count", "Sec",
                 "Mean", "Mean error", "Units");
         for (BenchmarkRecord key : runResults.keySet()) {
-            double[] interval = new double[]{Double.NaN, Double.NaN};
-
             RunResult res = runResults.get(key);
 
             int threads = res.getThreads();
@@ -188,31 +186,24 @@ public class TextReportFormat extends AbstractOutputFormat {
 
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();
-                if (stats.getN() > 2) {
-                    interval = stats.getConfidenceInterval(0.01);
-                }
-
                 out.printf("%-" + nameLen + "s %6s %3d %9d %4d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.getUsername()),
                         key.getMode().shortLabel(),
                         threads, stats.getN(),
                         runTime.convertTo(TimeUnit.SECONDS),
-                        stats.getMean(), (interval[1] - interval[0]) / 2,
+                        stats.getMean(), stats.getMeanError(0.999),
                         res.getScoreUnit());
             }
 
             for (String label : res.getSecondaryResults().keySet()) {
                 Statistics stats = res.getSecondaryResults().get(label).getStatistics();
-                if (stats.getN() > 2) {
-                    interval = stats.getConfidenceInterval(0.01);
-                }
 
                 out.printf("%-" + nameLen + "s %6s %3d %9d %4d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.getUsername() + ":" + label),
                         key.getMode().shortLabel(),
                         threads, stats.getN(),
                         runTime.convertTo(TimeUnit.SECONDS),
-                        stats.getMean(), (interval[1] - interval[0]) / 2,
+                        stats.getMean(), stats.getMeanError(0.999),
                         res.getScoreUnit());
             }
         }
