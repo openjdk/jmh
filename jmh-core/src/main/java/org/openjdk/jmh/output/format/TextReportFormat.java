@@ -191,7 +191,7 @@ public class TextReportFormat extends AbstractOutputFormat {
                         key.getMode().shortLabel(),
                         threads, stats.getN(),
                         runTime.convertTo(TimeUnit.SECONDS),
-                        stats.getMean(), stats.getMeanError(0.999),
+                        stats.getMean(), stats.getMeanErrorAt(0.999),
                         res.getScoreUnit());
             }
 
@@ -203,7 +203,7 @@ public class TextReportFormat extends AbstractOutputFormat {
                         key.getMode().shortLabel(),
                         threads, stats.getN(),
                         runTime.convertTo(TimeUnit.SECONDS),
-                        stats.getMean(), stats.getMeanError(0.999),
+                        stats.getMean(), stats.getMeanErrorAt(0.999),
                         res.getScoreUnit());
             }
         }

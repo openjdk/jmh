@@ -117,7 +117,7 @@ public class SampleTimeResult extends Result {
         sb.append("    samples = ").append(stats.getN()).append("\n");
 
         if (stats.getN() > 2) {
-            double[] interval = stats.getConfidenceInterval(0.999);
+            double[] interval = stats.getConfidenceIntervalAt(0.999);
             sb.append(String.format("        mean = %10.3f \u00B1(99.9%%) %.3f",
                     convertNs(stats.getMean()),
                     convertNs((interval[1] - interval[0]) / 2)

@@ -28,9 +28,19 @@ import java.io.Serializable;
 
 public interface Statistics extends Serializable {
 
-    double[] getConfidenceInterval(double confidence);
+    /**
+     * Gets the confidence interval at given confidence level.
+     * @param confidence confidence level (e.g. 0.95)
+     * @return the interval in which mean lies with the given confidence level
+     */
+    double[] getConfidenceIntervalAt(double confidence);
 
-    double getMeanError(double confidence);
+    /**
+     * Gets the mean error at given confidence level.
+     * @param confidence confidence level (e.g. 0.95)
+     * @return the mean error with the given confidence level
+     */
+    double getMeanErrorAt(double confidence);
 
     double getStandardDeviation();
 

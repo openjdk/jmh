@@ -91,7 +91,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         PrintWriter pw = new PrintWriter(sw);
 
         if (statistics.getN() > 2) {
-            double[] interval = statistics.getConfidenceInterval(0.999);
+            double[] interval = statistics.getConfidenceIntervalAt(0.999);
             pw.println(String.format("Result %s: %.3f \u00B1(99.9%%) %.3f %s",
                     (label == null) ? "" : "\"" + label + "\"",
                     statistics.getMean(), (interval[1] - interval[0]) / 2,

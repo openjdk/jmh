@@ -137,7 +137,7 @@ public abstract class AbstractStatistics implements Statistics {
      * @return the confidence interval
      */
     @Override
-    public double[] getConfidenceInterval(double confidence) {
+    public double[] getConfidenceIntervalAt(double confidence) {
         double[] interval = new double[2];
 
         double ip = getStudentT(1 - (1 - confidence)/2, getN() - 1);
@@ -168,8 +168,8 @@ public abstract class AbstractStatistics implements Statistics {
     }
 
     @Override
-    public double getMeanError(double confidence) {
-        if (getN() < 2) return Double.NaN;
+    public double getMeanErrorAt(double confidence) {
+        if (getN() <= 2) return Double.NaN;
         double ip = getStudentT(1 - (1 - confidence)/2, getN() - 1);
         return ip * (getStandardDeviation() / Math.sqrt(getN()));
     }

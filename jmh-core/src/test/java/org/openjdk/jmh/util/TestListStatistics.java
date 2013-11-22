@@ -127,11 +127,11 @@ public class TestListStatistics {
     }
 
     /**
-     * Test of getConfidenceInterval, of class Statistics
+     * Test of getConfidenceIntervalAt, of class Statistics
      */
     @Test
     public strictfp void testGetConfidenceInterval() {
-        double[] interval = instance.getConfidenceInterval(0.95);
+        double[] interval = instance.getConfidenceIntervalAt(0.95);
         assertEquals(39.234, interval[0], 0.002);
         assertEquals(62.831, interval[1], 0.002);
     }

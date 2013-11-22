@@ -32,15 +32,12 @@ import org.openjdk.jmh.benchmarks.NanoTimerBench;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.OutputFormatType;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Map;
 
 public class MainValidation {
 
@@ -73,7 +70,7 @@ public class MainValidation {
 
             pw.printf("%50s", "running empty benchmark: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         {
@@ -87,7 +84,7 @@ public class MainValidation {
 
             pw.printf("%50s", "Level.Trial, Scope.Benchmark, @Setup: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         {
@@ -101,7 +98,7 @@ public class MainValidation {
 
             pw.printf("%50s", "Level.Trial, Scope.Benchmark, @TearDown: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         {
@@ -115,7 +112,7 @@ public class MainValidation {
 
             pw.printf("%50s", "Level.Iteration, Scope.Benchmark, @Setup: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         {
@@ -129,7 +126,7 @@ public class MainValidation {
 
             pw.printf("%50s", "Level.Iteration, Scope.Benchmark, @TearDown: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         {
@@ -143,7 +140,7 @@ public class MainValidation {
 
             pw.printf("%50s", "Level.Invocation, Scope.Benchmark, @Setup: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         {
@@ -157,7 +154,7 @@ public class MainValidation {
 
             pw.printf("%50s", "Level.Invocation, Scope.Benchmark, @TearDown: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
         }
 
         pw.println();
@@ -183,7 +180,7 @@ public class MainValidation {
 
             pw.printf("%50s", "System.nanoTime latency: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
 
             latency = (long) r.getScore();
         }
@@ -200,7 +197,7 @@ public class MainValidation {
 
             pw.printf("%50s", "System.nanoTime granularity: ");
             pw.flush();
-            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanError(0.999));
+            pw.printf("%.2f +- %.2f ns\n", r.getScore(), r.getStatistics().getMeanErrorAt(0.999));
             granularity = (long) r.getScore();
         }
 
