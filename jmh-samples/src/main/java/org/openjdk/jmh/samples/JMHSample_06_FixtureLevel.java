@@ -41,7 +41,7 @@ public class JMHSample_06_FixtureLevel {
      *
      * Level.Trial:      before or after the entire benchmark run (the sequence of iterations)
      * Level.Iteration:  before or after the benchmark iteration (the sequence of invocations)
-     * Level.Invocation; before or after the benchmark method invocation
+     * Level.Invocation; before or after the benchmark method invocation (WARNING: read the Javadoc before using)
      *
      * Time spent in fixture methods does not count into the performance metrics,
      * so you can use this to do some heavy-lifting.
