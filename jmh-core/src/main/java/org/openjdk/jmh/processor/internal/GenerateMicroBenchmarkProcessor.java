@@ -195,6 +195,24 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
+        for (Element m : methods) {
+            if (m.getModifiers().contains(Modifier.ABSTRACT)) {
+                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                        + " method can not be abstract.", m);
+            }
+            if (m.getModifiers().contains(Modifier.PRIVATE)) {
+                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                        + " method can not be private.", m);
+            }
+            if (m.getModifiers().contains(Modifier.SYNCHRONIZED)) {
+                if (clazz.getAnnotation(State.class) == null) {
+                    throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                            + " method can only be synchronized if the enclosing class is annotated with "
+                            + "@" + State.class.getSimpleName() + ".", m);
+                    }
+            }
+        }
+
         Map<String, MethodGroup> result = new TreeMap<String, MethodGroup>();
 
         boolean classStrictFP = clazz.getModifiers().contains(Modifier.STRICTFP);
