@@ -31,7 +31,10 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 public class JSONResultFormat implements ResultFormat {
@@ -44,9 +47,8 @@ public class JSONResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Map<BenchmarkRecord, RunResult> results) {
-        PrintWriter pw = null;
-        try  {
-            pw = new PrintWriter(output);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
 
             boolean first = true;
 
@@ -61,54 +63,128 @@ public class JSONResultFormat implements ResultFormat {
                 RunResult runResult = results.get(br);
 
                 pw.println("{");
-                pw.println("  \"benchmark\" : \"" + br.getUsername() + "\",");
-                pw.println("  \"mode\" : \"" + br.getMode().shortLabel() + "\",");
-                pw.println("  \"threads\" : " + runResult.getThreads() + ",");
-                pw.println("  \"iterations\" : " + runResult.getIterationCount() + ",");
-                pw.println("  \"iterationTime\" : \"" + runResult.getTime() + "\",");
-                pw.println("  \"primaryMetric\" : {");
-                pw.println("    \"score\" : " + runResult.getPrimaryResult().getScore() + ",");
-                pw.println("    \"scoreStdev\" : " + runResult.getPrimaryResult().getStatistics().getStandardDeviation() + ",");
-                pw.println("    \"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.95)) + ",");
-                pw.println("    \"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.99)) + ",");
-                pw.println("    \"scoreConfidence999\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
-                pw.println("    \"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
-                pw.println("    \"rawData\" : [");
+                pw.println("\"benchmark\" : \"" + br.getUsername() + "\",");
+                pw.println("\"mode\" : \"" + br.getMode().shortLabel() + "\",");
+                pw.println("\"threads\" : " + runResult.getThreads() + ",");
+                pw.println("\"iterations\" : " + runResult.getIterationCount() + ",");
+                pw.println("\"iterationTime\" : \"" + runResult.getTime() + "\",");
+                pw.println("\"primaryMetric\" : {");
+                pw.println("\"score\" : " + runResult.getPrimaryResult().getScore() + ",");
+                pw.println("\"scoreStdev\" : " + runResult.getPrimaryResult().getStatistics().getStandardDeviation() + ",");
+                pw.println("\"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.95)) + ",");
+                pw.println("\"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.99)) + ",");
+                pw.println("\"scoreConfidence999\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
+                pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
+                pw.println("\"rawData\" :");
 
-                boolean firstBench = true;
-                for (BenchResult benchResult : runResult.getRawBenchResults()) {
-                    if (firstBench) {
-                        firstBench = false;
-                    } else {
-                        pw.println(",");
-                    }
-                    pw.println("      [");
-                    boolean firstResult = true;
-                    for (Result r : benchResult.getRawPrimaryResults()) {
-                        if (firstResult) {
-                            firstResult = false;
-                        } else {
-                            pw.println(",");
+                {
+                    Collection<String> l1 = new ArrayList<String>();
+                    for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                        Collection<String> scores = new ArrayList<String>();
+                        for (Result r : benchResult.getRawPrimaryResults()) {
+                            scores.add(String.valueOf(r.getScore()));
                         }
-                        pw.print("        " + r.getScore());
+                        l1.add(printMultiple(scores, "[", "]"));
                     }
-                    pw.println();
-                    pw.println("      ]");
+                    pw.println(printMultiple(l1, "[", "]"));
+                    pw.println("},");
                 }
-                pw.println("    ]");
-                pw.println("  }");
+
+                Collection<String> secondaries = new ArrayList<String>();
+                for (String secondaryName : runResult.getSecondaryResults().keySet()) {
+                    Result result = runResult.getSecondaryResults().get(secondaryName);
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("\"").append(secondaryName).append("\" : {").append("\n");
+                    sb.append("\"score\" : ").append(result.getScore()).append(",").append("\n");
+                    sb.append("\"scoreStdev\" : ").append(result.getStatistics().getStandardDeviation()).append(",").append("\n");
+                    sb.append("\"scoreConfidence95\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.95))).append(",").append("\n");
+                    sb.append("\"scoreConfidence99\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.99))).append(",").append("\n");
+                    sb.append("\"scoreConfidence999\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",").append("\n");
+                    sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",").append("\n");
+                    sb.append("\"rawData\" :").append("\n");
+
+                    Collection<String> l2 = new ArrayList<String>();
+                    for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                        Collection<String> scores = new ArrayList<String>();
+                        for (Result r : benchResult.getRawSecondaryResults().get(secondaryName)) {
+                            scores.add(String.valueOf(r.getScore()));
+                        }
+                        l2.add(printMultiple(scores, "[", "]"));
+                    }
+
+                    sb.append(printMultiple(l2, "[", "]"));
+                    sb.append("}");
+                    secondaries.add(sb.toString());
+                }
+                pw.println("\"secondaryMetrics\" : {");
+                pw.println(printMultiple(secondaries, "", ""));
                 pw.println("}");
+
+                pw.println("}");
+
             }
             pw.println("]");
 
+        try {
+            PrintWriter out = new PrintWriter(output);
+            out.println(tidy(sw.toString()));
+            out.close();
         } catch (IOException e) {
             throw new IllegalStateException(e);
-        } finally {
-            if (pw != null) {
-                pw.close();
+        }
+    }
+
+    private String tidy(String s) {
+        s = s.replaceAll("\n", " ");
+        s = s.replaceAll(",", ",\n");
+        s = s.replaceAll("\\{", "{\n");
+        s = s.replaceAll("\\[", "[\n");
+        s = s.replaceAll("\\}", "\n}\n");
+        s = s.replaceAll("\\]", "\n]\n");
+        s = s.replaceAll("\\]\n,\n", "],\n");
+        s = s.replaceAll("\\}\n,\n", "},\n");
+        s = s.replaceAll("\n( *)\n", "\n");
+
+        String[] lines = s.split("\n");
+
+        StringBuilder sb = new StringBuilder();
+
+        int ident = 0;
+        String prevL = null;
+        for (String l : lines) {
+            if (prevL != null && (prevL.endsWith("{") || prevL.endsWith("["))) {
+                ident++;
             }
+            if (l.endsWith("}") || l.endsWith("]") || l.endsWith("},") || l.endsWith("],")) {
+                ident--;
+            }
+
+            for (int c = 0; c < ident; c++) {
+                sb.append("    ");
+            }
+            sb.append(l.trim());
+            sb.append("\n");
+            prevL = l;
         }
 
+        return sb.toString();
+    }
+
+    private String printMultiple(Collection<String> elements, String leftBracket, String rightBracket) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(leftBracket);
+        boolean isFirst = true;
+        for (String e : elements) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                sb.append(",");
+            }
+            sb.append(e);
+        }
+        sb.append(rightBracket);
+        return sb.toString();
     }
 
 }
