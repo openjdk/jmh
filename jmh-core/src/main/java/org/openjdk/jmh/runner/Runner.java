@@ -36,7 +36,7 @@ import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.WarmupMode;
-import org.openjdk.jmh.runner.parameters.Defaults;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.internal.HashMultimap;
@@ -259,25 +259,6 @@ public class Runner extends BaseRunner {
         return runResults;
     }
 
-    private int decideForks(int optionForks, int benchForks) {
-        if (optionForks == -1) {
-            if (benchForks == -1) {
-                return Defaults.DEFAULT_FORK_TIMES;
-            } else {
-                return benchForks;
-            }
-        } else {
-            return optionForks;
-        }
-    }
-
-    private int decideWarmupForks(int optionWarmupForks, Fork forkAnnotation) {
-        if (optionWarmupForks == -1) {
-            return (forkAnnotation != null) ? forkAnnotation.warmups() : 0;
-        } else {
-            return optionWarmupForks;
-        }
-    }
 
     private Map<BenchmarkRecord, RunResult> runBenchmarks(Set<BenchmarkRecord> benchmarks) {
         Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
@@ -285,8 +266,8 @@ public class Runner extends BaseRunner {
 
         out.startRun();
         for (BenchmarkRecord benchmark : benchmarks) {
-            int f = decideForks(options.getForkCount(), benchForks(benchmark));
-            if (f > 0) {
+            BenchmarkParams params = new BenchmarkParams(options, benchmark, true, true);
+            if (params.getForks() > 0) {
                 forked.add(benchmark);
             } else {
                 embedded.add(benchmark);
@@ -353,8 +334,10 @@ public class Runner extends BaseRunner {
 
                 String[] commandString = getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
 
-                int forkCount = decideForks(options.getForkCount(), benchForks(benchmark));
-                int warmupForkCount = decideWarmupForks(options.getWarmupForkCount(), forkAnnotation);
+                BenchmarkParams params = new BenchmarkParams(options, benchmark, true, true);
+
+                int forkCount = params.getForks();
+                int warmupForkCount = params.getWarmupForks();
                 if (warmupForkCount > 0) {
                     out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                     for (int i = 0; i < warmupForkCount; i++) {
@@ -381,14 +364,6 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    /**
-     * Tests if the benchmark has the fork annotation
-     */
-    private int benchForks(BenchmarkRecord benchmark) {
-        Method m = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
-        Fork fork = m.getAnnotation(Fork.class);
-        return (fork != null) ? fork.value() : -1;
-    }
 
     private BenchResult doFork(BinaryLinkServer reader, String[] commandString) {
         try {

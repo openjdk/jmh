@@ -25,8 +25,7 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 
@@ -49,17 +48,17 @@ public class RunResult implements Serializable {
 
     private final Collection<BenchResult> benchResults;
     private final BenchmarkRecord benchmark;
-    private final IterationParams params;
+    private final BenchmarkParams params;
 
     public RunResult(Collection<BenchResult> data) {
         this.benchResults = data;
 
         BenchmarkRecord myRecord = null;
-        IterationParams myParams = null;
+        BenchmarkParams myParams = null;
 
         for (BenchResult br : data) {
             BenchmarkRecord record = br.getBenchmark();
-            IterationParams params = br.getParams();
+            BenchmarkParams params = br.getParams();
 
             if (myRecord != null && !record.equals(myRecord)) {
                 throw new IllegalStateException("Aggregating the benchmark results from different benchmarks");
@@ -132,19 +131,11 @@ public class RunResult implements Serializable {
         return getPrimaryResult().getScoreUnit();
     }
 
-    public int getThreads() {
-        return params.getThreads();
-    }
-
-    public TimeValue getTime() {
-        return params.getTime();
-    }
-
     public BenchmarkRecord getBenchmark() {
         return benchmark;
     }
 
-    public int getIterationCount() {
-        return params.getCount();
+    public BenchmarkParams getParams() {
+        return params;
     }
 }

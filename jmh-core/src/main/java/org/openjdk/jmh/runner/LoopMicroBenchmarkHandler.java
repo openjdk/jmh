@@ -74,7 +74,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      */
     @Override
     public IterationResult runIteration(IterationParams params, boolean last) {
-        int numThreads = params.getThreads();
+        int numThreads = params.getBenchmarkParams().getThreads();
         TimeValue runtime = params.getTime();
 
         CountDownLatch preSetupBarrier = new CountDownLatch(numThreads);
@@ -88,7 +88,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
 
-        int[] groups = params.getThreadGroups();
+        int[] groups = params.getBenchmarkParams().getThreadGroups();
         int currentGroup = 0;
         int currentSubgroup = 0;
         int remainingSubgroupThreads = groups[currentSubgroup];

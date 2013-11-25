@@ -55,11 +55,11 @@ public class CSVResultFormat implements ResultFormat {
                 pw.print("\", \"");
                 pw.print(br.getMode().shortLabel());
                 pw.print("\", ");
-                pw.print(runResult.getThreads());
+                pw.print(runResult.getParams().getThreads());
                 pw.print(", ");
-                pw.print(runResult.getIterationCount());
+                pw.print(runResult.getParams().getIteration().getCount());
                 pw.print(", \"");
-                pw.print(runResult.getTime());
+                pw.print(runResult.getParams().getIteration().getTime());
                 pw.print("\", ");
                 pw.print(runResult.getPrimaryResult().getStatistics().getMean());
                 pw.print(", ");

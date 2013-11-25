@@ -65,9 +65,9 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("{");
                 pw.println("\"benchmark\" : \"" + br.getUsername() + "\",");
                 pw.println("\"mode\" : \"" + br.getMode().shortLabel() + "\",");
-                pw.println("\"threads\" : " + runResult.getThreads() + ",");
-                pw.println("\"iterations\" : " + runResult.getIterationCount() + ",");
-                pw.println("\"iterationTime\" : \"" + runResult.getTime() + "\",");
+                pw.println("\"threads\" : " + runResult.getParams().getThreads() + ",");
+                pw.println("\"iterations\" : " + runResult.getParams().getIteration().getCount() + ",");
+                pw.println("\"iterationTime\" : \"" + runResult.getParams().getIteration().getTime() + "\",");
                 pw.println("\"primaryMetric\" : {");
                 pw.println("\"score\" : " + runResult.getPrimaryResult().getScore() + ",");
                 pw.println("\"scoreError\" : " + runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999) + ",");

@@ -54,7 +54,7 @@ public class IterationResult implements Serializable {
     public IterationResult(BenchmarkRecord benchmark, IterationParams params) {
         this.benchmark = benchmark;
         this.params = params;
-        this.primaryResults = new ArrayList<Result>(params.getThreads());
+        this.primaryResults = new ArrayList<Result>();
         this.profilerResults = new ArrayList<ProfilerResult>();
         this.secondaryResults = new TreeMultimap<String, Result>();
     }

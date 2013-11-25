@@ -25,12 +25,16 @@
 package org.openjdk.jmh.runner.parameters;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * @author sergey.kuksenko@oracle.com
  */
 public class IterationParams implements Serializable {
+
+    /**
+     * Benchmark parameters
+     */
+    private final BenchmarkParams benchmarkParams;
 
     /**
      * amount of iterations
@@ -42,21 +46,11 @@ public class IterationParams implements Serializable {
      */
     private final TimeValue timeValue;
 
-    /**
-     * Thread count
-     */
-    private final int threads;
 
-    /**
-     * Subgroups distribution
-     */
-    private final int[] threadGroups;
-
-    public IterationParams(int count, TimeValue time, int threads, int... threadGroups) {
+    public IterationParams(BenchmarkParams params, int count, TimeValue time) {
         this.count = count;
         this.timeValue = time;
-        this.threads = threads;
-        this.threadGroups = threadGroups;
+        this.benchmarkParams = params;
     }
 
     public int getCount() {
@@ -75,8 +69,6 @@ public class IterationParams implements Serializable {
         IterationParams that = (IterationParams) o;
 
         if (count != that.count) return false;
-        if (threads != that.threads) return false;
-        if (!Arrays.equals(threadGroups, that.threadGroups)) return false;
         if (timeValue != null ? !timeValue.equals(that.timeValue) : that.timeValue != null) return false;
 
         return true;
@@ -86,8 +78,6 @@ public class IterationParams implements Serializable {
     public int hashCode() {
         int result = count;
         result = 31 * result + (timeValue != null ? timeValue.hashCode() : 0);
-        result = 31 * result + threads;
-        result = 31 * result + (threadGroups != null ? Arrays.hashCode(threadGroups) : 0);
         return result;
     }
 
@@ -96,11 +86,8 @@ public class IterationParams implements Serializable {
         return "IterationParams("+ getCount()+", "+ getTime()+")";
     }
 
-    public int getThreads() {
-        return threads;
+    public BenchmarkParams getBenchmarkParams() {
+        return benchmarkParams;
     }
 
-    public int[] getThreadGroups() {
-        return threadGroups;
-    }
 }

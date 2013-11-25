@@ -181,8 +181,8 @@ public class TextReportFormat extends AbstractOutputFormat {
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult res = runResults.get(key);
 
-            int threads = res.getThreads();
-            TimeValue runTime = res.getTime();
+            int threads = res.getParams().getThreads();
+            TimeValue runTime = res.getParams().getIteration().getTime();
 
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();
