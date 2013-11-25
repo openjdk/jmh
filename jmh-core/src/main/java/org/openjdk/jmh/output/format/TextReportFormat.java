@@ -62,7 +62,7 @@ public class TextReportFormat extends AbstractOutputFormat {
         }
 
         out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " + mbParams.getWarmup().getTime() + " each");
-        out.println("# Measurement: " + mbParams.getIteration().getCount() + " iterations, " + mbParams.getIteration().getTime() + " each");
+        out.println("# Measurement: " + mbParams.getMeasurement().getCount() + " iterations, " + mbParams.getMeasurement().getTime() + " each");
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Running: " + name.getUsername());
@@ -182,7 +182,7 @@ public class TextReportFormat extends AbstractOutputFormat {
             RunResult res = runResults.get(key);
 
             int threads = res.getParams().getThreads();
-            TimeValue runTime = res.getParams().getIteration().getTime();
+            TimeValue runTime = res.getParams().getMeasurement().getTime();
 
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();

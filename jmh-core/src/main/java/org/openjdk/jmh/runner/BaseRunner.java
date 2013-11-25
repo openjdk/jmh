@@ -96,13 +96,13 @@ public abstract class BaseRunner {
             }
 
             out.iteration(handler.getBenchmark(), wp, i, IterationType.WARMUP);
-            boolean isLastIteration = (executionParams.getIteration().getCount() == 0);
+            boolean isLastIteration = (executionParams.getMeasurement().getCount() == 0);
             IterationResult iterData = handler.runIteration(wp, isLastIteration);
             out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterData);
         }
 
         // measurement
-        IterationParams mp = executionParams.getIteration();
+        IterationParams mp = executionParams.getMeasurement();
         for (int i = 1; i <= mp.getCount(); i++) {
             // will run system gc if we should
             if (runSystemGC()) {

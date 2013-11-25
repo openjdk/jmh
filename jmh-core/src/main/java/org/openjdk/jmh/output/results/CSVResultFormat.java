@@ -57,9 +57,9 @@ public class CSVResultFormat implements ResultFormat {
                 pw.print("\", ");
                 pw.print(runResult.getParams().getThreads());
                 pw.print(", ");
-                pw.print(runResult.getParams().getIteration().getCount());
+                pw.print(runResult.getParams().getMeasurement().getCount());
                 pw.print(", \"");
-                pw.print(runResult.getParams().getIteration().getTime());
+                pw.print(runResult.getParams().getMeasurement().getTime());
                 pw.print("\", ");
                 pw.print(runResult.getPrimaryResult().getStatistics().getMean());
                 pw.print(", ");
