@@ -66,8 +66,11 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("\"benchmark\" : \"" + br.getUsername() + "\",");
                 pw.println("\"mode\" : \"" + br.getMode().shortLabel() + "\",");
                 pw.println("\"threads\" : " + runResult.getParams().getThreads() + ",");
-                pw.println("\"iterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
-                pw.println("\"iterationTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
+                pw.println("\"forks\" : " + runResult.getParams().getForks() + ",");
+                pw.println("\"warmupIterations\" : " + runResult.getParams().getWarmup().getCount() + ",");
+                pw.println("\"warmupTime\" : \"" + runResult.getParams().getWarmup().getTime() + "\",");
+                pw.println("\"measurementIterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
+                pw.println("\"measurementTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
                 pw.println("\"primaryMetric\" : {");
                 pw.println("\"score\" : " + runResult.getPrimaryResult().getScore() + ",");
                 pw.println("\"scoreError\" : " + runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999) + ",");
@@ -83,7 +86,7 @@ public class JSONResultFormat implements ResultFormat {
                     for (BenchResult benchResult : runResult.getRawBenchResults()) {
                         Collection<String> scores = new ArrayList<String>();
                         for (Result r : benchResult.getRawPrimaryResults()) {
-                            scores.add(String.valueOf(r.getScore()));
+                            scores.add(String.format("%.3f", r.getScore()));
                         }
                         l1.add(printMultiple(scores, "[", "]"));
                     }
