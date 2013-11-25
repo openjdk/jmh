@@ -70,6 +70,7 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("\"iterationTime\" : \"" + runResult.getTime() + "\",");
                 pw.println("\"primaryMetric\" : {");
                 pw.println("\"score\" : " + runResult.getPrimaryResult().getScore() + ",");
+                pw.println("\"scoreError\" : " + runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999) + ",");
                 pw.println("\"scoreStdev\" : " + runResult.getPrimaryResult().getStatistics().getStandardDeviation() + ",");
                 pw.println("\"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.95)) + ",");
                 pw.println("\"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.99)) + ",");
@@ -95,14 +96,15 @@ public class JSONResultFormat implements ResultFormat {
                     Result result = runResult.getSecondaryResults().get(secondaryName);
 
                     StringBuilder sb = new StringBuilder();
-                    sb.append("\"").append(secondaryName).append("\" : {").append("\n");
-                    sb.append("\"score\" : ").append(result.getScore()).append(",").append("\n");
-                    sb.append("\"scoreStdev\" : ").append(result.getStatistics().getStandardDeviation()).append(",").append("\n");
-                    sb.append("\"scoreConfidence95\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.95))).append(",").append("\n");
-                    sb.append("\"scoreConfidence99\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.99))).append(",").append("\n");
-                    sb.append("\"scoreConfidence999\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",").append("\n");
-                    sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",").append("\n");
-                    sb.append("\"rawData\" :").append("\n");
+                    sb.append("\"").append(secondaryName).append("\" : {");
+                    sb.append("\"score\" : ").append(result.getScore()).append(",");
+                    sb.append("\"scoreError\" : ").append(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)).append(",");
+                    sb.append("\"scoreStdev\" : ").append(result.getStatistics().getStandardDeviation()).append(",");
+                    sb.append("\"scoreConfidence95\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.95))).append(",");
+                    sb.append("\"scoreConfidence99\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.99))).append(",");
+                    sb.append("\"scoreConfidence999\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
+                    sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
+                    sb.append("\"rawData\" :");
 
                     Collection<String> l2 = new ArrayList<String>();
                     for (BenchResult benchResult : runResult.getRawBenchResults()) {
