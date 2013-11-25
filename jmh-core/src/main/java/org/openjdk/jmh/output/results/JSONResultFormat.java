@@ -74,10 +74,7 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("\"primaryMetric\" : {");
                 pw.println("\"score\" : " + runResult.getPrimaryResult().getScore() + ",");
                 pw.println("\"scoreError\" : " + runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999) + ",");
-                pw.println("\"scoreStdev\" : " + runResult.getPrimaryResult().getStatistics().getStandardDeviation() + ",");
-                pw.println("\"scoreConfidence95\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.95)) + ",");
-                pw.println("\"scoreConfidence99\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.99)) + ",");
-                pw.println("\"scoreConfidence999\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
+                pw.println("\"scoreConfidence\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
                 pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
                 pw.println("\"rawData\" :");
 
@@ -86,7 +83,7 @@ public class JSONResultFormat implements ResultFormat {
                     for (BenchResult benchResult : runResult.getRawBenchResults()) {
                         Collection<String> scores = new ArrayList<String>();
                         for (Result r : benchResult.getRawPrimaryResults()) {
-                            scores.add(String.format("%.3f", r.getScore()));
+                            scores.add(String.valueOf(r.getScore()));
                         }
                         l1.add(printMultiple(scores, "[", "]"));
                     }
@@ -102,10 +99,7 @@ public class JSONResultFormat implements ResultFormat {
                     sb.append("\"").append(secondaryName).append("\" : {");
                     sb.append("\"score\" : ").append(result.getScore()).append(",");
                     sb.append("\"scoreError\" : ").append(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)).append(",");
-                    sb.append("\"scoreStdev\" : ").append(result.getStatistics().getStandardDeviation()).append(",");
-                    sb.append("\"scoreConfidence95\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.95))).append(",");
-                    sb.append("\"scoreConfidence99\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.99))).append(",");
-                    sb.append("\"scoreConfidence999\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
+                    sb.append("\"scoreConfidence\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
                     sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
                     sb.append("\"rawData\" :");
 
