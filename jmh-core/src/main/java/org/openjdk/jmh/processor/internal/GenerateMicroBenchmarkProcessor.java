@@ -730,7 +730,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -740,7 +740,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
@@ -799,8 +799,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
             String methodName = method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop";
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults res, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
-            writer.println("        RawResults result = res;");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        result.startTime = System.nanoTime();");
@@ -821,7 +820,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -830,7 +829,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
@@ -887,8 +886,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         // measurement loop bodies
         for (Element method : methodGroup.methods()) {
-            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " void " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, RawResults res, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
-            writer.println("        RawResults result = res;");
+            writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " void " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long operations = 0;");
             writer.println("        long realTime = 0;");
             writer.println("        result.startTime = System.nanoTime();");
@@ -921,7 +919,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -931,7 +929,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
@@ -996,7 +994,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("        int currentStride = 0;");
             writer.println("        do {");
 
-            invocationProlog(writer, 4, method, states, true);
+            invocationProlog(writer, 3, method, states, true);
 
             writer.println("            rnd = rnd * 6364136223846793005L + 1442695040888963407L;");
             writer.println("            boolean sample = (rnd & rndMask) == 0;");
@@ -1013,7 +1011,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("                }");
             writer.println("            }");
 
-            invocationEpilog(writer, 4, method, states, true);
+            invocationEpilog(writer, 3, method, states, true);
 
             writer.println("        } while(!control.isDone);");
 
@@ -1023,7 +1021,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable { ");
+        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -1034,7 +1032,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") { ");
+            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
