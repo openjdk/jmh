@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -72,9 +71,9 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("\"measurementIterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
                 pw.println("\"measurementTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
                 pw.println("\"primaryMetric\" : {");
-                pw.println("\"score\" : " + runResult.getPrimaryResult().getScore() + ",");
-                pw.println("\"scoreError\" : " + runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999) + ",");
-                pw.println("\"scoreConfidence\" : " + Arrays.toString(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
+                pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
+                pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)) + ",");
+                pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
                 pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
                 pw.println("\"rawData\" :");
 
@@ -83,7 +82,7 @@ public class JSONResultFormat implements ResultFormat {
                     for (BenchResult benchResult : runResult.getRawBenchResults()) {
                         Collection<String> scores = new ArrayList<String>();
                         for (Result r : benchResult.getRawPrimaryResults()) {
-                            scores.add(String.valueOf(r.getScore()));
+                            scores.add(emit(r.getScore()));
                         }
                         l1.add(printMultiple(scores, "[", "]"));
                     }
@@ -97,9 +96,9 @@ public class JSONResultFormat implements ResultFormat {
 
                     StringBuilder sb = new StringBuilder();
                     sb.append("\"").append(secondaryName).append("\" : {");
-                    sb.append("\"score\" : ").append(result.getScore()).append(",");
-                    sb.append("\"scoreError\" : ").append(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)).append(",");
-                    sb.append("\"scoreConfidence\" : ").append(Arrays.toString(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
+                    sb.append("\"score\" : ").append(emit(result.getScore())).append(",");
+                    sb.append("\"scoreError\" : ").append(emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999))).append(",");
+                    sb.append("\"scoreConfidence\" : ").append(emit(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
                     sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
                     sb.append("\"rawData\" :");
 
@@ -107,7 +106,7 @@ public class JSONResultFormat implements ResultFormat {
                     for (BenchResult benchResult : runResult.getRawBenchResults()) {
                         Collection<String> scores = new ArrayList<String>();
                         for (Result r : benchResult.getRawSecondaryResults().get(secondaryName)) {
-                            scores.add(String.valueOf(r.getScore()));
+                            scores.add(emit(r.getScore()));
                         }
                         l2.add(printMultiple(scores, "[", "]"));
                     }
@@ -128,10 +127,38 @@ public class JSONResultFormat implements ResultFormat {
         try {
             PrintWriter out = new PrintWriter(output);
             out.println(tidy(sw.toString()));
+            out.flush();
             out.close();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private String emit(double[] ds) {
+        StringBuilder sb = new StringBuilder();
+
+        boolean isFirst = true;
+        sb.append("[");
+        for (double d : ds) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                sb.append(",");
+            }
+            sb.append(emit(d));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String emit(double d) {
+        if (d != d)
+            return "\"NaN\"";
+        if (d == Double.NEGATIVE_INFINITY)
+            return "\"-INF\"";
+        if (d == Double.POSITIVE_INFINITY)
+            return "\"+INF\"";
+        return String.valueOf(d);
     }
 
     private String tidy(String s) {

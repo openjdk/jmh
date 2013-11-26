@@ -79,6 +79,19 @@ public class BenchmarkParams implements Serializable {
         return (fork != null) ? fork.value() : -1;
     }
 
+    /**
+     * Test entry method
+     */
+    public BenchmarkParams(boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks, int warmupIters, TimeValue warmupTime, int measureIters, TimeValue measureTime) {
+        this.synchIterations = synchIterations;
+        this.threads = threads;
+        this.threadGroups = threadGroups;
+        this.forks = forks;
+        this.warmupForks = warmupForks;
+        this.warmup = new IterationParams(this, warmupIters, warmupTime);
+        this.measurement = new IterationParams(this, measureIters, measureTime);
+    }
+
     public BenchmarkParams(Options options, BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
         Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
         Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());

@@ -140,6 +140,11 @@ public abstract class AbstractStatistics implements Statistics {
     public double[] getConfidenceIntervalAt(double confidence) {
         double[] interval = new double[2];
 
+        if (getN() <= 2) {
+            interval[0] = interval[1] = Double.NaN;
+            return interval;
+        }
+
         double ip = getStudentT(1 - (1 - confidence)/2, getN() - 1);
         interval[0] = getMean() - ip * (getStandardDeviation() / Math.sqrt(getN()));
         interval[1] = getMean() + ip * (getStandardDeviation() / Math.sqrt(getN()));

@@ -1,0 +1,6 @@
+"Benchmark", "Mode", "Threads", "Iterations", "Iteration time", "Mean", "Mean Error (95%)", "Mean Error (99%)", "Unit"
+"benchmark_3", "avgt", 968, 857, "438 s", 417.57142857142856, 331.1099544524174, "ops/ms"
+"benchmark_4", "avgt", 739, 16, "763 s", 956.0, NaN, "ops/ms"
+"benchmark_0", "avgt", 80, 802, "501 s", 528.8571428571429, 253.83689091986184, "ops/ms"
+"benchmark_1", "avgt", 900, 55, "398 s", 439.0, NaN, "ops/ms"
+"benchmark_2", "avgt", 466, 461, "96 s", 545.0, 493.81293072112726, "ops/ms"
