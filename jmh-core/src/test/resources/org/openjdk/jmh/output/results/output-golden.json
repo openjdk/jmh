@@ -1,172 +1,5 @@
 [
     {
-        "benchmark" : "benchmark_3",
-        "mode" : "avgt",
-        "threads" : 968,
-        "forks" : 581,
-        "warmupIterations" : 628,
-        "warmupTime" : "207 s",
-        "measurementIterations" : 857,
-        "measurementTime" : "438 s",
-        "primaryMetric" : {
-            "score" : 417.57141666666666,
-            "scoreError" : 331.1099544524174,
-            "scoreConfidence" : [
-                86.46147411901114,
-                748.6813830238459
-            ],
-            "scoreUnit" : "ops/ms",
-            "rawData" : [
-                [
-                    145.0,
-                    502.0,
-                    686.0,
-                    291.0,
-                    665.0,
-                    120.0,
-                    63.0,
-                    570.0
-                ],
-                [
-                    801.0
-                ],
-                [
-                    731.0,
-                    21.0
-                ],
-                [
-                    147.0,
-                    125.0,
-                    979.0
-                ]
-            ]
-        },
-        "secondaryMetrics" : {
-            "secondary1" : {
-                "score" : 672.2142833333334,
-                "scoreError" : 331.1099544524174,
-                "scoreConfidence" : [
-                    409.39701450647914,
-                    935.0315569220922
-                ],
-                "scoreUnit" : "ops/ms",
-                "rawData" :[
-                    [
-                        454.0,
-                        626.0,
-                        584.0,
-                        858.0,
-                        967.0,
-                        814.0,
-                        587.0,
-                        423.0
-                    ],
-                    [
-                        746.0
-                    ],
-                    [
-                        888.0,
-                        284.0
-                    ],
-                    [
-                        965.0,
-                        983.0,
-                        232.0
-                    ]
-                ]
-            },
-            "secondary2" : {
-                "score" : 560.14285,
-                "scoreError" : 331.1099544524174,
-                "scoreConfidence" : [
-                    295.6666772033807,
-                    824.6190370823335
-                ],
-                "scoreUnit" : "ops/ms",
-                "rawData" :[
-                    [
-                        114.0,
-                        166.0,
-                        559.0,
-                        560.0,
-                        341.0,
-                        765.0,
-                        353.0,
-                        522.0
-                    ],
-                    [
-                        779.0
-                    ],
-                    [
-                        870.0,
-                        848.0
-                    ],
-                    [
-                        863.0,
-                        392.0,
-                        710.0
-                    ]
-                ]
-            }
-        }
-    }
-    ,
-    {
-        "benchmark" : "benchmark_4",
-        "mode" : "avgt",
-        "threads" : 739,
-        "forks" : 670,
-        "warmupIterations" : 997,
-        "warmupTime" : "651 s",
-        "measurementIterations" : 16,
-        "measurementTime" : "763 s",
-        "primaryMetric" : {
-            "score" : 956.0,
-            "scoreError" : "NaN",
-            "scoreConfidence" : [
-                "NaN",
-                "NaN"
-            ],
-            "scoreUnit" : "ops/ms",
-            "rawData" : [
-                [
-                    956.0
-                ]
-            ]
-        },
-        "secondaryMetrics" : {
-            "secondary1" : {
-                "score" : 688.0,
-                "scoreError" : "NaN",
-                "scoreConfidence" : [
-                    "NaN",
-                    "NaN"
-                ],
-                "scoreUnit" : "ops/ms",
-                "rawData" :[
-                    [
-                        688.0
-                    ]
-                ]
-            },
-            "secondary2" : {
-                "score" : 237.0,
-                "scoreError" : "NaN",
-                "scoreConfidence" : [
-                    "NaN",
-                    "NaN"
-                ],
-                "scoreUnit" : "ops/ms",
-                "rawData" :[
-                    [
-                        237.0
-                    ]
-                ]
-            }
-        }
-    }
-    ,
-    {
         "benchmark" : "benchmark_0",
         "mode" : "avgt",
         "threads" : 80,
@@ -430,6 +263,173 @@
                         291.0,
                         339.0,
                         820.0
+                    ]
+                ]
+            }
+        }
+    }
+    ,
+    {
+        "benchmark" : "benchmark_3",
+        "mode" : "avgt",
+        "threads" : 968,
+        "forks" : 581,
+        "warmupIterations" : 628,
+        "warmupTime" : "207 s",
+        "measurementIterations" : 857,
+        "measurementTime" : "438 s",
+        "primaryMetric" : {
+            "score" : 417.57141666666666,
+            "scoreError" : 331.1099544524174,
+            "scoreConfidence" : [
+                86.46147411901114,
+                748.6813830238459
+            ],
+            "scoreUnit" : "ops/ms",
+            "rawData" : [
+                [
+                    145.0,
+                    502.0,
+                    686.0,
+                    291.0,
+                    665.0,
+                    120.0,
+                    63.0,
+                    570.0
+                ],
+                [
+                    801.0
+                ],
+                [
+                    731.0,
+                    21.0
+                ],
+                [
+                    147.0,
+                    125.0,
+                    979.0
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+            "secondary1" : {
+                "score" : 672.2142833333334,
+                "scoreError" : 331.1099544524174,
+                "scoreConfidence" : [
+                    409.39701450647914,
+                    935.0315569220922
+                ],
+                "scoreUnit" : "ops/ms",
+                "rawData" :[
+                    [
+                        454.0,
+                        626.0,
+                        584.0,
+                        858.0,
+                        967.0,
+                        814.0,
+                        587.0,
+                        423.0
+                    ],
+                    [
+                        746.0
+                    ],
+                    [
+                        888.0,
+                        284.0
+                    ],
+                    [
+                        965.0,
+                        983.0,
+                        232.0
+                    ]
+                ]
+            },
+            "secondary2" : {
+                "score" : 560.14285,
+                "scoreError" : 331.1099544524174,
+                "scoreConfidence" : [
+                    295.6666772033807,
+                    824.6190370823335
+                ],
+                "scoreUnit" : "ops/ms",
+                "rawData" :[
+                    [
+                        114.0,
+                        166.0,
+                        559.0,
+                        560.0,
+                        341.0,
+                        765.0,
+                        353.0,
+                        522.0
+                    ],
+                    [
+                        779.0
+                    ],
+                    [
+                        870.0,
+                        848.0
+                    ],
+                    [
+                        863.0,
+                        392.0,
+                        710.0
+                    ]
+                ]
+            }
+        }
+    }
+    ,
+    {
+        "benchmark" : "benchmark_4",
+        "mode" : "avgt",
+        "threads" : 739,
+        "forks" : 670,
+        "warmupIterations" : 997,
+        "warmupTime" : "651 s",
+        "measurementIterations" : 16,
+        "measurementTime" : "763 s",
+        "primaryMetric" : {
+            "score" : 956.0,
+            "scoreError" : "NaN",
+            "scoreConfidence" : [
+                "NaN",
+                "NaN"
+            ],
+            "scoreUnit" : "ops/ms",
+            "rawData" : [
+                [
+                    956.0
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+            "secondary1" : {
+                "score" : 688.0,
+                "scoreError" : "NaN",
+                "scoreConfidence" : [
+                    "NaN",
+                    "NaN"
+                ],
+                "scoreUnit" : "ops/ms",
+                "rawData" :[
+                    [
+                        688.0
+                    ]
+                ]
+            },
+            "secondary2" : {
+                "score" : 237.0,
+                "scoreError" : "NaN",
+                "scoreConfidence" : [
+                    "NaN",
+                    "NaN"
+                ],
+                "scoreUnit" : "ops/ms",
+                "rawData" :[
+                    [
+                        237.0
                     ]
                 ]
             }

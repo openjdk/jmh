@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 
 /**
  * These tests seal the machine-readable format.
@@ -54,7 +55,7 @@ import java.util.Random;
 public class ResultFormatTest {
 
     private Map<BenchmarkRecord, RunResult> getStub() {
-        Map<BenchmarkRecord, RunResult> results = new HashMap<BenchmarkRecord, RunResult>();
+        Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
 
         Random r = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
