@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.processor.internal;
 
+import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -36,6 +37,7 @@ import org.openjdk.jmh.util.internal.TreesetMultimap;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
@@ -66,6 +68,8 @@ public class StateObjectHandler {
     private int collapsedIndex = 0;
 
     private final HashMap<String, String> jmhTypes = new HashMap<String, String>();
+    private final Set<String> auxNames = new HashSet<String>();
+    private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
     public StateObjectHandler(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -146,6 +150,33 @@ public class StateObjectHandler {
             String identifier = collapseTypeName(className) + index;
             so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
             args.put(execMethod.getSimpleName().toString(), so);
+        }
+
+        // auxiliary result, produce the accessors
+        if (element.getAnnotation(AuxCounters.class) != null) {
+            for (Element sub : element.getEnclosedElements()) {
+                if (sub.getKind() == ElementKind.FIELD) {
+                    String fieldType = sub.asType().toString();
+                    if (fieldType.equals("int") || fieldType.equals("long")) {
+                        String name = sub.getSimpleName().toString();
+                        if (!auxNames.add(name)) {
+                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() + " fields", sub);
+                        }
+                        auxAccessors.put(name, so.localIdentifier + "." + name);
+                    }
+                }
+
+                if (sub.getKind() == ElementKind.METHOD) {
+                    String returnType = ((ExecutableElement) sub).getReturnType().toString();
+                    if (returnType.equals("int") || returnType.equals("long")) {
+                        String name = sub.getSimpleName().toString();
+                        if (!auxNames.add(name)) {
+                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() + " fields", sub);
+                        }
+                        auxAccessors.put(name, so.localIdentifier + "." + name + "()");
+                    }
+                }
+            }
         }
 
         stateObjects.add(so);
@@ -511,4 +542,13 @@ public class StateObjectHandler {
         }
         return s;
     }
+
+    public Collection<String> getAuxResultNames() {
+        return auxNames;
+    }
+
+    public String getAuxResultAccessor(String name) {
+        return auxAccessors.get(name);
+    }
+
 }

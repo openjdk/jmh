@@ -797,6 +797,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             }
+            for (String ops : states.getAuxResultNames()) {
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(ops) + ", res.getTime(), tu));");
+            }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
@@ -888,7 +891,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
             writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
+            }
+            for (String ops : states.getAuxResultNames()) {
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(ops) + ", res.getTime(), tu));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
