@@ -25,6 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Measurement;
@@ -32,14 +33,16 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(5)
 public class JMHSample_22_FalseSharing {
 
     /*
@@ -56,33 +59,40 @@ public class JMHSample_22_FalseSharing {
 
     /*
      * Suppose we have two threads:
-     *   a) innocious reader which blindly reads its own field
+     *   a) innocuous reader which blindly reads its own field
      *   b) furious writer which updates its own field
-     *
+     */
+
+    /*
+     * BASELINE EXPERIMENT:
      * Because of the false sharing, both reader and writer will experience
      * penalties.
      */
 
     @State(Scope.Group)
-    public static class StateDense {
+    public static class StateBaseline {
         int readOnly;
         int writeOnly;
     }
 
     @GenerateMicroBenchmark
-    @Group("dense")
-    public int reader(StateDense s) {
+    @Group("baseline")
+    public int reader(StateBaseline s) {
         return s.readOnly;
     }
 
     @GenerateMicroBenchmark
-    @Group("dense")
-    public void writer(StateDense s) {
+    @Group("baseline")
+    public void writer(StateBaseline s) {
         s.writeOnly++;
     }
 
     /*
-     * We can try to alleviate some of the effects with padding:
+     * APPROACH 1: PADDING
+     *
+     * We can try to alleviate some of the effects with padding.
+     * This is not versatile because JVMs can freely rearrange the
+     * field order.
      */
 
     @State(Scope.Group)
@@ -108,7 +118,12 @@ public class JMHSample_22_FalseSharing {
     }
 
     /*
-     * Or with the class hierarchy trick:
+     * APPROACH 2: CLASS HIERARCHY TRICK
+     *
+     * We can alleviate false sharing with this convoluted hierarchy trick,
+     * using the fact that superclass fields are usually laid out first.
+     * In this construction, the protected field will be squashed between
+     * paddings.
      */
 
     public static class StateHierarchy_1 {
@@ -146,7 +161,34 @@ public class JMHSample_22_FalseSharing {
     }
 
     /*
-     * Or with @Contended (since JDK 8):
+     * APPROACH 3: ARRAY TRICK
+     *
+     * This trick relies on the contiguous allocation of an array.
+     * Instead of placing the fields in the class, we mangle them
+     * into the array at very sparse offsets.
+     */
+
+    @State(Scope.Group)
+    public static class StateArray {
+        int[] arr = new int[128];
+    }
+
+    @GenerateMicroBenchmark
+    @Group("sparse")
+    public int reader(StateArray s) {
+        return s.arr[0];
+    }
+
+    @GenerateMicroBenchmark
+    @Group("sparse")
+    public void writer(StateArray s) {
+        s.arr[64]++;
+    }
+
+    /*
+     * APPROACH 4:
+     *
+     * @Contended (since JDK 8):
      *  Uncomment the annotation if building with JDK 8.
      *  Remember to flip -XX:-RestrictContended to enable.
      */
@@ -155,7 +197,7 @@ public class JMHSample_22_FalseSharing {
     public static class StateContended {
         int readOnly;
 
-//        @sun.misc.Contended
+        @sun.misc.Contended
         int writeOnly;
     }
 
@@ -176,7 +218,7 @@ public class JMHSample_22_FalseSharing {
      *
      * You can run this test with:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_22.*" -f 1
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_22.*" -t $CPU
      *
      * Note the slowdowns.
      */
