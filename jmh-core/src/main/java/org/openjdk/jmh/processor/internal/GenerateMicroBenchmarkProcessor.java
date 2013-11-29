@@ -792,9 +792,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -884,7 +885,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
             }
@@ -989,9 +991,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", buffer, tu));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", buffer, tu));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -1063,9 +1066,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), tu));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), tu));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
