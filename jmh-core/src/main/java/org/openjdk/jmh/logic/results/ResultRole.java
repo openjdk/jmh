@@ -25,26 +25,16 @@
 package org.openjdk.jmh.logic.results;
 
 public enum ResultRole {
-    PRIMARY(true, false),
-    SECONDARY(false, true),
-    BOTH(true, true),
-
+    PRIMARY,
+    SECONDARY
     ;
 
-    private final boolean primary;
-    private final boolean secondary;
-
-    ResultRole(boolean primary, boolean secondary) {
-        this.primary = primary;
-        this.secondary = secondary;
-    }
-
     public boolean isPrimary() {
-        return primary;
+        return this == PRIMARY;
     }
 
     public boolean isSecondary() {
-        return secondary;
+        return this == SECONDARY;
     }
 
 }

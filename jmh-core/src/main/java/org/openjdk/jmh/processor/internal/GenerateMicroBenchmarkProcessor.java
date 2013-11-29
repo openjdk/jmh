@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -459,6 +460,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + List.class.getName() + ';');
         writer.println("import " + AtomicInteger.class.getName() + ';');
         writer.println("import " + AtomicIntegerFieldUpdater.class.getName() + ';');
+        writer.println("import " + Collection.class.getName() + ';');
+        writer.println("import " + Collections.class.getName() + ';');
+        writer.println("import " + ArrayList.class.getName() + ';');
         writer.println("import " + Arrays.class.getName() + ';');
         writer.println("import " + TimeUnit.class.getName() + ';');
         writer.println("import " + Generated.class.getName() + ';');
@@ -730,7 +734,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -787,8 +791,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new ThroughputResult(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            if (!isSingleMethod) {
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            }
+            writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -820,7 +828,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -875,8 +883,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new AverageTimeResult(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            if (!isSingleMethod) {
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            }
+            writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -919,7 +931,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
         writer.println();
 
         methodProlog(writer, methodGroup);
@@ -976,8 +988,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new SampleTimeResult(ResultRole." + mode + ", \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            if (!isSingleMethod) {
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", buffer, (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            }
+            writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
@@ -1021,7 +1037,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
-        writer.println(ident(1) + "public Result " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -1046,8 +1062,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
             iterationEpilog(writer, 3, method, states);
 
-            ResultRole mode = isSingleMethod ? ResultRole.PRIMARY : ResultRole.BOTH;
-            writer.println(ident(3) + "return new SingleShotResult(ResultRole." + mode + ",\"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ");");
+            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            if (!isSingleMethod) {
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + "));");
+            }
+            writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");

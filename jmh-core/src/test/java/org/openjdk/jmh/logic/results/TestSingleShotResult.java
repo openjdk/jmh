@@ -39,8 +39,8 @@ public class TestSingleShotResult {
 
     @Test
     public void testRunAggregator1() {
-        SingleShotResult r1 = new SingleShotResult(ResultRole.BOTH, "Test1", 1000L, TimeUnit.MICROSECONDS);
-        SingleShotResult r2 = new SingleShotResult(ResultRole.BOTH, "Test1", 2000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
@@ -49,8 +49,8 @@ public class TestSingleShotResult {
 
     @Test
     public void testIterationAggregator1() {
-        SingleShotResult r1 = new SingleShotResult(ResultRole.BOTH, "Test1", 1000L, TimeUnit.MICROSECONDS);
-        SingleShotResult r2 = new SingleShotResult(ResultRole.BOTH, "Test1", 2000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());

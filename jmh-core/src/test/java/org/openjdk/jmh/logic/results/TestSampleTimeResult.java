@@ -48,8 +48,8 @@ public class TestSampleTimeResult {
         b2.add(3000);
         b2.add(4000);
 
-        SampleTimeResult r1 = new SampleTimeResult(ResultRole.BOTH, "Test1", b1, TimeUnit.MICROSECONDS);
-        SampleTimeResult r2 = new SampleTimeResult(ResultRole.BOTH, "Test1", b2, TimeUnit.MICROSECONDS);
+        SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
+        SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(2.5, result.getScore());
@@ -66,8 +66,8 @@ public class TestSampleTimeResult {
         b2.add(3000);
         b2.add(4000);
 
-        SampleTimeResult r1 = new SampleTimeResult(ResultRole.BOTH, "Test1", b1, TimeUnit.MICROSECONDS);
-        SampleTimeResult r2 = new SampleTimeResult(ResultRole.BOTH, "Test1", b2, TimeUnit.MICROSECONDS);
+        SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
+        SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(2.5, result.getScore());

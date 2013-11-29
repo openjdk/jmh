@@ -39,6 +39,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -108,7 +109,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         }
 
         // submit tasks to threadpool
-        List<Future<Result>> results = new ArrayList<Future<Result>>(numThreads);
+        List<Future<Collection<? extends Result>>> results = new ArrayList<Future<Collection<? extends Result>>>(numThreads);
         for (BenchmarkTask runner : runners) {
             results.add(executor.submit(runner));
         }
@@ -145,7 +146,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // The abrupt exception in any worker will float up here.
         int expected = numThreads;
         while (expected > 0) {
-            for (Future<Result> fr : results) {
+            for (Future<Collection<? extends Result>> fr : results) {
                 try {
                     fr.get(runtime.getTime() * 2, runtime.getTimeUnit());
                     expected--;
@@ -170,9 +171,9 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // Get the results.
         // Should previous loop allow us to get to this point, we can fully expect
         // all the results ready without the exceptions.
-        for (Future<Result> fr : results) {
+        for (Future<Collection<? extends Result>> fr : results) {
             try {
-                iterationResults.addResult(fr.get());
+                iterationResults.addResults(fr.get());
             } catch (InterruptedException ex) {
                 throw new IllegalStateException("Impossible to be here");
             } catch (ExecutionException ex) {
@@ -186,7 +187,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
     /**
      * Worker body.
      */
-    class BenchmarkTask implements Callable<Result> {
+    class BenchmarkTask implements Callable<Collection<? extends Result>> {
 
         private final ThreadLocal<InstanceProvider> invocationHandler;
         private final InfraControl control;
@@ -199,7 +200,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         }
 
         @Override
-        public Result call() throws Exception {
+        public Collection<? extends Result> call() throws Exception {
             try {
                 return invokeBenchmark(invocationHandler.get().getInstance(), control, threadControl);
             } catch (Throwable e) {
@@ -229,11 +230,11 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         /**
          * Helper method for running the benchmark in a given instance.
          */
-        private Result invokeBenchmark(Object instance, InfraControl control, ThreadControl threadControl) throws Throwable {
-            Result result;
+        private Collection<? extends Result> invokeBenchmark(Object instance, InfraControl control, ThreadControl threadControl) throws Throwable {
+            Collection<? extends Result> result;
             if (method != null) {
                 try {
-                    result = (Result) method.invoke(instance, control, threadControl);
+                    result = (Collection<? extends Result>) method.invoke(instance, control, threadControl);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Can't invoke " + method.getDeclaringClass().getName() + "." + method.getName(), e);
                 } catch (InvocationTargetException e) {

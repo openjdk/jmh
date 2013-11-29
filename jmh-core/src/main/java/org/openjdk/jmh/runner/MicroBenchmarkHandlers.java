@@ -33,6 +33,7 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.ClassUtils;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * Utility class for MicroBenchmarkHandlers.
@@ -79,7 +80,7 @@ public class MicroBenchmarkHandlers {
      * @return
      */
     private static boolean isValidBenchmarkSignature(Method m) {
-        if (m.getReturnType() != Result.class) {
+        if (m.getReturnType() != Collection.class) {
             return false;
         }
         final Class<?>[] parameterTypes = m.getParameterTypes();

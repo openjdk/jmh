@@ -59,6 +59,12 @@ public class IterationResult implements Serializable {
         this.secondaryResults = new TreeMultimap<String, Result>();
     }
 
+    public void addResults(Collection<? extends Result> rs) {
+        for (Result r : rs) {
+            addResult(r);
+        }
+    }
+
     public void addResult(Result result) {
         if (result.getRole().isPrimary()) {
             if (scoreUnit == null) {
