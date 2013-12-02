@@ -68,12 +68,13 @@ public class SampleTimeResult extends Result {
     /** {@inheritDoc} */
     @Override
     public double getScore() {
-        return convertNs(buffer.getStatistics().getMean());
+        return getStatistics().getMean();
     }
 
     @Override
     public Statistics getStatistics() {
-        return buffer.getStatistics();
+        double tuMultiplier = 1.0D * outputTimeUnit.convert(1, TimeUnit.DAYS) / TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
+        return buffer.getStatistics(tuMultiplier);
     }
 
     @Override
@@ -88,29 +89,29 @@ public class SampleTimeResult extends Result {
 
     @Override
     public String toString() {
-        Statistics stats = buffer.getStatistics();
+        Statistics stats = getStatistics();
 
         StringBuilder sb = new StringBuilder();
         sb.append("n = ").append(stats.getN()).append(", ");
         sb.append(String.format("mean = %.0f %s",
-                convertNs(stats.getMean()),
+                stats.getMean(),
                 getScoreUnit()));
         sb.append(String.format(", p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f %s",
-                convertNs(stats.getPercentile(0)),
-                convertNs(stats.getPercentile(50)),
-                convertNs(stats.getPercentile(90)),
-                convertNs(stats.getPercentile(95)),
-                convertNs(stats.getPercentile(99)),
-                convertNs(stats.getPercentile(99.9)),
-                convertNs(stats.getPercentile(99.99)),
-                convertNs(stats.getPercentile(100)),
+                stats.getPercentile(0),
+                stats.getPercentile(50),
+                stats.getPercentile(90),
+                stats.getPercentile(95),
+                stats.getPercentile(99),
+                stats.getPercentile(99.9),
+                stats.getPercentile(99.99),
+                stats.getPercentile(100),
                 getScoreUnit()));
         return sb.toString();
     }
 
     @Override
     public String extendedInfo(String label) {
-        Statistics stats = buffer.getStatistics();
+        Statistics stats = getStatistics();
 
         StringBuilder sb = new StringBuilder();
         sb.append("Run result ").append((label == null) ? "" : "\"" + label + "\"").append(": \n");
@@ -119,37 +120,29 @@ public class SampleTimeResult extends Result {
         if (stats.getN() > 2) {
             double[] interval = stats.getConfidenceIntervalAt(0.999);
             sb.append(String.format("        mean = %10.3f \u00B1(99.9%%) %.3f",
-                    convertNs(stats.getMean()),
-                    convertNs((interval[1] - interval[0]) / 2)
+                    stats.getMean(),
+                    (interval[1] - interval[0]) / 2
             ));
         } else {
             sb.append(String.format("        mean = %10.3f (<= 2 iterations)",
-                    convertNs(stats.getMean())
+                    stats.getMean()
             ));
         }
         sb.append(" ").append(getScoreUnit()).append("\n");
 
-        sb.append(String.format("         min = %10.3f %s\n", convertNs(stats.getMin()), getScoreUnit()));
+        sb.append(String.format("         min = %10.3f %s\n", stats.getMin(), getScoreUnit()));
 
         for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
             sb.append(String.format("  %9s = %10.3f %s\n",
                     "p(" + String.format("%7.4f", p*100) + ")",
-                    convertNs(stats.getPercentile(p*100)),
+                    stats.getPercentile(p*100),
                     getScoreUnit()
             ));
         }
 
-        sb.append(String.format("         max = %10.3f %s\n",  convertNs(stats.getMax()), getScoreUnit()));
+        sb.append(String.format("         max = %10.3f %s\n", stats.getMax(), getScoreUnit()));
 
         return sb.toString();
-    }
-
-    private double convertNs(double time) {
-        return convert(time, TimeUnit.NANOSECONDS, outputTimeUnit);
-    }
-
-    public static double convert(double time, TimeUnit from, TimeUnit to) {
-        return time * to.convert(1, TimeUnit.DAYS) / from.convert(1, TimeUnit.DAYS);
     }
 
     /**

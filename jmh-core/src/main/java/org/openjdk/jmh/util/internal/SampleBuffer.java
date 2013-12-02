@@ -62,11 +62,12 @@ public class SampleBuffer implements Serializable {
         hdr[bucket][subBucket]++;
     }
 
-    public Statistics getStatistics() {
+    public Statistics getStatistics(double multiplier) {
         MultisetStatistics stat = new MultisetStatistics();
         for (int i = 0; i < hdr.length; i++) {
             for (int j = 0; j < hdr[i].length; j++) {
-                stat.addValue((long) j << i, hdr[i][j]);
+                long ns = (long) j << i;
+                stat.addValue(multiplier * ns, hdr[i][j]);
             }
         }
         return stat;
