@@ -26,7 +26,6 @@ package org.openjdk.jmh.it.synciter;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;

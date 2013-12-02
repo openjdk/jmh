@@ -25,7 +25,6 @@
 package org.openjdk.jmh.processor.internal;
 
 import javax.lang.model.element.Element;
-import java.io.IOException;
 
 public class GenerationException extends RuntimeException {
 

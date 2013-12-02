@@ -25,7 +25,6 @@
 package org.openjdk.jmh;
 
 import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.ForkedRunner;
 import org.openjdk.jmh.runner.options.Options;
 

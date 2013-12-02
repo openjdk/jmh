@@ -26,7 +26,6 @@ package org.openjdk.jmh.it.asymm;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;

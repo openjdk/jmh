@@ -26,7 +26,6 @@ package org.openjdk.jmh.it.races;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
@@ -38,7 +37,6 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;

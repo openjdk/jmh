@@ -27,20 +27,14 @@ package org.openjdk.jmh.runner.options;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
-import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author anders.astrand@oracle.com

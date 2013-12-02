@@ -26,7 +26,6 @@ package org.openjdk.jmh.it.bulkwarmup;
 
 
 import org.junit.Test;
-import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;

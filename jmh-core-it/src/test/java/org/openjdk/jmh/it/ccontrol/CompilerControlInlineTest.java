@@ -25,7 +25,6 @@
 package org.openjdk.jmh.it.ccontrol;
 
 import org.junit.Test;
-import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Fork;
