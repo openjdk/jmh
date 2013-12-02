@@ -114,6 +114,17 @@ public class JMHSample_02_BenchmarkModes {
     @GenerateMicroBenchmark
     @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime, Mode.SingleShotTime})
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void measureMultiple() throws InterruptedException {
+        TimeUnit.MILLISECONDS.sleep(100);
+    }
+
+    /*
+     * Or even...
+     */
+
+    @GenerateMicroBenchmark
+    @BenchmarkMode(Mode.All)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureAll() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(100);
     }
