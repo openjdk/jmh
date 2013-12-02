@@ -138,9 +138,7 @@ public class BinaryLinkServer {
     }
 
     public void setCurrentBenchmark(BenchmarkRecord benchmark) {
-        if (!this.benchmark.compareAndSet(null, benchmark)) {
-            throw new IllegalStateException("Benchmark is already set");
-        }
+        this.benchmark.set(benchmark);
     }
 
     private final class Acceptor extends Thread {
@@ -266,7 +264,7 @@ public class BinaryLinkServer {
                     oos.flush();
                     break;
                 case BENCHMARK_REQUEST:
-                    oos.writeObject(new BenchmarkRecordFrame(benchmark.getAndSet(null)));
+                    oos.writeObject(new BenchmarkRecordFrame(benchmark.get()));
                     oos.flush();
                     break;
                 default:
