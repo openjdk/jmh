@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -500,7 +501,7 @@ public class CommandLineOptions implements Options {
 
     @Override
     public Collection<Mode> getBenchModes() {
-        return benchMode;
+        return (benchMode == null) ? null : new HashSet<Mode>(benchMode);
     }
 
 

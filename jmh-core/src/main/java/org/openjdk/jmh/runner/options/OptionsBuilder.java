@@ -33,6 +33,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +68,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<String> getRegexps() {
+        if (regexps.isEmpty()) {
+            return Collections.singletonList(".*");
+        }
         return regexps;
     }
 
