@@ -47,8 +47,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
@@ -475,10 +477,21 @@ public class Runner extends BaseRunner {
         {
             Set<String> hints = CompilerHints.defaultList().get();
             if (!hints.isEmpty()) {
-                command.add("-XX:CompileCommand=quiet ");
-            }
-            for (String l : hints) {
-                command.add("-XX:CompileCommand=" + l);
+                try {
+                    File file = File.createTempFile("jmh", "compilecommand");
+                    command.add("-XX:CompileCommandFile=" + file.getAbsolutePath());
+
+                    FileWriter writer = new FileWriter(file);
+                    PrintWriter pw = new PrintWriter(writer);
+                    pw.println("quiet");
+                    for (String l : hints) {
+                        pw.println(l);
+                    }
+                    pw.close();
+                    writer.close();
+                } catch (IOException e) {
+                    throw new IllegalStateException("Error creating compiler hints file", e);
+                }
             }
         }
 
