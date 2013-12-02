@@ -84,16 +84,6 @@ public class TwoThreadCountTest {
     }
 
     @Test
-    public void invokeCLI_1() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + ".*test1" + " -foe");
-    }
-
-    @Test
-    public void invokeCLI_2() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + ".*test2" + " -foe -t 2");
-    }
-
-    @Test
     public void invokeAPI_1() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass())+".*test1")

@@ -70,21 +70,6 @@ public class ForkedTest {
     }
 
     @Test
-    public void invokeCLI() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f");
-    }
-
-    @Test
-    public void invokeCLI_1() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 1");
-    }
-
-    @Test
-    public void invokeCLI_WF() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 1 -wf 2");
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))

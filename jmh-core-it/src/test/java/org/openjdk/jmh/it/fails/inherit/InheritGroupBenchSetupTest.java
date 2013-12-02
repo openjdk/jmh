@@ -62,18 +62,6 @@ public class InheritGroupBenchSetupTest extends InheritableGroupSetupState {
     }
 
     @Test
-    public void invokeCLI() {
-        boolean failed;
-        try {
-            Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
-            failed = false;
-        } catch (Throwable t) {
-            failed = true;
-        }
-        junit.framework.Assert.assertTrue("Should have failed", failed);
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         try {
             Options opt = new OptionsBuilder()

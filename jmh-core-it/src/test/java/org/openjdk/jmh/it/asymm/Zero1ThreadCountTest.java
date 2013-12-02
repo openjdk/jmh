@@ -82,11 +82,6 @@ public class Zero1ThreadCountTest {
     }
 
     @Test
-    public void invokeCL() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + ".*test" + " -foe");
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass())+".*test")

@@ -71,11 +71,6 @@ public class WarmupIterationCountCmdTest {
     }
 
     @Test
-    public void invokeCLI() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -v -w 1 -r 1 -i 1 -wi 3");
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))

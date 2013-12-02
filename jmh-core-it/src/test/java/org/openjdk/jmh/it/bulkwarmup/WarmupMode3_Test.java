@@ -101,13 +101,6 @@ public class WarmupMode3_Test {
     }
 
     @Test
-    public void invokeCLI() {
-        testSequence.clear();
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -w 1 -r 2 -t 2 -i 1 -wi 2 -f false -si false");
-        assertEquals("WWWWIIwwwwii", getSequence());
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         testSequence.clear();
 

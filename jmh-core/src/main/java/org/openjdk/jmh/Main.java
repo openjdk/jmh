@@ -122,12 +122,4 @@ public class Main {
         }
     }
 
-    /**
-     * Additional entry points for integration tests
-     * @param args non-exploded command line arguments
-     */
-    public static void testMain(String args) {
-        main(args.split(" "));
-    }
-
 }

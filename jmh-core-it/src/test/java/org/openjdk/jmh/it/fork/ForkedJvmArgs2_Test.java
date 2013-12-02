@@ -93,11 +93,6 @@ public class ForkedJvmArgs2_Test {
     }
 
     @Test
-    public void invokeCLI() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe");
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))

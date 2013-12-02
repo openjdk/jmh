@@ -75,11 +75,6 @@ public class IterationCountAnnTest {
     }
 
     @Test
-    public void invokeCLI() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -v");
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))

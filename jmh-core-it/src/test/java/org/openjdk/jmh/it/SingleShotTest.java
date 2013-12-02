@@ -66,16 +66,6 @@ public class SingleShotTest {
     }
 
     @Test
-    public void invokeCLI() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f");
-    }
-
-    @Test
-    public void invokeCLI_1() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + "  -foe -f 2");
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))

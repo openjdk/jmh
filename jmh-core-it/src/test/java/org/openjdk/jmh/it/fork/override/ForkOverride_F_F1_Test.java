@@ -61,14 +61,6 @@ public class ForkOverride_F_F1_Test {
     }
 
     @Test
-    public void invokeCLI() {
-        Main.testMain(Fixtures.getTestMask(this.getClass()) + " -foe -f 1");
-
-        // should execute in another VM.
-        Assert.assertEquals(false, sameVM);
-    }
-
-    @Test
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
