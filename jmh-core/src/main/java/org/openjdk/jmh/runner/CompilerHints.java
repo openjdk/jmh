@@ -25,7 +25,10 @@
 package org.openjdk.jmh.runner;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,6 +37,8 @@ public class CompilerHints extends AbstractResourceReader {
 
     public static final String LIST = "/META-INF/CompilerHints";
     private static volatile CompilerHints defaultList;
+    private static volatile String hintsFile;
+
 
     private final Set<String> hints;
 
@@ -42,6 +47,28 @@ public class CompilerHints extends AbstractResourceReader {
             defaultList = fromResource(LIST);
         }
         return defaultList;
+    }
+
+    public static String hintsFile() {
+        if (hintsFile == null) {
+            try {
+                File file = File.createTempFile("jmh", "compilecommand");
+
+                FileWriter writer = new FileWriter(file);
+                PrintWriter pw = new PrintWriter(writer);
+                pw.println("quiet");
+                for (String l : defaultList().get()) {
+                    pw.println(l);
+                }
+                pw.close();
+                writer.close();
+
+                hintsFile = file.getAbsolutePath();
+            } catch (IOException e) {
+                throw new IllegalStateException("Error creating compiler hints file", e);
+            }
+        }
+        return hintsFile;
     }
 
     public static CompilerHints fromResource(String resource) {

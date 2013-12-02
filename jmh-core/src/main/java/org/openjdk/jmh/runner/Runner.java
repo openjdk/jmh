@@ -475,26 +475,7 @@ public class Runner extends BaseRunner {
         }
 
         // add any compiler oracle hints
-        {
-            Set<String> hints = CompilerHints.defaultList().get();
-            if (!hints.isEmpty()) {
-                try {
-                    File file = File.createTempFile("jmh", "compilecommand");
-                    command.add("-XX:CompileCommandFile=" + file.getAbsolutePath());
-
-                    FileWriter writer = new FileWriter(file);
-                    PrintWriter pw = new PrintWriter(writer);
-                    pw.println("quiet");
-                    for (String l : hints) {
-                        pw.println(l);
-                    }
-                    pw.close();
-                    writer.close();
-                } catch (IOException e) {
-                    throw new IllegalStateException("Error creating compiler hints file", e);
-                }
-            }
-        }
+        command.add("-XX:CompileCommandFile=" + CompilerHints.hintsFile());
 
         // assemble final process command
         command.add("-cp");
