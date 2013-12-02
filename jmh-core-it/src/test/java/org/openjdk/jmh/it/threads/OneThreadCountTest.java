@@ -86,7 +86,7 @@ public class OneThreadCountTest {
     public void invokeAPI_1() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass())+".*test1")
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .build();
         new Runner(opt).run();
     }
@@ -95,7 +95,7 @@ public class OneThreadCountTest {
     public void invokeAPI_2() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass())+".*test2")
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .threads(1)
                 .build();
         new Runner(opt).run();

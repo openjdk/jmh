@@ -61,12 +61,12 @@ public class TestOptions {
     public void testIncludes() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{".*", ".*test.*", "test"});
         Options builder = new OptionsBuilder().include(".*").include(".*test.*").include("test").build();
-        Assert.assertEquals(builder.getRegexps(), cmdLine.getRegexps());
+        Assert.assertEquals(builder.getIncludes(), cmdLine.getIncludes());
     }
 
     @Test
     public void testIncludes_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getRegexps(), EMPTY_CMDLINE.getRegexps());
+        Assert.assertEquals(EMPTY_BUILDER.getIncludes(), EMPTY_CMDLINE.getIncludes());
     }
 
     @Test
@@ -201,21 +201,21 @@ public class TestOptions {
     @Test
     public void testSFOE_Set() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-foe"});
-        Options builder = new OptionsBuilder().failOnError(true).build();
+        Options builder = new OptionsBuilder().shouldFailOnError(true).build();
         Assert.assertEquals(builder.shouldFailOnError(), cmdLine.shouldFailOnError());
     }
 
     @Test
     public void testSFOE_True() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-foe", "true"});
-        Options builder = new OptionsBuilder().failOnError(true).build();
+        Options builder = new OptionsBuilder().shouldFailOnError(true).build();
         Assert.assertEquals(builder.shouldFailOnError(), cmdLine.shouldFailOnError());
     }
 
     @Test
     public void testSFOE_False() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-foe", "false"});
-        Options builder = new OptionsBuilder().failOnError(false).build();
+        Options builder = new OptionsBuilder().shouldFailOnError(false).build();
         Assert.assertEquals(builder.shouldFailOnError(), cmdLine.shouldFailOnError());
     }
 
@@ -259,26 +259,26 @@ public class TestOptions {
     public void testSynchIterations_Set() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-si"});
         Options builder = new OptionsBuilder().syncIterations(true).build();
-        Assert.assertEquals(builder.getSynchIterations(), cmdLine.getSynchIterations());
+        Assert.assertEquals(builder.shouldSyncIterations(), cmdLine.shouldSyncIterations());
     }
 
     @Test
     public void testSynchIterations_True() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-si", "true"});
         Options builder = new OptionsBuilder().syncIterations(true).build();
-        Assert.assertEquals(builder.getSynchIterations(), cmdLine.getSynchIterations());
+        Assert.assertEquals(builder.shouldSyncIterations(), cmdLine.shouldSyncIterations());
     }
 
     @Test
     public void testSynchIterations_False() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-si", "false"});
         Options builder = new OptionsBuilder().syncIterations(false).build();
-        Assert.assertEquals(builder.getSynchIterations(), cmdLine.getSynchIterations());
+        Assert.assertEquals(builder.shouldSyncIterations(), cmdLine.shouldSyncIterations());
     }
 
     @Test
     public void testSynchIterations_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getSynchIterations(), EMPTY_CMDLINE.getSynchIterations());
+        Assert.assertEquals(EMPTY_BUILDER.shouldSyncIterations(), EMPTY_CMDLINE.shouldSyncIterations());
     }
 
     @Test
@@ -309,36 +309,36 @@ public class TestOptions {
     public void testRuntimeIterations() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-i", "34"});
         Options builder = new OptionsBuilder().measurementIterations(34).build();
-        Assert.assertEquals(builder.getIterations(), cmdLine.getIterations());
+        Assert.assertEquals(builder.getMeasurementIterations(), cmdLine.getMeasurementIterations());
     }
 
     @Test
     public void testRuntimeIterations_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getIterations(), EMPTY_CMDLINE.getIterations());
+        Assert.assertEquals(EMPTY_BUILDER.getMeasurementIterations(), EMPTY_CMDLINE.getMeasurementIterations());
     }
 
     @Test
     public void testRuntime() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-r", "34ms"});
         Options builder = new OptionsBuilder().measurementTime(TimeValue.milliseconds(34)).build();
-        Assert.assertEquals(builder.getRuntime(), cmdLine.getRuntime());
+        Assert.assertEquals(builder.getMeasurementTime(), cmdLine.getMeasurementTime());
     }
 
     @Test
     public void testRuntime_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getRuntime(), EMPTY_CMDLINE.getRuntime());
+        Assert.assertEquals(EMPTY_BUILDER.getMeasurementTime(), EMPTY_CMDLINE.getMeasurementTime());
     }
 
     @Test
     public void testWarmupMicros() throws Exception {
         CommandLineOptions cmdLine = getOptions(new String[]{"-wmb", ".*", "-wmb", ".*test.*", "-wmb", "test"});
         Options builder = new OptionsBuilder().includeWarmup(".*").includeWarmup(".*test.*").includeWarmup("test").build();
-        Assert.assertEquals(builder.getWarmupMicros(), cmdLine.getWarmupMicros());
+        Assert.assertEquals(builder.getWarmupIncludes(), cmdLine.getWarmupIncludes());
     }
 
     @Test
     public void testWarmupMicros_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getWarmupMicros(), EMPTY_CMDLINE.getWarmupMicros());
+        Assert.assertEquals(EMPTY_BUILDER.getWarmupIncludes(), EMPTY_CMDLINE.getWarmupIncludes());
     }
 
     @Test

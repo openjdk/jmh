@@ -68,7 +68,7 @@ public class SingleShotTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .forks(1)
                 .build();
         new Runner(opt).run();
@@ -78,7 +78,7 @@ public class SingleShotTest {
     public void invokeAPI_1() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .forks(2)
                 .build();
         new Runner(opt).run();

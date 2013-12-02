@@ -105,7 +105,7 @@ public class WarmupMode2_Test {
 
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()) + ".testBig.*")
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .warmupIterations(2)
                 .warmupTime(TimeValue.seconds(1))
                 .measurementIterations(1)

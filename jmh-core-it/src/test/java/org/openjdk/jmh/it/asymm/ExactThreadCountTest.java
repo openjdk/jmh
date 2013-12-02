@@ -92,7 +92,7 @@ public class ExactThreadCountTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass())+".*test")
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .build();
         new Runner(opt).run();
     }

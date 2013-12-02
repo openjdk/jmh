@@ -61,7 +61,7 @@ public class ForkOverride_D_F0_Test {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .forks(0)
                 .build();
         new Runner(opt).run();

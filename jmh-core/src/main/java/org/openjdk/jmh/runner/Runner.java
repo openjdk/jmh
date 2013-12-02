@@ -116,7 +116,7 @@ public class Runner extends BaseRunner {
     }
 
     public void list() {
-        Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
+        Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         out.println("Benchmarks: ");
         for (BenchmarkRecord benchmark : benchmarks) {
@@ -132,7 +132,7 @@ public class Runner extends BaseRunner {
      * @throws IllegalStateException if more than one benchmark is found
      */
     public RunResult runSingle() throws RunnerException {
-        Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
+        Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.size() == 1) {
             Map<BenchmarkRecord, RunResult> rs = run();
@@ -148,7 +148,7 @@ public class Runner extends BaseRunner {
      * @return map of benchmark results
      */
     public Map<BenchmarkRecord, RunResult> run() throws RunnerException {
-        Set<BenchmarkRecord> benchmarks = list.find(out, options.getRegexps(), options.getExcludes());
+        Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
@@ -194,7 +194,7 @@ public class Runner extends BaseRunner {
         benchmarks.addAll(newBenchmarks);
 
         Map<BenchmarkRecord, RunResult> results;
-        if ((!options.getWarmupMicros().isEmpty()) ||
+        if ((!options.getWarmupIncludes().isEmpty()) ||
                 (options.getWarmupMode() == WarmupMode.BEFOREANY)) {
             results = runBulkWarmupBenchmarks(benchmarks);
         } else {
@@ -220,7 +220,7 @@ public class Runner extends BaseRunner {
         // list of micros executed before iteration
         Set<BenchmarkRecord> warmupMicros = new TreeSet<BenchmarkRecord>();
 
-        List<String> warmupMicrosRegexp = options.getWarmupMicros();
+        List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
             warmupMicros.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }

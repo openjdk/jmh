@@ -125,7 +125,7 @@ public class BenchmarkStateSameThreadTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .build();
         new Runner(opt).run();
     }

@@ -56,7 +56,7 @@ public class CompilerControlInlineTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .verbose(true)
                 .build();
         new Runner(opt).run();

@@ -75,7 +75,7 @@ public class FailingGroupStateTearDownTest {
         try {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
-                    .failOnError(true)
+                    .shouldFailOnError(true)
                     .build();
             new Runner(opt).run();
 

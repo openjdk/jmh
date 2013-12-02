@@ -112,7 +112,7 @@ public interface ChainedOptionsBuilder {
      * @param value flag
      * @return builder
      */
-    ChainedOptionsBuilder failOnError(boolean value);
+    ChainedOptionsBuilder shouldFailOnError(boolean value);
 
     /**
      * Number of threads to run the benchmark in

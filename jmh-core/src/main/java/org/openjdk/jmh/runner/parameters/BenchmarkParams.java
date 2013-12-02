@@ -104,7 +104,7 @@ public class BenchmarkParams implements Serializable {
         }
         this.threads = Utils.roundUp(threads, Utils.sum(threadGroups));
 
-        this.synchIterations = getBoolean(options.getSynchIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
+        this.synchIterations = getBoolean(options.shouldSyncIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
 
         this.measurement = doMeasurement ?
                 getMeasurement(options, benchmark, method) :
@@ -150,11 +150,11 @@ public class BenchmarkParams implements Serializable {
         if (isSingleShot) {
             return new IterationParams(
                     this,
-                    getInteger(options.getIterations(), iters, Defaults.SINGLE_SHOT_ITERATION_COUNT),
+                    getInteger(options.getMeasurementIterations(), iters, Defaults.SINGLE_SHOT_ITERATION_COUNT),
                     TimeValue.NONE);
 
         } else {
-            TimeValue timeValue = options.getRuntime();
+            TimeValue timeValue = options.getMeasurementTime();
             if (timeValue == null || timeValue.getTime() == -1) {
                 if (meAnn == null || meAnn.time() == -1) {
                     timeValue = Defaults.ITERATION_TIME;
@@ -164,7 +164,7 @@ public class BenchmarkParams implements Serializable {
             }
             return new IterationParams(
                     this,
-                    getInteger(options.getIterations(), iters, Defaults.MEASUREMENT_ITERATION_COUNT),
+                    getInteger(options.getMeasurementIterations(), iters, Defaults.MEASUREMENT_ITERATION_COUNT),
                     timeValue);
         }
     }

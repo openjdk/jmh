@@ -67,7 +67,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     }
 
     @Override
-    public List<String> getRegexps() {
+    public List<String> getIncludes() {
         if (regexps.isEmpty()) {
             return Collections.singletonList(".*");
         }
@@ -199,7 +199,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     private boolean shouldFailOnError;
 
     @Override
-    public ChainedOptionsBuilder failOnError(boolean value) {
+    public ChainedOptionsBuilder shouldFailOnError(boolean value) {
         shouldFailOnError = value;
         return this;
     }
@@ -250,7 +250,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     }
 
     @Override
-    public Boolean getSynchIterations() {
+    public Boolean shouldSyncIterations() {
         return syncIterations;
     }
 
@@ -310,7 +310,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     }
 
     @Override
-    public List<String> getWarmupMicros() {
+    public List<String> getWarmupIncludes() {
         return warmupMicros;
     }
 
@@ -325,7 +325,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     }
 
     @Override
-    public int getIterations() {
+    public int getMeasurementIterations() {
         return iterations;
     }
 
@@ -340,7 +340,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     }
 
     @Override
-    public TimeValue getRuntime() {
+    public TimeValue getMeasurementTime() {
         return measurementTime;
     }
 

@@ -72,7 +72,7 @@ public class ForkedTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .forks(1)
                 .build();
         new Runner(opt).run();
@@ -82,7 +82,7 @@ public class ForkedTest {
     public void invokeAPI_1() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .forks(1)
                 .build();
         new Runner(opt).run();
@@ -92,7 +92,7 @@ public class ForkedTest {
     public void invokeAPI_WF() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .forks(1)
                 .warmupForks(2)
                 .build();

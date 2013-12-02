@@ -73,7 +73,7 @@ public class WarmupIterationCountCmdTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .warmupTime(TimeValue.seconds(1))
                 .measurementTime(TimeValue.seconds(1))
                 .measurementIterations(1)

@@ -41,7 +41,7 @@ public interface Options extends Serializable {
      * Which benchmarks to execute?
      * @return list of regexps matching the requested benchmarks
      */
-    List<String> getRegexps();
+    List<String> getIncludes();
 
     /**
      * Which benchmarks to omit?
@@ -114,7 +114,7 @@ public interface Options extends Serializable {
      * TODO: Rework "null" interface?
      * @return should we? "null" if not defined
      */
-    Boolean getSynchIterations();
+    Boolean shouldSyncIterations();
 
     /**
      * Number of warmup iterations
@@ -138,19 +138,19 @@ public interface Options extends Serializable {
      * Which benchmarks to warmup before doing the run.
      * @return list of regexps matching the relevant benchmarks; null if no benchmarks are defined
      */
-    List<String> getWarmupMicros();
+    List<String> getWarmupIncludes();
 
     /**
      * Number of measurement iterations
      * @return number of measurement iterations; -1 to use default
      */
-    int getIterations();
+    int getMeasurementIterations();
 
     /**
      * The duration for measurement iterations
      * @return duration; null, if use default
      */
-    TimeValue getRuntime();
+    TimeValue getMeasurementTime();
 
     /**
      * Benchmarks modes to execute.

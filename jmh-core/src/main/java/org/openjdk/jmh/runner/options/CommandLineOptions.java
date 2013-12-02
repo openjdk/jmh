@@ -224,7 +224,7 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public List<String> getRegexps() {
+    public List<String> getIncludes() {
         if (!regexps.isEmpty()) {
             return regexps;
         } else {
@@ -249,7 +249,7 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public List<String> getWarmupMicros() {
+    public List<String> getWarmupIncludes() {
         if (warmupMicros == null) {
             return Collections.emptyList();
         } else {
@@ -384,7 +384,7 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public int getIterations() {
+    public int getMeasurementIterations() {
         return iterations;
     }
 
@@ -394,7 +394,7 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public TimeValue getRuntime() {
+    public TimeValue getMeasurementTime() {
         return runTime;
     }
 
@@ -457,7 +457,7 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public Boolean getSynchIterations() {
+    public Boolean shouldSyncIterations() {
         return synchIterations;
     }
 

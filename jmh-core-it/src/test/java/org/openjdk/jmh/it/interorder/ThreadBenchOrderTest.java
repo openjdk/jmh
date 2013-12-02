@@ -117,7 +117,7 @@ public class ThreadBenchOrderTest {
     public void invokeAPI() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .syncIterations(false)
                 .build();
         new Runner(opt).run();

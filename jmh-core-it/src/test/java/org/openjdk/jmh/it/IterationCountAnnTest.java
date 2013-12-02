@@ -77,7 +77,7 @@ public class IterationCountAnnTest {
     public void invokeAPI() throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .failOnError(true)
+                .shouldFailOnError(true)
                 .verbose(true)
                 .build();
         new Runner(opts).run();
