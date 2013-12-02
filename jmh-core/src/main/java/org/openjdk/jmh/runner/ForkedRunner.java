@@ -46,12 +46,6 @@ public class ForkedRunner extends BaseRunner {
     }
 
     public void run(BenchmarkRecord benchmark) throws IOException {
-        // expect the tuple from the parent process
-        if (options.isVerbose()) {
-            out.println("Benchmarks: ");
-            out.println(benchmark.getUsername());
-        }
-
         BenchResult result = runBenchmark(benchmark, true, true);
         link.pushResults(benchmark, result);
 
