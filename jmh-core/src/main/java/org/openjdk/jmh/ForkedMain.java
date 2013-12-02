@@ -52,10 +52,8 @@ public class ForkedMain {
                 // This assumes the exact order of arguments:
                 //   1) host name to back-connect
                 //   2) host port to back-connect
-                //   3) benchmark to execute (saves benchmark lookup via Options)
                 String hostName = argv[0];
                 int hostPort = Integer.valueOf(argv[1]);
-                BenchmarkRecord benchmark = new BenchmarkRecord(argv[2]);
 
                 // establish the link to host VM and pull the options
                 link = new BinaryLinkClient(hostName, hostPort);
@@ -63,7 +61,7 @@ public class ForkedMain {
 
                 // run!
                 ForkedRunner runner = new ForkedRunner(options, link);
-                runner.run(benchmark);
+                runner.run();
             } catch (IOException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
             } catch (ClassNotFoundException ex) {

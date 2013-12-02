@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.link;
 
+import org.openjdk.jmh.link.frames.BenchmarkRecordFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
@@ -84,5 +85,17 @@ public final class BinaryLinkClient {
     public void pushResults(BenchmarkRecord record, BenchResult result) throws IOException {
         oos.writeObject(new ResultsFrame(record, result));
         oos.flush();
+    }
+
+    public BenchmarkRecord requestNextBenchmark() throws IOException, ClassNotFoundException {
+        oos.writeObject(new InfraFrame(InfraFrame.Type.BENCHMARK_REQUEST));
+        oos.flush();
+
+        Object reply = ois.readObject();
+        if (reply instanceof BenchmarkRecordFrame) {
+            return (((BenchmarkRecordFrame) reply).getBenchmark());
+        } else {
+            throw new IllegalStateException("Got the erroneous reply: " + reply);
+        }
     }
 }

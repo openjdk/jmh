@@ -24,23 +24,18 @@
  */
 package org.openjdk.jmh.link.frames;
 
+import org.openjdk.jmh.runner.BenchmarkRecord;
+
 import java.io.Serializable;
 
-public class InfraFrame implements Serializable {
+public class BenchmarkRecordFrame implements Serializable {
+    private final BenchmarkRecord benchmark;
 
-    private final Type type;
-
-    public InfraFrame(Type type) {
-        this.type = type;
+    public BenchmarkRecordFrame(BenchmarkRecord benchmark) {
+        this.benchmark = benchmark;
     }
 
-    public Type getType() {
-        return type;
+    public BenchmarkRecord getBenchmark() {
+        return benchmark;
     }
-
-    public enum Type {
-        OPTIONS_REQUEST,
-        BENCHMARK_REQUEST,
-    }
-
 }

@@ -315,6 +315,8 @@ public class Runner extends BaseRunner {
             server = new BinaryLinkServer(options, out);
 
             for (BenchmarkRecord benchmark : benchmarks) {
+                server.setCurrentBenchmark(benchmark);
+
                 // Running microbenchmark in separate JVM requires to read some options from annotations.
                 final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
                 Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
@@ -334,7 +336,7 @@ public class Runner extends BaseRunner {
                     annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
                 }
 
-                String[] commandString = getSeparateExecutionCommand(benchmark, annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
+                String[] commandString = getSeparateExecutionCommand(annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
 
                 BenchmarkParams params = new BenchmarkParams(options, benchmark, true, true);
 
@@ -406,12 +408,11 @@ public class Runner extends BaseRunner {
     /**
      * Helper method for assembling the command to execute the forked JVM with
      *
-     * @param benchmark benchmark to execute
      * @param host host VM host
      * @param port host VM port
      * @return the final command to execute
      */
-    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
+    public String[] getSeparateExecutionCommand(String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
 
         Properties props = System.getProperties();
         String javaHome = (String) props.get("java.home");
@@ -503,10 +504,8 @@ public class Runner extends BaseRunner {
         // Forked VM assumes the exact order of arguments:
         //   1) host name to back-connect
         //   2) host port to back-connect
-        //   3) benchmark to execute (saves benchmark lookup via Options)
         command.add(host);
         command.add(String.valueOf(port));
-        command.add(benchmark.toLine());
 
         return command.toArray(new String[command.size()]);
     }

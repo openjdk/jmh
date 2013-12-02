@@ -45,7 +45,8 @@ public class ForkedRunner extends BaseRunner {
         this.link = link;
     }
 
-    public void run(BenchmarkRecord benchmark) throws IOException {
+    public void run() throws IOException, ClassNotFoundException {
+        BenchmarkRecord benchmark = link.requestNextBenchmark();
         BenchResult result = runBenchmark(benchmark, true, true);
         link.pushResults(benchmark, result);
 
