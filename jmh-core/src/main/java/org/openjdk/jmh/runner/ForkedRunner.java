@@ -46,9 +46,19 @@ public class ForkedRunner extends BaseRunner {
     }
 
     public void run() throws IOException, ClassNotFoundException {
-        BenchmarkRecord benchmark = link.requestNextBenchmark();
-        BenchResult result = runBenchmark(benchmark, true, true);
-        link.pushResults(benchmark, result);
+        BenchmarkRecord benchmark;
+
+        // Bulk warmup benchmarks first
+        while ((benchmark = link.requestNextWarmup()) != null) {
+            BenchResult result = runBenchmark(benchmark, true, false);
+            link.pushResults(benchmark, result);
+        }
+
+        // Measurement then
+        while ((benchmark = link.requestNextMeasurement()) != null) {
+            BenchResult result = runBenchmark(benchmark, true, true);
+            link.pushResults(benchmark, result);
+        }
 
         out.flush();
         out.close();

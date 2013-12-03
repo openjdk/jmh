@@ -313,8 +313,6 @@ public class Runner extends BaseRunner {
             server = new BinaryLinkServer(options, out);
 
             for (BenchmarkRecord benchmark : benchmarks) {
-                server.setCurrentBenchmark(benchmark);
-
                 // Running microbenchmark in separate JVM requires to read some options from annotations.
                 final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
                 Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
@@ -344,6 +342,7 @@ public class Runner extends BaseRunner {
                     out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                     for (int i = 0; i < warmupForkCount; i++) {
                         out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
+                        server.setCurrentBenchmark(benchmark);
                         doFork(server, commandString);
                     }
                 }
@@ -351,6 +350,7 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < forkCount; i++) {
                     out.println("# Fork: " + (i + 1) + " of " + forkCount);
+                    server.setCurrentBenchmark(benchmark);
                     BenchResult result = doFork(server, commandString);
                     results.put(benchmark, result);
                 }

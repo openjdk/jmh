@@ -138,7 +138,9 @@ public class BinaryLinkServer {
     }
 
     public void setCurrentBenchmark(BenchmarkRecord benchmark) {
-        this.benchmark.set(benchmark);
+        if (!this.benchmark.compareAndSet(null, benchmark)) {
+            throw new IllegalStateException("Benchmark is already set");
+        }
     }
 
     private final class Acceptor extends Thread {
@@ -264,7 +266,11 @@ public class BinaryLinkServer {
                     oos.flush();
                     break;
                 case BENCHMARK_REQUEST:
-                    oos.writeObject(new BenchmarkRecordFrame(benchmark.get()));
+                    oos.writeObject(new BenchmarkRecordFrame(benchmark.getAndSet(null)));
+                    oos.flush();
+                    break;
+                case BULK_WARMUP_REQUEST:
+                    oos.writeObject(null);
                     oos.flush();
                     break;
                 default:

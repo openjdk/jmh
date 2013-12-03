@@ -87,12 +87,28 @@ public final class BinaryLinkClient {
         oos.flush();
     }
 
-    public BenchmarkRecord requestNextBenchmark() throws IOException, ClassNotFoundException {
+    public BenchmarkRecord requestNextWarmup() throws IOException, ClassNotFoundException {
+        oos.writeObject(new InfraFrame(InfraFrame.Type.BULK_WARMUP_REQUEST));
+        oos.flush();
+
+        Object reply = ois.readObject();
+        if (reply == null) {
+            return null;
+        } else if (reply instanceof BenchmarkRecordFrame) {
+            return (((BenchmarkRecordFrame) reply).getBenchmark());
+        } else {
+            throw new IllegalStateException("Got the erroneous reply: " + reply);
+        }
+    }
+
+    public BenchmarkRecord requestNextMeasurement() throws IOException, ClassNotFoundException {
         oos.writeObject(new InfraFrame(InfraFrame.Type.BENCHMARK_REQUEST));
         oos.flush();
 
         Object reply = ois.readObject();
-        if (reply instanceof BenchmarkRecordFrame) {
+        if (reply == null) {
+            return null;
+        } else if (reply instanceof BenchmarkRecordFrame) {
             return (((BenchmarkRecordFrame) reply).getBenchmark());
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
