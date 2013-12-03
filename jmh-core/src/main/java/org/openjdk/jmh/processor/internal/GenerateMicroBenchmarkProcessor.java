@@ -25,6 +25,7 @@
 package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
@@ -335,7 +336,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println();
 
             generateImport(writer);
+
             // Write class header
+            writer.println("@" + CompilerControl.class.getSimpleName() +
+                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
+                    "." + CompilerControl.Mode.DONT_INLINE + ")");
             writer.println("@Generated(\"" + GenerateMicroBenchmarkProcessor.class.getCanonicalName() + "\")");
             writer.println("public final class " + info.generatedClassName + " {");
             writer.println();
@@ -466,6 +471,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println("import " + Arrays.class.getName() + ';');
         writer.println("import " + TimeUnit.class.getName() + ';');
         writer.println("import " + Generated.class.getName() + ';');
+        writer.println("import " + CompilerControl.class.getName() + ';');
         writer.println();
         writer.println("import " + InfraControl.class.getName() + ';');
         writer.println("import " + ThreadControl.class.getName() + ';');
