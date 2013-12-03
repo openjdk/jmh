@@ -375,7 +375,7 @@ public class BlackHole extends BlackHoleL4 {
         }
     }
 
-    public static volatile long consumedCPU = 42;
+    public static volatile long consumedCPU = System.nanoTime();
 
     /**
      * Consume some amount of time tokens.
