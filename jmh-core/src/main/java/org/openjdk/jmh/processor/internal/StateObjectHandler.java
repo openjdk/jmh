@@ -155,6 +155,11 @@ public class StateObjectHandler {
 
         // auxiliary result, produce the accessors
         if (element.getAnnotation(AuxCounters.class) != null) {
+            if (scope != Scope.Thread) {
+                throw new GenerationException("@" + AuxCounters.class.getSimpleName() +
+                        " can only be used with " + Scope.class.getSimpleName() + "." + Scope.Thread + " states.", element);
+            }
+
             for (Element sub : element.getEnclosedElements()) {
                 if (sub.getKind() == ElementKind.FIELD && sub.getModifiers().contains(Modifier.PUBLIC)) {
                     String fieldType = sub.asType().toString();

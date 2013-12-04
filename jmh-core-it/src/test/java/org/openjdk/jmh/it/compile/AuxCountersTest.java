@@ -32,13 +32,11 @@ import org.openjdk.jmh.annotations.State;
 
 public class AuxCountersTest {
 
-    @AuxCounters
     @State(Scope.Benchmark)
     public static class BenchmarkState {
         public int x;
     }
 
-    @AuxCounters
     @State(Scope.Group)
     public static class GroupState {
         public int y;
@@ -48,17 +46,6 @@ public class AuxCountersTest {
     @State(Scope.Thread)
     public static class ThreadState {
         public int z;
-    }
-
-    @GenerateMicroBenchmark
-    public void testBenchmark(BenchmarkState s) {
-
-    }
-
-    @GenerateMicroBenchmark
-    @Group("test")
-    public void testGroup(GroupState s) {
-
     }
 
     @GenerateMicroBenchmark
@@ -75,6 +62,11 @@ public class AuxCountersTest {
     @GenerateMicroBenchmark
     @Group("test_gt")
     public void testGroupThread_2(GroupState gs, ThreadState ts) {
+
+    }
+
+    @GenerateMicroBenchmark
+    public void testBenchThread(BenchmarkState bs, ThreadState ts) {
 
     }
 
