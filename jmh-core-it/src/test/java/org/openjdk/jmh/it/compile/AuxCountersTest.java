@@ -22,22 +22,48 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.annotations;
+package org.openjdk.jmh.it.compile;
 
-/**
- * THIS IS AN EXPERIMENTAL API.
- *  (That means it can be modified, deprecated and removed in future)
- * <p>
- * This annotation can be used to mark {@link State} objects as the bearers of
- * auxiliary secondary results. Marking the class with this annotation will enable
- * JMH to look for public {int, long} fields, as well as public methods returning
- * {int, long} values, and treat their values as the operation counts in current
- * iteration.
- * <p>
- * NOTE: You have to explicitly reset the state if you don't want the counters
- * to be shared across the iterations.
- * <p>
- * NOTE: This functionality is not available for all {@link BenchmarkMode}-s.
- */
-public @interface AuxCounters {
+import org.openjdk.jmh.annotations.AuxCounters;
+import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+
+public class AuxCountersTest {
+
+    @AuxCounters
+    @State(Scope.Benchmark)
+    public static class BenchmarkState {
+        public int x;
+    }
+
+    @AuxCounters
+    @State(Scope.Group)
+    public static class GroupState {
+        public int x;
+    }
+
+    @AuxCounters
+    @State(Scope.Thread)
+    public static class ThreadState {
+        public int x;
+    }
+
+    @GenerateMicroBenchmark
+    public void testBenchmark(BenchmarkState s) {
+
+    }
+
+    @GenerateMicroBenchmark
+    @Group("test")
+    public void testGroup(GroupState s) {
+
+    }
+
+    @GenerateMicroBenchmark
+    public void testThread(ThreadState s) {
+
+    }
+
 }

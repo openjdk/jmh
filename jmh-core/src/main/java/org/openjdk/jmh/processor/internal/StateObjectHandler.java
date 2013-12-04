@@ -39,6 +39,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
@@ -155,24 +156,20 @@ public class StateObjectHandler {
         // auxiliary result, produce the accessors
         if (element.getAnnotation(AuxCounters.class) != null) {
             for (Element sub : element.getEnclosedElements()) {
-                if (sub.getKind() == ElementKind.FIELD) {
+                if (sub.getKind() == ElementKind.FIELD && sub.getModifiers().contains(Modifier.PUBLIC)) {
                     String fieldType = sub.asType().toString();
                     if (fieldType.equals("int") || fieldType.equals("long")) {
                         String name = sub.getSimpleName().toString();
-                        if (!auxNames.add(name)) {
-                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() + " fields", sub);
-                        }
+                        auxNames.add(name);
                         auxAccessors.put(name, so.localIdentifier + "." + name);
                     }
                 }
 
-                if (sub.getKind() == ElementKind.METHOD) {
+                if (sub.getKind() == ElementKind.METHOD && sub.getModifiers().contains(Modifier.PUBLIC)) {
                     String returnType = ((ExecutableElement) sub).getReturnType().toString();
                     if (returnType.equals("int") || returnType.equals("long")) {
                         String name = sub.getSimpleName().toString();
-                        if (!auxNames.add(name)) {
-                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() + " fields", sub);
-                        }
+                        auxNames.add(name);
                         auxAccessors.put(name, so.localIdentifier + "." + name + "()");
                     }
                 }
