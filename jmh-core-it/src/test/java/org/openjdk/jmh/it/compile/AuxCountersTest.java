@@ -41,13 +41,13 @@ public class AuxCountersTest {
     @AuxCounters
     @State(Scope.Group)
     public static class GroupState {
-        public int x;
+        public int y;
     }
 
     @AuxCounters
     @State(Scope.Thread)
     public static class ThreadState {
-        public int x;
+        public int z;
     }
 
     @GenerateMicroBenchmark
@@ -63,6 +63,18 @@ public class AuxCountersTest {
 
     @GenerateMicroBenchmark
     public void testThread(ThreadState s) {
+
+    }
+
+    @GenerateMicroBenchmark
+    @Group("test_gt")
+    public void testGroupThread_1(GroupState gs, ThreadState ts) {
+
+    }
+
+    @GenerateMicroBenchmark
+    @Group("test_gt")
+    public void testGroupThread_2(GroupState gs, ThreadState ts) {
 
     }
 

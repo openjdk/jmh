@@ -69,7 +69,7 @@ public class StateObjectHandler {
     private int collapsedIndex = 0;
 
     private final HashMap<String, String> jmhTypes = new HashMap<String, String>();
-    private final Set<String> auxNames = new HashSet<String>();
+    private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
     public StateObjectHandler(ProcessingEnvironment processingEnv) {
@@ -160,8 +160,14 @@ public class StateObjectHandler {
                     String fieldType = sub.asType().toString();
                     if (fieldType.equals("int") || fieldType.equals("long")) {
                         String name = sub.getSimpleName().toString();
-                        auxNames.add(name);
-                        auxAccessors.put(name, so.localIdentifier + "." + name);
+                        String meth = execMethod.getSimpleName().toString();
+                        auxNames.put(meth, name);
+                        String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name);
+                        if (prev != null) {
+                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
+                                " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
+                                " injected into this method.", element);
+                        }
                     }
                 }
 
@@ -169,8 +175,14 @@ public class StateObjectHandler {
                     String returnType = ((ExecutableElement) sub).getReturnType().toString();
                     if (returnType.equals("int") || returnType.equals("long")) {
                         String name = sub.getSimpleName().toString();
-                        auxNames.add(name);
-                        auxAccessors.put(name, so.localIdentifier + "." + name + "()");
+                        String meth = execMethod.getSimpleName().toString();
+                        auxNames.put(meth, name);
+                        String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name + "()");
+                        if (prev != null) {
+                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
+                                    " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
+                                    " injected into this method.", element);
+                        }
                     }
                 }
             }
@@ -540,12 +552,12 @@ public class StateObjectHandler {
         return s;
     }
 
-    public Collection<String> getAuxResultNames() {
-        return auxNames;
+    public Collection<String> getAuxResultNames(Element method) {
+        return auxNames.get(method.getSimpleName().toString());
     }
 
-    public String getAuxResultAccessor(String name) {
-        return auxAccessors.get(name);
+    public String getAuxResultAccessor(Element method, String name) {
+        return auxAccessors.get(method.getSimpleName().toString() + name);
     }
 
 }
