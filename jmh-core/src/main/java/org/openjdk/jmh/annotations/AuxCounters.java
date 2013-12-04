@@ -34,8 +34,13 @@ package org.openjdk.jmh.annotations;
  * {int, long} values, and treat their values as the operation counts in current
  * iteration.
  * <p>
- * Currently allowed only at {@link Scope#Thread} level, because JMH metric
+ * NOTE: Currently allowed only at {@link Scope#Thread} level, because JMH metric
  * aggregator expects the distinct counters coming from every measurement thread.
+ * <p>
+ * NOTE: The counter names are plain field/method names. The namespace for counters
+ * is shared across all states participating in the run. JMH will fail to compile
+ * the benchmark if there is an ambiguity around what counter comes from what
+ * state class.
  * <p>
  * NOTE: You have to explicitly reset the state if you don't want the counters
  * to be shared across the iterations.
