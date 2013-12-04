@@ -114,7 +114,7 @@ public class WarmupMode5_Test {
                 .threads(1)
                 .forks(0)
                 .syncIterations(false)
-                .warmupMode(WarmupMode.BEFOREEACH)
+                .warmupMode(WarmupMode.INDI)
                 .build();
         new Runner(opt).run();
 

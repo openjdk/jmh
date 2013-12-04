@@ -152,7 +152,7 @@ public class CommandLineOptions implements Options {
     @Option(name = "-e", aliases = {"--exclude"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to exclude. Regexp filtering out classes or methods which are MicroBenchmarks.")
     protected List<String> excludes = new ArrayList<String>();
 
-    @Option(name = "-wm", aliases = {"--warmupmode"}, usage = "Warmup mode for warming up selected micro benchmarks. Warmup modes are BeforeAny (measurements) or BeforeEach (measurement) (original mode)")
+    @Option(name = "-wm", aliases = {"--warmupmode"}, usage = "Warmup mode for warming up selected micro benchmarks. Warmup modes are: " + WarmupMode.BULK + "," + WarmupMode.BULK_INDI + "," + WarmupMode.INDI + "")
     protected WarmupMode warmupMode = WarmupMode.defaultMode();
 
     @Option(name = "-wmb", aliases = {"--warmupmicrobenchmarks"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to run for warmup before running any other benchmarks. These micros may be different from the target micros to warm up the harness or other parts of the JVM prior to running the target micro benchmarks. Regexp filtering out classes or methods which are MicroBenchmarks.")

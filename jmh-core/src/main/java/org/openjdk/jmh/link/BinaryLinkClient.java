@@ -24,14 +24,15 @@
  */
 package org.openjdk.jmh.link;
 
-import org.openjdk.jmh.link.frames.BenchmarkRecordFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
+import org.openjdk.jmh.link.frames.RecipeFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.Recipe;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
@@ -87,29 +88,13 @@ public final class BinaryLinkClient {
         oos.flush();
     }
 
-    public BenchmarkRecord requestNextWarmup() throws IOException, ClassNotFoundException {
-        oos.writeObject(new InfraFrame(InfraFrame.Type.BULK_WARMUP_REQUEST));
+    public Recipe requestRecipe() throws IOException, ClassNotFoundException {
+        oos.writeObject(new InfraFrame(InfraFrame.Type.RECIPE_REQUEST));
         oos.flush();
 
         Object reply = ois.readObject();
-        if (reply == null) {
-            return null;
-        } else if (reply instanceof BenchmarkRecordFrame) {
-            return (((BenchmarkRecordFrame) reply).getBenchmark());
-        } else {
-            throw new IllegalStateException("Got the erroneous reply: " + reply);
-        }
-    }
-
-    public BenchmarkRecord requestNextMeasurement() throws IOException, ClassNotFoundException {
-        oos.writeObject(new InfraFrame(InfraFrame.Type.BENCHMARK_REQUEST));
-        oos.flush();
-
-        Object reply = ois.readObject();
-        if (reply == null) {
-            return null;
-        } else if (reply instanceof BenchmarkRecordFrame) {
-            return (((BenchmarkRecordFrame) reply).getBenchmark());
+        if (reply instanceof RecipeFrame) {
+            return ((RecipeFrame) reply).getRecipe();
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }

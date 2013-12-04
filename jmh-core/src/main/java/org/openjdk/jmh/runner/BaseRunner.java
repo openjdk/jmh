@@ -32,6 +32,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.ClassUtils;
+import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.internal.TreeMultimap;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -56,6 +58,42 @@ public abstract class BaseRunner {
     public BaseRunner(Options options, OutputFormat handler) {
         this.options = options;
         this.out = handler;
+    }
+
+    protected Multimap<BenchmarkRecord, BenchResult> runBenchmarks(boolean forked, Recipe recipe) {
+        Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
+
+        for (Recipe.Action action : recipe.getActions()) {
+
+            BenchmarkRecord benchmark = action.record;
+            Recipe.Mode mode = action.mode;
+
+            if (!forked) {
+                out.println("# Fork: N/A, test runs in the existing VM");
+            }
+
+            switch (mode) {
+                case WARMUP: {
+                    runBenchmark(benchmark, true, false);
+                    out.println("");
+                    break;
+                }
+                case MEASUREMENT: {
+                    BenchResult r = runBenchmark(benchmark, false, true);
+                    results.put(benchmark, r);
+                    break;
+                }
+                case WARMUP_MEASUREMENT: {
+                    BenchResult r = runBenchmark(benchmark, true, true);
+                    results.put(benchmark, r);
+                    break;
+                }
+                default:
+                    throw new IllegalStateException("Unknown mode: " + mode);
+            }
+        }
+
+        return results;
     }
 
     BenchResult runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {

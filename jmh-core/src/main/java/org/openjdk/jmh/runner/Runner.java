@@ -35,7 +35,6 @@ import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.WarmupMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -56,12 +55,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -193,13 +192,7 @@ public class Runner extends BaseRunner {
         benchmarks.clear();
         benchmarks.addAll(newBenchmarks);
 
-        Map<BenchmarkRecord, RunResult> results;
-        if ((!options.getWarmupIncludes().isEmpty()) ||
-                (options.getWarmupMode() == WarmupMode.BEFOREANY)) {
-            results = runBulkWarmupBenchmarks(benchmarks);
-        } else {
-            results = runBenchmarks(benchmarks);
-        }
+        Map<BenchmarkRecord, RunResult> results = runBenchmarks(benchmarks);
 
         out.flush();
         out.close();
@@ -210,81 +203,78 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    /**
-     * Run specified warmup microbenchmarks prior to running any requested mircobenchmarks.
-     * TODO: Currently valid only for non-external JVM runs
-     */
-    private Map<BenchmarkRecord, RunResult> runBulkWarmupBenchmarks(Set<BenchmarkRecord> benchmarks) {
-        out.startRun();
-
-        // list of micros executed before iteration
-        Set<BenchmarkRecord> warmupMicros = new TreeSet<BenchmarkRecord>();
+    private Recipe getEmbeddedRecipe(Set<BenchmarkRecord> benchmarks) {
+        Recipe r = new Recipe();
 
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
-            warmupMicros.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
+            r.addWarmup(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
-        if (options.getWarmupMode() == WarmupMode.BEFOREANY) {
-            warmupMicros.addAll(benchmarks);
+        if (options.getWarmupMode().isBulk()) {
+            r.addWarmup(benchmarks);
         }
 
-        if (!warmupMicros.isEmpty()) {
-            // run warmup iterations of the requested benchmarks before running
-            // any measured iterations of any of the requested benchmarks. This
-            // has the effect of getting all the classes loaded getting the JITed
-            // code the the final state, possibly invalidating optimizations that
-            // might not be invalided until later and quite possibly invalidated
-            // during measurement iteration causing a performance shift or simply
-            // increased variance.
-            // currently valid only for non-external JVM runs
-
-            int count = 0;
-            for (BenchmarkRecord benchmark : warmupMicros) {
-                out.println("# Fork: N/A, bulk warmup in progress, " + (++count) + " of " + warmupMicros.size());
-                runBenchmark(benchmark, true, false);
-                out.println("");
+        for (BenchmarkRecord br : benchmarks) {
+            BenchmarkParams params = new BenchmarkParams(options, br, true, true);
+            if (params.getForks() <= 0) {
+                if (options.getWarmupMode().isIndi()) {
+                    r.addWarmupMeasurement(br);
+                } else {
+                    r.addMeasurement(br);
+                }
             }
         }
-        // run microbenchmarks
-        //
-        Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
-        for (BenchmarkRecord benchmark : benchmarks) {
-            out.println("# Fork: N/A, test runs in same VM");
-            BenchResult result = runBenchmark(benchmark, false, true);
-            results.put(benchmark, result);
-        }
 
-        Map<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
-        out.endRun(runResults);
-        return runResults;
+        return r;
     }
 
+    private Set<Recipe> getForkedRecipes(Set<BenchmarkRecord> benchmarks) {
+        Recipe base = new Recipe();
 
-    private Map<BenchmarkRecord, RunResult> runBenchmarks(Set<BenchmarkRecord> benchmarks) {
-        Set<BenchmarkRecord> embedded = new TreeSet<BenchmarkRecord>();
-        Set<BenchmarkRecord> forked = new TreeSet<BenchmarkRecord>();
+        List<String> warmupMicrosRegexp = options.getWarmupIncludes();
+        if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
+            base.addWarmup(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
+        }
+        if (options.getWarmupMode().isBulk()) {
+            base.addWarmup(benchmarks);
+        }
 
-        out.startRun();
-        for (BenchmarkRecord benchmark : benchmarks) {
-            BenchmarkParams params = new BenchmarkParams(options, benchmark, true, true);
+        Set<Recipe> result = new HashSet<Recipe>();
+        for (BenchmarkRecord br : benchmarks) {
+            BenchmarkParams params = new BenchmarkParams(options, br, true, true);
             if (params.getForks() > 0) {
-                forked.add(benchmark);
-            } else {
-                embedded.add(benchmark);
+                Recipe r = new Recipe();
+                r.mixIn(base);
+                if (options.getWarmupMode().isIndi()) {
+                    r.addWarmupMeasurement(br);
+                } else {
+                    r.addMeasurement(br);
+                }
+                result.add(r);
             }
         }
 
+        return result;
+    }
+
+    private Map<BenchmarkRecord, RunResult> runBenchmarks(Set<BenchmarkRecord> benchmarks) {
+        out.startRun();
+
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
-        for (BenchmarkRecord benchmark : embedded) {
-            out.println("# Fork: N/A, test runs in same VM");
-            BenchResult r = runBenchmark(benchmark, true, true);
-            results.put(benchmark, r);
+
+        {
+            Recipe recipe = getEmbeddedRecipe(benchmarks);
+            Multimap<BenchmarkRecord, BenchResult> res = runBenchmarks(false, recipe);
+            for (BenchmarkRecord br : res.keys()) {
+                results.putAll(br, res.get(br));
+            }
         }
 
-        Multimap<BenchmarkRecord, BenchResult> separateResults = runSeparate(forked);
-        for (BenchmarkRecord k : separateResults.keys()) {
-            Collection<BenchResult> rs = separateResults.get(k);
-            results.putAll(k, rs);
+        for (Recipe r : getForkedRecipes(benchmarks)) {
+            Multimap<BenchmarkRecord, BenchResult> res = runSeparate(r);
+            for (BenchmarkRecord br : res.keys()) {
+                results.putAll(br, res.get(br));
+            }
         }
 
         Map<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
@@ -301,18 +291,21 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Multimap<BenchmarkRecord, BenchResult> runSeparate(Set<BenchmarkRecord> benchmarks) {
+    private Multimap<BenchmarkRecord, BenchResult> runSeparate(Recipe recipe) {
         Multimap<BenchmarkRecord, BenchResult> results = new HashMultimap<BenchmarkRecord, BenchResult>();
 
-        if (benchmarks.isEmpty()) {
-            return results;
+        if (recipe.getMeasurementActions().size() != 1) {
+            throw new IllegalStateException("Expect only single benchmark in the recipe, but was " + recipe.getMeasurementActions().size());
         }
 
         BinaryLinkServer server = null;
         try {
             server = new BinaryLinkServer(options, out);
 
-            for (BenchmarkRecord benchmark : benchmarks) {
+            server.setRecipe(recipe);
+
+            BenchmarkRecord benchmark = recipe.getMeasurementActions().get(0).record;
+
                 // Running microbenchmark in separate JVM requires to read some options from annotations.
                 final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
                 Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
@@ -342,7 +335,6 @@ public class Runner extends BaseRunner {
                     out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                     for (int i = 0; i < warmupForkCount; i++) {
                         out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
-                        server.setCurrentBenchmark(benchmark);
                         doFork(server, commandString);
                     }
                 }
@@ -350,11 +342,10 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < forkCount; i++) {
                     out.println("# Fork: " + (i + 1) + " of " + forkCount);
-                    server.setCurrentBenchmark(benchmark);
                     BenchResult result = doFork(server, commandString);
                     results.put(benchmark, result);
                 }
-            }
+
         } catch (IOException e) {
             throw new IllegalStateException(e);
         } finally {

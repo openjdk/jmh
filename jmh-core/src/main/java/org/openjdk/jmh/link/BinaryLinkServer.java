@@ -24,15 +24,15 @@
  */
 package org.openjdk.jmh.link;
 
-import org.openjdk.jmh.link.frames.BenchmarkRecordFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
+import org.openjdk.jmh.link.frames.RecipeFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.Recipe;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class BinaryLinkServer {
     private final Acceptor acceptor;
     private final AtomicReference<Handler> handler;
     private final AtomicReference<BenchResult> result;
-    private final AtomicReference<BenchmarkRecord> benchmark;
+    private final AtomicReference<Recipe> recipe;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -96,7 +96,7 @@ public class BinaryLinkServer {
 
         handler = new AtomicReference<Handler>();
         result = new AtomicReference<BenchResult>();
-        benchmark = new AtomicReference<BenchmarkRecord>();
+        recipe = new AtomicReference<Recipe>();
     }
 
     public void terminate() {
@@ -137,10 +137,8 @@ public class BinaryLinkServer {
         }
     }
 
-    public void setCurrentBenchmark(BenchmarkRecord benchmark) {
-        if (!this.benchmark.compareAndSet(null, benchmark)) {
-            throw new IllegalStateException("Benchmark is already set");
-        }
+    public void setRecipe(Recipe recipe) {
+        this.recipe.set(recipe);
     }
 
     private final class Acceptor extends Thread {
@@ -265,12 +263,8 @@ public class BinaryLinkServer {
                     oos.writeObject(new OptionsFrame(opts));
                     oos.flush();
                     break;
-                case BENCHMARK_REQUEST:
-                    oos.writeObject(new BenchmarkRecordFrame(benchmark.getAndSet(null)));
-                    oos.flush();
-                    break;
-                case BULK_WARMUP_REQUEST:
-                    oos.writeObject(null);
+                case RECIPE_REQUEST:
+                    oos.writeObject(new RecipeFrame(recipe.get()));
                     oos.flush();
                     break;
                 default:

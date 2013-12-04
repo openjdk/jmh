@@ -28,6 +28,7 @@ import org.openjdk.jmh.link.BinaryLinkClient;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.util.internal.Multimap;
 
 import java.io.IOException;
 
@@ -46,18 +47,13 @@ public class ForkedRunner extends BaseRunner {
     }
 
     public void run() throws IOException, ClassNotFoundException {
-        BenchmarkRecord benchmark;
+        Recipe recipe = link.requestRecipe();
 
-        // Bulk warmup benchmarks first
-        while ((benchmark = link.requestNextWarmup()) != null) {
-            BenchResult result = runBenchmark(benchmark, true, false);
-            link.pushResults(benchmark, result);
-        }
-
-        // Measurement then
-        while ((benchmark = link.requestNextMeasurement()) != null) {
-            BenchResult result = runBenchmark(benchmark, true, true);
-            link.pushResults(benchmark, result);
+        Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, recipe);
+        for (BenchmarkRecord br : res.keys()) {
+            for (BenchResult r : res.get(br)) {
+                link.pushResults(br, r);
+            }
         }
 
         out.flush();

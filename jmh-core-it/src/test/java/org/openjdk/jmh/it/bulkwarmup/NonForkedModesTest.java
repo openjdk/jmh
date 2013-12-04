@@ -46,16 +46,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * Tests if harness honors warmup command line settings like:
- * -wmb
- * -wm
- * -frw
- * ....
- *
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
+ * @author Aleksey Shipilev
  */
 @State(Scope.Thread)
-public class WarmupMode6_Test {
+public class NonForkedModesTest {
 
     private static Queue<String> testSequence = new ConcurrentLinkedQueue<String>();
 
@@ -70,9 +64,9 @@ public class WarmupMode6_Test {
     public void testBig(Control cnt) {
         if (!recorded) {
             recorded = true;
-            if (cnt.iterationTime == 1000) { // warmup
+            if (cnt.iterationTime == 100) { // warmup
                 testSequence.add("W");
-            } else if (cnt.iterationTime == 2000) {  // iteration
+            } else if (cnt.iterationTime == 200) {  // iteration
                 testSequence.add("I");
             }
         }
@@ -83,9 +77,9 @@ public class WarmupMode6_Test {
     public void testSmall(Control cnt) {
         if (!recorded) {
             recorded = true;
-            if (cnt.iterationTime == 1000) { // warmup
+            if (cnt.iterationTime == 100) { // warmup
                 testSequence.add("w");
-            } else if (cnt.iterationTime == 2000) {  // iteration
+            } else if (cnt.iterationTime == 200) {  // iteration
                 testSequence.add("i");
             }
         }
@@ -101,24 +95,38 @@ public class WarmupMode6_Test {
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
+    public void invokeINDI() throws RunnerException {
+        testWith(WarmupMode.INDI, "WIwi");
+    }
+
+    @Test
+    public void invokeBULK() throws RunnerException {
+        testWith(WarmupMode.BULK, "WwIi");
+    }
+
+    @Test
+    public void invokeBULK_INDI() throws RunnerException {
+        testWith(WarmupMode.BULK_INDI, "WwWIwi");
+    }
+
+    public void testWith(WarmupMode mode, String runSeq) throws RunnerException {
         testSequence.clear();
 
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
-                .warmupIterations(2)
-                .warmupTime(TimeValue.seconds(1))
+                .warmupIterations(1)
+                .warmupTime(TimeValue.milliseconds(100))
                 .measurementIterations(1)
-                .measurementTime(TimeValue.seconds(2))
+                .measurementTime(TimeValue.milliseconds(200))
                 .threads(1)
                 .forks(0)
                 .syncIterations(false)
-                .warmupMode(WarmupMode.BULK)
+                .warmupMode(mode)
                 .build();
         new Runner(opt).run();
 
-        assertEquals("WWwwIi", getSequence());
+        assertEquals(runSeq, getSequence());
     }
 
 }

@@ -30,18 +30,40 @@ package org.openjdk.jmh.runner.options;
 public enum WarmupMode {
 
     /**
-     * Warmup everything before any benchmark starts.
+     * Do the individual warmup for every benchmark
      */
-    BEFOREANY,
+    INDI(false, true),
 
     /**
-     * Warmup each benchmark before benchmark starts.
+     * Do the bulk warmup before any benchmark starts.
      */
-    BEFOREEACH,
+    BULK(true, false),
+
+    /**
+     * Do the bulk warmup before any benchmark starts,
+     * and then also do individual warmups for every
+     * benchmark.
+     */
+    BULK_INDI(true, true),
 
     ;
+    private final boolean bulk;
+    private final boolean indi;
+
+    WarmupMode(boolean bulk, boolean indi) {
+        this.bulk = bulk;
+        this.indi = indi;
+    }
+
+    public boolean isBulk() {
+        return bulk;
+    }
+
+    public boolean isIndi() {
+        return indi;
+    }
 
     static WarmupMode defaultMode() {
-        return BEFOREEACH;
+        return INDI;
     }
 }

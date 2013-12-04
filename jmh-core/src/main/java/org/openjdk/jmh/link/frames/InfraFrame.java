@@ -40,8 +40,7 @@ public class InfraFrame implements Serializable {
 
     public enum Type {
         OPTIONS_REQUEST,
-        BULK_WARMUP_REQUEST,
-        BENCHMARK_REQUEST,
+        RECIPE_REQUEST,
     }
 
 }

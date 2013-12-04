@@ -24,18 +24,18 @@
  */
 package org.openjdk.jmh.link.frames;
 
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.Recipe;
 
 import java.io.Serializable;
 
-public class BenchmarkRecordFrame implements Serializable {
-    private final BenchmarkRecord benchmark;
+public class RecipeFrame implements Serializable {
+    private final Recipe recipe;
 
-    public BenchmarkRecordFrame(BenchmarkRecord benchmark) {
-        this.benchmark = benchmark;
+    public RecipeFrame(Recipe recipe) {
+        this.recipe = recipe;
     }
 
-    public BenchmarkRecord getBenchmark() {
-        return benchmark;
+    public Recipe getRecipe() {
+        return recipe;
     }
 }
