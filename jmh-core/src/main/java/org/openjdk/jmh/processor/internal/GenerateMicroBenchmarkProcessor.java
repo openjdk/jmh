@@ -417,7 +417,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         if (type.getNestingKind().isNested() && !type.getModifiers().contains(Modifier.STATIC)) {
             throw new GenerationException(
                     "The " + State.class.getSimpleName()
-                            + " annotation does not support inner classes, "
+                            + " annotation does not support inner classes, make sure the class is nested (static), "
                             + type,
                     type);
         }
