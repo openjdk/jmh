@@ -78,4 +78,5 @@ public interface Multimap<K, V> {
 
     void remove(K key);
 
+    void merge(Multimap<K, V> other);
 }

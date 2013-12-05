@@ -94,4 +94,11 @@ public class TreesetMultimap<K, V> implements Multimap<K, V>, Serializable {
     public void remove(K key) {
         map.remove(key);
     }
+
+    @Override
+    public void merge(Multimap<K, V> other) {
+        for (K k : other.keys()) {
+            putAll(k, other.get(k));
+        }
+    }
 }

@@ -50,11 +50,7 @@ public class ForkedRunner extends BaseRunner {
         ActionPlan actionPlan = link.requestPlan();
 
         Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
-        for (BenchmarkRecord br : res.keys()) {
-            for (BenchResult r : res.get(br)) {
-                link.pushResults(br, r);
-            }
-        }
+        link.pushResults(res);
 
         out.flush();
         out.close();

@@ -26,23 +26,18 @@ package org.openjdk.jmh.link.frames;
 
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.util.internal.Multimap;
 
 import java.io.Serializable;
 
 public class ResultsFrame implements Serializable {
-    private final BenchmarkRecord record;
-    private final BenchResult result;
+    private final Multimap<BenchmarkRecord, BenchResult> res;
 
-    public ResultsFrame(BenchmarkRecord record, BenchResult result) {
-        this.record = record;
-        this.result = result;
+    public ResultsFrame(Multimap<BenchmarkRecord, BenchResult> res) {
+        this.res = res;
     }
 
-    public BenchmarkRecord getRecord() {
-        return record;
-    }
-
-    public BenchResult getResult() {
-        return result;
+    public Multimap<BenchmarkRecord, BenchResult> getRes() {
+        return res;
     }
 }

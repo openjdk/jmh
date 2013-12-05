@@ -342,8 +342,8 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < forkCount; i++) {
                     out.println("# Fork: " + (i + 1) + " of " + forkCount);
-                    BenchResult result = doFork(server, commandString);
-                    results.put(benchmark, result);
+                    Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
+                    results.merge(result);
                 }
 
         } catch (IOException e) {
@@ -358,7 +358,7 @@ public class Runner extends BaseRunner {
     }
 
 
-    private BenchResult doFork(BinaryLinkServer reader, String[] commandString) {
+    private Multimap<BenchmarkRecord, BenchResult> doFork(BinaryLinkServer reader, String[] commandString) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
@@ -391,7 +391,7 @@ public class Runner extends BaseRunner {
             out.exception(ex);
         }
 
-        return reader.getResult();
+        return reader.getResults();
     }
 
     /**

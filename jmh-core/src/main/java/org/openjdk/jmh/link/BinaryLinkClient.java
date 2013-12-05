@@ -34,6 +34,7 @@ import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.util.internal.Multimap;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -83,8 +84,8 @@ public final class BinaryLinkClient {
         clientSocket.close();
     }
 
-    public void pushResults(BenchmarkRecord record, BenchResult result) throws IOException {
-        oos.writeObject(new ResultsFrame(record, result));
+    public void pushResults(Multimap<BenchmarkRecord, BenchResult> res) throws IOException {
+        oos.writeObject(new ResultsFrame(res));
         oos.flush();
     }
 
