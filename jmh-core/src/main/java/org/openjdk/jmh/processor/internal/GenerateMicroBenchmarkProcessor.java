@@ -228,7 +228,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             String groupName = (groupAnn != null) ? groupAnn.value() : method.getSimpleName().toString();
 
             if (!checkJavaIdentifier(groupName)) {
-                throw new GenerationException("Group name should be the legal Java identifier. (" + groupName + ")", method);
+                throw new GenerationException("Group name should be the legal Java identifier.", method);
             }
 
             MethodGroup group = result.get(groupName);
@@ -300,7 +300,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         String sourcePackage = packageName(clazz);
         if (sourcePackage.isEmpty()) {
-            throw new GenerationException("Microbenchmark should have package other than default (" + clazz + ")", clazz);
+            throw new GenerationException("Microbenchmark should have package other than default.", clazz);
         }
 
         // Build package name and class name for the Class to generate
@@ -409,16 +409,13 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private void verifyState(TypeElement type) {
         if (!type.getModifiers().contains(Modifier.PUBLIC)) {
             throw new GenerationException(
-                    "The " + State.class.getSimpleName()
-                            + " annotation only supports public classes, "
-                            + type,
+                    "The " + State.class.getSimpleName() + " annotation only supports public classes.",
                     type);
         }
         if (type.getNestingKind().isNested() && !type.getModifiers().contains(Modifier.STATIC)) {
             throw new GenerationException(
                     "The " + State.class.getSimpleName()
-                            + " annotation does not support inner classes, make sure the class is nested (static), "
-                            + type,
+                            + " annotation does not support inner classes, make sure the class is nested (static).",
                     type);
         }
 
@@ -430,8 +427,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         if (!hasDefaultConstructor) {
             throw new GenerationException(
                     "The " + State.class.getSimpleName()
-                            + " annotation can only be applied to the classes having the default public constructor, "
-                            + type, type);
+                            + " annotation can only be applied to the classes having the default public constructor.",
+                    type);
         }
     }
 
@@ -444,8 +441,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                 || !validMethodSignature((ExecutableElement) method)) {
             throw new GenerationException(
                     "The " + GenerateMicroBenchmark.class.getSimpleName()
-                            + " annotation only supports methods with @State-bearing typed parameters, "
-                            + clazz + '.' + method, method);
+                            + " annotation only supports methods with @State-bearing typed parameters.",
+                    method);
         }
     }
 
@@ -602,15 +599,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         if (operationsPerInvocation != null && operationsPerInvocation.value() < 1) {
             throw new GenerationException(
                     "The " + OperationsPerInvocation.class.getSimpleName()
-                            + " needs to be greater than 0, "
-                            + method.getEnclosingElement() + '.' + method,
+                            + " needs to be greater than 0.",
                     method);
         }
         if (!method.getModifiers().contains(Modifier.PUBLIC) && !method.getModifiers().contains(Modifier.PROTECTED)) {
             throw new GenerationException(
-                    "benchmark method '" +
-                            method.getEnclosingElement() + '.' + method +
-                            "' should be public or protected",
+                    "@" + GenerateMicroBenchmark.class.getSimpleName() + " method should be public or protected.",
                     method);
         }
     }
