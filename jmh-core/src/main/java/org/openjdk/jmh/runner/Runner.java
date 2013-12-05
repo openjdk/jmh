@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -206,12 +207,18 @@ public class Runner extends BaseRunner {
     private ActionPlan getEmbeddedActionPlan(Set<BenchmarkRecord> benchmarks) {
         ActionPlan r = new ActionPlan();
 
+        LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
+
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
-            r.addWarmup(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
+            warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
         if (options.getWarmupMode().isBulk()) {
-            r.addWarmup(benchmarks);
+            warmupBenches.addAll(benchmarks);
+        }
+
+        for (BenchmarkRecord wr : warmupBenches) {
+            r.addWarmup(wr);
         }
 
         for (BenchmarkRecord br : benchmarks) {
@@ -231,12 +238,18 @@ public class Runner extends BaseRunner {
     private Set<ActionPlan> getForkedActionPlans(Set<BenchmarkRecord> benchmarks) {
         ActionPlan base = new ActionPlan();
 
+        LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
+
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
-            base.addWarmup(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
+            warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
         if (options.getWarmupMode().isBulk()) {
-            base.addWarmup(benchmarks);
+            warmupBenches.addAll(benchmarks);
+        }
+
+        for (BenchmarkRecord wr : warmupBenches) {
+            base.addWarmup(wr);
         }
 
         Set<ActionPlan> result = new HashSet<ActionPlan>();
