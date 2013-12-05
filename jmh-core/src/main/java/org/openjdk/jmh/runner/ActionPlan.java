@@ -29,16 +29,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Recipe implements Serializable {
+public class ActionPlan implements Serializable {
 
     private final List<Action> actions;
 
-    public Recipe() {
+    public ActionPlan() {
         actions = new ArrayList<Action>();
     }
 
     void addWarmup(BenchmarkRecord record) {
-        actions.add(new Action(record, Mode.WARMUP));
+        actions.add(new Action(record, ActionMode.WARMUP));
     }
 
     void addWarmup(Collection<BenchmarkRecord> rs) {
@@ -48,7 +48,7 @@ public class Recipe implements Serializable {
     }
 
     void addMeasurement(BenchmarkRecord record) {
-        actions.add(new Action(record, Mode.MEASUREMENT));
+        actions.add(new Action(record, ActionMode.MEASUREMENT));
     }
 
     void addMeasurement(Collection<BenchmarkRecord> rs) {
@@ -58,7 +58,7 @@ public class Recipe implements Serializable {
     }
 
     void addWarmupMeasurement(BenchmarkRecord record) {
-        actions.add(new Action(record, Mode.WARMUP_MEASUREMENT));
+        actions.add(new Action(record, ActionMode.WARMUP_MEASUREMENT));
     }
 
     void addWarmupMeasurement(Collection<BenchmarkRecord> rs) {
@@ -67,7 +67,7 @@ public class Recipe implements Serializable {
         }
     }
 
-    public void mixIn(Recipe other) {
+    public void mixIn(ActionPlan other) {
         actions.addAll(other.actions);
     }
 
@@ -78,7 +78,7 @@ public class Recipe implements Serializable {
     public List<Action> getMeasurementActions() {
         List<Action> result = new ArrayList<Action>();
         for (Action action : actions) {
-            switch (action.mode) {
+            switch (action.getMode()) {
                 case MEASUREMENT:
                 case WARMUP_MEASUREMENT:
                     result.add(action);
@@ -87,22 +87,6 @@ public class Recipe implements Serializable {
             }
         }
         return result;
-    }
-
-    public static class Action implements Serializable {
-        public final BenchmarkRecord record;
-        public final Mode mode;
-
-        public Action(BenchmarkRecord record, Mode mode) {
-            this.record = record;
-            this.mode = mode;
-        }
-    }
-
-    public static enum Mode {
-        WARMUP,
-        MEASUREMENT,
-        WARMUP_MEASUREMENT,
     }
 
 }

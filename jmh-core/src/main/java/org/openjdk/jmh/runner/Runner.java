@@ -203,8 +203,8 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private Recipe getEmbeddedRecipe(Set<BenchmarkRecord> benchmarks) {
-        Recipe r = new Recipe();
+    private ActionPlan getEmbeddedActionPlan(Set<BenchmarkRecord> benchmarks) {
+        ActionPlan r = new ActionPlan();
 
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
@@ -215,7 +215,7 @@ public class Runner extends BaseRunner {
         }
 
         for (BenchmarkRecord br : benchmarks) {
-            BenchmarkParams params = new BenchmarkParams(options, br, true, true);
+            BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
             if (params.getForks() <= 0) {
                 if (options.getWarmupMode().isIndi()) {
                     r.addWarmupMeasurement(br);
@@ -228,8 +228,8 @@ public class Runner extends BaseRunner {
         return r;
     }
 
-    private Set<Recipe> getForkedRecipes(Set<BenchmarkRecord> benchmarks) {
-        Recipe base = new Recipe();
+    private Set<ActionPlan> getForkedActionPlans(Set<BenchmarkRecord> benchmarks) {
+        ActionPlan base = new ActionPlan();
 
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
@@ -239,11 +239,11 @@ public class Runner extends BaseRunner {
             base.addWarmup(benchmarks);
         }
 
-        Set<Recipe> result = new HashSet<Recipe>();
+        Set<ActionPlan> result = new HashSet<ActionPlan>();
         for (BenchmarkRecord br : benchmarks) {
-            BenchmarkParams params = new BenchmarkParams(options, br, true, true);
+            BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
             if (params.getForks() > 0) {
-                Recipe r = new Recipe();
+                ActionPlan r = new ActionPlan();
                 r.mixIn(base);
                 if (options.getWarmupMode().isIndi()) {
                     r.addWarmupMeasurement(br);
@@ -263,14 +263,14 @@ public class Runner extends BaseRunner {
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
 
         {
-            Recipe recipe = getEmbeddedRecipe(benchmarks);
-            Multimap<BenchmarkRecord, BenchResult> res = runBenchmarks(false, recipe);
+            ActionPlan actionPlan = getEmbeddedActionPlan(benchmarks);
+            Multimap<BenchmarkRecord, BenchResult> res = runBenchmarks(false, actionPlan);
             for (BenchmarkRecord br : res.keys()) {
                 results.putAll(br, res.get(br));
             }
         }
 
-        for (Recipe r : getForkedRecipes(benchmarks)) {
+        for (ActionPlan r : getForkedActionPlans(benchmarks)) {
             Multimap<BenchmarkRecord, BenchResult> res = runSeparate(r);
             for (BenchmarkRecord br : res.keys()) {
                 results.putAll(br, res.get(br));
@@ -291,20 +291,20 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Multimap<BenchmarkRecord, BenchResult> runSeparate(Recipe recipe) {
+    private Multimap<BenchmarkRecord, BenchResult> runSeparate(ActionPlan actionPlan) {
         Multimap<BenchmarkRecord, BenchResult> results = new HashMultimap<BenchmarkRecord, BenchResult>();
 
-        if (recipe.getMeasurementActions().size() != 1) {
-            throw new IllegalStateException("Expect only single benchmark in the recipe, but was " + recipe.getMeasurementActions().size());
+        if (actionPlan.getMeasurementActions().size() != 1) {
+            throw new IllegalStateException("Expect only single benchmark in the action plan, but was " + actionPlan.getMeasurementActions().size());
         }
 
         BinaryLinkServer server = null;
         try {
             server = new BinaryLinkServer(options, out);
 
-            server.setRecipe(recipe);
+            server.setPlan(actionPlan);
 
-            BenchmarkRecord benchmark = recipe.getMeasurementActions().get(0).record;
+            BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
 
                 // Running microbenchmark in separate JVM requires to read some options from annotations.
                 final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
@@ -327,7 +327,7 @@ public class Runner extends BaseRunner {
 
                 String[] commandString = getSeparateExecutionCommand(annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
 
-                BenchmarkParams params = new BenchmarkParams(options, benchmark, true, true);
+                BenchmarkParams params = new BenchmarkParams(options, benchmark, ActionMode.UNDEF);
 
                 int forkCount = params.getForks();
                 int warmupForkCount = params.getWarmupForks();

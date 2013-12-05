@@ -24,40 +24,42 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.logic.results.BenchResult;
-import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.internal.Multimap;
+public enum ActionMode {
 
-import java.io.IOException;
+    /**
+     * No action.
+     */
+    UNDEF(false, false),
 
-/**
- * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
- */
-public class ForkedRunner extends BaseRunner {
+    /**
+     * Do warmup only.
+     */
+    WARMUP(true, false),
 
-    private final BinaryLinkClient link;
+    /**
+     * Do measurement only.
+     */
+    MEASUREMENT(false, true),
 
-    public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
-        this.link = link;
+    /**
+     * Do both warmup and measurement
+     */
+    WARMUP_MEASUREMENT(true, true),
+    ;
+
+    private final boolean doWarmup;
+    private final boolean doMeasurement;
+
+    ActionMode(boolean doWarmup, boolean doMeasurement) {
+        this.doWarmup = doWarmup;
+        this.doMeasurement = doMeasurement;
     }
 
-    public void run() throws IOException, ClassNotFoundException {
-        ActionPlan actionPlan = link.requestPlan();
-
-        Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
-        for (BenchmarkRecord br : res.keys()) {
-            for (BenchResult r : res.get(br)) {
-                link.pushResults(br, r);
-            }
-        }
-
-        out.flush();
-        out.close();
+    public boolean doWarmup() {
+        return doWarmup;
     }
 
+    public boolean doMeasurement() {
+        return doMeasurement;
+    }
 }

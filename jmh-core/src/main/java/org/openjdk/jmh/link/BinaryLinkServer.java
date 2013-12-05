@@ -24,15 +24,15 @@
  */
 package org.openjdk.jmh.link;
 
+import org.openjdk.jmh.link.frames.ActionPlanFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
-import org.openjdk.jmh.link.frames.RecipeFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.runner.Recipe;
+import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class BinaryLinkServer {
     private final Acceptor acceptor;
     private final AtomicReference<Handler> handler;
     private final AtomicReference<BenchResult> result;
-    private final AtomicReference<Recipe> recipe;
+    private final AtomicReference<ActionPlan> plan;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -96,7 +96,7 @@ public class BinaryLinkServer {
 
         handler = new AtomicReference<Handler>();
         result = new AtomicReference<BenchResult>();
-        recipe = new AtomicReference<Recipe>();
+        plan = new AtomicReference<ActionPlan>();
     }
 
     public void terminate() {
@@ -137,8 +137,8 @@ public class BinaryLinkServer {
         }
     }
 
-    public void setRecipe(Recipe recipe) {
-        this.recipe.set(recipe);
+    public void setPlan(ActionPlan actionPlan) {
+        this.plan.set(actionPlan);
     }
 
     private final class Acceptor extends Thread {
@@ -263,8 +263,8 @@ public class BinaryLinkServer {
                     oos.writeObject(new OptionsFrame(opts));
                     oos.flush();
                     break;
-                case RECIPE_REQUEST:
-                    oos.writeObject(new RecipeFrame(recipe.get()));
+                case ACTION_PLAN_REQUEST:
+                    oos.writeObject(new ActionPlanFrame(plan.get()));
                     oos.flush();
                     break;
                 default:

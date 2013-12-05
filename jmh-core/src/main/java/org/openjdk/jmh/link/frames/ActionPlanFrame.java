@@ -22,42 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.link.frames;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.logic.results.BenchResult;
-import org.openjdk.jmh.output.OutputFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.runner.ActionPlan;
 
-import java.io.IOException;
+import java.io.Serializable;
 
-/**
- * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
- */
-public class ForkedRunner extends BaseRunner {
+public class ActionPlanFrame implements Serializable {
+    private final ActionPlan actionPlan;
 
-    private final BinaryLinkClient link;
-
-    public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
-        this.link = link;
+    public ActionPlanFrame(ActionPlan actionPlan) {
+        this.actionPlan = actionPlan;
     }
 
-    public void run() throws IOException, ClassNotFoundException {
-        ActionPlan actionPlan = link.requestPlan();
-
-        Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
-        for (BenchmarkRecord br : res.keys()) {
-            for (BenchResult r : res.get(br)) {
-                link.pushResults(br, r);
-            }
-        }
-
-        out.flush();
-        out.close();
+    public ActionPlan getActionPlan() {
+        return actionPlan;
     }
-
 }

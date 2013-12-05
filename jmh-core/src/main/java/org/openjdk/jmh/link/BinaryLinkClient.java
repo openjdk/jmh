@@ -24,15 +24,15 @@
  */
 package org.openjdk.jmh.link;
 
+import org.openjdk.jmh.link.frames.ActionPlanFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
 import org.openjdk.jmh.link.frames.OutputFormatFrame;
-import org.openjdk.jmh.link.frames.RecipeFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
+import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.Recipe;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
@@ -88,13 +88,13 @@ public final class BinaryLinkClient {
         oos.flush();
     }
 
-    public Recipe requestRecipe() throws IOException, ClassNotFoundException {
-        oos.writeObject(new InfraFrame(InfraFrame.Type.RECIPE_REQUEST));
+    public ActionPlan requestPlan() throws IOException, ClassNotFoundException {
+        oos.writeObject(new InfraFrame(InfraFrame.Type.ACTION_PLAN_REQUEST));
         oos.flush();
 
         Object reply = ois.readObject();
-        if (reply instanceof RecipeFrame) {
-            return ((RecipeFrame) reply).getRecipe();
+        if (reply instanceof ActionPlanFrame) {
+            return ((ActionPlanFrame) reply).getActionPlan();
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }

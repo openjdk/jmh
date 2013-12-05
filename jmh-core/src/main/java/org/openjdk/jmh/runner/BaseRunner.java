@@ -60,13 +60,13 @@ public abstract class BaseRunner {
         this.out = handler;
     }
 
-    protected Multimap<BenchmarkRecord, BenchResult> runBenchmarks(boolean forked, Recipe recipe) {
+    protected Multimap<BenchmarkRecord, BenchResult> runBenchmarks(boolean forked, ActionPlan actionPlan) {
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
 
-        for (Recipe.Action action : recipe.getActions()) {
+        for (Action action : actionPlan.getActions()) {
 
-            BenchmarkRecord benchmark = action.record;
-            Recipe.Mode mode = action.mode;
+            BenchmarkRecord benchmark = action.getBenchmark();
+            ActionMode mode = action.getMode();
 
             if (!forked) {
                 out.println("# Fork: N/A, test runs in the existing VM");
@@ -74,17 +74,13 @@ public abstract class BaseRunner {
 
             switch (mode) {
                 case WARMUP: {
-                    runBenchmark(benchmark, true, false);
+                    runBenchmark(benchmark, mode);
                     out.println("");
                     break;
                 }
+                case WARMUP_MEASUREMENT:
                 case MEASUREMENT: {
-                    BenchResult r = runBenchmark(benchmark, false, true);
-                    results.put(benchmark, r);
-                    break;
-                }
-                case WARMUP_MEASUREMENT: {
-                    BenchResult r = runBenchmark(benchmark, true, true);
+                    BenchResult r = runBenchmark(benchmark, mode);
                     results.put(benchmark, r);
                     break;
                 }
@@ -96,13 +92,13 @@ public abstract class BaseRunner {
         return results;
     }
 
-    BenchResult runBenchmark(BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
+    BenchResult runBenchmark(BenchmarkRecord benchmark, ActionMode mode) {
         MicroBenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
-            BenchmarkParams executionParams = new BenchmarkParams(options, benchmark, doWarmup, doMeasurement);
+            BenchmarkParams executionParams = new BenchmarkParams(options, benchmark, mode);
             handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
             return runBenchmark(executionParams, handler);

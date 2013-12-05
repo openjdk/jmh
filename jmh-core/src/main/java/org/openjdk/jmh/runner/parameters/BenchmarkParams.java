@@ -30,6 +30,7 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.runner.ActionMode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.MicroBenchmarkHandlers;
 import org.openjdk.jmh.runner.options.Options;
@@ -92,7 +93,7 @@ public class BenchmarkParams implements Serializable {
         this.measurement = new IterationParams(this, measureIters, measureTime);
     }
 
-    public BenchmarkParams(Options options, BenchmarkRecord benchmark, boolean doWarmup, boolean doMeasurement) {
+    public BenchmarkParams(Options options, BenchmarkRecord benchmark, ActionMode mode) {
         Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
         Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
@@ -106,11 +107,11 @@ public class BenchmarkParams implements Serializable {
 
         this.synchIterations = getBoolean(options.shouldSyncIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
 
-        this.measurement = doMeasurement ?
+        this.measurement = mode.doMeasurement() ?
                 getMeasurement(options, benchmark, method) :
                 new IterationParams(this, 0, TimeValue.NONE);
 
-        this.warmup = doWarmup ?
+        this.warmup = mode.doWarmup() ?
                 getWarmup(options, benchmark, method) :
                 new IterationParams(this, 0, TimeValue.NONE);
 

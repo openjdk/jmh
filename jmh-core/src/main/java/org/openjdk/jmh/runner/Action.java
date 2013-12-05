@@ -22,20 +22,24 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link.frames;
-
-import org.openjdk.jmh.runner.Recipe;
+package org.openjdk.jmh.runner;
 
 import java.io.Serializable;
 
-public class RecipeFrame implements Serializable {
-    private final Recipe recipe;
+public class Action implements Serializable {
+    private final BenchmarkRecord benchmark;
+    private final ActionMode mode;
 
-    public RecipeFrame(Recipe recipe) {
-        this.recipe = recipe;
+    public Action(BenchmarkRecord benchmark, ActionMode mode) {
+        this.benchmark = benchmark;
+        this.mode = mode;
     }
 
-    public Recipe getRecipe() {
-        return recipe;
+    public BenchmarkRecord getBenchmark() {
+        return benchmark;
+    }
+
+    public ActionMode getMode() {
+        return mode;
     }
 }
