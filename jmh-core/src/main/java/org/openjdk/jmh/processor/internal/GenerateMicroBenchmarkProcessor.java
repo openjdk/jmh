@@ -602,9 +602,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                             + " needs to be greater than 0.",
                     method);
         }
-        if (!method.getModifiers().contains(Modifier.PUBLIC) && !method.getModifiers().contains(Modifier.PROTECTED)) {
+        if (!method.getModifiers().contains(Modifier.PUBLIC)) {
             throw new GenerationException(
-                    "@" + GenerateMicroBenchmark.class.getSimpleName() + " method should be public or protected.",
+                    "@" + GenerateMicroBenchmark.class.getSimpleName() + " method should be public.",
                     method);
         }
     }
