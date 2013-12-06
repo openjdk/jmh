@@ -458,34 +458,20 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     private void generateImport(PrintWriter writer) {
-        writer.println("import " + List.class.getName() + ';');
-        writer.println("import " + AtomicInteger.class.getName() + ';');
-        writer.println("import " + AtomicIntegerFieldUpdater.class.getName() + ';');
-        writer.println("import " + Collection.class.getName() + ';');
-        writer.println("import " + Collections.class.getName() + ';');
-        writer.println("import " + ArrayList.class.getName() + ';');
-        writer.println("import " + Arrays.class.getName() + ';');
-        writer.println("import " + TimeUnit.class.getName() + ';');
-        writer.println("import " + Generated.class.getName() + ';');
-        writer.println("import " + CompilerControl.class.getName() + ';');
-        writer.println();
-        writer.println("import " + InfraControl.class.getName() + ';');
-        writer.println("import " + ThreadControl.class.getName() + ';');
-        writer.println("import " + BlackHole.class.getName() + ';');
-        writer.println("import " + Result.class.getName() + ';');
-        writer.println("import " + ThroughputResult.class.getName() + ';');
-        writer.println("import " + AverageTimeResult.class.getName() + ';');
-        writer.println("import " + SampleTimeResult.class.getName() + ';');
-        writer.println("import " + SingleShotResult.class.getName() + ';');
-        writer.println("import " + SampleBuffer.class.getName() + ';');
-        writer.println("import " + Mode.class.getName() + ';');
-        writer.println("import " + Fork.class.getName() + ';');
-        writer.println("import " + Measurement.class.getName() + ';');
-        writer.println("import " + Threads.class.getName() + ';');
-        writer.println("import " + Warmup.class.getName() + ';');
-        writer.println("import " + BenchmarkMode.class.getName() + ';');
-        writer.println("import " + RawResults.class.getName() + ';');
-        writer.println("import " + ResultRole.class.getName() + ';');
+        Class<?>[] imports = new Class<?>[] {
+                List.class, AtomicInteger.class, AtomicIntegerFieldUpdater.class,
+                Collection.class, Collections.class, ArrayList.class, Arrays.class,
+                TimeUnit.class, Generated.class, CompilerControl.class,
+                InfraControl.class, ThreadControl.class, BlackHole.class,
+                Result.class, ThroughputResult.class, AverageTimeResult.class,
+                SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
+                Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
+                BenchmarkMode.class, RawResults.class, ResultRole.class
+        };
+
+        for (Class<?> c : imports) {
+            writer.println("import " + c.getName() + ';');
+        }
         writer.println();
     }
 
