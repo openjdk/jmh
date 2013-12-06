@@ -176,17 +176,44 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             throw new GenerationException("Microbenchmark should have package other than default.", clazz);
         }
 
+        Collection<TypeElement> states = new ArrayList<TypeElement>();
+
         // validate all arguments are @State-s
         for (Element e : methods) {
             ExecutableElement method = (ExecutableElement) e;
             for (VariableElement var : method.getParameters()) {
-                Element argClass = processingEnv.getTypeUtils().asElement(var.asType());
+                TypeElement argClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
                 if (argClass.getAnnotation(State.class) == null) {
                     throw new GenerationException(
                             "The " + GenerateMicroBenchmark.class.getSimpleName() +
                             " annotation only supports methods with @State-bearing typed parameters.",
                             var);
                 }
+                states.add(argClass);
+            }
+        }
+
+        // validate @State classes
+        for (TypeElement state : states) {
+            if (!state.getModifiers().contains(Modifier.PUBLIC)) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation only supports public classes.", state);
+            }
+            if (state.getNestingKind().isNested() && !state.getModifiers().contains(Modifier.STATIC)) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation does not support inner classes, make sure the class is nested (static).",
+                        state);
+            }
+
+            boolean hasDefaultConstructor = false;
+            for (ExecutableElement constructor : ElementFilter.constructorsIn(state.getEnclosedElements())) {
+                hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.getModifiers().contains(Modifier.PUBLIC));
+            }
+
+            if (!hasDefaultConstructor) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation can only be applied to the classes having the default public constructor.",
+                        state);
             }
         }
 
@@ -203,14 +230,16 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
+        // check modifiers
         for (Element m : methods) {
+            if (!m.getModifiers().contains(Modifier.PUBLIC)) {
+                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName() +
+                        " method should be public.", m);
+            }
+
             if (m.getModifiers().contains(Modifier.ABSTRACT)) {
                 throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
                         + " method can not be abstract.", m);
-            }
-            if (m.getModifiers().contains(Modifier.PRIVATE)) {
-                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
-                        + " method can not be private.", m);
             }
             if (m.getModifiers().contains(Modifier.SYNCHRONIZED)) {
                 if (clazz.getAnnotation(State.class) == null) {
@@ -218,6 +247,15 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                             + " method can only be synchronized if the enclosing class is annotated with "
                             + "@" + State.class.getSimpleName() + ".", m);
                     }
+            }
+        }
+
+        // check annotations
+        for (Element m : methods) {
+            OperationsPerInvocation opi = AnnUtils.getAnnotationRecursive(m, OperationsPerInvocation.class);
+            if (opi != null && opi.value() < 1) {
+                throw new GenerationException("The " + OperationsPerInvocation.class.getSimpleName() +
+                        " needs to be greater than 0.", m);
             }
         }
     }
@@ -371,14 +409,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             // Write all methods
             for (String groupName : info.methodGroups.keySet()) {
                 for (Element method : info.methodGroups.get(groupName).methods()) {
-                    // Final checks...
-                    verifyAnnotations(method);
-
                     // Look for method signature and figure out state bindings
                     ExecutableElement execMethod = (ExecutableElement) method;
                     for (VariableElement element : execMethod.getParameters()) {
                         TypeElement stateType = (TypeElement) processingEnv.getTypeUtils().asElement(element.asType());
-                        verifyState(stateType);
                         states.bindArg(execMethod, stateType);
                     }
                 }
@@ -415,32 +449,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.close();
         } catch (IOException ex) {
             throw new GenerationException("IOException", ex, clazz);
-        }
-    }
-
-    private void verifyState(TypeElement type) {
-        if (!type.getModifiers().contains(Modifier.PUBLIC)) {
-            throw new GenerationException(
-                    "The " + State.class.getSimpleName() + " annotation only supports public classes.",
-                    type);
-        }
-        if (type.getNestingKind().isNested() && !type.getModifiers().contains(Modifier.STATIC)) {
-            throw new GenerationException(
-                    "The " + State.class.getSimpleName()
-                            + " annotation does not support inner classes, make sure the class is nested (static).",
-                    type);
-        }
-
-        boolean hasDefaultConstructor = false;
-        for (ExecutableElement constructor : ElementFilter.constructorsIn(type.getEnclosedElements())) {
-            hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.getModifiers().contains(Modifier.PUBLIC));
-        }
-
-        if (!hasDefaultConstructor) {
-            throw new GenerationException(
-                    "The " + State.class.getSimpleName()
-                            + " annotation can only be applied to the classes having the default public constructor.",
-                    type);
         }
     }
 
@@ -540,26 +548,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             ann = guardedSet(ann, method.getEnclosingElement().getAnnotation(OperationsPerInvocation.class), method);
         }
         return (ann != null) ? ann.value() : 1;
-    }
-
-    /**
-     * Verifying that all annotations data is valid
-     *
-     * @param method
-     */
-    private void verifyAnnotations(Element method) {
-        OperationsPerInvocation operationsPerInvocation = method.getAnnotation(OperationsPerInvocation.class);
-        if (operationsPerInvocation != null && operationsPerInvocation.value() < 1) {
-            throw new GenerationException(
-                    "The " + OperationsPerInvocation.class.getSimpleName()
-                            + " needs to be greater than 0.",
-                    method);
-        }
-        if (!method.getModifiers().contains(Modifier.PUBLIC)) {
-            throw new GenerationException(
-                    "@" + GenerateMicroBenchmark.class.getSimpleName() + " method should be public.",
-                    method);
-        }
     }
 
 
