@@ -112,7 +112,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     // Generate code for all found Classes and Methods
                     for (TypeElement clazz : clazzes.keys()) {
                         try {
-                            BenchmarkInfo info = validateAndSplit(clazz, clazzes.get(clazz));
+                            validateBenchmark(clazz, clazzes.get(clazz));
+                            BenchmarkInfo info = makeBenchmarkInfo(clazz, clazzes.get(clazz));
                             generateClass(clazz, info);
                             benchmarkInfos.add(info);
                         } catch (GenerationException ge) {
@@ -168,13 +169,13 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     }
 
     /**
-     * Do benchmark method validation and split methods set to set's per each benchmark kind.
-     * Result sets may intersect.
-     *
-     * @param methods
-     * @return
+     * Do basic benchmark validation.
      */
-    private BenchmarkInfo validateAndSplit(TypeElement clazz, Collection<? extends Element> methods) {
+    private void validateBenchmark(TypeElement clazz, Collection<? extends Element> methods) {
+        if (packageName(clazz).isEmpty()) {
+            throw new GenerationException("Microbenchmark should have package other than default.", clazz);
+        }
+
         // validate against rogue fields
         if (clazz.getAnnotation(State.class) == null || clazz.getModifiers().contains(Modifier.ABSTRACT)) {
             for (VariableElement field : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
@@ -205,7 +206,61 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     }
             }
         }
+    }
 
+    /**
+     * validate benchmark info
+     * @param info benchmark info to validate
+     */
+    private void validateBenchmarkInfo(BenchmarkInfo info) {
+        // check the @Group preconditions,
+        // ban some of the surprising configurations
+        //
+        for (MethodGroup group : info.methodGroups.values()) {
+            if (group.methods().size() == 1) {
+                ExecutableElement meth = (ExecutableElement) group.methods().iterator().next();
+                if (meth.getAnnotation(Group.class) == null) {
+                    for (VariableElement param : meth.getParameters()) {
+                        TypeElement stateType = (TypeElement) processingEnv.getTypeUtils().asElement(param.asType());
+                        State stateAnn = stateType.getAnnotation(State.class);
+                        if (stateAnn != null && stateAnn.value() == Scope.Group) {
+                            throw new GenerationException(
+                                    "Only @" + Group.class.getSimpleName() + " methods can reference @" + State.class.getSimpleName()
+                                            + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
+                                    meth);
+                        }
+                    }
+
+                    State stateAnn = meth.getEnclosingElement().getAnnotation(State.class);
+                    if (stateAnn != null && stateAnn.value() == Scope.Group) {
+                        throw new GenerationException(
+                                "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
+                                        + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
+                                meth);
+                    }
+                }
+            } else {
+                for (Element m : group.methods()) {
+                    if (m.getAnnotation(Group.class) == null) {
+                        throw new GenerationException(
+                                "Internal error: multiple methods per @" + Group.class.getSimpleName()
+                                        + ", but not all methods have @" + Group.class.getSimpleName(),
+                                m);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate BenchmarkInfo for given class.
+     * We will figure out method groups at this point.
+     *
+     * @param clazz holder class
+     * @param methods annotated methods
+     * @return BenchmarkInfo
+     */
+    private BenchmarkInfo makeBenchmarkInfo(TypeElement clazz, Collection<? extends Element> methods) {
         Map<String, MethodGroup> result = new TreeMap<String, MethodGroup>();
 
         boolean classStrictFP = clazz.getModifiers().contains(Modifier.STRICTFP);
@@ -250,55 +305,13 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
-        // check the @Group preconditions,
-        // ban some of the surprising configurations
-        //
-        for (MethodGroup group : result.values()) {
-            if (group.methods().size() == 1) {
-                ExecutableElement meth = (ExecutableElement) group.methods().iterator().next();
-                if (meth.getAnnotation(Group.class) == null) {
-                    for (VariableElement param : meth.getParameters()) {
-                        TypeElement stateType = (TypeElement) processingEnv.getTypeUtils().asElement(param.asType());
-                        State stateAnn = stateType.getAnnotation(State.class);
-                        if (stateAnn != null && stateAnn.value() == Scope.Group) {
-                            throw new GenerationException(
-                                    "Only @" + Group.class.getSimpleName() + " methods can reference @" + State.class.getSimpleName()
-                                            + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
-                                    meth);
-                        }
-                    }
-
-                    State stateAnn = meth.getEnclosingElement().getAnnotation(State.class);
-                    if (stateAnn != null && stateAnn.value() == Scope.Group) {
-                        throw new GenerationException(
-                                "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
-                                        + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
-                                meth);
-                    }
-                }
-            } else {
-                for (Element m : group.methods()) {
-                    if (m.getAnnotation(Group.class) == null) {
-                        throw new GenerationException(
-                                "Internal error: multiple methods per @" + Group.class.getSimpleName()
-                                        + ", but not all methods have @" + Group.class.getSimpleName(),
-                                m);
-                    }
-                }
-            }
-
-        }
-
         String sourcePackage = packageName(clazz);
-        if (sourcePackage.isEmpty()) {
-            throw new GenerationException("Microbenchmark should have package other than default.", clazz);
-        }
-
-        // Build package name and class name for the Class to generate
         String generatedPackageName = sourcePackage + ".generated";
         String generatedClassName = clazz.getSimpleName().toString();
 
-        return new BenchmarkInfo(clazz.getQualifiedName().toString(), generatedPackageName, generatedClassName, result);
+        BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName().toString(), generatedPackageName, generatedClassName, result);
+        validateBenchmarkInfo(info);
+        return info;
     }
 
     public static boolean checkJavaIdentifier(String id) {
