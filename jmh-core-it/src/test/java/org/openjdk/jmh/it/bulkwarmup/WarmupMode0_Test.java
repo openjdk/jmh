@@ -69,9 +69,9 @@ public class WarmupMode0_Test {
     public void testBig(Control cnt) {
         if (!recorded) {
             recorded = true;
-            if (cnt.iterationTime == 1000) { // warmup
+            if (cnt.iterationTime == 100) { // warmup
                 testSequence.add("W");
-            } else if (cnt.iterationTime == 2000) {  // iteration
+            } else if (cnt.iterationTime == 200) {  // iteration
                 testSequence.add("I");
             }
         }
@@ -82,9 +82,9 @@ public class WarmupMode0_Test {
     public void testSmall(Control cnt) {
         if (!recorded) {
             recorded = true;
-            if (cnt.iterationTime == 1000) { // warmup
+            if (cnt.iterationTime == 100) { // warmup
                 testSequence.add("w");
-            } else if (cnt.iterationTime == 2000) {  // iteration
+            } else if (cnt.iterationTime == 200) {  // iteration
                 testSequence.add("i");
             }
         }
@@ -107,9 +107,9 @@ public class WarmupMode0_Test {
                 .include(Fixtures.getTestMask(this.getClass()) + ".testBig.*")
                 .shouldFailOnError(true)
                 .warmupIterations(2)
-                .warmupTime(TimeValue.seconds(1))
+                .warmupTime(TimeValue.milliseconds(100))
                 .measurementIterations(1)
-                .measurementTime(TimeValue.seconds(2))
+                .measurementTime(TimeValue.milliseconds(200))
                 .threads(1)
                 .forks(0)
                 .syncIterations(false)
