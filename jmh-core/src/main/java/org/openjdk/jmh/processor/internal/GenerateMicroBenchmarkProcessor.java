@@ -51,6 +51,8 @@ import org.openjdk.jmh.logic.results.ThroughputResult;
 import org.openjdk.jmh.runner.MicroBenchmarkList;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.internal.CollectionUtils;
+import org.openjdk.jmh.util.internal.HashMultimap;
+import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 
 import javax.annotation.Generated;
@@ -75,9 +77,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,13 +107,12 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             if (!roundEnv.processingOver()) {
                 for (TypeElement annotation : annotations) {
                     // Build a Set of classes with a list of annotated methods
-                    Map<TypeElement, Set<? extends Element>> clazzes = buildAnnotatedSet(annotation, roundEnv);
+                    Multimap<TypeElement, Element> clazzes = buildAnnotatedSet(annotation, roundEnv);
 
                     // Generate code for all found Classes and Methods
-                    for (Map.Entry<TypeElement, Set<? extends Element>> typeElementSetEntry : clazzes.entrySet()) {
-                        TypeElement clazz = typeElementSetEntry.getKey();
+                    for (TypeElement clazz : clazzes.keys()) {
                         try {
-                            BenchmarkInfo info = validateAndSplit(clazz, typeElementSetEntry.getValue());
+                            BenchmarkInfo info = validateAndSplit(clazz, clazzes.get(clazz));
                             generateClass(clazz, info);
                             benchmarkInfos.add(info);
                         } catch (GenerationException ge) {
@@ -152,26 +151,18 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     /**
      * Build a set of Classes which has annotated methods in them
      *
-     * @param te
-     * @param roundEnv
-     * @return
+     * @param annotation
+     * @return for all methods annotated with $annotation, returns Map<holder-class, Set<method>>
      */
-    private Map<TypeElement, Set<? extends Element>> buildAnnotatedSet(TypeElement te, RoundEnvironment roundEnv) {
-        Map<TypeElement, Set<? extends Element>> result = new HashMap<TypeElement, Set<? extends Element>>();
-        for (Element method : roundEnv.getElementsAnnotatedWith(te)) {
-            TypeElement teClass = processingEnv.getElementUtils().getTypeElement(method.getEnclosingElement().toString());
-            if (result.get(teClass) == null) {
-                Set<Element> set = new LinkedHashSet<Element>();
-                for (Element element : roundEnv.getElementsAnnotatedWith(te)) {
-                    if (element.getEnclosingElement().equals(teClass)) {
-                        set.add(element);
-                    }
-                }
+    private Multimap<TypeElement, Element> buildAnnotatedSet(TypeElement annotation, RoundEnvironment roundEnv) {
+        Multimap<TypeElement, Element> result = new HashMultimap<TypeElement, Element>();
+        for (Element method : roundEnv.getElementsAnnotatedWith(annotation)) {
+            TypeElement teClass = (TypeElement) method.getEnclosingElement();
 
-                if (!teClass.getModifiers().contains(javax.lang.model.element.Modifier.ABSTRACT)) {
-                    result.put(teClass, set);
-                }
-            }
+            // Not interested in abstract classes, sorry.
+            if (teClass.getModifiers().contains(Modifier.ABSTRACT)) continue;
+
+            result.put(teClass, method);
         }
         return result;
     }
@@ -183,7 +174,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * @param methods
      * @return
      */
-    private BenchmarkInfo validateAndSplit(TypeElement clazz, Set<? extends Element> methods) {
+    private BenchmarkInfo validateAndSplit(TypeElement clazz, Collection<? extends Element> methods) {
         // validate against rogue fields
         if (clazz.getAnnotation(State.class) == null || clazz.getModifiers().contains(Modifier.ABSTRACT)) {
             for (VariableElement field : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
