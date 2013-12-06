@@ -176,6 +176,20 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             throw new GenerationException("Microbenchmark should have package other than default.", clazz);
         }
 
+        // validate all arguments are @State-s
+        for (Element e : methods) {
+            ExecutableElement method = (ExecutableElement) e;
+            for (VariableElement var : method.getParameters()) {
+                Element argClass = processingEnv.getTypeUtils().asElement(var.asType());
+                if (argClass.getAnnotation(State.class) == null) {
+                    throw new GenerationException(
+                            "The " + GenerateMicroBenchmark.class.getSimpleName() +
+                            " annotation only supports methods with @State-bearing typed parameters.",
+                            var);
+                }
+            }
+        }
+
         // validate against rogue fields
         if (clazz.getAnnotation(State.class) == null || clazz.getModifiers().contains(Modifier.ABSTRACT)) {
             for (VariableElement field : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
@@ -266,7 +280,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean classStrictFP = clazz.getModifiers().contains(Modifier.STRICTFP);
 
         for (Element method : methods) {
-            validateSignature(clazz, method);
 
             boolean methodStrictFP = method.getModifiers().contains(Modifier.STRICTFP);
 
@@ -435,16 +448,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         // nothing here
     }
 
-    private void validateSignature(TypeElement clazz, Element method) {
-        if (!(method instanceof ExecutableElement)
-                || !validMethodSignature((ExecutableElement) method)) {
-            throw new GenerationException(
-                    "The " + GenerateMicroBenchmark.class.getSimpleName()
-                            + " annotation only supports methods with @State-bearing typed parameters.",
-                    method);
-        }
-    }
-
     private void generatePadding(PrintWriter writer) {
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
@@ -473,22 +476,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             writer.println("import " + c.getName() + ';');
         }
         writer.println();
-    }
-
-    /**
-     * Check that the method signature is correct for GenerateMicrobenchmark methods
-     *
-     * @param element The annotated method
-     * @return True iff the method has the correct signature
-     */
-    public boolean validMethodSignature(ExecutableElement element) {
-        Types typeUtils = processingEnv.getTypeUtils();
-        for (VariableElement var : element.getParameters()) {
-            if (typeUtils.asElement(var.asType()).getAnnotation(State.class) == null) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private TimeUnit findTimeUnit(MethodGroup methodGroup) {
