@@ -172,7 +172,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      * Do basic benchmark validation.
      */
     private void validateBenchmark(TypeElement clazz, Collection<? extends Element> methods) {
-        if (packageName(clazz).isEmpty()) {
+        if (AnnUtils.getPackageName(clazz).isEmpty()) {
             throw new GenerationException("Microbenchmark should have package other than default.", clazz);
         }
 
@@ -283,14 +283,9 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                 result.put(groupName, group);
             }
 
-            BenchmarkMode mbAn = method.getAnnotation(BenchmarkMode.class);
+            BenchmarkMode mbAn = AnnUtils.getAnnotationRecursive(method, BenchmarkMode.class);
             if (mbAn != null) {
                 group.addModes(mbAn.value());
-            } else {
-                mbAn = method.getEnclosingElement().getAnnotation(BenchmarkMode.class);
-                if (mbAn != null) {
-                    group.addModes(mbAn.value());
-                }
             }
 
             group.addStrictFP(classStrictFP);
@@ -305,7 +300,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
-        String sourcePackage = packageName(clazz);
+        String sourcePackage = AnnUtils.getPackageName(clazz);
         String generatedPackageName = sourcePackage + ".generated";
         String generatedClassName = clazz.getSimpleName().toString();
 
@@ -509,25 +504,6 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
         return true;
     }
-
-
-    /**
-     * Get the package name part of a class
-     *
-     * @param clazz
-     * @return the package name or "" if no package
-     */
-    private static String packageName(TypeElement clazz) {
-        String fullName = clazz.getQualifiedName().toString();
-        int index = fullName.lastIndexOf('.');
-
-        if (index > 0) {
-            return fullName.substring(0, index);
-        }
-
-        return "";
-    }
-
 
     private TimeUnit findTimeUnit(MethodGroup methodGroup) {
         OutputTimeUnit ann = methodGroup.methods().iterator().next().getEnclosingElement().getAnnotation(OutputTimeUnit.class);
