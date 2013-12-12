@@ -240,22 +240,17 @@ public class StateObjectHandler {
         return sb.toString();
     }
 
-    public static Collection<StateObject> cons(Collection<StateObject> l1) {
+    public static Collection<StateObject> cons(Collection<StateObject>... colls) {
         SortedSet<StateObject> r = new TreeSet<StateObject>(StateObject.ID_COMPARATOR);
-        r.addAll(l1);
-        return r;
-    }
-
-    public static Collection<StateObject> cons(Collection<StateObject> l1, Collection<StateObject> l2) {
-        SortedSet<StateObject> r = new TreeSet<StateObject>(StateObject.ID_COMPARATOR);
-        r.addAll(l1);
-        r.addAll(l2);
+        for (Collection<StateObject> coll : colls) {
+            r.addAll(coll);
+        }
         return r;
     }
 
     public Collection<String> getHelperBlock(String method, Level helperLevel, HelperType type) {
 
-        Collection<StateObject> states = cons(args.get(method), implicits.values());
+        Collection<StateObject> states = cons(args.get(method), implicits.values(), getControls());
 
         // Look for the offending methods.
         // This will be used to skip the irrelevant blocks for state objects down the stream.
@@ -442,7 +437,7 @@ public class StateObjectHandler {
 
     public List<String> getStateGetters(Element method) {
         List<String> result = new ArrayList<String>();
-        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values(), getControls())) {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
