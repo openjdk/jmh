@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -95,7 +96,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches includes and NOT matching excludes
      */
-    public Set<BenchmarkRecord> find(OutputFormat out, List<String> regexps, List<String> excludes) {
+    public SortedSet<BenchmarkRecord> find(OutputFormat out, List<String> regexps, List<String> excludes) {
 
         // compile all patterns
         List<Pattern> includePatterns = new ArrayList<Pattern>(regexps.size());
@@ -108,7 +109,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
         }
 
         // find all benchmarks matching pattern
-        Set<BenchmarkRecord> result = new TreeSet<BenchmarkRecord>();
+        SortedSet<BenchmarkRecord> result = new TreeSet<BenchmarkRecord>();
         try {
             for (Reader r : getReaders()) {
                 BufferedReader reader = new BufferedReader(r);

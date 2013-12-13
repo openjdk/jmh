@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -148,7 +149,7 @@ public class Runner extends BaseRunner {
      * @return map of benchmark results
      */
     public Map<BenchmarkRecord, RunResult> run() throws RunnerException {
-        Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
+        SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
@@ -204,7 +205,7 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private ActionPlan getEmbeddedActionPlan(Set<BenchmarkRecord> benchmarks) {
+    private ActionPlan getEmbeddedActionPlan(SortedSet<BenchmarkRecord> benchmarks) {
         ActionPlan r = new ActionPlan();
 
         LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
@@ -235,7 +236,7 @@ public class Runner extends BaseRunner {
         return r;
     }
 
-    private Set<ActionPlan> getForkedActionPlans(Set<BenchmarkRecord> benchmarks) {
+    private List<ActionPlan> getForkedActionPlans(Set<BenchmarkRecord> benchmarks) {
         ActionPlan base = new ActionPlan();
 
         LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
@@ -252,7 +253,7 @@ public class Runner extends BaseRunner {
             base.addWarmup(wr);
         }
 
-        Set<ActionPlan> result = new HashSet<ActionPlan>();
+        List<ActionPlan> result = new ArrayList<ActionPlan>();
         for (BenchmarkRecord br : benchmarks) {
             BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
             if (params.getForks() > 0) {
@@ -270,7 +271,7 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Map<BenchmarkRecord, RunResult> runBenchmarks(Set<BenchmarkRecord> benchmarks) {
+    private Map<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) {
         out.startRun();
 
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
