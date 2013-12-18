@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.logic;
 
+import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -375,28 +376,52 @@ public class BlackHole extends BlackHoleL4 {
         }
     }
 
-    public static volatile long consumedCPU = System.nanoTime();
+    private static volatile long consumedCPU = System.nanoTime();
 
     /**
      * Consume some amount of time tokens.
+     *
      * This method does the CPU work almost linear to the number of tokens.
-     * One token is really small, around 3 clocks on 2.0 Ghz i5,
-     * see JMH samples for the complete demo.
+     * The token cost may vary from system to system, and may change in
+     * future. (Translation: it is as reliable as we can get, but not absolutely
+     * reliable).
+     *
+     * See JMH samples for the complete demo, and core benchmarks for
+     * the performance assessments.
      *
      * @param tokens CPU tokens to consume
      */
     public static void consumeCPU(long tokens) {
-        // randomize start so that JIT could not memoize;
+        // If you are looking at this code trying to understand
+        // the non-linearity on low token counts, know this:
+        // we are pretty sure the generated assembly for almost all
+        // cases is the same, and the only explanation for the
+        // performance difference is hardware-specific effects.
+        // Be wary to waste more time on this. If you know more
+        // advanced and clever option to implement consumeCPU, let us
+        // know.
+
+        // Randomize start so that JIT could not memoize; this helps
+        // to break the loop optimizations if the method is called
+        // from the external loop body.
         long t = consumedCPU;
 
-        for (long i = 0; i < tokens; i++) {
-            t += (t * 0x5DEECE66DL + 0xBL) & (0xFFFFFFFFFFFFL);
+        // One of the rare cases when counting backwards is meaningful:
+        // for the forward loop HotSpot/x86 generates "cmp" with immediate
+        // on the hot path, while the backward loop tests against zero
+        // with "test". The immediate can have different lengths, which
+        // attribute to different machine code for different cases. We
+        // counter that with always counting backwards. We also mix the
+        // induction variable in, so that reversing the loop is the
+        // non-trivial optimization.
+        for (long i = tokens; i > 0; i--) {
+            t += (t * 0x5DEECE66DL + 0xBL + i) & (0xFFFFFFFFFFFFL);
         }
 
-        // need to guarantee side-effect on the result,
-        // but can't afford contention; make sure we update the shared state
-        // only in the unlikely case, so not to do the furious writes,
-        // but still dodge DCE.
+        // Need to guarantee side-effect on the result, but can't afford
+        // contention; make sure we update the shared state only in the
+        // unlikely case, so not to do the furious writes, but still
+        // dodge DCE.
         if (t == 42) {
             consumedCPU += t;
         }
