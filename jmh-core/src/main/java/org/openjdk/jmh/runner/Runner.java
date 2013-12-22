@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -148,7 +149,7 @@ public class Runner extends BaseRunner {
      *
      * @return map of benchmark results
      */
-    public Map<BenchmarkRecord, RunResult> run() throws RunnerException {
+    public SortedMap<BenchmarkRecord, RunResult> run() throws RunnerException {
         SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
@@ -194,7 +195,7 @@ public class Runner extends BaseRunner {
         benchmarks.clear();
         benchmarks.addAll(newBenchmarks);
 
-        Map<BenchmarkRecord, RunResult> results = runBenchmarks(benchmarks);
+        SortedMap<BenchmarkRecord, RunResult> results = runBenchmarks(benchmarks);
 
         out.flush();
         out.close();
@@ -271,7 +272,7 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Map<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) {
+    private SortedMap<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) {
         out.startRun();
 
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
@@ -291,13 +292,13 @@ public class Runner extends BaseRunner {
             }
         }
 
-        Map<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
+        SortedMap<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
         out.endRun(runResults);
         return runResults;
     }
 
-    private Map<BenchmarkRecord, RunResult> mergeRunResults(Multimap<BenchmarkRecord, BenchResult> results) {
-        Map<BenchmarkRecord, RunResult> result = new TreeMap<BenchmarkRecord, RunResult>();
+    private SortedMap<BenchmarkRecord, RunResult> mergeRunResults(Multimap<BenchmarkRecord, BenchResult> results) {
+        SortedMap<BenchmarkRecord, RunResult> result = new TreeMap<BenchmarkRecord, RunResult>();
         for (BenchmarkRecord key : results.keys()) {
             Collection<BenchResult> rs = results.get(key);
             result.put(key, new RunResult(rs));
