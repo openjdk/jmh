@@ -175,22 +175,16 @@ public class TextReportFormat extends AbstractOutputFormat {
         }
         nameLen += 2;
 
-        out.printf("%-" + nameLen + "s %6s %3s %9s %4s %12s %12s %8s%n",
-                "Benchmark", "Mode", "Thr", "Count", "Sec",
-                "Mean", "Mean error", "Units");
+        out.printf("%-" + nameLen + "s %6s %9s %12s %12s %8s%n",
+                "Benchmark", "Mode", "Samples", "Mean", "Mean error", "Units");
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult res = runResults.get(key);
-
-            int threads = res.getParams().getThreads();
-            TimeValue runTime = res.getParams().getMeasurement().getTime();
-
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();
-                out.printf("%-" + nameLen + "s %6s %3d %9d %4d %12.3f %12.3f %8s%n",
+                out.printf("%-" + nameLen + "s %6s %9d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.getUsername()),
                         key.getMode().shortLabel(),
-                        threads, stats.getN(),
-                        runTime.convertTo(TimeUnit.SECONDS),
+                        stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
                         res.getScoreUnit());
             }
@@ -198,11 +192,10 @@ public class TextReportFormat extends AbstractOutputFormat {
             for (String label : res.getSecondaryResults().keySet()) {
                 Statistics stats = res.getSecondaryResults().get(label).getStatistics();
 
-                out.printf("%-" + nameLen + "s %6s %3d %9d %4d %12.3f %12.3f %8s%n",
+                out.printf("%-" + nameLen + "s %6s %9d %12.3f %12.3f %8s%n",
                         benchPrefixes.get(key.getUsername() + ":" + label),
                         key.getMode().shortLabel(),
-                        threads, stats.getN(),
-                        runTime.convertTo(TimeUnit.SECONDS),
+                        stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
                         res.getScoreUnit());
             }
