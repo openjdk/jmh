@@ -66,13 +66,13 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -193,8 +193,24 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
         }
 
+        // validate if enclosing class is implicit @State
+        if (clazz.getAnnotation(State.class) != null) {
+            states.add(clazz);
+        }
+
         // validate @State classes
         for (TypeElement state : states) {
+            // Because of https://bugs.openjdk.java.net/browse/JDK-8031122,
+            // we need to preemptively check the annotation value, and
+            // the API can only allow that by catching the exception, argh.
+            try {
+                state.getAnnotation(State.class).value();
+            } catch (IncompleteAnnotationException iae) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation should have the explicit " + Scope.class.getSimpleName() + " argument",
+                        state);
+            }
+
             if (!state.getModifiers().contains(Modifier.PUBLIC)) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
                         " annotation only supports public classes.", state);

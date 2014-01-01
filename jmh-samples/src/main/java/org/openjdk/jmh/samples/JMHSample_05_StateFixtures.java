@@ -25,11 +25,12 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
-@State
+@State(Scope.Thread)
 public class JMHSample_05_StateFixtures {
 
     double x;

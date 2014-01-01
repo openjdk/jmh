@@ -69,7 +69,7 @@ public class JMHSample_07_FixtureLevelInvocation {
      * it is kept around the same across all iterations.
      */
 
-    @State
+    @State(Scope.Benchmark)
     public static class NormalState {
         ExecutorService service;
 

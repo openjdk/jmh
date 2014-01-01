@@ -56,7 +56,7 @@ public class JMHSample_13_RunToRun {
      * will have the similar behavior, but we do that artificially to make a point.
      */
 
-    @State
+    @State(Scope.Thread)
     public static class SleepyState {
         public long sleepTime;
 

@@ -32,6 +32,7 @@ import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
@@ -49,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@State
+@State(Scope.Thread)
 public class IterationCountAnnTest {
 
     private final AtomicInteger count = new AtomicInteger();

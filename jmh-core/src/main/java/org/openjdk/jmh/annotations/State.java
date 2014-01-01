@@ -47,6 +47,6 @@ public @interface State {
      * State scope.
      * @return state scope
      */
-    Scope value() default Scope.Thread;
+    Scope value();
 
 }
