@@ -33,17 +33,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-public class CSVResultFormat implements ResultFormat {
-
-    /*
-     * Implementation note:
-     *    We follow the provisions of http://tools.ietf.org/html/rfc4180
-     */
+public class XSVResultFormat implements ResultFormat {
 
     private final String output;
+    private final String delimiter;
 
-    public CSVResultFormat(String output) {
+    public XSVResultFormat(String output, String delimiter) {
         this.output = output;
+        this.delimiter = delimiter;
     }
 
     @Override
@@ -53,7 +50,21 @@ public class CSVResultFormat implements ResultFormat {
             fw = new FileWriter(output);
             BufferedWriter bw = new BufferedWriter(fw);
 
-            bw.write("\"Benchmark\",\"Mode\",\"Threads\",\"Iterations\",\"Iteration time\",\"Mean\",\"Mean Error (99.9%)\",\"Unit\"");
+            bw.write("\"Benchmark\"");
+            bw.write(delimiter);
+            bw.write("\"Mode\"");
+            bw.write(delimiter);
+            bw.write("\"Threads\"");
+            bw.write(delimiter);
+            bw.write("\"Iterations\"");
+            bw.write(delimiter);
+            bw.write("\"Iteration time\"");
+            bw.write(delimiter);
+            bw.write("\"Mean\"");
+            bw.write(delimiter);
+            bw.write("\"Mean Error (99.9%)\"");
+            bw.write(delimiter);
+            bw.write("\"Unit\"");
             bw.write("\r\n");
 
             for (BenchmarkRecord br : results.keySet()) {
@@ -61,19 +72,25 @@ public class CSVResultFormat implements ResultFormat {
 
                 bw.write("\"");
                 bw.write(br.getUsername());
-                bw.write("\",\"");
+                bw.write("\"");
+                bw.write(delimiter);
+                bw.write("\"");
                 bw.write(br.getMode().shortLabel());
-                bw.write("\",");
+                bw.write("\"");
+                bw.write(delimiter);
                 bw.write(String.valueOf(runResult.getParams().getThreads()));
-                bw.write(",");
+                bw.write(delimiter);
                 bw.write(String.valueOf(runResult.getParams().getMeasurement().getCount()));
-                bw.write(",\"");
+                bw.write(delimiter);
+                bw.write("\"");
                 bw.write(String.valueOf(runResult.getParams().getMeasurement().getTime()));
-                bw.write("\",");
+                bw.write("\"");
+                bw.write(delimiter);
                 bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMean()));
-                bw.write(",");
+                bw.write(delimiter);
                 bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)));
-                bw.write(",\"");
+                bw.write(delimiter);
+                bw.write("\"");
                 bw.write(runResult.getPrimaryResult().getScoreUnit());
                 bw.write("\"");
                 bw.write("\r\n");

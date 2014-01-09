@@ -122,4 +122,16 @@ public class ResultFormatTest {
         compare(actualFile, "output-golden.csv");
     }
 
+    @Test
+    public void scsvTest() throws IOException {
+        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+
+        ResultFormatFactory.getInstance(
+                    ResultFormatType.SCSV,
+                    actualFile)
+                .writeOut(getStub());
+
+        compare(actualFile, "output-golden.scsv");
+    }
+
 }

@@ -33,7 +33,18 @@ public class ResultFormatFactory {
             case NONE:
                 return new NoneResultFormat();
             case CSV:
-                return new CSVResultFormat(output);
+                /*
+                 * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180
+                 */
+                return new XSVResultFormat(output, ",");
+            case SCSV:
+                /*
+                 *    Since some implementations, notably Excel, think it is a good
+                 *    idea to hijack the CSV standard, and use semi-colon instead of
+                 *    comma in some locales, this is the specialised
+                 *     Semi-Colon Separated Values formatter.
+                 */
+                return new XSVResultFormat(output, ";");
             case JSON:
                 return new JSONResultFormat(output);
             default:
