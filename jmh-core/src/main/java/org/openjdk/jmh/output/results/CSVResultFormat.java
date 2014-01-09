@@ -27,11 +27,18 @@ package org.openjdk.jmh.output.results;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
 public class CSVResultFormat implements ResultFormat {
+
+    /*
+     * Implementation note:
+     *    We follow the provisions of http://tools.ietf.org/html/rfc4180
+     */
 
     private final String output;
 
@@ -41,39 +48,46 @@ public class CSVResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Map<BenchmarkRecord, RunResult> results) {
-        PrintWriter pw = null;
+        FileWriter fw = null;
         try  {
-            pw = new PrintWriter(output);
+            fw = new FileWriter(output);
+            BufferedWriter bw = new BufferedWriter(fw);
 
-            pw.println("\"Benchmark\", \"Mode\", \"Threads\", \"Iterations\", \"Iteration time\", \"Mean\", \"Mean Error (95%)\", \"Mean Error (99%)\", \"Unit\"");
+            bw.write("\"Benchmark\",\"Mode\",\"Threads\",\"Iterations\",\"Iteration time\",\"Mean\",\"Mean Error (99.9%)\",\"Unit\"");
+            bw.write("\r\n");
 
             for (BenchmarkRecord br : results.keySet()) {
                 RunResult runResult = results.get(br);
 
-                pw.print("\"");
-                pw.print(br.getUsername());
-                pw.print("\", \"");
-                pw.print(br.getMode().shortLabel());
-                pw.print("\", ");
-                pw.print(runResult.getParams().getThreads());
-                pw.print(", ");
-                pw.print(runResult.getParams().getMeasurement().getCount());
-                pw.print(", \"");
-                pw.print(runResult.getParams().getMeasurement().getTime());
-                pw.print("\", ");
-                pw.print(runResult.getPrimaryResult().getStatistics().getMean());
-                pw.print(", ");
-                pw.print(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999));
-                pw.print(", \"");
-                pw.print(runResult.getPrimaryResult().getScoreUnit());
-                pw.println("\"");
+                bw.write("\"");
+                bw.write(br.getUsername());
+                bw.write("\",\"");
+                bw.write(br.getMode().shortLabel());
+                bw.write("\",");
+                bw.write(String.valueOf(runResult.getParams().getThreads()));
+                bw.write(",");
+                bw.write(String.valueOf(runResult.getParams().getMeasurement().getCount()));
+                bw.write(",\"");
+                bw.write(String.valueOf(runResult.getParams().getMeasurement().getTime()));
+                bw.write("\",");
+                bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMean()));
+                bw.write(",");
+                bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)));
+                bw.write(",\"");
+                bw.write(runResult.getPrimaryResult().getScoreUnit());
+                bw.write("\"");
+                bw.write("\r\n");
             }
-
+            bw.close();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         } finally {
-            if (pw != null) {
-                pw.close();
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    // do nothing
+                }
             }
         }
 
