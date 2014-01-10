@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.it.parameters.Parameters;
-import org.openjdk.jmh.it.parameters.threads.BenchmarkThreadsTest;
 
 public class MethodForkTest {
 
@@ -41,7 +40,7 @@ public class MethodForkTest {
 
     @Test
     public void test() {
-        Assert.assertEquals(Integer.valueOf(10), Parameters.get(BenchmarkThreadsTest.class).getForks().get());
+        Assert.assertEquals(Integer.valueOf(10), Parameters.get(this.getClass()).getForks().get());
     }
 
 }

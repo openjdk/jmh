@@ -41,7 +41,7 @@ public class BenchmarkMethodThreadsTest {
 
     @Test
     public void test() {
-        Assert.assertEquals(Integer.valueOf(10), Parameters.get(BenchmarkThreadsTest.class).getThreads().get());
+        Assert.assertEquals(Integer.valueOf(10), Parameters.get(this.getClass()).getThreads().get());
     }
 
 }
