@@ -117,6 +117,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
+                .forks(1)
                 .build();
         new Runner(opt).run();
     }

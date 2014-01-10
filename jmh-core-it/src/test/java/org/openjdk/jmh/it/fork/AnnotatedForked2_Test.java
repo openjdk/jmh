@@ -54,7 +54,7 @@ public class AnnotatedForked2_Test {
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork()
+    @Fork(1)
     public void test1() {
         Fixtures.work();
         test1executed = true;
