@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -57,13 +56,6 @@ public interface ChainedOptionsBuilder {
      * @return builder
      */
     ChainedOptionsBuilder exclude(String regexp);
-
-    /**
-     * OutputFormat to use in the run
-     * @param type outputformat type
-     * @return builder
-     */
-    ChainedOptionsBuilder outputFormat(OutputFormatType type);
 
     /**
      * ResultFormatType to use in the run
@@ -101,11 +93,11 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder addProfiler(ProfilerType prof);
 
     /**
-     * Be extra verbose?
-     * @param value flag
+     * Control verbosity level.
+     * @param mode flag
      * @return builder
      */
-    ChainedOptionsBuilder verbose(boolean value);
+    ChainedOptionsBuilder verbosity(VerboseMode mode);
 
     /**
      * Should fail on first benchmark error?

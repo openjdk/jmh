@@ -22,38 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.runner.options;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.logic.results.BenchResult;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.internal.Multimap;
+public enum VerboseMode {
 
-import java.io.IOException;
+    /**
+     * Be completely silent.
+     */
+    Silent(0),
 
-/**
- * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
- */
-public class ForkedRunner extends BaseRunner {
+    /**
+     * Output normally.
+     */
+    Normal(1),
 
-    private final BinaryLinkClient link;
+    /**
+     * Output extra info.
+     */
+    Extra(2),
 
-    public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
-        this.link = link;
+    ;
+
+    private final int level;
+
+    VerboseMode(int level) {
+        this.level = level;
     }
 
-    public void run() throws IOException, ClassNotFoundException {
-        ActionPlan actionPlan = link.requestPlan();
-
-        Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
-        link.pushResults(res);
-
-        out.flush();
-        out.close();
+    public boolean equalsOrHigherThan(VerboseMode other) {
+        return level >= other.level;
     }
 
 }

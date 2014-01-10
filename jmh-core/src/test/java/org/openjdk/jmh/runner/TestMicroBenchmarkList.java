@@ -26,8 +26,9 @@ package org.openjdk.jmh.runner;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openjdk.jmh.output.OutputFormatFactory;
+import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class TestMicroBenchmarkList {
     public static void setUpClass() throws Exception {
         list = MicroBenchmarkList.fromResource("/org/openjdk/jmh/runner/MicroBenchmarks");
         excludes = new ArrayList<String>();
-        out = OutputFormatFactory.createFormatInstance(false);
+        out = OutputFormatFactory.createFormatInstance(System.out, VerboseMode.Normal);
     }
 
     @Test

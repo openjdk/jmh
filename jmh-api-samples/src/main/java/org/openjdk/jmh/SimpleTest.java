@@ -26,7 +26,6 @@ package org.openjdk.jmh;
 
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -46,7 +45,6 @@ public class SimpleTest {
                 .measurementTime(TimeValue.milliseconds(100))
                 .jvmArgs("-server")
                 .forks(5)
-                .outputFormat(OutputFormatType.TextReport)
                 .build();
 
         RunResult runResult = new Runner(opts).runSingle();

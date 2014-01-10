@@ -31,11 +31,11 @@ import org.openjdk.jmh.benchmarks.LevelTrialBench;
 import org.openjdk.jmh.benchmarks.NanoTimerBench;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintWriter;
 
@@ -62,7 +62,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(EmptyBench.class.getCanonicalName() + ".*")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -76,7 +76,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelTrialBench.class.getCanonicalName() + ".*benchmark_setup")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -90,7 +90,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelTrialBench.class.getCanonicalName() + ".*benchmark_teardown")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -104,7 +104,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelIterationBench.class.getCanonicalName() + ".*benchmark_setup")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -118,7 +118,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelIterationBench.class.getCanonicalName() + ".*benchmark_teardown")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -132,7 +132,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelInvocationBench.class.getCanonicalName() + ".*benchmark_setup")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -146,7 +146,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelInvocationBench.class.getCanonicalName() + ".*benchmark_teardown")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -172,7 +172,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(NanoTimerBench.class.getCanonicalName() + ".*latency")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -189,7 +189,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(NanoTimerBench.class.getCanonicalName() + ".*granularity")
-                    .outputFormat(OutputFormatType.Silent)
+                    .verbosity(VerboseMode.Silent)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();

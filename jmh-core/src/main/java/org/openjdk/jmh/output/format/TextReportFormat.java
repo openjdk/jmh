@@ -30,6 +30,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -51,16 +52,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class TextReportFormat extends AbstractOutputFormat {
 
-    public TextReportFormat(PrintStream out, boolean verbose) {
+    public TextReportFormat(PrintStream out, VerboseMode verbose) {
         super(out, verbose);
     }
 
     @Override
-    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams, boolean verbose) {
-        if (verbose) {
-            out.println("# Starting run at: " + new Date());
-        }
-
+    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams) {
         out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " + mbParams.getWarmup().getTime() + " each");
         out.println("# Measurement: " + mbParams.getMeasurement().getCount() + " iterations, " + mbParams.getMeasurement().getTime() + " each");
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));

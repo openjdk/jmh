@@ -30,11 +30,12 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.link.BinaryLinkServer;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.RunResult;
-import org.openjdk.jmh.output.OutputFormatFactory;
+import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -55,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +114,7 @@ public class Runner extends BaseRunner {
             }
         }
 
-        return OutputFormatFactory.createFormatInstance(out, options.getOutputFormat(), options.isVerbose());
+        return OutputFormatFactory.createFormatInstance(out, options.verbosity());
     }
 
     public void list() {
@@ -153,15 +153,17 @@ public class Runner extends BaseRunner {
         SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
-            out.println("No matching benchmarks. Miss-spelled regexp? Use -v for verbose output.");
+            out.println("No matching benchmarks. Miss-spelled regexp?");
+
+            if (options.verbosity() != VerboseMode.Extra) {
+                out.println("Use " + VerboseMode.Extra + " verbose mode to debug the pattern matching.");
+            } else {
+                list();
+            }
+
             out.flush();
             out.close();
             return null;
-        }
-
-        // list microbenchmarks if -v
-        if (options.isVerbose()) {
-            list();
         }
 
         // override the benchmark types;

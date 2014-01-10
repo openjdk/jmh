@@ -119,7 +119,7 @@ public abstract class BaseRunner {
     protected BenchResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
         List<IterationResult> allResults = new ArrayList<IterationResult>();
 
-        out.startBenchmark(handler.getBenchmark(), executionParams, this.options.isVerbose());
+        out.startBenchmark(handler.getBenchmark(), executionParams);
 
         // warmup
         IterationParams wp = executionParams.getWarmup();

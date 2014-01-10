@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.Defaults;
@@ -87,21 +86,6 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     @Override
     public List<String> getExcludes() {
         return excludes;
-    }
-
-    // ---------------------------------------------------------------------------
-
-    private OutputFormatType ofType = OutputFormatType.defaultType();
-
-    @Override
-    public ChainedOptionsBuilder outputFormat(OutputFormatType type) {
-        ofType = type;
-        return this;
-    }
-
-    @Override
-    public OutputFormatType getOutputFormat() {
-        return ofType;
     }
 
     // ---------------------------------------------------------------------------
@@ -181,17 +165,17 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private boolean isVerbose;
+    private VerboseMode verbosity = VerboseMode.Normal;
 
     @Override
-    public ChainedOptionsBuilder verbose(boolean value) {
-        isVerbose = value;
+    public ChainedOptionsBuilder verbosity(VerboseMode mode) {
+        verbosity = mode;
         return this;
     }
 
     @Override
-    public boolean isVerbose() {
-        return isVerbose;
+    public VerboseMode verbosity() {
+        return verbosity;
     }
 
     // ---------------------------------------------------------------------------

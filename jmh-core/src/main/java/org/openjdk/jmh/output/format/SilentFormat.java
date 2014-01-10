@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
@@ -41,7 +42,7 @@ import java.util.Map;
  */
 public class SilentFormat extends AbstractOutputFormat {
 
-    public SilentFormat(PrintStream out, boolean verbose) {
+    public SilentFormat(PrintStream out, VerboseMode verbose) {
         super(out, verbose);
     }
 
@@ -54,7 +55,7 @@ public class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams, boolean verbose) {
+    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams) {
 
     }
 

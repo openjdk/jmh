@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -79,20 +78,6 @@ public class TestOptions {
     @Test
     public void testExcludes_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getExcludes(), EMPTY_CMDLINE.getExcludes());
-    }
-
-    @Test
-    public void testOutputFormats() throws Exception {
-        for (OutputFormatType type : OutputFormatType.values()) {
-            CommandLineOptions cmdLine = getOptions(new String[]{ "-of", type.toString()});
-            Options builder = new OptionsBuilder().outputFormat(type).build();
-            Assert.assertEquals(builder.getOutputFormat(), cmdLine.getOutputFormat());
-        }
-    }
-
-    @Test
-    public void testOutputFormats_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getOutputFormat(), EMPTY_CMDLINE.getOutputFormat());
     }
 
     @Test
@@ -173,29 +158,35 @@ public class TestOptions {
     }
 
     @Test
-    public void testVerbose_Set() throws Exception {
-        CommandLineOptions cmdLine = getOptions(new String[]{"-v"});
-        Options builder = new OptionsBuilder().verbose(true).build();
-        Assert.assertEquals(builder.isVerbose(), cmdLine.isVerbose());
+    public void testVerbose() throws Exception {
+        for (VerboseMode mode : VerboseMode.values()) {
+            CommandLineOptions cmdLine = getOptions(new String[]{"-v", mode.toString()});
+            Options builder = new OptionsBuilder().verbosity(mode).build();
+            Assert.assertEquals(builder.verbosity(), cmdLine.verbosity());
+        }
     }
 
     @Test
-    public void testVerbose_True() throws Exception {
-        CommandLineOptions cmdLine = getOptions(new String[]{"-v", "true"});
-        Options builder = new OptionsBuilder().verbose(true).build();
-        Assert.assertEquals(builder.isVerbose(), cmdLine.isVerbose());
+    public void testVerbose_LC() throws Exception {
+        for (VerboseMode mode : VerboseMode.values()) {
+            CommandLineOptions cmdLine = getOptions(new String[]{"-v", mode.toString().toLowerCase()});
+            Options builder = new OptionsBuilder().verbosity(mode).build();
+            Assert.assertEquals(builder.verbosity(), cmdLine.verbosity());
+        }
     }
 
     @Test
-    public void testVerbose_False() throws Exception {
-        CommandLineOptions cmdLine = getOptions(new String[]{"-v", "false"});
-        Options builder = new OptionsBuilder().verbose(false).build();
-        Assert.assertEquals(builder.isVerbose(), cmdLine.isVerbose());
+    public void testVerbose_UC() throws Exception {
+        for (VerboseMode mode : VerboseMode.values()) {
+            CommandLineOptions cmdLine = getOptions(new String[]{"-v", mode.toString().toUpperCase()});
+            Options builder = new OptionsBuilder().verbosity(mode).build();
+            Assert.assertEquals(builder.verbosity(), cmdLine.verbosity());
+        }
     }
 
     @Test
     public void testVerbose_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.isVerbose(), EMPTY_CMDLINE.isVerbose());
+        Assert.assertEquals(EMPTY_BUILDER.verbosity(), EMPTY_CMDLINE.verbosity());
     }
 
     @Test

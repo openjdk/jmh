@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -48,12 +47,6 @@ public interface Options extends Serializable {
      * @return list of regexps matching the ignored benchmarks
      */
     List<String> getExcludes();
-
-    /**
-     * Output format to use
-     * @return format type
-     */
-    OutputFormatType getOutputFormat();
 
     /**
      * Which file to use for dumping the output
@@ -86,10 +79,10 @@ public interface Options extends Serializable {
     Collection<ProfilerType> getProfilers();
 
     /**
-     * Should be extra verbose?
-     * @return should be verbose?
+     * How verbose should we be?
+     * @return verbosity mode
      */
-    boolean isVerbose();
+    VerboseMode verbosity();
 
     /**
      * Should harness terminate on first error encountered?

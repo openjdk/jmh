@@ -82,7 +82,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         List<Profiler> list = new ArrayList<Profiler>();
         // register the profilers
         for (ProfilerType prof : options.getProfilers()) {
-            list.add(prof.createInstance(options.isVerbose()));
+            list.add(prof.createInstance(options.verbosity()));
         }
         return list;
     }

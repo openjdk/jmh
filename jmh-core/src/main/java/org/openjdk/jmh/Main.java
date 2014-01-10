@@ -25,7 +25,6 @@
 package org.openjdk.jmh;
 
 import org.kohsuke.args4j.CmdLineException;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.Runner;
@@ -49,20 +48,6 @@ public class Main {
 
         try {
             cmdOptions.parseArguments(argv);
-
-            // list output formats?
-            if (cmdOptions.shouldListOutputFormats()) {
-                StringBuilder sb = new StringBuilder();
-
-                for (OutputFormatType f : OutputFormatType.values()) {
-                    sb.append(f.toString().toLowerCase());
-                    sb.append(", ");
-                }
-                sb.setLength(sb.length() - 2);
-
-                System.out.println("Available formats: " + sb.toString());
-                return;
-            }
 
             if (cmdOptions.shouldListResultFormats()) {
                 StringBuilder sb = new StringBuilder();

@@ -57,7 +57,6 @@ public class CompilerControlInlineTest {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
-                .verbose(true)
                 .build();
         new Runner(opt).run();
     }

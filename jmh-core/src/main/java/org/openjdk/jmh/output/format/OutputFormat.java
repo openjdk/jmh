@@ -65,10 +65,8 @@ public interface OutputFormat {
 
     /**
      * Format for start-of-benchmark output.
-     *
-     * @param verbose Should we output verbose info?
      */
-    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams, boolean verbose);
+    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams);
 
     /**
      * Format for end-of-benchmark.

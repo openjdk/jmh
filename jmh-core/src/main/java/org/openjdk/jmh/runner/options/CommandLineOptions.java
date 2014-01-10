@@ -29,7 +29,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.output.OutputFormatType;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
@@ -104,8 +103,8 @@ public class CommandLineOptions implements Options {
     @Option(name = "-gc", usage = "Should do System.gc() between iterations?", handler = BooleanOptionHandler.class)
     protected boolean gcEachIteration = false;
 
-    @Option(name = "-v", aliases = {"--verbose"}, usage = "Verbose mode, default off", handler = BooleanOptionHandler.class)
-    protected boolean verbose = false;
+    @Option(name = "-v", aliases = {"--verbosity"}, metaVar = "LEVEL", usage = "Verbosity mode: (silent, normal, extra)")
+    protected VerboseMode verbose = VerboseMode.Normal;
 
     @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
     protected boolean failOnError = false;
@@ -134,9 +133,6 @@ public class CommandLineOptions implements Options {
     @Option(name = "-rff", aliases = {"--result"}, metaVar = "FILE", usage = "Redirect results to FILE")
     protected String result = Defaults.RESULT_FILE;
 
-    @Option(name = "-of", aliases = {"--outputformat"}, metaVar = "FORMAT", usage = "Format to use for output, use --listOutputFormats to list available formats")
-    protected OutputFormatType outputFormat = OutputFormatType.defaultType();
-
     @Option(name = "-rf", aliases = {"--resultformat"}, metaVar = "FORMAT", usage = "Format to use for results, use --listResultFormats to list available formats")
     protected ResultFormatType resultFormat = ResultFormatType.defaultType();
 
@@ -161,9 +157,6 @@ public class CommandLineOptions implements Options {
     // show something options
     @Option(name = "-l", aliases = {"--list"}, usage = "List available microbenchmarks and exit. Filter using available regexps.")
     protected boolean list = false;
-
-    @Option(name = "--listOutputFormats", usage = "List available output formats")
-    protected boolean listOutputFormats = false;
 
     @Option(name = "--listResultFormats", usage = "List available result formats")
     protected boolean listResultFormats = false;
@@ -326,16 +319,6 @@ public class CommandLineOptions implements Options {
         return output;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    @Override
-    public OutputFormatType getOutputFormat() {
-        return outputFormat;
-    }
-
     @Override
     public ResultFormatType getResultFormat() {
         return resultFormat;
@@ -344,15 +327,6 @@ public class CommandLineOptions implements Options {
     @Override
     public String getResult() {
         return result;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    public boolean shouldListOutputFormats() {
-        return listOutputFormats;
     }
 
     public boolean shouldListResultFormats() {
@@ -467,7 +441,7 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public boolean isVerbose() {
+    public VerboseMode verbosity() {
         return verbose;
     }
 

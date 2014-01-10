@@ -22,12 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output;
+package org.openjdk.jmh.output.format;
 
 import org.openjdk.jmh.link.BinaryLinkClient;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.SilentFormat;
 import org.openjdk.jmh.output.format.TextReportFormat;
+import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
 import java.lang.reflect.Proxy;
@@ -37,19 +38,18 @@ public class OutputFormatFactory {
     /**
      * Factory method for OutputFormat instances
      *
-     * @param format Format enum to use
+     * @param mode LogMode enum to use
      * @return a new OutputFormat instance of given type
      */
-    public static OutputFormat createFormatInstance(PrintStream out, OutputFormatType format, boolean verbose) {
-        assert (format != null) : "format is not null";
-
-        switch (format) {
+    public static OutputFormat createFormatInstance(PrintStream out, VerboseMode mode) {
+        switch (mode) {
             case Silent:
-                return new SilentFormat(out, verbose);
-            case TextReport:
-                return new TextReportFormat(out, verbose);
+                return new SilentFormat(out, mode);
+            case Normal:
+            case Extra:
+                return new TextReportFormat(out, mode);
             default:
-                throw new IllegalArgumentException("Format: " + format + " not found!");
+                throw new IllegalArgumentException("Mode " + mode + " not found!");
         }
     }
 
@@ -63,10 +63,6 @@ public class OutputFormatFactory {
                 new Class[]{OutputFormat.class},
                 link.getOutputFormatHandler()
         );
-    }
-
-    public static OutputFormat createFormatInstance(boolean verbose) {
-        return createFormatInstance(System.out, OutputFormatType.TextReport, verbose);
     }
 
 }
