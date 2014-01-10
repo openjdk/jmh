@@ -22,23 +22,30 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.it.parameters;
+package org.openjdk.jmh.it.parameters.threads;
 
 import org.junit.Assert;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
-import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.MicroBenchmarkList;
-import org.openjdk.jmh.runner.options.VerboseMode;
+import org.junit.Test;
+import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.it.parameters.Parameters;
 
-import java.util.Collections;
-import java.util.Set;
+@Threads(20)
+public class InheritedBenchMethodThreadsTest {
 
-public class Parameters {
-
-    public static BenchmarkRecord get(Class<?> klass) {
-        MicroBenchmarkList list = MicroBenchmarkList.fromFile("target/test-classes/META-INF/MicroBenchmarks");
-        Set<BenchmarkRecord> set = list.find(OutputFormatFactory.createFormatInstance(System.out, VerboseMode.Extra), ".*" + klass.getName().replaceAll("\\$",".") + ".*", Collections.<String>emptyList());
-        Assert.assertEquals("The single benchmark exists", 1, set.size());
-        return set.iterator().next();
+    public static abstract class AbstractBenchmark {
+        @Threads(10)
+        @GenerateMicroBenchmark
+        public void bench() {
+            // do nothing
+        }
     }
+
+    public static class ConcreteBenchmark extends AbstractBenchmark {}
+
+    @Test
+    public void test() {
+        Assert.assertEquals(Integer.valueOf(10), Parameters.get(ConcreteBenchmark.class).getThreads().get());
+    }
+
 }

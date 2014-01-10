@@ -59,6 +59,7 @@ import org.openjdk.jmh.util.internal.SampleBuffer;
 import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -78,11 +79,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -92,34 +95,29 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
+@SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
     private final Set<BenchmarkInfo> benchmarkInfos = new HashSet<BenchmarkInfo>();
 
     @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(GenerateMicroBenchmark.class.getName());
-    }
-
-    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
             if (!roundEnv.processingOver()) {
-                for (TypeElement annotation : annotations) {
-                    // Build a Set of classes with a list of annotated methods
-                    Multimap<TypeElement, Element> clazzes = buildAnnotatedSet(annotation, roundEnv);
+                TypeElement gmb = processingEnv.getElementUtils().getTypeElement(GenerateMicroBenchmark.class.getCanonicalName());
+                // Build a Set of classes with a list of annotated methods
+                Multimap<TypeElement, Element> clazzes = buildAnnotatedSet(gmb, roundEnv);
 
-                    // Generate code for all found Classes and Methods
-                    for (TypeElement clazz : clazzes.keys()) {
-                        try {
-                            validateBenchmark(clazz, clazzes.get(clazz));
-                            BenchmarkInfo info = makeBenchmarkInfo(clazz, clazzes.get(clazz));
-                            generateClass(clazz, info);
-                            benchmarkInfos.add(info);
-                        } catch (GenerationException ge) {
-                            processingEnv.getMessager().printMessage(Kind.ERROR, ge.getMessage(), ge.getElement());
-                        }
+                // Generate code for all found Classes and Methods
+                for (TypeElement clazz : clazzes.keys()) {
+                    try {
+                        validateBenchmark(clazz, clazzes.get(clazz));
+                        BenchmarkInfo info = makeBenchmarkInfo(clazz, clazzes.get(clazz));
+                        generateClass(clazz, info);
+                        benchmarkInfos.add(info);
+                    } catch (GenerationException ge) {
+                        processingEnv.getMessager().printMessage(Kind.ERROR, ge.getMessage(), ge.getElement());
                     }
                 }
             } else {
@@ -166,24 +164,74 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         return true;
     }
 
+    private List<TypeElement> getHierarchy(TypeElement subclass) {
+        List<TypeElement> result = new ArrayList<TypeElement>();
+        TypeElement walk = subclass;
+        do {
+            result.add(walk);
+        } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
+        return result;
+    }
+
     /**
      * Build a set of Classes which has annotated methods in them
      *
-     * @param annotation
      * @return for all methods annotated with $annotation, returns Map<holder-class, Set<method>>
      */
-    private Multimap<TypeElement, Element> buildAnnotatedSet(TypeElement annotation, RoundEnvironment roundEnv) {
+    private Multimap<TypeElement, Element> buildAnnotatedSet(TypeElement te, RoundEnvironment roundEnv) {
+
+        // Need to do a few rollovers to find all classes that have @GMB-annotated methods in their
+        // subclasses. This is mostly due to some of the nested classes not discoverable at once,
+        // when we need to discover the enclosing class first. With the potentially non-zero nesting
+        // depth, we need to do a few rounds. Hopefully we will just do a single stride in most
+        // cases.
+
+        Collection<TypeElement> discoveredClasses = new TreeSet<TypeElement>(new Comparator<TypeElement>() {
+            @Override
+            public int compare(TypeElement o1, TypeElement o2) {
+                return o1.getQualifiedName().toString().compareTo(o2.getQualifiedName().toString());
+            }
+        });
+
+        // Walk around until convergence...
+
+        int lastSize = -1;
+        while (discoveredClasses.size() > lastSize) {
+            lastSize = discoveredClasses.size();
+            for (Element e : roundEnv.getRootElements()) {
+                TypeElement walk = (TypeElement) e;
+                do {
+                    discoveredClasses.add(walk);
+                    for (TypeElement nested : ElementFilter.typesIn(walk.getEnclosedElements())) {
+                        discoveredClasses.add(nested);
+                    }
+                } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
+            }
+        }
+
+        // Transitively close the hierarchy:
+        //   If superclass has a @GMB method, then all subclasses also have it.
+        //   We skip the generated classes, which we had probably generated during the previous rounds
+        //   of processing. Abstract classes are of no interest for us either.
+
         Multimap<TypeElement, Element> result = new HashMultimap<TypeElement, Element>();
-        for (Element method : roundEnv.getElementsAnnotatedWith(annotation)) {
-            TypeElement teClass = (TypeElement) method.getEnclosingElement();
+        for (TypeElement currentClass : discoveredClasses) {
+            if (AnnUtils.getPackageName(currentClass).contains("generated")) continue;
+            if (currentClass.getModifiers().contains(Modifier.ABSTRACT)) continue;
 
-            // Not interested in abstract classes, sorry.
-            if (teClass.getModifiers().contains(Modifier.ABSTRACT)) continue;
-
-            result.put(teClass, method);
+            for (TypeElement upperClass : getHierarchy(currentClass)) {
+                if (AnnUtils.getPackageName(upperClass).contains("generated")) continue;
+                for (ExecutableElement method : ElementFilter.methodsIn(upperClass.getEnclosedElements())) {
+                    GenerateMicroBenchmark ann = method.getAnnotation(GenerateMicroBenchmark.class);
+                    if (ann != null) {
+                        result.put(currentClass, method);
+                    }
+                }
+            }
         }
         return result;
     }
+
 
     /**
      * Do basic benchmark validation.
@@ -386,7 +434,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         String sourcePackage = AnnUtils.getPackageName(clazz);
         String generatedPackageName = sourcePackage + ".generated";
-        String generatedClassName = clazz.getSimpleName().toString();
+        String generatedClassName = AnnUtils.getNestedName(clazz);
 
         BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName().toString(), generatedPackageName, generatedClassName, result);
         validateBenchmarkInfo(info);

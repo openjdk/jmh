@@ -61,4 +61,18 @@ public class AnnUtils {
         return walk.toString();
     }
 
+    /**
+     * Get the class name along with any nested class names
+     * @param clazz the subject
+     * @return the synthetic class name in form of "parent1_parent2_classname"
+     */
+    public static String getNestedName(TypeElement clazz) {
+        String name = "";
+        Element walk = clazz;
+        while (walk.getKind() != ElementKind.PACKAGE) {
+            name = walk.getSimpleName().toString() + "_" + name;
+            walk = walk.getEnclosingElement();
+        }
+        return name.substring(0, name.length());
+    }
 }
