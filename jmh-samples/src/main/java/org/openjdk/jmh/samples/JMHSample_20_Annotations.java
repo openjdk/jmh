@@ -35,6 +35,8 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
+@Fork(1)
 public class JMHSample_20_Annotations {
 
     double x1 = Math.PI;
@@ -45,13 +47,17 @@ public class JMHSample_20_Annotations {
      * for the some of the benchmarks. This is very useful when you are
      * dealing with lots of microbenchmarks, and some of them require
      * special treatment.
+     *
+     * Annotation can also be placed on class, to have the effect over
+     * all the benchmark methods in the same class. The rule is, the
+     * annotation in the closest scope takes the precedence: i.e.
+     * the method-based annotation overrides class-based annotation,
+     * etc.
      */
 
     @GenerateMicroBenchmark
-    @OutputTimeUnit(TimeUnit.SECONDS)
     @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(1)
     public double measure() {
         return Math.log(x1);
     }
