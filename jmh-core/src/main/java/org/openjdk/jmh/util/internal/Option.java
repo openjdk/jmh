@@ -93,6 +93,13 @@ public class Option<T> implements Serializable {
         }
     }
 
+    public T get() {
+        if (val == null) {
+            throw new IllegalStateException("Option is null");
+        }
+        return val;
+    }
+
     public interface Extractor<T> {
         T valueOf(String s);
     }
