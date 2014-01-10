@@ -43,11 +43,14 @@ import java.util.concurrent.TimeUnit;
 @Inherited
 public @interface Measurement {
 
+    public static final int BLANK_ITERATIONS = -1;
+    public static final long BLANK_TIME = -1L;
+
     /** Amount of iterations */
-    int iterations() default -1;
+    int iterations() default BLANK_ITERATIONS;
 
     /** time of each iteration */
-    long time() default -1L;
+    long time() default BLANK_TIME;
 
     /** time unit of the time value */
     TimeUnit timeUnit() default TimeUnit.SECONDS;

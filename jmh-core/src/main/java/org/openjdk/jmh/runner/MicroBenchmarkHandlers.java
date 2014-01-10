@@ -43,11 +43,6 @@ public class MicroBenchmarkHandlers {
     private MicroBenchmarkHandlers() {
     }
 
-    public static Method findBenchmarkMethod(BenchmarkRecord benchmark) {
-        Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
-        return findBenchmarkMethod(clazz, benchmark.generatedMethod());
-    }
-
     public static Method findBenchmarkMethod(Class<?> clazz, String methodName) {
         Method method = null;
         for (Method m : ClassUtils.enumerateMethods(clazz)) {

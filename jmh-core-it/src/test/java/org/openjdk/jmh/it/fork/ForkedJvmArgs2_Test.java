@@ -78,7 +78,7 @@ public class ForkedJvmArgs2_Test {
         Fixtures.work();
         Assert.assertNull(System.getProperty("test1"));
         Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNotNull(System.getProperty("testUpper"));
+        Assert.assertNull(System.getProperty("testUpper"));
     }
 
     @GenerateMicroBenchmark

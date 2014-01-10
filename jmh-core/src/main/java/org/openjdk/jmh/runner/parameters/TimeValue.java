@@ -151,7 +151,7 @@ public class TimeValue implements Serializable {
         if (timeString == null) {
             return new TimeValue(-1, null);
         }
-        timeString = timeString.toLowerCase();
+        timeString = timeString.replaceAll(" ", "").toLowerCase();
         if (timeString.contains("ns")) {
             return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("ns"))), TimeUnit.NANOSECONDS);
         }
@@ -166,6 +166,9 @@ public class TimeValue implements Serializable {
         }
         if (timeString.contains("m")) {
             return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("m"))), TimeUnit.MINUTES);
+        }
+        if (timeString.contains("day")) {
+            return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("day"))), TimeUnit.DAYS);
         }
         return new TimeValue(Integer.parseInt(timeString), TimeUnit.SECONDS);
     }

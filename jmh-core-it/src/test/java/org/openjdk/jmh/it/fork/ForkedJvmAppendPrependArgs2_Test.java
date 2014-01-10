@@ -83,9 +83,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("replaced"));
         Assert.assertNull(System.getProperty("appended"));
         Assert.assertNotNull(System.getProperty("prepended"));
-        Assert.assertNotNull(System.getProperty("appendedUp"));
-        Assert.assertNull(System.getProperty("prependedUp"));
-
+        Assert.assertNull(System.getProperty("appendedUp"));
     }
 
     @GenerateMicroBenchmark
@@ -98,22 +96,20 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNotNull(System.getProperty("appended"));
         Assert.assertNull(System.getProperty("prepended"));
         Assert.assertNull(System.getProperty("appendedUp"));
-        Assert.assertNotNull(System.getProperty("prependedUp"));
-
+        Assert.assertNull(System.getProperty("prependedUp"));
     }
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork()
+    @Fork
     public void test5() {
         Fixtures.work();
         Assert.assertNull(System.getProperty("replaced"));
         Assert.assertNull(System.getProperty("appended"));
         Assert.assertNull(System.getProperty("prepended"));
-        Assert.assertNotNull(System.getProperty("appendedUp"));
-        Assert.assertNotNull(System.getProperty("prependedUp"));
-
+        Assert.assertNull(System.getProperty("appendedUp"));
+        Assert.assertNull(System.getProperty("prependedUp"));
     }
 
     @Test

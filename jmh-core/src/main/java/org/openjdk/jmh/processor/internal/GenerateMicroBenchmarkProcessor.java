@@ -48,6 +48,7 @@ import org.openjdk.jmh.logic.results.ResultRole;
 import org.openjdk.jmh.logic.results.SampleTimeResult;
 import org.openjdk.jmh.logic.results.SingleShotResult;
 import org.openjdk.jmh.logic.results.ThroughputResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.MicroBenchmarkList;
 import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.internal.CollectionUtils;
@@ -131,7 +132,23 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                         for (String method : info.methodGroups.keySet()) {
                             MethodGroup group = info.methodGroups.get(method);
                             for (Mode m : group.getModes()) {
-                                writer.println(info.userName + "." + method + ", " + info.generatedName + "." + method + ", " + m + ", " + group.getThreads());
+                                BenchmarkRecord br = new BenchmarkRecord(
+                                        info.userName + "." + method,
+                                        info.generatedName + "." + method,
+                                        m,
+                                        group.getThreads(),
+                                        group.getTotalThreadCount(),
+                                        group.getWarmupIterations(),
+                                        group.getWarmupTime(),
+                                        group.getMeasurementIterations(),
+                                        group.getMeasurementTime(),
+                                        group.getForks(),
+                                        group.getWarmupForks(),
+                                        group.getJVMArgs(),
+                                        group.getJVMArgsPrepend(),
+                                        group.getJVMArgsAppend()
+                                );
+                                writer.println(br.toLine());
                             }
                         }
                     }
@@ -502,27 +519,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         writer.println();
     }
 
-    private TimeUnit findTimeUnit(MethodGroup methodGroup) {
-        OutputTimeUnit ann = methodGroup.methods().iterator().next().getEnclosingElement().getAnnotation(OutputTimeUnit.class);
-        for (Element method : methodGroup.methods()) {
-            ann = guardedSet(ann, method.getAnnotation(OutputTimeUnit.class), method);
-        }
-
-        if (ann == null) {
-            try {
-                java.lang.reflect.Method value = OutputTimeUnit.class.getMethod("value");
-                return (TimeUnit) value.getDefaultValue();
-            } catch (NoSuchMethodException e) {
-                throw new AssertionError("Shouldn't be here");
-            } catch (ClassCastException e) {
-                throw new AssertionError("Shouldn't be here");
-            }
-        } else {
-            return ann.value();
-        }
-    }
-
-    /**
+     /**
      * Generate the method for a specific benchmark method
      *
      * @param benchmarkKind
@@ -531,166 +528,25 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
      */
     private void generateMethod(Mode benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println();
-        for (String ann : generateMethodAnnotations(methodGroup)) {
-            writer.println("    " + ann);
-        }
-        final TimeUnit timeUnit = findTimeUnit(methodGroup);
         switch (benchmarkKind) {
             case Throughput:
-                generateThroughput(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
+                generateThroughput(writer, benchmarkKind, methodGroup, states);
                 break;
             case AverageTime:
-                generateAverageTime(writer, benchmarkKind, methodGroup, getOperationsPerInvocation(methodGroup), timeUnit, states);
+                generateAverageTime(writer, benchmarkKind, methodGroup, states);
                 break;
             case SampleTime:
-                generateSampleTime(writer, benchmarkKind, methodGroup, timeUnit, states);
+                generateSampleTime(writer, benchmarkKind, methodGroup, states);
                 break;
             case SingleShotTime:
-                generateSingleShotTime(writer, benchmarkKind, methodGroup, timeUnit, states);
+                generateSingleShotTime(writer, benchmarkKind, methodGroup, states);
                 break;
             default:
                 throw new AssertionError("Shouldn't be here");
         }
     }
 
-    private long getOperationsPerInvocation(MethodGroup methodGroup) {
-        OperationsPerInvocation ann = null;
-        for (Element method : methodGroup.methods()) {
-            OperationsPerInvocation operationsPerInvocation = method.getAnnotation(OperationsPerInvocation.class);
-            if (operationsPerInvocation != null && operationsPerInvocation.value() > 1) {
-                ann = guardedSet(ann, operationsPerInvocation, method);
-            }
-
-            ann = guardedSet(ann, method.getEnclosingElement().getAnnotation(OperationsPerInvocation.class), method);
-        }
-        return (ann != null) ? ann.value() : 1;
-    }
-
-
-    private static String annotationMapToString(Map<String, String> map) {
-        StringBuilder sb = new StringBuilder();
-        boolean hasOptions = false;
-        for (Map.Entry<String, String> e : map.entrySet()) {
-            if (hasOptions) {
-                sb.append(", ");
-            }
-            sb.append(e.getKey()).append(" = ").append(e.getValue());
-            hasOptions = true;
-        }
-        return sb.toString();
-    }
-
-    private static Map<String, String> warmupToMap(Map<String, String> map, Warmup wAnnotation) {
-        if (wAnnotation != null) {
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, wAnnotation.iterations() >= 0, "iterations", Integer.toString(wAnnotation.iterations()));
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, wAnnotation.time() >= 0L, "time", String.valueOf(wAnnotation.time()));
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, wAnnotation.timeUnit() != null, "timeUnit", "TimeUnit." + String.valueOf(wAnnotation.timeUnit()));
-        }
-        return map;
-    }
-
-    private static String generateWarmupAnnotation(Element method) {
-        Map<String, String> map = warmupToMap(null, method.getAnnotation(Warmup.class));
-        map = warmupToMap(map, method.getEnclosingElement().getAnnotation(Warmup.class));
-        if (map != null && !map.isEmpty()) {
-            return "@" + Warmup.class.getSimpleName() + "(" + annotationMapToString(map) + ")";
-        }
-        return null;
-    }
-
-    private static Map<String, String> measurementToMap(Map<String, String> map, Measurement mAnnotation) {
-        if (mAnnotation != null) {
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, mAnnotation.iterations() >= 0, "iterations", Integer.toString(mAnnotation.iterations()));
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, mAnnotation.time() >= 0L, "time", String.valueOf(mAnnotation.time()));
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, mAnnotation.timeUnit() != null, "timeUnit", "TimeUnit." + String.valueOf(mAnnotation.timeUnit()));
-        }
-        return map;
-    }
-
-    private static String generateMeasurementAnnotation(Element method) {
-        Map<String, String> map = measurementToMap(null, method.getAnnotation(Measurement.class));
-        map = measurementToMap(map, method.getEnclosingElement().getAnnotation(Measurement.class));
-        if (map != null && !map.isEmpty()) {
-            return "@" + Measurement.class.getSimpleName() + "(" + annotationMapToString(map) + ")";
-        }
-        return null;
-    }
-
-    private static int getThreads(Element method) {
-        Threads tAnnotation = method.getAnnotation(Threads.class);
-        if (tAnnotation != null && tAnnotation.value() > Integer.MIN_VALUE) {
-            return tAnnotation.value();
-        }
-        tAnnotation = method.getEnclosingElement().getAnnotation(Threads.class);
-        if (tAnnotation != null && tAnnotation.value() > Integer.MIN_VALUE) {
-            return tAnnotation.value();
-        }
-        return 1;
-    }
-
-    private static Map<String, String> forkToMap(Map<String, String> map, Fork fAnnotation) {
-        if (fAnnotation != null) {
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsentAndQuote(map, AnnotationUtils.isSet(fAnnotation.jvmArgs()),        "jvmArgs", fAnnotation.jvmArgs());
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsentAndQuote(map, AnnotationUtils.isSet(fAnnotation.jvmArgsAppend()),  "jvmArgsAppend", fAnnotation.jvmArgsAppend());
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsentAndQuote(map, AnnotationUtils.isSet(fAnnotation.jvmArgsPrepend()), "jvmArgsPrepend", fAnnotation.jvmArgsPrepend());
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, fAnnotation.value() != 1, "value", Integer.toString(fAnnotation.value()));
-            map = CollectionUtils.conditionalPutAndCreateTreeMapIfAbsent(map, fAnnotation.warmups() > 0, "warmups", Integer.toString(fAnnotation.warmups()));
-        }
-        return map;
-    }
-
-    private static String generateForkAnnotation(Element method) {
-        Fork forkAnnotation = method.getAnnotation(Fork.class);
-        Fork upperForkAnnotation = method.getEnclosingElement().getAnnotation(Fork.class);
-        if (forkAnnotation != null || upperForkAnnotation != null) {
-            Map<String, String> map = forkToMap(null, forkAnnotation);
-            map = forkToMap(map, upperForkAnnotation);
-            if (map == null || map.isEmpty()) {
-                return "@" + Fork.class.getSimpleName();
-            }
-            return "@" + Fork.class.getSimpleName() + "(" + annotationMapToString(map) + ")";
-        }
-        return null;
-    }
-
-    private List<String> generateMethodAnnotations(MethodGroup methodGroup) {
-        int totalThreads = 0;
-        String warmupAnn = null;
-        String measurementAnn = null;
-        String forkAnn = null;
-
-        for (Element method : methodGroup.methods()) {
-            totalThreads += getThreads(method);
-            warmupAnn = guardedSet(warmupAnn, generateWarmupAnnotation(method), method);
-            measurementAnn = guardedSet(measurementAnn, generateMeasurementAnnotation(method), method);
-            forkAnn = guardedSet(forkAnn, generateForkAnnotation(method), method);
-        }
-
-        List<String> annotations = new ArrayList<String>();
-
-        if (methodGroup.methods().size() == 1) {
-            // only honor this setting for non-@Group benchmarks
-            annotations.add("@" + Threads.class.getSimpleName() + "(" + totalThreads + ")");
-        }
-        annotations = CollectionUtils.addIfNotNull(annotations, warmupAnn);
-        annotations = CollectionUtils.addIfNotNull(annotations, measurementAnn);
-        annotations = CollectionUtils.addIfNotNull(annotations, forkAnn);
-        return annotations;
-    }
-
-    private <T> T guardedSet(T prev, T cur, Element element) {
-        if (prev == null) {
-            return cur;
-        } else {
-            if (cur == null || prev.equals(cur)) {
-                return prev;
-            } else {
-                throw new GenerationException("Colliding annotations: " + prev + " vs. " + cur, element);
-            }
-        }
-    }
-
-    private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
         writer.println();
 
@@ -725,7 +581,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(" + opsPerInv + "L);");
+            writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
             writer.println(ident(3) + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, res, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
@@ -749,7 +605,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
             writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
@@ -788,7 +644,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, long opsPerInv, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -822,7 +678,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(" + opsPerInv + "L);");
+            writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
             writer.println(ident(3) + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(control, res, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
@@ -845,7 +701,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
             writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", res.getOperations(), res.getTime(), tu));");
@@ -895,7 +751,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
         writer.println();
 
@@ -954,7 +810,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
             writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", buffer, tu));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", buffer, tu));");
@@ -1002,7 +858,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, TimeUnit timeUnit, StateObjectHandler states) {
+    private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -1029,7 +885,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + timeUnit + ";");
+            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
             writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), tu));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getSimpleName() + "\", (realTime > 0) ? realTime : (time2 - time1), tu));");

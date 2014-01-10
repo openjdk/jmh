@@ -50,6 +50,7 @@ public class Defaults {
 
     public static final int THREADS = 1;
 
+    public static final int DEFAULT_WARMUP_FORK_TIMES = 0;
     public static final int DEFAULT_FORK_TIMES = 10;
 
     public static final boolean SHOULD_SYNCH_ITERATIONS = true;

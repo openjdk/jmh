@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
@@ -43,6 +44,7 @@ import static org.junit.Assert.assertTrue;
  * @author anders.astrand@oracle.com
  *
  */
+@Ignore
 public class TestMicroBenchmarkList {
 
     private static MicroBenchmarkList list;

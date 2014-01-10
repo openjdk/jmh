@@ -49,7 +49,7 @@ public @interface Threads {
     public static int MAX = -1;
 
     /** Amount of threads */
-    int value() default 1;
+    int value();
 
 }
 

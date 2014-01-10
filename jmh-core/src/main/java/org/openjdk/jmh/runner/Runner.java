@@ -323,24 +323,9 @@ public class Runner extends BaseRunner {
 
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
 
-                // Running microbenchmark in separate JVM requires to read some options from annotations.
-                final Method benchmarkMethod = MicroBenchmarkHandlers.findBenchmarkMethod(benchmark);
-                Fork forkAnnotation = benchmarkMethod.getAnnotation(Fork.class);
-
-                String annJvmArgs = null;
-                if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgs())) {
-                    annJvmArgs = forkAnnotation.jvmArgs().trim();
-                }
-
-                String annJvmArgsAppend = null;
-                if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsAppend())) {
-                    annJvmArgsAppend = forkAnnotation.jvmArgsAppend().trim();
-                }
-
-                String annJvmArgsPrepend = null;
-                if (forkAnnotation != null && AnnotationUtils.isSet(forkAnnotation.jvmArgsPrepend())) {
-                    annJvmArgsPrepend = forkAnnotation.jvmArgsPrepend().trim();
-                }
+                String annJvmArgs = benchmark.getJvmArgs().orElse(null);
+                String annJvmArgsAppend = benchmark.getJvmArgsAppend().orElse(null);
+                String annJvmArgsPrepend = benchmark.getJvmArgsPrepend().orElse(null);
 
                 String[] commandString = getSeparateExecutionCommand(annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
 
