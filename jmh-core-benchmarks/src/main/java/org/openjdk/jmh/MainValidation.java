@@ -62,7 +62,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(EmptyBench.class.getCanonicalName() + ".*")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -76,7 +76,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelTrialBench.class.getCanonicalName() + ".*benchmark_setup")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -90,7 +90,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelTrialBench.class.getCanonicalName() + ".*benchmark_teardown")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -104,7 +104,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelIterationBench.class.getCanonicalName() + ".*benchmark_setup")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -118,7 +118,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelIterationBench.class.getCanonicalName() + ".*benchmark_teardown")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -132,7 +132,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelInvocationBench.class.getCanonicalName() + ".*benchmark_setup")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -146,7 +146,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(LevelInvocationBench.class.getCanonicalName() + ".*benchmark_teardown")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -172,7 +172,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(NanoTimerBench.class.getCanonicalName() + ".*latency")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();
@@ -189,7 +189,7 @@ public class MainValidation {
         {
             Options opts = new OptionsBuilder()
                     .include(NanoTimerBench.class.getCanonicalName() + ".*granularity")
-                    .verbosity(VerboseMode.Silent)
+                    .verbosity(VerboseMode.SILENT)
                     .build();
 
             RunResult result = new Runner(opts).runSingle();

@@ -25,9 +25,6 @@
 package org.openjdk.jmh.output.format;
 
 import org.openjdk.jmh.link.BinaryLinkClient;
-import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.output.format.SilentFormat;
-import org.openjdk.jmh.output.format.TextReportFormat;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
@@ -43,10 +40,10 @@ public class OutputFormatFactory {
      */
     public static OutputFormat createFormatInstance(PrintStream out, VerboseMode mode) {
         switch (mode) {
-            case Silent:
+            case SILENT:
                 return new SilentFormat(out, mode);
-            case Normal:
-            case Extra:
+            case NORMAL:
+            case EXTRA:
                 return new TextReportFormat(out, mode);
             default:
                 throw new IllegalArgumentException("Mode " + mode + " not found!");

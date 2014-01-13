@@ -165,7 +165,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private VerboseMode verbosity = VerboseMode.Normal;
+    private VerboseMode verbosity = VerboseMode.NORMAL;
 
     @Override
     public ChainedOptionsBuilder verbosity(VerboseMode mode) {

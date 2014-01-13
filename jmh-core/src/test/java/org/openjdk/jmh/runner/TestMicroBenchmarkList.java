@@ -55,7 +55,7 @@ public class TestMicroBenchmarkList {
     public static void setUpClass() throws Exception {
         list = MicroBenchmarkList.fromResource("/org/openjdk/jmh/runner/MicroBenchmarks");
         excludes = new ArrayList<String>();
-        out = OutputFormatFactory.createFormatInstance(System.out, VerboseMode.Normal);
+        out = OutputFormatFactory.createFormatInstance(System.out, VerboseMode.NORMAL);
     }
 
     @Test

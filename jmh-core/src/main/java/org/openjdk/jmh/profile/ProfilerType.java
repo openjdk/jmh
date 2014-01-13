@@ -31,7 +31,7 @@ public enum ProfilerType {
     GC {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new GCProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new GCProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -57,7 +57,7 @@ public enum ProfilerType {
     COMP {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new CompilerProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new CompilerProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -83,7 +83,7 @@ public enum ProfilerType {
     CL {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new ClassloaderProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new ClassloaderProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -119,7 +119,7 @@ public enum ProfilerType {
 
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new HotspotRuntimeProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new HotspotRuntimeProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -135,7 +135,7 @@ public enum ProfilerType {
     HS_CL {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new HotspotClassloadingProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new HotspotClassloadingProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -171,7 +171,7 @@ public enum ProfilerType {
 
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new HotspotCompilationProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new HotspotCompilationProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -197,7 +197,7 @@ public enum ProfilerType {
 
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new HotspotMemoryProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new HotspotMemoryProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override
@@ -223,7 +223,7 @@ public enum ProfilerType {
 
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new HotspotThreadProfiler(label(), mode.equalsOrHigherThan(VerboseMode.Extra));
+            return new HotspotThreadProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
         }
 
         @Override

@@ -29,17 +29,17 @@ public enum VerboseMode {
     /**
      * Be completely silent.
      */
-    Silent(0),
+    SILENT(0),
 
     /**
      * Output normally.
      */
-    Normal(1),
+    NORMAL(1),
 
     /**
      * Output extra info.
      */
-    Extra(2),
+    EXTRA(2),
 
     ;
 

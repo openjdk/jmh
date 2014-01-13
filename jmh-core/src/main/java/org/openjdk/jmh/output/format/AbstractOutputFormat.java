@@ -55,7 +55,7 @@ public abstract class AbstractOutputFormat implements OutputFormat {
 
     @Override
     public void verbosePrintln(String s) {
-        if (verbose == VerboseMode.Extra) {
+        if (verbose == VerboseMode.EXTRA) {
             out.println(s);
         }
     }

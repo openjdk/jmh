@@ -104,7 +104,7 @@ public class CommandLineOptions implements Options {
     protected boolean gcEachIteration = false;
 
     @Option(name = "-v", aliases = {"--verbosity"}, metaVar = "LEVEL", usage = "Verbosity mode: (silent, normal, extra)")
-    protected VerboseMode verbose = VerboseMode.Normal;
+    protected VerboseMode verbose = VerboseMode.NORMAL;
 
     @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
     protected boolean failOnError = false;

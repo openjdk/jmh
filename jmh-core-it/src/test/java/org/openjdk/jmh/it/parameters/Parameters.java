@@ -37,7 +37,7 @@ public class Parameters {
 
     public static BenchmarkRecord get(Class<?> klass) {
         MicroBenchmarkList list = MicroBenchmarkList.fromFile("target/test-classes/META-INF/MicroBenchmarks");
-        Set<BenchmarkRecord> set = list.find(OutputFormatFactory.createFormatInstance(System.out, VerboseMode.Extra), ".*" + klass.getName().replaceAll("\\$",".") + ".*", Collections.<String>emptyList());
+        Set<BenchmarkRecord> set = list.find(OutputFormatFactory.createFormatInstance(System.out, VerboseMode.EXTRA), ".*" + klass.getName().replaceAll("\\$",".") + ".*", Collections.<String>emptyList());
         Assert.assertEquals("The single benchmark exists", 1, set.size());
         return set.iterator().next();
     }

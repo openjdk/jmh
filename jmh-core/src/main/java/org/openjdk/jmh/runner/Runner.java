@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.ForkedMain;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.link.BinaryLinkServer;
 import org.openjdk.jmh.logic.results.BenchResult;
@@ -37,7 +36,6 @@ import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -51,7 +49,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -155,8 +152,8 @@ public class Runner extends BaseRunner {
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp?");
 
-            if (options.verbosity() != VerboseMode.Extra) {
-                out.println("Use " + VerboseMode.Extra + " verbose mode to debug the pattern matching.");
+            if (options.verbosity() != VerboseMode.EXTRA) {
+                out.println("Use " + VerboseMode.EXTRA + " verbose mode to debug the pattern matching.");
             } else {
                 list();
             }
