@@ -106,7 +106,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             remainingSubgroupThreads--;
 
             ThreadControl threadControl = new ThreadControl(currentGroup, currentSubgroup);
-            runners[i] = new BenchmarkTask(threadLocal, control, threadControl);
+            runners[i] = new BenchmarkTask(instances, control, threadControl);
         }
 
         // submit tasks to threadpool
@@ -190,11 +190,11 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      */
     class BenchmarkTask implements Callable<Collection<? extends Result>> {
 
-        private final ThreadLocal<InstanceProvider> invocationHandler;
+        private final ThreadLocal<Object> invocationHandler;
         private final InfraControl control;
         private final ThreadControl threadControl;
 
-        BenchmarkTask(ThreadLocal<InstanceProvider> invocationHandler, InfraControl control, ThreadControl threadControl) {
+        BenchmarkTask(ThreadLocal<Object> invocationHandler, InfraControl control, ThreadControl threadControl) {
             this.invocationHandler = invocationHandler;
             this.control = control;
             this.threadControl = threadControl;
@@ -203,7 +203,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         @Override
         public Collection<? extends Result> call() throws Exception {
             try {
-                return invokeBenchmark(invocationHandler.get().getInstance(), control, threadControl);
+                return invokeBenchmark(invocationHandler.get(), control, threadControl);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore

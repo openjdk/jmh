@@ -58,7 +58,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     protected final ExecutorService executor;
 
     // (Aleksey) Forgive me, Father, for I have sinned.
-    protected final ThreadLocal<InstanceProvider> threadLocal;
+    protected final ThreadLocal<Object> instances;
 
     protected final OutputFormat format;
     protected final TimeUnit timeUnit;
@@ -69,10 +69,16 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
         this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
-        this.threadLocal = new ThreadLocal<InstanceProvider>() {
+        this.instances = new ThreadLocal<Object>() {
             @Override
-            protected InstanceProvider initialValue() {
-                return new EagerInstanceProvider(clazz);
+            protected Object initialValue() {
+                try {
+                    return clazz.newInstance();
+                } catch (InstantiationException e) {
+                    throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
+                }
             }
         };
         this.format = format;
@@ -253,72 +259,6 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     @Override
     public void shutdown() {
         shutdownExecutor(executor);
-    }
-
-    public interface InstanceProvider {
-
-        /**
-         * Gets the benchmark instance. This call will lazily instantiate benchmark instance.
-         * @return benchmark instance.
-         * @throws RuntimeException if something goes wrong
-         */
-        public Object getInstance();
-
-    }
-
-    /**
-     * Gets the benchmark instance. This call will lazily instantiate benchmark instance.
-     */
-    public static class EagerInstanceProvider implements InstanceProvider {
-
-        private final Object instance;
-
-        public EagerInstanceProvider(Class<?> clazz) {
-            try {
-                instance = clazz.newInstance();
-            } catch (InstantiationException e) {
-                throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-            }
-        }
-
-        @Override
-        public Object getInstance() {
-            return instance;
-        }
-    }
-
-    /**
-     * Gets the benchmark instance. This call will lazily instantiate benchmark instance.
-     */
-    public static class LazyInstanceProvider implements InstanceProvider {
-
-        private final Class<?> clazz;
-
-        private volatile Object instance;
-
-        public LazyInstanceProvider(Class<?> clazz) {
-            this.clazz = clazz;
-        }
-
-        @Override
-        public Object getInstance() {
-            if (instance == null) {
-                synchronized (this) {
-                    if (instance == null) {
-                        try {
-                            instance = clazz.newInstance();
-                        } catch (InstantiationException e) {
-                            throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-                        }
-                    }
-                }
-            }
-            return instance;
-        }
     }
 
 }
