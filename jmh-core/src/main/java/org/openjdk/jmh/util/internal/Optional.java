@@ -85,6 +85,18 @@ public class Optional<T> implements Serializable {
         }
     }
 
+    public static <T> Optional<T> eitherOf(T val) {
+        if (val == null) {
+            return Optional.none();
+        } else {
+            return Optional.of(val);
+        }
+    }
+
+    public boolean hasValue() {
+        return val != null;
+    }
+
     public String toString() {
         if (val == null) {
             return "[]";
@@ -98,6 +110,23 @@ public class Optional<T> implements Serializable {
             throw new IllegalStateException("Optional is null");
         }
         return val;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Optional optional = (Optional) o;
+
+        if (val != null ? !val.equals(optional.val) : optional.val != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return val != null ? val.hashCode() : 0;
     }
 
     public interface Extractor<T> {

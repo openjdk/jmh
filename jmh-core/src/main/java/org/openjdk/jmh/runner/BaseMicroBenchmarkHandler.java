@@ -30,6 +30,7 @@ import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.Defaults;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -75,14 +76,14 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
             }
         };
         this.format = format;
-        this.timeUnit = options.getTimeUnit();
+        this.timeUnit = options.getTimeUnit().orElse(null);
     }
 
     private static List<Profiler> createProfilers(Options options) {
         List<Profiler> list = new ArrayList<Profiler>();
         // register the profilers
         for (ProfilerType prof : options.getProfilers()) {
-            list.add(prof.createInstance(options.verbosity()));
+            list.add(prof.createInstance(options.verbosity().orElse(Defaults.DEFAULT_VERBOSITY)));
         }
         return list;
     }

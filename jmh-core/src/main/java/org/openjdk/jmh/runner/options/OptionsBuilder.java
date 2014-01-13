@@ -27,8 +27,8 @@ package org.openjdk.jmh.runner.options;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
-import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.Optional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,61 +90,61 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private String output;
+    private Optional<String> output = Optional.none();
 
     @Override
     public ChainedOptionsBuilder output(String filename) {
-        this.output = filename;
+        this.output = Optional.of(filename);
         return this;
     }
 
     @Override
-    public String getOutput() {
+    public Optional<String> getOutput() {
         return output;
     }
 
     // ---------------------------------------------------------------------------
 
-    private ResultFormatType rfType = ResultFormatType.defaultType();
+    private Optional<ResultFormatType> rfType = Optional.none();
 
     @Override
     public ChainedOptionsBuilder resultFormat(ResultFormatType type) {
-        rfType = type;
+        rfType = Optional.of(type);
         return this;
     }
 
     @Override
-    public ResultFormatType getResultFormat() {
+    public Optional<ResultFormatType> getResultFormat() {
         return rfType;
     }
 
     // ---------------------------------------------------------------------------
 
-    private String result = Defaults.RESULT_FILE;
+    private Optional<String> result = Optional.none();
 
     @Override
     public ChainedOptionsBuilder result(String filename) {
-        this.result = filename;
+        this.result = Optional.of(filename);
         return this;
     }
 
     @Override
-    public String getResult() {
+    public Optional<String> getResult() {
         return result;
     }
 
     // ---------------------------------------------------------------------------
 
-    private boolean shouldDoGC;
+    private Optional<Boolean> shouldDoGC = Optional.none();
 
     @Override
     public ChainedOptionsBuilder shouldDoGC(boolean value) {
-        shouldDoGC = value;
+        shouldDoGC = Optional.of(value);
         return this;
     }
 
     @Override
-    public boolean shouldDoGC() {
+    public Optional<Boolean> shouldDoGC() {
         return shouldDoGC;
     }
 
@@ -165,121 +165,121 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private VerboseMode verbosity = VerboseMode.NORMAL;
+    private Optional<VerboseMode> verbosity = Optional.none();
 
     @Override
     public ChainedOptionsBuilder verbosity(VerboseMode mode) {
-        verbosity = mode;
+        verbosity = Optional.of(mode);
         return this;
     }
 
     @Override
-    public VerboseMode verbosity() {
+    public Optional<VerboseMode> verbosity() {
         return verbosity;
     }
 
     // ---------------------------------------------------------------------------
 
-    private boolean shouldFailOnError;
+    private Optional<Boolean> shouldFailOnError = Optional.none();
 
     @Override
     public ChainedOptionsBuilder shouldFailOnError(boolean value) {
-        shouldFailOnError = value;
+        shouldFailOnError = Optional.of(value);
         return this;
     }
 
     @Override
-    public boolean shouldFailOnError() {
+    public Optional<Boolean> shouldFailOnError() {
         return shouldFailOnError;
     }
 
     // ---------------------------------------------------------------------------
 
-    private int threads = Integer.MIN_VALUE;
+    private Optional<Integer> threads = Optional.none();
 
     @Override
     public ChainedOptionsBuilder threads(int count) {
-        this.threads = count;
+        this.threads = Optional.of(count);
         return this;
     }
 
     @Override
-    public int getThreads() {
+    public Optional<Integer> getThreads() {
         return threads;
     }
 
     // ---------------------------------------------------------------------------
 
-    private int[] threadGroups = new int[] {1};
+    private Optional<int[]> threadGroups = Optional.none();
 
     @Override
     public ChainedOptionsBuilder threadGroups(int... groups) {
-        this.threadGroups = groups;
+        this.threadGroups = Optional.of(groups);
         return this;
     }
 
     @Override
-    public int[] getThreadGroups() {
+    public Optional<int[]> getThreadGroups() {
         return threadGroups;
     }
 
     // ---------------------------------------------------------------------------
 
-    private Boolean syncIterations;
+    private Optional<Boolean> syncIterations = Optional.none();
 
     @Override
     public ChainedOptionsBuilder syncIterations(boolean value) {
-        this.syncIterations = value;
+        this.syncIterations = Optional.of(value);
         return this;
     }
 
     @Override
-    public Boolean shouldSyncIterations() {
+    public Optional<Boolean> shouldSyncIterations() {
         return syncIterations;
     }
 
     // ---------------------------------------------------------------------------
 
-    private int warmupIterations = -1;
+    private Optional<Integer> warmupIterations = Optional.none();
 
     @Override
     public ChainedOptionsBuilder warmupIterations(int value) {
-        this.warmupIterations = value;
+        this.warmupIterations = Optional.of(value);
         return this;
     }
 
     @Override
-    public int getWarmupIterations() {
+    public Optional<Integer> getWarmupIterations() {
         return warmupIterations;
     }
 
     // ---------------------------------------------------------------------------
 
-    private TimeValue warmupTime;
+    private Optional<TimeValue> warmupTime = Optional.none();
 
     @Override
     public ChainedOptionsBuilder warmupTime(TimeValue value) {
-        this.warmupTime = value;
+        this.warmupTime = Optional.of(value);
         return this;
     }
 
     @Override
-    public TimeValue getWarmupTime() {
+    public Optional<TimeValue> getWarmupTime() {
         return warmupTime;
     }
 
     // ---------------------------------------------------------------------------
 
-    private WarmupMode warmupMode = WarmupMode.defaultMode();
+    private Optional<WarmupMode> warmupMode = Optional.none();
 
     @Override
     public ChainedOptionsBuilder warmupMode(WarmupMode mode) {
-        this.warmupMode = mode;
+        this.warmupMode = Optional.of(mode);
         return this;
     }
 
     @Override
-    public WarmupMode getWarmupMode() {
+    public Optional<WarmupMode> getWarmupMode() {
         return warmupMode;
     }
 
@@ -300,43 +300,40 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private int iterations = -1;
+    private Optional<Integer> iterations = Optional.none();
 
     @Override
     public ChainedOptionsBuilder measurementIterations(int count) {
-        this.iterations = count;
+        this.iterations = Optional.of(count);
         return this;
     }
 
     @Override
-    public int getMeasurementIterations() {
+    public Optional<Integer> getMeasurementIterations() {
         return iterations;
     }
 
     // ---------------------------------------------------------------------------
 
-    private TimeValue measurementTime;
+    private Optional<TimeValue> measurementTime = Optional.none();
 
     @Override
     public ChainedOptionsBuilder measurementTime(TimeValue value) {
-        this.measurementTime = value;
+        this.measurementTime = Optional.of(value);
         return this;
     }
 
     @Override
-    public TimeValue getMeasurementTime() {
+    public Optional<TimeValue> getMeasurementTime() {
         return measurementTime;
     }
 
     // ---------------------------------------------------------------------------
 
-    private EnumSet<Mode> benchModes;
+    private EnumSet<Mode> benchModes = EnumSet.noneOf(Mode.class);
 
     @Override
     public ChainedOptionsBuilder mode(Mode mode) {
-        if (benchModes == null) {
-            benchModes = EnumSet.noneOf(Mode.class);
-        }
         benchModes.add(mode);
         return this;
     }
@@ -348,91 +345,91 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private TimeUnit timeUnit;
+    private Optional<TimeUnit> timeUnit = Optional.none();
 
     @Override
     public ChainedOptionsBuilder timeUnit(TimeUnit tu) {
-        this.timeUnit = tu;
+        this.timeUnit = Optional.of(tu);
         return this;
     }
 
     @Override
-    public TimeUnit getTimeUnit() {
+    public Optional<TimeUnit> getTimeUnit() {
         return timeUnit;
     }
 
     // ---------------------------------------------------------------------------
 
-    private int forks = -1;
+    private Optional<Integer> forks = Optional.none();
 
     @Override
     public ChainedOptionsBuilder forks(int value) {
-        this.forks = value;
+        this.forks = Optional.of(value);
         return this;
     }
 
     @Override
-    public int getForkCount() {
+    public Optional<Integer> getForkCount() {
         return forks;
     }
 
     // ---------------------------------------------------------------------------
 
-    private int warmupForks = -1;
+    private Optional<Integer> warmupForks = Optional.none();
 
     @Override
     public ChainedOptionsBuilder warmupForks(int value) {
-        this.warmupForks = value;
+        this.warmupForks = Optional.of(value);
         return this;
     }
 
     @Override
-    public int getWarmupForkCount() {
+    public Optional<Integer> getWarmupForkCount() {
         return warmupForks;
     }
 
     // ---------------------------------------------------------------------------
 
-    private String jvmClassPath;
+    private Optional<String> jvmClassPath = Optional.none();
 
     @Override
     public ChainedOptionsBuilder jvmClasspath(String value) {
-        this.jvmClassPath = value;
+        this.jvmClassPath = Optional.of(value);
         return this;
     }
 
     @Override
-    public String getJvmClassPath() {
+    public Optional<String> getJvmClassPath() {
         return jvmClassPath;
     }
 
     // ---------------------------------------------------------------------------
 
-    private String jvmBinary;
+    private Optional<String> jvmBinary = Optional.none();
 
     @Override
     public ChainedOptionsBuilder jvm(String path) {
-        this.jvmBinary = path;
+        this.jvmBinary = Optional.of(path);
         return this;
     }
 
     @Override
-    public String getJvm() {
+    public Optional<String> getJvm() {
         return jvmBinary;
     }
 
     // ---------------------------------------------------------------------------
 
-    private String jvmArgs;
+    private Optional<String> jvmArgs = Optional.none();
 
     @Override
     public ChainedOptionsBuilder jvmArgs(String value) {
-        this.jvmArgs = value;
+        this.jvmArgs = Optional.of(value);
         return this;
     }
 
     @Override
-    public String getJvmArgs() {
+    public Optional<String> getJvmArgs() {
         return jvmArgs;
     }
 

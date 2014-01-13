@@ -30,6 +30,7 @@ import org.openjdk.jmh.output.format.IterationType;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -104,7 +105,7 @@ public abstract class BaseRunner {
             return runBenchmark(executionParams, handler);
         } catch (Throwable ex) {
             out.exception(ex);
-            if (this.options.shouldFailOnError()) {
+            if (options.shouldFailOnError().orElse(Defaults.SHOULD_FAIL_ON_ERROR)) {
                 throw new IllegalStateException(ex.getMessage(), ex);
             }
         } finally {
@@ -177,7 +178,7 @@ public abstract class BaseRunner {
      * @return true if we did
      */
     public boolean runSystemGC() {
-        if (options.shouldDoGC()) {
+        if (options.shouldDoGC().orElse(Defaults.SHOULD_DO_GC)) {
             List<GarbageCollectorMXBean> enabledBeans = new ArrayList<GarbageCollectorMXBean>();
 
             long beforeGcCount = 0;

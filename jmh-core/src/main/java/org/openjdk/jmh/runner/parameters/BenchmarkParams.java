@@ -29,13 +29,10 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.runner.ActionMode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.MicroBenchmarkHandlers;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 public class BenchmarkParams implements Serializable {
@@ -47,30 +44,6 @@ public class BenchmarkParams implements Serializable {
     private final int warmupForks;
     private final IterationParams warmup;
     private final IterationParams measurement;
-
-    private int decideForks(int optionForks, int benchForks) {
-        if (optionForks == -1) {
-            if (benchForks == -1) {
-                return Defaults.DEFAULT_FORK_TIMES;
-            } else {
-                return benchForks;
-            }
-        } else {
-            return optionForks;
-        }
-    }
-
-    private int decideWarmupForks(int optionWarmupForks, int benchWarmupForks) {
-        if (optionWarmupForks == -1) {
-            if (benchWarmupForks == -1) {
-                return Defaults.DEFAULT_WARMUP_FORK_TIMES;
-            } else {
-                return benchWarmupForks;
-            }
-        } else {
-            return optionWarmupForks;
-        }
-    }
 
     /**
      * Test entry method
@@ -86,15 +59,20 @@ public class BenchmarkParams implements Serializable {
     }
 
     public BenchmarkParams(Options options, BenchmarkRecord benchmark, ActionMode mode) {
-        this.threadGroups = decideThreadGroups(options.getThreadGroups(), benchmark.getThreadGroups());
+        this.threadGroups = options.getThreadGroups().orElse(benchmark.getThreadGroups());
 
-        int threads = options.getThreads() > Integer.MIN_VALUE ? options.getThreads() : benchmark.getThreads().orElse(Defaults.THREADS);
+        int threads = options.getThreads().orElse(
+                benchmark.getThreads().orElse(
+                        Defaults.THREADS));
+
         if (threads == Threads.MAX) {
             threads = Runtime.getRuntime().availableProcessors();
         }
+
         this.threads = Utils.roundUp(threads, Utils.sum(threadGroups));
 
-        this.synchIterations = getBoolean(options.shouldSyncIterations(), Defaults.SHOULD_SYNCH_ITERATIONS);
+        this.synchIterations = options.shouldSyncIterations().orElse(
+                Defaults.SHOULD_SYNCH_ITERATIONS);
 
         this.measurement = mode.doMeasurement() ?
                 getMeasurement(options, benchmark) :
@@ -104,49 +82,41 @@ public class BenchmarkParams implements Serializable {
                 getWarmup(options, benchmark) :
                 new IterationParams(this, 0, TimeValue.NONE);
 
-        this.forks = decideForks(options.getForkCount(), benchmark.getForks().orElse(Defaults.DEFAULT_FORK_TIMES));
-        this.warmupForks = decideWarmupForks(options.getWarmupForkCount(), benchmark.getWarmupForks().orElse(Defaults.DEFAULT_WARMUP_FORK_TIMES));
+        this.forks = options.getForkCount().orElse(
+                benchmark.getForks().orElse(
+                        Defaults.DEFAULT_FORK_TIMES));
+
+        this.warmupForks = options.getWarmupForkCount().orElse(
+                benchmark.getWarmupForks().orElse(
+                        Defaults.DEFAULT_WARMUP_FORK_TIMES));
     }
 
     private IterationParams getWarmup(Options options, BenchmarkRecord benchmark) {
-        boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
-        int iters = benchmark.getWarmupIterations().orElse(-1);
-        if (isSingleShot) {
-            return new IterationParams(
-                    this,
-                    getInteger(options.getWarmupIterations(), iters, Defaults.SINGLE_SHOT_WARMUP_COUNT),
-                    TimeValue.NONE);
-        } else {
-            TimeValue timeValue = options.getWarmupTime();
-            if (timeValue == null || timeValue.getTime() == -1) {
-                timeValue = benchmark.getWarmupTime().orElse(Defaults.WARMUP_TIME);
-            }
-            return new IterationParams(
-                    this,
-                    getInteger(options.getWarmupIterations(), iters, Defaults.WARMUP_ITERATION_COUNT),
-                    timeValue);
-        }
+        return new IterationParams(
+                this,
+                options.getWarmupIterations().orElse(
+                        benchmark.getWarmupIterations().orElse(
+                            (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLE_SHOT_WARMUP_COUNT : Defaults.WARMUP_ITERATION_COUNT
+                )),
+                options.getWarmupTime().orElse(
+                        benchmark.getWarmupTime().orElse(
+                            (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.WARMUP_TIME
+                ))
+        );
     }
 
     private IterationParams getMeasurement(Options options, BenchmarkRecord benchmark) {
-        boolean isSingleShot = (benchmark.getMode() == Mode.SingleShotTime);
-        int iters = benchmark.getMeasurementIterations().orElse(-1);
-        if (isSingleShot) {
-            return new IterationParams(
-                    this,
-                    getInteger(options.getMeasurementIterations(), iters, Defaults.SINGLE_SHOT_ITERATION_COUNT),
-                    TimeValue.NONE);
-
-        } else {
-            TimeValue timeValue = options.getMeasurementTime();
-            if (timeValue == null || timeValue.getTime() == -1) {
-                timeValue = benchmark.getMeasurementTime().orElse(Defaults.ITERATION_TIME);
-            }
-            return new IterationParams(
-                    this,
-                    getInteger(options.getMeasurementIterations(), iters, Defaults.MEASUREMENT_ITERATION_COUNT),
-                    timeValue);
-        }
+        return new IterationParams(
+                this,
+                options.getMeasurementIterations().orElse(
+                        benchmark.getMeasurementIterations().orElse(
+                                (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLE_SHOT_ITERATION_COUNT : Defaults.MEASUREMENT_ITERATION_COUNT
+                        )),
+                options.getMeasurementTime().orElse(
+                        benchmark.getMeasurementTime().orElse(
+                                (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.ITERATION_TIME
+                        ))
+        );
     }
 
     public boolean shouldSynchIterations() {
@@ -205,22 +175,6 @@ public class BenchmarkParams implements Serializable {
         result = 31 * result + warmup.hashCode();
         result = 31 * result + measurement.hashCode();
         return result;
-    }
-
-    private static int[] decideThreadGroups(int[] first, int[] second) {
-        if (first.length == 1 && first[0] == 1) {
-            return second;
-        } else {
-            return first;
-        }
-    }
-
-    private static boolean getBoolean(Boolean value, boolean defaultValue) {
-        return value == null ? defaultValue : value;
-    }
-
-    private static int getInteger(int first, int second, int third) {
-        return first >= 0 ? first : (second >= 0 ? second : third);
     }
 
 }

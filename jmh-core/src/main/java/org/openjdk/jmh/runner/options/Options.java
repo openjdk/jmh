@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -50,31 +51,31 @@ public interface Options extends Serializable {
 
     /**
      * Which file to use for dumping the output
-     * @return file name; null if not defined
+     * @return file name
      */
-    String getOutput();
+    Optional<String> getOutput();
 
     /**
      * Result format to use
      * @return format type
      */
-    ResultFormatType getResultFormat();
+    Optional<ResultFormatType> getResultFormat();
 
     /**
      * Which file to use for dumping the result
-     * @return file name; null if not defined
+     * @return file name
      */
-    String getResult();
+    Optional<String> getResult();
 
     /**
      * Should force GC between iterations?
      * @return should GC?
      */
-    boolean shouldDoGC();
+    Optional<Boolean> shouldDoGC();
 
     /**
      * Profilers to use for the run.
-     * @return profilers to use; empty set if no profilers are required
+     * @return profilers to use; empty collection if no profilers are required
      */
     Collection<ProfilerType> getProfilers();
 
@@ -82,109 +83,108 @@ public interface Options extends Serializable {
      * How verbose should we be?
      * @return verbosity mode
      */
-    VerboseMode verbosity();
+    Optional<VerboseMode> verbosity();
 
     /**
      * Should harness terminate on first error encountered?
      * @return should terminate?
      */
-    boolean shouldFailOnError();
+    Optional<Boolean> shouldFailOnError();
 
     /**
      * Number of threads to run
-     * @return number of threads; 0 to use maximum number of threads; -1 to use default
+     * @return number of threads; 0 to use maximum number of threads
      */
-    int getThreads();
+    Optional<Integer> getThreads();
 
     /**
      * Thread subgroups distribution.
      * @return array of thread ratios
      */
-    int[] getThreadGroups();
+    Optional<int[]> getThreadGroups();
 
     /**
      * Should synchronize iterations?
-     * TODO: Rework "null" interface?
-     * @return should we? "null" if not defined
+     * @return should we?
      */
-    Boolean shouldSyncIterations();
+    Optional<Boolean> shouldSyncIterations();
 
     /**
      * Number of warmup iterations
-     * @return number of warmup iterations; -1 to use default
+     * @return number of warmup iterations
      */
-    int getWarmupIterations();
+    Optional<Integer> getWarmupIterations();
 
     /**
      * The duration for warmup iterations
-     * @return duration; null, if use default
+     * @return duration
      */
-    TimeValue getWarmupTime();
+    Optional<TimeValue> getWarmupTime();
 
     /**
      * Warmup mode.
      * @return warmup mode
      */
-    WarmupMode getWarmupMode();
+    Optional<WarmupMode> getWarmupMode();
 
     /**
      * Which benchmarks to warmup before doing the run.
-     * @return list of regexps matching the relevant benchmarks; null if no benchmarks are defined
+     * @return list of regexps matching the relevant benchmarks; empty if no benchmarks are defined
      */
     List<String> getWarmupIncludes();
 
     /**
      * Number of measurement iterations
-     * @return number of measurement iterations; -1 to use default
+     * @return number of measurement iterations
      */
-    int getMeasurementIterations();
+    Optional<Integer> getMeasurementIterations();
 
     /**
      * The duration for measurement iterations
-     * @return duration; null, if use default
+     * @return duration
      */
-    TimeValue getMeasurementTime();
+    Optional<TimeValue> getMeasurementTime();
 
     /**
      * Benchmarks modes to execute.
-     * @return modes to execute the benchmarks in; null to use the default mode
+     * @return modes to execute the benchmarks in; empty to use the default modes
      */
     Collection<Mode> getBenchModes();
 
     /**
      * Timeunit to use in units.
-     * @return timeunit; null to use the default timeunit
+     * @return timeunit
      */
-    TimeUnit getTimeUnit();
+    Optional<TimeUnit> getTimeUnit();
 
     /**
      * Fork count
      * @return fork count; 0, to prohibit forking
      */
-    int getForkCount();
+    Optional<Integer> getForkCount();
 
     /**
      * Number of initial forks to ignore the results for
      * @return initial fork count; 0, to disable
      */
-    int getWarmupForkCount();
+    Optional<Integer> getWarmupForkCount();
 
     /**
      * Additional JVM classpath
      * @return additional JVM classpath to add to forked VM
      */
-    String getJvmClassPath();
+    Optional<String> getJvmClassPath();
 
     /**
      * JVM to use for forks
      * @return JVM binary location
      */
-    String getJvm();
+    Optional<String> getJvm();
 
     /**
      * JVM parameters to use with forks
      * @return JVM parameters
      */
-    String getJvmArgs();
+    Optional<String> getJvmArgs();
 
 }

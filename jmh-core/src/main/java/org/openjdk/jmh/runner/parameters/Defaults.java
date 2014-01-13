@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.runner.parameters;
 
+import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.runner.options.VerboseMode;
+import org.openjdk.jmh.runner.options.WarmupMode;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -56,4 +60,9 @@ public class Defaults {
     public static final boolean SHOULD_SYNCH_ITERATIONS = true;
 
     public static final String RESULT_FILE = "jmh.out";
+    public static final VerboseMode DEFAULT_VERBOSITY = VerboseMode.NORMAL;
+    public static final Boolean SHOULD_FAIL_ON_ERROR = false;
+    public static final WarmupMode DEFAULT_WARMUP_MODE = WarmupMode.INDI;
+    public static final ResultFormatType RESULT_FORMAT = ResultFormatType.NONE;
+    public static final Boolean SHOULD_DO_GC = false;
 }

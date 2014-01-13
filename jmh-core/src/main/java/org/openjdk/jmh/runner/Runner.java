@@ -29,13 +29,14 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.link.BinaryLinkServer;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.RunResult;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -99,19 +100,19 @@ public class Runner extends BaseRunner {
     private static OutputFormat createOutputFormat(Options options) {
         PrintStream out;
         // setup OutputFormat singleton
-        if (options.getOutput() == null) {
-            out = System.out;
-        } else {
+        if (options.getOutput().hasValue()) {
             try {
-                out = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(options.getOutput()))));
+                out = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(options.getOutput().get()))));
                 System.setOut(out); // override to print everything to file
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Runner.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 throw new IllegalStateException(ex);
             }
+        } else {
+            out = System.out;
         }
 
-        return OutputFormatFactory.createFormatInstance(out, options.verbosity());
+        return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.DEFAULT_VERBOSITY));
     }
 
     public void list() {
@@ -152,7 +153,7 @@ public class Runner extends BaseRunner {
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp?");
 
-            if (options.verbosity() != VerboseMode.EXTRA) {
+            if (options.verbosity().orElse(Defaults.DEFAULT_VERBOSITY) != VerboseMode.EXTRA) {
                 out.println("Use " + VerboseMode.EXTRA + " verbose mode to debug the pattern matching.");
             } else {
                 list();
@@ -165,7 +166,7 @@ public class Runner extends BaseRunner {
 
         // override the benchmark types;
         // this may yield new benchmark records
-        if (options.getBenchModes() != null) {
+        if (!options.getBenchModes().isEmpty()) {
             List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
             for (BenchmarkRecord br : benchmarks) {
                 for (Mode m : options.getBenchModes()) {
@@ -199,7 +200,7 @@ public class Runner extends BaseRunner {
         out.flush();
         out.close();
 
-        ResultFormat resultFormat = ResultFormatFactory.getInstance(options.getResultFormat(), options.getResult());
+        ResultFormat resultFormat = ResultFormatFactory.getInstance(options.getResultFormat().orElse(Defaults.RESULT_FORMAT), options.getResult().orElse(Defaults.RESULT_FILE));
         resultFormat.writeOut(results);
 
         return results;
@@ -214,7 +215,7 @@ public class Runner extends BaseRunner {
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
             warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
-        if (options.getWarmupMode().isBulk()) {
+        if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isBulk()) {
             warmupBenches.addAll(benchmarks);
         }
 
@@ -225,7 +226,7 @@ public class Runner extends BaseRunner {
         for (BenchmarkRecord br : benchmarks) {
             BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
             if (params.getForks() <= 0) {
-                if (options.getWarmupMode().isIndi()) {
+                if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isIndi()) {
                     r.addWarmupMeasurement(br);
                 } else {
                     r.addMeasurement(br);
@@ -245,7 +246,7 @@ public class Runner extends BaseRunner {
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
             warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
-        if (options.getWarmupMode().isBulk()) {
+        if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isBulk()) {
             warmupBenches.addAll(benchmarks);
         }
 
@@ -259,7 +260,7 @@ public class Runner extends BaseRunner {
             if (params.getForks() > 0) {
                 ActionPlan r = new ActionPlan();
                 r.mixIn(base);
-                if (options.getWarmupMode().isIndi()) {
+                if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isIndi()) {
                     r.addWarmupMeasurement(br);
                 } else {
                     r.addMeasurement(br);
@@ -379,7 +380,7 @@ public class Runner extends BaseRunner {
 
             if (ecode != 0) {
                 out.println("WARNING: Forked process returned code: " + ecode);
-                if (options.shouldFailOnError()) {
+                if (options.shouldFailOnError().orElse(Defaults.SHOULD_FAIL_ON_ERROR)) {
                     throw new IllegalStateException("WARNING: Forked process returned code: " + ecode);
                 }
             }
@@ -409,13 +410,7 @@ public class Runner extends BaseRunner {
         boolean isOnWindows = osName.contains("indows");
         String platformSpecificBinaryPostfix = isOnWindows ? ".exe" : "";
 
-        String classPath;
-
-        if (options.getJvmClassPath() != null) {
-            classPath = options.getJvmClassPath();
-        } else {
-            classPath = (String) props.get("java.class.path");
-        }
+        String classPath = options.getJvmClassPath().orElse((String) props.get("java.class.path"));
 
         if (isOnWindows) {
             classPath = '"' + classPath + '"';
@@ -424,8 +419,8 @@ public class Runner extends BaseRunner {
         List<String> command = new ArrayList<String>();
 
         // use supplied jvm if given
-        if (options.getJvm() != null) {
-            command.add(options.getJvm());
+        if (options.getJvm().hasValue()) {
+            command.add(options.getJvm().get());
         } else {
             // else find out which one parent is and use that
             StringBuilder javaExecutable = new StringBuilder();
@@ -438,8 +433,8 @@ public class Runner extends BaseRunner {
             command.add(javaExecutable.toString());
         }
 
-        if (options.getJvmArgs() != null) { // use supplied jvm args if given in cmd line
-            command.addAll(Arrays.asList(options.getJvmArgs().split("[ ]+")));
+        if (options.getJvmArgs().hasValue()) { // use supplied jvm args if given in cmd line
+            command.addAll(Arrays.asList(options.getJvmArgs().get().split("[ ]+")));
         } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
             command.addAll(Arrays.asList(annJvmArgs.split("[ ]+")));
         } else {

@@ -33,6 +33,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
@@ -67,7 +68,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
-        this.shouldFailOnError = options.shouldFailOnError();
+        this.shouldFailOnError = options.shouldFailOnError().orElse(Defaults.SHOULD_FAIL_ON_ERROR);
     }
 
     /**

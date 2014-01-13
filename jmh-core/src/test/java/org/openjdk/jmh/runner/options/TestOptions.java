@@ -243,7 +243,7 @@ public class TestOptions {
 
     @Test
     public void testThreadGroups_Default() throws Exception {
-        Assert.assertArrayEquals(EMPTY_BUILDER.getThreadGroups(), EMPTY_CMDLINE.getThreadGroups());
+        Assert.assertEquals(EMPTY_BUILDER.getThreadGroups(), EMPTY_CMDLINE.getThreadGroups());
     }
 
     @Test

@@ -30,10 +30,5 @@ public enum ResultFormatType {
     CSV,
     SCSV,
     JSON,
-    ;
-
-    public static ResultFormatType defaultType() {
-        return NONE;
-    }
 
 }

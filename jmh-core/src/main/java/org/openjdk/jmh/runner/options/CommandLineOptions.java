@@ -39,8 +39,8 @@ import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.ThreadsOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeUnitOptionHandler;
 import org.openjdk.jmh.runner.options.handlers.TimeValueOptionHandler;
-import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.Optional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,43 +77,43 @@ public class CommandLineOptions implements Options {
      */
 
     @Option(name = "-i", aliases = {"--iterations"}, metaVar = "INT", usage = "Number of iterations.")
-    protected int iterations = -1;
+    protected Integer iterations;
 
-    @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms; defaults to " + Defaults.MEASUREMENT_TIME_SECS + "s", handler = TimeValueOptionHandler.class)
-    protected TimeValue runTime = null;
+    @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms", handler = TimeValueOptionHandler.class)
+    protected TimeValue runTime;
 
     @Option(name = "-wi", aliases = {"--warmupiterations"}, metaVar = "INT", usage = "Number of warmup iterations to run.")
-    protected int warmupIterations = -1;
+    protected Integer warmupIterations;
 
-    @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms; defaults to " + Defaults.WARMUP_TIME_SECS + "", handler = TimeValueOptionHandler.class)
-    protected TimeValue warmupTime = null;
+    @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms", handler = TimeValueOptionHandler.class)
+    protected TimeValue warmupTime;
 
     @Option(name = "-bm", aliases = {"--mode"}, multiValued = false, metaVar = "MODE", usage = "Benchmark mode", handler = BenchmarkModeTypeOptionHandler.class)
-    protected List<Mode> benchMode = null;
+    protected List<Mode> benchMode = new ArrayList<Mode>();
 
     @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
-    protected int threads = Integer.MIN_VALUE;
+    protected Integer threads;
 
     @Option(name = "-tg", aliases = {"--threadGroups"}, usage = "Thread group distribution", handler = ThreadCountsOptionHandler.class)
     protected List<Integer> threadGroups = new ArrayList<Integer>();
 
-    @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work? Default is " + Defaults.SHOULD_SYNCH_ITERATIONS, handler = BooleanOptionHandler.class)
-    protected Boolean synchIterations = null; // true
+    @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work?", handler = BooleanOptionHandler.class)
+    protected Boolean synchIterations;
 
     @Option(name = "-gc", usage = "Should do System.gc() between iterations?", handler = BooleanOptionHandler.class)
-    protected boolean gcEachIteration = false;
+    protected Boolean gcEachIteration;
 
     @Option(name = "-v", aliases = {"--verbosity"}, metaVar = "LEVEL", usage = "Verbosity mode: (silent, normal, extra)")
-    protected VerboseMode verbose = VerboseMode.NORMAL;
+    protected VerboseMode verbose;
 
     @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
-    protected boolean failOnError = false;
+    protected Boolean failOnError;
 
     @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listProfilers to list available profilers", handler = ProfilersOptionHandler.class)
     protected Set<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
 
     @Option(name = "-tu", aliases = {"--timeunit"}, usage = "Output time unit. Available values: m, s, ms, us, ns", handler = TimeUnitOptionHandler.class)
-    protected TimeUnit timeUnit = null;
+    protected TimeUnit timeUnit;
 
     // test selection options
     @Argument(metaVar = "REGEXP", usage = "Microbenchmarks to run. Regexp filtering out classes or methods which are MicroBenchmarks.")
@@ -122,34 +122,34 @@ public class CommandLineOptions implements Options {
     // micro options
 
     @Option(name = "-f", aliases = {"--fork"}, metaVar = "{ INT }", usage = "Start each benchmark in new JVM, forking from the same JDK unless --jvm is set. Optional parameter specifies number of times harness should fork. Zero forks means \"no fork\", also \"false\" is accepted", handler = ForkOptionHandler.class)
-    protected int fork = -1;
+    protected Integer fork;
 
     @Option(name = "-wf", aliases = {"--warmupfork"}, metaVar = "{ INT }", usage = "Number of warmup fork executions. (warmup fork execution results are ignored).")
-    protected int warmupFork = -1;
+    protected Integer warmupFork;
 
     @Option(name = "-o", aliases = {"--output"}, metaVar = "FILE", usage = "Redirect output to FILE")
-    protected String output = null;
+    protected String output;
 
     @Option(name = "-rff", aliases = {"--result"}, metaVar = "FILE", usage = "Redirect results to FILE")
-    protected String result = Defaults.RESULT_FILE;
+    protected String result;
 
     @Option(name = "-rf", aliases = {"--resultformat"}, metaVar = "FORMAT", usage = "Format to use for results, use --listResultFormats to list available formats")
-    protected ResultFormatType resultFormat = ResultFormatType.defaultType();
+    protected ResultFormatType resultFormat;
 
     @Option(name = "--jvm", metaVar = "JVM", usage = "Custom JVM to use with fork.")
-    protected String jvm = null;
+    protected String jvm;
 
     @Option(name = "--jvmargs", metaVar = "JVMARGS", usage = "Custom JVM arguments for --jvm, default is to use parent process's arguments")
-    protected String jvmArgs = null;
+    protected String jvmArgs;
 
     @Option(name = "--jvmclasspath", metaVar = "CLASSPATH", usage = "Custom classpath for --jvm, default is to use parent process's classpath")
-    protected String jvmClassPath = null;
+    protected String jvmClassPath;
 
     @Option(name = "-e", aliases = {"--exclude"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to exclude. Regexp filtering out classes or methods which are MicroBenchmarks.")
     protected List<String> excludes = new ArrayList<String>();
 
     @Option(name = "-wm", aliases = {"--warmupmode"}, usage = "Warmup mode for warming up selected micro benchmarks. Warmup modes are: BULK (before all benchmarks), INDI (before each benchmark), BULK_INDI (both)")
-    protected WarmupMode warmupMode = WarmupMode.defaultMode();
+    protected WarmupMode warmupMode;
 
     @Option(name = "-wmb", aliases = {"--warmupmicrobenchmarks"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to run for warmup before running any other benchmarks. These micros may be different from the target micros to warm up the harness or other parts of the JVM prior to running the target micro benchmarks. Regexp filtering out classes or methods which are MicroBenchmarks.")
     protected List<String> warmupMicros = new ArrayList<String>();
@@ -159,13 +159,13 @@ public class CommandLineOptions implements Options {
     protected boolean list = false;
 
     @Option(name = "--listResultFormats", usage = "List available result formats")
-    protected boolean listResultFormats = false;
+    protected boolean listResultFormats;
 
     @Option(name = "-h", aliases = {"--help"}, usage = "Display help")
     protected boolean help = false;
 
     @Option(name = "--listProfilers", usage = "List available profilers")
-    protected boolean listProfilers = false;
+    protected boolean listProfilers;
 
     /**
      * Kawaguchi's parser
@@ -207,8 +207,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public WarmupMode getWarmupMode() {
-        return warmupMode;
+    public Optional<WarmupMode> getWarmupMode() {
+        return Optional.eitherOf(warmupMode);
     }
 
     /**
@@ -265,8 +265,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public String getJvm() {
-        return jvm;
+    public Optional<String> getJvm() {
+        return Optional.eitherOf(jvm);
     }
 
     /**
@@ -275,8 +275,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public String getJvmArgs() {
-        return jvmArgs;
+    public Optional<String> getJvmArgs() {
+        return Optional.eitherOf(jvmArgs);
     }
 
     /**
@@ -285,8 +285,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public String getJvmClassPath() {
-        return jvmClassPath;
+    public Optional<String> getJvmClassPath() {
+        return Optional.eitherOf(jvmClassPath);
     }
 
     /**
@@ -295,8 +295,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public int getForkCount() {
-        return fork;
+    public Optional<Integer> getForkCount() {
+        return Optional.eitherOf(fork);
     }
 
     /**
@@ -305,8 +305,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public int getWarmupForkCount() {
-        return warmupFork;
+    public Optional<Integer> getWarmupForkCount() {
+        return Optional.eitherOf(warmupFork);
     }
 
     /**
@@ -315,18 +315,18 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public String getOutput() {
-        return output;
+    public Optional<String> getOutput() {
+        return Optional.eitherOf(output);
     }
 
     @Override
-    public ResultFormatType getResultFormat() {
-        return resultFormat;
+    public Optional<ResultFormatType> getResultFormat() {
+        return Optional.eitherOf(resultFormat);
     }
 
     @Override
-    public String getResult() {
-        return result;
+    public Optional<String> getResult() {
+        return Optional.eitherOf(result);
     }
 
     public boolean shouldListResultFormats() {
@@ -358,8 +358,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public int getMeasurementIterations() {
-        return iterations;
+    public Optional<Integer> getMeasurementIterations() {
+        return Optional.eitherOf(iterations);
     }
 
     /**
@@ -368,8 +368,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public TimeValue getMeasurementTime() {
-        return runTime;
+    public Optional<TimeValue> getMeasurementTime() {
+        return Optional.eitherOf(runTime);
     }
 
     /**
@@ -378,8 +378,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public TimeValue getWarmupTime() {
-        return warmupTime;
+    public Optional<TimeValue> getWarmupTime() {
+        return Optional.eitherOf(warmupTime);
     }
 
     /**
@@ -388,8 +388,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public int getWarmupIterations() {
-        return warmupIterations;
+    public Optional<Integer> getWarmupIterations() {
+        return Optional.eitherOf(warmupIterations);
     }
 
     /**
@@ -398,20 +398,20 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public int getThreads() {
-        return threads;
+    public Optional<Integer> getThreads() {
+        return Optional.eitherOf(threads);
     }
 
     @Override
-    public int[] getThreadGroups() {
+    public Optional<int[]> getThreadGroups() {
         if (threadGroups.isEmpty()) {
-            return new int[] { 1 };
+            return Optional.none();
         } else {
             int[] r = new int[threadGroups.size()];
             for (int c = 0; c < r.length; c++) {
                 r[c] = threadGroups.get(c);
             }
-            return r;
+            return Optional.of(r);
         }
     }
 
@@ -421,8 +421,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public boolean shouldDoGC() {
-        return gcEachIteration;
+    public Optional<Boolean> shouldDoGC() {
+        return Optional.eitherOf(gcEachIteration);
     }
 
     /**
@@ -431,8 +431,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public Boolean shouldSyncIterations() {
-        return synchIterations;
+    public Optional<Boolean> shouldSyncIterations() {
+        return Optional.eitherOf(synchIterations);
     }
 
     /**
@@ -441,8 +441,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public VerboseMode verbosity() {
-        return verbose;
+    public Optional<VerboseMode> verbosity() {
+        return Optional.eitherOf(verbose);
     }
 
     /**
@@ -451,8 +451,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
+    public Optional<TimeUnit> getTimeUnit() {
+        return Optional.eitherOf(timeUnit);
     }
 
     /**
@@ -460,8 +460,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public boolean shouldFailOnError() {
-        return failOnError;
+    public Optional<Boolean> shouldFailOnError() {
+        return Optional.eitherOf(failOnError);
     }
 
     /**
@@ -475,7 +475,7 @@ public class CommandLineOptions implements Options {
 
     @Override
     public Collection<Mode> getBenchModes() {
-        return (benchMode == null) ? null : new HashSet<Mode>(benchMode);
+        return new HashSet<Mode>(benchMode);
     }
 
 
