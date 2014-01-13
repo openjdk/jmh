@@ -34,35 +34,39 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author sergey.kuksenko@oracle.com
+ * Holds the JMH global defaults.
+ *
+ * @author Sergey Kuksenko
+ * @author Aleksey Shipilev
  */
 public class Defaults {
 
     public static final List<String> TRUE_VALUES  = Collections.unmodifiableList(Arrays.asList("true", "on", "yes"));
     public static final List<String> FALSE_VALUES = Collections.unmodifiableList(Arrays.asList("false", "off", "no"));
 
-    public static final int MEASUREMENT_TIME_SECS = 1;
-    public static final int MEASUREMENT_ITERATION_COUNT = 20;
-    public static final int SINGLE_SHOT_ITERATION_COUNT = 1;
+    public static final int MEASUREMENT_ITERATIONS = 20;
+    public static final int SINGLESHOT_MEASUREMENT_ITERATIONS = 1;
 
-    public static final int WARMUP_TIME_SECS = 1;
-    public static final int WARMUP_ITERATION_COUNT = 20;
-    public static final int SINGLE_SHOT_WARMUP_COUNT = 0;
+    public static final int WARMUP_ITERATIONS = 20;
+    public static final int SINGLESHOT_WARMUP_ITERATIONS = 0;
 
-    public static final TimeValue WARMUP_TIME = new TimeValue(WARMUP_TIME_SECS, TimeUnit.SECONDS);
-    public static final TimeValue ITERATION_TIME = new TimeValue(MEASUREMENT_TIME_SECS, TimeUnit.SECONDS);
+    public static final TimeValue WARMUP_TIME = new TimeValue(1, TimeUnit.SECONDS);
+    public static final TimeValue ITERATION_TIME = new TimeValue(1, TimeUnit.SECONDS);
 
     public static final int THREADS = 1;
 
-    public static final int DEFAULT_WARMUP_FORK_TIMES = 0;
-    public static final int DEFAULT_FORK_TIMES = 10;
+    public static final int FORKS = 10;
+    public static final int WARMUP_FORKS = 0;
 
-    public static final boolean SHOULD_SYNCH_ITERATIONS = true;
+    public static final boolean FAIL_ON_ERROR = false;
+    public static final boolean SYNC_ITERATIONS = true;
+    public static final boolean DO_GC = false;
 
-    public static final String RESULT_FILE = "jmh.out";
-    public static final VerboseMode DEFAULT_VERBOSITY = VerboseMode.NORMAL;
-    public static final Boolean SHOULD_FAIL_ON_ERROR = false;
-    public static final WarmupMode DEFAULT_WARMUP_MODE = WarmupMode.INDI;
     public static final ResultFormatType RESULT_FORMAT = ResultFormatType.NONE;
-    public static final Boolean SHOULD_DO_GC = false;
+    public static final String RESULT_FILE = "jmh.out";
+
+    public static final WarmupMode WARMUP_MODE = WarmupMode.INDI;
+
+    public static final VerboseMode VERBOSITY = VerboseMode.NORMAL;
+
 }

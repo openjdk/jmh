@@ -72,7 +72,7 @@ public class BenchmarkParams implements Serializable {
         this.threads = Utils.roundUp(threads, Utils.sum(threadGroups));
 
         this.synchIterations = options.shouldSyncIterations().orElse(
-                Defaults.SHOULD_SYNCH_ITERATIONS);
+                Defaults.SYNC_ITERATIONS);
 
         this.measurement = mode.doMeasurement() ?
                 getMeasurement(options, benchmark) :
@@ -84,11 +84,11 @@ public class BenchmarkParams implements Serializable {
 
         this.forks = options.getForkCount().orElse(
                 benchmark.getForks().orElse(
-                        Defaults.DEFAULT_FORK_TIMES));
+                        Defaults.FORKS));
 
         this.warmupForks = options.getWarmupForkCount().orElse(
                 benchmark.getWarmupForks().orElse(
-                        Defaults.DEFAULT_WARMUP_FORK_TIMES));
+                        Defaults.WARMUP_FORKS));
     }
 
     private IterationParams getWarmup(Options options, BenchmarkRecord benchmark) {
@@ -96,7 +96,7 @@ public class BenchmarkParams implements Serializable {
                 this,
                 options.getWarmupIterations().orElse(
                         benchmark.getWarmupIterations().orElse(
-                            (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLE_SHOT_WARMUP_COUNT : Defaults.WARMUP_ITERATION_COUNT
+                            (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLESHOT_WARMUP_ITERATIONS : Defaults.WARMUP_ITERATIONS
                 )),
                 options.getWarmupTime().orElse(
                         benchmark.getWarmupTime().orElse(
@@ -110,7 +110,7 @@ public class BenchmarkParams implements Serializable {
                 this,
                 options.getMeasurementIterations().orElse(
                         benchmark.getMeasurementIterations().orElse(
-                                (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLE_SHOT_ITERATION_COUNT : Defaults.MEASUREMENT_ITERATION_COUNT
+                                (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLESHOT_MEASUREMENT_ITERATIONS : Defaults.MEASUREMENT_ITERATIONS
                         )),
                 options.getMeasurementTime().orElse(
                         benchmark.getMeasurementTime().orElse(

@@ -68,7 +68,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
-        this.shouldFailOnError = options.shouldFailOnError().orElse(Defaults.SHOULD_FAIL_ON_ERROR);
+        this.shouldFailOnError = options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR);
     }
 
     /**

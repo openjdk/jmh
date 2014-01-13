@@ -112,7 +112,7 @@ public class Runner extends BaseRunner {
             out = System.out;
         }
 
-        return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.DEFAULT_VERBOSITY));
+        return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.VERBOSITY));
     }
 
     public void list() {
@@ -153,7 +153,7 @@ public class Runner extends BaseRunner {
         if (benchmarks.isEmpty()) {
             out.println("No matching benchmarks. Miss-spelled regexp?");
 
-            if (options.verbosity().orElse(Defaults.DEFAULT_VERBOSITY) != VerboseMode.EXTRA) {
+            if (options.verbosity().orElse(Defaults.VERBOSITY) != VerboseMode.EXTRA) {
                 out.println("Use " + VerboseMode.EXTRA + " verbose mode to debug the pattern matching.");
             } else {
                 list();
@@ -215,7 +215,7 @@ public class Runner extends BaseRunner {
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
             warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
-        if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isBulk()) {
+        if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isBulk()) {
             warmupBenches.addAll(benchmarks);
         }
 
@@ -226,7 +226,7 @@ public class Runner extends BaseRunner {
         for (BenchmarkRecord br : benchmarks) {
             BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
             if (params.getForks() <= 0) {
-                if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isIndi()) {
+                if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
                     r.addWarmupMeasurement(br);
                 } else {
                     r.addMeasurement(br);
@@ -246,7 +246,7 @@ public class Runner extends BaseRunner {
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
             warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
         }
-        if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isBulk()) {
+        if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isBulk()) {
             warmupBenches.addAll(benchmarks);
         }
 
@@ -260,7 +260,7 @@ public class Runner extends BaseRunner {
             if (params.getForks() > 0) {
                 ActionPlan r = new ActionPlan();
                 r.mixIn(base);
-                if (options.getWarmupMode().orElse(Defaults.DEFAULT_WARMUP_MODE).isIndi()) {
+                if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
                     r.addWarmupMeasurement(br);
                 } else {
                     r.addMeasurement(br);
@@ -380,7 +380,7 @@ public class Runner extends BaseRunner {
 
             if (ecode != 0) {
                 out.println("WARNING: Forked process returned code: " + ecode);
-                if (options.shouldFailOnError().orElse(Defaults.SHOULD_FAIL_ON_ERROR)) {
+                if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
                     throw new IllegalStateException("WARNING: Forked process returned code: " + ecode);
                 }
             }

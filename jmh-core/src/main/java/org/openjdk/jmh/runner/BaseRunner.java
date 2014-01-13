@@ -105,7 +105,7 @@ public abstract class BaseRunner {
             return runBenchmark(executionParams, handler);
         } catch (Throwable ex) {
             out.exception(ex);
-            if (options.shouldFailOnError().orElse(Defaults.SHOULD_FAIL_ON_ERROR)) {
+            if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
                 throw new IllegalStateException(ex.getMessage(), ex);
             }
         } finally {
@@ -178,7 +178,7 @@ public abstract class BaseRunner {
      * @return true if we did
      */
     public boolean runSystemGC() {
-        if (options.shouldDoGC().orElse(Defaults.SHOULD_DO_GC)) {
+        if (options.shouldDoGC().orElse(Defaults.DO_GC)) {
             List<GarbageCollectorMXBean> enabledBeans = new ArrayList<GarbageCollectorMXBean>();
 
             long beforeGcCount = 0;
