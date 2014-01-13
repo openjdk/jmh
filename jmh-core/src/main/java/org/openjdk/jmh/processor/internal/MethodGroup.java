@@ -33,7 +33,7 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.AnnotationUtils;
-import org.openjdk.jmh.util.internal.Option;
+import org.openjdk.jmh.util.internal.Optional;
 
 import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
@@ -91,12 +91,12 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return result;
     }
 
-    public Option<Integer> getTotalThreadCount() {
+    public Optional<Integer> getTotalThreadCount() {
         Threads ann = getFinal(Threads.class);
         if (ann != null) {
-            return Option.of(ann.value());
+            return Optional.of(ann.value());
         }
-        return Option.none();
+        return Optional.none();
     }
 
     public String getName() {
@@ -142,76 +142,76 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return (ann != null) ? ann.value() : TimeUnit.MILLISECONDS;
     }
 
-    public Option<Integer> getWarmupIterations() {
+    public Optional<Integer> getWarmupIterations() {
         Warmup ann = getFinal(Warmup.class);
         if (ann != null && ann.iterations() != Warmup.BLANK_ITERATIONS) {
-            return Option.of(ann.iterations());
+            return Optional.of(ann.iterations());
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<TimeValue> getWarmupTime() {
+    public Optional<TimeValue> getWarmupTime() {
         Warmup ann = getFinal(Warmup.class);
         if (ann != null && ann.time() != Warmup.BLANK_TIME) {
-            return Option.of(new TimeValue(ann.time(), ann.timeUnit()));
+            return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<Integer> getMeasurementIterations() {
+    public Optional<Integer> getMeasurementIterations() {
         Measurement ann = getFinal(Measurement.class);
         if (ann != null && ann.iterations() != Measurement.BLANK_ITERATIONS) {
-            return Option.of(ann.iterations());
+            return Optional.of(ann.iterations());
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<TimeValue> getMeasurementTime() {
+    public Optional<TimeValue> getMeasurementTime() {
         Measurement ann = getFinal(Measurement.class);
         if (ann != null && ann.time() != Measurement.BLANK_TIME) {
-            return Option.of(new TimeValue(ann.time(), ann.timeUnit()));
+            return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<Integer> getForks() {
+    public Optional<Integer> getForks() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && ann.value() != Fork.BLANK_FORKS) {
-            return Option.of(ann.value());
+            return Optional.of(ann.value());
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<Integer> getWarmupForks() {
+    public Optional<Integer> getWarmupForks() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && ann.warmups() != Fork.BLANK_FORKS) {
-            return Option.of(ann.warmups());
+            return Optional.of(ann.warmups());
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<String> getJVMArgs() {
+    public Optional<String> getJVMArgs() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !ann.jvmArgs().equals(AnnotationUtils.PARAM_NOT_SET)) {
-            return Option.of(ann.jvmArgs());
+            return Optional.of(ann.jvmArgs());
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<String> getJVMArgsAppend() {
+    public Optional<String> getJVMArgsAppend() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !ann.jvmArgsAppend().equals(AnnotationUtils.PARAM_NOT_SET)) {
-            return Option.of(ann.jvmArgsAppend());
+            return Optional.of(ann.jvmArgsAppend());
         }
-        return Option.none();
+        return Optional.none();
     }
 
-    public Option<String> getJVMArgsPrepend() {
+    public Optional<String> getJVMArgsPrepend() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !ann.jvmArgsPrepend().equals(AnnotationUtils.PARAM_NOT_SET)) {
-            return Option.of(ann.jvmArgsPrepend());
+            return Optional.of(ann.jvmArgsPrepend());
         }
-        return Option.none();
+        return Optional.none();
     }
 
     private <T extends Annotation> T getFinal(Class<T> klass) {

@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.Option;
+import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
 
@@ -36,21 +36,21 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final String generatedName;
     private final Mode mode;
     private final int[] threadGroups;
-    private final Option<Integer> threads;
-    private final Option<Integer> warmupIterations;
-    private final Option<TimeValue> warmupTime;
-    private final Option<Integer> measurementIterations;
-    private final Option<TimeValue> measurementTime;
-    private final Option<Integer> forks;
-    private final Option<Integer> warmupForks;
-    private final Option<String> jvmArgs;
-    private final Option<String> jvmArgsPrepend;
-    private final Option<String> jvmArgsAppend;
+    private final Optional<Integer> threads;
+    private final Optional<Integer> warmupIterations;
+    private final Optional<TimeValue> warmupTime;
+    private final Optional<Integer> measurementIterations;
+    private final Optional<TimeValue> measurementTime;
+    private final Optional<Integer> forks;
+    private final Optional<Integer> warmupForks;
+    private final Optional<String> jvmArgs;
+    private final Optional<String> jvmArgsPrepend;
+    private final Optional<String> jvmArgsAppend;
 
-    public BenchmarkRecord(String userName, String generatedName, Mode mode, int[] threadGroups, Option<Integer> threads,
-                           Option<Integer> warmupIterations, Option<TimeValue> warmupTime,
-                           Option<Integer> measurementIterations, Option<TimeValue> measurementTime,
-                           Option<Integer> forks, Option<Integer> warmupForks, Option<String> jvmArgs, Option<String> jvmArgsPrepend, Option<String> jvmArgsAppend) {
+    public BenchmarkRecord(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
+                           Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime,
+                           Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime,
+                           Optional<Integer> forks, Optional<Integer> warmupForks, Optional<String> jvmArgs, Optional<String> jvmArgsPrepend, Optional<String> jvmArgsAppend) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -78,22 +78,22 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());
         this.threadGroups = convert(args[3].split("="));
-        this.threads = Option.of(args[4], Option.INTEGER_EXTRACTOR);
-        this.warmupIterations = Option.of(args[5], Option.INTEGER_EXTRACTOR);
-        this.warmupTime = Option.of(args[6], Option.TIME_VALUE_EXTRACTOR);
-        this.measurementIterations = Option.of(args[7], Option.INTEGER_EXTRACTOR);
-        this.measurementTime = Option.of(args[8], Option.TIME_VALUE_EXTRACTOR);
-        this.forks = Option.of(args[9], Option.INTEGER_EXTRACTOR);
-        this.warmupForks = Option.of(args[10], Option.INTEGER_EXTRACTOR);
-        this.jvmArgs = Option.of(args[11], Option.STRING_EXTRACTOR);
-        this.jvmArgsPrepend = Option.of(args[12], Option.STRING_EXTRACTOR);
-        this.jvmArgsAppend = Option.of(args[13], Option.STRING_EXTRACTOR);
+        this.threads = Optional.of(args[4], Optional.INTEGER_EXTRACTOR);
+        this.warmupIterations = Optional.of(args[5], Optional.INTEGER_EXTRACTOR);
+        this.warmupTime = Optional.of(args[6], Optional.TIME_VALUE_EXTRACTOR);
+        this.measurementIterations = Optional.of(args[7], Optional.INTEGER_EXTRACTOR);
+        this.measurementTime = Optional.of(args[8], Optional.TIME_VALUE_EXTRACTOR);
+        this.forks = Optional.of(args[9], Optional.INTEGER_EXTRACTOR);
+        this.warmupForks = Optional.of(args[10], Optional.INTEGER_EXTRACTOR);
+        this.jvmArgs = Optional.of(args[11], Optional.STRING_EXTRACTOR);
+        this.jvmArgsPrepend = Optional.of(args[12], Optional.STRING_EXTRACTOR);
+        this.jvmArgsAppend = Optional.of(args[13], Optional.STRING_EXTRACTOR);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
-        this(userName, generatedName, mode, new int[]{}, Option.<Integer>none(),
-                Option.<Integer>none(), Option.<TimeValue>none(), Option.<Integer>none(), Option.<TimeValue>none(),
-                Option.<Integer>none(), Option.<Integer>none(), Option.<String>none(), Option.<String>none(), Option.<String>none());
+        this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
+                Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<TimeValue>none(),
+                Optional.<Integer>none(), Optional.<Integer>none(), Optional.<String>none(), Optional.<String>none(), Optional.<String>none());
     }
 
     public String toLine() {
@@ -196,43 +196,43 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 '}';
     }
 
-    public Option<TimeValue> getWarmupTime() {
+    public Optional<TimeValue> getWarmupTime() {
         return warmupTime;
     }
 
-    public Option<Integer> getWarmupIterations() {
+    public Optional<Integer> getWarmupIterations() {
         return warmupIterations;
     }
 
-    public Option<TimeValue> getMeasurementTime() {
+    public Optional<TimeValue> getMeasurementTime() {
         return measurementTime;
     }
 
-    public Option<Integer> getMeasurementIterations() {
+    public Optional<Integer> getMeasurementIterations() {
         return measurementIterations;
     }
 
-    public Option<Integer> getForks() {
+    public Optional<Integer> getForks() {
         return forks;
     }
 
-    public Option<Integer> getWarmupForks() {
+    public Optional<Integer> getWarmupForks() {
         return warmupForks;
     }
 
-    public Option<String> getJvmArgs() {
+    public Optional<String> getJvmArgs() {
         return jvmArgs;
     }
 
-    public Option<String> getJvmArgsAppend() {
+    public Optional<String> getJvmArgsAppend() {
         return jvmArgsAppend;
     }
 
-    public Option<String> getJvmArgsPrepend() {
+    public Optional<String> getJvmArgsPrepend() {
         return jvmArgsPrepend;
     }
 
-    public Option<Integer> getThreads() {
+    public Optional<Integer> getThreads() {
         return threads;
     }
 }

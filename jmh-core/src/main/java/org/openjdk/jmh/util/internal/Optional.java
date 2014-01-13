@@ -32,18 +32,18 @@ import java.io.Serializable;
  * Option class
  * @param <T> stored value.
  */
-public class Option<T> implements Serializable {
+public class Optional<T> implements Serializable {
 
     private final T val;
 
-    private Option(T val) {
+    private Optional(T val) {
         if (val == null) {
             throw new IllegalArgumentException("Val can not be null");
         }
         this.val = val;
     }
 
-    private Option() {
+    private Optional() {
         this.val = null;
     }
 
@@ -56,8 +56,8 @@ public class Option<T> implements Serializable {
      * @param <T> type
      * @return empty option
      */
-    public static <T> Option<T> none() {
-        return new Option<T>();
+    public static <T> Optional<T> none() {
+        return new Optional<T>();
     }
 
     /**
@@ -66,8 +66,8 @@ public class Option<T> implements Serializable {
      * @param <T> type
      * @return option with value
      */
-    public static <T> Option<T> of(T val) {
-        return new Option<T>(val);
+    public static <T> Optional<T> of(T val) {
+        return new Optional<T>(val);
     }
 
     /**
@@ -77,11 +77,11 @@ public class Option<T> implements Serializable {
      * @param <T> type
      * @return value wrapped in the Option
      */
-    public static <T> Option<T> of(String source, Extractor<T> extractor) {
+    public static <T> Optional<T> of(String source, Extractor<T> extractor) {
         if (source.equals("[]")) {
-            return Option.none();
+            return Optional.none();
         } else {
-            return Option.of(extractor.valueOf(source.substring(1, source.length() - 1)));
+            return Optional.of(extractor.valueOf(source.substring(1, source.length() - 1)));
         }
     }
 
@@ -95,7 +95,7 @@ public class Option<T> implements Serializable {
 
     public T get() {
         if (val == null) {
-            throw new IllegalStateException("Option is null");
+            throw new IllegalStateException("Optional is null");
         }
         return val;
     }
@@ -104,21 +104,21 @@ public class Option<T> implements Serializable {
         T valueOf(String s);
     }
 
-    public static final Extractor<Integer> INTEGER_EXTRACTOR = new Option.Extractor<Integer>() {
+    public static final Extractor<Integer> INTEGER_EXTRACTOR = new Optional.Extractor<Integer>() {
         @Override
         public Integer valueOf(String s) {
             return Integer.valueOf(s);
         }
     };
 
-    public static final Extractor<TimeValue> TIME_VALUE_EXTRACTOR = new Option.Extractor<TimeValue>() {
+    public static final Extractor<TimeValue> TIME_VALUE_EXTRACTOR = new Optional.Extractor<TimeValue>() {
         @Override
         public TimeValue valueOf(String s) {
             return TimeValue.fromString(s);
         }
     };
 
-    public static final Extractor<String> STRING_EXTRACTOR = new Option.Extractor<String>() {
+    public static final Extractor<String> STRING_EXTRACTOR = new Optional.Extractor<String>() {
         @Override
         public String valueOf(String s) {
             return s;
