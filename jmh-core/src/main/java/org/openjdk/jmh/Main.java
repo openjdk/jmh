@@ -24,12 +24,12 @@
  */
 package org.openjdk.jmh;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.openjdk.jmh.output.results.ResultFormatType;
-import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.CommandLineOptionException;
 import org.openjdk.jmh.runner.options.CommandLineOptions;
+
+import java.io.IOException;
 
 /**
  * Main program entry point
@@ -44,66 +44,39 @@ public class Main {
      * @param argv Command line arguments
      */
     public static void main(String[] argv) {
-        CommandLineOptions cmdOptions = CommandLineOptions.newInstance();
-
         try {
-            cmdOptions.parseArguments(argv);
-
-            if (cmdOptions.shouldListResultFormats()) {
-                StringBuilder sb = new StringBuilder();
-
-                for (ResultFormatType f : ResultFormatType.values()) {
-                    sb.append(f.toString().toLowerCase());
-                    sb.append(", ");
-                }
-                sb.setLength(sb.length() - 2);
-
-                System.out.println("Available formats: " + sb.toString());
-                return;
-            }
-
-            // list available profilers?
-            if (cmdOptions.shouldListProfilers()) {
-                StringBuilder sb = new StringBuilder();
-                for (String s : ProfilerFactory.getAvailableProfilers()) {
-                    if (ProfilerFactory.isSupported(s)) {
-                        sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
-                    }
-                }
-                if (!sb.toString().isEmpty()) {
-                    System.out.println("Supported profilers:\n" + sb.toString());
-                }
-
-                sb = new StringBuilder();
-                for (String s : ProfilerFactory.getAvailableProfilers()) {
-                    if (!ProfilerFactory.isSupported(s)) {
-                        sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
-                    }
-                }
-
-                if (!sb.toString().isEmpty()) {
-                    System.out.println("Unsupported profilers:\n" + sb.toString());
-                }
-                return;
-            }
-
-            if (cmdOptions.shouldHelp()) {
-                cmdOptions.printUsage("Displaying help");
-                return;
-            }
+            CommandLineOptions cmdOptions = new CommandLineOptions(argv);
 
             Runner runner = new Runner(cmdOptions);
+
+            if (cmdOptions.shouldHelp()) {
+                cmdOptions.showHelp();
+                return;
+            }
 
             if (cmdOptions.shouldList()) {
                 runner.list();
                 return;
             }
 
+            if (cmdOptions.shouldListProfilers()) {
+                cmdOptions.listProfilers();
+                return;
+            }
+
+            if (cmdOptions.shouldListResultFormats()) {
+                cmdOptions.listResultFormats();
+                return;
+            }
+
             runner.run();
-        } catch (CmdLineException ex) {
-            cmdOptions.printUsage(ex.getMessage());
         } catch (RunnerException e) {
-            cmdOptions.printUsage(e.getMessage());
+            System.err.println(e.getMessage());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        } catch (CommandLineOptionException e) {
+            System.err.println("Error parsing command line:");
+            System.err.println(" " + e.getMessage());
         }
     }
 

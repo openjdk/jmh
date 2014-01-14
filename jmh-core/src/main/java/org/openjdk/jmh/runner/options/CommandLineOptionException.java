@@ -22,50 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh;
+package org.openjdk.jmh.runner.options;
 
-import org.junit.Test;
+public class CommandLineOptionException extends Exception {
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import static org.junit.Assert.assertTrue;
-
-/**
- * Tests for Main
- *
- * @author anders.astrand@oracle.com
- *
- */
-public class TestMain {
-
-    @Test
-    public void testFaultyArgs() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream tmp = System.err;
-
-        System.setErr(new PrintStream(baos));
-        Main.main(new String[] {"-kakor"});
-        System.setErr(tmp);
-
-        String s = baos.toString();
-        assertTrue(s, s.contains("\"-kakor\""));
-        assertTrue(s, s.contains("Usage"));
-        baos.close();
+    public CommandLineOptionException(String message) {
+        super(message);
     }
 
-    @Test
-    public void testHelp() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream tmp = System.err;
-
-        System.setErr(new PrintStream(baos));
-        Main.main(new String[] {"-h"});
-        System.setErr(tmp);
-
-        String s = baos.toString();
-        assertTrue(s, s.contains("Usage: [options]"));
-        baos.close();
+    public CommandLineOptionException(String message, Throwable cause) {
+        super(message, cause);
     }
-
 }

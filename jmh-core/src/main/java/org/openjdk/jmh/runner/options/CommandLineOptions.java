@@ -24,25 +24,21 @@
  */
 package org.openjdk.jmh.runner.options;
 
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.profile.ProfilerType;
-import org.openjdk.jmh.runner.options.handlers.BenchmarkModeTypeOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.BooleanOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.ForkOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.ProfilersOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.ThreadCountsOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.ThreadsOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.TimeUnitOptionHandler;
-import org.openjdk.jmh.runner.options.handlers.TimeValueOptionHandler;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -52,153 +48,372 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class that handles all the options and arguments specific to the harness JVM.
+ * Class that handles all the command line options.
  *
- * Boolean/boolean options getters name conventions:
- *   - method name is prefixed by "is" or "should" when the Option class gives exact answer
- *   - method name is prefixed by "get" when the method is just a getter and meaning of the option clarified somewhere else
- *
- * @author anders.astrand@oracle.com
- * @author sergey.kuksenko@oracle.com
+ * @author Anders Astrand
+ * @author Sergey Kuksenko
+ * @author Aleksey Shipilev
  */
 public class CommandLineOptions implements Options {
 
-        /*
-     *  Conventions for options processing (unless otherwise specified):
-     *  - int options:
-     *              negative value means unset
-     *  - Boolean options:
-     *              null means unset, TRUE/FALSE means true/false;
-     *              default values should be processed explicitly
-     *  - boolean options:
-     *              may be used only for options with false default value
-     *              may be set to true in cmdLine, can't be set to false explicitly
-     *
-     */
+    private final Optional<Integer> iterations;
+    private final Optional<TimeValue> runTime;
+    private final Optional<Integer> warmupIterations;
+    private final Optional<TimeValue> warmupTime;
+    private final List<Mode> benchMode = new ArrayList<Mode>();
+    private final Optional<Integer> threads;
+    private final List<Integer> threadGroups = new ArrayList<Integer>();
+    private final Optional<Boolean> synchIterations;
+    private final Optional<Boolean> gcEachIteration;
+    private final Optional<VerboseMode> verbose;
+    private final Optional<Boolean> failOnError;
+    private final Set<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
+    private final Optional<TimeUnit> timeUnit;
+    private final List<String> regexps = new ArrayList<String>();
+    private final Optional<Integer> fork;
+    private final Optional<Integer> warmupFork;
+    private final Optional<String> output;
+    private final Optional<String> result;
+    private final Optional<ResultFormatType> resultFormat;
+    private final Optional<String> jvm;
+    private final Optional<String> jvmArgs;
+    private final Optional<String> jvmClassPath;
+    private final List<String> excludes = new ArrayList<String>();
+    private final Optional<WarmupMode> warmupMode;
+    private final List<String> warmupMicros = new ArrayList<String>();
+    private final boolean list;
+    private final boolean listResultFormats;
+    private final boolean help;
+    private final boolean listProfilers;
 
-    @Option(name = "-i", aliases = {"--iterations"}, metaVar = "INT", usage = "Number of iterations.")
-    protected Integer iterations;
+    private final OptionParser parser;
 
-    @Option(name = "-r", aliases = {"--runtime"}, metaVar = "TIME", usage = "Run time for each iteration. Examples: 100s, 200ms", handler = TimeValueOptionHandler.class)
-    protected TimeValue runTime;
+    public CommandLineOptions(String... argv) throws CommandLineOptionException {
+        parser = new OptionParser();
+        parser.formatHelpWith(new OptionFormatter());
 
-    @Option(name = "-wi", aliases = {"--warmupiterations"}, metaVar = "INT", usage = "Number of warmup iterations to run.")
-    protected Integer warmupIterations;
+        OptionSpec<Integer> optMeasureCount = parser.accepts("i", "Number of measurement iterations to do.")
+                .withRequiredArg().ofType(Integer.class).describedAs("int");
 
-    @Option(name = "-w", aliases = {"--warmup"}, metaVar = "TIME", usage = "Run time for warmup iterations. Result not used when calculating score. Examples 100s, 200ms", handler = TimeValueOptionHandler.class)
-    protected TimeValue warmupTime;
+        OptionSpec<String> optMeasureTime = parser.accepts("r", "Time to spend at each measurement iteration.")
+                .withRequiredArg().ofType(String.class).describedAs("time");
 
-    @Option(name = "-bm", aliases = {"--mode"}, multiValued = false, metaVar = "MODE", usage = "Benchmark mode", handler = BenchmarkModeTypeOptionHandler.class)
-    protected List<Mode> benchMode = new ArrayList<Mode>();
+        OptionSpec<Integer> optWarmupCount = parser.accepts("wi", "Number of warmup iterations to do.")
+                .withRequiredArg().ofType(Integer.class).describedAs("int");
 
-    @Option(name = "-t", aliases = {"--threads"}, usage = "Number of threads to run the microbenchmark with. Special value \"max\" will use Runtime.availableProcessors()", handler = ThreadsOptionHandler.class)
-    protected Integer threads;
+        OptionSpec<String> optWarmupTime = parser.accepts("w", "Time to spend at each warmup iteration.")
+                .withRequiredArg().ofType(String.class).describedAs("time");
 
-    @Option(name = "-tg", aliases = {"--threadGroups"}, usage = "Thread group distribution", handler = ThreadCountsOptionHandler.class)
-    protected List<Integer> threadGroups = new ArrayList<Integer>();
+        OptionSpec<String> optThreads = parser.accepts("t", "Number of worker threads to run with.")
+                .withRequiredArg().ofType(String.class).describedAs("int");
 
-    @Option(name = "-si", aliases = {"--synciterations"}, usage = "Should the harness continue to load each thread with work untill all threads are done with their measured work?", handler = BooleanOptionHandler.class)
-    protected Boolean synchIterations;
+        OptionSpec<String> optBenchmarkMode = parser.accepts("bm", "Benchmark mode. Available modes are: " + Mode.getKnown())
+                .withRequiredArg().ofType(String.class).withValuesSeparatedBy(',').describedAs("mode");
 
-    @Option(name = "-gc", usage = "Should do System.gc() between iterations?", handler = BooleanOptionHandler.class)
-    protected Boolean gcEachIteration;
+        OptionSpec<Boolean> optSyncIters = parser.accepts("si", "Synchronize iterations?")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-    @Option(name = "-v", aliases = {"--verbosity"}, metaVar = "LEVEL", usage = "Verbosity mode: (silent, normal, extra)")
-    protected VerboseMode verbose;
+        OptionSpec<Boolean> optGC = parser.accepts("gc", "Should JMH force GC between iterations?")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-    @Option(name = "-foe", usage = "Fail the harness on benchmark erro?", handler = BooleanOptionHandler.class)
-    protected Boolean failOnError;
+        OptionSpec<Boolean> optFOE = parser.accepts("foe", "Should JMH fail immediately if any benchmark had" +
+                " experienced the unrecoverable error?")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-    @Option(name = "-prof", aliases = {"--useprofiler"}, multiValued = false, usage = "Use profilers for collecting additional info, use --listProfilers to list available profilers", handler = ProfilersOptionHandler.class)
-    protected Set<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
+        OptionSpec<String> optVerboseMode = parser.accepts("v", "Verbosity mode. Available modes are: " + Arrays.toString(VerboseMode.values()))
+                .withRequiredArg().ofType(String.class).describedAs("mode");
 
-    @Option(name = "-tu", aliases = {"--timeunit"}, usage = "Output time unit. Available values: m, s, ms, us, ns", handler = TimeUnitOptionHandler.class)
-    protected TimeUnit timeUnit;
+        OptionSpec<String> optArgs = parser.nonOptions("Benchmarks to run (regexp+).")
+                .describedAs("regexp+");
 
-    // test selection options
-    @Argument(metaVar = "REGEXP", usage = "Microbenchmarks to run. Regexp filtering out classes or methods which are MicroBenchmarks.")
-    protected List<String> regexps = new ArrayList<String>();
+        OptionSpec<Integer> optForks = parser.accepts("f", "How many times to forks a single benchmark." +
+                " Use 0 to disable forking altogether (WARNING: disabling forking may have detrimental" +
+                " impact on benchmark and infrastructure reliability, you might want to use different" +
+                " warmup mode instead).")
+                .withOptionalArg().ofType(Integer.class).describedAs("int");
 
-    // micro options
+        OptionSpec<Integer> optWarmupForks = parser.accepts("wf", "How many warmup forks to make " +
+                "for a single benchmark. 0 to disable warmup forks.")
+                .withRequiredArg().ofType(Integer.class).describedAs("int");
 
-    @Option(name = "-f", aliases = {"--fork"}, metaVar = "{ INT }", usage = "Start each benchmark in new JVM, forking from the same JDK unless --jvm is set. Optional parameter specifies number of times harness should fork. Zero forks means \"no fork\", also \"false\" is accepted", handler = ForkOptionHandler.class)
-    protected Integer fork;
+        OptionSpec<String> optOutput = parser.accepts("o", "Redirect human-readable output to file.")
+                .withRequiredArg().ofType(String.class).describedAs("filename");
 
-    @Option(name = "-wf", aliases = {"--warmupfork"}, metaVar = "{ INT }", usage = "Number of warmup fork executions. (warmup fork execution results are ignored).")
-    protected Integer warmupFork;
+        OptionSpec<String> optOutputResults = parser.accepts("rff", "Write results to given file.")
+                .withRequiredArg().ofType(String.class).describedAs("filename");
 
-    @Option(name = "-o", aliases = {"--output"}, metaVar = "FILE", usage = "Redirect output to FILE")
-    protected String output;
+        OptionSpec<String> optProfilers = parser.accepts("prof", "Use profilers to collect additional data." +
+                " See the list of available profilers first.")
+                .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("profiler+");
 
-    @Option(name = "-rff", aliases = {"--result"}, metaVar = "FILE", usage = "Redirect results to FILE")
-    protected String result;
+        OptionSpec<Integer> optThreadGroups = parser.accepts("tg", "Override thread group distribution for asymmetric benchmarks.")
+                .withRequiredArg().withValuesSeparatedBy(',').ofType(Integer.class).describedAs("int+");
 
-    @Option(name = "-rf", aliases = {"--resultformat"}, metaVar = "FORMAT", usage = "Format to use for results, use --listResultFormats to list available formats")
-    protected ResultFormatType resultFormat;
+        OptionSpec<String> optJvm = parser.accepts("jvm", "Custom JVM to use when forking.")
+                .withRequiredArg().ofType(String.class).describedAs("string");
 
-    @Option(name = "--jvm", metaVar = "JVM", usage = "Custom JVM to use with fork.")
-    protected String jvm;
+        OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Custom JVM args to use when forking.")
+                .withRequiredArg().ofType(String.class).describedAs("string");
 
-    @Option(name = "--jvmargs", metaVar = "JVMARGS", usage = "Custom JVM arguments for --jvm, default is to use parent process's arguments")
-    protected String jvmArgs;
+        OptionSpec<String> optJvmCP = parser.accepts("jvmClasspath", "Custom JVM classpath to use when forking.")
+                .withRequiredArg().ofType(String.class).describedAs("string");
 
-    @Option(name = "--jvmclasspath", metaVar = "CLASSPATH", usage = "Custom classpath for --jvm, default is to use parent process's classpath")
-    protected String jvmClassPath;
+        OptionSpec<String> optTU = parser.accepts("tu", "Output time unit. Available time units are: [m, s, ms, us, ns].")
+                .withRequiredArg().ofType(String.class).describedAs("TU");
 
-    @Option(name = "-e", aliases = {"--exclude"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to exclude. Regexp filtering out classes or methods which are MicroBenchmarks.")
-    protected List<String> excludes = new ArrayList<String>();
+        OptionSpec<String> optResultFormat = parser.accepts("rf", "Result format type. See the list of available result formats first.")
+                .withRequiredArg().ofType(String.class).describedAs("type");
 
-    @Option(name = "-wm", aliases = {"--warmupmode"}, usage = "Warmup mode for warming up selected micro benchmarks. Warmup modes are: BULK (before all benchmarks), INDI (before each benchmark), BULK_INDI (both)")
-    protected WarmupMode warmupMode;
+        OptionSpec<String> optWarmupMode = parser.accepts("wm", "Warmup mode for warming up selected benchmarks. Warmup modes are: " + Arrays.toString(WarmupMode.values()) + ".")
+                .withRequiredArg().ofType(String.class).describedAs("mode");
 
-    @Option(name = "-wmb", aliases = {"--warmupmicrobenchmarks"}, multiValued = true, metaVar = "REGEXP", usage = "Microbenchmarks to run for warmup before running any other benchmarks. These micros may be different from the target micros to warm up the harness or other parts of the JVM prior to running the target micro benchmarks. Regexp filtering out classes or methods which are MicroBenchmarks.")
-    protected List<String> warmupMicros = new ArrayList<String>();
+        OptionSpec<String> optExcludes = parser.accepts("e", "Benchmarks to exclude from the run.")
+                .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("regexp+");
 
-    // show something options
-    @Option(name = "-l", aliases = {"--list"}, usage = "List available microbenchmarks and exit. Filter using available regexps.")
-    protected boolean list = false;
+        OptionSpec<String> optWarmupBenchmarks = parser.accepts("wmb", "Warmup benchmarks to include in the run " +
+                "in addition to already selected. JMH will not measure these benchmarks, but only use them" +
+                " for the warmup.")
+                .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("regexp+");
 
-    @Option(name = "--listResultFormats", usage = "List available result formats")
-    protected boolean listResultFormats;
+        parser.accepts("l", "List matching benchmarks and exit.");
+        parser.accepts("lrf", "List result formats.");
+        parser.accepts("lprof", "List profilers.");
+        parser.accepts("h", "Display help.");
 
-    @Option(name = "-h", aliases = {"--help"}, usage = "Display help")
-    protected boolean help = false;
+        try {
+            OptionSet set = parser.parse(argv);
 
-    @Option(name = "--listProfilers", usage = "List available profilers")
-    protected boolean listProfilers;
+            if (set.has(optExcludes)) {
+                excludes.addAll(optExcludes.values(set));
+            }
 
-    /**
-     * Kawaguchi's parser
-     */
-    private transient CmdLineParser parser;
+            if (set.has(optWarmupBenchmarks)) {
+                warmupMicros.addAll(optWarmupBenchmarks.values(set));
+            }
 
-    public static CommandLineOptions newInstance() {
-        CommandLineOptions opts = new CommandLineOptions();
-        opts.parser = new CmdLineParser(opts);
-        return opts;
+            if (set.has(optTU)) {
+                String va = optTU.value(set);
+                TimeUnit tu;
+                if (va.equalsIgnoreCase("ns")) {
+                    tu = TimeUnit.NANOSECONDS;
+                } else if (va.equalsIgnoreCase("us")) {
+                    tu = TimeUnit.MICROSECONDS;
+                } else if (va.equalsIgnoreCase("ms")) {
+                    tu = TimeUnit.MILLISECONDS;
+                } else if (va.equalsIgnoreCase("s")) {
+                    tu = TimeUnit.SECONDS;
+                } else if (va.equalsIgnoreCase("m")) {
+                    tu = TimeUnit.MINUTES;
+                } else if (va.equalsIgnoreCase("h")) {
+                    tu = TimeUnit.HOURS;
+                } else {
+                    throw new CommandLineOptionException("Unknown time unit: " + va);
+                }
+                timeUnit = Optional.of(tu);
+            } else {
+                timeUnit = Optional.none();
+            }
+
+            if (set.has(optWarmupMode)) {
+                try {
+                    warmupMode = Optional.of(WarmupMode.valueOf(optWarmupMode.value(set)));
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            } else {
+                warmupMode = Optional.none();
+            }
+
+            if (set.has(optResultFormat)) {
+                try {
+                    resultFormat = Optional.of(ResultFormatType.valueOf(optResultFormat.value(set)));
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            } else {
+                resultFormat = Optional.none();
+            }
+
+            help = set.has("h");
+            list = set.has("l");
+            listResultFormats = set.has("lrf");
+            listProfilers = set.has("lprof");
+
+            iterations = Optional.eitherOf(optMeasureCount.value(set));
+
+            if (set.has(optMeasureTime)) {
+                String value = optMeasureTime.value(set);
+                try {
+                    runTime = Optional.of(TimeValue.fromString(value));
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            } else {
+                runTime = Optional.none();
+            }
+
+            warmupIterations = Optional.eitherOf(optWarmupCount.value(set));
+
+            if (set.has(optWarmupTime)) {
+                String value = optWarmupTime.value(set);
+                try {
+                    warmupTime = Optional.of(TimeValue.fromString(value));
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            } else {
+                warmupTime = Optional.none();
+            }
+
+            if (set.has(optThreads)) {
+                String v = optThreads.value(set);
+                if (v.equalsIgnoreCase("max")) {
+                    threads = Optional.of(Threads.MAX);
+                } else {
+                    try {
+                        threads = Optional.of(Integer.valueOf(v));
+                    } catch (IllegalArgumentException iae) {
+                        throw new CommandLineOptionException(iae.getMessage(), iae);
+                    }
+                }
+            } else {
+                threads = Optional.none();
+            }
+
+            if (set.has(optBenchmarkMode)) {
+                try {
+                    List<Mode> modes = new ArrayList<Mode>();
+                    for (String m : optBenchmarkMode.values(set)) {
+                        modes.add(Mode.deepValueOf(m));
+                    }
+                    benchMode.addAll(modes);
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            }
+
+            if (set.has(optSyncIters)) {
+                if (set.hasArgument(optSyncIters)) {
+                    synchIterations = Optional.of(optSyncIters.value(set));
+                } else {
+                    synchIterations = Optional.of(true);
+                }
+            } else {
+                synchIterations = Optional.none();
+            }
+
+            if (set.has(optGC)) {
+                if (set.hasArgument(optGC)) {
+                    gcEachIteration = Optional.of(optGC.value(set));
+                } else {
+                    gcEachIteration = Optional.of(true);
+                }
+            } else {
+                gcEachIteration = Optional.none();
+            }
+
+            if (set.has(optFOE)) {
+                if (set.hasArgument(optFOE)) {
+                    failOnError = Optional.of(optFOE.value(set));
+                } else {
+                    failOnError = Optional.of(true);
+                }
+            } else {
+                failOnError = Optional.none();
+            }
+
+            if (set.has(optVerboseMode)) {
+                try {
+                    if (set.hasArgument(optVerboseMode)) {
+                        verbose = Optional.of(VerboseMode.valueOf(set.valueOf(optVerboseMode).toUpperCase()));
+                    } else {
+                        verbose = Optional.of(VerboseMode.EXTRA);
+                    }
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            } else {
+                verbose = Optional.none();
+            }
+
+            regexps.addAll(set.valuesOf(optArgs));
+
+            if (set.has(optForks)) {
+                if (set.hasArgument(optForks)) {
+                    fork = Optional.of(optForks.value(set));
+                } else {
+                    fork = Optional.of(1);
+                }
+            } else {
+                fork = Optional.none();
+            }
+
+            warmupFork = Optional.eitherOf(optWarmupForks.value(set));
+            output = Optional.eitherOf(optOutput.value(set));
+            result = Optional.eitherOf(optOutputResults.value(set));
+
+            if (set.has(optProfilers)) {
+                try {
+                    Set<ProfilerType> profs = EnumSet.noneOf(ProfilerType.class);
+                    for (String m : optProfilers.values(set)) {
+                        profs.add(ProfilerType.valueOf(m.toUpperCase()));
+                    }
+                    profilers.addAll(profs);
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            }
+
+            if (set.has(optThreadGroups)) {
+                threadGroups.addAll(set.valuesOf(optThreadGroups));
+            }
+
+            jvm = Optional.eitherOf(optJvm.value(set));
+            jvmArgs = Optional.eitherOf(optJvmArgs.value(set));
+            jvmClassPath = Optional.eitherOf(optJvmCP.value(set));
+
+        } catch (OptionException e) {
+            throw new CommandLineOptionException(e.getMessage(), e);
+        }
     }
 
-    protected CommandLineOptions() {
+    public void showHelp() throws IOException {
+        parser.printHelpOn(System.err);
     }
 
-    /**
-     * Print Usage
-     *
-     * @param message Message to print at the top
-     */
-    public void printUsage(String message) {
-        System.err.println(message);
-        System.err.println("Usage: [options] [benchmark regexp]*");
-        parser.printUsage(System.err);
+    public void listProfilers() {
+        StringBuilder sb = new StringBuilder();
+        for (String s : ProfilerFactory.getAvailableProfilers()) {
+            if (ProfilerFactory.isSupported(s)) {
+                sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
+            }
+        }
+        if (!sb.toString().isEmpty()) {
+            System.out.println("Supported profilers:\n" + sb.toString());
+        }
+
+        sb = new StringBuilder();
+        for (String s : ProfilerFactory.getAvailableProfilers()) {
+            if (!ProfilerFactory.isSupported(s)) {
+                sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
+            }
+        }
+
+        if (!sb.toString().isEmpty()) {
+            System.out.println("Unsupported profilers:\n" + sb.toString());
+        }
     }
 
-    /**
-     * parse arguments and set fields in the Options instance
-     *
-     * @throws CmdLineException
-     */
-    public void parseArguments(String[] argv) throws CmdLineException {
-        parser.parseArgument(argv);
+    public void listResultFormats() {
+        StringBuilder sb = new StringBuilder();
+
+        for (ResultFormatType f : ResultFormatType.values()) {
+            sb.append(f.toString().toLowerCase());
+            sb.append(", ");
+        }
+        sb.setLength(sb.length() - 2);
+
+        System.out.println("Available formats: " + sb.toString());
     }
 
     /**
@@ -208,7 +423,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<WarmupMode> getWarmupMode() {
-        return Optional.eitherOf(warmupMode);
+        return warmupMode;
     }
 
     /**
@@ -243,11 +458,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public List<String> getWarmupIncludes() {
-        if (warmupMicros == null) {
-            return Collections.emptyList();
-        } else {
-            return warmupMicros;
-        }
+        return warmupMicros;
     }
 
     /**
@@ -266,7 +477,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<String> getJvm() {
-        return Optional.eitherOf(jvm);
+        return jvm;
     }
 
     /**
@@ -276,7 +487,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<String> getJvmArgs() {
-        return Optional.eitherOf(jvmArgs);
+        return jvmArgs;
     }
 
     /**
@@ -286,7 +497,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<String> getJvmClassPath() {
-        return Optional.eitherOf(jvmClassPath);
+        return jvmClassPath;
     }
 
     /**
@@ -296,7 +507,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Integer> getForkCount() {
-        return Optional.eitherOf(fork);
+        return fork;
     }
 
     /**
@@ -306,7 +517,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Integer> getWarmupForkCount() {
-        return Optional.eitherOf(warmupFork);
+        return warmupFork;
     }
 
     /**
@@ -316,17 +527,17 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<String> getOutput() {
-        return Optional.eitherOf(output);
+        return output;
     }
 
     @Override
     public Optional<ResultFormatType> getResultFormat() {
-        return Optional.eitherOf(resultFormat);
+        return resultFormat;
     }
 
     @Override
     public Optional<String> getResult() {
-        return Optional.eitherOf(result);
+        return result;
     }
 
     public boolean shouldListResultFormats() {
@@ -359,7 +570,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Integer> getMeasurementIterations() {
-        return Optional.eitherOf(iterations);
+        return iterations;
     }
 
     /**
@@ -369,7 +580,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<TimeValue> getMeasurementTime() {
-        return Optional.eitherOf(runTime);
+        return runTime;
     }
 
     /**
@@ -379,7 +590,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<TimeValue> getWarmupTime() {
-        return Optional.eitherOf(warmupTime);
+        return warmupTime;
     }
 
     /**
@@ -389,7 +600,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Integer> getWarmupIterations() {
-        return Optional.eitherOf(warmupIterations);
+        return warmupIterations;
     }
 
     /**
@@ -399,7 +610,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Integer> getThreads() {
-        return Optional.eitherOf(threads);
+        return threads;
     }
 
     @Override
@@ -422,7 +633,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Boolean> shouldDoGC() {
-        return Optional.eitherOf(gcEachIteration);
+        return gcEachIteration;
     }
 
     /**
@@ -432,7 +643,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Boolean> shouldSyncIterations() {
-        return Optional.eitherOf(synchIterations);
+        return synchIterations;
     }
 
     /**
@@ -442,7 +653,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<VerboseMode> verbosity() {
-        return Optional.eitherOf(verbose);
+        return verbose;
     }
 
     /**
@@ -452,7 +663,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<TimeUnit> getTimeUnit() {
-        return Optional.eitherOf(timeUnit);
+        return timeUnit;
     }
 
     /**
@@ -461,7 +672,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public Optional<Boolean> shouldFailOnError() {
-        return Optional.eitherOf(failOnError);
+        return failOnError;
     }
 
     /**
@@ -477,6 +688,5 @@ public class CommandLineOptions implements Options {
     public Collection<Mode> getBenchModes() {
         return new HashSet<Mode>(benchMode);
     }
-
 
 }

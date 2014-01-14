@@ -149,7 +149,7 @@ public class TimeValue implements Serializable {
 
     public static TimeValue fromString(String timeString) {
         if (timeString == null) {
-            return new TimeValue(-1, null);
+            throw new IllegalArgumentException("String is null");
         }
         timeString = timeString.replaceAll(" ", "").toLowerCase();
         if (timeString.contains("ns")) {
