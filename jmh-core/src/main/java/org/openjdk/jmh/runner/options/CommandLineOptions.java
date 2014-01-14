@@ -86,7 +86,7 @@ public class CommandLineOptions implements Options {
     private final boolean help;
     private final boolean listProfilers;
 
-    private final OptionParser parser;
+    private final transient OptionParser parser;
 
     public CommandLineOptions(String... argv) throws CommandLineOptionException {
         parser = new OptionParser();

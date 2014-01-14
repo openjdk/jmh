@@ -33,6 +33,9 @@ import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,6 +51,20 @@ public class TestOptions {
     public void setUp() throws Exception {
         EMPTY_CMDLINE = new CommandLineOptions();
         EMPTY_BUILDER = new OptionsBuilder().build();
+    }
+
+    @Test
+    public void testSerializable_Cmdline() throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
+        oos.writeObject(EMPTY_CMDLINE);
+        oos.flush();
+    }
+
+    @Test
+    public void testSerializable_Builder() throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
+        oos.writeObject(EMPTY_BUILDER);
+        oos.flush();
     }
 
     @Test
