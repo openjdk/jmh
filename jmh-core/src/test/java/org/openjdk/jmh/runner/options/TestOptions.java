@@ -113,6 +113,24 @@ public class TestOptions {
     }
 
     @Test
+    public void testResultFormats_UC() throws Exception {
+        for (ResultFormatType type : ResultFormatType.values()) {
+            CommandLineOptions cmdLine = new CommandLineOptions("-rf", type.toString().toUpperCase());
+            Options builder = new OptionsBuilder().resultFormat(type).build();
+            Assert.assertEquals(builder.getResultFormat(), cmdLine.getResultFormat());
+        }
+    }
+
+    @Test
+    public void testResultFormats_LC() throws Exception {
+        for (ResultFormatType type : ResultFormatType.values()) {
+            CommandLineOptions cmdLine = new CommandLineOptions("-rf", type.toString().toLowerCase());
+            Options builder = new OptionsBuilder().resultFormat(type).build();
+            Assert.assertEquals(builder.getResultFormat(), cmdLine.getResultFormat());
+        }
+    }
+
+    @Test
     public void testResultFormats_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getResultFormat(), EMPTY_CMDLINE.getResultFormat());
     }

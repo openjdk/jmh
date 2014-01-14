@@ -226,7 +226,7 @@ public class CommandLineOptions implements Options {
 
             if (set.has(optResultFormat)) {
                 try {
-                    resultFormat = Optional.of(ResultFormatType.valueOf(optResultFormat.value(set)));
+                    resultFormat = Optional.of(ResultFormatType.valueOf(optResultFormat.value(set).toUpperCase()));
                 } catch (IllegalArgumentException iae) {
                     throw new CommandLineOptionException(iae.getMessage(), iae);
                 }
