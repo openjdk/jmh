@@ -37,10 +37,10 @@ questions.
     <property name="jmh.jar" location="../jmh-core/target/jmh-core-1.0-SNAPSHOT.jar"/>
 
     <!--
-        Point this to args4j dependency. Again, we default to the one
+        Point this to joptsimple dependency. Again, we default to the one
         Maven already resolved for us, but you can point it elsewhere.
     -->
-    <property name="args4j.jar" location="${user.home}/.m2/repository/args4j/args4j/2.0.16/args4j-2.0.16.jar"/>
+    <property name="joptsimple.jar" location="${user.home}/.m2/repository/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"/>
 
     <property name="src" location="src"/>
     <property name="build" location="build"/>
@@ -70,7 +70,7 @@ questions.
                 <attribute name="Main-Class" value="org.openjdk.jmh.Main"/>
             </manifest>
             <zipgroupfileset file="${jmh.jar}" includes="**/*.jar" />
-            <zipgroupfileset file="${args4j.jar}" includes="**/*.jar" />
+            <zipgroupfileset file="${joptsimple.jar}" includes="**/*.jar" />
         </jar>
     </target>
 
