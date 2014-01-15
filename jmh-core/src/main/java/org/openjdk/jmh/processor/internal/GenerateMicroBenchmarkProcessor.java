@@ -874,15 +874,15 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         for (Element method : methodGroup.methods()) {
             writer.println("    public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + method.getSimpleName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println("        long realTime = 0;");
-            writer.println("        long rnd = System.nanoTime();");
-            writer.println("        long rndMask = 0;");
+            writer.println("        int rnd = (int)System.nanoTime();");
+            writer.println("        int rndMask = 0;");
             writer.println("        long time = 0;");
             writer.println("        int currentStride = 0;");
             writer.println("        do {");
 
             invocationProlog(writer, 3, method, states, true);
 
-            writer.println("            rnd = rnd * 6364136223846793005L + 1442695040888963407L;");
+            writer.println("            rnd = (rnd * 1664525 + 1013904223);");
             writer.println("            boolean sample = (rnd & rndMask) == 0;");
             writer.println("            if (sample) {");
             writer.println("                time = System.nanoTime();");

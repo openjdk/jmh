@@ -73,8 +73,8 @@ class BlackHoleL2 extends BlackHoleL1 {
     public volatile Object obj1 = new Object();
     public volatile Object[] objs1 = new Object[]{new Object()};
     public volatile BlackHoleL2 nullBait = null;
-    public long tlr = System.nanoTime();
-    public long tlrMask = 1;
+    public int tlr = (int) System.nanoTime();
+    public int tlrMask = 1;
 }
 
 class BlackHoleL3 extends BlackHoleL2 {
@@ -247,10 +247,10 @@ public class BlackHole extends BlackHoleL4 {
      */
     public final void consume(Object obj) {
         // let's play the optimizing compiler, dude!
-        long tlr = this.tlr;
-        long tlrMask = this.tlrMask;
+        int tlr = this.tlr;
+        int tlrMask = this.tlrMask;
 
-        tlr = (tlr * 6364136223846793005L + 1442695040888963407L);
+        tlr = (tlr * 1664525 + 1013904223);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.obj1 = obj;
@@ -267,10 +267,10 @@ public class BlackHole extends BlackHoleL4 {
      */
     public final void consume(Object[] objs) {
         // let's play the optimizing compiler, dude!
-        long tlr = this.tlr;
-        long tlrMask = this.tlrMask;
+        int tlr = this.tlr;
+        int tlrMask = this.tlrMask;
 
-        tlr = (tlr * 6364136223846793005L + 1442695040888963407L);
+        tlr = (tlr * 1664525 + 1013904223);
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.objs1 = objs;

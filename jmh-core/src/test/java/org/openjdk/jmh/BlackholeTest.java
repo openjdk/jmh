@@ -33,7 +33,7 @@ public class BlackholeTest {
         long tlr = 0;
         long tlrMask = 0;
         for (int t = 0; t < 1000000000; t++) {
-            tlr = (tlr * 6364136223846793005L + 1442695040888963407L);
+            tlr = (tlr * 1664525 + 1013904223);
             if ((tlr & tlrMask) == 0) {
                 // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
                 tlrMask = (tlrMask << 1) + 1;
