@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.logic;
 
-import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -246,18 +245,12 @@ public class BlackHole extends BlackHoleL4 {
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
-        // let's play the optimizing compiler, dude!
-        int tlr = this.tlr;
-        int tlrMask = this.tlrMask;
-
-        tlr = (tlr * 1664525 + 1013904223);
+        int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.obj1 = obj;
-            this.tlrMask = (tlrMask << 1) + 1;
-            tlr = 0;
+            this.tlrMask = (this.tlrMask << 1) + 1;
         }
-        this.tlr = tlr;
     }
 
     /**
@@ -266,18 +259,12 @@ public class BlackHole extends BlackHoleL4 {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
-        // let's play the optimizing compiler, dude!
-        int tlr = this.tlr;
-        int tlrMask = this.tlrMask;
-
-        tlr = (tlr * 1664525 + 1013904223);
+        int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.objs1 = objs;
             this.tlrMask = (tlrMask << 1) + 1;
-            tlr = 0;
         }
-        this.tlr = tlr;
     }
 
     /**
