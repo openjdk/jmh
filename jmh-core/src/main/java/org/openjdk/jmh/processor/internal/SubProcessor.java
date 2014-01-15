@@ -24,34 +24,11 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
-import org.openjdk.jmh.annotations.Threads;
-
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.tools.Diagnostic.Kind;
 
-public class GroupValidationProcessor implements SubProcessor {
+public interface SubProcessor {
 
-    @Override
-    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
-        try {
-            for (Element element : roundEnv.getElementsAnnotatedWith(Group.class)) {
-                if (element.getAnnotation(Threads.class) != null) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
-                            "@" + Threads.class.getSimpleName() + " annotation is placed within " +
-                                    "the benchmark method with @" + Group.class.getSimpleName() + " annotation. " +
-                                    "This has ambiguous behavioral effect, and prohibited. " +
-                                    "Did you mean @" + GroupThreads.class.getSimpleName() + " instead?",
-                            element);
-                }
-            }
-        } catch (Throwable t) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had throw exception: " + t);
-            t.printStackTrace(System.err);
-        }
-    }
+    void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv);
 
 }

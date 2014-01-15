@@ -33,7 +33,6 @@ import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
@@ -50,14 +49,13 @@ import org.openjdk.jmh.logic.results.SingleShotResult;
 import org.openjdk.jmh.logic.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.MicroBenchmarkList;
-import org.openjdk.jmh.util.AnnotationUtils;
-import org.openjdk.jmh.util.internal.CollectionUtils;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 
 import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -101,9 +99,23 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
     private final Set<BenchmarkInfo> benchmarkInfos = new HashSet<BenchmarkInfo>();
 
+    private final Collection<SubProcessor> subProcessors = new ArrayList<SubProcessor>();
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        subProcessors.add(new CompilerControlProcessor());
+        subProcessors.add(new HelperMethodValidationProcessor());
+        subProcessors.add(new GroupValidationProcessor());
+    }
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
+            for (SubProcessor sub : subProcessors) {
+                sub.process(roundEnv, processingEnv);
+            }
+
             if (!roundEnv.processingOver()) {
                 TypeElement gmb = processingEnv.getElementUtils().getTypeElement(GenerateMicroBenchmark.class.getCanonicalName());
                 // Build a Set of classes with a list of annotated methods

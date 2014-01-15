@@ -27,59 +27,45 @@ package org.openjdk.jmh.processor.internal;
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.runner.CompilerHints;
 
-import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class CompilerControlProcessor extends AbstractProcessor {
+public class CompilerControlProcessor implements SubProcessor {
 
     private final List<String> lines = new ArrayList<String>();
 
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(CompilerControl.class.getName());
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
         try {
             if (!roundEnv.processingOver()) {
-                for (TypeElement annotation : annotations) {
-                    for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
+                for (Element element : roundEnv.getElementsAnnotatedWith(CompilerControl.class)) {
 
-                        CompilerControl ann = element.getAnnotation(CompilerControl.class);
-                        if (ann == null) {
-                            throw new IllegalStateException("No annotation");
-                        }
-
-                        switch (element.getKind()) {
-                            case CLASS:
-                                lines.add(ann.value().command() + "," + element.toString().replaceAll("\\.", "/") + ".*");
-                                break;
-                            case METHOD:
-                                lines.add(ann.value().command() + "," + element.getEnclosingElement().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
-                                break;
-                            default:
-                                processingEnv.getMessager().printMessage(Kind.ERROR,
-                                        "@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
-                                                "unexpected target",
-                                        element);
-                        }
-
+                    CompilerControl ann = element.getAnnotation(CompilerControl.class);
+                    if (ann == null) {
+                        throw new IllegalStateException("No annotation");
                     }
+
+                    switch (element.getKind()) {
+                        case CLASS:
+                            lines.add(ann.value().command() + "," + element.toString().replaceAll("\\.", "/") + ".*");
+                            break;
+                        case METHOD:
+                            lines.add(ann.value().command() + "," + element.getEnclosingElement().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
+                            break;
+                        default:
+                            processingEnv.getMessager().printMessage(Kind.ERROR,
+                                    "@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
+                                            "unexpected target",
+                                    element);
+                    }
+
                 }
             } else {
                 try {
@@ -93,13 +79,11 @@ public class CompilerControlProcessor extends AbstractProcessor {
                 } catch (IOException ex) {
                     processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing compiler hint list " + ex);
                 }
-
             }
         } catch (Throwable t) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had thrown exception: " + t);
             t.printStackTrace(System.err);
         }
-        return true;
     }
 
 }

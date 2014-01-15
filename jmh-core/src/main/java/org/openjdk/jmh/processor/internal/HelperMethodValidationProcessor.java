@@ -28,62 +28,49 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
-import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
-import java.util.HashSet;
-import java.util.Set;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class HelperMethodValidationProcessor extends AbstractProcessor {
+public class HelperMethodValidationProcessor implements SubProcessor {
 
     @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        HashSet<String> supported = new HashSet<String>();
-        supported.add(Setup.class.getName());
-        supported.add(TearDown.class.getName());
-        return supported;
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
         try {
-            for (TypeElement annotation : annotations) {
-                for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
+            for (Element element : roundEnv.getElementsAnnotatedWith(Setup.class)) {
+                // OK to have these annotation for @State objects
+                if (element.getEnclosingElement().getAnnotation(State.class) != null) continue;
 
-                    // OK to have these annotation for @State objects
-                    if (element.getEnclosingElement().getAnnotation(State.class) != null) continue;
+                // Abstract classes are not instantiated, assume OK
+                if (element.getEnclosingElement().getModifiers().contains(Modifier.ABSTRACT)) continue;
 
-                    // Abstract classes are not instantiated, assume OK
-                    if (element.getEnclosingElement().getModifiers().contains(Modifier.ABSTRACT)) continue;
-
-                    if (element.getAnnotation(Setup.class) != null) {
-                        processingEnv.getMessager().printMessage(Kind.ERROR,
-                                "@" + Setup.class.getSimpleName() + " annotation is placed within " +
-                                        "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                        "This has no behavioral effect, and prohibited.",
-                                element);
-                    }
-                    if (element.getAnnotation(TearDown.class) != null) {
-                        processingEnv.getMessager().printMessage(Kind.ERROR,
-                                "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
-                                        "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                        "This can be futile if no @State-bearing subclass is used.",
-                                element);
-                    }
-                }
-
+                    processingEnv.getMessager().printMessage(Kind.ERROR,
+                            "@" + Setup.class.getSimpleName() + " annotation is placed within " +
+                                    "the class not having @" + State.class.getSimpleName() + " annotation. " +
+                                    "This has no behavioral effect, and prohibited.",
+                            element);
             }
+
+            for (Element element : roundEnv.getElementsAnnotatedWith(TearDown.class)) {
+                // OK to have these annotation for @State objects
+                if (element.getEnclosingElement().getAnnotation(State.class) != null) continue;
+
+                // Abstract classes are not instantiated, assume OK
+                if (element.getEnclosingElement().getModifiers().contains(Modifier.ABSTRACT)) continue;
+
+                processingEnv.getMessager().printMessage(Kind.ERROR,
+                            "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
+                                    "the class not having @" + State.class.getSimpleName() + " annotation. " +
+                                    "This can be futile if no @State-bearing subclass is used.",
+                            element);
+            }
+
         } catch (Throwable t) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had throw exception: " + t);
             t.printStackTrace(System.err);
         }
-        return true;
     }
 
 }
