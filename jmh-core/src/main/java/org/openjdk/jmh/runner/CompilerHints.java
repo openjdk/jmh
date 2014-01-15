@@ -57,6 +57,7 @@ public class CompilerHints extends AbstractResourceReader {
                 FileWriter writer = new FileWriter(file);
                 PrintWriter pw = new PrintWriter(writer);
                 pw.println("quiet");
+                pw.println("inline,org/openjdk/jmh/logic/BlackHole.*");
                 for (String l : defaultList().get()) {
                     pw.println(l);
                 }
