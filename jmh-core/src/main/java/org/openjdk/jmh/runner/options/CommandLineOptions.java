@@ -384,7 +384,7 @@ public class CommandLineOptions implements Options {
         StringBuilder sb = new StringBuilder();
         for (String s : ProfilerFactory.getAvailableProfilers()) {
             if (ProfilerFactory.isSupported(s)) {
-                sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
+                sb.append(String.format("%20s: %s\n", s, ProfilerFactory.getDescription(s)));
             }
         }
         if (!sb.toString().isEmpty()) {
@@ -394,7 +394,7 @@ public class CommandLineOptions implements Options {
         sb = new StringBuilder();
         for (String s : ProfilerFactory.getAvailableProfilers()) {
             if (!ProfilerFactory.isSupported(s)) {
-                sb.append(String.format("%10s: %s\n", s, ProfilerFactory.getDescription(s)));
+                sb.append(String.format("%20s: %s\n", s, ProfilerFactory.getDescription(s)));
             }
         }
 

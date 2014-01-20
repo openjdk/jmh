@@ -40,11 +40,6 @@ public enum ProfilerType {
         }
 
         @Override
-        public String id() {
-            return "gc";
-        }
-
-        @Override
         public String label() {
             return "GC";
         }
@@ -63,11 +58,6 @@ public enum ProfilerType {
         @Override
         public boolean isSupported() {
             return CompilerProfiler.isSupported();
-        }
-
-        @Override
-        public String id() {
-            return "comp";
         }
 
         @Override
@@ -92,11 +82,6 @@ public enum ProfilerType {
         }
 
         @Override
-        public String id() {
-            return "cl";
-        }
-
-        @Override
         public String label() {
             return "Class";
         }
@@ -106,11 +91,7 @@ public enum ProfilerType {
             return "Classloader profiling via standard MBeans";
         }
     },
-    HS_RUNTIME {
-        @Override
-        public String id() {
-            return "hs_rt";
-        }
+    HS_RT {
 
         @Override
         public String label() {
@@ -144,11 +125,6 @@ public enum ProfilerType {
         }
 
         @Override
-        public String id() {
-            return "hs_cl";
-        }
-
-        @Override
         public String label() {
             return "HS(Class)";
         }
@@ -159,11 +135,6 @@ public enum ProfilerType {
         }
     },
     HS_COMP {
-        @Override
-        public String id() {
-            return "hs_comp";
-        }
-
         @Override
         public String label() {
             return "HS(JIT)";
@@ -186,11 +157,6 @@ public enum ProfilerType {
     },
     HS_GC {
         @Override
-        public String id() {
-            return "hs_gc";
-        }
-
-        @Override
         public String label() {
             return "HS(GC)";
         }
@@ -210,11 +176,7 @@ public enum ProfilerType {
             return "HotSpot (tm) memory manager (GC) profiling via implementation-specific MBeans";
         }
     },
-    HS_THREAD {
-        @Override
-        public String id() {
-            return "hs_thr";
-        }
+    HS_THR {
 
         @Override
         public String label() {
@@ -236,12 +198,7 @@ public enum ProfilerType {
             return "HotSpot (tm) threading subsystem via implementation-specific MBeans";
         }
     },
-    STACK_PROFILER {
-        @Override
-        public String id() {
-            return "stack";
-        }
-
+    STACK {
         @Override
         public String label() {
             return "Stack";
@@ -270,7 +227,9 @@ public enum ProfilerType {
     /**
      * @return id to reference the profiler
      */
-    public abstract String id();
+    public final String id() {
+        return this.toString().toLowerCase();
+    }
 
     /**
      * @return label to pretty-print profiler name
