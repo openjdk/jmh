@@ -50,7 +50,7 @@ public class ForkedJvmArgs3_Test {
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest1  -Dtest3")
+    @Fork(jvmArgs = {"-Dtest1", "-Dtest3"})
     public void test1() {
         Fixtures.work();
         Assert.assertNotNull(System.getProperty("test1"));
@@ -61,7 +61,7 @@ public class ForkedJvmArgs3_Test {
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest2  -Dtest3")
+    @Fork(jvmArgs = {"-Dtest2", "-Dtest3"})
     public void test2() {
         Fixtures.work();
         Assert.assertNull(System.getProperty("test1"));

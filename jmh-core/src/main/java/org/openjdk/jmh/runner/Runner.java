@@ -321,30 +321,28 @@ public class Runner extends BaseRunner {
 
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
 
-                String annJvmArgs = benchmark.getJvmArgs().orElse(null);
-                String annJvmArgsAppend = benchmark.getJvmArgsAppend().orElse(null);
-                String annJvmArgsPrepend = benchmark.getJvmArgsPrepend().orElse(null);
+            String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort());
 
-                String[] commandString = getSeparateExecutionCommand(annJvmArgs, annJvmArgsPrepend, annJvmArgsAppend, server.getHost(), server.getPort());
+            BenchmarkParams params = new BenchmarkParams(options, benchmark, ActionMode.UNDEF);
 
-                BenchmarkParams params = new BenchmarkParams(options, benchmark, ActionMode.UNDEF);
-
-                int forkCount = params.getForks();
-                int warmupForkCount = params.getWarmupForks();
-                if (warmupForkCount > 0) {
-                    out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
-                    for (int i = 0; i < warmupForkCount; i++) {
-                        out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
-                        doFork(server, commandString);
-                    }
+            int forkCount = params.getForks();
+            int warmupForkCount = params.getWarmupForks();
+            if (warmupForkCount > 0) {
+                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
+                for (int i = 0; i < warmupForkCount; i++) {
+                    out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
+                    out.println("# VM options: " + merge(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark)))));
+                    doFork(server, commandString);
                 }
+            }
 
-                out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
-                for (int i = 0; i < forkCount; i++) {
-                    out.println("# Fork: " + (i + 1) + " of " + forkCount);
-                    Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
-                    results.merge(result);
-                }
+            out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
+            for (int i = 0; i < forkCount; i++) {
+                out.println("# Fork: " + (i + 1) + " of " + forkCount);
+                out.println("# VM options: " + merge(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark)))));
+                Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
+                results.merge(result);
+            }
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -357,6 +355,13 @@ public class Runner extends BaseRunner {
         return results;
     }
 
+    private String merge(Collection<String> ss) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : ss) {
+            sb.append(s).append(" ");
+        }
+        return sb.toString().trim();
+    }
 
     private Multimap<BenchmarkRecord, BenchResult> doFork(BinaryLinkServer reader, String[] commandString) {
         try {
@@ -397,72 +402,32 @@ public class Runner extends BaseRunner {
     /**
      * Helper method for assembling the command to execute the forked JVM with
      *
+     *
+     * @param benchmark benchmark to execute
      * @param host host VM host
      * @param port host VM port
      * @return the final command to execute
      */
-    public String[] getSeparateExecutionCommand(String annJvmArgs, String annJvmArgsPrepend, String annJvmArgsAppend, String host, int port) {
-
-        Properties props = System.getProperties();
-        String javaHome = (String) props.get("java.home");
-        String separator = File.separator;
-        String osName = props.getProperty("os.name");
-        boolean isOnWindows = osName.contains("indows");
-        String platformSpecificBinaryPostfix = isOnWindows ? ".exe" : "";
-
-        String classPath = options.getJvmClassPath().orElse((String) props.get("java.class.path"));
-
-        if (isOnWindows) {
-            classPath = '"' + classPath + '"';
-        }
+    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String host, int port) {
 
         List<String> command = new ArrayList<String>();
 
-        // use supplied jvm if given
-        if (options.getJvm().hasValue()) {
-            command.add(options.getJvm().get());
-        } else {
-            // else find out which one parent is and use that
-            StringBuilder javaExecutable = new StringBuilder();
-            javaExecutable.append(javaHome);
-            javaExecutable.append(separator);
-            javaExecutable.append("bin");
-            javaExecutable.append(separator);
-            javaExecutable.append("java");
-            javaExecutable.append(platformSpecificBinaryPostfix);
-            command.add(javaExecutable.toString());
-        }
+        // use supplied jvm, if given
+        command.add(options.getJvm().orElse(getDefaultJvm()));
 
-        if (options.getJvmArgs().hasValue()) { // use supplied jvm args if given in cmd line
-            command.addAll(Arrays.asList(options.getJvmArgs().get().split("[ ]+")));
-        } else if (annJvmArgs != null) { // use jvm args supplied in annotation which shuns implicit args
-            command.addAll(Arrays.asList(annJvmArgs.split("[ ]+")));
-        } else {
-            // else use same jvm args given to this runner
-            RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
-            List<String> args = RuntimemxBean.getInputArguments();
-
-            // prepend jvm args
-            if (annJvmArgsPrepend != null) {
-                command.addAll(Arrays.asList(annJvmArgsPrepend.split(" ")));
-            }
-
-            for (String arg : args) {
-                command.add(arg);
-            }
-
-            // append jvm args
-            if (annJvmArgsAppend != null) {
-                command.addAll(Arrays.asList(annJvmArgsAppend.split(" ")));
-            }
-        }
+        // use supplied jvm args, if given
+        command.addAll(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark))));
 
         // add any compiler oracle hints
         command.add("-XX:CompileCommandFile=" + CompilerHints.hintsFile());
 
         // assemble final process command
         command.add("-cp");
-        command.add(classPath);
+        if (isWindows()) {
+            command.add('"' + System.getProperty("java.class.path") + '"');
+        } else {
+            command.add(System.getProperty("java.class.path"));
+        }
         command.add(ForkedMain.class.getName());
 
         // Forked VM assumes the exact order of arguments:
@@ -472,6 +437,29 @@ public class Runner extends BaseRunner {
         command.add(String.valueOf(port));
 
         return command.toArray(new String[command.size()]);
+    }
+
+    private boolean isWindows() {
+        return System.getProperty("os.name").contains("indows");
+    }
+
+    private String getDefaultJvm() {
+        StringBuilder javaExecutable = new StringBuilder();
+        javaExecutable.append(System.getProperty("java.home"));
+        javaExecutable.append(File.separator);
+        javaExecutable.append("bin");
+        javaExecutable.append(File.separator);
+        javaExecutable.append("java");
+        javaExecutable.append(isWindows() ? ".exe" : "");
+        return javaExecutable.toString();
+    }
+
+    private Collection<String> getDefaultJvmArgs(BenchmarkRecord benchmark) {
+        Collection<String> res = new ArrayList<String>();
+        res.addAll(benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList()));
+        res.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+        res.addAll(benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList()));
+        return res;
     }
 
 }

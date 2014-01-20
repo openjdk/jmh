@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.annotations;
 
-import org.openjdk.jmh.util.AnnotationUtils;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -46,20 +44,21 @@ public @interface Fork {
 
     public static final int BLANK_FORKS = -1;
 
+    public static final String BLANK_ARGS = "blank_blank_blank_2014";
+
     /** specifies number of times harness should fork, zero means "no fork" */
     int value() default BLANK_FORKS;
 
     /** enforce strict JVM args, replaces any implicit jvm args */
-    String jvmArgs() default AnnotationUtils.PARAM_NOT_SET;
+    String[] jvmArgs() default { BLANK_ARGS };
 
     /** prepend these arguments in the command line */
-    String jvmArgsPrepend() default AnnotationUtils.PARAM_NOT_SET;
+    String[] jvmArgsPrepend() default { BLANK_ARGS };
 
     /** append these arguments in the command line */
-    String jvmArgsAppend() default AnnotationUtils.PARAM_NOT_SET;
+    String[] jvmArgsAppend() default { BLANK_ARGS };
 
     /** ignore results first warmups forks */
     int warmups() default BLANK_FORKS;
 
 }
-

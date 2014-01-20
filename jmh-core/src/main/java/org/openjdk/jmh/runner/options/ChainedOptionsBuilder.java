@@ -208,19 +208,11 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder jvm(String path);
 
     /**
-     * Forked JVM classpath.
-     *
-     * @param value classpath to override with
-     * @return builder
-     */
-    ChainedOptionsBuilder jvmClasspath(String value);
-
-    /**
      * Forked JVM arguments.
      *
      * @param value arguments to override with
      * @return builder
      */
-    ChainedOptionsBuilder jvmArgs(String value);
+    ChainedOptionsBuilder jvmArgs(String... value);
 
 }

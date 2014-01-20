@@ -31,6 +31,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -390,21 +391,6 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private Optional<String> jvmClassPath = Optional.none();
-
-    @Override
-    public ChainedOptionsBuilder jvmClasspath(String value) {
-        this.jvmClassPath = Optional.of(value);
-        return this;
-    }
-
-    @Override
-    public Optional<String> getJvmClassPath() {
-        return jvmClassPath;
-    }
-
-    // ---------------------------------------------------------------------------
-
     private Optional<String> jvmBinary = Optional.none();
 
     @Override
@@ -420,16 +406,16 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private Optional<String> jvmArgs = Optional.none();
+    private Optional<Collection<String>> jvmArgs = Optional.none();
 
     @Override
-    public ChainedOptionsBuilder jvmArgs(String value) {
-        this.jvmArgs = Optional.of(value);
+    public ChainedOptionsBuilder jvmArgs(String... value) {
+        this.jvmArgs = Optional.<Collection<String>>of(Arrays.asList(value));
         return this;
     }
 
     @Override
-    public Optional<String> getJvmArgs() {
+    public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
     }
 

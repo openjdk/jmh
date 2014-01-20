@@ -29,6 +29,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializable {
 
@@ -43,14 +44,14 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final Optional<TimeValue> measurementTime;
     private final Optional<Integer> forks;
     private final Optional<Integer> warmupForks;
-    private final Optional<String> jvmArgs;
-    private final Optional<String> jvmArgsPrepend;
-    private final Optional<String> jvmArgsAppend;
+    private final Optional<Collection<String>> jvmArgs;
+    private final Optional<Collection<String>> jvmArgsPrepend;
+    private final Optional<Collection<String>> jvmArgsAppend;
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
                            Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime,
                            Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime,
-                           Optional<Integer> forks, Optional<Integer> warmupForks, Optional<String> jvmArgs, Optional<String> jvmArgsPrepend, Optional<String> jvmArgsAppend) {
+                           Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -78,28 +79,31 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());
         this.threadGroups = convert(args[3].split("="));
-        this.threads = Optional.of(args[4], Optional.INTEGER_EXTRACTOR);
-        this.warmupIterations = Optional.of(args[5], Optional.INTEGER_EXTRACTOR);
-        this.warmupTime = Optional.of(args[6], Optional.TIME_VALUE_EXTRACTOR);
-        this.measurementIterations = Optional.of(args[7], Optional.INTEGER_EXTRACTOR);
-        this.measurementTime = Optional.of(args[8], Optional.TIME_VALUE_EXTRACTOR);
-        this.forks = Optional.of(args[9], Optional.INTEGER_EXTRACTOR);
-        this.warmupForks = Optional.of(args[10], Optional.INTEGER_EXTRACTOR);
-        this.jvmArgs = Optional.of(args[11], Optional.STRING_EXTRACTOR);
-        this.jvmArgsPrepend = Optional.of(args[12], Optional.STRING_EXTRACTOR);
-        this.jvmArgsAppend = Optional.of(args[13], Optional.STRING_EXTRACTOR);
+        this.threads = Optional.of(args[4], Optional.INTEGER_UNMARSHALLER);
+        this.warmupIterations = Optional.of(args[5], Optional.INTEGER_UNMARSHALLER);
+        this.warmupTime = Optional.of(args[6], Optional.TIME_VALUE_UNMARSHALLER);
+        this.measurementIterations = Optional.of(args[7], Optional.INTEGER_UNMARSHALLER);
+        this.measurementTime = Optional.of(args[8], Optional.TIME_VALUE_UNMARSHALLER);
+        this.forks = Optional.of(args[9], Optional.INTEGER_UNMARSHALLER);
+        this.warmupForks = Optional.of(args[10], Optional.INTEGER_UNMARSHALLER);
+        this.jvmArgs = Optional.of(args[11], Optional.STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsPrepend = Optional.of(args[12], Optional.STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsAppend = Optional.of(args[13], Optional.STRING_COLLECTION_UNMARSHALLER);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<TimeValue>none(),
-                Optional.<Integer>none(), Optional.<Integer>none(), Optional.<String>none(), Optional.<String>none(), Optional.<String>none());
+                Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none());
     }
 
     public String toLine() {
         return userName + "," + generatedName + "," + mode + "," + convert(threadGroups) + "," + threads + "," +
                 warmupIterations + "," + warmupTime + "," + measurementIterations + "," + measurementTime + "," +
-                forks + "," + warmupForks + "," + jvmArgs + "," + jvmArgsPrepend + "," + jvmArgsAppend;
+                forks + "," + warmupForks + "," +
+                jvmArgs.toString(Optional.STRING_COLLECTION_MARSHALLER) + "," +
+                jvmArgsPrepend.toString(Optional.STRING_COLLECTION_MARSHALLER) + "," +
+                jvmArgsAppend.toString(Optional.STRING_COLLECTION_MARSHALLER);
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {
@@ -220,15 +224,15 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return warmupForks;
     }
 
-    public Optional<String> getJvmArgs() {
+    public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
     }
 
-    public Optional<String> getJvmArgsAppend() {
+    public Optional<Collection<String>> getJvmArgsAppend() {
         return jvmArgsAppend;
     }
 
-    public Optional<String> getJvmArgsPrepend() {
+    public Optional<Collection<String>> getJvmArgsPrepend() {
         return jvmArgsPrepend;
     }
 

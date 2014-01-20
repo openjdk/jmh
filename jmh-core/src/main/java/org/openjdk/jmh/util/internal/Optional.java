@@ -27,6 +27,8 @@ package org.openjdk.jmh.util.internal;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Option class
@@ -73,15 +75,15 @@ public class Optional<T> implements Serializable {
     /**
      * Parse the existing string value into the Option
      * @param source source string
-     * @param extractor extractor lambda parsing the (String -> T)
+     * @param unmarshaller unmarshaller lambda parsing the (String -> T)
      * @param <T> type
      * @return value wrapped in the Option
      */
-    public static <T> Optional<T> of(String source, Extractor<T> extractor) {
+    public static <T> Optional<T> of(String source, Unmarshaller<T> unmarshaller) {
         if (source.equals("[]")) {
             return Optional.none();
         } else {
-            return Optional.of(extractor.valueOf(source.substring(1, source.length() - 1)));
+            return Optional.of(unmarshaller.valueOf(source.substring(1, source.length() - 1)));
         }
     }
 
@@ -102,6 +104,14 @@ public class Optional<T> implements Serializable {
             return "[]";
         } else {
             return "[" + val + "]";
+        }
+    }
+
+    public String toString(Marshaller<T> m) {
+        if (val == null) {
+            return "[]";
+        } else {
+            return "[" + m.valueOf(val) + "]";
         }
     }
 
@@ -129,28 +139,43 @@ public class Optional<T> implements Serializable {
         return val != null ? val.hashCode() : 0;
     }
 
-    public interface Extractor<T> {
+    public interface Unmarshaller<T> {
         T valueOf(String s);
     }
 
-    public static final Extractor<Integer> INTEGER_EXTRACTOR = new Optional.Extractor<Integer>() {
+    public interface Marshaller<T> {
+        String valueOf(T val);
+    }
+
+    public static final Unmarshaller<Integer> INTEGER_UNMARSHALLER = new Unmarshaller<Integer>() {
         @Override
         public Integer valueOf(String s) {
             return Integer.valueOf(s);
         }
     };
 
-    public static final Extractor<TimeValue> TIME_VALUE_EXTRACTOR = new Optional.Extractor<TimeValue>() {
+    public static final Unmarshaller<TimeValue> TIME_VALUE_UNMARSHALLER = new Unmarshaller<TimeValue>() {
         @Override
         public TimeValue valueOf(String s) {
             return TimeValue.fromString(s);
         }
     };
 
-    public static final Extractor<String> STRING_EXTRACTOR = new Optional.Extractor<String>() {
+    public static final Unmarshaller<Collection<String>> STRING_COLLECTION_UNMARSHALLER = new Unmarshaller<Collection<String>>() {
         @Override
-        public String valueOf(String s) {
-            return s;
+        public Collection<String> valueOf(String s) {
+            return Arrays.asList(s.split("===SEP==="));
+        }
+    };
+
+    public static final Marshaller<Collection<String>> STRING_COLLECTION_MARSHALLER = new Optional.Marshaller<Collection<String>>() {
+        @Override
+        public String valueOf(Collection<String> src) {
+            StringBuilder sb = new StringBuilder();
+            for (String s : src) {
+                sb.append(s).append("===SEP===");
+            }
+            return sb.toString();
         }
     };
 

@@ -170,12 +170,6 @@ public interface Options extends Serializable {
     Optional<Integer> getWarmupForkCount();
 
     /**
-     * Additional JVM classpath
-     * @return additional JVM classpath to add to forked VM
-     */
-    Optional<String> getJvmClassPath();
-
-    /**
      * JVM to use for forks
      * @return JVM binary location
      */
@@ -185,6 +179,6 @@ public interface Options extends Serializable {
      * JVM parameters to use with forks
      * @return JVM parameters
      */
-    Optional<String> getJvmArgs();
+    Optional<Collection<String>> getJvmArgs();
 
 }

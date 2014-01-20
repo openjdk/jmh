@@ -432,18 +432,6 @@ public class TestOptions {
     }
 
     @Test
-    public void testJvmClasspath() throws Exception {
-        CommandLineOptions cmdLine = new CommandLineOptions("--jvmClasspath", "sample.jar");
-        Options builder = new OptionsBuilder().jvmClasspath("sample.jar").build();
-        Assert.assertEquals(builder.getJvmClassPath(), cmdLine.getJvmClassPath());
-    }
-
-    @Test
-    public void testJvmClasspath_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getJvmClassPath(), EMPTY_CMDLINE.getJvmClassPath());
-    }
-
-    @Test
     public void testJvm() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("--jvm", "sample.jar");
         Options builder = new OptionsBuilder().jvm("sample.jar").build();

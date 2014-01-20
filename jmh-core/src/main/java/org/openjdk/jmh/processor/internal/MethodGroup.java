@@ -32,12 +32,12 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.AnnotationUtils;
 import org.openjdk.jmh.util.internal.Optional;
 
 import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -190,26 +190,26 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
-    public Optional<String> getJVMArgs() {
+    public Optional<Collection<String>> getJVMArgs() {
         Fork ann = getFinal(Fork.class);
-        if (ann != null && !ann.jvmArgs().equals(AnnotationUtils.PARAM_NOT_SET)) {
-            return Optional.of(ann.jvmArgs());
+        if (ann != null && !(ann.jvmArgs().length == 1 && ann.jvmArgs()[0].equals(Fork.BLANK_ARGS))) {
+            return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgs()));
         }
         return Optional.none();
     }
 
-    public Optional<String> getJVMArgsAppend() {
+    public Optional<Collection<String>> getJVMArgsAppend() {
         Fork ann = getFinal(Fork.class);
-        if (ann != null && !ann.jvmArgsAppend().equals(AnnotationUtils.PARAM_NOT_SET)) {
-            return Optional.of(ann.jvmArgsAppend());
+        if (ann != null && !(ann.jvmArgsAppend().length == 1 && ann.jvmArgsAppend()[0].equals(Fork.BLANK_ARGS))) {
+            return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsAppend()));
         }
         return Optional.none();
     }
 
-    public Optional<String> getJVMArgsPrepend() {
+    public Optional<Collection<String>> getJVMArgsPrepend() {
         Fork ann = getFinal(Fork.class);
-        if (ann != null && !ann.jvmArgsPrepend().equals(AnnotationUtils.PARAM_NOT_SET)) {
-            return Optional.of(ann.jvmArgsPrepend());
+        if (ann != null && !(ann.jvmArgsPrepend().length == 1 && ann.jvmArgsPrepend()[0].equals(Fork.BLANK_ARGS))) {
+            return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsPrepend()));
         }
         return Optional.none();
     }

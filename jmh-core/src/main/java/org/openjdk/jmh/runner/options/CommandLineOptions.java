@@ -76,8 +76,7 @@ public class CommandLineOptions implements Options {
     private final Optional<String> result;
     private final Optional<ResultFormatType> resultFormat;
     private final Optional<String> jvm;
-    private final Optional<String> jvmArgs;
-    private final Optional<String> jvmClassPath;
+    private final Optional<Collection<String>> jvmArgs;
     private final List<String> excludes = new ArrayList<String>();
     private final Optional<WarmupMode> warmupMode;
     private final List<String> warmupMicros = new ArrayList<String>();
@@ -153,9 +152,6 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Custom JVM args to use when forking.")
-                .withRequiredArg().ofType(String.class).describedAs("string");
-
-        OptionSpec<String> optJvmCP = parser.accepts("jvmClasspath", "Custom JVM classpath to use when forking.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optTU = parser.accepts("tu", "Output time unit. Available time units are: [m, s, ms, us, ns].")
@@ -369,9 +365,12 @@ public class CommandLineOptions implements Options {
             }
 
             jvm = Optional.eitherOf(optJvm.value(set));
-            jvmArgs = Optional.eitherOf(optJvmArgs.value(set));
-            jvmClassPath = Optional.eitherOf(optJvmCP.value(set));
 
+            if (set.hasArgument(optJvmArgs)) {
+                jvmArgs = Optional.<Collection<String>>of(Arrays.asList(optJvmArgs.value(set).trim().split("[ ]+")));
+            } else {
+                jvmArgs = Optional.none();
+            }
         } catch (OptionException e) {
             throw new CommandLineOptionException(e.getMessage(), e);
         }
@@ -486,18 +485,8 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
-    public Optional<String> getJvmArgs() {
+    public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    @Override
-    public Optional<String> getJvmClassPath() {
-        return jvmClassPath;
     }
 
     /**
