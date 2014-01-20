@@ -33,6 +33,8 @@ import java.util.Collection;
 
 public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializable {
 
+    private static final String BR_SEPARATOR = "===,===";
+
     private final String userName;
     private final String generatedName;
     private final Mode mode;
@@ -69,7 +71,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     }
 
     public BenchmarkRecord(String line) {
-        String[] args = line.split(",");
+        String[] args = line.split(BR_SEPARATOR);
 
         if (args.length != 14) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
@@ -98,11 +100,11 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     }
 
     public String toLine() {
-        return userName + "," + generatedName + "," + mode + "," + convert(threadGroups) + "," + threads + "," +
-                warmupIterations + "," + warmupTime + "," + measurementIterations + "," + measurementTime + "," +
-                forks + "," + warmupForks + "," +
-                jvmArgs.toString(Optional.STRING_COLLECTION_MARSHALLER) + "," +
-                jvmArgsPrepend.toString(Optional.STRING_COLLECTION_MARSHALLER) + "," +
+        return userName + BR_SEPARATOR + generatedName + BR_SEPARATOR + mode + BR_SEPARATOR + convert(threadGroups) + BR_SEPARATOR +
+                threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + measurementIterations + BR_SEPARATOR +
+                measurementTime + BR_SEPARATOR + forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
+                jvmArgs.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
+                jvmArgsPrepend.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsAppend.toString(Optional.STRING_COLLECTION_MARSHALLER);
     }
 
