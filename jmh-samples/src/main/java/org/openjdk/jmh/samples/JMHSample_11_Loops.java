@@ -44,13 +44,14 @@ public class JMHSample_11_Loops {
      * (This is the bad thing Caliper taught everyone). This tests explains why
      * this is a bad idea.
      *
-     * There is an argument that we would want to minimize the overhead for calling
-     * the test method, etc. Don't buy this argument; we had seen that calling this
-     * method is uber-fast.
+     * Looping uses the idea of minimize the overhead for calling the test method,
+     * if we do the operations inside the loop inside the method call.
+     * Don't buy this argument; you will see there is more magic
+     * happening when we allow optimizers to merge the loop iterations.
      */
 
     /*
-     * Suppose, we want to measure how much it takes to sum two integers:
+     * Suppose we want to measure how much it takes to sum two integers:
      */
 
     int x = 1;
@@ -66,7 +67,7 @@ public class JMHSample_11_Loops {
     }
 
     /*
-     * These tests emulate the naive looping.
+     * The following tests emulate the naive looping.
      * This is the Caliper-style benchmark.
      */
     private int reps(int reps) {
@@ -79,8 +80,7 @@ public class JMHSample_11_Loops {
 
     /*
      * We would like to measure this with different repetitions count.
-     * Special invocation is used in conjunction with AverageTimePerOp
-     * to get the individual operation cost.
+     * Special annotation is used to get the individual operation cost.
      */
 
     @GenerateMicroBenchmark
