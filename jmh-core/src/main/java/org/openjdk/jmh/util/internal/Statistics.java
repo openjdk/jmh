@@ -24,9 +24,11 @@
  */
 package org.openjdk.jmh.util.internal;
 
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
+
 import java.io.Serializable;
 
-public interface Statistics extends Serializable {
+public interface Statistics extends Serializable, StatisticalSummary {
 
     /**
      * Gets the confidence interval at given confidence level.
@@ -42,6 +44,15 @@ public interface Statistics extends Serializable {
      */
     double getMeanErrorAt(double confidence);
 
+    /**
+     * Checks if this statistics statistically different from the given one
+     * with the given confidence level.
+     * @param other statistics to test against
+     * @param confidence confidence level (e.g. 0.95)
+     * @return true, if mean difference is statistically significant
+     */
+    boolean isDifferent(Statistics other, double confidence);
+
     double getStandardDeviation();
 
     double getMax();
@@ -50,7 +61,7 @@ public interface Statistics extends Serializable {
 
     double getMean();
 
-    int getN();
+    long getN();
 
     double getSum();
 

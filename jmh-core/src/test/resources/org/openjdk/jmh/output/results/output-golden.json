@@ -10,10 +10,10 @@
         "measurementTime" : "501 s",
         "primaryMetric" : {
             "score" : 528.8571333333333,
-            "scoreError" : 253.83689091986184,
+            "scoreError" : 278.1419529743147,
             "scoreConfidence" : [
-                275.02025193728105,
-                782.6940337770047
+                250.7151898828282,
+                806.9990958314576
             ],
             "scoreUnit" : "ops/ms",
             "rawData" : [
@@ -50,10 +50,10 @@
         "secondaryMetrics" : {
             "secondary1" : {
                 "score" : 549.7142833333334,
-                "scoreError" : 253.83689091986184,
+                "scoreError" : 278.1419529743147,
                 "scoreConfidence" : [
-                    257.4694477714426,
-                    841.9591236571287
+                    229.48679759181687,
+                    869.9417738367545
                 ],
                 "scoreUnit" : "ops/ms",
                 "rawData" :[
@@ -89,10 +89,10 @@
             },
             "secondary2" : {
                 "score" : 615.5,
-                "scoreError" : 253.83689091986184,
+                "scoreError" : 278.1419529743147,
                 "scoreConfidence" : [
-                    324.18411727164244,
-                    906.8158827283576
+                    296.2904152116224,
+                    934.7095847883776
                 ],
                 "scoreUnit" : "ops/ms",
                 "rawData" :[
@@ -195,10 +195,10 @@
         "measurementTime" : "96 s",
         "primaryMetric" : {
             "score" : 545.0,
-            "scoreError" : 493.81293072112726,
+            "scoreError" : 553.3366994253071,
             "scoreConfidence" : [
-                51.18706927887274,
-                1038.8129307211273
+                -8.336699425307074,
+                1098.336699425307
             ],
             "scoreUnit" : "ops/ms",
             "rawData" : [
@@ -220,10 +220,10 @@
         "secondaryMetrics" : {
             "secondary1" : {
                 "score" : 434.44443333333334,
-                "scoreError" : 493.81293072112726,
+                "scoreError" : 553.3366994253071,
                 "scoreConfidence" : [
-                    19.30274846974106,
-                    849.5861404191478
+                    -30.738060009237756,
+                    899.6269488981267
                 ],
                 "scoreUnit" : "ops/ms",
                 "rawData" :[
@@ -244,10 +244,10 @@
             },
             "secondary2" : {
                 "score" : 470.3333333333333,
-                "scoreError" : 493.81293072112726,
+                "scoreError" : 553.3366994253071,
                 "scoreConfidence" : [
-                    22.091019482393506,
-                    918.5756471842731
+                    -31.939707850174727,
+                    972.6063745168414
                 ],
                 "scoreUnit" : "ops/ms",
                 "rawData" :[
@@ -280,10 +280,10 @@
         "measurementTime" : "438 s",
         "primaryMetric" : {
             "score" : 417.57141666666666,
-            "scoreError" : 331.1099544524174,
+            "scoreError" : 362.81396705929166,
             "scoreConfidence" : [
-                86.46147411901114,
-                748.6813830238459
+                54.7574615121369,
+                780.3853956307203
             ],
             "scoreUnit" : "ops/ms",
             "rawData" : [
@@ -314,10 +314,10 @@
         "secondaryMetrics" : {
             "secondary1" : {
                 "score" : 672.2142833333334,
-                "scoreError" : 331.1099544524174,
+                "scoreError" : 362.81396705929166,
                 "scoreConfidence" : [
-                    409.39701450647914,
-                    935.0315569220922
+                    384.2320746802016,
+                    960.1964967483698
                 ],
                 "scoreUnit" : "ops/ms",
                 "rawData" :[
@@ -347,10 +347,10 @@
             },
             "secondary2" : {
                 "score" : 560.14285,
-                "scoreError" : 331.1099544524174,
+                "scoreError" : 362.81396705929166,
                 "scoreConfidence" : [
-                    295.6666772033807,
-                    824.6190370823335
+                    270.3428956913269,
+                    849.9428185943873
                 ],
                 "scoreUnit" : "ops/ms",
                 "rawData" :[

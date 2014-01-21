@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
+import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openjdk.jmh.util.internal.ListStatistics;
@@ -132,9 +133,9 @@ public class TestMultisetStatistics {
      */
     @Test
     public strictfp void testGetConfidenceInterval() {
-        double[] interval = instance.getConfidenceIntervalAt(0.95);
-        assertEquals(39.234, interval[0], 0.002);
-        assertEquals(62.831, interval[1], 0.002);
+        double[] interval = instance.getConfidenceIntervalAt(0.999);
+        assertEquals(29.62232, interval[0], 0.002);
+        assertEquals(72.44402, interval[1], 0.002);
     }
 
     /**
@@ -146,4 +147,52 @@ public class TestMultisetStatistics {
         String result = instance.toString();
         assertEquals(expResult, result);
     }
+
+    @Test
+    public strictfp void testSignificant_Always() {
+        MultisetStatistics s1 = new MultisetStatistics();
+        MultisetStatistics s2 = new MultisetStatistics();
+
+        s1.addValue(1, 10);
+        s1.addValue(1.1, 10);
+        s2.addValue(2, 10);
+        s2.addValue(2.1, 10);
+
+        for (double conf : new double[] {0.5, 0.9, 0.99, 0.999, 0.9999, 0.99999}) {
+            Assert.assertTrue("Diff significant at " + conf, s1.isDifferent(s2, conf));
+        }
+    }
+
+    @Test
+    public strictfp void testSignificant_Never() {
+        MultisetStatistics s1 = new MultisetStatistics();
+        MultisetStatistics s2 = new MultisetStatistics();
+
+        s1.addValue(1, 10);
+        s1.addValue(1.1, 10);
+        s2.addValue(1, 10);
+        s2.addValue(1.1, 10);
+
+        for (double conf : new double[] {0.5, 0.9, 0.99, 0.999, 0.9999, 0.99999}) {
+            Assert.assertFalse("Diff not significant at " + conf, s1.isDifferent(s2, conf));
+        }
+    }
+
+    @Test
+    public strictfp void testSignificant_Sometimes() {
+        MultisetStatistics s1 = new MultisetStatistics();
+        MultisetStatistics s2 = new MultisetStatistics();
+
+        s1.addValue(1, 10);
+        s1.addValue(2, 10);
+        s2.addValue(1, 10);
+        s2.addValue(3, 10);
+
+        Assert.assertTrue("Diff significant at 0.5", s1.isDifferent(s2, 0.5));
+        Assert.assertTrue("Diff significant at 0.9", s1.isDifferent(s2, 0.9));
+        Assert.assertFalse("Diff not significant at 0.99", s1.isDifferent(s2, 0.99));
+        Assert.assertFalse("Diff not significant at 0.999", s1.isDifferent(s2, 0.999));
+        Assert.assertFalse("Diff not significant at 0.9999", s1.isDifferent(s2, 0.9999));
+    }
+
 }

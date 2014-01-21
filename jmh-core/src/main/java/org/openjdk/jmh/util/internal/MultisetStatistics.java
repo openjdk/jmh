@@ -55,7 +55,7 @@ public class MultisetStatistics extends AbstractStatistics {
     }
 
     @Override
-    public int getN() {
+    public long getN() {
         return values.size();
     }
 
