@@ -322,6 +322,10 @@ public class Runner extends BaseRunner {
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
 
             String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort());
+            String opts = merge(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark))));
+            if (opts.trim().isEmpty()) {
+                opts = "<none>";
+            }
 
             BenchmarkParams params = new BenchmarkParams(options, benchmark, ActionMode.UNDEF);
 
@@ -331,7 +335,7 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < warmupForkCount; i++) {
                     out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
-                    out.println("# VM options: " + merge(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark)))));
+                    out.println("# VM options: " + opts);
                     doFork(server, commandString);
                 }
             }
@@ -339,7 +343,7 @@ public class Runner extends BaseRunner {
             out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < forkCount; i++) {
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
-                out.println("# VM options: " + merge(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark)))));
+                out.println("# VM options: " + opts);
                 Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
                 results.merge(result);
             }
