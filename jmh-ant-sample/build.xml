@@ -61,6 +61,7 @@ questions.
               * Bring the dependencies along in the JAR
               * (You might be able to run JMH without the self-contained JAR,
                 take note of the META-INF/* files in that case)
+              * Filter out META-INF/services/ to disable JMH processors for the future
     -->
     <target name="jar" description="Generate the self-contained JAR">
         <delete dir="${build}"/>
@@ -75,9 +76,9 @@ questions.
             <manifest>
                 <attribute name="Main-Class" value="org.openjdk.jmh.Main"/>
             </manifest>
-            <zipgroupfileset file="${jmh.jar}" includes="**/*.jar" />
-            <zipgroupfileset file="${joptsimple.jar}" includes="**/*.jar" />
-            <zipgroupfileset file="${commonsmath.jar}" includes="**/*.jar" />
+            <zipfileset src="${jmh.jar}" excludes="**/META-INF/services/**" />
+            <zipfileset src="${joptsimple.jar}" />
+            <zipfileset src="${commonsmath.jar}" />
         </jar>
     </target>
 
