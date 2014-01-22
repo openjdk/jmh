@@ -30,7 +30,6 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Map;
 
 public class XSVResultFormat implements ResultFormat {
@@ -56,9 +55,7 @@ public class XSVResultFormat implements ResultFormat {
             bw.write(delimiter);
             bw.write("\"Threads\"");
             bw.write(delimiter);
-            bw.write("\"Iterations\"");
-            bw.write(delimiter);
-            bw.write("\"Iteration time\"");
+            bw.write("\"Samples\"");
             bw.write(delimiter);
             bw.write("\"Mean\"");
             bw.write(delimiter);
@@ -80,11 +77,7 @@ public class XSVResultFormat implements ResultFormat {
                 bw.write(delimiter);
                 bw.write(String.valueOf(runResult.getParams().getThreads()));
                 bw.write(delimiter);
-                bw.write(String.valueOf(runResult.getParams().getMeasurement().getCount()));
-                bw.write(delimiter);
-                bw.write("\"");
-                bw.write(String.valueOf(runResult.getParams().getMeasurement().getTime()));
-                bw.write("\"");
+                bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getN()));
                 bw.write(delimiter);
                 bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMean()));
                 bw.write(delimiter);
