@@ -134,11 +134,11 @@ public class InfraControl extends InfraControlL4 {
     }
 }
 
-class InfraControlL0 {
+abstract class InfraControlL0 {
     public int markerBegin;
 }
 
-class InfraControlL1 extends InfraControlL0 {
+abstract class InfraControlL1 extends InfraControlL0 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -160,7 +160,7 @@ class InfraControlL1 extends InfraControlL0 {
 /**
  * @see BlackHole for rationale
  */
-class InfraControlL2 extends InfraControlL1 {
+abstract class InfraControlL2 extends InfraControlL1 {
     /* Flag for if we are done or not.
      * This is specifically the public field, so to spare one virtual call.
      */
@@ -220,7 +220,7 @@ class InfraControlL2 extends InfraControlL1 {
 
 }
 
-class InfraControlL3 extends InfraControlL2 {
+abstract class InfraControlL3 extends InfraControlL2 {
     private boolean q001, q002, q003, q004, q005, q006, q007, q008;
     private boolean q011, q012, q013, q014, q015, q016, q017, q018;
     private boolean q021, q022, q023, q024, q025, q026, q027, q028;
@@ -243,7 +243,7 @@ class InfraControlL3 extends InfraControlL2 {
     }
 }
 
-class InfraControlL4 extends InfraControlL3 {
+abstract class InfraControlL4 extends InfraControlL3 {
     public int markerEnd;
 
     public InfraControlL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit) {

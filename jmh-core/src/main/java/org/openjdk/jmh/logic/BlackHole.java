@@ -37,11 +37,11 @@ import java.lang.reflect.Field;
     See the rationale for BlackHoleL1..BlackHoleL4 classes below.
  */
 
-class BlackHoleL0 {
+abstract class BlackHoleL0 {
     public int markerBegin;
 }
 
-class BlackHoleL1 extends BlackHoleL0 {
+abstract class BlackHoleL1 extends BlackHoleL0 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -60,7 +60,7 @@ class BlackHoleL1 extends BlackHoleL0 {
     private boolean p171, p172, p173, p174, p175, p176, p177, p178;
 }
 
-class BlackHoleL2 extends BlackHoleL1 {
+abstract class BlackHoleL2 extends BlackHoleL1 {
     public volatile byte b1 = 1, b2 = 2;
     public volatile boolean bool1 = false, bool2 = true;
     public volatile char c1 = 'A', c2 = 'B';
@@ -76,7 +76,7 @@ class BlackHoleL2 extends BlackHoleL1 {
     public int tlrMask = 1;
 }
 
-class BlackHoleL3 extends BlackHoleL2 {
+abstract class BlackHoleL3 extends BlackHoleL2 {
     private boolean q001, q002, q003, q004, q005, q006, q007, q008;
     private boolean q011, q012, q013, q014, q015, q016, q017, q018;
     private boolean q021, q022, q023, q024, q025, q026, q027, q028;
@@ -95,7 +95,7 @@ class BlackHoleL3 extends BlackHoleL2 {
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 }
 
-class BlackHoleL4 extends BlackHoleL3 {
+abstract class BlackHoleL4 extends BlackHoleL3 {
     public int markerEnd;
 }
 

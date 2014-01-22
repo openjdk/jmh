@@ -38,11 +38,11 @@ public class Control extends ControlL3 {
 
 }
 
-class ControlL0 {
+abstract class ControlL0 {
     public int markerBegin;
 }
 
-class ControlL1 extends ControlL0 {
+abstract class ControlL1 extends ControlL0 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -61,7 +61,7 @@ class ControlL1 extends ControlL0 {
     private boolean p171, p172, p173, p174, p175, p176, p177, p178;
 }
 
-class ControlL2 extends ControlL1 {
+abstract class ControlL2 extends ControlL1 {
 
     @Setup(Level.Iteration)
     public void setup() {
@@ -85,7 +85,7 @@ class ControlL2 extends ControlL1 {
     public volatile long iterationTime;
 }
 
-class ControlL3 extends ControlL2 {
+abstract class ControlL3 extends ControlL2 {
     private boolean q001, q002, q003, q004, q005, q006, q007, q008;
     private boolean q011, q012, q013, q014, q015, q016, q017, q018;
     private boolean q021, q022, q023, q024, q025, q026, q027, q028;
