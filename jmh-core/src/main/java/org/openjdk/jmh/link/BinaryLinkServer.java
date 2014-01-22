@@ -149,7 +149,7 @@ public class BinaryLinkServer {
         private final ServerSocket server;
 
         public Acceptor() throws IOException {
-            server = new ServerSocket(0);
+            server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
         }
 
         @Override
@@ -173,11 +173,7 @@ public class BinaryLinkServer {
         }
 
         public String getHost() {
-            try {
-                return InetAddress.getLocalHost().getHostAddress();
-            } catch (UnknownHostException e) {
-                throw new IllegalStateException("Unable to resolve local host", e);
-            }
+            return InetAddress.getLoopbackAddress().getHostAddress();
         }
 
         public int getPort() {
