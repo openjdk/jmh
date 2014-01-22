@@ -144,12 +144,33 @@ public class BinaryLinkServer {
         this.plan.set(actionPlan);
     }
 
+    private InetAddress getLoopback() {
+        // Try to use JDK 7+ method first, it is more reliable.
+        try {
+            Method m = InetAddress.class.getMethod("getLoopbackAddress");
+            return (InetAddress) m.invoke(null);
+        } catch (InvocationTargetException e) {
+            // shun
+        } catch (NoSuchMethodException e) {
+            // shun
+        } catch (IllegalAccessException e) {
+            // shun
+        }
+
+        // Otherwise fallback to well-known
+        try {
+            return InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException("Unable to resolve local host", e);
+        }
+    }
+
     private final class Acceptor extends Thread {
 
         private final ServerSocket server;
 
         public Acceptor() throws IOException {
-            server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
+            server = new ServerSocket(0, 50, getLoopback());
         }
 
         @Override
@@ -173,7 +194,7 @@ public class BinaryLinkServer {
         }
 
         public String getHost() {
-            return InetAddress.getLoopbackAddress().getHostAddress();
+            return getLoopback().getHostAddress();
         }
 
         public int getPort() {
