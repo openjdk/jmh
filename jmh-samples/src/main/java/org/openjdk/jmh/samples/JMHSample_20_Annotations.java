@@ -31,6 +31,10 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -63,14 +67,26 @@ public class JMHSample_20_Annotations {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can run this test with:
+     * Note JMH honors the default annotation settings. You can always override
+     * the defaults via the command line or API.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_20.*"
      *
-     * Note JMH honors the default annotation settings. You can always override
-     * the defaults via the command line.
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_20_Annotations.class.getSimpleName() + ".*")
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

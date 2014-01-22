@@ -28,6 +28,10 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -130,15 +134,30 @@ public class JMHSample_02_BenchmarkModes {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
-     *
-     * You can run this test with:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_02.*" -i 5 -f 1
-     *    (we requested 5 iterations, single fork)
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * You are expected to see the different run modes for the same benchmark.
      * Note the units are different, scores are consistent with each other.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
+     *    $ mvn clean install
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_02.*" -wi 5 -i 5 -f 1
+     *    (we requested 5 warmup/measurement iterations, single fork)
+     *
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_02_BenchmarkModes.class.getSimpleName() + ".*")
+                .warmupIterations(5)
+                .measurementIterations(5)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

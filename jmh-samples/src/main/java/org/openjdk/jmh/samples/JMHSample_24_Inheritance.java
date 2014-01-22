@@ -25,7 +25,6 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -34,6 +33,10 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -97,11 +100,23 @@ public class JMHSample_24_Inheritance {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can run this test with:
+     * You can run this test:
+     *
+     * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_24.*"
+     *
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_24_Inheritance.class.getSimpleName() + ".*")
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

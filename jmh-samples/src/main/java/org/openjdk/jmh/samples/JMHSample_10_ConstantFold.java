@@ -30,6 +30,10 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -70,15 +74,30 @@ public class JMHSample_10_ConstantFold {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can run this test with:
+     * You can see the unrealistically fast calculation in with measureWrong(),
+     * while realistic measurement with measureRight().
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_10.*" -i 5 -f 1
      *    (we requested 5 iterations, single fork)
      *
-     * You can see the unrealistically fast calculation in with measureWrong(),
-     * while realistic measurement with measureRight().
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_10_ConstantFold.class.getSimpleName() + ".*")
+                .warmupIterations(5)
+                .measurementIterations(5)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

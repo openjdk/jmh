@@ -32,6 +32,10 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -89,15 +93,29 @@ public class JMHSample_13_RunToRun {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can run this test with:
+     * Note the baseline is random within [0..1000] msec; and both forked runs
+     * are estimating the average 500 msec with some confidence.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_13.*" -wi 0 -i 3
      *    (we requested no warmup, 3 measurement iterations)
      *
-     * Note the baseline is random within [0..1000] msec; and both forked runs
-     * are estimating the average 500 msec with some confidence.
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_13_RunToRun.class.getSimpleName() + ".*")
+                .warmupIterations(0)
+                .measurementIterations(5)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

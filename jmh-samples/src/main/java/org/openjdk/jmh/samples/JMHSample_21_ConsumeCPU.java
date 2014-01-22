@@ -29,6 +29,10 @@ import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -109,14 +113,29 @@ public class JMHSample_21_ConsumeCPU {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can run this test with:
+     * Note the single token is just a few cycles, and the more tokens
+     * you request, then more work is spent (almost linearly)
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_21.*" -w 1 -i 5 -f 1
      *
-     * Note the single token is just a few cycles, and the more tokens
-     * you request, then more work is spent (almost linerarly)
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_21_ConsumeCPU.class.getSimpleName() + ".*")
+                .warmupIterations(1)
+                .measurementIterations(5)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

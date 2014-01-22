@@ -31,6 +31,10 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -152,16 +156,30 @@ public class JMHSample_12_Forking {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
-     *
-     * You can run this test with:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_12.*" -i 5
-     *    (we requested 5 iterations)
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * Note that C1 is faster, C2 is slower, but the C1 is slow again! This is because
      * the profiles for C1 and C2 had merged together. Notice how flawless the measurement
      * is for forked runs.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
+     *    $ mvn clean install
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_12.*" -wi 5 -i 5
+     *    (we requested 5 warmup/measurement iterations)
+     *
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_12_Forking.class.getSimpleName() + ".*")
+                .warmupIterations(5)
+                .measurementIterations(5)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

@@ -31,6 +31,10 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -104,16 +108,31 @@ public class JMHSample_16_CompilerControl {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
-     *
-     * You can run this test with:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_16.*" -wi 1 -i 3 -f 1
-     *    (we requested 1 warmup iterations, 3 iterations, single fork)
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * Note the performance of the baseline, blank, and inline methods are the same.
      * dontinline differs a bit, because we are making the proper call.
      * exclude is severely slower, becase we are not compiling it at all.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
+     *    $ mvn clean install
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_16.*" -wi 1 -i 3 -f 1
+     *    (we requested 1 warmup iterations, 3 iterations, single fork)
+     *
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_16_CompilerControl.class.getSimpleName() + ".*")
+                .warmupIterations(1)
+                .measurementIterations(3)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

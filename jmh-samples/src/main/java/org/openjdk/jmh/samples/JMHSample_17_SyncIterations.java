@@ -28,6 +28,10 @@ import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -73,20 +77,11 @@ public class JMHSample_17_SyncIterations {
      */
 
     /*
-     * HOW TO RUN THIS TEST:
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * You will need to oversubscribe the system to make this effect
      * clearly visible; however, this effect can also be shown on the
      * unsaturated systems.*
-     *
-     * Say, $CPU is the number of CPUs on your machine.
-     *
-     * You can run this test with:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_17.*" \
-     *        -i 20 -wi 1 -f 1 -t ${CPU*16} -si {true|false}
-     *    (we requested 1 warmup iterations, 20 iterations, single fork,
-     *     lots of threads, and changeable "synchronize iterations" option)
      *
      * Note the performance of -si false version is more flaky, even
      * though it is "better". This is the false improvement, granted by
@@ -94,6 +89,32 @@ public class JMHSample_17_SyncIterations {
      * and coherent.
      *
      * -si true is enabled by default.
+     *
+     * Say, $CPU is the number of CPUs on your machine.
+     *
+     * You can run this test with:
+     *
+     * a) Via the command line:
+     *    $ mvn clean install
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_17.*" \
+     *        -i 20 -wi 1 -f 1 -t ${CPU*16} -si {true|false}
+     *    (we requested 1 warmup iterations, 20 iterations, single fork,
+     *     lots of threads, and changeable "synchronize iterations" option)
+     *
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_17_SyncIterations.class.getSimpleName() + ".*")
+                .warmupIterations(1)
+                .measurementIterations(20)
+                .threads(Runtime.getRuntime().availableProcessors()*16)
+                .forks(1)
+                .syncIterations(true) // try to switch to "false"
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

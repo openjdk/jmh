@@ -33,6 +33,10 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -144,15 +148,28 @@ public class JMHSample_07_FixtureLevelInvocation {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
-     *
-     * You can run this test with:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_07.*" -i 5 -f 1
-     *    (we requested 5 iterations, single fork)
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * You can see the cold scenario is running longer, because we pay for
      * thread wakeups.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
+     *    $ mvn clean install
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_07.*" -wi 5 -i 5 -f 1
+     *    (we requested 5 warmup/measurement iterations, single fork)
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_07_FixtureLevelInvocation.class.getSimpleName() + ".*")
+                .warmupIterations(5)
+                .measurementIterations(5)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }

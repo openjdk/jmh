@@ -31,6 +31,10 @@ import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -120,12 +124,7 @@ public class JMHSample_11_Loops {
     }
 
     /*
-     * HOW TO RUN THIS TEST:
-     *
-     * You can run this test with:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_11.*" -i 5 -f 1
-     *    (we requested 5 iterations, single fork)
+     * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * You might notice the larger the repetitions count, the lower the "perceived"
      * cost of the operation being measured. Up to the point we do each addition with 1/20 ns,
@@ -134,6 +133,26 @@ public class JMHSample_11_Loops {
      * This happens because the loop is heavily unrolled/pipelined, and the operation
      * to be measured is hoisted from the loop. Morale: don't overuse loops, rely on JMH
      * to get the measurement right.
+     *
+     * You can run this test:
+     *
+     * a) Via the command line:
+     *    $ mvn clean install
+     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_11.*" -wi 5 -i 5 -f 1
+     *    (we requested 5 warmup/measurement iterations, single fork)
+     *
+     * b) Via the Java API:
      */
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(".*" + JMHSample_11_Loops.class.getSimpleName() + ".*")
+                .warmupIterations(5)
+                .measurementIterations(5)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 
 }
