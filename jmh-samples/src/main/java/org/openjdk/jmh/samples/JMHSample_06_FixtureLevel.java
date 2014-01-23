@@ -72,7 +72,9 @@ public class JMHSample_06_FixtureLevel {
      * ============================== HOW TO RUN THIS TEST: ====================================
      *
      * You can see measureRight() yields the result, and measureWrong() fires
-     * the assert at the end of first iteration!
+     * the assert at the end of first iteration! This will not generate the results
+     * for measureWrong(). You can also prevent JMH for proceeding further by
+     * requiring "fail on error".
      *
      * You can run this test:
      *
@@ -80,6 +82,8 @@ public class JMHSample_06_FixtureLevel {
      *    $ mvn clean install
      *    $ java -ea -jar target/microbenchmarks.jar ".*JMHSample_06.*" -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
+     *
+     *    You can optionally supply -foe to fail the complete run.
      *
      * b) Via the Java API:
      */
@@ -91,6 +95,7 @@ public class JMHSample_06_FixtureLevel {
                 .measurementIterations(5)
                 .forks(1)
                 .jvmArgs("-ea")
+                .shouldFailOnError(false) // switch to "true" to fail the complete run
                 .build();
 
         new Runner(opt).run();
