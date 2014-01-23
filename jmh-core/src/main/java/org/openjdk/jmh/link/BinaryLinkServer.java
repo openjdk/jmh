@@ -157,11 +157,21 @@ public class BinaryLinkServer {
             // shun
         }
 
-        // Otherwise fallback to well-known
+        // Otherwise open up the special loopback.
+        //   (It can only fail for the obscure reason)
+        try {
+            return InetAddress.getByAddress(new byte[] {127, 0, 0, 1});
+        } catch (UnknownHostException e) {
+            // shun
+        }
+
+        // Last resort. Open the local host: this resolves
+        // the machine name, and not reliable on mis-configured
+        // hosts, but there is nothing else we can try.
         try {
             return InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
-            throw new IllegalStateException("Unable to resolve local host", e);
+            throw new IllegalStateException("Can not find the address to bind to.", e);
         }
     }
 
