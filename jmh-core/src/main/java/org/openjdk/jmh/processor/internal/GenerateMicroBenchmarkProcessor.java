@@ -61,6 +61,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -211,6 +212,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         while (discoveredClasses.size() > lastSize) {
             lastSize = discoveredClasses.size();
             for (Element e : roundEnv.getRootElements()) {
+                if (e.getKind() != ElementKind.CLASS) continue;
                 TypeElement walk = (TypeElement) e;
                 do {
                     discoveredClasses.add(walk);
