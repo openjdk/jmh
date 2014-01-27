@@ -49,7 +49,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,7 +56,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -206,39 +204,8 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private ActionPlan getEmbeddedActionPlan(SortedSet<BenchmarkRecord> benchmarks) {
-        ActionPlan r = new ActionPlan();
-
-        LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
-
-        List<String> warmupMicrosRegexp = options.getWarmupIncludes();
-        if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
-            warmupBenches.addAll(list.find(out, warmupMicrosRegexp, Collections.<String>emptyList()));
-        }
-        if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isBulk()) {
-            warmupBenches.addAll(benchmarks);
-        }
-
-        for (BenchmarkRecord wr : warmupBenches) {
-            r.addWarmup(wr);
-        }
-
-        for (BenchmarkRecord br : benchmarks) {
-            BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
-            if (params.getForks() <= 0) {
-                if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
-                    r.addWarmupMeasurement(br);
-                } else {
-                    r.addMeasurement(br);
-                }
-            }
-        }
-
-        return r;
-    }
-
-    private List<ActionPlan> getForkedActionPlans(Set<BenchmarkRecord> benchmarks) {
-        ActionPlan base = new ActionPlan();
+    private List<ActionPlan> getActionPlans(Set<BenchmarkRecord> benchmarks) {
+        ActionPlan base = new ActionPlan(ActionType.FORKED);
 
         LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
 
@@ -254,11 +221,23 @@ public class Runner extends BaseRunner {
             base.addWarmup(wr);
         }
 
+        ActionPlan embeddedPlan = new ActionPlan(ActionType.EMBEDDED);
+        embeddedPlan.mixIn(base);
+
         List<ActionPlan> result = new ArrayList<ActionPlan>();
         for (BenchmarkRecord br : benchmarks) {
             BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
+
+            if (params.getForks() <= 0) {
+                if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
+                    embeddedPlan.addWarmupMeasurement(br);
+                } else {
+                    embeddedPlan.addMeasurement(br);
+                }
+            }
+
             if (params.getForks() > 0) {
-                ActionPlan r = new ActionPlan();
+                ActionPlan r = new ActionPlan(ActionType.FORKED);
                 r.mixIn(base);
                 if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
                     r.addWarmupMeasurement(br);
@@ -268,6 +247,7 @@ public class Runner extends BaseRunner {
                 result.add(r);
             }
         }
+        result.add(embeddedPlan);
 
         return result;
     }
@@ -276,17 +256,23 @@ public class Runner extends BaseRunner {
         out.startRun();
 
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
+        List<ActionPlan> plan = getActionPlans(benchmarks);
 
-        {
-            ActionPlan actionPlan = getEmbeddedActionPlan(benchmarks);
-            Multimap<BenchmarkRecord, BenchResult> res = runBenchmarks(false, actionPlan);
-            for (BenchmarkRecord br : res.keys()) {
-                results.putAll(br, res.get(br));
+        beforeBenchmarks(plan);
+
+        for (ActionPlan r : plan) {
+            Multimap<BenchmarkRecord, BenchResult> res;
+            switch (r.getType()) {
+                case EMBEDDED:
+                    res = runBenchmarks(false, r);
+                    break;
+                case FORKED:
+                    res = runSeparate(r);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown action plan type: " + r.getType());
             }
-        }
 
-        for (ActionPlan r : getForkedActionPlans(benchmarks)) {
-            Multimap<BenchmarkRecord, BenchResult> res = runSeparate(r);
             for (BenchmarkRecord br : res.keys()) {
                 results.putAll(br, res.get(br));
             }
@@ -334,18 +320,22 @@ public class Runner extends BaseRunner {
             if (warmupForkCount > 0) {
                 out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < warmupForkCount; i++) {
+                    beforeBenchmark();
                     out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
                     out.println("# VM options: " + opts);
                     doFork(server, commandString);
+                    afterBenchmark(benchmark);
                 }
             }
 
             out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < forkCount; i++) {
+                beforeBenchmark();
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
                 out.println("# VM options: " + opts);
                 Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
                 results.merge(result);
+                afterBenchmark(benchmark);
             }
 
         } catch (IOException e) {

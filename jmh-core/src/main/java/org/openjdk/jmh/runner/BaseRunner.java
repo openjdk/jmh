@@ -40,6 +40,7 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +51,11 @@ import java.util.concurrent.TimeUnit;
  */
 
 public abstract class BaseRunner {
+
+    private long projectedTotalTime;
+    private long projectedRunningTime;
+    private long actualRunningTime;
+    private long benchmarkStart;
 
     /** Class holding all our runtime options/arguments */
     protected final Options options;
@@ -70,6 +76,7 @@ public abstract class BaseRunner {
             ActionMode mode = action.getMode();
 
             if (!forked) {
+                beforeBenchmark();
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
 
@@ -88,9 +95,61 @@ public abstract class BaseRunner {
                 default:
                     throw new IllegalStateException("Unknown mode: " + mode);
             }
+
+            if (!forked) {
+                afterBenchmark(benchmark);
+            }
         }
 
         return results;
+    }
+
+    protected void afterBenchmark(BenchmarkRecord name) {
+        long current = System.nanoTime();
+        projectedRunningTime += name.estimatedTimeSingleFork(options);
+        actualRunningTime += (current - benchmarkStart);
+        benchmarkStart = current;
+    }
+
+    protected void beforeBenchmarks(Collection<ActionPlan> plans) {
+        projectedTotalTime = 0;
+        for (ActionPlan plan : plans) {
+            for (Action act : plan.getActions()) {
+                projectedTotalTime += act.getBenchmark().estimatedTime(options);
+            }
+        }
+    }
+
+    protected void beforeBenchmark() {
+        if (benchmarkStart == 0) {
+            benchmarkStart = System.nanoTime();
+        }
+
+        long totalETA;
+        double partsDone = 1.0D * projectedRunningTime / projectedTotalTime;
+        if (partsDone != 0) {
+            totalETA = (long) (actualRunningTime * (1.0D / partsDone - 1));
+        } else {
+            totalETA = projectedTotalTime;
+        }
+
+        out.println(String.format("# Run progress: %.2f%% complete, ETA %s", partsDone * 100, formatDuration(totalETA)));
+    }
+
+    private String formatDuration(long nanos) {
+        long days = TimeUnit.NANOSECONDS.toDays(nanos);
+        nanos -= days * TimeUnit.DAYS.toNanos(1);
+
+        long hrs = TimeUnit.NANOSECONDS.toHours(nanos);
+        nanos -= hrs * TimeUnit.HOURS.toNanos(1);
+
+        long mins = TimeUnit.NANOSECONDS.toMinutes(nanos);
+        nanos -= mins * TimeUnit.MINUTES.toNanos(1);
+
+        long secs = TimeUnit.NANOSECONDS.toSeconds(nanos);
+        nanos -= secs * TimeUnit.SECONDS.toNanos(1);
+
+        return String.format("%s%02d:%02d:%02d", (days > 0) ? days + "days, " : "", hrs, mins, secs);
     }
 
     BenchResult runBenchmark(BenchmarkRecord benchmark, ActionMode mode) {

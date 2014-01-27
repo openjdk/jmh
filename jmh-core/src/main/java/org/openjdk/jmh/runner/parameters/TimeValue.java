@@ -81,6 +81,10 @@ public class TimeValue implements Serializable {
         return time;
     }
 
+    public long getTime(TimeUnit tu) {
+        return tu.convert(time, timeUnit);
+    }
+
     public TimeUnit getTimeUnit() {
         return timeUnit;
     }

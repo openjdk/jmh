@@ -32,9 +32,15 @@ import java.util.List;
 public class ActionPlan implements Serializable {
 
     private final List<Action> actions;
+    private final ActionType type;
 
-    public ActionPlan() {
+    public ActionPlan(ActionType type) {
+        this.type = type;
         actions = new ArrayList<Action>();
+    }
+
+    public ActionType getType() {
+        return type;
     }
 
     void addWarmup(BenchmarkRecord record) {

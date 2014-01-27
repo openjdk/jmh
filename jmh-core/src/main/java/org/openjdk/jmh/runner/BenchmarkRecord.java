@@ -25,11 +25,14 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializable {
 
@@ -241,4 +244,37 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     public Optional<Integer> getThreads() {
         return threads;
     }
+
+    public long estimatedTimeSingleFork(Options opts) {
+        int mi = opts.getMeasurementIterations()
+                .orElse(getMeasurementIterations()
+                        .orElse(Defaults.MEASUREMENT_ITERATIONS));
+
+        TimeValue mt = opts.getMeasurementTime()
+                .orElse(getMeasurementTime()
+                        .orElse(Defaults.ITERATION_TIME));
+
+        int wi = opts.getWarmupIterations()
+                .orElse(getWarmupIterations()
+                        .orElse(Defaults.WARMUP_ITERATIONS));
+
+        TimeValue wt = opts.getWarmupTime()
+                .orElse(getWarmupTime()
+                        .orElse(Defaults.WARMUP_TIME));
+
+        return (wi * wt.getTime(TimeUnit.NANOSECONDS) + mi * mt.getTime(TimeUnit.NANOSECONDS));
+    }
+
+    public long estimatedTime(Options opts) {
+        int forks = opts.getForkCount()
+                .orElse(getForks()
+                        .orElse(Defaults.FORKS));
+
+        int warmupForks = opts.getWarmupForkCount()
+                .orElse(getWarmupForks()
+                        .orElse(Defaults.WARMUP_FORKS));
+
+        return (Math.max(1, forks) + warmupForks) * estimatedTimeSingleFork(opts);
+    }
+
 }
