@@ -43,7 +43,7 @@ public class Main {
      *
      * @param argv Command line arguments
      */
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws RunnerException, IOException {
         try {
             CommandLineOptions cmdOptions = new CommandLineOptions(argv);
 
@@ -70,10 +70,6 @@ public class Main {
             }
 
             runner.run();
-        } catch (RunnerException e) {
-            System.err.println(e.getMessage());
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
         } catch (CommandLineOptionException e) {
             System.err.println("Error parsing command line:");
             System.err.println(" " + e.getMessage());

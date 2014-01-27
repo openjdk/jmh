@@ -86,10 +86,6 @@ public interface OutputFormat {
      */
     public void endRun(Map<BenchmarkRecord, RunResult> result);
 
-    /* ------------- SPECIAL TRACING METHODS -------------------- */
-
-    void exception(Throwable ex);
-
     /* ------------- RAW OUTPUT METHODS ------------------- */
 
     void println(String s);

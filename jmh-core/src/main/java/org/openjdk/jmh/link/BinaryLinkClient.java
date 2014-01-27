@@ -25,6 +25,7 @@
 package org.openjdk.jmh.link;
 
 import org.openjdk.jmh.link.frames.ActionPlanFrame;
+import org.openjdk.jmh.link.frames.ExceptionFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
@@ -32,6 +33,7 @@ import org.openjdk.jmh.link.frames.OutputFormatFrame;
 import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.ActionPlan;
+import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -99,5 +101,10 @@ public final class BinaryLinkClient {
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }
+    }
+
+    public void pushException(BenchmarkException error) throws IOException {
+        oos.writeObject(new ExceptionFrame(error));
+        oos.flush();
     }
 }

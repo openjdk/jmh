@@ -119,7 +119,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         try {
             preSetupBarrier.await();
         } catch (InterruptedException ex) {
-            log(ex);
+            throw new BenchmarkException(ex);
         }
 
         // profilers start when iteration starts
@@ -137,7 +137,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         try {
             preTearDownBarrier.await();
         } catch (InterruptedException ex) {
-            log(ex);
+            throw new BenchmarkException(ex);
         }
 
         // profilers stop when iteration ends
@@ -152,17 +152,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                     fr.get(runtime.getTime() * 2, runtime.getTimeUnit());
                     expected--;
                 } catch (InterruptedException ex) {
-                    log(ex);
-                    iterationResults.clearResults();
-                    return iterationResults;
+                    throw new BenchmarkException(ex);
                 } catch (ExecutionException ex) {
                     Throwable cause = ex.getCause().getCause(); // unwrap
-                    log(cause);
-                    iterationResults.clearResults();
-                    if (shouldFailOnError) {
-                        throw new IllegalStateException(cause.getMessage(), cause);
-                    }
-                    return iterationResults;
+                    throw new BenchmarkException(cause);
                 } catch (TimeoutException e) {
                     // do nothing, respin
                 }

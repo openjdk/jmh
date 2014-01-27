@@ -24,16 +24,8 @@
  */
 package org.openjdk.jmh.runner;
 
-public class RunnerException extends Exception {
-    public RunnerException(Throwable t) {
-        super(t);
-    }
-
-    public RunnerException() {
-        super();
-    }
-
-    public RunnerException(String s, Throwable cause) {
-        super(s, cause);
+public class BenchmarkException extends RuntimeException {
+    public BenchmarkException(Throwable ex) {
+        super(ex);
     }
 }

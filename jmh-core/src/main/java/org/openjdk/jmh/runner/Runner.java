@@ -252,7 +252,7 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private SortedMap<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) {
+    private SortedMap<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
         out.startRun();
 
         Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
@@ -260,27 +260,31 @@ public class Runner extends BaseRunner {
 
         beforeBenchmarks(plan);
 
-        for (ActionPlan r : plan) {
-            Multimap<BenchmarkRecord, BenchResult> res;
-            switch (r.getType()) {
-                case EMBEDDED:
-                    res = runBenchmarks(false, r);
-                    break;
-                case FORKED:
-                    res = runSeparate(r);
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown action plan type: " + r.getType());
+        try {
+            for (ActionPlan r : plan) {
+                Multimap<BenchmarkRecord, BenchResult> res;
+                switch (r.getType()) {
+                    case EMBEDDED:
+                        res = runBenchmarks(false, r);
+                        break;
+                    case FORKED:
+                        res = runSeparate(r);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unknown action plan type: " + r.getType());
+                }
+
+                for (BenchmarkRecord br : res.keys()) {
+                    results.putAll(br, res.get(br));
+                }
             }
 
-            for (BenchmarkRecord br : res.keys()) {
-                results.putAll(br, res.get(br));
-            }
+            SortedMap<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
+            out.endRun(runResults);
+            return runResults;
+        } catch (BenchmarkException be) {
+            throw new RunnerException("Benchmark caught the exception", be.getCause());
         }
-
-        SortedMap<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
-        out.endRun(runResults);
-        return runResults;
     }
 
     private SortedMap<BenchmarkRecord, RunResult> mergeRunResults(Multimap<BenchmarkRecord, BenchResult> results) {
@@ -378,19 +382,27 @@ public class Runner extends BaseRunner {
             reader.waitFinish();
 
             if (ecode != 0) {
-                out.println("WARNING: Forked process returned code: " + ecode);
+                out.println("<forked VM failed with exit code " + ecode + ">");
+                out.println("");
                 if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
-                    throw new IllegalStateException("WARNING: Forked process returned code: " + ecode);
+                    throw new BenchmarkException(
+                        new IllegalStateException("Forked VM failed with exit code " + ecode)
+                    );
                 }
             }
 
         } catch (IOException ex) {
-            out.exception(ex);
+            throw new BenchmarkException(ex);
         } catch (InterruptedException ex) {
-            out.exception(ex);
+            throw new BenchmarkException(ex);
         }
 
-        return reader.getResults();
+        BenchmarkException exception = reader.getException();
+        if (exception == null) {
+            return reader.getResults();
+        } else {
+            throw exception;
+        }
     }
 
     /**

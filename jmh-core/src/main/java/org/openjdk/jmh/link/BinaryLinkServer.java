@@ -25,6 +25,7 @@
 package org.openjdk.jmh.link;
 
 import org.openjdk.jmh.link.frames.ActionPlanFrame;
+import org.openjdk.jmh.link.frames.ExceptionFrame;
 import org.openjdk.jmh.link.frames.FinishingFrame;
 import org.openjdk.jmh.link.frames.InfraFrame;
 import org.openjdk.jmh.link.frames.OptionsFrame;
@@ -33,6 +34,7 @@ import org.openjdk.jmh.link.frames.ResultsFrame;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.ActionPlan;
+import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.internal.HashMultimap;
@@ -72,6 +74,7 @@ public class BinaryLinkServer {
     private final Acceptor acceptor;
     private final AtomicReference<Handler> handler;
     private final AtomicReference<Multimap<BenchmarkRecord, BenchResult>> results;
+    private final AtomicReference<BenchmarkException> exception;
     private final AtomicReference<ActionPlan> plan;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
@@ -99,6 +102,7 @@ public class BinaryLinkServer {
 
         handler = new AtomicReference<Handler>();
         results = new AtomicReference<Multimap<BenchmarkRecord, BenchResult>>(new HashMultimap<BenchmarkRecord, BenchResult>());
+        exception = new AtomicReference<BenchmarkException>();
         plan = new AtomicReference<ActionPlan>();
     }
 
@@ -129,6 +133,10 @@ public class BinaryLinkServer {
                 // ignore
             }
         }
+    }
+
+    public BenchmarkException getException() {
+        return exception.getAndSet(null);
     }
 
     public Multimap<BenchmarkRecord, BenchResult> getResults() {
@@ -259,6 +267,9 @@ public class BinaryLinkServer {
                     if (obj instanceof ResultsFrame) {
                         handleResults((ResultsFrame)obj);
                     }
+                    if (obj instanceof ExceptionFrame) {
+                        handleException((ExceptionFrame)obj);
+                    }
                     if (obj instanceof FinishingFrame) {
                         // close the streams
                         break;
@@ -279,6 +290,10 @@ public class BinaryLinkServer {
             } finally {
                 close();
             }
+        }
+
+        private void handleException(ExceptionFrame obj) {
+            exception.set(obj.getError());
         }
 
         private void handleResults(ResultsFrame obj) {

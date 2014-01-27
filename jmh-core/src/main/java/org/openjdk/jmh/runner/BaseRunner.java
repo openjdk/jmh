@@ -80,20 +80,32 @@ public abstract class BaseRunner {
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
 
-            switch (mode) {
-                case WARMUP: {
-                    runBenchmark(benchmark, mode);
-                    out.println("");
-                    break;
+            try {
+                switch (mode) {
+                    case WARMUP: {
+                        runBenchmark(benchmark, mode);
+                        out.println("");
+                        break;
+                    }
+                    case WARMUP_MEASUREMENT:
+                    case MEASUREMENT: {
+                        BenchResult r = runBenchmark(benchmark, mode);
+                        results.put(benchmark, r);
+                        break;
+                    }
+                    default:
+                        throw new IllegalStateException("Unknown mode: " + mode);
+
                 }
-                case WARMUP_MEASUREMENT:
-                case MEASUREMENT: {
-                    BenchResult r = runBenchmark(benchmark, mode);
-                    results.put(benchmark, r);
-                    break;
+            } catch (BenchmarkException be) {
+                out.println("<failure>");
+                out.println("");
+                be.getCause().printStackTrace();
+                out.println("");
+
+                if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
+                    throw be;
                 }
-                default:
-                    throw new IllegalStateException("Unknown mode: " + mode);
             }
 
             if (!forked) {
@@ -162,18 +174,15 @@ public abstract class BaseRunner {
             handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
             return runBenchmark(executionParams, handler);
+        } catch (BenchmarkException be) {
+            throw be;
         } catch (Throwable ex) {
-            out.exception(ex);
-            if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
-                throw new IllegalStateException(ex.getMessage(), ex);
-            }
+            throw new BenchmarkException(ex);
         } finally {
             if (handler != null) {
                 handler.shutdown();
             }
         }
-        // FIXME: Better handling here!
-        return null;
     }
 
     protected BenchResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
@@ -208,24 +217,16 @@ public abstract class BaseRunner {
 
             boolean isLastIteration = (i == mp.getCount());
             IterationResult iterData = handler.runIteration(mp, isLastIteration);
-
-            // might get an exception above, in which case the results list will be empty
-            if (iterData.isResultsEmpty()) {
-                out.println("WARNING: No results returned, benchmark payload threw exception?");
-            } else {
-                out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData);
-
-                allResults.add(iterData);
-            }
+            out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData);
+            allResults.add(iterData);
         }
 
-        // only print end-of-run output if we have actual results
         if (!allResults.isEmpty()) {
             BenchResult result = new BenchResult(allResults);
             out.endBenchmark(handler.getBenchmark(), result);
             return result;
         } else {
-            // FIXME: Better handling here!
+            // should be ignored in the caller
             return null;
         }
     }

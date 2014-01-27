@@ -215,7 +215,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
             try {
                 iterationResults.addProfileResult(prof.endProfile());
             } catch (Throwable ex) {
-                log(ex);
+                throw new BenchmarkException(ex);
             }
         }
     }
@@ -226,15 +226,10 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
             try {
                 prof.startProfile();
             } catch (Throwable ex) {
-                log(ex);
+                throw new BenchmarkException(ex);
             }
         }
     }
-
-    protected void log(Throwable ex) {
-        format.exception(ex);
-    }
-
 
     /**
      * {@inheritDoc}

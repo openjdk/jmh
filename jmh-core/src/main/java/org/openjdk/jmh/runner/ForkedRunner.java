@@ -49,8 +49,12 @@ public class ForkedRunner extends BaseRunner {
     public void run() throws IOException, ClassNotFoundException {
         ActionPlan actionPlan = link.requestPlan();
 
-        Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
-        link.pushResults(res);
+        try {
+            Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
+            link.pushResults(res);
+        } catch (BenchmarkException be) {
+            link.pushException(be);
+        }
 
         out.flush();
         out.close();

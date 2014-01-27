@@ -22,18 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.link.frames;
 
-public class RunnerException extends Exception {
-    public RunnerException(Throwable t) {
-        super(t);
+import org.openjdk.jmh.runner.BenchmarkException;
+
+import java.io.Serializable;
+
+public class ExceptionFrame implements Serializable {
+    private final BenchmarkException error;
+
+    public ExceptionFrame(BenchmarkException error) {
+        this.error = error;
     }
 
-    public RunnerException() {
-        super();
-    }
-
-    public RunnerException(String s, Throwable cause) {
-        super(s, cause);
+    public BenchmarkException getError() {
+        return error;
     }
 }

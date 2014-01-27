@@ -28,8 +28,6 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class AbstractOutputFormat implements OutputFormat {
 
@@ -73,11 +71,6 @@ public abstract class AbstractOutputFormat implements OutputFormat {
     @Override
     public void close() {
         // do nothing
-    }
-
-    @Override
-    public void exception(Throwable ex) {
-        Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage(), ex);
     }
 
 }
