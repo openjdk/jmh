@@ -33,16 +33,13 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * TextReportFormat implementation of OutputFormat.
@@ -62,7 +59,7 @@ public class TextReportFormat extends AbstractOutputFormat {
         out.println("# Measurement: " + mbParams.getMeasurement().getCount() + " iterations, " + mbParams.getMeasurement().getTime() + " each");
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
-        out.println("# Running: " + name.getUsername());
+        out.println("# Benchmark: " + name.getUsername());
     }
 
     @Override
