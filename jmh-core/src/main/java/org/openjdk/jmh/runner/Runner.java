@@ -317,6 +317,8 @@ public class Runner extends BaseRunner {
                 opts = "<none>";
             }
 
+            String jvm = options.getJvm().orElse(getDefaultJvm());
+
             BenchmarkParams params = new BenchmarkParams(options, benchmark, ActionMode.UNDEF);
 
             int forkCount = params.getForks();
@@ -325,8 +327,9 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < warmupForkCount; i++) {
                     beforeBenchmark();
-                    out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
+                    out.println("# VM invoker: " + jvm);
                     out.println("# VM options: " + opts);
+                    out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
                     doFork(server, commandString);
                     afterBenchmark(benchmark);
                 }
@@ -335,8 +338,9 @@ public class Runner extends BaseRunner {
             out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < forkCount; i++) {
                 beforeBenchmark();
-                out.println("# Fork: " + (i + 1) + " of " + forkCount);
+                out.println("# VM invoker: " + jvm);
                 out.println("# VM options: " + opts);
+                out.println("# Fork: " + (i + 1) + " of " + forkCount);
                 Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
                 results.merge(result);
                 afterBenchmark(benchmark);
