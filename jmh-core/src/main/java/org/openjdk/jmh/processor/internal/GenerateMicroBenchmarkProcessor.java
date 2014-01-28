@@ -101,13 +101,17 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     private final Set<BenchmarkInfo> benchmarkInfos = new HashSet<BenchmarkInfo>();
 
     private final Collection<SubProcessor> subProcessors = new ArrayList<SubProcessor>();
+    private CompilerControlProcessor compilerControl;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        subProcessors.add(new CompilerControlProcessor());
+
+        compilerControl = new CompilerControlProcessor();
+
         subProcessors.add(new HelperMethodValidationProcessor());
         subProcessors.add(new GroupValidationProcessor());
+        subProcessors.add(compilerControl);
     }
 
     @Override
@@ -134,6 +138,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                     }
                 }
             } else {
+                for (SubProcessor sub : subProcessors) {
+                    sub.finish(roundEnv, processingEnv);
+                }
+
                 // Processing completed, final round. Print all added methods to file
                 try {
                     FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
@@ -617,6 +625,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            compilerControl.forceInline(method);
+
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
@@ -714,6 +724,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            compilerControl.forceInline(method);
+
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
@@ -822,6 +834,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            compilerControl.forceInline(method);
+
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
@@ -930,6 +944,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
+            compilerControl.forceInline(method);
+
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");

@@ -41,48 +41,64 @@ import java.util.List;
 public class CompilerControlProcessor implements SubProcessor {
 
     private final List<String> lines = new ArrayList<String>();
+    private final List<Element> forceInline = new ArrayList<Element>();
+
+    public void forceInline(Element element) {
+        forceInline.add(element);
+    }
 
     public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
         try {
-            if (!roundEnv.processingOver()) {
-                for (Element element : roundEnv.getElementsAnnotatedWith(CompilerControl.class)) {
-
-                    CompilerControl ann = element.getAnnotation(CompilerControl.class);
-                    if (ann == null) {
-                        throw new IllegalStateException("No annotation");
-                    }
-
-                    switch (element.getKind()) {
-                        case CLASS:
-                            lines.add(ann.value().command() + "," + element.toString().replaceAll("\\.", "/") + ".*");
-                            break;
-                        case METHOD:
-                            lines.add(ann.value().command() + "," + element.getEnclosingElement().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
-                            break;
-                        default:
-                            processingEnv.getMessager().printMessage(Kind.ERROR,
-                                    "@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
-                                            "unexpected target",
-                                    element);
-                    }
-
+            for (Element element : roundEnv.getElementsAnnotatedWith(CompilerControl.class)) {
+                CompilerControl ann = element.getAnnotation(CompilerControl.class);
+                if (ann == null) {
+                    throw new IllegalStateException("No annotation");
                 }
-            } else {
-                try {
-                    FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
-                            CompilerHints.LIST.substring(1));
-                    PrintWriter writer = new PrintWriter(file.openWriter());
-                    for (String line : lines) {
-                        writer.println(line);
-                    }
-                    writer.close();
-                } catch (IOException ex) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing compiler hint list " + ex);
-                }
+
+                CompilerControl.Mode command = ann.value();
+                addLine(processingEnv, element, command);
+            }
+
+            for (Element element : forceInline) {
+                addLine(processingEnv, element, CompilerControl.Mode.INLINE);
             }
         } catch (Throwable t) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had thrown exception: " + t);
             t.printStackTrace(System.err);
+        }
+    }
+
+    @Override
+    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+        try {
+            FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
+                    CompilerHints.LIST.substring(1));
+            PrintWriter writer = new PrintWriter(file.openWriter());
+            for (String line : lines) {
+                writer.println(line);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing compiler hint list " + ex);
+        } catch (Throwable t) {
+            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had thrown exception: " + t);
+            t.printStackTrace(System.err);
+        }
+    }
+
+    private void addLine(ProcessingEnvironment processingEnv, Element element, CompilerControl.Mode command) {
+        switch (element.getKind()) {
+            case CLASS:
+                lines.add(command.command() + "," + element.toString().replaceAll("\\.", "/") + ".*");
+                break;
+            case METHOD:
+                lines.add(command.command() + "," + element.getEnclosingElement().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
+                break;
+            default:
+                processingEnv.getMessager().printMessage(Kind.ERROR,
+                        "@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
+                                "unexpected target",
+                        element);
         }
     }
 

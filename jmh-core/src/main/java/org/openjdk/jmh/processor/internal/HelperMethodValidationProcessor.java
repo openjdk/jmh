@@ -73,4 +73,9 @@ public class HelperMethodValidationProcessor implements SubProcessor {
         }
     }
 
+    @Override
+    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+        // do nothing
+    }
+
 }

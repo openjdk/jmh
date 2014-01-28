@@ -31,4 +31,6 @@ public interface SubProcessor {
 
     void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv);
 
+    void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv);
+
 }

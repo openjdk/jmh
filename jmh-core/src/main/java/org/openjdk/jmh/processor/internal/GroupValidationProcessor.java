@@ -54,4 +54,9 @@ public class GroupValidationProcessor implements SubProcessor {
         }
     }
 
+    @Override
+    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+        // do nothing
+    }
+
 }
