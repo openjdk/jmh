@@ -28,7 +28,7 @@ import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 
 import java.io.Serializable;
 
-public interface Statistics extends Serializable, StatisticalSummary {
+public interface Statistics extends Serializable, StatisticalSummary, Comparable<Statistics> {
 
     /**
      * Gets the confidence interval at given confidence level.
@@ -52,6 +52,28 @@ public interface Statistics extends Serializable, StatisticalSummary {
      * @return true, if mean difference is statistically significant
      */
     boolean isDifferent(Statistics other, double confidence);
+
+    /**
+     * Compares this statistics to another one.
+     * Follows the contract of {@link Comparable}.
+     *
+     * @param other statistics to compare against
+     * @return a negative integer, zero, or a positive integer as this statistics
+     *          is less than, equal to, or greater than the specified statistics.
+     */
+    int compareTo(Statistics other);
+
+    /**
+     * Compares this statistics to another one.
+     * Follows the contract of {@link Comparable}.
+     *
+     * @param other statistics to compare against
+     * @param confidence confidence level (e.g. 0.99)
+     * @return a negative integer, zero, or a positive integer as this statistics
+     *          is less than, equal to, or greater than the specified statistics.
+     */
+
+    int compareTo(Statistics other, double confidence);
 
     double getStandardDeviation();
 

@@ -160,6 +160,7 @@ public class TestMultisetStatistics {
 
         for (double conf : new double[] {0.5, 0.9, 0.99, 0.999, 0.9999, 0.99999}) {
             Assert.assertTrue("Diff significant at " + conf, s1.isDifferent(s2, conf));
+            Assert.assertEquals(1, s1.compareTo(s2, conf));
         }
     }
 
@@ -175,6 +176,7 @@ public class TestMultisetStatistics {
 
         for (double conf : new double[] {0.5, 0.9, 0.99, 0.999, 0.9999, 0.99999}) {
             Assert.assertFalse("Diff not significant at " + conf, s1.isDifferent(s2, conf));
+            Assert.assertEquals(0, s1.compareTo(s2, conf));
         }
     }
 
@@ -193,6 +195,12 @@ public class TestMultisetStatistics {
         Assert.assertFalse("Diff not significant at 0.99", s1.isDifferent(s2, 0.99));
         Assert.assertFalse("Diff not significant at 0.999", s1.isDifferent(s2, 0.999));
         Assert.assertFalse("Diff not significant at 0.9999", s1.isDifferent(s2, 0.9999));
+
+        Assert.assertEquals("compareTo at 0.5", 1, s1.compareTo(s2, 0.5));
+        Assert.assertEquals("compareTo at 0.9", 1, s1.compareTo(s2, 0.9));
+        Assert.assertEquals("compareTo at 0.99", 0, s1.compareTo(s2, 0.99));
+        Assert.assertEquals("compareTo at 0.999", 0, s1.compareTo(s2, 0.999));
+        Assert.assertEquals("compareTo at 0.9999", 0, s1.compareTo(s2, 0.9999));
     }
 
 }

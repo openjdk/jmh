@@ -87,4 +87,19 @@ public abstract class AbstractStatistics implements Statistics {
         return Math.sqrt(getVariance());
     }
 
+    @Override
+    public int compareTo(Statistics other, double confidence) {
+        if (isDifferent(other, confidence)) {
+            double t = getMean();
+            double o = other.getMean();
+            return (t > o) ? -1 : 1;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int compareTo(Statistics other) {
+        return compareTo(other, 0.99);
+    }
 }
