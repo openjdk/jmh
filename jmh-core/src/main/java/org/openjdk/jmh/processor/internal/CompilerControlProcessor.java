@@ -41,10 +41,10 @@ import java.util.List;
 public class CompilerControlProcessor implements SubProcessor {
 
     private final List<String> lines = new ArrayList<String>();
-    private final List<Element> forceInline = new ArrayList<Element>();
+    private final List<Element> defaultForceInline = new ArrayList<Element>();
 
-    public void forceInline(Element element) {
-        forceInline.add(element);
+    public void defaultForceInline(Element element) {
+        defaultForceInline.add(element);
     }
 
     public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
@@ -59,7 +59,8 @@ public class CompilerControlProcessor implements SubProcessor {
                 addLine(processingEnv, element, command);
             }
 
-            for (Element element : forceInline) {
+            for (Element element : defaultForceInline) {
+                if (element.getAnnotation(CompilerControl.class) != null) continue;
                 addLine(processingEnv, element, CompilerControl.Mode.INLINE);
             }
         } catch (Throwable t) {

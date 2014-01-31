@@ -625,7 +625,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
-            compilerControl.forceInline(method);
+            compilerControl.defaultForceInline(method);
 
             subGroup++;
 
@@ -724,7 +724,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
-            compilerControl.forceInline(method);
+            compilerControl.defaultForceInline(method);
 
             subGroup++;
 
@@ -834,7 +834,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
-            compilerControl.forceInline(method);
+            compilerControl.defaultForceInline(method);
 
             subGroup++;
 
@@ -944,7 +944,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (Element method : methodGroup.methods()) {
-            compilerControl.forceInline(method);
+            compilerControl.defaultForceInline(method);
 
             subGroup++;
 
