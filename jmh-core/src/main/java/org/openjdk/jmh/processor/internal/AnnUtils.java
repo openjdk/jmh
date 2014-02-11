@@ -70,7 +70,7 @@ public class AnnUtils {
         String name = "";
         Element walk = clazz;
         while (walk.getKind() != ElementKind.PACKAGE) {
-            name = walk.getSimpleName().toString() + "_" + name;
+            name = walk.getSimpleName().toString() + (name.isEmpty() ? "" : "_" + name);
             walk = walk.getEnclosingElement();
         }
         return name.substring(0, name.length());
