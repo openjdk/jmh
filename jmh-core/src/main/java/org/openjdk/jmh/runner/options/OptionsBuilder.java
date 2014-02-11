@@ -41,17 +41,18 @@ import java.util.concurrent.TimeUnit;
 
 public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
-    private boolean finalized;
-
-    private void checkFinalized() {
-        if (finalized) {
-            throw new IllegalStateException("The builder is already finalized");
-        }
-    }
-
     @Override
     public Options build() {
-        finalized = true;
+        return this;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private Options otherOptions;
+
+    @Override
+    public ChainedOptionsBuilder parent(Options other) {
+        this.otherOptions = other;
         return this;
     }
 
@@ -61,17 +62,24 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder include(String regexp) {
-        checkFinalized();
         regexps.add(regexp);
         return this;
     }
 
     @Override
     public List<String> getIncludes() {
-        if (regexps.isEmpty()) {
-            return Collections.singletonList(".*");
+        List<String> result = new ArrayList<String>();
+
+        result.addAll(regexps);
+        if (otherOptions != null) {
+            result.addAll(otherOptions.getIncludes());
         }
-        return regexps;
+
+        if (result.isEmpty()) {
+            return Collections.singletonList(".*");
+        } else {
+            return result;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -86,7 +94,14 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<String> getExcludes() {
-        return excludes;
+        List<String> result = new ArrayList<String>();
+
+        result.addAll(excludes);
+        if (otherOptions != null) {
+            result.addAll(otherOptions.getExcludes());
+        }
+
+        return result;
     }
 
     // ---------------------------------------------------------------------------
@@ -101,7 +116,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<String> getOutput() {
-        return output;
+        if (otherOptions != null) {
+            return output.orAnother(otherOptions.getOutput());
+        } else {
+            return output;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -116,7 +135,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<ResultFormatType> getResultFormat() {
-        return rfType;
+        if (otherOptions != null) {
+            return rfType.orAnother(otherOptions.getResultFormat());
+        } else {
+            return rfType;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -131,7 +154,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<String> getResult() {
-        return result;
+        if (otherOptions != null) {
+            return result.orAnother(otherOptions.getResult());
+        } else {
+            return result;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -146,7 +173,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Boolean> shouldDoGC() {
-        return shouldDoGC;
+        if (otherOptions != null) {
+            return shouldDoGC.orAnother(otherOptions.shouldDoGC());
+        } else {
+            return shouldDoGC;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -161,6 +192,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Set<ProfilerType> getProfilers() {
+        if (otherOptions != null) {
+            profilers.addAll(otherOptions.getProfilers());
+        }
         return profilers;
     }
 
@@ -176,7 +210,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<VerboseMode> verbosity() {
-        return verbosity;
+        if (otherOptions != null) {
+            return verbosity.orAnother(otherOptions.verbosity());
+        } else {
+            return verbosity;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -191,7 +229,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Boolean> shouldFailOnError() {
-        return shouldFailOnError;
+        if (otherOptions != null) {
+            return shouldFailOnError.orAnother(otherOptions.shouldFailOnError());
+        } else {
+            return shouldFailOnError;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -206,7 +248,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Integer> getThreads() {
-        return threads;
+        if (otherOptions != null) {
+            return threads.orAnother(otherOptions.getThreads());
+        } else {
+            return threads;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -221,7 +267,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<int[]> getThreadGroups() {
-        return threadGroups;
+        if (otherOptions != null) {
+            return threadGroups.orAnother(otherOptions.getThreadGroups());
+        } else {
+            return threadGroups;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -236,7 +286,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Boolean> shouldSyncIterations() {
-        return syncIterations;
+        if (otherOptions != null) {
+            return syncIterations.orAnother(otherOptions.shouldSyncIterations());
+        } else {
+            return syncIterations;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -251,7 +305,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Integer> getWarmupIterations() {
-        return warmupIterations;
+        if (otherOptions != null) {
+            return warmupIterations.orAnother(otherOptions.getWarmupIterations());
+        } else {
+            return warmupIterations;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -266,7 +324,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<TimeValue> getWarmupTime() {
-        return warmupTime;
+        if (otherOptions != null) {
+            return warmupTime.orAnother(otherOptions.getWarmupTime());
+        } else {
+            return warmupTime;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -281,7 +343,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<WarmupMode> getWarmupMode() {
-        return warmupMode;
+        if (otherOptions != null) {
+            return warmupMode.orAnother(otherOptions.getWarmupMode());
+        } else {
+            return warmupMode;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -296,7 +362,12 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<String> getWarmupIncludes() {
-        return warmupMicros;
+        List<String> result = new ArrayList<String>();
+        result.addAll(warmupMicros);
+        if (otherOptions != null) {
+            result.addAll(otherOptions.getWarmupIncludes());
+        }
+        return result;
     }
 
     // ---------------------------------------------------------------------------
@@ -311,7 +382,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Integer> getMeasurementIterations() {
-        return iterations;
+        if (otherOptions != null) {
+            return iterations.orAnother(otherOptions.getMeasurementIterations());
+        } else {
+            return iterations;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -326,7 +401,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<TimeValue> getMeasurementTime() {
-        return measurementTime;
+        if (otherOptions != null) {
+            return measurementTime.orAnother(otherOptions.getMeasurementTime());
+        } else {
+            return measurementTime;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -341,7 +420,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Collection<Mode> getBenchModes() {
-        return benchModes;
+        if (otherOptions != null && benchModes.isEmpty()) {
+            return otherOptions.getBenchModes();
+        } else {
+            return benchModes;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -356,7 +439,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<TimeUnit> getTimeUnit() {
-        return timeUnit;
+        if (otherOptions != null) {
+            return timeUnit.orAnother(otherOptions.getTimeUnit());
+        } else {
+            return timeUnit;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -371,7 +458,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Integer> getForkCount() {
-        return forks;
+        if (otherOptions != null) {
+            return forks.orAnother(otherOptions.getForkCount());
+        } else {
+            return forks;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -386,7 +477,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Integer> getWarmupForkCount() {
-        return warmupForks;
+        if (otherOptions != null) {
+            return warmupForks.orAnother(otherOptions.getWarmupForkCount());
+        } else {
+            return warmupForks;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -401,7 +496,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<String> getJvm() {
-        return jvmBinary;
+        if (otherOptions != null) {
+            return jvmBinary.orAnother(otherOptions.getJvm());
+        } else {
+            return jvmBinary;
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -416,7 +515,11 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Collection<String>> getJvmArgs() {
-        return jvmArgs;
+        if (otherOptions != null) {
+            return jvmArgs.orAnother(otherOptions.getJvmArgs());
+        } else {
+            return jvmArgs;
+        }
     }
 
 }

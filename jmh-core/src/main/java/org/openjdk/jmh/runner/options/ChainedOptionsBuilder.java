@@ -40,6 +40,15 @@ public interface ChainedOptionsBuilder {
     Options build();
 
     /**
+     * Override the defaults from the given option.
+     * You may use this only once.
+     *
+     * @param other options to base on
+     * @return builder
+     */
+    ChainedOptionsBuilder parent(Options other);
+
+    /**
      * Include benchmark in the run
      * (Can be used multiple times)
      *

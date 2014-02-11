@@ -28,6 +28,8 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.CommandLineOptionException;
+import org.openjdk.jmh.runner.options.CommandLineOptions;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -38,8 +40,9 @@ public class SimpleTest {
      * This sample uses VERY EXPERIMENTAL API; use with care!
      */
 
-    public static void main(String[] args) throws RunnerException {
+    public static void main(String[] args) throws RunnerException, CommandLineOptionException {
         Options opts = new OptionsBuilder()
+                .parent(new CommandLineOptions(args))
                 .include(".*")
                 .warmupTime(TimeValue.milliseconds(100))
                 .measurementTime(TimeValue.milliseconds(100))
