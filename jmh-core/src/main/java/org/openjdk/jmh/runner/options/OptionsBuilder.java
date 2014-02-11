@@ -30,6 +30,7 @@ import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -509,7 +510,12 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder jvmArgs(String... value) {
-        this.jvmArgs = Optional.<Collection<String>>of(Arrays.asList(value));
+        if (jvmArgs.hasValue()) {
+            jvmArgs.get().addAll(Arrays.asList(value));
+        } else {
+            Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
+            jvmArgs = Optional.<Collection<String>>of(vals);
+        }
         return this;
     }
 
@@ -522,4 +528,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
         }
     }
 
+    @Override
+    public ChainedOptionsBuilder detectJvmArgs() {
+        List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        return jvmArgs(inputArguments.toArray(new String[inputArguments.size()]));
+    }
 }

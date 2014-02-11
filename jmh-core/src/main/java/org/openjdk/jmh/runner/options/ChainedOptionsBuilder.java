@@ -224,4 +224,10 @@ public interface ChainedOptionsBuilder {
      */
     ChainedOptionsBuilder jvmArgs(String... value);
 
+    /**
+     * Autodetect forked JVM arguments from the parent VM.
+     * @return builder
+     */
+    ChainedOptionsBuilder detectJvmArgs();
+
 }

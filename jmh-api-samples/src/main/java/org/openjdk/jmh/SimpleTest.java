@@ -46,7 +46,7 @@ public class SimpleTest {
                 .include(".*")
                 .warmupTime(TimeValue.milliseconds(100))
                 .measurementTime(TimeValue.milliseconds(100))
-                .jvmArgs("-server")
+                .detectJvmArgs()
                 .forks(5)
                 .build();
 
