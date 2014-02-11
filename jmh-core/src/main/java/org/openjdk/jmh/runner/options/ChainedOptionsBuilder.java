@@ -218,8 +218,9 @@ public interface ChainedOptionsBuilder {
 
     /**
      * Forked JVM arguments.
+     * (can be used multiple times)
      *
-     * @param value arguments to override with
+     * @param value arguments to add to the run
      * @return builder
      */
     ChainedOptionsBuilder jvmArgs(String... value);

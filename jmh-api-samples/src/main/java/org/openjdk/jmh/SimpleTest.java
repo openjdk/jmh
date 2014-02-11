@@ -47,6 +47,7 @@ public class SimpleTest {
                 .warmupTime(TimeValue.milliseconds(100))
                 .measurementTime(TimeValue.milliseconds(100))
                 .detectJvmArgs()
+                .jvmArgs("-XX:-DoEscapeAnalysis")
                 .forks(5)
                 .build();
 

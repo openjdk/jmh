@@ -202,7 +202,7 @@ public class TestParentOptions {
     public void testJVMArgs_Merge() throws Exception {
         Options parent = new OptionsBuilder().jvmArgs("opt1", "opt2").build();
         Options builder = new OptionsBuilder().parent(parent).jvmArgs("opt3", "opt4").build();
-        Assert.assertEquals(Arrays.asList("opt3", "opt4"), builder.getJvmArgs().get());
+        Assert.assertEquals(Arrays.asList("opt1", "opt2", "opt3", "opt4"), builder.getJvmArgs().get());
     }
 
     @Test

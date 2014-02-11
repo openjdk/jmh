@@ -521,10 +521,17 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public Optional<Collection<String>> getJvmArgs() {
+        Collection<String> result = new ArrayList<String>();
+
         if (otherOptions != null) {
-            return jvmArgs.orAnother(otherOptions.getJvmArgs());
+            result.addAll(otherOptions.getJvmArgs().orElse(Collections.<String>emptyList()));
+        }
+        result.addAll(jvmArgs.orElse(Collections.<String>emptyList()));
+
+        if (result.isEmpty()) {
+            return Optional.none();
         } else {
-            return jvmArgs;
+            return Optional.of(result);
         }
     }
 
