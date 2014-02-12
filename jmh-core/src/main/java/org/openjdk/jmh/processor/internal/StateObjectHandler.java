@@ -113,7 +113,7 @@ public class StateObjectHandler {
 
     private void bindState(ExecutableElement execMethod, TypeElement element, Scope scope, String implicitLabel) {
         Integer index;
-        String className = element.asType().toString();
+        String className = element.getQualifiedName().toString();
         switch (scope) {
             case Benchmark: {
                 index = globalIndexByType.get(className);

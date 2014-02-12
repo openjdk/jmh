@@ -94,7 +94,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         return list;
     }
 
-    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("harness.executor", ExecutorType.FIXED_TPE.toString()));
+    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("harness.executor", ExecutorType.FIXED_TPE.name()));
 
     private enum ExecutorType {
 

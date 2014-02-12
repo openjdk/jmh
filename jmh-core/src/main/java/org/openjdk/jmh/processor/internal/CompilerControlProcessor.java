@@ -30,6 +30,7 @@ import org.openjdk.jmh.runner.CompilerHints;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -90,10 +91,10 @@ public class CompilerControlProcessor implements SubProcessor {
     private void addLine(ProcessingEnvironment processingEnv, Element element, CompilerControl.Mode command) {
         switch (element.getKind()) {
             case CLASS:
-                lines.add(command.command() + "," + element.toString().replaceAll("\\.", "/") + ".*");
+                lines.add(command.command() + "," + ((TypeElement)element).getQualifiedName().toString().replaceAll("\\.", "/") + ".*");
                 break;
             case METHOD:
-                lines.add(command.command() + "," + element.getEnclosingElement().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
+                lines.add(command.command() + "," + ((TypeElement)element.getEnclosingElement()).getQualifiedName().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
                 break;
             default:
                 processingEnv.getMessager().printMessage(Kind.ERROR,

@@ -109,7 +109,7 @@ public enum Mode {
     public static List<String> getKnown() {
         List<String> res = new ArrayList<String>();
         for (Mode type : Mode.values()) {
-            res.add(type.toString() + "/" + type.shortLabel());
+            res.add(type.name() + "/" + type.shortLabel());
         }
         return res;
     }

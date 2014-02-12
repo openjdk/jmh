@@ -26,6 +26,7 @@ package org.openjdk.jmh.processor.internal;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
 
@@ -58,7 +59,7 @@ public class AnnUtils {
         while (walk.getKind() != ElementKind.PACKAGE) {
             walk = walk.getEnclosingElement();
         }
-        return walk.toString();
+        return ((PackageElement)walk).getQualifiedName().toString();
     }
 
     /**
