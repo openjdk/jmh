@@ -37,12 +37,20 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class CompilerControlProcessor implements SubProcessor {
 
     private final List<String> lines = new ArrayList<String>();
-    private final List<Element> defaultForceInline = new ArrayList<Element>();
+    private final Set<Element> defaultForceInline = new TreeSet<Element>(new Comparator<Element>() {
+        @Override
+        public int compare(Element o1, Element o2) {
+            return getName(o1).compareTo(getName(o2));
+        }
+    });
 
     public void defaultForceInline(Element element) {
         defaultForceInline.add(element);
@@ -57,12 +65,12 @@ public class CompilerControlProcessor implements SubProcessor {
                 }
 
                 CompilerControl.Mode command = ann.value();
-                addLine(processingEnv, element, command);
+                lines.add(command.command() + "," + getName(element));
             }
 
             for (Element element : defaultForceInline) {
                 if (element.getAnnotation(CompilerControl.class) != null) continue;
-                addLine(processingEnv, element, CompilerControl.Mode.INLINE);
+                lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
             }
         } catch (Throwable t) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had thrown exception: " + t);
@@ -88,19 +96,15 @@ public class CompilerControlProcessor implements SubProcessor {
         }
     }
 
-    private void addLine(ProcessingEnvironment processingEnv, Element element, CompilerControl.Mode command) {
+    private static String getName(Element element) {
         switch (element.getKind()) {
             case CLASS:
-                lines.add(command.command() + "," + ((TypeElement)element).getQualifiedName().toString().replaceAll("\\.", "/") + ".*");
-                break;
+                return ((TypeElement)element).getQualifiedName().toString().replaceAll("\\.", "/") + ".*";
             case METHOD:
-                lines.add(command.command() + "," + ((TypeElement)element.getEnclosingElement()).getQualifiedName().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString());
-                break;
+                return ((TypeElement)element.getEnclosingElement()).getQualifiedName().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString();
             default:
-                processingEnv.getMessager().printMessage(Kind.ERROR,
-                        "@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
-                                "unexpected target",
-                        element);
+                throw new GenerationException("@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
+                                "unexpected target", element);
         }
     }
 
