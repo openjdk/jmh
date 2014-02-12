@@ -127,16 +127,21 @@ public class Runner extends BaseRunner {
      * This method is handy when Options describe only the single benchmark to run.
      *
      * @return benchmark result
-     * @throws IllegalStateException if more than one benchmark is found
+     * @throws RunnerException if more than one benchmark is found, or no results are returned
      */
     public RunResult runSingle() throws RunnerException {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.size() == 1) {
             Map<BenchmarkRecord, RunResult> rs = run();
-            return rs.values().iterator().next();
+            Collection<RunResult> values = rs.values();
+            if (values.size() == 1) {
+                return values.iterator().next();
+            } else {
+                throw new RunnerException("No results returned");
+            }
         } else {
-            throw new IllegalStateException("More than single benchmark is matching the options");
+            throw new RunnerException("More than single benchmark is matching the options");
         }
     }
 

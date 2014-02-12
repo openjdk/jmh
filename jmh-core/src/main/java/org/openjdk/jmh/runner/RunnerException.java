@@ -33,7 +33,12 @@ public class RunnerException extends Exception {
         super();
     }
 
+    public RunnerException(String s) {
+        super(s);
+    }
+
     public RunnerException(String s, Throwable cause) {
         super(s, cause);
     }
+
 }
