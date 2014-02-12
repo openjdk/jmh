@@ -68,6 +68,7 @@ public class StateObjectHandler {
     private final HashMap<String, String> collapsedTypes = new HashMap<String, String>();
     private int collapsedIndex = 0;
 
+    private final Set<String> claimedJmhTypes = new HashSet<String>();
     private final HashMap<String, String> jmhTypes = new HashMap<String, String>();
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
@@ -83,7 +84,11 @@ public class StateObjectHandler {
     private String getJMHtype(String type) {
         String jmhType = jmhTypes.get(type);
         if (jmhType == null) {
-            jmhType = getBaseType(type) + "_jmh";
+            int v = 1;
+            do {
+                jmhType = getBaseType(type) + "_" + v + "_jmh";
+                v++;
+            } while (!claimedJmhTypes.add(jmhType));
             jmhTypes.put(type, jmhType);
         }
         return jmhType;
