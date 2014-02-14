@@ -171,6 +171,9 @@ public class TimeValue implements Serializable {
         if (timeString.contains("m")) {
             return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("m"))), TimeUnit.MINUTES);
         }
+        if (timeString.contains("hr")) {
+            return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("hr"))), TimeUnit.HOURS);
+        }
         if (timeString.contains("day")) {
             return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("day"))), TimeUnit.DAYS);
         }
