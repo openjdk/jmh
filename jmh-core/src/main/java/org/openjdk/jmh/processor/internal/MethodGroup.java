@@ -158,6 +158,14 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
+    public Optional<Integer> getWarmupBatchSize() {
+        Warmup ann = getFinal(Warmup.class);
+        if (ann != null && ann.batchSize() != Warmup.BLANK_BATCHSIZE) {
+            return Optional.of(ann.batchSize());
+        }
+        return Optional.none();
+    }
+
     public Optional<Integer> getMeasurementIterations() {
         Measurement ann = getFinal(Measurement.class);
         if (ann != null && ann.iterations() != Measurement.BLANK_ITERATIONS) {
@@ -170,6 +178,14 @@ public class MethodGroup implements Comparable<MethodGroup> {
         Measurement ann = getFinal(Measurement.class);
         if (ann != null && ann.time() != Measurement.BLANK_TIME) {
             return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
+        }
+        return Optional.none();
+    }
+
+    public Optional<Integer> getMeasurementBatchSize() {
+        Measurement ann = getFinal(Measurement.class);
+        if (ann != null && ann.batchSize() != Measurement.BLANK_BATCHSIZE) {
+            return Optional.of(ann.batchSize());
         }
         return Optional.none();
     }

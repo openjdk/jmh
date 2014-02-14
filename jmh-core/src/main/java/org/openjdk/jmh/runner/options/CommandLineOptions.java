@@ -58,8 +58,10 @@ public class CommandLineOptions implements Options {
 
     private final Optional<Integer> iterations;
     private final Optional<TimeValue> runTime;
+    private final Optional<Integer> batchSize;
     private final Optional<Integer> warmupIterations;
     private final Optional<TimeValue> warmupTime;
+    private final Optional<Integer> warmupBatchSize;
     private final List<Mode> benchMode = new ArrayList<Mode>();
     private final Optional<Integer> threads;
     private final List<Integer> threadGroups = new ArrayList<Integer>();
@@ -94,10 +96,18 @@ public class CommandLineOptions implements Options {
         OptionSpec<Integer> optMeasureCount = parser.accepts("i", "Number of measurement iterations to do.")
                 .withRequiredArg().ofType(Integer.class).describedAs("int");
 
+        OptionSpec<Integer> optMeasureBatchSize = parser.accepts("bs", "Batch size: number of benchmark method calls per operation. " +
+                "(some benchmark modes can ignore this setting)")
+                .withRequiredArg().ofType(Integer.class).describedAs("int");
+
         OptionSpec<String> optMeasureTime = parser.accepts("r", "Time to spend at each measurement iteration.")
                 .withRequiredArg().ofType(String.class).describedAs("time");
 
         OptionSpec<Integer> optWarmupCount = parser.accepts("wi", "Number of warmup iterations to do.")
+                .withRequiredArg().ofType(Integer.class).describedAs("int");
+
+        OptionSpec<Integer> optWarmupBatchSize = parser.accepts("wbs", "Warmup batch size: number of benchmark method calls per operation. " +
+                "(some benchmark modes can ignore this setting)")
                 .withRequiredArg().ofType(Integer.class).describedAs("int");
 
         OptionSpec<String> optWarmupTime = parser.accepts("w", "Time to spend at each warmup iteration.")
@@ -237,6 +247,8 @@ public class CommandLineOptions implements Options {
 
             iterations = Optional.eitherOf(optMeasureCount.value(set));
 
+            batchSize = Optional.eitherOf(optMeasureBatchSize.value(set));
+
             if (set.has(optMeasureTime)) {
                 String value = optMeasureTime.value(set);
                 try {
@@ -249,6 +261,8 @@ public class CommandLineOptions implements Options {
             }
 
             warmupIterations = Optional.eitherOf(optWarmupCount.value(set));
+
+            warmupBatchSize = Optional.eitherOf(optWarmupBatchSize.value(set));
 
             if (set.has(optWarmupTime)) {
                 String value = optWarmupTime.value(set);
@@ -568,6 +582,16 @@ public class CommandLineOptions implements Options {
      * @return the value
      */
     @Override
+    public Optional<Integer> getMeasurementBatchSize() {
+        return batchSize;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
     public Optional<TimeValue> getMeasurementTime() {
         return runTime;
     }
@@ -590,6 +614,16 @@ public class CommandLineOptions implements Options {
     @Override
     public Optional<Integer> getWarmupIterations() {
         return warmupIterations;
+    }
+
+    /**
+     * Getter
+     *
+     * @return the value
+     */
+    @Override
+    public Optional<Integer> getWarmupBatchSize() {
+        return warmupBatchSize;
     }
 
     /**

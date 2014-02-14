@@ -45,8 +45,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final Optional<Integer> threads;
     private final Optional<Integer> warmupIterations;
     private final Optional<TimeValue> warmupTime;
+    private final Optional<Integer> warmupBatchSize;
     private final Optional<Integer> measurementIterations;
     private final Optional<TimeValue> measurementTime;
+    private final Optional<Integer> measurementBatchSize;
     private final Optional<Integer> forks;
     private final Optional<Integer> warmupForks;
     private final Optional<Collection<String>> jvmArgs;
@@ -54,8 +56,8 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final Optional<Collection<String>> jvmArgsAppend;
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
-                           Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime,
-                           Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime,
+                           Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
+                           Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
                            Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend) {
         this.userName = userName;
         this.generatedName = generatedName;
@@ -64,8 +66,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.threads = threads;
         this.warmupIterations = warmupIterations;
         this.warmupTime = warmupTime;
+        this.warmupBatchSize = warmupBatchSize;
         this.measurementIterations = measurementIterations;
         this.measurementTime = measurementTime;
+        this.measurementBatchSize = measurementBatchSize;
         this.forks = forks;
         this.warmupForks = warmupForks;
         this.jvmArgs = jvmArgs;
@@ -76,7 +80,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     public BenchmarkRecord(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 14) {
+        if (args.length != 16) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -87,25 +91,28 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.threads = Optional.of(args[4], Optional.INTEGER_UNMARSHALLER);
         this.warmupIterations = Optional.of(args[5], Optional.INTEGER_UNMARSHALLER);
         this.warmupTime = Optional.of(args[6], Optional.TIME_VALUE_UNMARSHALLER);
-        this.measurementIterations = Optional.of(args[7], Optional.INTEGER_UNMARSHALLER);
-        this.measurementTime = Optional.of(args[8], Optional.TIME_VALUE_UNMARSHALLER);
-        this.forks = Optional.of(args[9], Optional.INTEGER_UNMARSHALLER);
-        this.warmupForks = Optional.of(args[10], Optional.INTEGER_UNMARSHALLER);
-        this.jvmArgs = Optional.of(args[11], Optional.STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsPrepend = Optional.of(args[12], Optional.STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsAppend = Optional.of(args[13], Optional.STRING_COLLECTION_UNMARSHALLER);
+        this.warmupBatchSize = Optional.of(args[7], Optional.INTEGER_UNMARSHALLER);
+        this.measurementIterations = Optional.of(args[8], Optional.INTEGER_UNMARSHALLER);
+        this.measurementTime = Optional.of(args[9], Optional.TIME_VALUE_UNMARSHALLER);
+        this.measurementBatchSize = Optional.of(args[10], Optional.INTEGER_UNMARSHALLER);
+        this.forks = Optional.of(args[11], Optional.INTEGER_UNMARSHALLER);
+        this.warmupForks = Optional.of(args[12], Optional.INTEGER_UNMARSHALLER);
+        this.jvmArgs = Optional.of(args[13], Optional.STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsPrepend = Optional.of(args[14], Optional.STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsAppend = Optional.of(args[15], Optional.STRING_COLLECTION_UNMARSHALLER);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
-                Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<TimeValue>none(),
+                Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none());
     }
 
     public String toLine() {
         return userName + BR_SEPARATOR + generatedName + BR_SEPARATOR + mode + BR_SEPARATOR + convert(threadGroups) + BR_SEPARATOR +
-                threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + measurementIterations + BR_SEPARATOR +
-                measurementTime + BR_SEPARATOR + forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
+                threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
+                measurementIterations + BR_SEPARATOR + measurementTime + BR_SEPARATOR + measurementBatchSize + BR_SEPARATOR +
+                forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
                 jvmArgs.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsPrepend.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsAppend.toString(Optional.STRING_COLLECTION_MARSHALLER);
@@ -113,7 +120,8 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     public BenchmarkRecord cloneWith(Mode mode) {
         return new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
-                warmupIterations, warmupTime, measurementIterations, measurementTime,
+                warmupIterations, warmupTime, warmupBatchSize,
+                measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend);
     }
 
@@ -213,12 +221,20 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return warmupIterations;
     }
 
+    public Optional<Integer> getWarmupBatchSize() {
+        return warmupBatchSize;
+    }
+
     public Optional<TimeValue> getMeasurementTime() {
         return measurementTime;
     }
 
     public Optional<Integer> getMeasurementIterations() {
         return measurementIterations;
+    }
+
+    public Optional<Integer> getMeasurementBatchSize() {
+        return measurementBatchSize;
     }
 
     public Optional<Integer> getForks() {

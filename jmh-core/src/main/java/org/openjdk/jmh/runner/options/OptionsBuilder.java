@@ -315,6 +315,25 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
+    private Optional<Integer> warmupBatchSize = Optional.none();
+
+    @Override
+    public ChainedOptionsBuilder warmupBatchSize(int value) {
+        this.warmupBatchSize = Optional.of(value);
+        return this;
+    }
+
+    @Override
+    public Optional<Integer> getWarmupBatchSize() {
+        if (otherOptions != null) {
+            return warmupBatchSize.orAnother(otherOptions.getWarmupBatchSize());
+        } else {
+            return warmupBatchSize;
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+
     private Optional<TimeValue> warmupTime = Optional.none();
 
     @Override
@@ -408,6 +427,26 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
             return measurementTime;
         }
     }
+
+    // ---------------------------------------------------------------------------
+
+    private Optional<Integer> measurementBatchSize = Optional.none();
+
+    @Override
+    public ChainedOptionsBuilder measurementBatchSize(int value) {
+        this.measurementBatchSize = Optional.of(value);
+        return this;
+    }
+
+    @Override
+    public Optional<Integer> getMeasurementBatchSize() {
+        if (otherOptions != null) {
+            return measurementBatchSize.orAnother(otherOptions.getMeasurementBatchSize());
+        } else {
+            return measurementBatchSize;
+        }
+    }
+
 
     // ---------------------------------------------------------------------------
 

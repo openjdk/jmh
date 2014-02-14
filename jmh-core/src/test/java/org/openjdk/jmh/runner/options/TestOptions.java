@@ -455,4 +455,28 @@ public class TestOptions {
         Assert.assertEquals(EMPTY_BUILDER.getJvmArgs(), EMPTY_CMDLINE.getJvmArgs());
     }
 
+    @Test
+    public void testBatchSize() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-bs", "42");
+        Options builder = new OptionsBuilder().measurementBatchSize(42).build();
+        Assert.assertEquals(builder.getMeasurementBatchSize(), cmdLine.getMeasurementBatchSize());
+    }
+
+    @Test
+    public void testBatchSize_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getMeasurementBatchSize(), EMPTY_CMDLINE.getMeasurementBatchSize());
+    }
+
+    @Test
+    public void testWarmupBatchSize() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-wbs", "43");
+        Options builder = new OptionsBuilder().warmupBatchSize(43).build();
+        Assert.assertEquals(builder.getWarmupBatchSize(), cmdLine.getWarmupBatchSize());
+    }
+
+    @Test
+    public void testWarmupBatchSize_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getWarmupBatchSize(), EMPTY_CMDLINE.getWarmupBatchSize());
+    }
+
 }

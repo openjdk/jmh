@@ -144,6 +144,13 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder warmupIterations(int value);
 
     /**
+     * How large warmup batchSize should be?
+     * @param value batch size
+     * @return builder
+     */
+    ChainedOptionsBuilder warmupBatchSize(int value);
+
+    /**
      * How long each warmup iteration should take?
      * @param value time
      * @return builder
@@ -170,6 +177,13 @@ public interface ChainedOptionsBuilder {
      * @return builder
      */
     ChainedOptionsBuilder measurementIterations(int count);
+
+    /**
+     * How large measurement batchSize should be?
+     * @param value batch size
+     * @return builder
+     */
+    ChainedOptionsBuilder measurementBatchSize(int value);
 
     /**
      * How long each measurement iteration should take?

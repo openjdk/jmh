@@ -46,7 +46,7 @@ public class TestAggregateResult {
 
     @BeforeClass
     public static void setupClass() {
-        result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime), new IterationParams(null, 1, TimeValue.days(1)));
+        result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime), new IterationParams(null, 1, TimeValue.days(1), 1));
         for (double d : values) {
             result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000));
         }

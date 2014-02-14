@@ -46,9 +46,11 @@ public class Defaults {
 
     public static final int MEASUREMENT_ITERATIONS = 20;
     public static final int SINGLESHOT_MEASUREMENT_ITERATIONS = 1;
+    public static final int MEASUREMENT_BATCHSIZE = 1;
 
     public static final int WARMUP_ITERATIONS = 20;
     public static final int SINGLESHOT_WARMUP_ITERATIONS = 0;
+    public static final int WARMUP_BATCHSIZE = 1;
 
     public static final TimeValue WARMUP_TIME = new TimeValue(1, TimeUnit.SECONDS);
     public static final TimeValue ITERATION_TIME = new TimeValue(1, TimeUnit.SECONDS);

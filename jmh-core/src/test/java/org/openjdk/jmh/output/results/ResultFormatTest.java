@@ -66,8 +66,10 @@ public class ResultFormatTest {
                     r.nextInt(1000),
                     r.nextInt(1000),
                     TimeValue.seconds(r.nextInt(1000)),
+                    1,
                     r.nextInt(1000),
-                    TimeValue.seconds(r.nextInt(1000))
+                    TimeValue.seconds(r.nextInt(1000)),
+                    1
             );
 
             Collection<BenchResult> benchResults = new ArrayList<BenchResult>();

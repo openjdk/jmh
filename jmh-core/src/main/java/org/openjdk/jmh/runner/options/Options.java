@@ -122,6 +122,12 @@ public interface Options extends Serializable {
     Optional<TimeValue> getWarmupTime();
 
     /**
+     * Number of batch size for warmup
+     * @return number of batch size for warmup
+     */
+    Optional<Integer> getWarmupBatchSize();
+
+    /**
      * Warmup mode.
      * @return warmup mode
      */
@@ -144,6 +150,12 @@ public interface Options extends Serializable {
      * @return duration
      */
     Optional<TimeValue> getMeasurementTime();
+
+    /**
+     * Number of batch size for measurement
+     * @return number of batch size for measurement
+     */
+    Optional<Integer> getMeasurementBatchSize();
 
     /**
      * Benchmarks modes to execute.

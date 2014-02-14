@@ -46,11 +46,16 @@ public class IterationParams implements Serializable {
      */
     private final TimeValue timeValue;
 
+    /**
+     * batch size (method invocations inside the single op)
+     */
+    private final int batchSize;
 
-    public IterationParams(BenchmarkParams params, int count, TimeValue time) {
+    public IterationParams(BenchmarkParams params, int count, TimeValue time, int batchSize) {
         this.count = count;
         this.timeValue = time;
         this.benchmarkParams = params;
+        this.batchSize = batchSize;
     }
 
     public int getCount() {
@@ -61,6 +66,10 @@ public class IterationParams implements Serializable {
         return timeValue;
     }
 
+    public int getBatchSize() {
+        return batchSize;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,6 +78,7 @@ public class IterationParams implements Serializable {
         IterationParams that = (IterationParams) o;
 
         if (count != that.count) return false;
+        if (batchSize != that.batchSize) return false;
         if (timeValue != null ? !timeValue.equals(that.timeValue) : that.timeValue != null) return false;
 
         return true;
@@ -77,13 +87,14 @@ public class IterationParams implements Serializable {
     @Override
     public int hashCode() {
         int result = count;
+        result = 31 * result + batchSize;
         result = 31 * result + (timeValue != null ? timeValue.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "IterationParams("+ getCount()+", "+ getTime()+")";
+        return "IterationParams("+ getCount()+", "+ getTime()+", "+ getBatchSize()+")";
     }
 
     public BenchmarkParams getBenchmarkParams() {

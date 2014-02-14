@@ -159,8 +159,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                                         group.getTotalThreadCount(),
                                         group.getWarmupIterations(),
                                         group.getWarmupTime(),
+                                        group.getWarmupBatchSize(),
                                         group.getMeasurementIterations(),
                                         group.getMeasurementTime(),
+                                        group.getMeasurementBatchSize(),
                                         group.getForks(),
                                         group.getWarmupForks(),
                                         group.getJVMArgs(),
@@ -955,7 +957,10 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             invocationProlog(writer, 3, method, states, false);
 
             writer.println(ident(3) + "long time1 = System.nanoTime();");
-            writer.println(ident(3) + emitCall(method, states) + ';');
+            writer.println(ident(3) + "int batchSize = control.batchSize;");
+            writer.println(ident(3) + "for (int b = 0; b < batchSize; b++) {");
+            writer.println(ident(4) + emitCall(method, states) + ';');
+            writer.println(ident(3) + "}");
             writer.println(ident(3) + "long time2 = System.nanoTime();");
 
             invocationEpilog(writer, 3, method, states, false);

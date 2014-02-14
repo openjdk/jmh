@@ -85,7 +85,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // result object to accumulate the results in
         IterationResult iterationResults = new IterationResult(microbenchmark, params);
 
-        InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit);
+        InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit, params.getBatchSize());
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];

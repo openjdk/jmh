@@ -48,14 +48,16 @@ public class BenchmarkParams implements Serializable {
     /**
      * Test entry method
      */
-    public BenchmarkParams(boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks, int warmupIters, TimeValue warmupTime, int measureIters, TimeValue measureTime) {
+    public BenchmarkParams(boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks,
+                           int warmupIters, TimeValue warmupTime, int warmupBatchSize,
+                           int measureIters, TimeValue measureTime, int measureBatchSize) {
         this.synchIterations = synchIterations;
         this.threads = threads;
         this.threadGroups = threadGroups;
         this.forks = forks;
         this.warmupForks = warmupForks;
-        this.warmup = new IterationParams(this, warmupIters, warmupTime);
-        this.measurement = new IterationParams(this, measureIters, measureTime);
+        this.warmup = new IterationParams(this, warmupIters, warmupTime, warmupBatchSize);
+        this.measurement = new IterationParams(this, measureIters, measureTime, measureBatchSize);
     }
 
     public BenchmarkParams(Options options, BenchmarkRecord benchmark, ActionMode mode) {
@@ -76,11 +78,11 @@ public class BenchmarkParams implements Serializable {
 
         this.measurement = mode.doMeasurement() ?
                 getMeasurement(options, benchmark) :
-                new IterationParams(this, 0, TimeValue.NONE);
+                new IterationParams(this, 0, TimeValue.NONE, 1);
 
         this.warmup = mode.doWarmup() ?
                 getWarmup(options, benchmark) :
-                new IterationParams(this, 0, TimeValue.NONE);
+                new IterationParams(this, 0, TimeValue.NONE, 1);
 
         this.forks = options.getForkCount().orElse(
                 benchmark.getForks().orElse(
@@ -101,7 +103,13 @@ public class BenchmarkParams implements Serializable {
                 options.getWarmupTime().orElse(
                         benchmark.getWarmupTime().orElse(
                             (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.WARMUP_TIME
-                ))
+                )),
+                (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
+                        options.getWarmupBatchSize().orElse(
+                                benchmark.getWarmupBatchSize().orElse(
+                                        Defaults.WARMUP_BATCHSIZE
+                                )
+                        )
         );
     }
 
@@ -111,11 +119,17 @@ public class BenchmarkParams implements Serializable {
                 options.getMeasurementIterations().orElse(
                         benchmark.getMeasurementIterations().orElse(
                                 (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.SINGLESHOT_MEASUREMENT_ITERATIONS : Defaults.MEASUREMENT_ITERATIONS
-                        )),
+                )),
                 options.getMeasurementTime().orElse(
                         benchmark.getMeasurementTime().orElse(
                                 (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.ITERATION_TIME
-                        ))
+                )),
+                (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
+                        options.getMeasurementBatchSize().orElse(
+                                benchmark.getMeasurementBatchSize().orElse(
+                                        Defaults.MEASUREMENT_BATCHSIZE
+                                )
+                        )
         );
     }
 
