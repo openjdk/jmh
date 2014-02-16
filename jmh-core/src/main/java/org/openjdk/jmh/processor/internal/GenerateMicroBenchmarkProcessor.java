@@ -33,6 +33,7 @@ import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
@@ -111,6 +112,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         subProcessors.add(new HelperMethodValidationProcessor());
         subProcessors.add(new GroupValidationProcessor());
+        subProcessors.add(new ParamValidationProcessor());
         subProcessors.add(compilerControl);
     }
 
@@ -167,7 +169,8 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
                                         group.getWarmupForks(),
                                         group.getJVMArgs(),
                                         group.getJVMArgsPrepend(),
-                                        group.getJVMArgsAppend()
+                                        group.getJVMArgsAppend(),
+                                        group.getParams()
                                 );
                                 writer.println(br.toLine());
                             }
@@ -447,6 +450,31 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
             group.addStrictFP(classStrictFP);
             group.addStrictFP(methodStrictFP);
             group.addMethod(method, (method.getAnnotation(GroupThreads.class) != null) ? method.getAnnotation(GroupThreads.class).value() : 1);
+
+            // Discovering @Params, part 1:
+            //   For each parameter, walk the type hierarchy up to discover inherited @Param fields in @State objects.
+            ExecutableElement execMethod = (ExecutableElement) method;
+            for (VariableElement element : execMethod.getParameters()) {
+                TypeElement walk = (TypeElement) processingEnv.getTypeUtils().asElement(element.asType());
+                do {
+                    for (VariableElement ve : ElementFilter.fieldsIn(walk.getEnclosedElements())) {
+                        if (ve.getAnnotation(Param.class) != null) {
+                            group.addParam(ve.getSimpleName().toString(), ve.getAnnotation(Param.class).value());
+                        }
+                    }
+                } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
+            }
+
+            // Discovering @Params, part 2:
+            //  Walk the type hierarchy up to discover inherited @Param fields for class.
+            TypeElement walk = clazz;
+            do {
+                for (VariableElement ve : ElementFilter.fieldsIn(walk.getEnclosedElements())) {
+                    if (ve.getAnnotation(Param.class) != null) {
+                        group.addParam(ve.getSimpleName().toString(), ve.getAnnotation(Param.class).value());
+                    }
+                }
+            } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
         }
 
         // enforce the default value

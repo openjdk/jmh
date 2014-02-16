@@ -193,4 +193,11 @@ public interface Options extends Serializable {
      */
     Optional<Collection<String>> getJvmArgs();
 
+    /**
+     * The overridden value of the parameter.
+     * @param name parameter name
+     * @return parameter
+     */
+    Optional<Collection<String>> getParameter(String name);
+
 }

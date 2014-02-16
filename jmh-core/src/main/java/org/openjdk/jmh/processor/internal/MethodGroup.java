@@ -41,7 +41,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
@@ -49,12 +51,14 @@ public class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
     private final Set<MethodInvocation> methods;
     private final EnumSet<Mode> modes;
+    private final Map<String, String[]> params;
     private boolean strictFP;
 
     MethodGroup(String name) {
         this.name = name;
         this.methods = new TreeSet<MethodInvocation>();
         this.modes = EnumSet.noneOf(Mode.class);
+        this.params = new TreeMap<String, String[]>();
     }
 
     @Override
@@ -101,6 +105,10 @@ public class MethodGroup implements Comparable<MethodGroup> {
 
     public String getName() {
         return name;
+    }
+
+    public void addParam(String name, String[] value) {
+        params.put(name, value);
     }
 
     public void addStrictFP(boolean sfp) {
@@ -242,6 +250,14 @@ public class MethodGroup implements Comparable<MethodGroup> {
             finalAnn = ann;
         }
         return finalAnn;
+    }
+
+    public Optional<Map<String, String[]>> getParams() {
+        if (params.isEmpty()) {
+            return Optional.none();
+        } else {
+            return Optional.of(params);
+        }
     }
 
 }

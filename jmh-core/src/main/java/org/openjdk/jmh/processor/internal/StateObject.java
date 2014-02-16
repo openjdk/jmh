@@ -26,7 +26,11 @@ package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.Scope;
 
+import javax.lang.model.element.VariableElement;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class StateObject {
 
@@ -42,6 +46,7 @@ public class StateObject {
     public final Scope scope;
     public final String localIdentifier;
     public final String fieldIdentifier;
+    public final Map<String, String> params;
 
     public StateObject(String userType, String jmhType, Scope scope, String fieldIdentifier, String localIdentifier) {
         this.userType = userType;
@@ -49,6 +54,7 @@ public class StateObject {
         this.scope = scope;
         this.localIdentifier = localIdentifier;
         this.fieldIdentifier = fieldIdentifier;
+        this.params = new TreeMap<String, String>();
     }
 
     @Override
@@ -82,4 +88,53 @@ public class StateObject {
         return localIdentifier;
     }
 
+    public String getParamAccessor(String name) {
+        return params.get(name);
+    }
+
+    public void addParam(VariableElement ve) {
+        String type = ve.asType().toString();
+        String name = ve.getSimpleName().toString();
+        if (type.equalsIgnoreCase("java.lang.String")) {
+            params.put(name, "control.getParam(\"" + name + "\")");
+            return;
+        }
+        if (type.equalsIgnoreCase("boolean") || type.equalsIgnoreCase("java.lang.Boolean")) {
+            params.put(name, "Boolean.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        if (type.equalsIgnoreCase("byte") || type.equalsIgnoreCase("java.lang.Byte")) {
+            params.put(name, "Byte.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        if (type.equalsIgnoreCase("char") || type.equalsIgnoreCase("java.lang.Character")) {
+            params.put(name, "(control.getParam(\"" + name + "\")).charAt(0)");
+            return;
+        }
+        if (type.equalsIgnoreCase("short") || type.equalsIgnoreCase("java.lang.Short")) {
+            params.put(name, "Short.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("java.lang.Integer")) {
+            params.put(name, "Integer.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        if (type.equalsIgnoreCase("float") || type.equalsIgnoreCase("java.lang.Float")) {
+            params.put(name, "Float.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        if (type.equalsIgnoreCase("long") || type.equalsIgnoreCase("java.lang.Long")) {
+            params.put(name, "Long.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("java.lang.Double")) {
+            params.put(name, "Double.valueOf(control.getParam(\"" + name + "\"))");
+            return;
+        }
+        throw new IllegalStateException("Unknown type: " + type);
+    }
+
+    public Collection<String> getParamsLabels() {
+        return params.keySet();
+    }
 }

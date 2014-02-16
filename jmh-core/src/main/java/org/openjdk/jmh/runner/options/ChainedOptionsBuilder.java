@@ -245,4 +245,12 @@ public interface ChainedOptionsBuilder {
      */
     ChainedOptionsBuilder detectJvmArgs();
 
+    /**
+     * Set benchmark parameter.
+     * @param name parameter
+     * @param values list of values to set
+     * @return builder
+     */
+    ChainedOptionsBuilder param(String name, String... values);
+
 }

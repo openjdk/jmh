@@ -34,6 +34,8 @@ import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.HashMultimap;
+import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.IOException;
@@ -82,6 +84,7 @@ public class CommandLineOptions implements Options {
     private final List<String> excludes = new ArrayList<String>();
     private final Optional<WarmupMode> warmupMode;
     private final List<String> warmupMicros = new ArrayList<String>();
+    private final Multimap<String, String> params = new HashMultimap<String, String>();
     private final boolean list;
     private final boolean listResultFormats;
     private final boolean help;
@@ -175,6 +178,11 @@ public class CommandLineOptions implements Options {
 
         OptionSpec<String> optExcludes = parser.accepts("e", "Benchmarks to exclude from the run.")
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("regexp+");
+
+        OptionSpec<String> optParams = parser.accepts("p", "Benchmark parameters. This option is expected to be used once" +
+                " per parameter. Parameter name and parameter values should be separated with equals sign." +
+                " Parameter values should be separated with commas.")
+                .withRequiredArg().ofType(String.class).describedAs("param={v,}*");
 
         OptionSpec<String> optWarmupBenchmarks = parser.accepts("wmb", "Warmup benchmarks to include in the run " +
                 "in addition to already selected. JMH will not measure these benchmarks, but only use them" +
@@ -385,6 +393,17 @@ public class CommandLineOptions implements Options {
             } else {
                 jvmArgs = Optional.none();
             }
+
+            if (set.hasArgument(optParams)) {
+                for (String p : optParams.values(set)) {
+                    String[] keys = p.split("=");
+                    if (keys.length != 2) {
+                        throw new CommandLineOptionException("Unable to parse parameter string \"" + p + "\"");
+                    }
+                    params.putAll(keys[0], Arrays.asList(keys[1].split(",")));
+                }
+            }
+
         } catch (OptionException e) {
             throw new CommandLineOptionException(e.getMessage(), e);
         }
@@ -501,6 +520,16 @@ public class CommandLineOptions implements Options {
     @Override
     public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
+    }
+
+    @Override
+    public Optional<Collection<String>> getParameter(String name) {
+        Collection<String> list = params.get(name);
+        if (list == null || list.isEmpty()){
+            return Optional.none();
+        } else {
+            return Optional.of(list);
+        }
     }
 
     /**

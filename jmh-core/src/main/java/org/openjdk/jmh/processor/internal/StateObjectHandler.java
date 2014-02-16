@@ -26,6 +26,7 @@ package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -41,6 +42,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -200,10 +202,20 @@ public class StateObjectHandler {
 
         stateObjects.add(so);
 
-        // walk the type hierarchy up to discover inherited helper methods
-        TypeElement walk = element;
+        // walk the type hierarchy up to discover inherited @Params
+        TypeElement walk1 = element;
         do {
-            for (ExecutableElement m : ElementFilter.methodsIn(walk.getEnclosedElements())) {
+            for (VariableElement ve : ElementFilter.fieldsIn(walk1.getEnclosedElements())) {
+                if (ve.getAnnotation(Param.class) != null) {
+                    so.addParam(ve);
+                }
+            }
+        } while ((walk1 = (TypeElement) processingEnv.getTypeUtils().asElement(walk1.getSuperclass())) != null);
+
+        // walk the type hierarchy up to discover inherited helper methods
+        TypeElement walk2 = element;
+        do {
+            for (ExecutableElement m : ElementFilter.methodsIn(walk2.getEnclosedElements())) {
                 Setup setupAnn = m.getAnnotation(Setup.class);
                 if (setupAnn != null) {
                     helpersByState.put(so, new HelperMethodInvocation(m.getSimpleName().toString(), so, setupAnn.value(), HelperType.SETUP));
@@ -214,7 +226,7 @@ public class StateObjectHandler {
                     helpersByState.put(so, new HelperMethodInvocation(m.getSimpleName().toString(), so, tearDownAnn.value(), HelperType.TEARDOWN));
                 }
             }
-        } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
+        } while ((walk2 = (TypeElement) processingEnv.getTypeUtils().asElement(walk2.getSuperclass())) != null);
     }
 
     public String getArgList(Element method) {
@@ -373,12 +385,15 @@ public class StateObjectHandler {
             result.add("");
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(" + so.type + " val) throws Throwable {");
+            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val) throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        if (" + so.fieldIdentifier + " == null) {");
             result.add("            " + so.fieldIdentifier + " = val;");
             result.add("        }");
             result.add("        if (!" + so.fieldIdentifier + ".ready" + Level.Trial + ") {");
+            for (String paramName : so.getParamsLabels()) {
+                result.add("            " + so.fieldIdentifier + "." + paramName + " = " + so.getParamAccessor(paramName) + ";");
+            }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
@@ -397,8 +412,11 @@ public class StateObjectHandler {
             result.add("");
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(" + so.type + " val) throws Throwable {");
+            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val) throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
+            for (String paramName : so.getParamsLabels()) {
+                result.add("                val." + paramName + " = " + so.getParamAccessor(paramName) + ";");
+            }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
@@ -417,7 +435,7 @@ public class StateObjectHandler {
             result.add("");
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(int groupId, " + so.type + " val) throws Throwable {");
+            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, int groupId, " + so.type + " val) throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(groupId);");
             result.add("        if (local == null) {");
@@ -425,6 +443,9 @@ public class StateObjectHandler {
             result.add("            local = val;");
             result.add("        }");
             result.add("        if (!local.ready" + Level.Trial + ") {");
+            for (String paramName : so.getParamsLabels()) {
+                result.add("            local." + paramName + " = " + so.getParamAccessor(paramName) + ";");
+            }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
@@ -446,10 +467,10 @@ public class StateObjectHandler {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(new " + so.type + "());");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, new " + so.type + "());");
                     break;
                 case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(threadControl.group, new " + so.type + "());");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, threadControl.group, new " + so.type + "());");
                     break;
                 default:
                     throw new IllegalStateException("Unhandled scope: " + so.scope);

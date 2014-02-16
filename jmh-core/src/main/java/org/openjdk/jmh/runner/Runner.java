@@ -183,20 +183,38 @@ public class Runner extends BaseRunner {
         }
 
         // clone with all the modes
-        List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
-        for (BenchmarkRecord br : benchmarks) {
-            if (br.getMode() == Mode.All) {
-                for (Mode mode : Mode.values()) {
-                    if (mode == Mode.All) continue;
-                    newBenchmarks.add(br.cloneWith(mode));
+        {
+            List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
+            for (BenchmarkRecord br : benchmarks) {
+                if (br.getMode() == Mode.All) {
+                    for (Mode mode : Mode.values()) {
+                        if (mode == Mode.All) continue;
+                        newBenchmarks.add(br.cloneWith(mode));
+                    }
+                } else {
+                    newBenchmarks.add(br);
                 }
-            } else {
-                newBenchmarks.add(br);
             }
+
+            benchmarks.clear();
+            benchmarks.addAll(newBenchmarks);
         }
 
-        benchmarks.clear();
-        benchmarks.addAll(newBenchmarks);
+        // clone with all parameters
+        {
+            List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
+            for (BenchmarkRecord br : benchmarks) {
+                if (br.getParams().hasValue()) {
+                    for (ActualParams p : explodeAllParams(br)) {
+                        newBenchmarks.add(br.cloneWith(p));
+                    }
+                } else {
+                    newBenchmarks.add(br);
+                }
+            }
+            benchmarks.clear();
+            benchmarks.addAll(newBenchmarks);
+        }
 
         SortedMap<BenchmarkRecord, RunResult> results = runBenchmarks(benchmarks);
 
@@ -256,6 +274,35 @@ public class Runner extends BaseRunner {
 
         return result;
     }
+
+    private List<ActualParams> explodeAllParams(BenchmarkRecord br) {
+        Map<String, String[]> benchParams = br.getParams().orElse(Collections.<String, String[]>emptyMap());
+        List<ActualParams> ps = new ArrayList<ActualParams>();
+        List<ActualParams> newPs = new ArrayList<ActualParams>();
+        for (String k : benchParams.keySet()) {
+            Collection<String> values = options.getParameter(k).orElse(Arrays.asList(benchParams.get(k)));
+            if (ps.isEmpty()) {
+                for (String v : values) {
+                    ActualParams al = new ActualParams();
+                    al.put(k, v);
+                    ps.add(al);
+                }
+            } else {
+                for (ActualParams p : ps) {
+                    for (String v : values) {
+                        ActualParams al = p.copy();
+                        al.put(k, v);
+                        newPs.add(al);
+                    }
+                }
+                ps.clear();
+                ps.addAll(newPs);
+            }
+        }
+        return ps;
+    }
+
+
 
     private SortedMap<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
         out.startRun();

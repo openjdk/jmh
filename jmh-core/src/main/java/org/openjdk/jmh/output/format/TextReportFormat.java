@@ -64,6 +64,9 @@ public class TextReportFormat extends AbstractOutputFormat {
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Benchmark: " + name.getUsername());
+        if (name.getActualParams() != null) {
+            out.println("# Parameters: " + name.getActualParams());
+        }
     }
 
     @Override
@@ -158,9 +161,9 @@ public class TextReportFormat extends AbstractOutputFormat {
         Collection<String> benchNames = new ArrayList<String>();
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult runResult = runResults.get(key);
-            benchNames.add(key.getUsername());
+            benchNames.add(key.getUsername() + mixActualParams(key));
             for (String label : runResult.getSecondaryResults().keySet()) {
-                benchNames.add(key.getUsername() + ":" + label);
+                benchNames.add(key.getUsername() + ":" + label + mixActualParams(key));
             }
         }
 
@@ -180,7 +183,7 @@ public class TextReportFormat extends AbstractOutputFormat {
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();
                 out.printf("%-" + nameLen + "s %6s %9d %12.3f %12.3f %8s%n",
-                        benchPrefixes.get(key.getUsername()),
+                        benchPrefixes.get(key.getUsername() + mixActualParams(key)),
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
@@ -191,7 +194,7 @@ public class TextReportFormat extends AbstractOutputFormat {
                 Statistics stats = res.getSecondaryResults().get(label).getStatistics();
 
                 out.printf("%-" + nameLen + "s %6s %9d %12.3f %12.3f %8s%n",
-                        benchPrefixes.get(key.getUsername() + ":" + label),
+                        benchPrefixes.get(key.getUsername() + ":" + label + mixActualParams(key)),
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
@@ -200,5 +203,8 @@ public class TextReportFormat extends AbstractOutputFormat {
         }
     }
 
+    private static String mixActualParams(BenchmarkRecord key) {
+        return (key.getActualParams() == null ? "" : " " + key.getActualParams().toString());
+    }
 
 }

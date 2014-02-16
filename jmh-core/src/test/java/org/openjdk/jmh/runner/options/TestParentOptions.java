@@ -32,6 +32,7 @@ import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
@@ -518,6 +519,35 @@ public class TestParentOptions {
         Options parent = new OptionsBuilder().includeWarmup(".*").build();
         Options builder = new OptionsBuilder().parent(parent).includeWarmup(".*test.*").build();
         Assert.assertEquals(Arrays.asList(".*test.*", ".*"), builder.getWarmupIncludes());
+    }
+
+    @Test
+    public void testParameters_Empty() {
+        Options parent = new OptionsBuilder().build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertFalse(builder.getParameter("x").hasValue());
+    }
+
+    @Test
+    public void testParameters_Parent() {
+        Options parent = new OptionsBuilder().param("x", "1", "2", "3").build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Collection<String> bp = builder.getParameter("x").get();
+        Assert.assertEquals(3, bp.size());
+        for (String b : new String[] {"1", "2", "3"}) {
+            Assert.assertTrue("BP does not contain: " + b, bp.contains(b));
+        }
+    }
+
+    @Test
+    public void testParameters_Merged() {
+        Options parent = new OptionsBuilder().param("x", "1", "2", "3").build();
+        Options builder = new OptionsBuilder().parent(parent).param("x", "4", "5", "6").build();
+        Collection<String> bp = builder.getParameter("x").get();
+        Assert.assertEquals(3, bp.size());
+        for (String b : new String[] {"4", "5", "6"}) {
+            Assert.assertTrue("BP does not contain: " + b, bp.contains(b));
+        }
     }
 
 }

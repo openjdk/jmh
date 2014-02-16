@@ -36,6 +36,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -477,6 +478,27 @@ public class TestOptions {
     @Test
     public void testWarmupBatchSize_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupBatchSize(), EMPTY_CMDLINE.getWarmupBatchSize());
+    }
+
+    @Test
+    public void testParam_Default() {
+        Assert.assertEquals(EMPTY_BUILDER.getParameter("sample"), EMPTY_CMDLINE.getParameter("sample"));
+    }
+
+    @Test
+    public void testParam() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-p", "x=1,2,3");
+        Options builder = new OptionsBuilder().param("x", "1", "2", "3").build();
+
+        Collection<String> bp = builder.getParameter("x").get();
+        Collection<String> cp = cmdLine.getParameter("x").get();
+
+        for (String b : bp) {
+            Assert.assertTrue("CP does not contain: " + b, cp.contains(b));
+        }
+        for (String c : cp) {
+            Assert.assertTrue("BP does not contain: " + c, bp.contains(c));
+        }
     }
 
 }

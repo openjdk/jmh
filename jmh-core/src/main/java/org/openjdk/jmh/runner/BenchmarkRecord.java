@@ -32,6 +32,7 @@ import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializable {
@@ -54,11 +55,15 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final Optional<Collection<String>> jvmArgs;
     private final Optional<Collection<String>> jvmArgsPrepend;
     private final Optional<Collection<String>> jvmArgsAppend;
+    private final Optional<Map<String, String[]>> params;
+
+    private ActualParams actualParams;
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
                            Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
                            Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
-                           Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend) {
+                           Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
+                           Optional<Map<String, String[]>> params) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -75,12 +80,13 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.jvmArgs = jvmArgs;
         this.jvmArgsPrepend = jvmArgsPrepend;
         this.jvmArgsAppend = jvmArgsAppend;
+        this.params = params;
     }
 
     public BenchmarkRecord(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 16) {
+        if (args.length != 17) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -100,12 +106,14 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.jvmArgs = Optional.of(args[13], Optional.STRING_COLLECTION_UNMARSHALLER);
         this.jvmArgsPrepend = Optional.of(args[14], Optional.STRING_COLLECTION_UNMARSHALLER);
         this.jvmArgsAppend = Optional.of(args[15], Optional.STRING_COLLECTION_UNMARSHALLER);
+        this.params = Optional.of(args[16], Optional.PARAM_COLLECTION_UNMARSHALLER);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
-                Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none());
+                Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
+                Optional.<Map<String, String[]>>none());
     }
 
     public String toLine() {
@@ -115,14 +123,28 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
                 jvmArgs.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsPrepend.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
-                jvmArgsAppend.toString(Optional.STRING_COLLECTION_MARSHALLER);
+                jvmArgsAppend.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
+                params.toString(Optional.PARAM_COLLECTION_MARSHALLER);
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {
         return new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend);
+                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params);
+    }
+
+    public BenchmarkRecord cloneWith(ActualParams p) {
+        BenchmarkRecord br = new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
+                warmupIterations, warmupTime, warmupBatchSize,
+                measurementIterations, measurementTime, measurementBatchSize,
+                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params);
+        br.actualParams = p;
+        return br;
+    }
+
+    public ActualParams getActualParams() {
+        return actualParams;
     }
 
     private int[] convert(String[] ss) {
@@ -151,7 +173,16 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
             return v;
         }
 
-        return userName.compareTo(o.userName);
+        int v1 = userName.compareTo(o.userName);
+        if (v1 != 0) {
+            return v1;
+        }
+
+        if (actualParams == null || o.actualParams == null) {
+            return 0;
+        }
+
+        return actualParams.compareTo(o.actualParams);
     }
 
     @Override
@@ -159,18 +190,20 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BenchmarkRecord that = (BenchmarkRecord) o;
+        BenchmarkRecord record = (BenchmarkRecord) o;
 
-        if (mode != that.mode) return false;
-        if (!userName.equals(that.userName)) return false;
+        if (mode != record.mode) return false;
+        if (actualParams != null ? !actualParams.equals(record.actualParams) : record.actualParams != null) return false;
+        if (userName != null ? !userName.equals(record.userName) : record.userName != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = userName.hashCode();
-        result = 31 * result + mode.hashCode();
+        int result = userName != null ? userName.hashCode() : 0;
+        result = 31 * result + (mode != null ? mode.hashCode() : 0);
+        result = 31 * result + (actualParams != null ? actualParams.hashCode() : 0);
         return result;
     }
 
@@ -210,6 +243,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 "userName='" + userName + '\'' +
                 ", generatedName='" + generatedName + '\'' +
                 ", mode=" + mode +
+                ", actualParams=" + actualParams +
                 '}';
     }
 
@@ -291,6 +325,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                         .orElse(Defaults.WARMUP_FORKS));
 
         return (Math.max(1, forks) + warmupForks) * estimatedTimeSingleFork(opts);
+    }
+
+    public Optional<Map<String, String[]>> getParams() {
+        return params;
     }
 
 }

@@ -28,6 +28,8 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerType;
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.HashMultimap;
+import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.Optional;
 
 import java.lang.management.ManagementFactory;
@@ -578,5 +580,29 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     public ChainedOptionsBuilder detectJvmArgs() {
         List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
         return jvmArgs(inputArguments.toArray(new String[inputArguments.size()]));
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private Multimap<String, String> params = new HashMultimap<String, String>();
+
+    @Override
+    public Optional<Collection<String>> getParameter(String name) {
+        Collection<String> list = params.get(name);
+        if (list == null || list.isEmpty()){
+            if (otherOptions != null) {
+                return otherOptions.getParameter(name);
+            } else {
+                return Optional.none();
+            }
+        } else {
+            return Optional.of(list);
+        }
+    }
+
+    @Override
+    public ChainedOptionsBuilder param(String name, String... values) {
+        params.putAll(name, Arrays.asList(values));
+        return this;
     }
 }
