@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.util.internal;
 
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
+import java.util.Arrays;
+
 public class MultisetStatistics extends AbstractStatistics {
 
     private final Multiset<Double> values;
@@ -73,13 +77,19 @@ public class MultisetStatistics extends AbstractStatistics {
         if (rank < 0.0d || rank > 100.0d)
             throw new IllegalArgumentException("Rank should be within [0; 100]");
 
-        long thresh = (long) (values.size() * rank / 100.0);
-        long cur = 0;
-        for (double d : values.keys()) {
-            cur += values.count(d);
-            if (cur >= thresh) return d;
+        if (rank == 0.0d) {
+            return getMin();
         }
-        return Double.NaN;
+
+        int cur = 0;
+        double[] vs = new double[values.size()];
+        for (double d : values.keys()) {
+            Arrays.fill(vs, cur, cur + values.count(d), d);
+            cur += values.count(d);
+        }
+
+        Percentile p = new Percentile();
+        return p.evaluate(vs, rank);
     }
 
     @Override

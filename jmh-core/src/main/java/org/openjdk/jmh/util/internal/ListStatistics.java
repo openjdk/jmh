@@ -24,8 +24,9 @@
  */
 package org.openjdk.jmh.util.internal;
 
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -111,31 +112,17 @@ public class ListStatistics extends AbstractStatistics {
             return Double.NaN;
         }
 
-        Collections.sort(values);
-
-        int n1 = (int) Math.floor(rank / 100.0D * values.size());
-        int n2 = (int) Math.ceil(rank / 100.D * values.size());
-
-        if (n1 < 0) {
-            n1 = 0;
+        if (rank == 0) {
+            return getMin();
         }
 
-        if (n2 < 0) {
-            n2 = 0;
+        double[] vs = new double[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            vs[i] = values.get(i);
         }
 
-        if (n1 >= values.size()) {
-            n1 = values.size() - 1;
-        }
-
-        if (n2 >= values.size()) {
-            n2 = values.size() - 1;
-        }
-
-        double v1 = values.get(n1);
-        double v2 = values.get(n2);
-
-        return v1 + (v2 - v1) / 2;
+        Percentile p = new Percentile();
+        return p.evaluate(vs, rank);
     }
 
     @Override

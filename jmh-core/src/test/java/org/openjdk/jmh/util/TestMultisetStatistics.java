@@ -138,6 +138,31 @@ public class TestMultisetStatistics {
         assertEquals(72.44402, interval[1], 0.002);
     }
 
+    @Test
+    public strictfp void testPercentile_00() {
+        assertEquals(2.345, instance.getPercentile(0), 0.002);
+    }
+
+    @Test
+    public strictfp void testPercentile_50() {
+        assertEquals(56.460, instance.getPercentile(50), 0.002);
+    }
+
+    @Test
+    public strictfp void testPercentile_90() {
+        assertEquals(93.044, instance.getPercentile(90), 0.002);
+    }
+
+    @Test
+    public strictfp void testPercentile_99() {
+        assertEquals(96.667, instance.getPercentile(99), 0.002);
+    }
+
+    @Test
+    public strictfp void testPercentile_100() {
+        assertEquals(96.667, instance.getPercentile(100), 0.002);
+    }
+
     /**
      * Test of toString, of class Statistics
      */
