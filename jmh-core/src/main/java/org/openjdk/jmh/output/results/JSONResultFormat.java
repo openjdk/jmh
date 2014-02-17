@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -74,6 +75,7 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
                 pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)) + ",");
                 pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
+                pw.println(emitPercentiles(runResult.getPrimaryResult().getStatistics()));
                 pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
                 pw.println("\"rawData\" :");
 
@@ -99,6 +101,7 @@ public class JSONResultFormat implements ResultFormat {
                     sb.append("\"score\" : ").append(emit(result.getScore())).append(",");
                     sb.append("\"scoreError\" : ").append(emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999))).append(",");
                     sb.append("\"scoreConfidence\" : ").append(emit(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
+                    sb.append(emitPercentiles(result.getStatistics()));
                     sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
                     sb.append("\"rawData\" :");
 
@@ -132,6 +135,24 @@ public class JSONResultFormat implements ResultFormat {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private String emitPercentiles(Statistics stats) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\"scorePercentiles\" : {");
+        boolean firstPercentile = true;
+        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999, 1.0}) {
+            if (firstPercentile) {
+                firstPercentile = false;
+            } else {
+                sb.append(",");
+            }
+
+            double v = stats.getPercentile(p * 100);
+            sb.append(String.format("\"%.4f\" : %.3f", p*100, v));
+        }
+        sb.append("},");
+        return sb.toString();
     }
 
     private String emit(double[] ds) {
