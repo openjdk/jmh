@@ -62,7 +62,7 @@
         "secondaryMetrics" : {
             "secondary1" : {
                 "score" : 549.7142833333334,
-                "scoreError" : 278.1419529743147,
+                "scoreError" : 320.2274881224688,
                 "scoreConfidence" : [
                     229.48679759181687,
                     869.9417738367545
@@ -113,7 +113,7 @@
             },
             "secondary2" : {
                 "score" : 615.5,
-                "scoreError" : 278.1419529743147,
+                "scoreError" : 319.2095847883776,
                 "scoreConfidence" : [
                     296.2904152116224,
                     934.7095847883776
@@ -304,7 +304,7 @@
         "secondaryMetrics" : {
             "secondary1" : {
                 "score" : 434.44443333333334,
-                "scoreError" : 553.3366994253071,
+                "scoreError" : 465.1825044536822,
                 "scoreConfidence" : [
                     -30.738060009237756,
                     899.6269488981267
@@ -340,7 +340,7 @@
             },
             "secondary2" : {
                 "score" : 470.3333333333333,
-                "scoreError" : 553.3366994253071,
+                "scoreError" : 502.27304118350804,
                 "scoreConfidence" : [
                     -31.939707850174727,
                     972.6063745168414
@@ -434,7 +434,7 @@
         "secondaryMetrics" : {
             "secondary1" : {
                 "score" : 672.2142833333334,
-                "scoreError" : 362.81396705929166,
+                "scoreError" : 287.98221103408406,
                 "scoreConfidence" : [
                     384.2320746802016,
                     960.1964967483698
@@ -479,7 +479,7 @@
             },
             "secondary2" : {
                 "score" : 560.14285,
-                "scoreError" : 362.81396705929166,
+                "scoreError" : 289.79996145153024,
                 "scoreConfidence" : [
                     270.3428956913269,
                     849.9428185943873

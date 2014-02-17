@@ -99,7 +99,7 @@ public class JSONResultFormat implements ResultFormat {
                     StringBuilder sb = new StringBuilder();
                     sb.append("\"").append(secondaryName).append("\" : {");
                     sb.append("\"score\" : ").append(emit(result.getScore())).append(",");
-                    sb.append("\"scoreError\" : ").append(emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999))).append(",");
+                    sb.append("\"scoreError\" : ").append(emit(result.getStatistics().getMeanErrorAt(0.999))).append(",");
                     sb.append("\"scoreConfidence\" : ").append(emit(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
                     sb.append(emitPercentiles(result.getStatistics()));
                     sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
