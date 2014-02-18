@@ -461,6 +461,29 @@ public class StateObjectHandler {
         return result;
     }
 
+    public Collection<String> getStateDestructors(Element method) {
+        List<String> result = new ArrayList<String>();
+        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+            if (so.scope != Scope.Benchmark) continue;
+            result.add("synchronized(this.getClass()) {");
+            result.add("    " + so.fieldIdentifier + " = null;");
+            result.add("}");
+        }
+
+        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+            if (so.scope != Scope.Thread) continue;
+            result.add("" + so.fieldIdentifier + " = null;");
+        }
+
+        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+            if (so.scope != Scope.Group) continue;
+            result.add("synchronized(this.getClass()) {");
+            result.add("    " + so.fieldIdentifier + "_map.remove(threadControl.group);");
+            result.add("}");
+        }
+        return result;
+    }
+
     public List<String> getStateGetters(Element method) {
         List<String> result = new ArrayList<String>();
         for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values(), getControls())) {

@@ -1049,6 +1049,7 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
 
         writer.println(ident(prefix) + "if (control.isLastIteration()) {");
         for (String s : states.getRunTearDowns(method)) writer.println(ident(prefix + 1) + s);
+        for (String s : states.getStateDestructors(method)) writer.println(ident(prefix + 1) + s);
         writer.println(ident(prefix) + "}");
     }
 
