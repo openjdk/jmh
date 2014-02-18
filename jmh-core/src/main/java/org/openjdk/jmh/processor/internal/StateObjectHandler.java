@@ -378,8 +378,11 @@ public class StateObjectHandler {
     }
 
     public List<String> getStateInitializers() {
+        Collection<StateObject> sos = cons(stateObjects);
+
         List<String> result = new ArrayList<String>();
-        for (StateObject so : cons(stateObjects)) {
+
+        for (StateObject so : sos) {
             if (so.scope != Scope.Benchmark) continue;
 
             result.add("");
@@ -406,7 +409,7 @@ public class StateObjectHandler {
             result.add("}");
         }
 
-        for (StateObject so : cons(stateObjects)) {
+        for (StateObject so : sos) {
             if (so.scope != Scope.Thread) continue;
 
             result.add("");
@@ -429,7 +432,7 @@ public class StateObjectHandler {
             result.add("}");
         }
 
-        for (StateObject so : cons(stateObjects)) {
+        for (StateObject so : sos) {
             if (so.scope != Scope.Group) continue;
 
             result.add("");
@@ -462,20 +465,22 @@ public class StateObjectHandler {
     }
 
     public Collection<String> getStateDestructors(Element method) {
+        Collection<StateObject> sos = cons(args.get(method.getSimpleName().toString()), implicits.values());
+
         List<String> result = new ArrayList<String>();
-        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+        for (StateObject so : sos) {
             if (so.scope != Scope.Benchmark) continue;
             result.add("synchronized(this.getClass()) {");
             result.add("    " + so.fieldIdentifier + " = null;");
             result.add("}");
         }
 
-        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+        for (StateObject so : sos) {
             if (so.scope != Scope.Thread) continue;
             result.add("" + so.fieldIdentifier + " = null;");
         }
 
-        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values())) {
+        for (StateObject so : sos) {
             if (so.scope != Scope.Group) continue;
             result.add("synchronized(this.getClass()) {");
             result.add("    " + so.fieldIdentifier + "_map.remove(threadControl.group);");
