@@ -27,6 +27,7 @@ package org.openjdk.jmh.output.results;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.internal.Statistics;
 
@@ -71,6 +72,13 @@ public class JSONResultFormat implements ResultFormat {
                 pw.println("\"warmupTime\" : \"" + runResult.getParams().getWarmup().getTime() + "\",");
                 pw.println("\"measurementIterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
                 pw.println("\"measurementTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
+
+                if (!br.getActualParams().isEmpty()) {
+                    pw.println("\"params\" : {");
+                    pw.println(emitParams(br.getActualParams()));
+                    pw.println("},");
+                }
+
                 pw.println("\"primaryMetric\" : {");
                 pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
                 pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)) + ",");
@@ -135,6 +143,21 @@ public class JSONResultFormat implements ResultFormat {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private String emitParams(ActualParams params) {
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+        for (String k : params.keys()) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                sb.append(", ");
+            }
+            sb.append("\"").append(k).append("\" : ");
+            sb.append("\"").append(params.get(k)).append("\"");
+        }
+        return sb.toString();
     }
 
     private String emitPercentiles(Statistics stats) {

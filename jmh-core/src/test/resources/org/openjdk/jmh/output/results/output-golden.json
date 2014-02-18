@@ -8,6 +8,13 @@
         "warmupTime" : "375 s",
         "measurementIterations" : 802,
         "measurementTime" : "501 s",
+        "params" : {
+            "param0" : "value0",
+            "param1" : "value1",
+            "param2" : "value2",
+            "param3" : "value3",
+            "param4" : "value4"
+        },
         "primaryMetric" : {
             "score" : 528.8571333333333,
             "scoreError" : 278.1419529743147,
@@ -174,6 +181,13 @@
         "warmupTime" : "409 s",
         "measurementIterations" : 55,
         "measurementTime" : "398 s",
+        "params" : {
+            "param0" : "value0",
+            "param1" : "value1",
+            "param2" : "value2",
+            "param3" : "value3",
+            "param4" : "value4"
+        },
         "primaryMetric" : {
             "score" : 439.0,
             "scoreError" : "NaN",
@@ -265,6 +279,13 @@
         "warmupTime" : "105 s",
         "measurementIterations" : 461,
         "measurementTime" : "96 s",
+        "params" : {
+            "param0" : "value0",
+            "param1" : "value1",
+            "param2" : "value2",
+            "param3" : "value3",
+            "param4" : "value4"
+        },
         "primaryMetric" : {
             "score" : 545.0,
             "scoreError" : 553.3366994253071,
@@ -386,6 +407,13 @@
         "warmupTime" : "207 s",
         "measurementIterations" : 857,
         "measurementTime" : "438 s",
+        "params" : {
+            "param0" : "value0",
+            "param1" : "value1",
+            "param2" : "value2",
+            "param3" : "value3",
+            "param4" : "value4"
+        },
         "primaryMetric" : {
             "score" : 417.57141666666666,
             "scoreError" : 362.81396705929166,
@@ -534,6 +562,13 @@
         "warmupTime" : "651 s",
         "measurementIterations" : 16,
         "measurementTime" : "763 s",
+        "params" : {
+            "param0" : "value0",
+            "param1" : "value1",
+            "param2" : "value2",
+            "param3" : "value3",
+            "param4" : "value4"
+        },
         "primaryMetric" : {
             "score" : 956.0,
             "scoreError" : "NaN",

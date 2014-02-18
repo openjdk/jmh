@@ -32,6 +32,7 @@ import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.ResultRole;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.logic.results.ThroughputResult;
+import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -59,6 +60,11 @@ public class ResultFormatTest {
         Random r = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
             BenchmarkRecord record = new BenchmarkRecord("benchmark_" + b, JSONResultFormat.class.getName() + ".benchmark_" + b, Mode.AverageTime);
+            ActualParams ps = new ActualParams();
+            for (int p = 0; p < 5; p++) {
+                ps.put("param" + p, "value" + p);
+            }
+            record = record.cloneWith(ps);
             BenchmarkParams params = new BenchmarkParams(false,
                     r.nextInt(1000),
                     new int[]{ r.nextInt(1000) },

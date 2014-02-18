@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -98,5 +99,13 @@ public class ActualParams implements Comparable<ActualParams>, Serializable {
 
     public ActualParams copy() {
         return new ActualParams(params);
+    }
+
+    public boolean isEmpty() {
+        return params.isEmpty();
+    }
+
+    public Collection<String> keys() {
+        return params.keySet();
     }
 }
