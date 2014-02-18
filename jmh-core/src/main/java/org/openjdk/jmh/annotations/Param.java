@@ -51,10 +51,12 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Param {
 
+    public static final String BLANK_ARGS = "blank_blank_blank_2014";
+
     /**
      * Default values for the parameter.
      * @return values sequence to follow.
      */
-    String[] value();
+    String[] value() default { BLANK_ARGS };
 
 }

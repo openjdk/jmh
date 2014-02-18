@@ -192,7 +192,11 @@ public class Optional<T> implements Serializable {
             String[] pairs = s.split("===PAIR-SEP===");
             for (String pair : pairs) {
                 String[] kv = pair.split("===SEP-K===");
-                map.put(kv[0], kv[1].split("===SEP-V==="));
+                if (kv[1].equalsIgnoreCase("===EMPTY===")) {
+                    map.put(kv[0], new String[0]);
+                } else {
+                    map.put(kv[0], kv[1].split("===SEP-V==="));
+                }
             }
             return map;
         }
@@ -205,9 +209,13 @@ public class Optional<T> implements Serializable {
             for (String s : src.keySet()) {
                 sb.append(s);
                 sb.append("===SEP-K===");
-                for (String v : src.get(s)) {
-                    sb.append(v);
-                    sb.append("===SEP-V===");
+                if (src.get(s).length == 0) {
+                    sb.append("===EMPTY===");
+                } else {
+                    for (String v : src.get(s)) {
+                        sb.append(v);
+                        sb.append("===SEP-V===");
+                    }
                 }
                 sb.append("===PAIR-SEP===");
             }

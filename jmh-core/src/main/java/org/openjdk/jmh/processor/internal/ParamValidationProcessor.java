@@ -73,14 +73,16 @@ public class ParamValidationProcessor implements SubProcessor {
                 VariableElement ve = (VariableElement) element;
                 String[] values = element.getAnnotation(Param.class).value();
 
-                String type = ve.asType().toString();
-                for (String val : values) {
-                    if (!isConforming(val, type)) {
-                        processingEnv.getMessager().printMessage(Kind.ERROR,
-                                "Some @" + Param.class.getSimpleName() + " values can not be converted to target type: " +
-                                "\"" + val + "\" can not be converted to " + type,
-                                element
-                        );
+                if (values.length >= 1 && !values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
+                    String type = ve.asType().toString();
+                    for (String val : values) {
+                        if (!isConforming(val, type)) {
+                            processingEnv.getMessager().printMessage(Kind.ERROR,
+                                    "Some @" + Param.class.getSimpleName() + " values can not be converted to target type: " +
+                                    "\"" + val + "\" can not be converted to " + type,
+                                    element
+                            );
+                        }
                     }
                 }
 

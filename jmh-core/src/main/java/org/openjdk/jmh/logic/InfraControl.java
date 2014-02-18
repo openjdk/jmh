@@ -226,7 +226,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
     public String getParam(String name) {
         if (!params.containsKey(name)) {
-            throw new IllegalStateException("Querying the non-existing parameter: " + name);
+            throw new IllegalStateException("The value for the parameter \"" + name + "\" is not set.");
         }
         return params.get(name);
     }

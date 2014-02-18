@@ -29,6 +29,7 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.parameters.TimeValue;
@@ -253,10 +254,21 @@ public class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public Optional<Map<String, String[]>> getParams() {
+        Map<String, String[]> map = new TreeMap<String, String[]>();
+
+        for (String key : params.keySet()) {
+            String[] values = params.get(key);
+            if (values.length == 1 && values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
+                map.put(key, new String[0]);
+            } else {
+                map.put(key, values);
+            }
+        }
+
         if (params.isEmpty()) {
             return Optional.none();
         } else {
-            return Optional.of(params);
+            return Optional.of(map);
         }
     }
 

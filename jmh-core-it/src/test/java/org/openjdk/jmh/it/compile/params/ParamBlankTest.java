@@ -30,57 +30,57 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
-public class ParamTest {
+public class ParamBlankTest {
 
-    @Param("true")
+    @Param
     public boolean param_boolean;
 
-    @Param("0")
+    @Param
     public byte param_byte;
 
-    @Param("0")
+    @Param
     public short param_short;
 
-    @Param("0")
+    @Param
     public char param_char;
 
-    @Param("0")
+    @Param
     public int param_int;
 
-    @Param("0")
+    @Param
     public float param_float;
 
-    @Param("0")
+    @Param
     public long param_long;
 
-    @Param("0")
+    @Param
     public double param_double;
 
-    @Param("true")
+    @Param
     public Boolean param_Boolean;
 
-    @Param("0")
+    @Param
     public Byte param_Byte;
 
-    @Param("0")
+    @Param
     public Short param_Short;
 
-    @Param("0")
+    @Param
     public Character param_Char;
 
-    @Param("0")
+    @Param
     public Integer param_Int;
 
-    @Param("0")
+    @Param
     public Float param_Float;
 
-    @Param("0")
+    @Param
     public Long param_Long;
 
-    @Param("0")
+    @Param
     public Double param_Double;
 
-    @Param("null")
+    @Param
     public String param_String;
 
     @GenerateMicroBenchmark
