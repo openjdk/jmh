@@ -203,7 +203,7 @@ public class TestParentOptions {
     public void testJVMArgs_Merge() throws Exception {
         Options parent = new OptionsBuilder().jvmArgs("opt1", "opt2").build();
         Options builder = new OptionsBuilder().parent(parent).jvmArgs("opt3", "opt4").build();
-        Assert.assertEquals(Arrays.asList("opt1", "opt2", "opt3", "opt4"), builder.getJvmArgs().get());
+        Assert.assertEquals(Arrays.asList("opt3", "opt4"), builder.getJvmArgs().get());
     }
 
     @Test
@@ -224,7 +224,7 @@ public class TestParentOptions {
     public void testJVMArgsAppend_Merge() throws Exception {
         Options parent = new OptionsBuilder().jvmArgsAppend("opt1", "opt2").build();
         Options builder = new OptionsBuilder().parent(parent).jvmArgsAppend("opt3", "opt4").build();
-        Assert.assertEquals(Arrays.asList("opt1", "opt2", "opt3", "opt4"), builder.getJvmArgsAppend().get());
+        Assert.assertEquals(Arrays.asList("opt3", "opt4"), builder.getJvmArgsAppend().get());
     }
 
     @Test
@@ -245,7 +245,7 @@ public class TestParentOptions {
     public void testJVMArgsPrepend_Merge() throws Exception {
         Options parent = new OptionsBuilder().jvmArgsPrepend("opt1", "opt2").build();
         Options builder = new OptionsBuilder().parent(parent).jvmArgsPrepend("opt3", "opt4").build();
-        Assert.assertEquals(Arrays.asList("opt1", "opt2", "opt3", "opt4"), builder.getJvmArgsPrepend().get());
+        Assert.assertEquals(Arrays.asList("opt3", "opt4"), builder.getJvmArgsPrepend().get());
     }
 
     @Test

@@ -551,28 +551,16 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder jvmArgs(String... value) {
-        if (jvmArgs.hasValue()) {
-            jvmArgs.get().addAll(Arrays.asList(value));
-        } else {
-            Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
-            jvmArgs = Optional.of(vals);
-        }
+        jvmArgs = Optional.<Collection<String>>of(Arrays.asList(value));
         return this;
     }
 
     @Override
     public Optional<Collection<String>> getJvmArgs() {
-        Collection<String> result = new ArrayList<String>();
-
         if (otherOptions != null) {
-            result.addAll(otherOptions.getJvmArgs().orElse(Collections.<String>emptyList()));
-        }
-        result.addAll(jvmArgs.orElse(Collections.<String>emptyList()));
-
-        if (result.isEmpty()) {
-            return Optional.none();
+            return jvmArgs.orAnother(otherOptions.getJvmArgs().orAnother(Optional.<Collection<String>>none()));
         } else {
-            return Optional.of(result);
+            return jvmArgs.orAnother(Optional.<Collection<String>>none());
         }
     }
 
@@ -582,28 +570,16 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder jvmArgsAppend(String... value) {
-        if (jvmArgsAppend.hasValue()) {
-            jvmArgsAppend.get().addAll(Arrays.asList(value));
-        } else {
-            Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
-            jvmArgsAppend = Optional.of(vals);
-        }
+        jvmArgsAppend = Optional.<Collection<String>>of(Arrays.asList(value));
         return this;
     }
 
     @Override
     public Optional<Collection<String>> getJvmArgsAppend() {
-        Collection<String> result = new ArrayList<String>();
-
         if (otherOptions != null) {
-            result.addAll(otherOptions.getJvmArgsAppend().orElse(Collections.<String>emptyList()));
-        }
-        result.addAll(jvmArgsAppend.orElse(Collections.<String>emptyList()));
-
-        if (result.isEmpty()) {
-            return Optional.none();
+            return jvmArgsAppend.orAnother(otherOptions.getJvmArgsAppend().orAnother(Optional.<Collection<String>>none()));
         } else {
-            return Optional.of(result);
+            return jvmArgsAppend.orAnother(Optional.<Collection<String>>none());
         }
     }
 
@@ -613,28 +589,16 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder jvmArgsPrepend(String... value) {
-        if (jvmArgsPrepend.hasValue()) {
-            jvmArgsPrepend.get().addAll(Arrays.asList(value));
-        } else {
-            Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
-            jvmArgsPrepend = Optional.of(vals);
-        }
+        jvmArgsPrepend = Optional.<Collection<String>>of(Arrays.asList(value));
         return this;
     }
 
     @Override
     public Optional<Collection<String>> getJvmArgsPrepend() {
-        Collection<String> result = new ArrayList<String>();
-
         if (otherOptions != null) {
-            result.addAll(otherOptions.getJvmArgsPrepend().orElse(Collections.<String>emptyList()));
-        }
-        result.addAll(jvmArgsPrepend.orElse(Collections.<String>emptyList()));
-
-        if (result.isEmpty()) {
-            return Optional.none();
+            return jvmArgsPrepend.orAnother(otherOptions.getJvmArgsPrepend().orAnother(Optional.<Collection<String>>none()));
         } else {
-            return Optional.of(result);
+            return jvmArgsPrepend.orAnother(Optional.<Collection<String>>none());
         }
     }
 
