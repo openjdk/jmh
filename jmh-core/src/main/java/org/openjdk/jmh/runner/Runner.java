@@ -381,7 +381,7 @@ public class Runner extends BaseRunner {
                     beforeBenchmark();
                     out.println("# VM invoker: " + jvm);
                     out.println("# VM options: " + opts);
-                    out.println("# Warmup Fork: " + (i + 1) + " of " + forkCount);
+                    out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
                     doFork(server, commandString);
                     afterBenchmark(benchmark);
                 }
