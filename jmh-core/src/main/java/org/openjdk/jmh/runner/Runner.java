@@ -364,7 +364,7 @@ public class Runner extends BaseRunner {
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
 
             String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort());
-            String opts = merge(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark))));
+            String opts = merge(getJvmArgs(benchmark));
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
             }
@@ -478,7 +478,7 @@ public class Runner extends BaseRunner {
         command.add(options.getJvm().orElse(getDefaultJvm()));
 
         // use supplied jvm args, if given
-        command.addAll(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(getDefaultJvmArgs(benchmark))));
+        command.addAll(getJvmArgs(benchmark));
 
         // add any compiler oracle hints
         command.add("-XX:CompileCommandFile=" + CompilerHints.hintsFile());
@@ -516,11 +516,11 @@ public class Runner extends BaseRunner {
         return javaExecutable.toString();
     }
 
-    private Collection<String> getDefaultJvmArgs(BenchmarkRecord benchmark) {
+    private Collection<String> getJvmArgs(BenchmarkRecord benchmark) {
         Collection<String> res = new ArrayList<String>();
-        res.addAll(benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList()));
-        res.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
-        res.addAll(benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList()));
+        res.addAll(options.getJvmArgsPrepend().orElse(benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList())));
+        res.addAll(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(ManagementFactory.getRuntimeMXBean().getInputArguments())));
+        res.addAll(options.getJvmArgsAppend().orElse(benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
         return res;
     }
 

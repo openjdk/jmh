@@ -240,6 +240,26 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder jvmArgs(String... value);
 
     /**
+     * Append forked JVM arguments:
+     * These options go after other options.
+     * (can be used multiple times)
+     *
+     * @param value arguments to add to the run
+     * @return builder
+     */
+    ChainedOptionsBuilder jvmArgsAppend(String... value);
+
+    /**
+     * Prepend forked JVM arguments:
+     * These options go before any other options.
+     * (can be used multiple times)
+     *
+     * @param value arguments to add to the run
+     * @return builder
+     */
+    ChainedOptionsBuilder jvmArgsPrepend(String... value);
+
+    /**
      * Autodetect forked JVM arguments from the parent VM.
      * @return builder
      */

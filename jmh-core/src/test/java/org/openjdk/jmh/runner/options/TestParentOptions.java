@@ -207,6 +207,48 @@ public class TestParentOptions {
     }
 
     @Test
+    public void testJVMArgsAppend_Empty() throws Exception {
+        Options parent = new OptionsBuilder().build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertFalse(builder.getJvmArgsAppend().hasValue());
+    }
+
+    @Test
+    public void testJVMArgsAppend_Parent() throws Exception {
+        Options parent = new OptionsBuilder().jvmArgsAppend("opt1", "opt2").build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertEquals(Arrays.asList("opt1", "opt2"), builder.getJvmArgsAppend().get());
+    }
+
+    @Test
+    public void testJVMArgsAppend_Merge() throws Exception {
+        Options parent = new OptionsBuilder().jvmArgsAppend("opt1", "opt2").build();
+        Options builder = new OptionsBuilder().parent(parent).jvmArgsAppend("opt3", "opt4").build();
+        Assert.assertEquals(Arrays.asList("opt1", "opt2", "opt3", "opt4"), builder.getJvmArgsAppend().get());
+    }
+
+    @Test
+    public void testJVMArgsPrepend_Empty() throws Exception {
+        Options parent = new OptionsBuilder().build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertFalse(builder.getJvmArgsPrepend().hasValue());
+    }
+
+    @Test
+    public void testJVMArgsPrepend_Parent() throws Exception {
+        Options parent = new OptionsBuilder().jvmArgsPrepend("opt1", "opt2").build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertEquals(Arrays.asList("opt1", "opt2"), builder.getJvmArgsPrepend().get());
+    }
+
+    @Test
+    public void testJVMArgsPrepend_Merge() throws Exception {
+        Options parent = new OptionsBuilder().jvmArgsPrepend("opt1", "opt2").build();
+        Options builder = new OptionsBuilder().parent(parent).jvmArgsPrepend("opt3", "opt4").build();
+        Assert.assertEquals(Arrays.asList("opt1", "opt2", "opt3", "opt4"), builder.getJvmArgsPrepend().get());
+    }
+
+    @Test
     public void testOutput_Empty() throws Exception {
         Options parent = new OptionsBuilder().build();
         Options builder = new OptionsBuilder().parent(parent).build();

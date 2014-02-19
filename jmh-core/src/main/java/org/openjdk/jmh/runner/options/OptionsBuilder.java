@@ -555,7 +555,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
             jvmArgs.get().addAll(Arrays.asList(value));
         } else {
             Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
-            jvmArgs = Optional.<Collection<String>>of(vals);
+            jvmArgs = Optional.of(vals);
         }
         return this;
     }
@@ -575,6 +575,70 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
             return Optional.of(result);
         }
     }
+
+    // ---------------------------------------------------------------------------
+
+    private Optional<Collection<String>> jvmArgsAppend = Optional.none();
+
+    @Override
+    public ChainedOptionsBuilder jvmArgsAppend(String... value) {
+        if (jvmArgsAppend.hasValue()) {
+            jvmArgsAppend.get().addAll(Arrays.asList(value));
+        } else {
+            Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
+            jvmArgsAppend = Optional.of(vals);
+        }
+        return this;
+    }
+
+    @Override
+    public Optional<Collection<String>> getJvmArgsAppend() {
+        Collection<String> result = new ArrayList<String>();
+
+        if (otherOptions != null) {
+            result.addAll(otherOptions.getJvmArgsAppend().orElse(Collections.<String>emptyList()));
+        }
+        result.addAll(jvmArgsAppend.orElse(Collections.<String>emptyList()));
+
+        if (result.isEmpty()) {
+            return Optional.none();
+        } else {
+            return Optional.of(result);
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private Optional<Collection<String>> jvmArgsPrepend = Optional.none();
+
+    @Override
+    public ChainedOptionsBuilder jvmArgsPrepend(String... value) {
+        if (jvmArgsPrepend.hasValue()) {
+            jvmArgsPrepend.get().addAll(Arrays.asList(value));
+        } else {
+            Collection<String> vals = new ArrayList<String>(Arrays.asList(value));
+            jvmArgsPrepend = Optional.of(vals);
+        }
+        return this;
+    }
+
+    @Override
+    public Optional<Collection<String>> getJvmArgsPrepend() {
+        Collection<String> result = new ArrayList<String>();
+
+        if (otherOptions != null) {
+            result.addAll(otherOptions.getJvmArgsPrepend().orElse(Collections.<String>emptyList()));
+        }
+        result.addAll(jvmArgsPrepend.orElse(Collections.<String>emptyList()));
+
+        if (result.isEmpty()) {
+            return Optional.none();
+        } else {
+            return Optional.of(result);
+        }
+    }
+
+    // ---------------------------------------------------------------------------
 
     @Override
     public ChainedOptionsBuilder detectJvmArgs() {

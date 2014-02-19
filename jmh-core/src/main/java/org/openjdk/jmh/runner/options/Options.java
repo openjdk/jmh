@@ -194,6 +194,20 @@ public interface Options extends Serializable {
     Optional<Collection<String>> getJvmArgs();
 
     /**
+     * JVM parameters to use with forks (these options will be appended
+     * after any other JVM option)
+     * @return JVM parameters
+     */
+    Optional<Collection<String>> getJvmArgsAppend();
+
+    /**
+     * JVM parameters to use with forks (these options will be prepended
+     * before any other JVM option)
+     * @return JVM parameters
+     */
+    Optional<Collection<String>> getJvmArgsPrepend();
+
+    /**
      * The overridden value of the parameter.
      * @param name parameter name
      * @return parameter

@@ -81,6 +81,8 @@ public class CommandLineOptions implements Options {
     private final Optional<ResultFormatType> resultFormat;
     private final Optional<String> jvm;
     private final Optional<Collection<String>> jvmArgs;
+    private final Optional<Collection<String>> jvmArgsAppend;
+    private final Optional<Collection<String>> jvmArgsPrepend;
     private final List<String> excludes = new ArrayList<String>();
     private final Optional<WarmupMode> warmupMode;
     private final List<String> warmupMicros = new ArrayList<String>();
@@ -165,6 +167,12 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Custom JVM args to use when forking.")
+                .withRequiredArg().ofType(String.class).describedAs("string");
+
+        OptionSpec<String> optJvmArgsAppend = parser.accepts("jvmArgsAppend", "Custom JVM args to use when forking (append these)")
+                .withRequiredArg().ofType(String.class).describedAs("string");
+
+        OptionSpec<String> optJvmArgsPrepend = parser.accepts("jvmArgsPrepend", "Custom JVM args to use when forking (prepend these)")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optTU = parser.accepts("tu", "Output time unit. Available time units are: [m, s, ms, us, ns].")
@@ -394,6 +402,18 @@ public class CommandLineOptions implements Options {
                 jvmArgs = Optional.none();
             }
 
+            if (set.hasArgument(optJvmArgsAppend)) {
+                jvmArgsAppend = Optional.<Collection<String>>of(Arrays.asList(optJvmArgsAppend.value(set).trim().split("[ ]+")));
+            } else {
+                jvmArgsAppend = Optional.none();
+            }
+
+            if (set.hasArgument(optJvmArgsPrepend)) {
+                jvmArgsPrepend = Optional.<Collection<String>>of(Arrays.asList(optJvmArgsPrepend.value(set).trim().split("[ ]+")));
+            } else {
+                jvmArgsPrepend = Optional.none();
+            }
+
             if (set.hasArgument(optParams)) {
                 for (String p : optParams.values(set)) {
                     String[] keys = p.split("=");
@@ -520,6 +540,16 @@ public class CommandLineOptions implements Options {
     @Override
     public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
+    }
+
+    @Override
+    public Optional<Collection<String>> getJvmArgsAppend() {
+        return jvmArgsAppend;
+    }
+
+    @Override
+    public Optional<Collection<String>> getJvmArgsPrepend() {
+        return jvmArgsPrepend;
     }
 
     @Override

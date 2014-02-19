@@ -457,6 +457,30 @@ public class TestOptions {
     }
 
     @Test
+    public void testJvmArgsAppend() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("--jvmArgsAppend", "sample.jar");
+        Options builder = new OptionsBuilder().jvmArgsAppend("sample.jar").build();
+        Assert.assertEquals(builder.getJvmArgsAppend(), cmdLine.getJvmArgsAppend());
+    }
+
+    @Test
+    public void testJvmArgsAppend_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getJvmArgsAppend(), EMPTY_CMDLINE.getJvmArgsAppend());
+    }
+
+    @Test
+    public void testJvmArgsPrepend() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("--jvmArgsPrepend", "sample.jar");
+        Options builder = new OptionsBuilder().jvmArgsPrepend("sample.jar").build();
+        Assert.assertEquals(builder.getJvmArgsPrepend(), cmdLine.getJvmArgsPrepend());
+    }
+
+    @Test
+    public void testJvmArgsPrepend_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getJvmArgsPrepend(), EMPTY_CMDLINE.getJvmArgsPrepend());
+    }
+
+    @Test
     public void testBatchSize() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-bs", "42");
         Options builder = new OptionsBuilder().measurementBatchSize(42).build();
