@@ -24,11 +24,51 @@
  */
 package org.openjdk.jmh.output.results;
 
+import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
+
 public class ResultFormatFactory {
 
     private ResultFormatFactory() {}
 
-    public static ResultFormat getInstance(ResultFormatType type, String output) {
+    /**
+     * Get the instance of ResultFormat of given type which writes the result to file
+     * @param type result format type
+     * @param file target file
+     * @return result format
+     */
+    public static ResultFormat getInstance(final ResultFormatType type, final String file) {
+        return new ResultFormat() {
+            @Override
+            public void writeOut(Map<BenchmarkRecord, RunResult> results) {
+                try {
+                    PrintWriter pw = new PrintWriter(file);
+                    ResultFormat rf = getInstance(type, pw);
+                    rf.writeOut(results);
+                    pw.flush();
+                    pw.close();
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        };
+    }
+
+    /**
+     * Get the instance of ResultFormat of given type which write the result to writer.
+     * It is a user responsibility to initialize and finish the writer as appropriate.
+     *
+     * @param type result format type
+     * @param writer target writer
+     * @return result format.
+     */
+    public static ResultFormat getInstance(ResultFormatType type, PrintWriter writer) {
         switch (type) {
             case NONE:
                 return new NoneResultFormat();
@@ -36,7 +76,7 @@ public class ResultFormatFactory {
                 /*
                  * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180
                  */
-                return new XSVResultFormat(output, ",");
+                return new XSVResultFormat(writer, ",");
             case SCSV:
                 /*
                  *    Since some implementations, notably Excel, think it is a good
@@ -44,9 +84,9 @@ public class ResultFormatFactory {
                  *    comma in some locales, this is the specialised
                  *     Semi-Colon Separated Values formatter.
                  */
-                return new XSVResultFormat(output, ";");
+                return new XSVResultFormat(writer, ";");
             case JSON:
-                return new JSONResultFormat(output);
+                return new JSONResultFormat(writer);
             default:
                 throw new IllegalStateException("Unsupported result format: " + type);
         }

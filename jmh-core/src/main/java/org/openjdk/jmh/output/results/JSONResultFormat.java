@@ -31,19 +31,18 @@ import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.internal.Statistics;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class JSONResultFormat implements ResultFormat {
+class JSONResultFormat implements ResultFormat {
 
-    private final String output;
+    private final PrintWriter out;
 
-    public JSONResultFormat(String output) {
-        this.output = output;
+    public JSONResultFormat(PrintWriter out) {
+        this.out = out;
     }
 
     @Override
@@ -51,98 +50,91 @@ public class JSONResultFormat implements ResultFormat {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
-            boolean first = true;
+        boolean first = true;
 
-            pw.println("[");
-            for (BenchmarkRecord br : results.keySet()) {
-                if (first) {
-                    first = false;
-                } else {
-                    pw.println(",");
-                }
-
-                RunResult runResult = results.get(br);
-
-                pw.println("{");
-                pw.println("\"benchmark\" : \"" + br.getUsername() + "\",");
-                pw.println("\"mode\" : \"" + br.getMode().shortLabel() + "\",");
-                pw.println("\"threads\" : " + runResult.getParams().getThreads() + ",");
-                pw.println("\"forks\" : " + runResult.getParams().getForks() + ",");
-                pw.println("\"warmupIterations\" : " + runResult.getParams().getWarmup().getCount() + ",");
-                pw.println("\"warmupTime\" : \"" + runResult.getParams().getWarmup().getTime() + "\",");
-                pw.println("\"measurementIterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
-                pw.println("\"measurementTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
-
-                if (!br.getActualParams().isEmpty()) {
-                    pw.println("\"params\" : {");
-                    pw.println(emitParams(br.getActualParams()));
-                    pw.println("},");
-                }
-
-                pw.println("\"primaryMetric\" : {");
-                pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
-                pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)) + ",");
-                pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
-                pw.println(emitPercentiles(runResult.getPrimaryResult().getStatistics()));
-                pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
-                pw.println("\"rawData\" :");
-
-                {
-                    Collection<String> l1 = new ArrayList<String>();
-                    for (BenchResult benchResult : runResult.getRawBenchResults()) {
-                        Collection<String> scores = new ArrayList<String>();
-                        for (Result r : benchResult.getRawPrimaryResults()) {
-                            scores.add(emit(r.getScore()));
-                        }
-                        l1.add(printMultiple(scores, "[", "]"));
-                    }
-                    pw.println(printMultiple(l1, "[", "]"));
-                    pw.println("},");
-                }
-
-                Collection<String> secondaries = new ArrayList<String>();
-                for (String secondaryName : runResult.getSecondaryResults().keySet()) {
-                    Result result = runResult.getSecondaryResults().get(secondaryName);
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("\"").append(secondaryName).append("\" : {");
-                    sb.append("\"score\" : ").append(emit(result.getScore())).append(",");
-                    sb.append("\"scoreError\" : ").append(emit(result.getStatistics().getMeanErrorAt(0.999))).append(",");
-                    sb.append("\"scoreConfidence\" : ").append(emit(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
-                    sb.append(emitPercentiles(result.getStatistics()));
-                    sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
-                    sb.append("\"rawData\" :");
-
-                    Collection<String> l2 = new ArrayList<String>();
-                    for (BenchResult benchResult : runResult.getRawBenchResults()) {
-                        Collection<String> scores = new ArrayList<String>();
-                        for (Result r : benchResult.getRawSecondaryResults().get(secondaryName)) {
-                            scores.add(emit(r.getScore()));
-                        }
-                        l2.add(printMultiple(scores, "[", "]"));
-                    }
-
-                    sb.append(printMultiple(l2, "[", "]"));
-                    sb.append("}");
-                    secondaries.add(sb.toString());
-                }
-                pw.println("\"secondaryMetrics\" : {");
-                pw.println(printMultiple(secondaries, "", ""));
-                pw.println("}");
-
-                pw.println("}");
-
+        pw.println("[");
+        for (BenchmarkRecord br : results.keySet()) {
+            if (first) {
+                first = false;
+            } else {
+                pw.println(",");
             }
-            pw.println("]");
 
-        try {
-            PrintWriter out = new PrintWriter(output);
-            out.println(tidy(sw.toString()));
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+            RunResult runResult = results.get(br);
+
+            pw.println("{");
+            pw.println("\"benchmark\" : \"" + br.getUsername() + "\",");
+            pw.println("\"mode\" : \"" + br.getMode().shortLabel() + "\",");
+            pw.println("\"threads\" : " + runResult.getParams().getThreads() + ",");
+            pw.println("\"forks\" : " + runResult.getParams().getForks() + ",");
+            pw.println("\"warmupIterations\" : " + runResult.getParams().getWarmup().getCount() + ",");
+            pw.println("\"warmupTime\" : \"" + runResult.getParams().getWarmup().getTime() + "\",");
+            pw.println("\"measurementIterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
+            pw.println("\"measurementTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
+
+            if (!br.getActualParams().isEmpty()) {
+                pw.println("\"params\" : {");
+                pw.println(emitParams(br.getActualParams()));
+                pw.println("},");
+            }
+
+            pw.println("\"primaryMetric\" : {");
+            pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
+            pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)) + ",");
+            pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
+            pw.println(emitPercentiles(runResult.getPrimaryResult().getStatistics()));
+            pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
+            pw.println("\"rawData\" :");
+
+            {
+                Collection<String> l1 = new ArrayList<String>();
+                for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                    Collection<String> scores = new ArrayList<String>();
+                    for (Result r : benchResult.getRawPrimaryResults()) {
+                        scores.add(emit(r.getScore()));
+                    }
+                    l1.add(printMultiple(scores, "[", "]"));
+                }
+                pw.println(printMultiple(l1, "[", "]"));
+                pw.println("},");
+            }
+
+            Collection<String> secondaries = new ArrayList<String>();
+            for (String secondaryName : runResult.getSecondaryResults().keySet()) {
+                Result result = runResult.getSecondaryResults().get(secondaryName);
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("\"").append(secondaryName).append("\" : {");
+                sb.append("\"score\" : ").append(emit(result.getScore())).append(",");
+                sb.append("\"scoreError\" : ").append(emit(result.getStatistics().getMeanErrorAt(0.999))).append(",");
+                sb.append("\"scoreConfidence\" : ").append(emit(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
+                sb.append(emitPercentiles(result.getStatistics()));
+                sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
+                sb.append("\"rawData\" :");
+
+                Collection<String> l2 = new ArrayList<String>();
+                for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                    Collection<String> scores = new ArrayList<String>();
+                    for (Result r : benchResult.getRawSecondaryResults().get(secondaryName)) {
+                        scores.add(emit(r.getScore()));
+                    }
+                    l2.add(printMultiple(scores, "[", "]"));
+                }
+
+                sb.append(printMultiple(l2, "[", "]"));
+                sb.append("}");
+                secondaries.add(sb.toString());
+            }
+            pw.println("\"secondaryMetrics\" : {");
+            pw.println(printMultiple(secondaries, "", ""));
+            pw.println("}");
+
+            pw.println("}");
+
         }
+        pw.println("]");
+
+        out.println(tidy(sw.toString()));
     }
 
     private String emitParams(ActualParams params) {
@@ -164,7 +156,7 @@ public class JSONResultFormat implements ResultFormat {
         StringBuilder sb = new StringBuilder();
         sb.append("\"scorePercentiles\" : {");
         boolean firstPercentile = true;
-        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999, 1.0}) {
+        for (double p : new double[]{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999, 1.0}) {
             if (firstPercentile) {
                 firstPercentile = false;
             } else {
@@ -172,7 +164,7 @@ public class JSONResultFormat implements ResultFormat {
             }
 
             double v = stats.getPercentile(p * 100);
-            sb.append(String.format("\"%.4f\" : %.3f", p*100, v));
+            sb.append(String.format("\"%.4f\" : %.3f", p * 100, v));
         }
         sb.append("},");
         return sb.toString();

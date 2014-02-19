@@ -30,75 +30,59 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
-public class XSVResultFormat implements ResultFormat {
+class XSVResultFormat implements ResultFormat {
 
-    private final String output;
+    private final PrintWriter pw;
     private final String delimiter;
 
-    public XSVResultFormat(String output, String delimiter) {
-        this.output = output;
+    public XSVResultFormat(PrintWriter pw, String delimiter) {
+        this.pw = pw;
         this.delimiter = delimiter;
     }
 
     @Override
     public void writeOut(Map<BenchmarkRecord, RunResult> results) {
-        FileWriter fw = null;
-        try  {
-            fw = new FileWriter(output);
-            BufferedWriter bw = new BufferedWriter(fw);
+        pw.write("\"Benchmark\"");
+        pw.write(delimiter);
+        pw.write("\"Mode\"");
+        pw.write(delimiter);
+        pw.write("\"Threads\"");
+        pw.write(delimiter);
+        pw.write("\"Samples\"");
+        pw.write(delimiter);
+        pw.write("\"Mean\"");
+        pw.write(delimiter);
+        pw.write("\"Mean Error (99.9%)\"");
+        pw.write(delimiter);
+        pw.write("\"Unit\"");
+        pw.write("\r\n");
 
-            bw.write("\"Benchmark\"");
-            bw.write(delimiter);
-            bw.write("\"Mode\"");
-            bw.write(delimiter);
-            bw.write("\"Threads\"");
-            bw.write(delimiter);
-            bw.write("\"Samples\"");
-            bw.write(delimiter);
-            bw.write("\"Mean\"");
-            bw.write(delimiter);
-            bw.write("\"Mean Error (99.9%)\"");
-            bw.write(delimiter);
-            bw.write("\"Unit\"");
-            bw.write("\r\n");
+        for (BenchmarkRecord br : results.keySet()) {
+            RunResult runResult = results.get(br);
 
-            for (BenchmarkRecord br : results.keySet()) {
-                RunResult runResult = results.get(br);
-
-                bw.write("\"");
-                bw.write(br.getUsername());
-                bw.write("\"");
-                bw.write(delimiter);
-                bw.write("\"");
-                bw.write(br.getMode().shortLabel());
-                bw.write("\"");
-                bw.write(delimiter);
-                bw.write(String.valueOf(runResult.getParams().getThreads()));
-                bw.write(delimiter);
-                bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getN()));
-                bw.write(delimiter);
-                bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMean()));
-                bw.write(delimiter);
-                bw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)));
-                bw.write(delimiter);
-                bw.write("\"");
-                bw.write(runResult.getPrimaryResult().getScoreUnit());
-                bw.write("\"");
-                bw.write("\r\n");
-            }
-            bw.close();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            if (fw != null) {
-                try {
-                    fw.close();
-                } catch (IOException e) {
-                    // do nothing
-                }
-            }
+            pw.write("\"");
+            pw.write(br.getUsername());
+            pw.write("\"");
+            pw.write(delimiter);
+            pw.write("\"");
+            pw.write(br.getMode().shortLabel());
+            pw.write("\"");
+            pw.write(delimiter);
+            pw.write(String.valueOf(runResult.getParams().getThreads()));
+            pw.write(delimiter);
+            pw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getN()));
+            pw.write(delimiter);
+            pw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMean()));
+            pw.write(delimiter);
+            pw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)));
+            pw.write(delimiter);
+            pw.write("\"");
+            pw.write(runResult.getPrimaryResult().getScoreUnit());
+            pw.write("\"");
+            pw.write("\r\n");
         }
 
     }

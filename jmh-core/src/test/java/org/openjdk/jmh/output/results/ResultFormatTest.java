@@ -39,9 +39,11 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -119,6 +121,20 @@ public class ResultFormatTest {
     }
 
     @Test
+    public void jsonTest_Stream() throws IOException {
+        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+
+        PrintWriter pw = new PrintWriter(actualFile);
+        ResultFormatFactory.getInstance(
+                    ResultFormatType.JSON,
+                    pw)
+                .writeOut(getStub());
+        pw.close();
+
+        compare(actualFile, "output-golden.json");
+    }
+
+    @Test
     public void csvTest() throws IOException {
         String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
 
@@ -131,6 +147,20 @@ public class ResultFormatTest {
     }
 
     @Test
+    public void csvTest_Stream() throws IOException {
+        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+
+        PrintWriter pw = new PrintWriter(actualFile);
+        ResultFormatFactory.getInstance(
+                    ResultFormatType.CSV,
+                    pw)
+                .writeOut(getStub());
+        pw.close();
+
+        compare(actualFile, "output-golden.csv");
+    }
+
+    @Test
     public void scsvTest() throws IOException {
         String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
 
@@ -138,6 +168,20 @@ public class ResultFormatTest {
                     ResultFormatType.SCSV,
                     actualFile)
                 .writeOut(getStub());
+
+        compare(actualFile, "output-golden.scsv");
+    }
+
+    @Test
+    public void scsvTest_Stream() throws IOException {
+        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+
+        PrintWriter pw = new PrintWriter(actualFile);
+        ResultFormatFactory.getInstance(
+                    ResultFormatType.SCSV,
+                    actualFile)
+                .writeOut(getStub());
+        pw.close();
 
         compare(actualFile, "output-golden.scsv");
     }

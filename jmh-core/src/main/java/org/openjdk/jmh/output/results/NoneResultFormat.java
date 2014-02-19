@@ -29,7 +29,7 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 
 import java.util.Map;
 
-public class NoneResultFormat implements ResultFormat {
+class NoneResultFormat implements ResultFormat {
     @Override
     public void writeOut(Map<BenchmarkRecord, RunResult> results) {
         // do nothing
