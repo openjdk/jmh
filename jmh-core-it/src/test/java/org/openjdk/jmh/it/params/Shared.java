@@ -37,7 +37,7 @@ public class Shared {
     public static void compare(SortedMap<BenchmarkRecord,RunResult> params, int[] xs, String[] ys) {
         Set<String> actualPairs = new HashSet<String>();
         for (BenchmarkRecord br : params.keySet()) {
-            actualPairs.add(br.getActualParams().get("x") + br.getActualParams().get("y"));
+            actualPairs.add(br.getActualParam("x") + br.getActualParam("y"));
         }
 
         for (int x : xs) {

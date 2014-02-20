@@ -147,6 +147,14 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return actualParams;
     }
 
+    public String getActualParam(String key) {
+        if (actualParams != null) {
+            return actualParams.get(key);
+        } else {
+            return null;
+        }
+    }
+
     private int[] convert(String[] ss) {
         int[] arr = new int[ss.length];
         int cnt = 0;

@@ -32,6 +32,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 class XSVResultFormat implements ResultFormat {
 
@@ -45,6 +47,13 @@ class XSVResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Map<BenchmarkRecord, RunResult> results) {
+        SortedSet<String> params = new TreeSet<String>();
+        for (BenchmarkRecord br : results.keySet()) {
+            if (br.getActualParams() != null) {
+                params.addAll(br.getActualParams().keys());
+            }
+        }
+
         pw.write("\"Benchmark\"");
         pw.write(delimiter);
         pw.write("\"Mode\"");
@@ -58,6 +67,10 @@ class XSVResultFormat implements ResultFormat {
         pw.write("\"Mean Error (99.9%)\"");
         pw.write(delimiter);
         pw.write("\"Unit\"");
+        for (String k : params) {
+            pw.write(delimiter);
+            pw.write("\"Param: " + k + "\"");
+        }
         pw.write("\r\n");
 
         for (BenchmarkRecord br : results.keySet()) {
@@ -82,6 +95,17 @@ class XSVResultFormat implements ResultFormat {
             pw.write("\"");
             pw.write(runResult.getPrimaryResult().getScoreUnit());
             pw.write("\"");
+
+            for (String p : params) {
+                pw.write(delimiter);
+                pw.write("\"");
+                String v = br.getActualParam(p);
+                if (v != null) {
+                    pw.write(v);
+                }
+                pw.write("\"");
+            }
+
             pw.write("\r\n");
         }
 
