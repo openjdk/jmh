@@ -39,7 +39,10 @@ import org.openjdk.jmh.util.internal.Statistics;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * TextReportFormat implementation of OutputFormat.
@@ -161,9 +164,9 @@ public class TextReportFormat extends AbstractOutputFormat {
         Collection<String> benchNames = new ArrayList<String>();
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult runResult = runResults.get(key);
-            benchNames.add(key.getUsername() + mixActualParams(key));
+            benchNames.add(key.getUsername());
             for (String label : runResult.getSecondaryResults().keySet()) {
-                benchNames.add(key.getUsername() + ":" + label + mixActualParams(key));
+                benchNames.add(key.getUsername() + ":" + label);
             }
         }
 
@@ -176,14 +179,41 @@ public class TextReportFormat extends AbstractOutputFormat {
         }
         nameLen += 2;
 
-        out.printf("%-" + nameLen + "s %6s %9s %12s %12s %8s%n",
-                "Benchmark", "Mode", "Samples", "Mean", "Mean error", "Units");
+        Map<String, Integer> paramLengths = new HashMap<String, Integer>();
+        SortedSet<String> params = new TreeSet<String>();
+        for (BenchmarkRecord br : runResults.keySet()) {
+            if (br.getActualParams() != null) {
+                for (String k : br.getActualParams().keys()) {
+                    params.add(k);
+                    Integer len = paramLengths.get(k);
+                    if (len == null) {
+                        len = ("(" + k + ")").length();
+                    }
+                    paramLengths.put(k, Math.max(len, br.getActualParam(k).length()));
+                }
+            }
+        }
+
+        out.printf("%-" + nameLen + "s ", "Benchmark");
+        for (String k : params) {
+            out.printf("%" + paramLengths.get(k) + "s ", "(" + k + ")");
+        }
+
+        out.printf("%6s %9s %12s %12s %8s%n",
+                    "Mode", "Samples", "Mean", "Mean error", "Units");
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult res = runResults.get(key);
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();
-                out.printf("%-" + nameLen + "s %6s %9d %12.3f %12.3f %8s%n",
-                        benchPrefixes.get(key.getUsername() + mixActualParams(key)),
+                out.printf("%-" + nameLen + "s ",
+                        benchPrefixes.get(key.getUsername()));
+
+                for (String k : params) {
+                    String v = key.getActualParam(k);
+                    out.printf("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v);
+                }
+
+                out.printf("%6s %9d %12.3f %12.3f %8s%n",
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
@@ -193,18 +223,21 @@ public class TextReportFormat extends AbstractOutputFormat {
             for (String label : res.getSecondaryResults().keySet()) {
                 Statistics stats = res.getSecondaryResults().get(label).getStatistics();
 
-                out.printf("%-" + nameLen + "s %6s %9d %12.3f %12.3f %8s%n",
-                        benchPrefixes.get(key.getUsername() + ":" + label + mixActualParams(key)),
+                out.printf("%-" + nameLen + "s ",
+                        benchPrefixes.get(key.getUsername() + ":" + label));
+
+                for (String k : params) {
+                    String v = key.getActualParam(k);
+                    out.printf("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v);
+                }
+
+                out.printf("%6s %9d %12.3f %12.3f %8s%n",
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
                         res.getScoreUnit());
             }
         }
-    }
-
-    private static String mixActualParams(BenchmarkRecord key) {
-        return (key.getActualParams() == null ? "" : " " + key.getActualParams().toString());
     }
 
 }
