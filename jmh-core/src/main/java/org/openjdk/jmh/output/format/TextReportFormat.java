@@ -67,7 +67,7 @@ public class TextReportFormat extends AbstractOutputFormat {
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Benchmark: " + name.getUsername());
-        if (name.getActualParams() != null) {
+        if (!name.getActualParams().isEmpty()) {
             out.println("# Parameters: " + name.getActualParams());
         }
     }
@@ -182,15 +182,13 @@ public class TextReportFormat extends AbstractOutputFormat {
         Map<String, Integer> paramLengths = new HashMap<String, Integer>();
         SortedSet<String> params = new TreeSet<String>();
         for (BenchmarkRecord br : runResults.keySet()) {
-            if (br.getActualParams() != null) {
-                for (String k : br.getActualParams().keys()) {
-                    params.add(k);
-                    Integer len = paramLengths.get(k);
-                    if (len == null) {
-                        len = ("(" + k + ")").length();
-                    }
-                    paramLengths.put(k, Math.max(len, br.getActualParam(k).length()));
+            for (String k : br.getActualParams().keys()) {
+                params.add(k);
+                Integer len = paramLengths.get(k);
+                if (len == null) {
+                    len = ("(" + k + ")").length();
                 }
+                paramLengths.put(k, Math.max(len, br.getActualParam(k).length()));
             }
         }
 

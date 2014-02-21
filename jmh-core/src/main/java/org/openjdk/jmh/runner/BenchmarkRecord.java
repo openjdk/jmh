@@ -81,6 +81,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.jvmArgsPrepend = jvmArgsPrepend;
         this.jvmArgsAppend = jvmArgsAppend;
         this.params = params;
+        this.actualParams = new ActualParams();
     }
 
     public BenchmarkRecord(String line) {
@@ -90,6 +91,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
+        this.actualParams = new ActualParams();
         this.userName = args[0].trim();
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());

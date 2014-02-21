@@ -27,9 +27,6 @@ package org.openjdk.jmh.output.results;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.SortedSet;
@@ -49,9 +46,7 @@ class XSVResultFormat implements ResultFormat {
     public void writeOut(Map<BenchmarkRecord, RunResult> results) {
         SortedSet<String> params = new TreeSet<String>();
         for (BenchmarkRecord br : results.keySet()) {
-            if (br.getActualParams() != null) {
-                params.addAll(br.getActualParams().keys());
-            }
+            params.addAll(br.getActualParams().keys());
         }
 
         pw.write("\"Benchmark\"");
