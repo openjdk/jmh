@@ -24,24 +24,19 @@
  */
 package org.openjdk.jmh.processor.internal;
 
+import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Threads;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.tools.Diagnostic.Kind;
-
-public class GroupValidationProcessor implements SubProcessor {
+public class GroupValidationPlugin implements Plugin {
 
     @Override
-    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void process(GeneratorSource source) {
         try {
-            for (Element element : roundEnv.getElementsAnnotatedWith(Group.class)) {
+            for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, CompilerControl.class)) {
                 if (element.getAnnotation(Threads.class) != null) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
-                            "@" + Threads.class.getSimpleName() + " annotation is placed within " +
+                    source.printError("@" + Threads.class.getSimpleName() + " annotation is placed within " +
                                     "the benchmark method with @" + Group.class.getSimpleName() + " annotation. " +
                                     "This has ambiguous behavioral effect, and prohibited. " +
                                     "Did you mean @" + GroupThreads.class.getSimpleName() + " instead?",
@@ -49,13 +44,12 @@ public class GroupValidationProcessor implements SubProcessor {
                 }
             }
         } catch (Throwable t) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had throw exception: " + t);
-            t.printStackTrace(System.err);
+            source.printError("Group validation processor had thrown the unexpected exception", t);
         }
     }
 
     @Override
-    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void finish(GeneratorSource source) {
         // do nothing
     }
 

@@ -36,14 +36,6 @@ import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.TreesetMultimap;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,7 +49,6 @@ import java.util.TreeSet;
 
 public class StateObjectHandler {
 
-    private final ProcessingEnvironment processingEnv;
     private final Multimap<String, StateObject> args;
     private final Map<String, StateObject> implicits;
     private final Set<StateObject> stateObjects;
@@ -75,8 +66,7 @@ public class StateObjectHandler {
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
-    public StateObjectHandler(ProcessingEnvironment processingEnv) {
-        this.processingEnv = processingEnv;
+    public StateObjectHandler() {
         this.args = new HashMultimap<String, StateObject>();
         this.implicits = new HashMap<String, StateObject>();
         this.stateObjects = new HashSet<StateObject>();
@@ -100,27 +90,27 @@ public class StateObjectHandler {
         return type.substring(type.lastIndexOf(".") + 1);
     }
 
-    public void bindArg(ExecutableElement execMethod, TypeElement type) {
-        State ann = type.getAnnotation(State.class);
+    public void bindArg(MethodInfo mi, ParameterInfo pi) {
+        State ann = pi.getType().getAnnotation(State.class);
         if (ann != null) {
-            bindState(execMethod, type, ann.value(), null);
+            bindState(mi, pi.getType(), ann.value(), null);
         } else {
-            throw new IllegalStateException("The method parameter is not a @State: " + type);
+            throw new IllegalStateException("The method parameter is not a @State: " + pi);
         }
     }
 
-    public void bindImplicit(TypeElement type, String label) {
-        bindImplicit(type, label, Scope.Thread);
+    public void bindImplicit(ClassInfo ci, String label) {
+        bindImplicit(ci, label, Scope.Thread);
     }
 
-    public void bindImplicit(TypeElement type, String label, Scope scope) {
-        State ann = type.getAnnotation(State.class);
-        bindState(null, type, (ann != null) ? ann.value() : scope, label);
+    public void bindImplicit(ClassInfo ci, String label, Scope scope) {
+        State ann = ci.getAnnotation(State.class);
+        bindState(null, ci, (ann != null) ? ann.value() : scope, label);
     }
 
-    private void bindState(ExecutableElement execMethod, TypeElement element, Scope scope, String implicitLabel) {
+    private void bindState(MethodInfo execMethod, ClassInfo ci, Scope scope, String implicitLabel) {
         Integer index;
-        String className = element.getQualifiedName().toString();
+        String className = ci.getQualifiedName();
         switch (scope) {
             case Benchmark: {
                 index = globalIndexByType.get(className);
@@ -157,43 +147,45 @@ public class StateObjectHandler {
         } else {
             String identifier = collapseTypeName(className) + index;
             so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
-            args.put(execMethod.getSimpleName().toString(), so);
+            args.put(execMethod.getName(), so);
         }
 
         // auxiliary result, produce the accessors
-        if (element.getAnnotation(AuxCounters.class) != null) {
+        if (ci.getAnnotation(AuxCounters.class) != null) {
             if (scope != Scope.Thread) {
                 throw new GenerationException("@" + AuxCounters.class.getSimpleName() +
-                        " can only be used with " + Scope.class.getSimpleName() + "." + Scope.Thread + " states.", element);
+                        " can only be used with " + Scope.class.getSimpleName() + "." + Scope.Thread + " states.", ci);
             }
 
-            for (Element sub : element.getEnclosedElements()) {
-                if (sub.getKind() == ElementKind.FIELD && sub.getModifiers().contains(Modifier.PUBLIC)) {
-                    String fieldType = sub.asType().toString();
+            for (FieldInfo sub : ci.getDeclaredFields()) {
+                if (sub.isPublic()) {
+                    String fieldType = sub.getType();
                     if (fieldType.equals("int") || fieldType.equals("long")) {
-                        String name = sub.getSimpleName().toString();
-                        String meth = execMethod.getSimpleName().toString();
+                        String name = sub.getName();
+                        String meth = execMethod.getName();
                         auxNames.put(meth, name);
                         String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name);
                         if (prev != null) {
                             throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
                                 " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
-                                " injected into this method.", element);
+                                " injected into this method.", sub);
                         }
                     }
                 }
+            }
 
-                if (sub.getKind() == ElementKind.METHOD && sub.getModifiers().contains(Modifier.PUBLIC)) {
-                    String returnType = ((ExecutableElement) sub).getReturnType().toString();
+            for (MethodInfo sub : ci.getDeclaredMethods()) {
+                if (sub.isPublic()) {
+                    String returnType = sub.getReturnType();
                     if (returnType.equals("int") || returnType.equals("long")) {
-                        String name = sub.getSimpleName().toString();
-                        String meth = execMethod.getSimpleName().toString();
+                        String name = sub.getName();
+                        String meth = execMethod.getName();
                         auxNames.put(meth, name);
                         String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name + "()");
                         if (prev != null) {
                             throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
                                     " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
-                                    " injected into this method.", element);
+                                    " injected into this method.", sub);
                         }
                     }
                 }
@@ -203,37 +195,32 @@ public class StateObjectHandler {
         stateObjects.add(so);
 
         // walk the type hierarchy up to discover inherited @Params
-        TypeElement walk1 = element;
-        do {
-            for (VariableElement ve : ElementFilter.fieldsIn(walk1.getEnclosedElements())) {
-                if (ve.getAnnotation(Param.class) != null) {
-                    so.addParam(ve);
-                }
+        for (FieldInfo fi : ci.getFields()) {
+            if (fi.getAnnotation(Param.class) != null) {
+                so.addParam(fi);
             }
-        } while ((walk1 = (TypeElement) processingEnv.getTypeUtils().asElement(walk1.getSuperclass())) != null);
+        }
 
-        // walk the type hierarchy up to discover inherited helper methods
-        TypeElement walk2 = element;
-        do {
-            for (ExecutableElement m : ElementFilter.methodsIn(walk2.getEnclosedElements())) {
-                Setup setupAnn = m.getAnnotation(Setup.class);
-                if (setupAnn != null) {
-                    helpersByState.put(so, new HelperMethodInvocation(m.getSimpleName().toString(), so, setupAnn.value(), HelperType.SETUP));
-                }
-
-                TearDown tearDownAnn = m.getAnnotation(TearDown.class);
-                if (tearDownAnn != null) {
-                    helpersByState.put(so, new HelperMethodInvocation(m.getSimpleName().toString(), so, tearDownAnn.value(), HelperType.TEARDOWN));
-                }
+        // put the @State objects helper methods
+        for (MethodInfo mi : ci.getMethods()) {
+            Setup setupAnn = mi.getAnnotation(Setup.class);
+            if (setupAnn != null) {
+                helpersByState.put(so, new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));
             }
-        } while ((walk2 = (TypeElement) processingEnv.getTypeUtils().asElement(walk2.getSuperclass())) != null);
+
+            TearDown tearDownAnn = mi.getAnnotation(TearDown.class);
+            if (tearDownAnn != null) {
+                helpersByState.put(so, new HelperMethodInvocation(mi, so, tearDownAnn.value(), HelperType.TEARDOWN));
+            }
+        }
+
     }
 
-    public String getArgList(Element method) {
+    public String getArgList(MethodInfo methodInfo) {
         StringBuilder sb = new StringBuilder();
 
         int i = 0;
-        for (StateObject so : args.get(method.getSimpleName().toString())) {
+        for (StateObject so : args.get(methodInfo.getName())) {
             if (i != 0) {
                 sb.append(", ");
             }
@@ -243,11 +230,11 @@ public class StateObjectHandler {
         return sb.toString();
     }
 
-    public String getTypeArgList(Element method) {
+    public String getTypeArgList(MethodInfo methodInfo) {
         StringBuilder sb = new StringBuilder();
 
         int i = 0;
-        for (StateObject so : args.get(method.getSimpleName().toString())) {
+        for (StateObject so : args.get(methodInfo.getName())) {
             if (i != 0) {
                 sb.append(", ");
             }
@@ -265,9 +252,9 @@ public class StateObjectHandler {
         return r;
     }
 
-    public Collection<String> getHelperBlock(String method, Level helperLevel, HelperType type) {
+    public Collection<String> getHelperBlock(MethodInfo method, Level helperLevel, HelperType type) {
 
-        Collection<StateObject> states = cons(args.get(method), implicits.values(), getControls());
+        Collection<StateObject> states = cons(args.get(method.getName()), implicits.values(), getControls());
 
         // Look for the offending methods.
         // This will be used to skip the irrelevant blocks for state objects down the stream.
@@ -289,7 +276,7 @@ public class StateObjectHandler {
                 result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : helpersByState.get(so)) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
-                        result.add("    " + so.localIdentifier + "." + mi.name + "();");
+                        result.add("    " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
                 }
                 result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = true;");
@@ -300,7 +287,7 @@ public class StateObjectHandler {
                 result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : helpersByState.get(so)) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        result.add("    " + so.localIdentifier + "." + mi.name + "();");
+                        result.add("    " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
                 }
                 result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = false;");
@@ -321,7 +308,7 @@ public class StateObjectHandler {
                 result.add("    if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : helpersByState.get(so)) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
-                        result.add("        " + so.localIdentifier + "." + mi.name + "();");
+                        result.add("        " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
                 }
                 result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = true;");
@@ -339,7 +326,7 @@ public class StateObjectHandler {
                 result.add("    if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : helpersByState.get(so)) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        result.add("        " + so.localIdentifier + "." + mi.name + "();");
+                        result.add("        " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
                 }
                 result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = false;");
@@ -353,28 +340,28 @@ public class StateObjectHandler {
         return result;
     }
 
-    public Collection<String> getInvocationSetups(Element method) {
-        return getHelperBlock(method.getSimpleName().toString(), Level.Invocation, HelperType.SETUP);
+    public Collection<String> getInvocationSetups(MethodInfo method) {
+        return getHelperBlock(method, Level.Invocation, HelperType.SETUP);
     }
 
-    public Collection<String> getInvocationTearDowns(Element method) {
-        return getHelperBlock(method.getSimpleName().toString(), Level.Invocation, HelperType.TEARDOWN);
+    public Collection<String> getInvocationTearDowns(MethodInfo method) {
+        return getHelperBlock(method, Level.Invocation, HelperType.TEARDOWN);
     }
 
-    public Collection<String> getIterationSetups(Element method) {
-        return getHelperBlock(method.getSimpleName().toString(), Level.Iteration, HelperType.SETUP);
+    public Collection<String> getIterationSetups(MethodInfo method) {
+        return getHelperBlock(method, Level.Iteration, HelperType.SETUP);
     }
 
-    public Collection<String> getIterationTearDowns(Element method) {
-        return getHelperBlock(method.getSimpleName().toString(), Level.Iteration, HelperType.TEARDOWN);
+    public Collection<String> getIterationTearDowns(MethodInfo method) {
+        return getHelperBlock(method, Level.Iteration, HelperType.TEARDOWN);
     }
 
-    public Collection<String> getRunSetups(Element method) {
-        return getHelperBlock(method.getSimpleName().toString(), Level.Trial, HelperType.SETUP);
+    public Collection<String> getRunSetups(MethodInfo method) {
+        return getHelperBlock(method, Level.Trial, HelperType.SETUP);
     }
 
-    public Collection<String> getRunTearDowns(Element method) {
-        return getHelperBlock(method.getSimpleName().toString(), Level.Trial, HelperType.TEARDOWN);
+    public Collection<String> getRunTearDowns(MethodInfo method) {
+        return getHelperBlock(method, Level.Trial, HelperType.TEARDOWN);
     }
 
     public List<String> getStateInitializers() {
@@ -400,7 +387,7 @@ public class StateObjectHandler {
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                result.add("            " + so.fieldIdentifier + "." + hmi.name + "();");
+                result.add("            " + so.fieldIdentifier + "." + hmi.method.getName() + "();");
             }
             result.add("            " + so.fieldIdentifier + ".ready" + Level.Trial + " = true;");
             result.add("        }");
@@ -423,7 +410,7 @@ public class StateObjectHandler {
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                result.add("                val." + hmi.name + "();");
+                result.add("                val." + hmi.method.getName() + "();");
             }
             result.add("                " + "val.ready" + Level.Trial + " = true;");
             result.add("          " + so.fieldIdentifier + " = val;");
@@ -452,7 +439,7 @@ public class StateObjectHandler {
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                result.add("            local." + hmi.name + "();");
+                result.add("            local." + hmi.method.getName() + "();");
             }
             result.add("            " + "local.ready" + Level.Trial + " = true;");
             result.add("            " + so.fieldIdentifier + "_map.put(groupId, val);");
@@ -464,8 +451,8 @@ public class StateObjectHandler {
         return result;
     }
 
-    public Collection<String> getStateDestructors(Element method) {
-        Collection<StateObject> sos = cons(args.get(method.getSimpleName().toString()), implicits.values());
+    public Collection<String> getStateDestructors(MethodInfo method) {
+        Collection<StateObject> sos = cons(args.get(method.getName()), implicits.values());
 
         List<String> result = new ArrayList<String>();
         for (StateObject so : sos) {
@@ -489,9 +476,9 @@ public class StateObjectHandler {
         return result;
     }
 
-    public List<String> getStateGetters(Element method) {
+    public List<String> getStateGetters(MethodInfo method) {
         List<String> result = new ArrayList<String>();
-        for (StateObject so : cons(args.get(method.getSimpleName().toString()), implicits.values(), getControls())) {
+        for (StateObject so : cons(args.get(method.getName()), implicits.values(), getControls())) {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
@@ -562,9 +549,9 @@ public class StateObjectHandler {
     public static void padding(List<String> lines, String suffix) {
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
-            sb.append("    boolean jmh_b3_pad_").append(p);
+            sb.append("    boolean jmh_").append(suffix).append("_pad_").append(p);
             for (int q = 1; q < 16; q++) {
-                sb.append(", jmh_b3_pad_").append(p).append("_").append(q);
+                sb.append(", jmh_").append(suffix).append("_pad_").append(p).append("_").append(q);
             }
             sb.append(";");
             lines.add(sb.toString());
@@ -606,12 +593,12 @@ public class StateObjectHandler {
         return s;
     }
 
-    public Collection<String> getAuxResultNames(Element method) {
-        return auxNames.get(method.getSimpleName().toString());
+    public Collection<String> getAuxResultNames(MethodInfo method) {
+        return auxNames.get(method.getName());
     }
 
-    public String getAuxResultAccessor(Element method, String name) {
-        return auxAccessors.get(method.getSimpleName().toString() + name);
+    public String getAuxResultAccessor(MethodInfo method, String name) {
+        return auxAccessors.get(method.getName() + name);
     }
 
 }

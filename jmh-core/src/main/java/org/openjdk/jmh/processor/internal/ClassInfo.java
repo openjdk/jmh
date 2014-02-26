@@ -24,16 +24,56 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-public class GenerationException extends RuntimeException {
+import java.lang.annotation.Annotation;
+import java.util.Collection;
 
-    private final MetadataInfo element;
+/**
+ * Class metadata.
+ */
+public interface ClassInfo extends MetadataInfo {
 
-    public GenerationException(String message, MetadataInfo element) {
-        super(message);
-        this.element = element;
-    }
+    /**
+     * Returns the fully qualified package name for class.
+     * Example:
+     *   f(java.util.HashMap) = java.util
+     *
+     * @return package name
+     */
+    String getPackageName();
 
-    public MetadataInfo getElement() {
-        return element;
-    }
+    /**
+     * Returns the marshalling
+     * @return
+     */
+    String getNestedName();
+
+    String getQualifiedName();
+
+    Collection<FieldInfo> getDeclaredFields();
+
+    Collection<FieldInfo> getFields();
+
+    Collection<MethodInfo> getConstructors();
+
+    Collection<MethodInfo> getDeclaredMethods();
+
+    Collection<MethodInfo> getMethods();
+
+    Collection<ClassInfo> getSuperclasses();
+
+    <T extends Annotation> T getAnnotation(Class<T> annClass);
+
+    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
+
+    boolean isNested();
+
+    boolean isAbstract();
+
+    boolean isPublic();
+
+    boolean isStatic();
+
+    boolean isStrictFP();
+
 }
+

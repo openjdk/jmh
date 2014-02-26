@@ -22,18 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.processor.internal;
+package org.openjdk.jmh.processor.internal.annotations;
 
-public class GenerationException extends RuntimeException {
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 
-    private final MetadataInfo element;
+public class APMetadataInfo {
 
-    public GenerationException(String message, MetadataInfo element) {
-        super(message);
+    protected final ProcessingEnvironment processEnv;
+    private final Element element;
+
+    public APMetadataInfo(ProcessingEnvironment processEnv, Element element) {
+        this.processEnv = processEnv;
         this.element = element;
     }
 
-    public MetadataInfo getElement() {
+    public Element getElement() {
         return element;
     }
 }

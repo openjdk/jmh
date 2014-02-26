@@ -27,13 +27,6 @@ package org.openjdk.jmh.processor.internal;
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.runner.CompilerHints;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic.Kind;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -42,23 +35,35 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class CompilerControlProcessor implements SubProcessor {
+public class CompilerControlPlugin implements Plugin {
 
     private final List<String> lines = new ArrayList<String>();
-    private final Set<Element> defaultForceInline = new TreeSet<Element>(new Comparator<Element>() {
+
+    private final Set<MethodInfo> defaultForceInlineMethods = new TreeSet<MethodInfo>(new Comparator<MethodInfo>() {
         @Override
-        public int compare(Element o1, Element o2) {
-            return getName(o1).compareTo(getName(o2));
+        public int compare(MethodInfo o1, MethodInfo o2) {
+            return o1.getQualifiedName().compareTo(o2.getQualifiedName());
         }
     });
 
-    public void defaultForceInline(Element element) {
-        defaultForceInline.add(element);
+    private final Set<ClassInfo> defaultForceInlineClasses = new TreeSet<ClassInfo>(new Comparator<ClassInfo>() {
+        @Override
+        public int compare(ClassInfo o1, ClassInfo o2) {
+            return o1.getQualifiedName().compareTo(o2.getQualifiedName());
+        }
+    });
+
+    public void defaultForceInline(MethodInfo methodInfo) {
+        defaultForceInlineMethods.add(methodInfo);
     }
 
-    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void defaultForceInline(ClassInfo classInfo) {
+        defaultForceInlineClasses.add(classInfo);
+    }
+
+    public void process(GeneratorSource source) {
         try {
-            for (Element element : roundEnv.getElementsAnnotatedWith(CompilerControl.class)) {
+            for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, CompilerControl.class)) {
                 CompilerControl ann = element.getAnnotation(CompilerControl.class);
                 if (ann == null) {
                     throw new IllegalStateException("No annotation");
@@ -68,44 +73,51 @@ public class CompilerControlProcessor implements SubProcessor {
                 lines.add(command.command() + "," + getName(element));
             }
 
-            for (Element element : defaultForceInline) {
+            for (MethodInfo element : defaultForceInlineMethods) {
+                if (element.getAnnotation(CompilerControl.class) != null) continue;
+                lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
+            }
+
+            for (ClassInfo element : BenchmarkGeneratorUtils.getClassesAnnotatedWith(source, CompilerControl.class)) {
+                CompilerControl ann = element.getAnnotation(CompilerControl.class);
+                if (ann == null) {
+                    throw new IllegalStateException("No annotation");
+                }
+
+                CompilerControl.Mode command = ann.value();
+                lines.add(command.command() + "," + getName(element));
+            }
+
+            for (ClassInfo element : defaultForceInlineClasses) {
                 if (element.getAnnotation(CompilerControl.class) != null) continue;
                 lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
             }
         } catch (Throwable t) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had thrown exception: " + t);
-            t.printStackTrace(System.err);
+            source.printError("Compiler control processor had thrown the unexpected exception", t);
         }
     }
 
     @Override
-    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void finish(GeneratorSource source) {
         try {
-            FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
-                    CompilerHints.LIST.substring(1));
-            PrintWriter writer = new PrintWriter(file.openWriter());
+            PrintWriter writer = new PrintWriter(source.newResource(CompilerHints.LIST.substring(1)));
             for (String line : lines) {
                 writer.println(line);
             }
             writer.close();
         } catch (IOException ex) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing compiler hint list " + ex);
+            source.printError("Error writing compiler hint list ", ex);
         } catch (Throwable t) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had thrown exception: " + t);
-            t.printStackTrace(System.err);
+            source.printError("Compiler control processor had thrown the unexpected exception", t);
         }
     }
 
-    private static String getName(Element element) {
-        switch (element.getKind()) {
-            case CLASS:
-                return ((TypeElement)element).getQualifiedName().toString().replaceAll("\\.", "/") + ".*";
-            case METHOD:
-                return ((TypeElement)element.getEnclosingElement()).getQualifiedName().toString().replaceAll("\\.", "/") + "." + element.getSimpleName().toString();
-            default:
-                throw new GenerationException("@" + CompilerControl.class.getSimpleName() + " annotation is placed within " +
-                                "unexpected target", element);
-        }
+    private static String getName(MethodInfo mi) {
+       return mi.getOwner().getQualifiedName().replaceAll("\\.", "/") + "." + mi.getName();
+    }
+
+    private static String getName(ClassInfo ci) {
+      return ci.getQualifiedName().replaceAll("\\.", "/") + ".*";
     }
 
 }

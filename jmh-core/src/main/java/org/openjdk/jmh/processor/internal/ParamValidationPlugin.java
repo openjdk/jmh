@@ -27,57 +27,42 @@ package org.openjdk.jmh.processor.internal;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.State;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
-import javax.tools.Diagnostic.Kind;
-
-public class ParamValidationProcessor implements SubProcessor {
+public class ParamValidationPlugin implements Plugin {
 
     @Override
-    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void process(GeneratorSource source) {
         try {
-            for (Element element : roundEnv.getElementsAnnotatedWith(Param.class)) {
-                if (element.getKind() != ElementKind.FIELD) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
-                            "@" + Param.class.getSimpleName() + " annotation is acceptable on fields only.",
-                            element
-                    );
-                }
-
-                if (!element.getModifiers().contains(Modifier.PUBLIC)) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
+            for (FieldInfo element : BenchmarkGeneratorUtils.getFieldsAnnotatedWith(source, Param.class)) {
+                if (!element.isPublic()) {
+                    source.printError(
                             "@" + Param.class.getSimpleName() + " annotation is not acceptable on non-public field.",
                             element
                     );
                 }
 
-                if (element.getModifiers().contains(Modifier.STATIC)) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
+                if (element.isStatic()) {
+                    source.printError(
                             "@" + Param.class.getSimpleName() + " annotation is not acceptable on static fields.",
                             element
                     );
                 }
 
-                if (AnnUtils.getAnnotationRecursive(element, State.class) == null) {
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
+                if (element.getOwner().getAnnotationRecursive(State.class) == null) {
+                    source.printError(
                             "@" + Param.class.getSimpleName() + " annotation should be placed in @" + State.class.getSimpleName() +
                                     "-annotated class.",
                             element
                     );
                 }
 
-                VariableElement ve = (VariableElement) element;
+
                 String[] values = element.getAnnotation(Param.class).value();
 
                 if (values.length >= 1 && !values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
-                    String type = ve.asType().toString();
+                    String type = element.getType();
                     for (String val : values) {
                         if (!isConforming(val, type)) {
-                            processingEnv.getMessager().printMessage(Kind.ERROR,
+                            source.printError(
                                     "Some @" + Param.class.getSimpleName() + " values can not be converted to target type: " +
                                     "\"" + val + "\" can not be converted to " + type,
                                     element
@@ -88,8 +73,7 @@ public class ParamValidationProcessor implements SubProcessor {
 
             }
         } catch (Throwable t) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had throw exception: " + t);
-            t.printStackTrace(System.err);
+            source.printError("Param validation processor had thrown the unexpected exception.", t);
         }
     }
 
@@ -149,7 +133,7 @@ public class ParamValidationProcessor implements SubProcessor {
     }
 
     @Override
-    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void finish(GeneratorSource source) {
         // do nothing
     }
 

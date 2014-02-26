@@ -35,7 +35,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
-import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +54,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
     private final Map<String, String[]> params;
     private boolean strictFP;
 
-    MethodGroup(String name) {
+    public MethodGroup(String name) {
         this.name = name;
         this.methods = new TreeSet<MethodInvocation>();
         this.modes = EnumSet.noneOf(Mode.class);
@@ -84,14 +83,14 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return name.compareTo(o.name);
     }
 
-    public void addMethod(Element method, int threads) {
+    public void addMethod(MethodInfo method, int threads) {
         methods.add(new MethodInvocation(method, threads));
     }
 
-    public Collection<Element> methods() {
-        Collection<Element> result = new ArrayList<Element>();
+    public Collection<MethodInfo> methods() {
+        Collection<MethodInfo> result = new ArrayList<MethodInfo>();
         for (MethodInvocation m : methods) {
-            result.add(m.element);
+            result.add(m.method);
         }
         return result;
     }
@@ -242,10 +241,10 @@ public class MethodGroup implements Comparable<MethodGroup> {
     private <T extends Annotation> T getFinal(Class<T> klass) {
         T finalAnn = null;
         for (MethodInvocation mi : methods) {
-            T ann = AnnUtils.getAnnotationRecursive(mi.element, klass);
+            T ann = mi.method.getAnnotationRecursive(klass);
             if (ann != null && finalAnn != null) {
                 if (!finalAnn.equals(ann)) {
-                    throw new GenerationException("Colliding annotations: " + ann + " vs. " + finalAnn, mi.element);
+                    throw new GenerationException("Colliding annotations: " + ann + " vs. " + finalAnn, mi.method);
                 }
             }
             finalAnn = ann;

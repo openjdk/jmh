@@ -26,7 +26,6 @@ package org.openjdk.jmh.processor.internal;
 
 import org.openjdk.jmh.annotations.Scope;
 
-import javax.lang.model.element.VariableElement;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
@@ -92,9 +91,9 @@ public class StateObject {
         return params.get(name);
     }
 
-    public void addParam(VariableElement ve) {
-        String type = ve.asType().toString();
-        String name = ve.getSimpleName().toString();
+    public void addParam(FieldInfo fieldInfo) {
+        String type = fieldInfo.getType();
+        String name = fieldInfo.getName();
         if (type.equalsIgnoreCase("java.lang.String")) {
             params.put(name, "control.getParam(\"" + name + "\")");
             return;

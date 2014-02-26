@@ -22,18 +22,31 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.processor.internal;
+package org.openjdk.jmh.processor.internal.annotations;
 
-public class GenerationException extends RuntimeException {
+import org.openjdk.jmh.processor.internal.ClassInfo;
+import org.openjdk.jmh.processor.internal.ParameterInfo;
 
-    private final MetadataInfo element;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
-    public GenerationException(String message, MetadataInfo element) {
-        super(message);
-        this.element = element;
+public class APParameterInfo extends APMetadataInfo implements ParameterInfo {
+    private final VariableElement ve;
+    private final TypeElement stateType;
+
+    public APParameterInfo(ProcessingEnvironment processEnv, VariableElement ve) {
+        super(processEnv, ve);
+        this.ve = ve;
+        this.stateType = (TypeElement) processEnv.getTypeUtils().asElement(ve.asType());
     }
 
-    public MetadataInfo getElement() {
-        return element;
+    @Override
+    public ClassInfo getType() {
+        return new APClassInfo(processEnv, stateType);
+    }
+
+    public String toString() {
+        return getType() + " " + ve.getSimpleName();
     }
 }

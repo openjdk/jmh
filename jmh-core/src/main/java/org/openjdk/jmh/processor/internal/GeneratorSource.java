@@ -24,16 +24,23 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-public class GenerationException extends RuntimeException {
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
 
-    private final MetadataInfo element;
+public interface GeneratorSource {
 
-    public GenerationException(String message, MetadataInfo element) {
-        super(message);
-        this.element = element;
-    }
+    Collection<ClassInfo> getClasses();
 
-    public MetadataInfo getElement() {
-        return element;
-    }
+    ClassInfo resolveClass(String className);
+
+    Writer newResource(String path) throws IOException;
+
+    Writer newFile(String objectName) throws IOException;
+
+    void printError(String message);
+
+    void printError(String message, MetadataInfo element);
+
+    void printError(String message, Throwable throwable);
 }

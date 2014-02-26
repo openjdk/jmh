@@ -24,19 +24,17 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-import javax.lang.model.element.Element;
-
 public class MethodInvocation implements Comparable<MethodInvocation> {
-    public final Element element;
+    public final MethodInfo method;
     public final int threads;
 
-    public MethodInvocation(Element element, int threads) {
-        this.element = element;
+    public MethodInvocation(MethodInfo method, int threads) {
+        this.method = method;
         this.threads = threads;
     }
 
     @Override
     public int compareTo(MethodInvocation o) {
-        return element.getSimpleName().toString().compareTo(o.element.getSimpleName().toString());
+        return method.compareTo(o.method);
     }
 }

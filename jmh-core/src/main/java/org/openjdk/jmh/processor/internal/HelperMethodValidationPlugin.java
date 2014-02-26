@@ -28,39 +28,33 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
-import javax.tools.Diagnostic.Kind;
-
-public class HelperMethodValidationProcessor implements SubProcessor {
+public class HelperMethodValidationPlugin implements Plugin {
 
     @Override
-    public void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void process(GeneratorSource source) {
         try {
-            for (Element element : roundEnv.getElementsAnnotatedWith(Setup.class)) {
+            for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, Setup.class)) {
                 // OK to have these annotation for @State objects
-                if (element.getEnclosingElement().getAnnotation(State.class) != null) continue;
+                if (element.getOwner().getAnnotation(State.class) != null) continue;
 
                 // Abstract classes are not instantiated, assume OK
-                if (element.getEnclosingElement().getModifiers().contains(Modifier.ABSTRACT)) continue;
+                if (element.getOwner().isAbstract()) continue;
 
-                    processingEnv.getMessager().printMessage(Kind.ERROR,
-                            "@" + Setup.class.getSimpleName() + " annotation is placed within " +
-                                    "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                    "This has no behavioral effect, and prohibited.",
-                            element);
+                source.printError(
+                        "@" + Setup.class.getSimpleName() + " annotation is placed within " +
+                                "the class not having @" + State.class.getSimpleName() + " annotation. " +
+                                "This has no behavioral effect, and prohibited.",
+                        element);
             }
 
-            for (Element element : roundEnv.getElementsAnnotatedWith(TearDown.class)) {
+            for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, TearDown.class)) {
                 // OK to have these annotation for @State objects
-                if (element.getEnclosingElement().getAnnotation(State.class) != null) continue;
+                if (element.getOwner().getAnnotation(State.class) != null) continue;
 
                 // Abstract classes are not instantiated, assume OK
-                if (element.getEnclosingElement().getModifiers().contains(Modifier.ABSTRACT)) continue;
+                if (element.getOwner().isAbstract()) continue;
 
-                processingEnv.getMessager().printMessage(Kind.ERROR,
+                source.printError(
                             "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
                                     "the class not having @" + State.class.getSimpleName() + " annotation. " +
                                     "This can be futile if no @State-bearing subclass is used.",
@@ -68,13 +62,12 @@ public class HelperMethodValidationProcessor implements SubProcessor {
             }
 
         } catch (Throwable t) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "Annotation processor had throw exception: " + t);
-            t.printStackTrace(System.err);
+            source.printError("Helper method validation processor had thrown the unexpected exception.", t);
         }
     }
 
     @Override
-    public void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public void finish(GeneratorSource source) {
         // do nothing
     }
 

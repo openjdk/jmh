@@ -24,16 +24,26 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-public class GenerationException extends RuntimeException {
+import java.lang.annotation.Annotation;
+import java.util.Collection;
 
-    private final MetadataInfo element;
+public interface MethodInfo extends Comparable<MethodInfo>, MetadataInfo {
 
-    public GenerationException(String message, MetadataInfo element) {
-        super(message);
-        this.element = element;
-    }
+    ClassInfo getOwner();
 
-    public MetadataInfo getElement() {
-        return element;
-    }
+    String getName();
+    String getQualifiedName();
+    String getReturnType();
+
+    Collection<ParameterInfo> getParameters();
+
+    <T extends Annotation> T getAnnotation(Class<T> annClass);
+    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
+
+    boolean isPublic();
+    boolean isAbstract();
+    boolean isSynchronized();
+    boolean isStrictFP();
+
+
 }

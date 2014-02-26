@@ -24,13 +24,5 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-
-public interface SubProcessor {
-
-    void process(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv);
-
-    void finish(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv);
-
+public interface MetadataInfo {
 }

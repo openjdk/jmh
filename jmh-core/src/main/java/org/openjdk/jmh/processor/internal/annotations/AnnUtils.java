@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.processor.internal;
+package org.openjdk.jmh.processor.internal.annotations;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

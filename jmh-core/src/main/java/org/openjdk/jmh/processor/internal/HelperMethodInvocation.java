@@ -27,13 +27,13 @@ package org.openjdk.jmh.processor.internal;
 import org.openjdk.jmh.annotations.Level;
 
 public class HelperMethodInvocation implements Comparable<HelperMethodInvocation> {
-    public final String name;
+    public final MethodInfo method;
     public final StateObject state;
     public final Level helperLevel;
     public final HelperType type;
 
-    HelperMethodInvocation(String name, StateObject state, Level helperLevel, HelperType type) {
-        this.name = name;
+    public HelperMethodInvocation(MethodInfo method, StateObject state, Level helperLevel, HelperType type) {
+        this.method = method;
         this.state = state;
         this.helperLevel = helperLevel;
         this.type = type;
@@ -47,7 +47,7 @@ public class HelperMethodInvocation implements Comparable<HelperMethodInvocation
         HelperMethodInvocation that = (HelperMethodInvocation) o;
 
         if (helperLevel != that.helperLevel) return false;
-        if (!name.equals(that.name)) return false;
+        if (!method.equals(that.method)) return false;
         if (!state.equals(that.state)) return false;
         if (type != that.type) return false;
 
@@ -56,7 +56,7 @@ public class HelperMethodInvocation implements Comparable<HelperMethodInvocation
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
+        int result = method.hashCode();
         result = 31 * result + state.hashCode();
         result = 31 * result + helperLevel.hashCode();
         result = 31 * result + type.hashCode();
@@ -65,6 +65,6 @@ public class HelperMethodInvocation implements Comparable<HelperMethodInvocation
 
     @Override
     public int compareTo(HelperMethodInvocation o) {
-        return name.compareTo(o.name);
+        return method.compareTo(o.method);
     }
 }

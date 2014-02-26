@@ -24,16 +24,6 @@
  */
 package org.openjdk.jmh.processor.internal;
 
-public class GenerationException extends RuntimeException {
-
-    private final MetadataInfo element;
-
-    public GenerationException(String message, MetadataInfo element) {
-        super(message);
-        this.element = element;
-    }
-
-    public MetadataInfo getElement() {
-        return element;
-    }
+public interface ParameterInfo extends MetadataInfo {
+    ClassInfo getType();
 }
