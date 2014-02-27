@@ -64,6 +64,7 @@ import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 
 import javax.annotation.Generated;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.IncompleteAnnotationException;
@@ -504,9 +505,9 @@ public class BenchmarkGenerator {
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
             sb.append(ident(1));
-            sb.append("boolean jmh_pad_").append(p);
+            sb.append("private boolean p").append(p);
             for (int q = 1; q < 16; q++) {
-                sb.append(", jmh_pad_").append(p).append("_").append(q);
+                sb.append(", p").append(p).append("_").append(q);
             }
             sb.append(";");
             writer.println(sb.toString());

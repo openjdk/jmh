@@ -575,9 +575,9 @@ public class StateObjectHandler {
     public static void padding(List<String> lines, String suffix) {
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
-            sb.append("    boolean jmh_").append(suffix).append("_pad_").append(p);
+            sb.append("    private boolean p").append(suffix).append("_").append(p);
             for (int q = 1; q < 16; q++) {
-                sb.append(", jmh_").append(suffix).append("_pad_").append(p).append("_").append(q);
+                sb.append(", p").append(suffix).append("_").append(p).append("_").append(q);
             }
             sb.append(";");
             lines.add(sb.toString());

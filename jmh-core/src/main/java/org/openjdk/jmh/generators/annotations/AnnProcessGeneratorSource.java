@@ -36,6 +36,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
