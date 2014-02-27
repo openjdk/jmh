@@ -22,43 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.bytecode;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
+import org.openjdk.jmh.generators.source.ClassInfo;
+import org.openjdk.jmh.generators.source.ParameterInfo;
 
-/**
- * Class metadata.
- */
-public interface ClassInfo extends MetadataInfo {
+public class ASMParameterInfo implements ParameterInfo {
 
-    String getPackageName();
+    private final ClassInfo ci;
 
-    String getNestedName();
+    public ASMParameterInfo(ClassInfo ci) {
+        this.ci = ci;
+    }
 
-    String getQualifiedName();
-
-    Collection<FieldInfo> getDeclaredFields();
-
-    Collection<FieldInfo> getFields();
-
-    Collection<MethodInfo> getConstructors();
-
-    Collection<MethodInfo> getDeclaredMethods();
-
-    Collection<MethodInfo> getMethods();
-
-    Collection<ClassInfo> getSuperclasses();
-
-    <T extends Annotation> T getAnnotation(Class<T> annClass);
-
-    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
-
-    boolean isAbstract();
-
-    boolean isPublic();
-
-    boolean isStrictFP();
-
+    @Override
+    public ClassInfo getType() {
+        return ci;
+    }
 }
-

@@ -22,68 +22,46 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.annotations;
+package org.openjdk.jmh.generators.reflective;
 
 import org.openjdk.jmh.generators.source.ClassInfo;
 import org.openjdk.jmh.generators.source.FieldInfo;
 import org.openjdk.jmh.generators.source.MethodInfo;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-public class APClassInfo extends APMetadataInfo implements ClassInfo {
+public class ReflectiveClassInfo implements ClassInfo {
+    private final Class<?> klass;
 
-    private final TypeElement el;
-
-    public APClassInfo(ProcessingEnvironment processEnv, TypeElement element) {
-        super(processEnv, element);
-        this.el = element;
+    public ReflectiveClassInfo(Class<?> klass) {
+        this.klass = klass;
     }
 
     @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        return el.getAnnotation(annClass);
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
-        return AnnUtils.getAnnotationRecursive(el, annClass);
-    }
-
-    @Override
-    public Collection<MethodInfo> getConstructors() {
-        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
-        for (ExecutableElement e : ElementFilter.constructorsIn(el.getEnclosedElements())) {
-            mis.add(new APMethodInfo(processEnv, this, e));
-        }
-        return mis;
+    public String getPackageName() {
+        return klass.getPackage().getName();
     }
 
     @Override
     public String getNestedName() {
-        return AnnUtils.getNestedName(el);
+        // FIXME
+        return getQualifiedName();
     }
 
     @Override
     public String getQualifiedName() {
-        return el.getQualifiedName().toString();
+        return klass.getCanonicalName();
     }
 
     @Override
     public Collection<FieldInfo> getDeclaredFields() {
-        List<FieldInfo> ls = new ArrayList<FieldInfo>();
-        for (VariableElement e : ElementFilter.fieldsIn(el.getEnclosedElements())) {
-            ls.add(new APFieldInfo(processEnv, e));
-        }
-        return ls;
+        // FIXME
+        return Collections.emptyList();
     }
 
     @Override
@@ -97,12 +75,15 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
+    public Collection<MethodInfo> getConstructors() {
+        // FIXME
+        return Collections.emptyList();
+    }
+
+    @Override
     public Collection<MethodInfo> getDeclaredMethods() {
-        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
-        for (ExecutableElement e : ElementFilter.methodsIn(el.getEnclosedElements())) {
-            mis.add(new APMethodInfo(processEnv, this, e));
-        }
-        return mis;
+        // FIXME
+        return Collections.emptyList();
     }
 
     @Override
@@ -116,37 +97,34 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public String getPackageName() {
-        return AnnUtils.getPackageName(el);
+    public Collection<ClassInfo> getSuperclasses() {
+        // FIXME
+        return Collections.emptyList();
     }
 
     @Override
-    public Collection<ClassInfo> getSuperclasses() {
-        List<ClassInfo> list = new ArrayList<ClassInfo>();
-        TypeElement walk = el;
-        while ((walk = (TypeElement) processEnv.getTypeUtils().asElement(walk.getSuperclass())) != null) {
-            list.add(new APClassInfo(processEnv, walk));
-        }
-        return list;
+    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
+        return klass.getAnnotation(annClass);
+    }
+
+    @Override
+    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
+        // TODO: FIXME
+        return getAnnotation(annClass);
     }
 
     @Override
     public boolean isAbstract() {
-        return el.getModifiers().contains(Modifier.ABSTRACT);
+        return Modifier.isAbstract(klass.getModifiers());
     }
 
     @Override
     public boolean isPublic() {
-        return el.getModifiers().contains(Modifier.PUBLIC);
+        return Modifier.isPublic(klass.getModifiers());
     }
 
     @Override
     public boolean isStrictFP() {
-        return el.getModifiers().contains(Modifier.STRICTFP);
+        return Modifier.isStrict(klass.getModifiers());
     }
-
-    public String toString() {
-        return getQualifiedName();
-    }
-
 }

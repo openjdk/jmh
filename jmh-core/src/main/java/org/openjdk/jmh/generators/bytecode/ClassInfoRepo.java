@@ -22,43 +22,34 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.bytecode;
 
-import java.lang.annotation.Annotation;
+import org.objectweb.asm.Type;
+import org.openjdk.jmh.generators.source.ClassInfo;
+
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Class metadata.
- */
-public interface ClassInfo extends MetadataInfo {
+public class ClassInfoRepo {
 
-    String getPackageName();
+    private final Map<Type, ClassInfo> map = new HashMap<Type, ClassInfo>();
 
-    String getNestedName();
+    public ClassInfo get(String desc) {
+        Type type = Type.getType(desc);
+        return get(type);
+    }
 
-    String getQualifiedName();
+    public ClassInfo get(Type type) {
+        return map.get(type);
+    }
 
-    Collection<FieldInfo> getDeclaredFields();
+    public void put(String desc, ClassInfo info) {
+        Type type = Type.getType(desc);
+        map.put(type, info);
+    }
 
-    Collection<FieldInfo> getFields();
-
-    Collection<MethodInfo> getConstructors();
-
-    Collection<MethodInfo> getDeclaredMethods();
-
-    Collection<MethodInfo> getMethods();
-
-    Collection<ClassInfo> getSuperclasses();
-
-    <T extends Annotation> T getAnnotation(Class<T> annClass);
-
-    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
-
-    boolean isAbstract();
-
-    boolean isPublic();
-
-    boolean isStrictFP();
-
+    public Collection<ClassInfo> getInfos() {
+        return map.values();
+    }
 }
-

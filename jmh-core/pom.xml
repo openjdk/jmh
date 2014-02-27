@@ -67,6 +67,11 @@ questions.
             <artifactId>commons-math3</artifactId>
             <version>3.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>4.2</version>
+        </dependency>
     </dependencies>
 
     <prerequisites>
@@ -113,7 +118,7 @@ questions.
                         <configuration>
                             <header>file:///${project.basedir}/../src/license/gpl_cpe/header.txt</header>
                             <skipExistingHeaders>false</skipExistingHeaders>
-                            <strictCheck>true</strictCheck>
+                            <strictCheck>${project.bu}</strictCheck>
                             <mapping>
                                 <java>PHP</java>
                             </mapping>

@@ -248,12 +248,6 @@ public class BenchmarkGenerator {
                         " annotation only supports public classes.", state);
             }
 
-            if (state.isNested() && !state.isStatic()) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation does not support inner classes, make sure the class is nested (static).",
-                        state);
-            }
-
             boolean hasDefaultConstructor = false;
             for (MethodInfo constructor : state.getConstructors()) {
                 hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
@@ -261,7 +255,8 @@ public class BenchmarkGenerator {
 
             if (!hasDefaultConstructor) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation can only be applied to the classes having the default public constructor.",
+                        " annotation can only be applied to the classes having the default public constructor." +
+                        " Make sure the class is nested (static).",
                         state);
             }
         }

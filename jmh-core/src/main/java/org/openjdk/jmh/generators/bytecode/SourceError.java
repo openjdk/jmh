@@ -22,43 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.bytecode;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
+public class SourceError {
 
-/**
- * Class metadata.
- */
-public interface ClassInfo extends MetadataInfo {
+    private final String message;
 
-    String getPackageName();
+    public SourceError(String message) {
+        this.message = message;
+    }
 
-    String getNestedName();
+    public String getMessage() {
+        return message;
+    }
 
-    String getQualifiedName();
-
-    Collection<FieldInfo> getDeclaredFields();
-
-    Collection<FieldInfo> getFields();
-
-    Collection<MethodInfo> getConstructors();
-
-    Collection<MethodInfo> getDeclaredMethods();
-
-    Collection<MethodInfo> getMethods();
-
-    Collection<ClassInfo> getSuperclasses();
-
-    <T extends Annotation> T getAnnotation(Class<T> annClass);
-
-    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
-
-    boolean isAbstract();
-
-    boolean isPublic();
-
-    boolean isStrictFP();
-
+    @Override
+    public String toString() {
+        return message;
+    }
 }
-
