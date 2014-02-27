@@ -26,18 +26,24 @@ package org.openjdk.jmh.generators.bytecode;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
+import org.openjdk.jmh.util.internal.HashMultimap;
+import org.openjdk.jmh.util.internal.Multimap;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
     private final Map<String, Object> values;
+    private final Multimap<String, String> valuesArray;
 
     public AnnHandler(AnnotationVisitor annotationVisitor) {
         super(Opcodes.ASM4, annotationVisitor);
         this.values = new HashMap<String, Object>();
+        this.valuesArray = new HashMultimap<String, String>();
     }
 
     @Override
@@ -45,17 +51,27 @@ public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
         String key = method.getName();
         Class<?> returnType = method.getReturnType();
 
-        Object value = values.get(key);
-        if (value == null) {
-            value = method.getDefaultValue();
-        }
+        // FIXME: Better type handling
 
-        // FIXME: Types
-        if (returnType.isEnum() && (value instanceof String)) {
-            Method m = returnType.getMethod("valueOf", String.class);
-            return m.invoke(null, value);
+        if (returnType.isArray()) {
+            String[] strings = valuesArray.get(key).toArray(new String[0]);
+            if (strings.length == 0) {
+                strings = (String[]) method.getDefaultValue();
+            }
+
+            return strings;
+        } else {
+            Object value = values.get(key);
+            if (value == null) {
+                value = method.getDefaultValue();
+            }
+
+            if (returnType.isEnum() && (value instanceof String)) {
+                Method m = returnType.getMethod("valueOf", String.class);
+                return m.invoke(null, value);
+            }
+            return value;
         }
-        return value;
     }
 
     @Override
@@ -72,6 +88,18 @@ public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
 
     @Override
     public AnnotationVisitor visitArray(final String name) {
-        throw new UnsupportedOperationException("This processor does not support annotations with array arguments yet.");
+        return new AnnotationVisitor(Opcodes.ASM4, super.visitArray(name)) {
+            @Override
+            public void visitEnum(String n, String desc, String value) {
+                valuesArray.put(name, value);
+                super.visitEnum(n, desc, value);
+            }
+
+            @Override
+            public void visit(String n, Object value) {
+                valuesArray.put(name, (String)value);
+                super.visit(n, value);
+            }
+        };
     }
 }
