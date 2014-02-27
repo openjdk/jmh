@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 /**
  * Marks the configurable parameter in the benchmark.
  * <p/>
- * {@link Param} fields should be public non-final instance fields,
+ * {@link Param} fields should be non-final instance fields,
  * and should only reside in in {@link State} classes. JMH will inject
  * the value into the annotated field before any {@link Setup} method
  * is called. It is *not* guaranteed the field value would be accessible

@@ -389,8 +389,14 @@ public class StateObjectHandler {
             result.add("            " + so.fieldIdentifier + " = val;");
             result.add("        }");
             result.add("        if (!" + so.fieldIdentifier + ".ready" + Level.Trial + ") {");
+            if (!so.getParamsLabels().isEmpty()) {
+                result.add("            Field f;");
+                result.add("            Class c = " + so.userType + ".class;");
+            }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            " + so.fieldIdentifier + "." + paramName + " = " + so.getParamAccessor(paramName) + ";");
+                result.add("            f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f.setAccessible(true);");
+                result.add("            f.set(" + so.fieldIdentifier + ", " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
@@ -412,8 +418,14 @@ public class StateObjectHandler {
             result.add("");
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val) throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
+            if (!so.getParamsLabels().isEmpty()) {
+                result.add("            Field f;");
+                result.add("            Class c = " + so.userType + ".class;");
+            }
             for (String paramName : so.getParamsLabels()) {
-                result.add("                val." + paramName + " = " + so.getParamAccessor(paramName) + ";");
+                result.add("            f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f.setAccessible(true);");
+                result.add("            f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
@@ -441,8 +453,14 @@ public class StateObjectHandler {
             result.add("            local = val;");
             result.add("        }");
             result.add("        if (!local.ready" + Level.Trial + ") {");
+            if (!so.getParamsLabels().isEmpty()) {
+                result.add("            Field f;");
+                result.add("            Class c = " + so.userType + ".class;");
+            }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            local." + paramName + " = " + so.getParamAccessor(paramName) + ";");
+                result.add("            f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f.setAccessible(true);");
+                result.add("            f.set(local, " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;

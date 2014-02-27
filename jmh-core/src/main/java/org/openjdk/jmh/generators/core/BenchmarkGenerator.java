@@ -67,6 +67,7 @@ import javax.annotation.Generated;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.IncompleteAnnotationException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -521,7 +522,8 @@ public class BenchmarkGenerator {
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
-                BenchmarkMode.class, RawResults.class, ResultRole.class
+                BenchmarkMode.class, RawResults.class, ResultRole.class,
+                Field.class
         };
 
         for (Class<?> c : imports) {

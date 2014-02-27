@@ -35,13 +35,6 @@ public class ParamValidationPlugin implements Plugin {
     public void process(GeneratorSource source) {
         try {
             for (FieldInfo element : BenchmarkGeneratorUtils.getFieldsAnnotatedWith(source, Param.class)) {
-                if (!element.isPublic()) {
-                    source.printError(
-                            "@" + Param.class.getSimpleName() + " annotation is not acceptable on non-public field.",
-                            element
-                    );
-                }
-
                 if (element.isStatic()) {
                     source.printError(
                             "@" + Param.class.getSimpleName() + " annotation is not acceptable on static fields.",
