@@ -559,7 +559,6 @@ public class BenchmarkGenerator {
     private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadControl threadControl) throws Throwable {");
-        writer.println();
 
         methodProlog(writer, methodGroup);
 
@@ -631,14 +630,14 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
-        writer.println();
-
         writer.println(ident(1) + "}");
+
+        writer.println();
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
             String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
-            writer.println(ident(1) + "public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -730,13 +729,13 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
-        writer.println();
-
         writer.println(ident(1) + "}");
+
+        writer.println();
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            writer.println(ident(1) + "public " + (methodGroup.isStrictFP() ? "strictfp" : "") +  " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") +  " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
                     "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() +
                     prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
@@ -773,7 +772,6 @@ public class BenchmarkGenerator {
     private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadControl threadControl) throws Throwable {");
-        writer.println();
 
         methodProlog(writer, methodGroup);
 
@@ -841,12 +839,13 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
-
         writer.println(ident(1) + "}");
+
+        writer.println();
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            writer.println(ident(1) + "public " + (methodGroup.isStrictFP() ? "strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
             writer.println(ident(2) + "int rndMask = 0;");
@@ -921,8 +920,6 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
-        writer.println();
-
         writer.println(ident(1) + "}");
     }
 
