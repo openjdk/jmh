@@ -14,8 +14,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @goal "generate"
- * @phase "process-sources"
+ * @goal generate
+ * @phase process-sources
  */
 public class JmhMojo extends AbstractMojo {
 
