@@ -419,21 +419,21 @@ public class StateObjectHandler {
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val) throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
             if (!so.getParamsLabels().isEmpty()) {
-                result.add("            Field f;");
-                result.add("            Class c = " + so.userType + ".class;");
+                result.add("        Field f;");
+                result.add("        Class c = " + so.userType + ".class;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = c.getDeclaredField(\"" + paramName + "\");");
-                result.add("            f.setAccessible(true);");
-                result.add("            f.set(val, " + so.getParamAccessor(paramName) + ");");
+                result.add("        f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("        f.setAccessible(true);");
+                result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : helpersByState.get(so)) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                result.add("                val." + hmi.method.getName() + "();");
+                result.add("        val." + hmi.method.getName() + "();");
             }
-            result.add("                " + "val.ready" + Level.Trial + " = true;");
-            result.add("          " + so.fieldIdentifier + " = val;");
+            result.add("        " + "val.ready" + Level.Trial + " = true;");
+            result.add("        " + so.fieldIdentifier + " = val;");
             result.add("    }");
             result.add("    return " + so.fieldIdentifier + ";");
             result.add("}");
