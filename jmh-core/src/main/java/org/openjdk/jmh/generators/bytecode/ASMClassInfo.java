@@ -56,6 +56,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private final Map<String, AnnHandler> annotations = new HashMap<String, AnnHandler>();
     private final ClassInfoRepo classInfos;
     private String superName;
+    private String declaringClass;
 
     public ASMClassInfo(ClassInfoRepo classInfos) {
         super(Opcodes.ASM4);
@@ -156,9 +157,18 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
+    public void visitOuterClass(String owner, String name, String desc) {
+        declaringClass = name;
+        super.visitOuterClass(owner, name, desc);
+    }
+
+    @Override
     public ClassInfo getEnclosingClass() {
-        // TODO: FIXME
-        return null;
+        if (declaringClass != null) {
+            return classInfos.get(declaringClass);
+        } else {
+            return null;
+        }
     }
 
     @Override
