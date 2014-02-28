@@ -68,14 +68,8 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public String getNestedName() {
-        String name = "";
-        Element walk = el;
-        while (walk.getKind() != ElementKind.PACKAGE) {
-            name = walk.getSimpleName().toString() + (name.isEmpty() ? "" : "_" + name);
-            walk = walk.getEnclosingElement();
-        }
-        return name.substring(0, name.length());
+    public String getName() {
+        return el.getSimpleName().toString();
     }
 
     @Override

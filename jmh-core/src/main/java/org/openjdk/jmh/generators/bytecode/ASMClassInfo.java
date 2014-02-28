@@ -126,7 +126,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public String getNestedName() {
+    public String getName() {
         return name;
     }
 

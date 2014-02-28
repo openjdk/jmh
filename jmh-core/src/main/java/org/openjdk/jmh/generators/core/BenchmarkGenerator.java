@@ -406,7 +406,7 @@ public class BenchmarkGenerator {
 
         String sourcePackage = clazz.getPackageName();
         String generatedPackageName = sourcePackage + ".generated";
-        String generatedClassName = clazz.getNestedName();
+        String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz);
 
         BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName(), generatedPackageName, generatedClassName, result);
         validateBenchmarkInfo(info);

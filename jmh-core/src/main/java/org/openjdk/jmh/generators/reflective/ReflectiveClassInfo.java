@@ -48,9 +48,8 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public String getNestedName() {
-        // FIXME
-        return getQualifiedName();
+    public String getName() {
+        return klass.getName();
     }
 
     @Override

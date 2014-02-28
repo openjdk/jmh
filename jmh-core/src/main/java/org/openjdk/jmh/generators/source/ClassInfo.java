@@ -36,7 +36,7 @@ public interface ClassInfo extends MetadataInfo {
 
     String getQualifiedName();
 
-    String getNestedName();
+    String getName();
 
     ClassInfo getSuperClass();
 
