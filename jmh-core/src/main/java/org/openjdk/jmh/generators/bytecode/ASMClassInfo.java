@@ -157,9 +157,11 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public void visitOuterClass(String owner, String name, String desc) {
-        declaringClass = name;
-        super.visitOuterClass(owner, name, desc);
+    public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        if (name.equals(idName)) {
+            declaringClass = outerName;
+        }
+        super.visitInnerClass(name, outerName, innerName, access);
     }
 
     @Override
