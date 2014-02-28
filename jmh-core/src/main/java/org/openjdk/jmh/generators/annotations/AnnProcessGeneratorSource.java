@@ -49,6 +49,7 @@ public class AnnProcessGeneratorSource implements GeneratorSource {
 
     private final RoundEnvironment roundEnv;
     private final ProcessingEnvironment processingEnv;
+    private Collection<ClassInfo> classInfos;
 
     public AnnProcessGeneratorSource(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
         this.roundEnv = roundEnv;
@@ -57,11 +58,9 @@ public class AnnProcessGeneratorSource implements GeneratorSource {
 
     @Override
     public Collection<ClassInfo> getClasses() {
-        // Need to do a few rollovers to find all classes that have @GMB-annotated methods in their
-        // subclasses. This is mostly due to some of the nested classes not discoverable at once,
-        // when we need to discover the enclosing class first. With the potentially non-zero nesting
-        // depth, we need to do a few rounds. Hopefully we will just do a single stride in most
-        // cases.
+        if (classInfos != null) {
+            return classInfos;
+        }
 
         Collection<TypeElement> discoveredClasses = new TreeSet<TypeElement>(new Comparator<TypeElement>() {
             @Override
@@ -70,24 +69,36 @@ public class AnnProcessGeneratorSource implements GeneratorSource {
             }
         });
 
-        // Walk around until convergence...
+        // Need to do a few rollovers to find all classes that have @GMB-annotated methods in their
+        // subclasses. This is mostly due to some of the nested classes not discoverable at once,
+        // when we need to discover the enclosing class first. With the potentially non-zero nesting
+        // depth, we need to do a few rounds. Hopefully we will just do a single stride in most
+        // cases.
 
-        int lastSize = -1;
-        while (discoveredClasses.size() > lastSize) {
-            lastSize = discoveredClasses.size();
-            for (Element e : roundEnv.getRootElements()) {
-                if (e.getKind() != ElementKind.CLASS) continue;
+        List<TypeElement> front = new ArrayList<TypeElement>();
+
+        for (Element e : roundEnv.getRootElements()) {
+            if (e.getKind() != ElementKind.CLASS) continue;
+            front.add((TypeElement) e);
+        }
+
+        while (!front.isEmpty()) {
+            discoveredClasses.addAll(front);
+
+            List<TypeElement> newClasses = new ArrayList<TypeElement>();
+            for (Element e : front) {
                 TypeElement walk = (TypeElement) e;
                 do {
-                    discoveredClasses.add(walk);
                     for (TypeElement nested : ElementFilter.typesIn(walk.getEnclosedElements())) {
-                        discoveredClasses.add(nested);
+                        newClasses.add(nested);
                     }
                 } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
             }
+            front = newClasses;
         }
 
-        return convert(discoveredClasses);
+        classInfos = convert(discoveredClasses);
+        return classInfos;
     }
 
     protected Collection<ClassInfo> convert(Collection<TypeElement> els) {
