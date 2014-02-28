@@ -86,4 +86,26 @@ public class BenchmarkGeneratorUtils {
         return ls;
     }
 
+    public static <T extends Annotation> T getAnnotationRecursive(ClassInfo ci, Class<T> annClass) {
+        T ann = ci.getAnnotation(annClass);
+        if (ann != null) {
+            return ann;
+        } else {
+            ClassInfo eci = ci.getEnclosingClass();
+            if (eci != null) {
+                return getAnnotationRecursive(eci, annClass);
+            }
+        }
+        return null;
+    }
+
+    public static <T extends Annotation> T getAnnotationRecursive(MethodInfo mi, Class<T> annClass) {
+        T ann = mi.getAnnotation(annClass);
+        if (ann != null) {
+            return ann;
+        } else {
+            return getAnnotationRecursive(mi.getOwner(), annClass);
+        }
+    }
+
 }

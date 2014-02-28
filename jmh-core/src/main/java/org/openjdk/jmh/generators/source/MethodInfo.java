@@ -38,7 +38,6 @@ public interface MethodInfo extends Comparable<MethodInfo>, MetadataInfo {
     Collection<ParameterInfo> getParameters();
 
     <T extends Annotation> T getAnnotation(Class<T> annClass);
-    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
 
     boolean isPublic();
     boolean isAbstract();

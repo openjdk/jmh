@@ -77,11 +77,6 @@ public class APMethodInfo extends APMetadataInfo implements MethodInfo {
     }
 
     @Override
-    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
-        return AnnUtils.getAnnotationRecursive(el, annClass);
-    }
-
-    @Override
     public boolean isPublic() {
         return el.getModifiers().contains(Modifier.PUBLIC);
     }

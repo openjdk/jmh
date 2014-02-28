@@ -83,14 +83,14 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        return klass.getAnnotation(annClass);
+    public ClassInfo getEnclosingClass() {
+        // FIXME
+        return null;
     }
 
     @Override
-    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
-        // TODO: FIXME
-        return getAnnotation(annClass);
+    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
+        return klass.getAnnotation(annClass);
     }
 
     @Override

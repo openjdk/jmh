@@ -29,8 +29,11 @@ import org.openjdk.jmh.generators.source.FieldInfo;
 import org.openjdk.jmh.generators.source.MethodInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
@@ -56,11 +59,6 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
-        return AnnUtils.getAnnotationRecursive(el, annClass);
-    }
-
-    @Override
     public Collection<MethodInfo> getConstructors() {
         Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
         for (ExecutableElement e : ElementFilter.constructorsIn(el.getEnclosedElements())) {
@@ -71,7 +69,13 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
 
     @Override
     public String getNestedName() {
-        return AnnUtils.getNestedName(el);
+        String name = "";
+        Element walk = el;
+        while (walk.getKind() != ElementKind.PACKAGE) {
+            name = walk.getSimpleName().toString() + (name.isEmpty() ? "" : "_" + name);
+            walk = walk.getEnclosingElement();
+        }
+        return name.substring(0, name.length());
     }
 
     @Override
@@ -100,7 +104,11 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
 
     @Override
     public String getPackageName() {
-        return AnnUtils.getPackageName(el);
+        Element walk = el;
+        while (walk.getKind() != ElementKind.PACKAGE) {
+            walk = walk.getEnclosingElement();
+        }
+        return ((PackageElement)walk).getQualifiedName().toString();
     }
 
     @Override
@@ -108,10 +116,20 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
         TypeMirror superclass = el.getSuperclass();
         if (superclass.getKind() == TypeKind.NONE) {
             return null;
+        } else {
+            TypeElement element = (TypeElement) processEnv.getTypeUtils().asElement(superclass);
+            return new APClassInfo(processEnv, element);
         }
+    }
 
-        TypeElement element = (TypeElement) processEnv.getTypeUtils().asElement(superclass);
-        return new APClassInfo(processEnv, element);
+    @Override
+    public ClassInfo getEnclosingClass() {
+        Element enclosingElement = el.getEnclosingElement();
+        if (enclosingElement.getKind() == ElementKind.CLASS) {
+            return new APClassInfo(processEnv, (TypeElement) enclosingElement);
+        } else {
+            return null;
+        }
     }
 
     @Override

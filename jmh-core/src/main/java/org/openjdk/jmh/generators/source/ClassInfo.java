@@ -40,6 +40,8 @@ public interface ClassInfo extends MetadataInfo {
 
     ClassInfo getSuperclass();
 
+    ClassInfo getEnclosingClass();
+
     Collection<FieldInfo> getFields();
 
     Collection<MethodInfo> getMethods();
@@ -47,8 +49,6 @@ public interface ClassInfo extends MetadataInfo {
     Collection<MethodInfo> getConstructors();
 
     <T extends Annotation> T getAnnotation(Class<T> annClass);
-
-    <T extends Annotation> T getAnnotationRecursive(Class<T> annClass);
 
     boolean isAbstract();
 

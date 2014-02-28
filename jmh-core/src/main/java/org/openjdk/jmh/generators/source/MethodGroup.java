@@ -32,6 +32,7 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.generators.core.BenchmarkGeneratorUtils;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
@@ -241,7 +242,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
     private <T extends Annotation> T getFinal(Class<T> klass) {
         T finalAnn = null;
         for (MethodInvocation mi : methods) {
-            T ann = mi.method.getAnnotationRecursive(klass);
+            T ann = BenchmarkGeneratorUtils.getAnnotationRecursive(mi.method, klass);
             if (ann != null && finalAnn != null) {
                 if (!finalAnn.equals(ann)) {
                     throw new GenerationException("Colliding annotations: " + ann + " vs. " + finalAnn, mi.method);

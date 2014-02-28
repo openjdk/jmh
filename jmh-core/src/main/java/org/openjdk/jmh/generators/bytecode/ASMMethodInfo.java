@@ -71,16 +71,6 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
     }
 
     @Override
-    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
-        T ann = getAnnotation(annClass);
-        if (ann != null) {
-            return ann;
-        } else {
-            return classInfo.getAnnotation(annClass);
-        }
-    }
-
-    @Override
     public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
         AnnHandler annHandler = new AnnHandler(super.visitAnnotation(desc, visible));
         annotations.put(Type.getType(desc).getClassName(), annHandler);

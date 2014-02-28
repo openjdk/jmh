@@ -288,7 +288,7 @@ public class BenchmarkGenerator {
 
         // check annotations
         for (MethodInfo m : methods) {
-            OperationsPerInvocation opi = m.getAnnotationRecursive(OperationsPerInvocation.class);
+            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnotationRecursive(m, OperationsPerInvocation.class);
             if (opi != null && opi.value() < 1) {
                 throw new GenerationException("The " + OperationsPerInvocation.class.getSimpleName() +
                         " needs to be greater than 0.", m);
@@ -364,7 +364,7 @@ public class BenchmarkGenerator {
                 result.put(groupName, group);
             }
 
-            BenchmarkMode mbAn = method.getAnnotationRecursive(BenchmarkMode.class);
+            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnotationRecursive(method, BenchmarkMode.class);
             if (mbAn != null) {
                 group.addModes(mbAn.value());
             }

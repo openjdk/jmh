@@ -155,8 +155,9 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {
-        return getAnnotation(annClass); // TODO: FIXME
+    public ClassInfo getEnclosingClass() {
+        // TODO: FIXME
+        return null;
     }
 
     @Override

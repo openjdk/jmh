@@ -28,15 +28,16 @@ import java.lang.annotation.Annotation;
 
 public interface FieldInfo extends MetadataInfo {
 
+    ClassInfo getOwner();
+
     String getName();
 
     String getType();
+
+    <T extends Annotation> T getAnnotation(Class<T> annClass);
 
     boolean isPublic();
 
     boolean isStatic();
 
-    <T extends Annotation> T getAnnotation(Class<T> annClass);
-
-    ClassInfo getOwner();
 }
