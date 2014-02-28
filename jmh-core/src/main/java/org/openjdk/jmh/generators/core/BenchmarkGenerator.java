@@ -214,7 +214,7 @@ public class BenchmarkGenerator {
         // validate all arguments are @State-s
         for (MethodInfo e : methods) {
             for (ParameterInfo var : e.getParameters()) {
-                if (BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(var.getType(), State.class) == null) {
+                if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) == null) {
                     throw new GenerationException(
                             "Method parameters should be @" + State.class.getSimpleName() + " classes.",
                             e);
@@ -224,7 +224,7 @@ public class BenchmarkGenerator {
         }
 
         // validate if enclosing class is implicit @State
-        if (BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(clazz, State.class) != null) {
+        if (BenchmarkGeneratorUtils.getAnnSuper(clazz, State.class) != null) {
             states.add(clazz);
         }
 
@@ -234,7 +234,7 @@ public class BenchmarkGenerator {
             // we need to preemptively check the annotation value, and
             // the API can only allow that by catching the exception, argh.
             try {
-                BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(state, State.class).value();
+                BenchmarkGeneratorUtils.getAnnSuper(state, State.class).value();
             } catch (IncompleteAnnotationException iae) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
                         " annotation should have the explicit " + Scope.class.getSimpleName() + " argument",
@@ -260,7 +260,7 @@ public class BenchmarkGenerator {
         }
 
         // validate against rogue fields
-        if (BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(clazz, State.class) == null || clazz.isAbstract()) {
+        if (BenchmarkGeneratorUtils.getAnnSuper(clazz, State.class) == null || clazz.isAbstract()) {
             for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
                 // allow static fields
                 if (fi.isStatic()) continue;
@@ -283,7 +283,7 @@ public class BenchmarkGenerator {
                         + " method can not be abstract.", m);
             }
             if (m.isSynchronized()) {
-                if (BenchmarkGeneratorUtils.getAnnotationRecursive(m, State.class) == null) {
+                if (BenchmarkGeneratorUtils.getAnnSyntax(m, State.class) == null) {
                     throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
                             + " method can only be synchronized if the enclosing class is annotated with "
                             + "@" + State.class.getSimpleName() + ".", m);
@@ -293,7 +293,7 @@ public class BenchmarkGenerator {
 
         // check annotations
         for (MethodInfo m : methods) {
-            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnotationRecursive(m, OperationsPerInvocation.class);
+            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnSyntax(m, OperationsPerInvocation.class);
             if (opi != null && opi.value() < 1) {
                 throw new GenerationException("The " + OperationsPerInvocation.class.getSimpleName() +
                         " needs to be greater than 0.", m);
@@ -314,7 +314,7 @@ public class BenchmarkGenerator {
                 MethodInfo meth = group.methods().iterator().next();
                 if (meth.getAnnotation(Group.class) == null) {
                     for (ParameterInfo param : meth.getParameters()) {
-                        State stateAnn = BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(param.getType(), State.class);
+                        State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(param.getType(), State.class);
                         if (stateAnn != null && stateAnn.value() == Scope.Group) {
                             throw new GenerationException(
                                     "Only @" + Group.class.getSimpleName() + " methods can reference @" + State.class.getSimpleName()
@@ -323,7 +323,7 @@ public class BenchmarkGenerator {
                         }
                     }
 
-                    State stateAnn = BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(meth.getOwner(), State.class);
+                    State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(meth.getOwner(), State.class);
                     if (stateAnn != null && stateAnn.value() == Scope.Group) {
                         throw new GenerationException(
                                 "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
@@ -369,7 +369,7 @@ public class BenchmarkGenerator {
                 result.put(groupName, group);
             }
 
-            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnotationRecursive(method, BenchmarkMode.class);
+            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnSyntax(method, BenchmarkMode.class);
             if (mbAn != null) {
                 group.addModes(mbAn.value());
             }

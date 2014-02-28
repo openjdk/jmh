@@ -99,7 +99,7 @@ public class StateObjectHandler {
     }
 
     public void bindArg(MethodInfo mi, ParameterInfo pi) {
-        State ann = BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(pi.getType(), State.class);
+        State ann = BenchmarkGeneratorUtils.getAnnSuper(pi.getType(), State.class);
         if (ann != null) {
             bindState(mi, pi.getType(), ann.value(), null);
         } else {
@@ -112,7 +112,7 @@ public class StateObjectHandler {
     }
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
-        State ann = BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(ci, State.class);
+        State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
         bindState(null, ci, (ann != null) ? ann.value() : scope, label);
     }
 
@@ -391,10 +391,9 @@ public class StateObjectHandler {
             result.add("        if (!" + so.fieldIdentifier + ".ready" + Level.Trial + ") {");
             if (!so.getParamsLabels().isEmpty()) {
                 result.add("            Field f;");
-                result.add("            Class c = " + so.userType + ".class;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f = " + so.getParam(paramName).getOwner().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
                 result.add("            f.setAccessible(true);");
                 result.add("            f.set(" + so.fieldIdentifier + ", " + so.getParamAccessor(paramName) + ");");
             }
@@ -419,11 +418,10 @@ public class StateObjectHandler {
             result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val) throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
             if (!so.getParamsLabels().isEmpty()) {
-                result.add("        Field f;");
-                result.add("        Class c = " + so.userType + ".class;");
+                result.add("            Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("        f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("        f = " + so.getParam(paramName).getOwner().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
                 result.add("        f.setAccessible(true);");
                 result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
@@ -455,10 +453,10 @@ public class StateObjectHandler {
             result.add("        if (!local.ready" + Level.Trial + ") {");
             if (!so.getParamsLabels().isEmpty()) {
                 result.add("            Field f;");
-                result.add("            Class c = " + so.userType + ".class;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = c.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f = " + so.getParam(paramName).getOwner().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f.setAccessible(true);");
                 result.add("            f.setAccessible(true);");
                 result.add("            f.set(local, " + so.getParamAccessor(paramName) + ");");
             }

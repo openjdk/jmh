@@ -45,7 +45,7 @@ public class StateObject {
     public final Scope scope;
     public final String localIdentifier;
     public final String fieldIdentifier;
-    public final Map<String, String> params;
+    public final Map<String, FieldInfo> params;
 
     public StateObject(String userType, String jmhType, Scope scope, String fieldIdentifier, String localIdentifier) {
         this.userType = userType;
@@ -53,7 +53,7 @@ public class StateObject {
         this.scope = scope;
         this.localIdentifier = localIdentifier;
         this.fieldIdentifier = fieldIdentifier;
-        this.params = new TreeMap<String, String>();
+        this.params = new TreeMap<String, FieldInfo>();
     }
 
     @Override
@@ -87,53 +87,49 @@ public class StateObject {
         return localIdentifier;
     }
 
-    public String getParamAccessor(String name) {
-        return params.get(name);
+    public Collection<String> getParamsLabels() {
+        return params.keySet();
     }
 
     public void addParam(FieldInfo fieldInfo) {
-        String type = fieldInfo.getType();
-        String name = fieldInfo.getName();
+        params.put(fieldInfo.getName(), fieldInfo);
+    }
+
+    public FieldInfo getParam(String name) {
+        return params.get(name);
+    }
+
+    public String getParamAccessor(String name) {
+        String type = params.get(name).getType();
+
         if (type.equalsIgnoreCase("java.lang.String")) {
-            params.put(name, "control.getParam(\"" + name + "\")");
-            return;
+            return "control.getParam(\"" + name + "\")";
         }
         if (type.equalsIgnoreCase("boolean") || type.equalsIgnoreCase("java.lang.Boolean")) {
-            params.put(name, "Boolean.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Boolean.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("byte") || type.equalsIgnoreCase("java.lang.Byte")) {
-            params.put(name, "Byte.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Byte.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("char") || type.equalsIgnoreCase("java.lang.Character")) {
-            params.put(name, "(control.getParam(\"" + name + "\")).charAt(0)");
-            return;
+            return "(control.getParam(\"" + name + "\")).charAt(0)";
         }
         if (type.equalsIgnoreCase("short") || type.equalsIgnoreCase("java.lang.Short")) {
-            params.put(name, "Short.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Short.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("java.lang.Integer")) {
-            params.put(name, "Integer.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Integer.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("float") || type.equalsIgnoreCase("java.lang.Float")) {
-            params.put(name, "Float.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Float.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("long") || type.equalsIgnoreCase("java.lang.Long")) {
-            params.put(name, "Long.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Long.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("java.lang.Double")) {
-            params.put(name, "Double.valueOf(control.getParam(\"" + name + "\"))");
-            return;
+            return "Double.valueOf(control.getParam(\"" + name + "\"))";
         }
         throw new IllegalStateException("Unknown type: " + type);
     }
 
-    public Collection<String> getParamsLabels() {
-        return params.keySet();
-    }
 }
