@@ -99,7 +99,7 @@ public class StateObjectHandler {
     }
 
     public void bindArg(MethodInfo mi, ParameterInfo pi) {
-        State ann = pi.getType().getAnnotation(State.class);
+        State ann = BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(pi.getType(), State.class);
         if (ann != null) {
             bindState(mi, pi.getType(), ann.value(), null);
         } else {
@@ -112,7 +112,7 @@ public class StateObjectHandler {
     }
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
-        State ann = ci.getAnnotation(State.class);
+        State ann = BenchmarkGeneratorUtils.getAnnotationRecursiveSuper(ci, State.class);
         bindState(null, ci, (ann != null) ? ann.value() : scope, label);
     }
 

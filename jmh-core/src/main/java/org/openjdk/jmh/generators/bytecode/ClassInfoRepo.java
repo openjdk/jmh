@@ -37,10 +37,6 @@ public class ClassInfoRepo {
 
     public ClassInfo get(String desc) {
         Type type = Type.getType(desc);
-        return get(type);
-    }
-
-    public ClassInfo get(Type type) {
         return map.get(type);
     }
 

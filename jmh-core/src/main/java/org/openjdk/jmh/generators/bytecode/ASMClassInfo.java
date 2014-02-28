@@ -56,6 +56,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private final List<FieldInfo> fields;
     private final Map<String, AnnHandler> annotations = new HashMap<String, AnnHandler>();
     private final ClassInfoRepo classInfos;
+    private String superName;
 
     public ASMClassInfo(ClassInfoRepo classInfos) {
         super(Opcodes.ASM4);
@@ -72,6 +73,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
+        this.superName = superName;
         this.idName = name;
         this.access = access;
         qualifiedName = name.replaceAll("/", ".");
@@ -150,8 +152,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
 
     @Override
     public ClassInfo getSuperclass() {
-        // TODO: FIXME
-        return null;
+        return classInfos.get(superName);
     }
 
     @Override
