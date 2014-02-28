@@ -25,7 +25,15 @@ public class JmhMojo extends AbstractMojo {
      * @parameter expression="${project.build.outputDirectory}"
      * @required
      */
-    private File classesDirectory;
+    private File compiledBytecodeDirectory;
+
+    /**
+     * Classes dir
+     *
+     * @parameter expression="${project.build.outputDirectory}"
+     * @required
+     */
+    private File outputResourceDirectory;
 
     /**
      * Classes dir
@@ -33,13 +41,16 @@ public class JmhMojo extends AbstractMojo {
      * @parameter expression="${project.build.directory}/generated-sources/jmh/"
      * @required
      */
-    private File generatedSourcesDir;
+    private File outputSourceDirectory;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        ASMGeneratorSource source = new ASMGeneratorSource(classesDirectory, generatedSourcesDir);
+        ASMGeneratorSource source = new ASMGeneratorSource(outputResourceDirectory, outputSourceDirectory);
 
         try {
-            source.processClasses(getClasses(classesDirectory));
+            Collection<File> classes = getClasses(compiledBytecodeDirectory);
+            getLog().info("Processing " + classes.size() + " classes from " + compiledBytecodeDirectory);
+            getLog().info("Writing out Java source to "  + outputSourceDirectory + " and resources to " + outputResourceDirectory);
+            source.processClasses(classes);
         } catch (IOException ioe) {
             throw new MojoExecutionException("IOException", ioe);
         }
@@ -64,12 +75,15 @@ public class JmhMojo extends AbstractMojo {
         while (!newDirs.isEmpty()) {
             List<File> add = new ArrayList<File>();
             for (File dir : newDirs) {
-                for (File f : dir.listFiles()) {
-                    if (f.isDirectory()) {
-                        add.add(f);
-                    } else {
-                        if (f.getName().endsWith(".class")) {
-                            result.add(f);
+                File[] files = dir.listFiles();
+                if (files != null) {
+                    for (File f : files) {
+                        if (f.isDirectory()) {
+                            add.add(f);
+                        } else {
+                            if (f.getName().endsWith(".class")) {
+                                result.add(f);
+                            }
                         }
                     }
                 }
