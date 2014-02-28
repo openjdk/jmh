@@ -38,13 +38,13 @@ public interface ClassInfo extends MetadataInfo {
 
     String getQualifiedName();
 
+    ClassInfo getSuperclass();
+
     Collection<FieldInfo> getFields();
 
     Collection<MethodInfo> getMethods();
 
     Collection<MethodInfo> getConstructors();
-
-    Collection<ClassInfo> getSuperclasses();
 
     <T extends Annotation> T getAnnotation(Class<T> annClass);
 

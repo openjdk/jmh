@@ -149,11 +149,10 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public Collection<ClassInfo> getSuperclasses() {
+    public ClassInfo getSuperclass() {
         // TODO: FIXME
-        return Collections.emptyList();
+        return null;
     }
-
 
     @Override
     public <T extends Annotation> T getAnnotationRecursive(Class<T> annClass) {

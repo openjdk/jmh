@@ -72,19 +72,17 @@ public class BenchmarkGeneratorUtils {
 
     public static Collection<FieldInfo> getAllFields(ClassInfo ci) {
         List<FieldInfo> ls = new ArrayList<FieldInfo>();
-        ls.addAll(ci.getFields());
-        for (ClassInfo cl : ci.getSuperclasses()) {
-            ls.addAll(cl.getFields());
-        }
+        do {
+            ls.addAll(ci.getFields());
+        } while ((ci = ci.getSuperclass()) != null);
         return ls;
     }
 
     public static Collection<MethodInfo> getMethods(ClassInfo ci) {
         List<MethodInfo> ls = new ArrayList<MethodInfo>();
-        ls.addAll(ci.getMethods());
-        for (ClassInfo cl : ci.getSuperclasses()) {
-            ls.addAll(cl.getMethods());
-        }
+        do {
+            ls.addAll(ci.getMethods());
+        } while ((ci = ci.getSuperclass()) != null);
         return ls;
     }
 

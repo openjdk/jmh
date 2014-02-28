@@ -185,25 +185,17 @@ public class BenchmarkGenerator {
 
         Multimap<ClassInfo, MethodInfo> result = new HashMultimap<ClassInfo, MethodInfo>();
         for (ClassInfo currentClass : source.getClasses()) {
-            if (currentClass.getQualifiedName().contains("generated")) continue;
-            if (currentClass.isAbstract()) continue;
-
-            for (MethodInfo mi : currentClass.getMethods()) {
-                GenerateMicroBenchmark ann = mi.getAnnotation(GenerateMicroBenchmark.class);
-                if (ann != null) {
-                    result.put(currentClass, mi);
-                }
-            }
-
-            for (ClassInfo upperClass : currentClass.getSuperclasses()) {
-                if (upperClass.getQualifiedName().contains("generated")) continue;
-                for (MethodInfo mi : upperClass.getMethods()) {
+            ClassInfo walk = currentClass;
+            do {
+                if (currentClass.getQualifiedName().contains("generated")) continue;
+                if (currentClass.isAbstract()) continue;
+                for (MethodInfo mi : walk.getMethods()) {
                     GenerateMicroBenchmark ann = mi.getAnnotation(GenerateMicroBenchmark.class);
                     if (ann != null) {
                         result.put(currentClass, mi);
                     }
                 }
-            }
+            } while ((walk = walk.getSuperclass()) != null);
         }
         return result;
     }

@@ -33,6 +33,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -102,13 +104,14 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public Collection<ClassInfo> getSuperclasses() {
-        List<ClassInfo> list = new ArrayList<ClassInfo>();
-        TypeElement walk = el;
-        while ((walk = (TypeElement) processEnv.getTypeUtils().asElement(walk.getSuperclass())) != null) {
-            list.add(new APClassInfo(processEnv, walk));
+    public ClassInfo getSuperclass() {
+        TypeMirror superclass = el.getSuperclass();
+        if (superclass.getKind() == TypeKind.NONE) {
+            return null;
         }
-        return list;
+
+        TypeElement element = (TypeElement) processEnv.getTypeUtils().asElement(superclass);
+        return new APClassInfo(processEnv, element);
     }
 
     @Override
