@@ -36,10 +36,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ReflectiveClassInfo implements ClassInfo {
+public class RFClassInfo implements ClassInfo {
     private final Class<?> klass;
 
-    public ReflectiveClassInfo(Class<?> klass) {
+    public RFClassInfo(Class<?> klass) {
         this.klass = klass;
     }
 
@@ -102,7 +102,7 @@ public class ReflectiveClassInfo implements ClassInfo {
     @Override
     public ClassInfo getSuperClass() {
         if (klass.getSuperclass() != null) {
-            return new ReflectiveClassInfo(klass.getSuperclass());
+            return new RFClassInfo(klass.getSuperclass());
         } else {
             return null;
         }
@@ -111,7 +111,7 @@ public class ReflectiveClassInfo implements ClassInfo {
     @Override
     public ClassInfo getDeclaringClass() {
         if (klass.getDeclaringClass() != null) {
-            return new ReflectiveClassInfo(klass.getDeclaringClass());
+            return new RFClassInfo(klass.getDeclaringClass());
         } else {
             return null;
         }

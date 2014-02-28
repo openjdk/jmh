@@ -36,6 +36,6 @@ public class RFParameterInfo implements ParameterInfo {
 
     @Override
     public ClassInfo getType() {
-        return new ReflectiveClassInfo(cl);
+        return new RFClassInfo(cl);
     }
 }

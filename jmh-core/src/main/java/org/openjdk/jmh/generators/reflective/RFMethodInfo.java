@@ -36,10 +36,10 @@ import java.util.Collection;
 
 public class RFMethodInfo implements MethodInfo {
 
-    private final ReflectiveClassInfo declaringClass;
+    private final RFClassInfo declaringClass;
     private final Method m;
 
-    public RFMethodInfo(ReflectiveClassInfo declaringClass, Method m) {
+    public RFMethodInfo(RFClassInfo declaringClass, Method m) {
         this.declaringClass = declaringClass;
         this.m = m;
     }
