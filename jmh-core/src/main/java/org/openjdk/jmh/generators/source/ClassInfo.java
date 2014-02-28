@@ -34,11 +34,11 @@ public interface ClassInfo extends MetadataInfo {
 
     String getPackageName();
 
-    String getNestedName();
-
     String getQualifiedName();
 
-    ClassInfo getSuperclass();
+    String getNestedName();
+
+    ClassInfo getSuperClass();
 
     ClassInfo getEnclosingClass();
 

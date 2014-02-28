@@ -77,7 +77,7 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public ClassInfo getSuperclass() {
+    public ClassInfo getSuperClass() {
         // FIXME
         return null;
     }

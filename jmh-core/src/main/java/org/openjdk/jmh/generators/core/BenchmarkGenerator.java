@@ -195,7 +195,7 @@ public class BenchmarkGenerator {
                         result.put(currentClass, mi);
                     }
                 }
-            } while ((walk = walk.getSuperclass()) != null);
+            } while ((walk = walk.getSuperClass()) != null);
         }
         return result;
     }

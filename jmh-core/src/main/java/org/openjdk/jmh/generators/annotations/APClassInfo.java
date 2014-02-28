@@ -112,7 +112,7 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public ClassInfo getSuperclass() {
+    public ClassInfo getSuperClass() {
         TypeMirror superclass = el.getSuperclass();
         if (superclass.getKind() == TypeKind.NONE) {
             return null;

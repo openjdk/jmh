@@ -151,7 +151,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public ClassInfo getSuperclass() {
+    public ClassInfo getSuperClass() {
         return classInfos.get(superName);
     }
 

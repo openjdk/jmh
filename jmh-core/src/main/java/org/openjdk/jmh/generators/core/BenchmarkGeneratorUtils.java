@@ -74,7 +74,7 @@ public class BenchmarkGeneratorUtils {
         List<FieldInfo> ls = new ArrayList<FieldInfo>();
         do {
             ls.addAll(ci.getFields());
-        } while ((ci = ci.getSuperclass()) != null);
+        } while ((ci = ci.getSuperClass()) != null);
         return ls;
     }
 
@@ -82,7 +82,7 @@ public class BenchmarkGeneratorUtils {
         List<MethodInfo> ls = new ArrayList<MethodInfo>();
         do {
             ls.addAll(ci.getMethods());
-        } while ((ci = ci.getSuperclass()) != null);
+        } while ((ci = ci.getSuperClass()) != null);
         return ls;
     }
 
@@ -91,7 +91,7 @@ public class BenchmarkGeneratorUtils {
         if (ann != null) {
             return ann;
         } else {
-            ClassInfo eci = ci.getSuperclass();
+            ClassInfo eci = ci.getSuperClass();
             if (eci != null) {
                 return getAnnSuper(eci, annClass);
             }
