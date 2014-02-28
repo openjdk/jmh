@@ -79,4 +79,24 @@ public class TreeMultiset<T extends Comparable<T>> implements Multiset<T>, Seria
     public Collection<T> keys() {
         return Collections.unmodifiableCollection(map.keySet());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TreeMultiset that = (TreeMultiset) o;
+
+        if (size != that.size) return false;
+        if (!map.equals(that.map)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = map.hashCode();
+        result = 31 * result + size;
+        return result;
+    }
 }

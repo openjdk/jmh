@@ -101,4 +101,21 @@ public class HashsetMultimap<K, V> implements Multimap<K, V>, Serializable {
             putAll(k, other.get(k));
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HashsetMultimap that = (HashsetMultimap) o;
+
+        if (!map.equals(that.map)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
 }
