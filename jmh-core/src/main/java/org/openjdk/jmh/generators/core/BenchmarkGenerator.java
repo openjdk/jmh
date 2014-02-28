@@ -265,7 +265,7 @@ public class BenchmarkGenerator {
 
         // validate against rogue fields
         if (clazz.getAnnotation(State.class) == null || clazz.isAbstract()) {
-            for (FieldInfo fi : clazz.getFields()) {
+            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
                 // allow static fields
                 if (fi.isStatic()) continue;
                 throw new GenerationException(
@@ -385,7 +385,7 @@ public class BenchmarkGenerator {
             // Discovering @Params, part 1:
             //   For each parameter, walk the type hierarchy up to discover inherited @Param fields in @State objects.
             for (ParameterInfo pi : method.getParameters()) {
-                for (FieldInfo fi : pi.getType().getFields()) {
+                for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(pi.getType())) {
                     if (fi.getAnnotation(Param.class) != null) {
                         group.addParam(fi.getName(), fi.getAnnotation(Param.class).value());
                     }
@@ -394,7 +394,7 @@ public class BenchmarkGenerator {
 
             // Discovering @Params, part 2:
             //  Walk the type hierarchy up to discover inherited @Param fields for class.
-            for (FieldInfo fi : clazz.getFields()) {
+            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
                 if (fi.getAnnotation(Param.class) != null) {
                     group.addParam(fi.getName(), fi.getAnnotation(Param.class).value());
                 }

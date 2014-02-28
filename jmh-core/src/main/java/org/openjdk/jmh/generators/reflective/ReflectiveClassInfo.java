@@ -65,16 +65,6 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public Collection<FieldInfo> getFields() {
-        List<FieldInfo> ls = new ArrayList<FieldInfo>();
-        ls.addAll(getDeclaredFields());
-        for (ClassInfo cl : getSuperclasses()) {
-            ls.addAll(cl.getDeclaredFields());
-        }
-        return ls;
-    }
-
-    @Override
     public Collection<MethodInfo> getConstructors() {
         // FIXME
         return Collections.emptyList();
@@ -84,16 +74,6 @@ public class ReflectiveClassInfo implements ClassInfo {
     public Collection<MethodInfo> getDeclaredMethods() {
         // FIXME
         return Collections.emptyList();
-    }
-
-    @Override
-    public Collection<MethodInfo> getMethods() {
-        List<MethodInfo> ls = new ArrayList<MethodInfo>();
-        ls.addAll(getDeclaredMethods());
-        for (ClassInfo cl : getSuperclasses()) {
-            ls.addAll(cl.getDeclaredMethods());
-        }
-        return ls;
     }
 
     @Override

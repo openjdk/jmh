@@ -203,14 +203,14 @@ public class StateObjectHandler {
         stateObjects.add(so);
 
         // walk the type hierarchy up to discover inherited @Params
-        for (FieldInfo fi : ci.getFields()) {
+        for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(ci)) {
             if (fi.getAnnotation(Param.class) != null) {
                 so.addParam(fi);
             }
         }
 
         // put the @State objects helper methods
-        for (MethodInfo mi : ci.getMethods()) {
+        for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
             Setup setupAnn = mi.getAnnotation(Setup.class);
             if (setupAnn != null) {
                 helpersByState.put(so, new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));

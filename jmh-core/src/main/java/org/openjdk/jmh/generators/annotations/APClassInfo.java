@@ -86,15 +86,6 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
         return ls;
     }
 
-    @Override
-    public Collection<FieldInfo> getFields() {
-        List<FieldInfo> ls = new ArrayList<FieldInfo>();
-        ls.addAll(getDeclaredFields());
-        for (ClassInfo cl : getSuperclasses()) {
-            ls.addAll(cl.getDeclaredFields());
-        }
-        return ls;
-    }
 
     @Override
     public Collection<MethodInfo> getDeclaredMethods() {
@@ -103,16 +94,6 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
             mis.add(new APMethodInfo(processEnv, this, e));
         }
         return mis;
-    }
-
-    @Override
-    public Collection<MethodInfo> getMethods() {
-        List<MethodInfo> ls = new ArrayList<MethodInfo>();
-        ls.addAll(getDeclaredMethods());
-        for (ClassInfo cl : getSuperclasses()) {
-            ls.addAll(cl.getDeclaredMethods());
-        }
-        return ls;
     }
 
     @Override

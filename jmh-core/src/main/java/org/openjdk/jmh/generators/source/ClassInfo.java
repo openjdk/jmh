@@ -40,13 +40,9 @@ public interface ClassInfo extends MetadataInfo {
 
     Collection<FieldInfo> getDeclaredFields();
 
-    Collection<FieldInfo> getFields();
-
     Collection<MethodInfo> getConstructors();
 
     Collection<MethodInfo> getDeclaredMethods();
-
-    Collection<MethodInfo> getMethods();
 
     Collection<ClassInfo> getSuperclasses();
 

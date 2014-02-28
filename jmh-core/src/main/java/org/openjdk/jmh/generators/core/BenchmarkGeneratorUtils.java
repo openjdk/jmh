@@ -70,4 +70,22 @@ public class BenchmarkGeneratorUtils {
         return mis;
     }
 
+    public static Collection<FieldInfo> getAllFields(ClassInfo ci) {
+        List<FieldInfo> ls = new ArrayList<FieldInfo>();
+        ls.addAll(ci.getDeclaredFields());
+        for (ClassInfo cl : ci.getSuperclasses()) {
+            ls.addAll(cl.getDeclaredFields());
+        }
+        return ls;
+    }
+
+    public static Collection<MethodInfo> getMethods(ClassInfo ci) {
+        List<MethodInfo> ls = new ArrayList<MethodInfo>();
+        ls.addAll(ci.getDeclaredMethods());
+        for (ClassInfo cl : ci.getSuperclasses()) {
+            ls.addAll(cl.getDeclaredMethods());
+        }
+        return ls;
+    }
+
 }

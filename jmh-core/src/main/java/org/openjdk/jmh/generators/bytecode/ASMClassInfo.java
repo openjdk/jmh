@@ -139,16 +139,6 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public Collection<FieldInfo> getFields() {
-        List<FieldInfo> ls = new ArrayList<FieldInfo>();
-        ls.addAll(getDeclaredFields());
-        for (ClassInfo cl : getSuperclasses()) {
-            ls.addAll(cl.getDeclaredFields());
-        }
-        return ls;
-    }
-
-    @Override
     public Collection<MethodInfo> getConstructors() {
         return constructors;
     }
@@ -156,16 +146,6 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     @Override
     public Collection<MethodInfo> getDeclaredMethods() {
         return methods;
-    }
-
-    @Override
-    public Collection<MethodInfo> getMethods() {
-        List<MethodInfo> ls = new ArrayList<MethodInfo>();
-        ls.addAll(getDeclaredMethods());
-        for (ClassInfo cl : getSuperclasses()) {
-            ls.addAll(cl.getDeclaredMethods());
-        }
-        return ls;
     }
 
     @Override
