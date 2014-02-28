@@ -29,11 +29,12 @@ import org.openjdk.jmh.generators.source.FieldInfo;
 import org.openjdk.jmh.generators.source.MethodInfo;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class ReflectiveClassInfo implements ClassInfo {
     private final Class<?> klass;
@@ -44,47 +45,76 @@ public class ReflectiveClassInfo implements ClassInfo {
 
     @Override
     public String getPackageName() {
-        return klass.getPackage().getName();
+        if (klass.getDeclaringClass() != null) {
+            return klass.getDeclaringClass().getPackage().getName();
+        } else {
+            return klass.getPackage().getName();
+        }
     }
 
     @Override
     public String getName() {
-        return klass.getName();
+        String name = klass.getSimpleName();
+        if (name.contains("$")) {
+            return name.substring(name.lastIndexOf("$"));
+        } else {
+            return name;
+        }
     }
 
     @Override
     public String getQualifiedName() {
-        return klass.getCanonicalName();
+        String name = klass.getCanonicalName();
+        if (name.contains("$")) {
+            return name.replace("$", ".");
+        } else {
+            return name;
+        }
     }
 
     @Override
     public Collection<FieldInfo> getFields() {
-        // FIXME
-        return Collections.emptyList();
+        Collection<FieldInfo> fis = new ArrayList<FieldInfo>();
+        for (Field f : klass.getDeclaredFields()) {
+            fis.add(new RFFieldInfo(this, f));
+        }
+        return fis;
     }
 
     @Override
     public Collection<MethodInfo> getConstructors() {
-        // FIXME
-        return Collections.emptyList();
+        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
+        for (Constructor m : klass.getConstructors()) {
+            mis.add(new RFConstructorInfo(this, m));
+        }
+        return mis;
     }
 
     @Override
     public Collection<MethodInfo> getMethods() {
-        // FIXME
-        return Collections.emptyList();
+        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
+        for (Method m : klass.getMethods()) {
+            mis.add(new RFMethodInfo(this, m));
+        }
+        return mis;
     }
 
     @Override
     public ClassInfo getSuperClass() {
-        // FIXME
-        return null;
+        if (klass.getSuperclass() != null) {
+            return new ReflectiveClassInfo(klass.getSuperclass());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public ClassInfo getEnclosingClass() {
-        // FIXME
-        return null;
+        if (klass.getDeclaringClass() != null) {
+            return new ReflectiveClassInfo(klass.getDeclaringClass());
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -105,5 +135,10 @@ public class ReflectiveClassInfo implements ClassInfo {
     @Override
     public boolean isStrictFP() {
         return Modifier.isStrict(klass.getModifiers());
+    }
+
+    @Override
+    public String toString() {
+        return getQualifiedName();
     }
 }

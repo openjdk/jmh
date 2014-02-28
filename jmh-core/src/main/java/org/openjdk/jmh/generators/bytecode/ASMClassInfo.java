@@ -38,7 +38,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +75,9 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
         this.superName = superName;
         this.idName = name;
         this.access = access;
-        qualifiedName = name.replaceAll("/", ".");
+        qualifiedName = name.replace("/", ".");
         packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
+        qualifiedName = qualifiedName.replace('$', '.');
         this.name = qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
     }
 
