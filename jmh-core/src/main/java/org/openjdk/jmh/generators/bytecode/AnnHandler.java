@@ -29,21 +29,22 @@ import org.objectweb.asm.Opcodes;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
     private final Map<String, Object> values;
-    private final Multimap<String, String> valuesArray;
+    private final Multimap<String, Object> valuesArray;
 
     public AnnHandler(AnnotationVisitor annotationVisitor) {
         super(Opcodes.ASM4, annotationVisitor);
         this.values = new HashMap<String, Object>();
-        this.valuesArray = new HashMultimap<String, String>();
+        this.valuesArray = new HashMultimap<String, Object>();
     }
 
     @Override
@@ -51,15 +52,37 @@ public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
         String key = method.getName();
         Class<?> returnType = method.getReturnType();
 
+        if (key.equalsIgnoreCase("toString")) {
+            return values + ", " + valuesArray;
+        }
+
         // FIXME: Better type handling
 
         if (returnType.isArray()) {
-            String[] strings = valuesArray.get(key).toArray(new String[0]);
-            if (strings.length == 0) {
-                strings = (String[]) method.getDefaultValue();
-            }
+            Class<?> componentType = returnType.getComponentType();
+            if (componentType.isEnum()) {
+                int count = valuesArray.get(key).size();
+                List<Object> list = new ArrayList<Object>(valuesArray.get(key));
 
-            return strings;
+                Object o = Array.newInstance(componentType, count);
+                for (int c = 0; c < count; c++) {
+                    Object v = list.get(c);
+                    if (v instanceof String) {
+                        Method m = componentType.getMethod("valueOf", String.class);
+                        v =  m.invoke(null, v);
+                    }
+                    Array.set(o, c, v);
+                }
+                return o;
+            } else if (componentType.isPrimitive()) {
+                throw new IllegalStateException("Primitive arrays are not handled yet");
+            } else {
+                String[] strings = valuesArray.get(key).toArray(new String[0]);
+                if (strings.length == 0) {
+                    strings = (String[]) method.getDefaultValue();
+                }
+                return strings;
+            }
         } else {
             Object value = values.get(key);
             if (value == null) {
@@ -97,7 +120,7 @@ public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
 
             @Override
             public void visit(String n, Object value) {
-                valuesArray.put(name, (String)value);
+                valuesArray.put(name, value);
                 super.visit(n, value);
             }
         };
