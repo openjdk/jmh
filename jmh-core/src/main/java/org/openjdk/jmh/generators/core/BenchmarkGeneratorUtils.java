@@ -39,7 +39,7 @@ public class BenchmarkGeneratorUtils {
     public static <T extends Annotation> Collection<MethodInfo> getMethodsAnnotatedWith(GeneratorSource source, Class<T> annClass) {
         List<MethodInfo> mis = new ArrayList<MethodInfo>();
         for (ClassInfo ci : source.getClasses()) {
-            for (MethodInfo mi : ci.getDeclaredMethods()) {
+            for (MethodInfo mi : ci.getMethods()) {
                 if (mi.getAnnotation(annClass) != null) {
                     mis.add(mi);
                 }
@@ -61,7 +61,7 @@ public class BenchmarkGeneratorUtils {
     public static <T extends Annotation> Collection<FieldInfo> getFieldsAnnotatedWith(GeneratorSource source, Class<T> annClass) {
         List<FieldInfo> mis = new ArrayList<FieldInfo>();
         for (ClassInfo ci : source.getClasses()) {
-            for (FieldInfo mi : ci.getDeclaredFields()) {
+            for (FieldInfo mi : ci.getFields()) {
                 if (mi.getAnnotation(annClass) != null) {
                     mis.add(mi);
                 }
@@ -72,18 +72,18 @@ public class BenchmarkGeneratorUtils {
 
     public static Collection<FieldInfo> getAllFields(ClassInfo ci) {
         List<FieldInfo> ls = new ArrayList<FieldInfo>();
-        ls.addAll(ci.getDeclaredFields());
+        ls.addAll(ci.getFields());
         for (ClassInfo cl : ci.getSuperclasses()) {
-            ls.addAll(cl.getDeclaredFields());
+            ls.addAll(cl.getFields());
         }
         return ls;
     }
 
     public static Collection<MethodInfo> getMethods(ClassInfo ci) {
         List<MethodInfo> ls = new ArrayList<MethodInfo>();
-        ls.addAll(ci.getDeclaredMethods());
+        ls.addAll(ci.getMethods());
         for (ClassInfo cl : ci.getSuperclasses()) {
-            ls.addAll(cl.getDeclaredMethods());
+            ls.addAll(cl.getMethods());
         }
         return ls;
     }

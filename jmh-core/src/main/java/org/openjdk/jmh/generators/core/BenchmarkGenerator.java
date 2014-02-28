@@ -64,7 +64,6 @@ import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 
 import javax.annotation.Generated;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.IncompleteAnnotationException;
@@ -189,7 +188,7 @@ public class BenchmarkGenerator {
             if (currentClass.getQualifiedName().contains("generated")) continue;
             if (currentClass.isAbstract()) continue;
 
-            for (MethodInfo mi : currentClass.getDeclaredMethods()) {
+            for (MethodInfo mi : currentClass.getMethods()) {
                 GenerateMicroBenchmark ann = mi.getAnnotation(GenerateMicroBenchmark.class);
                 if (ann != null) {
                     result.put(currentClass, mi);
@@ -198,7 +197,7 @@ public class BenchmarkGenerator {
 
             for (ClassInfo upperClass : currentClass.getSuperclasses()) {
                 if (upperClass.getQualifiedName().contains("generated")) continue;
-                for (MethodInfo mi : upperClass.getDeclaredMethods()) {
+                for (MethodInfo mi : upperClass.getMethods()) {
                     GenerateMicroBenchmark ann = mi.getAnnotation(GenerateMicroBenchmark.class);
                     if (ann != null) {
                         result.put(currentClass, mi);

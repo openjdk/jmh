@@ -134,7 +134,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public Collection<FieldInfo> getDeclaredFields() {
+    public Collection<FieldInfo> getFields() {
         return fields;
     }
 
@@ -144,7 +144,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public Collection<MethodInfo> getDeclaredMethods() {
+    public Collection<MethodInfo> getMethods() {
         return methods;
     }
 

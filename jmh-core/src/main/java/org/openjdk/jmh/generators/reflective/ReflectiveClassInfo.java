@@ -59,7 +59,7 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public Collection<FieldInfo> getDeclaredFields() {
+    public Collection<FieldInfo> getFields() {
         // FIXME
         return Collections.emptyList();
     }
@@ -71,7 +71,7 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public Collection<MethodInfo> getDeclaredMethods() {
+    public Collection<MethodInfo> getMethods() {
         // FIXME
         return Collections.emptyList();
     }

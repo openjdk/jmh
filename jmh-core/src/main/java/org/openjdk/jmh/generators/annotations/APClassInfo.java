@@ -78,7 +78,7 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public Collection<FieldInfo> getDeclaredFields() {
+    public Collection<FieldInfo> getFields() {
         List<FieldInfo> ls = new ArrayList<FieldInfo>();
         for (VariableElement e : ElementFilter.fieldsIn(el.getEnclosedElements())) {
             ls.add(new APFieldInfo(processEnv, e));
@@ -88,7 +88,7 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
 
 
     @Override
-    public Collection<MethodInfo> getDeclaredMethods() {
+    public Collection<MethodInfo> getMethods() {
         Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
         for (ExecutableElement e : ElementFilter.methodsIn(el.getEnclosedElements())) {
             mis.add(new APMethodInfo(processEnv, this, e));

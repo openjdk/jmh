@@ -38,11 +38,11 @@ public interface ClassInfo extends MetadataInfo {
 
     String getQualifiedName();
 
-    Collection<FieldInfo> getDeclaredFields();
+    Collection<FieldInfo> getFields();
+
+    Collection<MethodInfo> getMethods();
 
     Collection<MethodInfo> getConstructors();
-
-    Collection<MethodInfo> getDeclaredMethods();
 
     Collection<ClassInfo> getSuperclasses();
 

@@ -165,7 +165,7 @@ public class StateObjectHandler {
                         " can only be used with " + Scope.class.getSimpleName() + "." + Scope.Thread + " states.", ci);
             }
 
-            for (FieldInfo sub : ci.getDeclaredFields()) {
+            for (FieldInfo sub : ci.getFields()) {
                 if (sub.isPublic()) {
                     String fieldType = sub.getType();
                     if (fieldType.equals("int") || fieldType.equals("long")) {
@@ -182,7 +182,7 @@ public class StateObjectHandler {
                 }
             }
 
-            for (MethodInfo sub : ci.getDeclaredMethods()) {
+            for (MethodInfo sub : ci.getMethods()) {
                 if (sub.isPublic()) {
                     String returnType = sub.getReturnType();
                     if (returnType.equals("int") || returnType.equals("long")) {
