@@ -36,7 +36,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -45,13 +44,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class AnnProcessGeneratorSource implements GeneratorSource {
+public class APGeneratorSource implements GeneratorSource {
 
     private final RoundEnvironment roundEnv;
     private final ProcessingEnvironment processingEnv;
     private Collection<ClassInfo> classInfos;
 
-    public AnnProcessGeneratorSource(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+    public APGeneratorSource(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
         this.roundEnv = roundEnv;
         this.processingEnv = processingEnv;
     }
