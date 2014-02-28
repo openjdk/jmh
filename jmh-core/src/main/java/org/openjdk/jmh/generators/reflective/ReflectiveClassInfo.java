@@ -109,7 +109,7 @@ public class ReflectiveClassInfo implements ClassInfo {
     }
 
     @Override
-    public ClassInfo getEnclosingClass() {
+    public ClassInfo getDeclaringClass() {
         if (klass.getDeclaringClass() != null) {
             return new ReflectiveClassInfo(klass.getDeclaringClass());
         } else {

@@ -116,7 +116,7 @@ public class CompilerControlPlugin implements Plugin {
     }
 
     private static String getName(MethodInfo mi) {
-       return mi.getOwner().getQualifiedName().replaceAll("\\.", "/") + "." + mi.getName();
+       return mi.getDeclaringClass().getQualifiedName().replaceAll("\\.", "/") + "." + mi.getName();
     }
 
     private static String getName(ClassInfo ci) {

@@ -42,7 +42,7 @@ import java.util.Map;
 
 public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
 
-    private final ASMClassInfo classInfo;
+    private final ASMClassInfo declaringClass;
     private final Map<String, AnnHandler> annotations;
     private final int access;
     private final String name;
@@ -50,9 +50,9 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
     private final Type[] argumentTypes;
     private final ClassInfoRepo repo;
 
-    public ASMMethodInfo(MethodVisitor methodVisitor, ClassInfoRepo repo, ASMClassInfo classInfo, int access, String name, String desc, String signature) {
+    public ASMMethodInfo(MethodVisitor methodVisitor, ClassInfoRepo repo, ASMClassInfo declaringClass, int access, String name, String desc, String signature) {
         super(Opcodes.ASM4, methodVisitor);
-        this.classInfo = classInfo;
+        this.declaringClass = declaringClass;
         this.repo = repo;
         this.access = access;
         this.name = name;
@@ -79,8 +79,8 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
     }
 
     @Override
-    public ClassInfo getOwner() {
-        return classInfo;
+    public ClassInfo getDeclaringClass() {
+        return declaringClass;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
 
     @Override
     public String getQualifiedName() {
-        return classInfo.getQualifiedName() + "." + name;
+        return declaringClass.getQualifiedName() + "." + name;
     }
 
     @Override

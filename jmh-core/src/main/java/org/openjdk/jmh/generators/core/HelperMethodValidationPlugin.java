@@ -37,10 +37,10 @@ public class HelperMethodValidationPlugin implements Plugin {
         try {
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, Setup.class)) {
                 // OK to have these annotation for @State objects
-                if (BenchmarkGeneratorUtils.getAnnSuper(element.getOwner(), State.class) != null) continue;
+                if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) != null) continue;
 
                 // Abstract classes are not instantiated, assume OK
-                if (element.getOwner().isAbstract()) continue;
+                if (element.getDeclaringClass().isAbstract()) continue;
 
                 source.printError(
                         "@" + Setup.class.getSimpleName() + " annotation is placed within " +
@@ -51,10 +51,10 @@ public class HelperMethodValidationPlugin implements Plugin {
 
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, TearDown.class)) {
                 // OK to have these annotation for @State objects
-                if (BenchmarkGeneratorUtils.getAnnSuper(element.getOwner(), State.class) != null) continue;
+                if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) != null) continue;
 
                 // Abstract classes are not instantiated, assume OK
-                if (element.getOwner().isAbstract()) continue;
+                if (element.getDeclaringClass().isAbstract()) continue;
 
                 source.printError(
                             "@" + TearDown.class.getSimpleName() + " annotation is placed within " +

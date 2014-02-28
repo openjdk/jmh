@@ -117,7 +117,7 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     @Override
-    public ClassInfo getEnclosingClass() {
+    public ClassInfo getDeclaringClass() {
         Element enclosingElement = el.getEnclosingElement();
         if (enclosingElement.getKind() == ElementKind.CLASS) {
             return new APClassInfo(processEnv, (TypeElement) enclosingElement);

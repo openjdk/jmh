@@ -29,11 +29,11 @@ import java.util.Collection;
 
 public interface MethodInfo extends Comparable<MethodInfo>, MetadataInfo {
 
-    ClassInfo getOwner();
-
     String getName();
     String getQualifiedName();
     String getReturnType();
+
+    ClassInfo getDeclaringClass();
 
     Collection<ParameterInfo> getParameters();
 

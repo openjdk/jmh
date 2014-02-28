@@ -28,11 +28,11 @@ import java.lang.annotation.Annotation;
 
 public interface FieldInfo extends MetadataInfo {
 
-    ClassInfo getOwner();
-
     String getName();
 
     String getType();
+
+    ClassInfo getDeclaringClass();
 
     <T extends Annotation> T getAnnotation(Class<T> annClass);
 

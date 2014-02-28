@@ -393,7 +393,7 @@ public class StateObjectHandler {
                 result.add("            Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = " + so.getParam(paramName).getOwner().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
                 result.add("            f.setAccessible(true);");
                 result.add("            f.set(" + so.fieldIdentifier + ", " + so.getParamAccessor(paramName) + ");");
             }
@@ -421,7 +421,7 @@ public class StateObjectHandler {
                 result.add("            Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("        f = " + so.getParam(paramName).getOwner().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                result.add("        f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
                 result.add("        f.setAccessible(true);");
                 result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
@@ -455,7 +455,7 @@ public class StateObjectHandler {
                 result.add("            Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = " + so.getParam(paramName).getOwner().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                result.add("            f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
                 result.add("            f.setAccessible(true);");
                 result.add("            f.setAccessible(true);");
                 result.add("            f.set(local, " + so.getParamAccessor(paramName) + ");");

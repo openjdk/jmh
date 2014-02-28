@@ -39,14 +39,14 @@ import java.util.Map;
 public class ASMFieldInfo extends FieldVisitor implements FieldInfo {
 
     private final String type;
-    private final ASMClassInfo owner;
+    private final ASMClassInfo declaringClass;
     private final int access;
     private final String name;
     private final Map<String, AnnHandler> annotations;
 
-    public ASMFieldInfo(FieldVisitor fieldVisitor, ASMClassInfo owner, int access, String name, String desc, String signature) {
+    public ASMFieldInfo(FieldVisitor fieldVisitor, ASMClassInfo declaringClass, int access, String name, String desc, String signature) {
         super(Opcodes.ASM4, fieldVisitor);
-        this.owner = owner;
+        this.declaringClass = declaringClass;
         this.access = access;
         this.name = name;
         this.type = Type.getReturnType(desc).getClassName();
@@ -91,12 +91,12 @@ public class ASMFieldInfo extends FieldVisitor implements FieldInfo {
     }
 
     @Override
-    public ClassInfo getOwner() {
-        return owner;
+    public ClassInfo getDeclaringClass() {
+        return declaringClass;
     }
 
     @Override
     public String toString() {
-        return owner.getQualifiedName() + "." + name;
+        return declaringClass.getQualifiedName() + "." + name;
     }
 }

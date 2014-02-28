@@ -32,17 +32,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 public class RFFieldInfo implements FieldInfo {
-    private final ClassInfo owner;
+    private final ClassInfo declaringClass;
     private final Field f;
 
-    public RFFieldInfo(ClassInfo owner, Field f) {
-        this.owner = owner;
+    public RFFieldInfo(ClassInfo declaringClass, Field f) {
+        this.declaringClass = declaringClass;
         this.f = f;
     }
 
     @Override
-    public ClassInfo getOwner() {
-        return owner;
+    public ClassInfo getDeclaringClass() {
+        return declaringClass;
     }
 
     @Override

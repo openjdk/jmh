@@ -40,7 +40,7 @@ public interface ClassInfo extends MetadataInfo {
 
     ClassInfo getSuperClass();
 
-    ClassInfo getEnclosingClass();
+    ClassInfo getDeclaringClass();
 
     Collection<FieldInfo> getFields();
 

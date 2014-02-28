@@ -68,7 +68,7 @@ public class APFieldInfo extends APMetadataInfo implements FieldInfo {
     }
 
     @Override
-    public ClassInfo getOwner() {
+    public ClassInfo getDeclaringClass() {
         return new APClassInfo(processEnv, (TypeElement)ve.getEnclosingElement());
     }
 

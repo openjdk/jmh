@@ -36,17 +36,17 @@ import java.util.Collection;
 
 public class RFConstructorInfo implements MethodInfo {
 
-    private final ReflectiveClassInfo owner;
+    private final ReflectiveClassInfo declaringClass;
     private final Constructor m;
 
-    public RFConstructorInfo(ReflectiveClassInfo owner, Constructor m) {
-        this.owner = owner;
+    public RFConstructorInfo(ReflectiveClassInfo declaringClass, Constructor m) {
+        this.declaringClass = declaringClass;
         this.m = m;
     }
 
     @Override
-    public ClassInfo getOwner() {
-        return owner;
+    public ClassInfo getDeclaringClass() {
+        return declaringClass;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RFConstructorInfo implements MethodInfo {
 
     @Override
     public String getQualifiedName() {
-        return owner.getQualifiedName() + "." + m.getName();
+        return declaringClass.getQualifiedName() + "." + m.getName();
     }
 
     @Override

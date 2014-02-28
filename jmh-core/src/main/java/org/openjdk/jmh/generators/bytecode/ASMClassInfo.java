@@ -163,7 +163,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
-    public ClassInfo getEnclosingClass() {
+    public ClassInfo getDeclaringClass() {
         if (declaringClass != null) {
             return classInfos.get(declaringClass);
         } else {

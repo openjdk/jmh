@@ -29,8 +29,6 @@ import org.openjdk.jmh.generators.source.FieldInfo;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 import org.openjdk.jmh.generators.source.MethodInfo;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -106,7 +104,7 @@ public class BenchmarkGeneratorUtils {
         if (ann != null) {
             return ann;
         } else {
-            ClassInfo eci = ci.getEnclosingClass();
+            ClassInfo eci = ci.getDeclaringClass();
             if (eci != null) {
                 return getAnnSyntax(eci, annClass);
             }
@@ -119,7 +117,7 @@ public class BenchmarkGeneratorUtils {
         if (ann != null) {
             return ann;
         } else {
-            return getAnnSyntax(mi.getOwner(), annClass);
+            return getAnnSyntax(mi.getDeclaringClass(), annClass);
         }
     }
 
@@ -127,7 +125,7 @@ public class BenchmarkGeneratorUtils {
         String name = "";
         do {
             name = ci.getName() + (name.isEmpty() ? "" : "_" + name);
-        } while ((ci = ci.getEnclosingClass()) != null);
+        } while ((ci = ci.getDeclaringClass()) != null);
         return name;
     }
 

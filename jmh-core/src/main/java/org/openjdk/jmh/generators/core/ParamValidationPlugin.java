@@ -42,7 +42,7 @@ public class ParamValidationPlugin implements Plugin {
                     );
                 }
 
-                if (BenchmarkGeneratorUtils.getAnnSyntax(element.getOwner(), State.class) == null) {
+                if (BenchmarkGeneratorUtils.getAnnSyntax(element.getDeclaringClass(), State.class) == null) {
                     source.printError(
                             "@" + Param.class.getSimpleName() + " annotation should be placed in @" + State.class.getSimpleName() +
                                     "-annotated class.",

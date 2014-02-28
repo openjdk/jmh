@@ -48,7 +48,7 @@ public class APMethodInfo extends APMetadataInfo implements MethodInfo {
     }
 
     @Override
-    public ClassInfo getOwner() {
+    public ClassInfo getDeclaringClass() {
         return ci;
     }
 
@@ -107,7 +107,7 @@ public class APMethodInfo extends APMetadataInfo implements MethodInfo {
     }
 
     public String toString() {
-        return getOwner() + " " + getName() ;
+        return getDeclaringClass() + " " + getName() ;
     }
 
 }

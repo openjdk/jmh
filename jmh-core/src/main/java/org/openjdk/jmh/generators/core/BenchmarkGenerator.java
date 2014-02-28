@@ -323,7 +323,7 @@ public class BenchmarkGenerator {
                         }
                     }
 
-                    State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(meth.getOwner(), State.class);
+                    State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(meth.getDeclaringClass(), State.class);
                     if (stateAnn != null && stateAnn.value() == Scope.Group) {
                         throw new GenerationException(
                                 "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
