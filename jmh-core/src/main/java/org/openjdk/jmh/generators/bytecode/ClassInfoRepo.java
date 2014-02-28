@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.generators.bytecode;
 
-import org.objectweb.asm.Type;
+import org.openjdk.jmh.generators.reflective.RFClassInfo;
 import org.openjdk.jmh.generators.source.ClassInfo;
 
 import java.util.Collection;
@@ -33,16 +33,25 @@ import java.util.Map;
 
 public class ClassInfoRepo {
 
-    private final Map<Type, ClassInfo> map = new HashMap<Type, ClassInfo>();
+    private final Map<String, ClassInfo> map = new HashMap<String, ClassInfo>();
 
     public ClassInfo get(String desc) {
-        Type type = Type.getType(desc);
-        return map.get(type);
+        desc = desc.replace('/', '.');
+        ClassInfo info = map.get(desc);
+        if (info != null) {
+            return info;
+        }
+
+        try {
+            return new RFClassInfo(Class.forName(desc));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Unable to resolve class: " + desc);
+        }
     }
 
     public void put(String desc, ClassInfo info) {
-        Type type = Type.getType(desc);
-        map.put(type, info);
+        desc = desc.replace('/', '.');
+        map.put(desc, info);
     }
 
     public Collection<ClassInfo> getInfos() {

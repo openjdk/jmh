@@ -28,7 +28,6 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.openjdk.jmh.generators.reflective.RFClassInfo;
 import org.openjdk.jmh.generators.source.ClassInfo;
 import org.openjdk.jmh.generators.source.MethodInfo;
 import org.openjdk.jmh.generators.source.ParameterInfo;
@@ -102,14 +101,7 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
     public Collection<ParameterInfo> getParameters() {
         Collection<ParameterInfo> result = new ArrayList<ParameterInfo>();
         for (Type t : argumentTypes) {
-            ClassInfo ci = repo.get(t.getClassName().replaceAll("\\.", "/"));
-            if (ci == null) {
-                try {
-                    ci = new RFClassInfo(Class.forName(t.getClassName()));
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalStateException("Unresolved class: " + this + " " + t, e);
-                }
-            }
+            ClassInfo ci = repo.get(t.getClassName());
             result.add(new ASMParameterInfo(ci));
         }
         return result;

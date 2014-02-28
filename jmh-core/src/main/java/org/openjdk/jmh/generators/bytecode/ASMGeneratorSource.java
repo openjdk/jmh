@@ -25,7 +25,6 @@
 package org.openjdk.jmh.generators.bytecode;
 
 import org.objectweb.asm.ClassReader;
-import org.openjdk.jmh.generators.reflective.RFClassInfo;
 import org.openjdk.jmh.generators.source.ClassInfo;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 import org.openjdk.jmh.generators.source.MetadataInfo;
@@ -85,11 +84,7 @@ public class ASMGeneratorSource implements GeneratorSource {
 
     @Override
     public ClassInfo resolveClass(String className) {
-        try {
-            return new RFClassInfo(Class.forName(className));
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
+        return classInfos.get(className);
     }
 
     @Override
