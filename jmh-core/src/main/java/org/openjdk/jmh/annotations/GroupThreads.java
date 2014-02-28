@@ -34,9 +34,9 @@ import java.lang.annotation.Target;
  * This annotation describes the default amount of threads
  * for particular subgroup. See {@link Group} for more details.
  */
+@Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 public @interface GroupThreads {
 
     /** Number of threads in this subgroup. */

@@ -75,7 +75,7 @@ import java.lang.annotation.Target;
  * @author Sergey Kuksenko
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface GenerateMicroBenchmark {
 
 }

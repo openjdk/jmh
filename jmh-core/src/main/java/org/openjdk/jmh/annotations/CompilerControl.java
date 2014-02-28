@@ -40,8 +40,8 @@ import java.lang.annotation.Target;
  * Also, these control annotations might get freely ignored by the compiler,
  * reduced to no-ops, or otherwise invalidated. Be cautious.
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface CompilerControl {
 
     /**

@@ -46,9 +46,9 @@ import java.lang.annotation.Target;
  * When multiple {@link Param}-s are needed for the benchmark run,
  * JMH will compute the outer product of all the parameters in the run.
  */
-@Target({ElementType.FIELD})
-@Retention(RetentionPolicy.SOURCE)
 @Inherited
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Param {
 
     public static final String BLANK_ARGS = "blank_blank_blank_2014";

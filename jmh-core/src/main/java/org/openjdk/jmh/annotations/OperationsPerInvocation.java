@@ -43,10 +43,9 @@ import java.lang.annotation.Target;
  * }
  * </pre></blockquote></p>
  */
-
-@Target({ElementType.METHOD,ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
 @Inherited
+@Target({ElementType.METHOD,ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface OperationsPerInvocation {
 
     /**

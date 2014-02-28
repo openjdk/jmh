@@ -38,9 +38,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author sergey.kuksenko@oracle.com
  */
+@Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 public @interface Measurement {
 
     public static final int BLANK_ITERATIONS = -1;

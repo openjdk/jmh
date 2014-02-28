@@ -37,9 +37,9 @@ import java.lang.annotation.Target;
  *
  * @author sergey.kuksenko@oracle.com
  */
+@Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 public @interface Threads {
 
     /**

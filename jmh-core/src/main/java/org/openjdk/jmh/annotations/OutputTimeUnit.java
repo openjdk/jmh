@@ -36,9 +36,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author sergey.kuksenko@oracle.com
  */
-@Target({ElementType.METHOD,ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
 @Inherited
+@Target({ElementType.METHOD,ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface OutputTimeUnit {
 
     /**

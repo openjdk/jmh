@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * The results of each method is labelled by source method name.
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Group {
 
     /**

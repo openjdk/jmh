@@ -24,12 +24,18 @@
  */
 package org.openjdk.jmh.annotations;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Annotations declares the default mode in which benchmark should be run.
  */
 @Inherited
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface BenchmarkMode {
 
     Mode[] value();

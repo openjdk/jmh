@@ -38,9 +38,9 @@ import java.lang.annotation.Target;
  * <p />
  *
  */
+@Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 public @interface State {
 
     /**

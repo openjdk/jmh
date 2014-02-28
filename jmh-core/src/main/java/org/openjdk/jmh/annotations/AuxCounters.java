@@ -24,6 +24,11 @@
  */
 package org.openjdk.jmh.annotations;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * THIS IS AN EXPERIMENTAL API.
  *  (That means it can be modified, deprecated and removed in future)
@@ -47,5 +52,7 @@ package org.openjdk.jmh.annotations;
  * <p>
  * NOTE: This functionality is not available for all {@link BenchmarkMode}-s.
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface AuxCounters {
 }
