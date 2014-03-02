@@ -43,7 +43,7 @@ public class ClassInfoRepo {
         }
 
         try {
-            return new RFClassInfo(Class.forName(desc));
+            return new RFClassInfo(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Unable to resolve class: " + desc);
         }
