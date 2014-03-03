@@ -50,7 +50,7 @@ public @interface OperationsPerInvocation {
 
     /**
      * Annotation specifies how much to increase the operations count for each invocation of the test-method. */
-    long value() default 1;
+    int value() default 1;
 
 }
 

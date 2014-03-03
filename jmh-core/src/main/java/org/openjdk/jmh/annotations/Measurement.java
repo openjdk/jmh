@@ -44,14 +44,14 @@ import java.util.concurrent.TimeUnit;
 public @interface Measurement {
 
     public static final int BLANK_ITERATIONS = -1;
-    public static final long BLANK_TIME = -1L;
+    public static final int BLANK_TIME = -1;
     public static final int BLANK_BATCHSIZE = -1;
 
     /** Amount of iterations */
     int iterations() default BLANK_ITERATIONS;
 
     /** time of each iteration */
-    long time() default BLANK_TIME;
+    int time() default BLANK_TIME;
 
     /** time unit of the time value */
     TimeUnit timeUnit() default TimeUnit.SECONDS;

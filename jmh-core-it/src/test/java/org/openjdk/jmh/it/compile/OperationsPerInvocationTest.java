@@ -50,10 +50,4 @@ public class OperationsPerInvocationTest {
 
     }
 
-    @GenerateMicroBenchmark
-    @OperationsPerInvocation(Long.MAX_VALUE/2)
-    public void test4() {
-
-    }
-
 }
