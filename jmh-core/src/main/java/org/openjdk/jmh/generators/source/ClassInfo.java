@@ -56,5 +56,6 @@ public interface ClassInfo extends MetadataInfo {
 
     boolean isStrictFP();
 
+    boolean isFinal();
 }
 

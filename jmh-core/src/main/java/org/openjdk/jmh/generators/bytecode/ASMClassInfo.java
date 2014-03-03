@@ -189,6 +189,11 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
+    public boolean isFinal() {
+        return (access & Opcodes.ACC_FINAL) > 0;
+    }
+
+    @Override
     public String toString() {
         return qualifiedName;
     }

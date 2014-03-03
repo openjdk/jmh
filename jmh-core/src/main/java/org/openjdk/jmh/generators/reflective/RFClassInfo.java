@@ -138,6 +138,11 @@ public class RFClassInfo implements ClassInfo {
     }
 
     @Override
+    public boolean isFinal() {
+        return Modifier.isFinal(klass.getModifiers());
+    }
+
+    @Override
     public String toString() {
         return getQualifiedName();
     }

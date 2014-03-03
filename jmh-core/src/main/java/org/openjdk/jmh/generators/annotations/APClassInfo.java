@@ -141,6 +141,11 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
         return el.getModifiers().contains(Modifier.STRICTFP);
     }
 
+    @Override
+    public boolean isFinal() {
+        return el.getModifiers().contains(Modifier.FINAL);
+    }
+
     public String toString() {
         return getQualifiedName();
     }

@@ -209,6 +209,10 @@ public class BenchmarkGenerator {
             throw new GenerationException("Microbenchmark should have package other than default.", clazz);
         }
 
+        if (clazz.isFinal()) {
+            throw new GenerationException("Benchmark classes should not be final.", clazz);
+        }
+
         Collection<ClassInfo> states = new ArrayList<ClassInfo>();
 
         // validate all arguments are @State-s
@@ -244,6 +248,11 @@ public class BenchmarkGenerator {
             if (!state.isPublic()) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
                         " annotation only supports public classes.", state);
+            }
+
+            if (state.isFinal()) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation only supports non-final classes.", state);
             }
 
             boolean hasDefaultConstructor = false;
