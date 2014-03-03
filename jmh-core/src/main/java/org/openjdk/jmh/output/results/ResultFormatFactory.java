@@ -44,6 +44,9 @@ public class ResultFormatFactory {
      * @return result format
      */
     public static ResultFormat getInstance(final ResultFormatType type, final String file) {
+        if (type == ResultFormatType.NONE) {
+            return new NoneResultFormat();
+        }
         return new ResultFormat() {
             @Override
             public void writeOut(Map<BenchmarkRecord, RunResult> results) {
@@ -71,7 +74,7 @@ public class ResultFormatFactory {
     public static ResultFormat getInstance(ResultFormatType type, PrintWriter writer) {
         switch (type) {
             case NONE:
-                return new NoneResultFormat();
+                throw new IllegalStateException(ResultFormatType.NONE + " should be handled already");
             case CSV:
                 /*
                  * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180
