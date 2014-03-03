@@ -28,19 +28,74 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
+/**
+ * Generator source.
+ *
+ * This is an entry point towards {@link org.openjdk.jmh.generators.core.BenchmarkGenerator}
+ * interface.
+ */
 public interface GeneratorSource {
 
+    /**
+     * @return collection of all resolved classes
+     */
     Collection<ClassInfo> getClasses();
 
+    /**
+     * Resolve class info for a name.
+     * <p/>
+     * Users may call this method for the classes not
+     * listed in {@link #getClasses()} call, the implementation
+     * has to have the fall-back strategy for these cases.
+     *
+     * @param className class name
+     * @return class metainfo
+     */
     ClassInfo resolveClass(String className);
 
-    Writer newResource(String path) throws IOException;
+    /**
+     * Returns the Writer for the given resource.
+     * Callers are responsible for closing Writers.
+     *
+     * @param resourcePath resource path
+     * @return writer usable to write the resource
+     * @throws IOException if something wacked happens
+     */
+    Writer newResource(String resourcePath) throws IOException;
 
-    Writer newFile(String objectName) throws IOException;
+    /**
+     * Returns the Writer for the given class.
+     * Callers are responsible for closing Writers.
+     *
+     * @param className class name
+     * @return writer usable to write the resource
+     * @throws IOException if something wacked happens
+     */
+    Writer newClass(String className) throws IOException;
 
+    /**
+     * Print the error.
+     * Calling this method should not terminate anything.
+     *
+     * @param message error.
+     */
     void printError(String message);
 
+    /**
+     * Print the error.
+     * Calling this method should not terminate anything.
+     *
+     * @param message error.
+     * @param element metadata element, to which this error is tailored
+     */
     void printError(String message, MetadataInfo element);
 
+    /**
+     * Print the error.
+     * Calling this method should not terminate anything.
+     *
+     * @param message error.
+     * @param throwable exception causing the error
+     */
     void printError(String message, Throwable throwable);
 }

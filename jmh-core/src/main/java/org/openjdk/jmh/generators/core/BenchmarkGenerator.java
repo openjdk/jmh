@@ -82,6 +82,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
+ * Benchmark generator.
+ * <p/>
+ * Benchmark generator is the agnostic piece of code which generates
+ * synthetic Java code for JMH benchmarks. {@link GeneratorSource} is
+ * used to feed the generator with the required metadata.
+ *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class BenchmarkGenerator {
@@ -103,6 +109,11 @@ public class BenchmarkGenerator {
         plugins.add(compilerControl);
     }
 
+    /**
+     * Execute the next phase of benchmark generation.
+     * Multiple calls to this method are acceptable, even with the difference sources
+     * @param source generator source to get the metadata from
+     */
     public void generate(GeneratorSource source) {
         try {
             for (Plugin sub : plugins) {
@@ -130,6 +141,12 @@ public class BenchmarkGenerator {
         }
     }
 
+    /**
+     * Finish generating the benchmarks.
+     * Must be called at the end of generation.
+     *
+     * @param source source generator to use
+     */
     public void complete(GeneratorSource source) {
         for (Plugin sub : plugins) {
             sub.finish(source);
@@ -438,7 +455,7 @@ public class BenchmarkGenerator {
     private void generateClass(GeneratorSource source, ClassInfo classInfo, BenchmarkInfo info) {
         try {
             // Create file and open an outputstream
-            PrintWriter writer = new PrintWriter(source.newFile(info.generatedName), false);
+            PrintWriter writer = new PrintWriter(source.newClass(info.generatedName), false);
 
             // Write package and imports
             writer.println("package " + info.generatedPackageName + ';');

@@ -24,5 +24,8 @@
  */
 package org.openjdk.jmh.generators.source;
 
+/**
+ * Super-interface for all metadata elements.
+ */
 public interface MetadataInfo {
 }

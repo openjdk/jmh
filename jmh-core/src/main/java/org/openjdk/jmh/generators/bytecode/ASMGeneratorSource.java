@@ -88,15 +88,15 @@ public class ASMGeneratorSource implements GeneratorSource {
     }
 
     @Override
-    public Writer newResource(String path) throws IOException {
-        String pathName = targetDir.getAbsolutePath() + "/" + path;
+    public Writer newResource(String resourcePath) throws IOException {
+        String pathName = targetDir.getAbsolutePath() + "/" + resourcePath;
         new File(pathName.substring(0, pathName.lastIndexOf("/"))).mkdirs();
         return new FileWriter(new File(pathName));
     }
 
     @Override
-    public Writer newFile(String objectName) throws IOException {
-        String pathName = targetSourceDir.getAbsolutePath() + "/" + objectName.replaceAll("\\.", "/");
+    public Writer newClass(String className) throws IOException {
+        String pathName = targetSourceDir.getAbsolutePath() + "/" + className.replaceAll("\\.", "/");
         new File(pathName.substring(0, pathName.lastIndexOf("/"))).mkdirs();
         return new FileWriter(new File(pathName + ".java"));
     }

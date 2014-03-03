@@ -114,13 +114,13 @@ public class APGeneratorSource implements GeneratorSource {
     }
 
     @Override
-    public Writer newResource(String path) throws IOException {
-        return processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", path).openWriter();
+    public Writer newResource(String resourcePath) throws IOException {
+        return processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openWriter();
     }
 
     @Override
-    public Writer newFile(String objectName) throws IOException {
-        return processingEnv.getFiler().createSourceFile(objectName).openWriter();
+    public Writer newClass(String className) throws IOException {
+        return processingEnv.getFiler().createSourceFile(className).openWriter();
     }
 
     @Override
