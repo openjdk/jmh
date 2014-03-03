@@ -118,7 +118,7 @@ questions.
                         <configuration>
                             <header>file:///${project.basedir}/../src/license/gpl_cpe/header.txt</header>
                             <skipExistingHeaders>false</skipExistingHeaders>
-                            <strictCheck>${project.bu}</strictCheck>
+                            <strictCheck>true</strictCheck>
                             <mapping>
                                 <java>PHP</java>
                             </mapping>
