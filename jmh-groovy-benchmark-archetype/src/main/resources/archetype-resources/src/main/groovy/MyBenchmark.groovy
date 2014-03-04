@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 class MyBenchmark {
 
     @GenerateMicroBenchmark
-    def pure() {
+    def testMethod() {
         // Put your benchmark code here
     }
 

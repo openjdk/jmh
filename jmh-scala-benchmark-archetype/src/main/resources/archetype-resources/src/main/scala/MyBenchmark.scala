@@ -30,7 +30,7 @@ import org.openjdk.jmh.annotations.GenerateMicroBenchmark
   class MyBenchmark {
 
     @GenerateMicroBenchmark
-    def test(): Any = {
+    def testMethod(): Any = {
       // place your benchmark code here
     }
 
