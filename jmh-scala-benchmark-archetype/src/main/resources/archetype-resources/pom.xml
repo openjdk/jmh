@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>${jmh.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -32,7 +32,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jmh.version>1.0-SNAPSHOT</jmh.version>
         <scala.version>2.10.3</scala.version>
         <scala.maven.version>3.1.6</scala.maven.version>
     </properties>
@@ -93,7 +92,7 @@
             <plugin>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-maven-plugin</artifactId>
-                <version>${jmh.version}</version>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
