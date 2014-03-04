@@ -49,9 +49,9 @@ public class CompilerControlPlugin implements Plugin {
         }
     });
 
-    private final Set<ClassInfo> defaultForceInlineClasses = new TreeSet<ClassInfo>(new Comparator<ClassInfo>() {
+    private final Set<MethodInfo> defaultDontInlineMethods = new TreeSet<MethodInfo>(new Comparator<MethodInfo>() {
         @Override
-        public int compare(ClassInfo o1, ClassInfo o2) {
+        public int compare(MethodInfo o1, MethodInfo o2) {
             return o1.getQualifiedName().compareTo(o2.getQualifiedName());
         }
     });
@@ -60,8 +60,8 @@ public class CompilerControlPlugin implements Plugin {
         defaultForceInlineMethods.add(methodInfo);
     }
 
-    public void defaultForceInline(ClassInfo classInfo) {
-        defaultForceInlineClasses.add(classInfo);
+    public void defaultDontInline(MethodInfo methodInfo) {
+        defaultDontInlineMethods.add(methodInfo);
     }
 
     public void process(GeneratorSource source) {
@@ -81,6 +81,11 @@ public class CompilerControlPlugin implements Plugin {
                 lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
             }
 
+            for (MethodInfo element : defaultDontInlineMethods) {
+                if (element.getAnnotation(CompilerControl.class) != null) continue;
+                lines.add(CompilerControl.Mode.DONT_INLINE.command() + "," + getName(element));
+            }
+
             for (ClassInfo element : BenchmarkGeneratorUtils.getClassesAnnotatedWith(source, CompilerControl.class)) {
                 CompilerControl ann = element.getAnnotation(CompilerControl.class);
                 if (ann == null) {
@@ -91,10 +96,6 @@ public class CompilerControlPlugin implements Plugin {
                 lines.add(command.command() + "," + getName(element));
             }
 
-            for (ClassInfo element : defaultForceInlineClasses) {
-                if (element.getAnnotation(CompilerControl.class) != null) continue;
-                lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
-            }
         } catch (Throwable t) {
             source.printError("Compiler control generators had thrown the unexpected exception", t);
         }

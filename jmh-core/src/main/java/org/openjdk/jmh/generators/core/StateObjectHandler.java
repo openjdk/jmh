@@ -69,12 +69,15 @@ public class StateObjectHandler {
     private final HashMap<String, String> collapsedTypes = new HashMap<String, String>();
     private int collapsedIndex = 0;
 
+    private final CompilerControlPlugin compileControl;
+
     private final Set<String> claimedJmhTypes = new HashSet<String>();
     private final HashMap<String, String> jmhTypes = new HashMap<String, String>();
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
-    public StateObjectHandler() {
+    public StateObjectHandler(CompilerControlPlugin compileControl) {
+        this.compileControl = compileControl;
         this.args = new HashMultimap<String, StateObject>();
         this.implicits = new HashMap<String, StateObject>();
         this.stateObjects = new HashSet<StateObject>();
@@ -214,14 +217,15 @@ public class StateObjectHandler {
             Setup setupAnn = mi.getAnnotation(Setup.class);
             if (setupAnn != null) {
                 helpersByState.put(so, new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));
+                compileControl.defaultForceInline(mi);
             }
 
             TearDown tearDownAnn = mi.getAnnotation(TearDown.class);
             if (tearDownAnn != null) {
                 helpersByState.put(so, new HelperMethodInvocation(mi, so, tearDownAnn.value(), HelperType.TEARDOWN));
+                compileControl.defaultForceInline(mi);
             }
         }
-
     }
 
     public String getArgList(MethodInfo methodInfo) {

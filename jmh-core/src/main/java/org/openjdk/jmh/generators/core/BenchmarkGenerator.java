@@ -464,15 +464,12 @@ public class BenchmarkGenerator {
             generateImport(writer);
 
             // Write class header
-            writer.println("@" + CompilerControl.class.getSimpleName() +
-                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
-                    "." + CompilerControl.Mode.DONT_INLINE + ")");
             writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
             writer.println("public final class " + info.generatedClassName + " {");
             writer.println();
             generatePadding(writer);
 
-            StateObjectHandler states = new StateObjectHandler();
+            StateObjectHandler states = new StateObjectHandler(compilerControl);
 
             // benchmark instance is implicit
             states.bindImplicit(classInfo, "bench", Scope.Thread);
@@ -587,8 +584,6 @@ public class BenchmarkGenerator {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (MethodInfo method : methodGroup.methods()) {
-            compilerControl.defaultForceInline(method);
-
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
@@ -658,8 +653,14 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            String loopMethodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
+
+            compilerControl.defaultForceInline(method);
+
+            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
+                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
+                    "." + CompilerControl.Mode.DONT_INLINE + ")");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + loopMethodName + "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -688,8 +689,6 @@ public class BenchmarkGenerator {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (MethodInfo method : methodGroup.methods()) {
-            compilerControl.defaultForceInline(method);
-
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
@@ -757,7 +756,12 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") +  " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
+            compilerControl.defaultForceInline(method);
+
+            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
+                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
+                    "." + CompilerControl.Mode.DONT_INLINE + ")");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
                     "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() +
                     prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
@@ -800,8 +804,6 @@ public class BenchmarkGenerator {
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (MethodInfo method : methodGroup.methods()) {
-            compilerControl.defaultForceInline(method);
-
             subGroup++;
 
             writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
@@ -867,7 +869,12 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            compilerControl.defaultForceInline(method);
+
+            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
+                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
+                    "." + CompilerControl.Mode.DONT_INLINE + ")");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" + "(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
             writer.println(ident(2) + "int rndMask = 0;");
@@ -902,6 +909,9 @@ public class BenchmarkGenerator {
     }
 
     private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
+        writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
+                "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
+                "." + CompilerControl.Mode.DONT_INLINE + ")");
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
