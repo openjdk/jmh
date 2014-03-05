@@ -37,30 +37,40 @@ public class HelperMethodValidationPlugin implements Plugin {
         try {
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, Setup.class)) {
                 // OK to have these annotation for @State objects
-                if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) != null) continue;
+                if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) == null) {
+                    if (!element.getDeclaringClass().isAbstract()) {
+                        source.printError(
+                                "@" + Setup.class.getSimpleName() + " annotation is placed within " +
+                                        "the class not having @" + State.class.getSimpleName() + " annotation. " +
+                                        "This has no behavioral effect, and prohibited.",
+                                element);
+                    }
+                }
 
-                // Abstract classes are not instantiated, assume OK
-                if (element.getDeclaringClass().isAbstract()) continue;
-
-                source.printError(
-                        "@" + Setup.class.getSimpleName() + " annotation is placed within " +
-                                "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                "This has no behavioral effect, and prohibited.",
-                        element);
+                if (!element.isPublic()) {
+                    source.printError(
+                            "@" + Setup.class.getSimpleName() + " method should be public.",
+                            element);
+                }
             }
 
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, TearDown.class)) {
                 // OK to have these annotation for @State objects
-                if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) != null) continue;
+                if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) == null) {
+                    if (!element.getDeclaringClass().isAbstract()) {
+                        source.printError(
+                                "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
+                                        "the class not having @" + State.class.getSimpleName() + " annotation. " +
+                                        "This has no behavioral effect, and prohibited.",
+                                element);
+                    }
+                }
 
-                // Abstract classes are not instantiated, assume OK
-                if (element.getDeclaringClass().isAbstract()) continue;
-
-                source.printError(
-                            "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
-                                    "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                    "This can be futile if no @State-bearing subclass is used.",
+                if (!element.isPublic()) {
+                    source.printError(
+                            "@" + TearDown.class.getSimpleName() + " method should be public.",
                             element);
+                }
             }
 
         } catch (Throwable t) {
