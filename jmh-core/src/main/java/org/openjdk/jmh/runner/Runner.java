@@ -282,17 +282,21 @@ public class Runner extends BaseRunner {
         for (String k : benchParams.keySet()) {
             Collection<String> values = options.getParameter(k).orElse(Arrays.asList(benchParams.get(k)));
             if (ps.isEmpty()) {
+                int idx = 0;
                 for (String v : values) {
                     ActualParams al = new ActualParams();
-                    al.put(k, v);
+                    al.put(k, v, idx);
                     ps.add(al);
+                    idx++;
                 }
             } else {
                 for (ActualParams p : ps) {
+                    int idx = 0;
                     for (String v : values) {
                         ActualParams al = p.copy();
-                        al.put(k, v);
+                        al.put(k, v, idx);
                         newPs.add(al);
+                        idx++;
                     }
                 }
                 ps.clear();

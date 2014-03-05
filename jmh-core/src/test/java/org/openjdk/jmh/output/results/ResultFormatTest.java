@@ -64,7 +64,7 @@ public class ResultFormatTest {
             BenchmarkRecord record = new BenchmarkRecord("benchmark_" + b, JSONResultFormat.class.getName() + ".benchmark_" + b, Mode.AverageTime);
             ActualParams ps = new ActualParams();
             for (int p = 0; p < 5; p++) {
-                ps.put("param" + p, "value" + p);
+                ps.put("param" + p, "value" + p, p);
             }
             record = record.cloneWith(ps);
             BenchmarkParams params = new BenchmarkParams(false,

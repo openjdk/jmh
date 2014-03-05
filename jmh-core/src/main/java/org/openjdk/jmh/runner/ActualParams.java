@@ -31,24 +31,34 @@ import java.util.TreeMap;
 
 public class ActualParams implements Comparable<ActualParams>, Serializable {
 
-    private final SortedMap<String, String> params;
+    private final SortedMap<String, Value> params;
 
     public ActualParams() {
-        params = new TreeMap<String, String>();
+        params = new TreeMap<String, Value>();
     }
 
-    private ActualParams(SortedMap<String, String> params) {
+    private ActualParams(SortedMap<String, Value> params) {
         this();
         this.params.putAll(params);
     }
 
     @Override
     public int compareTo(ActualParams o) {
-        return params.toString().compareTo(o.params.toString());
+        if (!params.keySet().equals(o.params.keySet())) {
+            throw new IllegalStateException("Comparing actual params with different key sets.");
+        }
+
+        for (String key : params.keySet()) {
+            int cr = params.get(key).compareTo(o.params.get(key));
+            if (cr != 0) {
+                return cr;
+            }
+        }
+        return 0;
     }
 
-    public void put(String k, String v) {
-        params.put(k, v);
+    public void put(String k, String v, int vOrder) {
+        params.put(k, new Value(v, vOrder));
     }
 
     public boolean containsKey(String name) {
@@ -56,7 +66,12 @@ public class ActualParams implements Comparable<ActualParams>, Serializable {
     }
 
     public String get(String name) {
-        return params.get(name);
+        Value value = params.get(name);
+        if (value == null) {
+            return null;
+        } else {
+            return value.value;
+        }
     }
 
     @Override
@@ -91,7 +106,7 @@ public class ActualParams implements Comparable<ActualParams>, Serializable {
             } else {
                 sb.append(", ");
             }
-            sb.append(k).append(" = ").append(params.get(k));
+            sb.append(k).append(" = ").append(params.get(k).value);
         }
         sb.append(")");
         return sb.toString();
@@ -108,4 +123,37 @@ public class ActualParams implements Comparable<ActualParams>, Serializable {
     public Collection<String> keys() {
         return params.keySet();
     }
+
+    private static class Value implements Comparable<Value>, Serializable {
+        private String value;
+        private int order;
+
+        public Value(String value, int order) {
+            this.value = value;
+            this.order = order;
+        }
+
+        @Override
+        public int compareTo(Value o) {
+            return Integer.valueOf(order).compareTo(o.order);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Value value1 = (Value) o;
+
+            if (value != null ? !value.equals(value1.value) : value1.value != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
+        }
+    }
+
 }

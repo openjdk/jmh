@@ -22,71 +22,76 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.samples;
+package org.openjdk.jmh.it.params;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.junit.Assert;
+import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
-import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
-@State(Scope.Benchmark)
-public class JMHSample_27_Params {
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(0)
+@State(Scope.Thread)
+public class ParamDeclaredOrderTest {
 
-    /**
-     * In many cases, the experiments require walking the configuration space
-     * for a benchmark. This is needed for additional control, or investigating
-     * how the workload performance changes with different settings.
-     */
+    static int prevV;
 
-    @Param({"1", "31", "65", "101", "103"})
-    public int arg;
+    @Param({"1", "2", "4", "8", "16", "32", "64"})
+    public int v;
 
-    @Param({"0", "1", "2", "4", "8", "16", "32"})
-    public int certainty;
-
-    @GenerateMicroBenchmark
-    public boolean bench() {
-        return BigInteger.valueOf(arg).isProbablePrime(certainty);
+    @Setup(Level.Trial)
+    public void setup() {
+        Assert.assertTrue("Running in different VM", prevV != 0);
     }
 
-    /*
-     * ============================== HOW TO RUN THIS TEST: ====================================
-     *
-     * Note the performance is different with different parameters.
-     *
-     * You can run this test:
-     *
-     * a) Via the command line:
-     *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_27.*"
-     *
-     * b) Via the Java API:
-     */
+    @GenerateMicroBenchmark
+    public void test() {
+        Fixtures.work();
+        Assert.assertTrue(v + " > " + prevV, v > prevV);
+    }
 
-    public static void main(String[] args) throws RunnerException {
+    @TearDown(Level.Trial)
+    public void tearDown() {
+        prevV = v;
+    }
+
+    @Test
+    public void invoke() throws RunnerException {
+        prevV = -1;
+
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_27_Params.class.getSimpleName() + ".*")
-//                .param("arg", "41", "42") // Use this to selectively constrain/override parameters
+                .include(Fixtures.getTestMask(this.getClass()))
+                .shouldFailOnError(true)
                 .build();
+        new Runner(opt).run();
+    }
 
+    @Test
+    public void invokeOverride() throws RunnerException {
+        prevV = -1;
+
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .shouldFailOnError(true)
+                .param("128", "1024", "2048")
+                .build();
         new Runner(opt).run();
     }
 
