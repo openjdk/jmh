@@ -62,6 +62,8 @@ public class ParamDeclaredOrderTest {
     }
 
     @GenerateMicroBenchmark
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     public void test() {
         Fixtures.work();
         Assert.assertTrue(v + " > " + prevV, v > prevV);

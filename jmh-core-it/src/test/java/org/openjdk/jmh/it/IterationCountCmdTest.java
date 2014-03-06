@@ -39,6 +39,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -75,6 +76,7 @@ public class IterationCountCmdTest {
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
                 .measurementIterations(1)
+                .measurementTime(TimeValue.milliseconds(100))
                 .warmupIterations(0)
                 .build();
         new Runner(opt).run();

@@ -39,6 +39,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Baseline test:
  * Checks if assertions are propagated back to integration tests.
@@ -50,7 +52,7 @@ public class InheritBenchmarkBenchTearDownTest extends InheritableBenchmarkTearD
 
     @GenerateMicroBenchmark
     @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 1)
+    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(1)
     @Threads(4)
     public void test() {

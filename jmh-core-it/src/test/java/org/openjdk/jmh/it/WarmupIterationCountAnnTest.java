@@ -42,6 +42,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -66,8 +67,8 @@ public class WarmupIterationCountAnnTest {
 
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.All)
-    @Warmup(iterations = 3, time = 1)
-    @Measurement(iterations = 1, time = 1)
+    @Warmup(iterations = 3, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(1)
     public void test() {
         Fixtures.work();

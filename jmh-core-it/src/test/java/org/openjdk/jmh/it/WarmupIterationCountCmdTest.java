@@ -30,17 +30,20 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -75,8 +78,8 @@ public class WarmupIterationCountCmdTest {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
-                .warmupTime(TimeValue.seconds(1))
-                .measurementTime(TimeValue.seconds(1))
+                .warmupTime(TimeValue.milliseconds(1))
+                .measurementTime(TimeValue.milliseconds(1))
                 .measurementIterations(1)
                 .warmupIterations(3)
                 .build();
