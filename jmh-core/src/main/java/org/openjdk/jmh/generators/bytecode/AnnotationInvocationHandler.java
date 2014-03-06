@@ -33,18 +33,16 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class AnnotationInvocationHandler extends AnnotationVisitor implements InvocationHandler {
-    private final Map<String, Object> values;
-    private final Multimap<String, Object> valuesArray;
+    private final Multimap<String, Object> values;
 
     public AnnotationInvocationHandler(AnnotationVisitor annotationVisitor) {
         super(Opcodes.ASM4, annotationVisitor);
-        this.values = new HashMap<String, Object>();
-        this.valuesArray = new HashMultimap<String, Object>();
+        this.values = new HashMultimap<String, Object>();
     }
 
     @Override
@@ -53,16 +51,16 @@ public class AnnotationInvocationHandler extends AnnotationVisitor implements In
         Class<?> returnType = method.getReturnType();
 
         if (key.equalsIgnoreCase("toString")) {
-            return values + ", " + valuesArray;
+            return values;
         }
 
-        // FIXME: Better type handling
+        Collection<Object> vs = values.get(key);
 
         if (returnType.isArray()) {
             Class<?> componentType = returnType.getComponentType();
             if (componentType.isEnum()) {
-                int count = valuesArray.get(key).size();
-                List<Object> list = new ArrayList<Object>(valuesArray.get(key));
+                int count = vs.size();
+                List<Object> list = new ArrayList<Object>(vs);
 
                 Object o = Array.newInstance(componentType, count);
                 for (int c = 0; c < count; c++) {
@@ -77,16 +75,22 @@ public class AnnotationInvocationHandler extends AnnotationVisitor implements In
             } else if (componentType.isPrimitive()) {
                 throw new IllegalStateException("Primitive arrays are not handled yet");
             } else {
-                String[] strings = valuesArray.get(key).toArray(new String[0]);
+                String[] strings = vs.toArray(new String[vs.size()]);
                 if (strings.length == 0) {
                     strings = (String[]) method.getDefaultValue();
                 }
                 return strings;
             }
         } else {
-            Object value = values.get(key);
-            if (value == null) {
+            Object value;
+            if (vs == null || vs.isEmpty()) {
                 value = method.getDefaultValue();
+            } else {
+                if (vs.size() == 1) {
+                    value = vs.iterator().next();
+                } else {
+                    throw new IllegalStateException("Expected to see a single value, but got " + vs.size());
+                }
             }
 
             if (returnType.isEnum() && (value instanceof String)) {
@@ -114,13 +118,13 @@ public class AnnotationInvocationHandler extends AnnotationVisitor implements In
         return new AnnotationVisitor(Opcodes.ASM4, super.visitArray(name)) {
             @Override
             public void visitEnum(String n, String desc, String value) {
-                valuesArray.put(name, value);
+                values.put(name, value);
                 super.visitEnum(n, desc, value);
             }
 
             @Override
             public void visit(String n, Object value) {
-                valuesArray.put(name, value);
+                values.put(name, value);
                 super.visit(n, value);
             }
         };
