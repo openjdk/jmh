@@ -37,11 +37,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AnnHandler extends AnnotationVisitor implements InvocationHandler {
+public class AnnotationInvocationHandler extends AnnotationVisitor implements InvocationHandler {
     private final Map<String, Object> values;
     private final Multimap<String, Object> valuesArray;
 
-    public AnnHandler(AnnotationVisitor annotationVisitor) {
+    public AnnotationInvocationHandler(AnnotationVisitor annotationVisitor) {
         super(Opcodes.ASM4, annotationVisitor);
         this.values = new HashMap<String, Object>();
         this.valuesArray = new HashMultimap<String, Object>();

@@ -53,7 +53,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private final List<MethodInfo> methods;
     private final List<MethodInfo> constructors;
     private final List<FieldInfo> fields;
-    private final Map<String, AnnHandler> annotations = new HashMap<String, AnnHandler>();
+    private final Map<String, AnnotationInvocationHandler> annotations = new HashMap<String, AnnotationInvocationHandler>();
     private final ClassInfoRepo classInfos;
     private String superName;
     private String declaringClass;
@@ -84,12 +84,12 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
 
     @Override
     public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        AnnHandler handler = annotations.get(annClass.getCanonicalName());
+        AnnotationInvocationHandler handler = annotations.get(annClass.getCanonicalName());
         if (handler == null) {
             return null;
         } else {
             return (T) Proxy.newProxyInstance(
-                    this.getClass().getClassLoader(),
+                    Thread.currentThread().getContextClassLoader(),
                     new Class[]{annClass},
                     handler);
         }
@@ -97,7 +97,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-        AnnHandler annHandler = new AnnHandler(super.visitAnnotation(desc, visible));
+        AnnotationInvocationHandler annHandler = new AnnotationInvocationHandler(super.visitAnnotation(desc, visible));
         annotations.put(Type.getType(desc).getClassName(), annHandler);
         return annHandler;
     }

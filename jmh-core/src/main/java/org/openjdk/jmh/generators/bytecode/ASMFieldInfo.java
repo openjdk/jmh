@@ -42,7 +42,7 @@ public class ASMFieldInfo extends FieldVisitor implements FieldInfo {
     private final ASMClassInfo declaringClass;
     private final int access;
     private final String name;
-    private final Map<String, AnnHandler> annotations;
+    private final Map<String, AnnotationInvocationHandler> annotations;
 
     public ASMFieldInfo(FieldVisitor fieldVisitor, ASMClassInfo declaringClass, int access, String name, String desc, String signature) {
         super(Opcodes.ASM4, fieldVisitor);
@@ -50,7 +50,7 @@ public class ASMFieldInfo extends FieldVisitor implements FieldInfo {
         this.access = access;
         this.name = name;
         this.type = Type.getReturnType(desc).getClassName();
-        this.annotations = new HashMap<String, AnnHandler>();
+        this.annotations = new HashMap<String, AnnotationInvocationHandler>();
     }
 
     @Override
@@ -75,17 +75,20 @@ public class ASMFieldInfo extends FieldVisitor implements FieldInfo {
 
     @Override
     public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        AnnHandler handler = annotations.get(annClass.getCanonicalName());
+        AnnotationInvocationHandler handler = annotations.get(annClass.getCanonicalName());
         if (handler == null) {
             return null;
         } else {
-            return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{annClass}, handler);
+            return (T) Proxy.newProxyInstance(
+                    Thread.currentThread().getContextClassLoader(),
+                    new Class[]{annClass},
+                    handler);
         }
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-        AnnHandler annHandler = new AnnHandler(super.visitAnnotation(desc, visible));
+        AnnotationInvocationHandler annHandler = new AnnotationInvocationHandler(super.visitAnnotation(desc, visible));
         annotations.put(Type.getType(desc).getClassName(), annHandler);
         return annHandler;
     }

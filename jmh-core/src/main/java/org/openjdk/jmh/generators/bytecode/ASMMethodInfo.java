@@ -42,7 +42,7 @@ import java.util.Map;
 public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
 
     private final ASMClassInfo declaringClass;
-    private final Map<String, AnnHandler> annotations;
+    private final Map<String, AnnotationInvocationHandler> annotations;
     private final int access;
     private final String name;
     private final String returnType;
@@ -56,23 +56,26 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
         this.access = access;
         this.name = name;
         this.returnType = Type.getReturnType(desc).getClassName();
-        this.annotations = new HashMap<String, AnnHandler>();
+        this.annotations = new HashMap<String, AnnotationInvocationHandler>();
         this.argumentTypes = Type.getArgumentTypes(desc);
     }
 
     @Override
     public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        AnnHandler handler = annotations.get(annClass.getCanonicalName());
+        AnnotationInvocationHandler handler = annotations.get(annClass.getCanonicalName());
         if (handler == null) {
             return null;
         } else {
-            return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{annClass}, handler);
+            return (T) Proxy.newProxyInstance(
+                    Thread.currentThread().getContextClassLoader(),
+                    new Class[]{annClass},
+                    handler);
         }
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-        AnnHandler annHandler = new AnnHandler(super.visitAnnotation(desc, visible));
+        AnnotationInvocationHandler annHandler = new AnnotationInvocationHandler(super.visitAnnotation(desc, visible));
         annotations.put(Type.getType(desc).getClassName(), annHandler);
         return annHandler;
     }
