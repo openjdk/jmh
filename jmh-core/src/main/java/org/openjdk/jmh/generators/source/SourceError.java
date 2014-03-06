@@ -22,26 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.bytecode;
+package org.openjdk.jmh.generators.source;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+public class SourceError {
 
-public class SourceThrowableError extends SourceError {
+    private final String message;
 
-    private final Throwable element;
+    public SourceError(String message) {
+        this.message = message;
+    }
 
-    public SourceThrowableError(String message, Throwable element) {
-        super(message);
-        this.element = element;
+    public String getMessage() {
+        return message;
     }
 
     @Override
     public String toString() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        element.printStackTrace(pw);
-        pw.close();
-        return super.toString() + "\n" + sw.toString();
+        return message;
     }
 }

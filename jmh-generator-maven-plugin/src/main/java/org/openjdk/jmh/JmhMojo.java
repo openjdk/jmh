@@ -6,9 +6,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.openjdk.jmh.generators.bytecode.ASMGeneratorSource;
-import org.openjdk.jmh.generators.bytecode.SourceError;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.FileSystemDestination;
+import org.openjdk.jmh.generators.source.SourceError;
 
 import java.io.File;
 import java.io.IOException;

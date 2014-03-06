@@ -105,6 +105,13 @@ questions.
     <profiles>
         <profile>
             <id>default</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>

@@ -22,21 +22,26 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.bytecode;
+package org.openjdk.jmh.generators.source;
 
-import org.openjdk.jmh.generators.source.MetadataInfo;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-public class SourceElementError extends SourceError {
+public class SourceThrowableError extends SourceError {
 
-    private final MetadataInfo element;
+    private final Throwable element;
 
-    public SourceElementError(String message, MetadataInfo element) {
+    public SourceThrowableError(String message, Throwable element) {
         super(message);
         this.element = element;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n   [" + element.toString() + "]";
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        element.printStackTrace(pw);
+        pw.close();
+        return super.toString() + "\n" + sw.toString();
     }
 }

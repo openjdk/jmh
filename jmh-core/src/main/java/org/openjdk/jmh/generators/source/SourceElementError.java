@@ -22,22 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.bytecode;
+package org.openjdk.jmh.generators.source;
 
-public class SourceError {
+public class SourceElementError extends SourceError {
 
-    private final String message;
+    private final MetadataInfo element;
 
-    public SourceError(String message) {
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
+    public SourceElementError(String message, MetadataInfo element) {
+        super(message);
+        this.element = element;
     }
 
     @Override
     public String toString() {
-        return message;
+        return super.toString() + "\n   [" + element.toString() + "]";
     }
 }
