@@ -162,11 +162,8 @@ questions.
         <module>jmh-core-it</module>
         <module>jmh-core-benchmarks</module>
         <module>jmh-samples</module>
-        <module>jmh-simple-benchmark-archetype</module>
-        <module>jmh-scala-benchmark-archetype</module>
-        <module>jmh-groovy-benchmark-archetype</module>
-        <module>jmh-kotlin-benchmark-archetype</module>
         <module>jmh-generator-maven-plugin</module>
+        <module>jmh-archetypes</module>
     </modules>
 
 </project>
