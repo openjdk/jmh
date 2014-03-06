@@ -26,7 +26,6 @@ package org.openjdk.jmh.generators.annotations;
 
 import org.openjdk.jmh.generators.source.ClassInfo;
 import org.openjdk.jmh.generators.source.GeneratorSource;
-import org.openjdk.jmh.generators.source.MetadataInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -34,10 +33,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic;
-import javax.tools.StandardLocation;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -111,31 +106,6 @@ public class APGeneratorSource implements GeneratorSource {
     @Override
     public ClassInfo resolveClass(String className) {
         return new APClassInfo(processingEnv, processingEnv.getElementUtils().getTypeElement(className));
-    }
-
-    @Override
-    public Writer newResource(String resourcePath) throws IOException {
-        return processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openWriter();
-    }
-
-    @Override
-    public Writer newClass(String className) throws IOException {
-        return processingEnv.getFiler().createSourceFile(className).openWriter();
-    }
-
-    @Override
-    public void printError(String message) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message);
-    }
-
-    @Override
-    public void printError(String message, MetadataInfo element) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, ((APMetadataInfo)element).getElement());
-    }
-
-    @Override
-    public void printError(String message, Throwable throwable) {
-        printError(message + " " + throwable);
     }
 
 }

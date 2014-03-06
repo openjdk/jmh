@@ -26,6 +26,7 @@ package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.generators.source.ClassInfo;
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 import org.openjdk.jmh.generators.source.MethodInfo;
 import org.openjdk.jmh.runner.CompilerHints;
@@ -64,7 +65,7 @@ public class CompilerControlPlugin implements Plugin {
         defaultDontInlineMethods.add(methodInfo);
     }
 
-    public void process(GeneratorSource source) {
+    public void process(GeneratorSource source, GeneratorDestination destination) {
         try {
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, CompilerControl.class)) {
                 CompilerControl ann = element.getAnnotation(CompilerControl.class);
@@ -97,22 +98,22 @@ public class CompilerControlPlugin implements Plugin {
             }
 
         } catch (Throwable t) {
-            source.printError("Compiler control generators had thrown the unexpected exception", t);
+            destination.printError("Compiler control generators had thrown the unexpected exception", t);
         }
     }
 
     @Override
-    public void finish(GeneratorSource source) {
+    public void finish(GeneratorSource source, GeneratorDestination destination) {
         try {
-            PrintWriter writer = new PrintWriter(source.newResource(CompilerHints.LIST.substring(1)));
+            PrintWriter writer = new PrintWriter(destination.newResource(CompilerHints.LIST.substring(1)));
             for (String line : lines) {
                 writer.println(line);
             }
             writer.close();
         } catch (IOException ex) {
-            source.printError("Error writing compiler hint list ", ex);
+            destination.printError("Error writing compiler hint list ", ex);
         } catch (Throwable t) {
-            source.printError("Compiler control generators had thrown the unexpected exception", t);
+            destination.printError("Compiler control generators had thrown the unexpected exception", t);
         }
     }
 

@@ -27,28 +27,17 @@ package org.openjdk.jmh.generators.bytecode;
 import org.objectweb.asm.ClassReader;
 import org.openjdk.jmh.generators.source.ClassInfo;
 import org.openjdk.jmh.generators.source.GeneratorSource;
-import org.openjdk.jmh.generators.source.MetadataInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class ASMGeneratorSource implements GeneratorSource {
 
     private final ClassInfoRepo classInfos;
-    private final File targetDir;
-    private final File targetSourceDir;
-    private final List<SourceError> sourceErrors;
 
-    public ASMGeneratorSource(File targetDir, File targetSourceDir) {
-        this.targetDir = targetDir;
-        this.targetSourceDir = targetSourceDir;
-        this.sourceErrors = new ArrayList<SourceError>();
+    public ASMGeneratorSource() {
         this.classInfos = new ClassInfoRepo();
     }
 
@@ -81,43 +70,6 @@ public class ASMGeneratorSource implements GeneratorSource {
     @Override
     public ClassInfo resolveClass(String className) {
         return classInfos.get(className);
-    }
-
-    @Override
-    public Writer newResource(String resourcePath) throws IOException {
-        String pathName = targetDir.getAbsolutePath() + "/" + resourcePath;
-        new File(pathName.substring(0, pathName.lastIndexOf("/"))).mkdirs();
-        return new FileWriter(new File(pathName));
-    }
-
-    @Override
-    public Writer newClass(String className) throws IOException {
-        String pathName = targetSourceDir.getAbsolutePath() + "/" + className.replaceAll("\\.", "/");
-        new File(pathName.substring(0, pathName.lastIndexOf("/"))).mkdirs();
-        return new FileWriter(new File(pathName + ".java"));
-    }
-
-    @Override
-    public void printError(String message) {
-        sourceErrors.add(new SourceError(message));
-    }
-
-    @Override
-    public void printError(String message, MetadataInfo element) {
-        sourceErrors.add(new SourceElementError(message, element));
-    }
-
-    @Override
-    public void printError(String message, Throwable throwable) {
-        sourceErrors.add(new SourceThrowableError(message, throwable));
-    }
-
-    public boolean hasErrors() {
-        return !sourceErrors.isEmpty();
-    }
-
-    public Collection<SourceError> getErrors() {
-        return sourceErrors;
     }
 
 }

@@ -24,15 +24,12 @@
  */
 package org.openjdk.jmh.generators.source;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 
 /**
  * Generator source.
- *
- * This is an entry point towards {@link org.openjdk.jmh.generators.core.BenchmarkGenerator}
- * interface.
+ * <p/>
+ * The entry point for {@link org.openjdk.jmh.generators.core.BenchmarkGenerator}.
  */
 public interface GeneratorSource {
 
@@ -53,49 +50,4 @@ public interface GeneratorSource {
      */
     ClassInfo resolveClass(String className);
 
-    /**
-     * Returns the Writer for the given resource.
-     * Callers are responsible for closing Writers.
-     *
-     * @param resourcePath resource path
-     * @return writer usable to write the resource
-     * @throws IOException if something wacked happens
-     */
-    Writer newResource(String resourcePath) throws IOException;
-
-    /**
-     * Returns the Writer for the given class.
-     * Callers are responsible for closing Writers.
-     *
-     * @param className class name
-     * @return writer usable to write the resource
-     * @throws IOException if something wacked happens
-     */
-    Writer newClass(String className) throws IOException;
-
-    /**
-     * Print the error.
-     * Calling this method should not terminate anything.
-     *
-     * @param message error.
-     */
-    void printError(String message);
-
-    /**
-     * Print the error.
-     * Calling this method should not terminate anything.
-     *
-     * @param message error.
-     * @param element metadata element, to which this error is tailored
-     */
-    void printError(String message, MetadataInfo element);
-
-    /**
-     * Print the error.
-     * Calling this method should not terminate anything.
-     *
-     * @param message error.
-     * @param throwable exception causing the error
-     */
-    void printError(String message, Throwable throwable);
 }

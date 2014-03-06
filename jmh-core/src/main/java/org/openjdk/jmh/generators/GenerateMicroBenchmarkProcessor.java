@@ -24,8 +24,10 @@
  */
 package org.openjdk.jmh.generators;
 
+import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
 import org.openjdk.jmh.generators.annotations.APGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -50,10 +52,11 @@ public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         GeneratorSource source = new APGeneratorSource(roundEnv, processingEnv);
+        GeneratorDestination destination = new APGeneratorDestinaton(roundEnv, processingEnv);
         if (!roundEnv.processingOver()) {
-            generator.generate(source);
+            generator.generate(source, destination);
         } else {
-            generator.complete(source);
+            generator.complete(source, destination);
         }
         return true;
     }

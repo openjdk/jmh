@@ -24,12 +24,13 @@
  */
 package org.openjdk.jmh.generators.core;
 
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 
 public interface Plugin {
 
-    void process(GeneratorSource source);
+    void process(GeneratorSource source, GeneratorDestination destination);
 
-    void finish(GeneratorSource source);
+    void finish(GeneratorSource source, GeneratorDestination destination);
 
 }

@@ -42,6 +42,7 @@ import org.openjdk.jmh.generators.source.BenchmarkInfo;
 import org.openjdk.jmh.generators.source.ClassInfo;
 import org.openjdk.jmh.generators.source.FieldInfo;
 import org.openjdk.jmh.generators.source.GenerationException;
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 import org.openjdk.jmh.generators.source.MethodGroup;
 import org.openjdk.jmh.generators.source.MethodInfo;
@@ -113,11 +114,12 @@ public class BenchmarkGenerator {
      * Execute the next phase of benchmark generation.
      * Multiple calls to this method are acceptable, even with the difference sources
      * @param source generator source to get the metadata from
+     * @param destination generator destination to write the results to
      */
-    public void generate(GeneratorSource source) {
+    public void generate(GeneratorSource source, GeneratorDestination destination) {
         try {
             for (Plugin sub : plugins) {
-                sub.process(source);
+                sub.process(source, destination);
             }
 
             // Build a Set of classes with a list of annotated methods
@@ -129,14 +131,14 @@ public class BenchmarkGenerator {
                 try {
                     validateBenchmark(clazz, clazzes.get(clazz));
                     BenchmarkInfo info = makeBenchmarkInfo(clazz, clazzes.get(clazz));
-                    generateClass(source, clazz, info);
+                    generateClass(source, destination, clazz, info);
                     benchmarkInfos.add(info);
                 } catch (GenerationException ge) {
-                    source.printError(ge.getMessage(), ge.getElement());
+                    destination.printError(ge.getMessage(), ge.getElement());
                 }
             }
         } catch (Throwable t) {
-            source.printError("Annotation generators had thrown the exception: " + t);
+            destination.printError("Annotation generators had thrown the exception: " + t);
             t.printStackTrace(System.err);
         }
     }
@@ -147,14 +149,14 @@ public class BenchmarkGenerator {
      *
      * @param source source generator to use
      */
-    public void complete(GeneratorSource source) {
+    public void complete(GeneratorSource source, GeneratorDestination destination) {
         for (Plugin sub : plugins) {
-            sub.finish(source);
+            sub.finish(source, destination);
         }
 
         // Processing completed, final round. Print all added methods to file
         try {
-            PrintWriter writer = new PrintWriter(source.newResource(MicroBenchmarkList.MICROBENCHMARK_LIST.substring(1)));
+            PrintWriter writer = new PrintWriter(destination.newResource(MicroBenchmarkList.MICROBENCHMARK_LIST.substring(1)));
             for (BenchmarkInfo info : benchmarkInfos) {
                 for (String method : info.methodGroups.keySet()) {
                     MethodGroup group = info.methodGroups.get(method);
@@ -185,7 +187,7 @@ public class BenchmarkGenerator {
 
             writer.close();
         } catch (IOException ex) {
-            source.printError("Error writing MicroBenchmark list " + ex);
+            destination.printError("Error writing MicroBenchmark list " + ex);
         }
     }
 
@@ -452,10 +454,10 @@ public class BenchmarkGenerator {
     /**
      * Create and generate Java code for a class and it's methods
      */
-    private void generateClass(GeneratorSource source, ClassInfo classInfo, BenchmarkInfo info) {
+    private void generateClass(GeneratorSource source, GeneratorDestination destination, ClassInfo classInfo, BenchmarkInfo info) {
         try {
             // Create file and open an outputstream
-            PrintWriter writer = new PrintWriter(source.newClass(info.generatedName), false);
+            PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
 
             // Write package and imports
             writer.println("package " + info.generatedPackageName + ';');

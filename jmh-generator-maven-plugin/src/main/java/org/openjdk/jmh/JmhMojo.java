@@ -8,6 +8,7 @@ import org.apache.maven.project.MavenProject;
 import org.openjdk.jmh.generators.bytecode.ASMGeneratorSource;
 import org.openjdk.jmh.generators.bytecode.SourceError;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
+import org.openjdk.jmh.generators.core.FileSystemDestination;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,7 +85,8 @@ public class JmhMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         extendPluginClasspath();
 
-        ASMGeneratorSource source = new ASMGeneratorSource(outputResourceDirectory, outputSourceDirectory);
+        ASMGeneratorSource source = new ASMGeneratorSource();
+        FileSystemDestination destination = new FileSystemDestination(outputResourceDirectory, outputSourceDirectory);
 
         try {
             Collection<File> classes = getClasses(compiledBytecodeDirectory);
@@ -96,11 +98,11 @@ public class JmhMojo extends AbstractMojo {
         }
 
         BenchmarkGenerator gen = new BenchmarkGenerator();
-        gen.generate(source);
-        gen.complete(source);
+        gen.generate(source, destination);
+        gen.complete(source, destination);
 
-        if (source.hasErrors()) {
-            for (SourceError e : source.getErrors()) {
+        if (destination.hasErrors()) {
+            for (SourceError e : destination.getErrors()) {
                 getLog().error(e.toString() + "\n");
             }
             throw new MojoFailureException("Errors detected.");

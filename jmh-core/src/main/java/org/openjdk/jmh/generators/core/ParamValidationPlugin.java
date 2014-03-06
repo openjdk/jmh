@@ -27,23 +27,24 @@ package org.openjdk.jmh.generators.core;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.generators.source.FieldInfo;
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 
 public class ParamValidationPlugin implements Plugin {
 
     @Override
-    public void process(GeneratorSource source) {
+    public void process(GeneratorSource source, GeneratorDestination destination) {
         try {
             for (FieldInfo element : BenchmarkGeneratorUtils.getFieldsAnnotatedWith(source, Param.class)) {
                 if (element.isStatic()) {
-                    source.printError(
+                    destination.printError(
                             "@" + Param.class.getSimpleName() + " annotation is not acceptable on static fields.",
                             element
                     );
                 }
 
                 if (BenchmarkGeneratorUtils.getAnnSyntax(element.getDeclaringClass(), State.class) == null) {
-                    source.printError(
+                    destination.printError(
                             "@" + Param.class.getSimpleName() + " annotation should be placed in @" + State.class.getSimpleName() +
                                     "-annotated class.",
                             element
@@ -57,7 +58,7 @@ public class ParamValidationPlugin implements Plugin {
                     String type = element.getType();
                     for (String val : values) {
                         if (!isConforming(val, type)) {
-                            source.printError(
+                            destination.printError(
                                     "Some @" + Param.class.getSimpleName() + " values can not be converted to target type: " +
                                     "\"" + val + "\" can not be converted to " + type,
                                     element
@@ -68,7 +69,7 @@ public class ParamValidationPlugin implements Plugin {
 
             }
         } catch (Throwable t) {
-            source.printError("Param validation generators had thrown the unexpected exception.", t);
+            destination.printError("Param validation generators had thrown the unexpected exception.", t);
         }
     }
 
@@ -128,7 +129,7 @@ public class ParamValidationPlugin implements Plugin {
     }
 
     @Override
-    public void finish(GeneratorSource source) {
+    public void finish(GeneratorSource source, GeneratorDestination destination) {
         // do nothing
     }
 

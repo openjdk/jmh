@@ -28,17 +28,18 @@ import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 import org.openjdk.jmh.generators.source.MethodInfo;
 
 public class GroupValidationPlugin implements Plugin {
 
     @Override
-    public void process(GeneratorSource source) {
+    public void process(GeneratorSource source, GeneratorDestination destination) {
         try {
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, CompilerControl.class)) {
                 if (element.getAnnotation(Threads.class) != null) {
-                    source.printError("@" + Threads.class.getSimpleName() + " annotation is placed within " +
+                    destination.printError("@" + Threads.class.getSimpleName() + " annotation is placed within " +
                                     "the benchmark method with @" + Group.class.getSimpleName() + " annotation. " +
                                     "This has ambiguous behavioral effect, and prohibited. " +
                                     "Did you mean @" + GroupThreads.class.getSimpleName() + " instead?",
@@ -46,12 +47,12 @@ public class GroupValidationPlugin implements Plugin {
                 }
             }
         } catch (Throwable t) {
-            source.printError("Group validation generators had thrown the unexpected exception", t);
+            destination.printError("Group validation generators had thrown the unexpected exception", t);
         }
     }
 
     @Override
-    public void finish(GeneratorSource source) {
+    public void finish(GeneratorSource source, GeneratorDestination destination) {
         // do nothing
     }
 

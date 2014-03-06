@@ -27,19 +27,20 @@ package org.openjdk.jmh.generators.core;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.generators.source.GeneratorDestination;
 import org.openjdk.jmh.generators.source.GeneratorSource;
 import org.openjdk.jmh.generators.source.MethodInfo;
 
 public class HelperMethodValidationPlugin implements Plugin {
 
     @Override
-    public void process(GeneratorSource source) {
+    public void process(GeneratorSource source, GeneratorDestination destination) {
         try {
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, Setup.class)) {
                 // OK to have these annotation for @State objects
                 if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) == null) {
                     if (!element.getDeclaringClass().isAbstract()) {
-                        source.printError(
+                        destination.printError(
                                 "@" + Setup.class.getSimpleName() + " annotation is placed within " +
                                         "the class not having @" + State.class.getSimpleName() + " annotation. " +
                                         "This has no behavioral effect, and prohibited.",
@@ -48,7 +49,7 @@ public class HelperMethodValidationPlugin implements Plugin {
                 }
 
                 if (!element.isPublic()) {
-                    source.printError(
+                    destination.printError(
                             "@" + Setup.class.getSimpleName() + " method should be public.",
                             element);
                 }
@@ -58,7 +59,7 @@ public class HelperMethodValidationPlugin implements Plugin {
                 // OK to have these annotation for @State objects
                 if (BenchmarkGeneratorUtils.getAnnSuper(element.getDeclaringClass(), State.class) == null) {
                     if (!element.getDeclaringClass().isAbstract()) {
-                        source.printError(
+                        destination.printError(
                                 "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
                                         "the class not having @" + State.class.getSimpleName() + " annotation. " +
                                         "This has no behavioral effect, and prohibited.",
@@ -67,19 +68,19 @@ public class HelperMethodValidationPlugin implements Plugin {
                 }
 
                 if (!element.isPublic()) {
-                    source.printError(
+                    destination.printError(
                             "@" + TearDown.class.getSimpleName() + " method should be public.",
                             element);
                 }
             }
 
         } catch (Throwable t) {
-            source.printError("Helper method validation generators had thrown the unexpected exception.", t);
+            destination.printError("Helper method validation generators had thrown the unexpected exception.", t);
         }
     }
 
     @Override
-    public void finish(GeneratorSource source) {
+    public void finish(GeneratorSource source, GeneratorDestination destination) {
         // do nothing
     }
 
