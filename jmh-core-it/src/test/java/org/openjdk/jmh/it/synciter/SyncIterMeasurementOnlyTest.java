@@ -54,6 +54,7 @@ public class SyncIterMeasurementOnlyTest {
     @Threads(2)
     public void test() {
         Assert.assertTrue(isInMeasurementLoop());
+        Fixtures.work();
     }
 
     private boolean isInMeasurementLoop() {

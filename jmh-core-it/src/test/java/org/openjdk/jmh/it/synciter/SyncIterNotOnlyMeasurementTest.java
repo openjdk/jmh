@@ -63,6 +63,7 @@ public class SyncIterNotOnlyMeasurementTest {
     @Threads(2)
     public void test() {
         inMeasurementLoopOnly &= isInMeasurementLoop();
+        Fixtures.work();
     }
 
     private boolean isInMeasurementLoop() {
