@@ -46,7 +46,7 @@ questions.
     </properties>
 
     <modules>
-        <module>jmh-simple-benchmark-archetype</module>
+        <module>jmh-java-benchmark-archetype</module>
         <module>jmh-scala-benchmark-archetype</module>
         <module>jmh-groovy-benchmark-archetype</module>
         <module>jmh-kotlin-benchmark-archetype</module>
