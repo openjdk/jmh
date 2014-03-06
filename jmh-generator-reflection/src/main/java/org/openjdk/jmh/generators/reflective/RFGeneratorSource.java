@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.generators.reflective;
 
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.GeneratorSource;
+import org.openjdk.jmh.generators.core.ClassInfo;
+import org.openjdk.jmh.generators.core.GeneratorSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;

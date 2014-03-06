@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
 public enum HelperType {
     SETUP,

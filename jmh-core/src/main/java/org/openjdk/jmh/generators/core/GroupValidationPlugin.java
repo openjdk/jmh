@@ -28,9 +28,6 @@ import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.GeneratorSource;
-import org.openjdk.jmh.generators.source.MethodInfo;
 
 public class GroupValidationPlugin implements Plugin {
 

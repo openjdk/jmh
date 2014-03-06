@@ -27,9 +27,6 @@ package org.openjdk.jmh.generators.core;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.GeneratorSource;
-import org.openjdk.jmh.generators.source.MethodInfo;
 
 public class HelperMethodValidationPlugin implements Plugin {
 

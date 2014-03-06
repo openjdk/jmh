@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.generators.annotations;
 
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.FieldInfo;
+import org.openjdk.jmh.generators.core.ClassInfo;
+import org.openjdk.jmh.generators.core.FieldInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;

@@ -8,7 +8,7 @@ import org.apache.maven.project.MavenProject;
 import org.openjdk.jmh.generators.bytecode.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.FileSystemDestination;
-import org.openjdk.jmh.generators.source.SourceError;
+import org.openjdk.jmh.generators.core.SourceError;
 
 import java.io.File;
 import java.io.IOException;

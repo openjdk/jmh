@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.generators.reflective;
 
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.ParameterInfo;
+import org.openjdk.jmh.generators.core.ClassInfo;
+import org.openjdk.jmh.generators.core.ParameterInfo;
 
 public class RFParameterInfo implements ParameterInfo {
     private final Class<?> cl;

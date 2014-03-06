@@ -28,9 +28,9 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.MethodInfo;
-import org.openjdk.jmh.generators.source.ParameterInfo;
+import org.openjdk.jmh.generators.core.ClassInfo;
+import org.openjdk.jmh.generators.core.MethodInfo;
+import org.openjdk.jmh.generators.core.ParameterInfo;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;

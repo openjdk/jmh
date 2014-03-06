@@ -22,39 +22,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-import java.util.Map;
+public class GenerationException extends RuntimeException {
 
-public class BenchmarkInfo {
-    public final String userName;
-    public final String generatedName;
-    public final String generatedPackageName;
-    public final String generatedClassName;
-    public final Map<String, MethodGroup> methodGroups;
+    private final MetadataInfo element;
 
-    public BenchmarkInfo(String userName, String generatedPackageName, String generatedClassName, Map<String, MethodGroup> methods) {
-        this.userName = userName;
-        this.generatedPackageName = generatedPackageName;
-        this.generatedClassName = generatedClassName;
-        this.generatedName = generatedPackageName + "." + generatedClassName;
-        this.methodGroups = methods;
+    public GenerationException(String message, MetadataInfo element) {
+        super(message);
+        this.element = element;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        BenchmarkInfo that = (BenchmarkInfo) o;
-
-        if (!userName.equals(that.userName)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return userName.hashCode();
+    public MetadataInfo getElement() {
+        return element;
     }
 }

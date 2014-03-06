@@ -22,15 +22,26 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-/**
- * Method parameter metadata.
- */
-public interface ParameterInfo extends MetadataInfo {
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-    /**
-     * @return parameter type
-     */
-    ClassInfo getType();
+public class SourceThrowableError extends SourceError {
+
+    private final Throwable element;
+
+    public SourceThrowableError(String message, Throwable element) {
+        super(message);
+        this.element = element;
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        element.printStackTrace(pw);
+        pw.close();
+        return super.toString() + "\n" + sw.toString();
+    }
 }

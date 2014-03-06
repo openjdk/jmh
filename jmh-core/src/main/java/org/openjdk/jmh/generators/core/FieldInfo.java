@@ -22,19 +22,45 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-public class SourceElementError extends SourceError {
+import java.lang.annotation.Annotation;
 
-    private final MetadataInfo element;
+/**
+ * Field metadata info.
+ */
+public interface FieldInfo extends MetadataInfo {
 
-    public SourceElementError(String message, MetadataInfo element) {
-        super(message);
-        this.element = element;
-    }
+    /**
+     * @return field name
+     */
+    String getName();
 
-    @Override
-    public String toString() {
-        return super.toString() + "\n   [" + element.toString() + "]";
-    }
+    /**
+     * @return fully qualified field type
+     */
+    String getType();
+
+    /**
+     * @return reference to syntactically-enclosing class
+     */
+    ClassInfo getDeclaringClass();
+
+    /**
+     * @param annClass annotation class
+     * @param <T> annotation type
+     * @return field-level annotation, if any; null otherwise
+     */
+    <T extends Annotation> T getAnnotation(Class<T> annClass);
+
+    /**
+     * @return true, if field is public
+     */
+    boolean isPublic();
+
+    /**
+     * @return true, if field is static
+     */
+    boolean isStatic();
+
 }

@@ -24,11 +24,6 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.FieldInfo;
-import org.openjdk.jmh.generators.source.GeneratorSource;
-import org.openjdk.jmh.generators.source.MethodInfo;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -22,26 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+public class MethodInvocation implements Comparable<MethodInvocation> {
+    public final MethodInfo method;
+    public final int threads;
 
-public class SourceThrowableError extends SourceError {
-
-    private final Throwable element;
-
-    public SourceThrowableError(String message, Throwable element) {
-        super(message);
-        this.element = element;
+    public MethodInvocation(MethodInfo method, int threads) {
+        this.method = method;
+        this.threads = threads;
     }
 
     @Override
-    public String toString() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        element.printStackTrace(pw);
-        pw.close();
-        return super.toString() + "\n" + sw.toString();
+    public int compareTo(MethodInvocation o) {
+        return method.compareTo(o.method);
     }
 }

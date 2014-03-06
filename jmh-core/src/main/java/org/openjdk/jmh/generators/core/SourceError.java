@@ -22,10 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-/**
- * Super-interface for all metadata elements.
- */
-public interface MetadataInfo {
+public class SourceError {
+
+    private final String message;
+
+    public SourceError(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return message;
+    }
 }

@@ -22,45 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
-
-import java.lang.annotation.Annotation;
+package org.openjdk.jmh.generators.core;
 
 /**
- * Field metadata info.
+ * Method parameter metadata.
  */
-public interface FieldInfo extends MetadataInfo {
+public interface ParameterInfo extends MetadataInfo {
 
     /**
-     * @return field name
+     * @return parameter type
      */
-    String getName();
-
-    /**
-     * @return fully qualified field type
-     */
-    String getType();
-
-    /**
-     * @return reference to syntactically-enclosing class
-     */
-    ClassInfo getDeclaringClass();
-
-    /**
-     * @param annClass annotation class
-     * @param <T> annotation type
-     * @return field-level annotation, if any; null otherwise
-     */
-    <T extends Annotation> T getAnnotation(Class<T> annClass);
-
-    /**
-     * @return true, if field is public
-     */
-    boolean isPublic();
-
-    /**
-     * @return true, if field is static
-     */
-    boolean isStatic();
-
+    ClassInfo getType();
 }

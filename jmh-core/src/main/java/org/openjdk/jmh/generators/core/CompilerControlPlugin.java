@@ -25,10 +25,6 @@
 package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.GeneratorSource;
-import org.openjdk.jmh.generators.source.MethodInfo;
 import org.openjdk.jmh.runner.CompilerHints;
 
 import java.io.IOException;

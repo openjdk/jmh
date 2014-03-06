@@ -24,12 +24,6 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.MetadataInfo;
-import org.openjdk.jmh.generators.source.SourceElementError;
-import org.openjdk.jmh.generators.source.SourceError;
-import org.openjdk.jmh.generators.source.SourceThrowableError;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

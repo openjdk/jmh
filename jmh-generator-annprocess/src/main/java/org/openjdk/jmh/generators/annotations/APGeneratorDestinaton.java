@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.generators.annotations;
 
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.MetadataInfo;
+import org.openjdk.jmh.generators.core.GeneratorDestination;
+import org.openjdk.jmh.generators.core.MetadataInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;

@@ -25,8 +25,8 @@
 package org.openjdk.jmh.generators.bytecode;
 
 import org.objectweb.asm.ClassReader;
-import org.openjdk.jmh.generators.source.ClassInfo;
-import org.openjdk.jmh.generators.source.GeneratorSource;
+import org.openjdk.jmh.generators.core.ClassInfo;
+import org.openjdk.jmh.generators.core.GeneratorSource;
 
 import java.io.File;
 import java.io.FileInputStream;

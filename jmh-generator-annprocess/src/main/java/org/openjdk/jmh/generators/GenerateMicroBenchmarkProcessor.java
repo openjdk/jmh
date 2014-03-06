@@ -27,8 +27,8 @@ package org.openjdk.jmh.generators;
 import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
 import org.openjdk.jmh.generators.annotations.APGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.GeneratorSource;
+import org.openjdk.jmh.generators.core.GeneratorDestination;
+import org.openjdk.jmh.generators.core.GeneratorSource;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;

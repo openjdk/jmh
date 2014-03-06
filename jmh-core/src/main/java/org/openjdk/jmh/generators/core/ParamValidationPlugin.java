@@ -26,9 +26,6 @@ package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.generators.source.FieldInfo;
-import org.openjdk.jmh.generators.source.GeneratorDestination;
-import org.openjdk.jmh.generators.source.GeneratorSource;
 
 public class ParamValidationPlugin implements Plugin {
 

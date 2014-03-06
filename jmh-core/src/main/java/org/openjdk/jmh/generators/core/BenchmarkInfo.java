@@ -22,21 +22,23 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.annotations.Level;
+import java.util.Map;
 
-public class HelperMethodInvocation implements Comparable<HelperMethodInvocation> {
-    public final MethodInfo method;
-    public final StateObject state;
-    public final Level helperLevel;
-    public final HelperType type;
+public class BenchmarkInfo {
+    public final String userName;
+    public final String generatedName;
+    public final String generatedPackageName;
+    public final String generatedClassName;
+    public final Map<String, MethodGroup> methodGroups;
 
-    public HelperMethodInvocation(MethodInfo method, StateObject state, Level helperLevel, HelperType type) {
-        this.method = method;
-        this.state = state;
-        this.helperLevel = helperLevel;
-        this.type = type;
+    public BenchmarkInfo(String userName, String generatedPackageName, String generatedClassName, Map<String, MethodGroup> methods) {
+        this.userName = userName;
+        this.generatedPackageName = generatedPackageName;
+        this.generatedClassName = generatedClassName;
+        this.generatedName = generatedPackageName + "." + generatedClassName;
+        this.methodGroups = methods;
     }
 
     @Override
@@ -44,27 +46,15 @@ public class HelperMethodInvocation implements Comparable<HelperMethodInvocation
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        HelperMethodInvocation that = (HelperMethodInvocation) o;
+        BenchmarkInfo that = (BenchmarkInfo) o;
 
-        if (helperLevel != that.helperLevel) return false;
-        if (!method.equals(that.method)) return false;
-        if (!state.equals(that.state)) return false;
-        if (type != that.type) return false;
+        if (!userName.equals(that.userName)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = method.hashCode();
-        result = 31 * result + state.hashCode();
-        result = 31 * result + helperLevel.hashCode();
-        result = 31 * result + type.hashCode();
-        return result;
-    }
-
-    @Override
-    public int compareTo(HelperMethodInvocation o) {
-        return method.compareTo(o.method);
+        return userName.hashCode();
     }
 }

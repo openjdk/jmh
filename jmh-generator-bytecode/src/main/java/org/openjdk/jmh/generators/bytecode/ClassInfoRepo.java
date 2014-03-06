@@ -25,7 +25,7 @@
 package org.openjdk.jmh.generators.bytecode;
 
 import org.openjdk.jmh.generators.reflective.RFClassInfo;
-import org.openjdk.jmh.generators.source.ClassInfo;
+import org.openjdk.jmh.generators.core.ClassInfo;
 
 import java.util.Collection;
 import java.util.HashMap;

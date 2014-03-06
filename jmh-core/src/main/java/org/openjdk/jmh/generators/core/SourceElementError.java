@@ -22,32 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.source;
+package org.openjdk.jmh.generators.core;
 
-import java.util.Collection;
+public class SourceElementError extends SourceError {
 
-/**
- * Generator source.
- * <p/>
- * The entry point for {@link org.openjdk.jmh.generators.core.BenchmarkGenerator}.
- */
-public interface GeneratorSource {
+    private final MetadataInfo element;
 
-    /**
-     * @return collection of all resolved classes
-     */
-    Collection<ClassInfo> getClasses();
+    public SourceElementError(String message, MetadataInfo element) {
+        super(message);
+        this.element = element;
+    }
 
-    /**
-     * Resolve class info for a name.
-     * <p/>
-     * Users may call this method for the classes not
-     * listed in {@link #getClasses()} call, the implementation
-     * has to have the fall-back strategy for these cases.
-     *
-     * @param className class name
-     * @return class metainfo
-     */
-    ClassInfo resolveClass(String className);
-
+    @Override
+    public String toString() {
+        return super.toString() + "\n   [" + element.toString() + "]";
+    }
 }
