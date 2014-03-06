@@ -54,11 +54,7 @@ public class ASMGeneratorSource implements GeneratorSource {
 
     public void processClasses(Collection<File> classFiles)  throws IOException {
         for (File f : classFiles) {
-            try {
-                processClass(f);
-            } catch (UnresolvedClassException e) {
-
-            }
+            processClass(f);
         }
     }
 
