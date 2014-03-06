@@ -12,7 +12,11 @@
     <artifactId>jmh-kotlin-benchmark-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
-    <name>JMH Kotlin Benchmark Archetype</name>
+    <name>JMH Benchmark Archetype: Kotlin</name>
+
+    <description>
+        Generates Kotlin benchmarking project, uses JMH bytecode processors
+    </description>
 
     <build>
         <extensions>

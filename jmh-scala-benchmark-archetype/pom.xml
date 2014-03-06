@@ -12,7 +12,11 @@
     <artifactId>jmh-scala-benchmark-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
-    <name>JMH Scala Benchmark Archetype</name>
+    <name>JMH Benchmark Archetype: Scala</name>
+
+    <description>
+        Generates Scala benchmarking project, uses JMH bytecode processors
+    </description>
 
     <build>
         <extensions>

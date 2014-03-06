@@ -33,7 +33,7 @@ questions.
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <name>JMH Simple Benchmark Archetype</name>
+    <name>JMH Benchmark Archetype: Java (Using Annotation Processors)</name>
     <artifactId>jmh-simple-benchmark-archetype</artifactId>
     <packaging>jar</packaging>
 
@@ -45,7 +45,7 @@ questions.
     <inceptionYear>2012</inceptionYear>
 
     <description>
-        Basic archetype for simple JMH-driven benchmark.
+        Generates Java benchmarking project, uses JMH annotation processors
     </description>
 
     <prerequisites>
