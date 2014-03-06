@@ -58,12 +58,22 @@ public class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams) {
-        out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " +
-                mbParams.getWarmup().getTime() + " each" +
-                (mbParams.getWarmup().getBatchSize() <= 1 ? "" : ", " + mbParams.getWarmup().getBatchSize() + " calls per batch"));
-        out.println("# Measurement: " + mbParams.getMeasurement().getCount() + " iterations, " +
-                mbParams.getMeasurement().getTime() + " each"+
-                (mbParams.getMeasurement().getBatchSize() <= 1 ? "" : ", " + mbParams.getMeasurement().getBatchSize() + " calls per batch"));
+        if (mbParams.getWarmup().getCount() > 0) {
+            out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " +
+                    mbParams.getWarmup().getTime() + " each" +
+                    (mbParams.getWarmup().getBatchSize() <= 1 ? "" : ", " + mbParams.getWarmup().getBatchSize() + " calls per batch"));
+        } else {
+            out.println("# Warmup: <none>");
+        }
+
+        if (mbParams.getMeasurement().getCount() > 0) {
+            out.println("# Measurement: " + mbParams.getMeasurement().getCount() + " iterations, " +
+                    mbParams.getMeasurement().getTime() + " each" +
+                    (mbParams.getMeasurement().getBatchSize() <= 1 ? "" : ", " + mbParams.getMeasurement().getBatchSize() + " calls per batch"));
+        } else {
+            out.println("# Measurement: <none>");
+        }
+
         out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Benchmark: " + name.getUsername());
