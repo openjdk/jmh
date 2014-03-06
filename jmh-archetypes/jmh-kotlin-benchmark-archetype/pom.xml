@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>org.openjdk.jmh</groupId>
-        <artifactId>jmh-parent</artifactId>
+        <artifactId>jmh-archetypes</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
