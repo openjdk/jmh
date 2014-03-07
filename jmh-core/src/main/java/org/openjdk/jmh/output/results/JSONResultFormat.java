@@ -194,7 +194,7 @@ class JSONResultFormat implements ResultFormat {
             return "\"-INF\"";
         if (d == Double.POSITIVE_INFINITY)
             return "\"+INF\"";
-        return String.valueOf(d);
+        return String.format("%.3f", d);
     }
 
     private String tidy(String s) {
