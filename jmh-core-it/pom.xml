@@ -110,6 +110,7 @@ questions.
                     <groupId>org.openjdk.jmh</groupId>
                     <artifactId>jmh-generator-annprocess</artifactId>
                     <version>${project.version}</version>
+                    <scope>provided</scope>
                 </dependency>
             </dependencies>
             <activation>
@@ -138,6 +139,7 @@ questions.
                     <groupId>org.openjdk.jmh</groupId>
                     <artifactId>jmh-generator-maven-plugin</artifactId>
                     <version>${project.version}</version>
+                    <scope>provided</scope>
                 </dependency>
             </dependencies>
             <build>
