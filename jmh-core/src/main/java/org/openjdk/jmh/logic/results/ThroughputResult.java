@@ -82,7 +82,7 @@ public class ThroughputResult extends Result {
     /** {@inheritDoc} */
     @Override
     public double getScore() {
-        return operations / (durationNs / (double) outputTimeUnit.toNanos(1));
+        return 1.0D * operations * outputTimeUnit.toNanos(1) / durationNs;
     }
 
     @Override
@@ -92,26 +92,27 @@ public class ThroughputResult extends Result {
             @Override
             public Result aggregate(Collection<ThroughputResult> results) {
                 ListStatistics stat = new ListStatistics();
-                for (ThroughputResult r : results) {
-                    stat.addValue(r.getScore());
-                }
+                ResultRole mode = null;
+                String label = null;
+                double operations = 0;
+                TimeUnit tu = null;
 
                 final long normalizedDuration = TimeUnit.MINUTES.toNanos(1);
 
-                ResultRole mode = null;
-                String label = null;
-                long operations = 0;
-                TimeUnit tu = null;
                 for (ThroughputResult r : results) {
+                    stat.addValue(r.getScore());
                     mode = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
-
-                    // care about long overflow
-                    operations += Math.round(r.operations * (1.0 * normalizedDuration / r.durationNs));
+                    operations += 1.0D * r.operations * normalizedDuration / r.durationNs;
                 }
 
-                return new ThroughputResult(mode, label, operations, normalizedDuration, tu, stat);
+                // care about long underflow/overflow
+                if (Long.MIN_VALUE < operations && operations < Long.MAX_VALUE) {
+                    return new ThroughputResult(mode, label, (long) operations, normalizedDuration, tu, stat);
+                } else {
+                    throw new IllegalStateException("Internal error: the operation count does not fit into long: " + operations);
+                }
             }
         };
     }
@@ -123,27 +124,28 @@ public class ThroughputResult extends Result {
             @Override
             public Result aggregate(Collection<ThroughputResult> results) {
                 ListStatistics stat = new ListStatistics();
-                for (ThroughputResult r : results) {
-                    stat.addValue(r.getScore());
-                }
+                ResultRole role = null;
+                String label = null;
+                double operations = 0;
+                TimeUnit tu = null;
 
                 final long normalizedDuration = TimeUnit.MINUTES.toNanos(1);
 
-                ResultRole role = null;
-                String label = null;
-                long operations = 0;
-                TimeUnit tu = null;
                 for (ThroughputResult r : results) {
+                    stat.addValue(r.getScore());
                     role = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
-
-                    // care about long overflow
-                    operations += Math.round(r.operations * (1.0 * normalizedDuration / r.durationNs));
+                    operations += 1.0D * r.operations * normalizedDuration / r.durationNs;
                 }
                 operations /= results.size();
 
-                return new ThroughputResult(role, label, operations, normalizedDuration, tu, stat);
+                // care about long underflow/overflow
+                if (Long.MIN_VALUE < operations && operations < Long.MAX_VALUE) {
+                    return new ThroughputResult(role, label, (long) operations, normalizedDuration, tu, stat);
+                } else {
+                    throw new IllegalStateException("Internal error: the operation count does not fit into long: " + operations);
+                }
             }
         };
     }

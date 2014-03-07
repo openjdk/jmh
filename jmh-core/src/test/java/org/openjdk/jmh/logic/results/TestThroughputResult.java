@@ -57,7 +57,7 @@ public class TestThroughputResult {
         assertEquals("ops/day", instanced.getScoreUnit());
 
         ThroughputResult instanceh = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.HOURS);
-        assertEquals(3600000000.0000005D, instanceh.getScore(), 0.0);
+        assertEquals(3600000000D, instanceh.getScore(), 0.0);
         assertEquals("ops/hr", instanceh.getScoreUnit());
 
         ThroughputResult instancem = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MINUTES);
