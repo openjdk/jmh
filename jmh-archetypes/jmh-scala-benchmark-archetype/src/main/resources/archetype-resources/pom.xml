@@ -9,8 +9,8 @@
     <name>JMH benchmark sample: Scala</name>
 
     <!--
-       This is the experimental lifecycle to build Scala benchmarks with JMH.
-       We make no promises about the reliability and performance of this workloads yet.
+       This is the example build script for building Scala benchmarks with JMH.
+       It needs a proper dependency on Scala library to compile.
      -->
 
     <dependencies>
@@ -19,11 +19,10 @@
             <artifactId>jmh-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
+        <!--
+            Put the appropriate dependency on scala-library here:
+              org.scala-lang:scala-library:2.10.3 is one of the choices.
+          -->
     </dependencies>
 
     <prerequisites>
@@ -32,8 +31,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <scala.version>2.10.3</scala.version>
-        <scala.maven.version>3.1.6</scala.maven.version>
     </properties>
 
     <build>
@@ -71,7 +68,7 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>${scala.maven.version}</version>
+                <version>3.1.6</version>
                 <configuration>
                     <recompileMode>incremental</recompileMode>
                 </configuration>

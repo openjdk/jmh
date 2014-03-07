@@ -9,13 +9,13 @@
     <name>JMH benchmark sample: Kotlin</name>
 
     <!--
-       This is the experimental lifecycle to build Kotlin benchmarks with JMH.
-       We make no promises about the reliability and performance of this workloads yet.
+       This is the example build script for building Kotlin benchmarks with JMH.
+       It needs a proper dependency on Kotlin library to compile, as well as
+       the plugin version set to most recent Kotlin compiler.
      -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>0.6.2517</kotlin.version>
     </properties>
 
     <prerequisites>
@@ -28,11 +28,10 @@
             <artifactId>jmh-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
+        <!--
+          Put the dependency on Kotlin stdlib here:
+            org.jetbrains.kotlin:kotlin-stdlib:0.6.2517 is one of the choices
+         -->
     </dependencies>
 
     <build>
@@ -44,7 +43,10 @@
             <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <groupId>org.jetbrains.kotlin</groupId>
-                <version>${kotlin.version}</version>
+                <!--
+                   Put an approriate Kotlin compiler version here.
+                 -->
+                <version>PUT_THE_VERSION_HERE</version>
 
                 <executions>
                     <execution>

@@ -9,8 +9,8 @@
     <name>JMH benchmark sample: Groovy</name>
 
     <!--
-       This is the experimental lifecycle to build Groovy benchmarks with JMH.
-       We make no promises about the reliability and performance of this workloads yet.
+       This is the example build script for building Groovy benchmarks with JMH.
+       It needs a proper dependency on Groovy library to compile.
      -->
 
     <dependencies>
@@ -19,11 +19,10 @@
             <artifactId>jmh-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>${groovy.version}</version>
-        </dependency>
+        <!--
+           Put the dependency on Groovy here:
+             org.codehaus.groovy:groovy:2.2.2 is on of the possible dependencies
+         -->
     </dependencies>
 
     <prerequisites>
@@ -32,8 +31,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <groovy.version>2.2.2</groovy.version>
-        <gmaven.version>1.5</gmaven.version>
     </properties>
 
     <build>
@@ -71,7 +68,7 @@
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
-                <version>${gmaven.version}</version>
+                <version>1.5</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
