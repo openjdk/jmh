@@ -28,6 +28,11 @@
             <artifactId>jmh-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-bytecode</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--
           Put the dependency on Kotlin stdlib here:
             org.jetbrains.kotlin:kotlin-stdlib:0.6.2517 is one of the choices
@@ -77,15 +82,23 @@
             -->
 
             <plugin>
-                <groupId>org.openjdk.jmh</groupId>
-                <artifactId>jmh-generator-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>java</goal>
                         </goals>
+                        <configuration>
+                            <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
+                            <arguments>
+                                <argument>target/classes/</argument>
+                                <argument>target/generated-sources/jmh/</argument>
+                                <argument>target/classes/</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -165,7 +165,6 @@ questions.
         <module>jmh-generator-annprocess</module>
         <module>jmh-generator-bytecode</module>
         <module>jmh-generator-reflection</module>
-        <module>jmh-generator-maven-plugin</module>
         <module>jmh-archetypes</module>
     </modules>
 
