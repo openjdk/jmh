@@ -137,9 +137,8 @@ questions.
             <dependencies>
                 <dependency>
                     <groupId>org.openjdk.jmh</groupId>
-                    <artifactId>jmh-generator-maven-plugin</artifactId>
+                    <artifactId>jmh-generator-bytecode</artifactId>
                     <version>${project.version}</version>
-                    <scope>provided</scope>
                 </dependency>
             </dependencies>
             <build>
@@ -191,19 +190,22 @@ questions.
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.openjdk.jmh</groupId>
-                        <artifactId>jmh-generator-maven-plugin</artifactId>
-                        <version>${project.version}</version>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
                         <executions>
                             <execution>
-                                <phase>process-test-sources</phase>
+                                <phase>process-sources</phase>
                                 <goals>
-                                    <goal>generate</goal>
+                                    <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <compiledBytecodeDirectory>${project.build.testOutputDirectory}</compiledBytecodeDirectory>
-                                    <outputResourceDirectory>${project.build.testOutputDirectory}</outputResourceDirectory>
-                                    <outputSourceDirectory>${project.build.testOutputDirectory}/generated-jmh-sources/</outputSourceDirectory>
+                                    <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
+                                    <arguments>
+                                        <argument>target/classes/</argument>
+                                        <argument>target/generated-sources/jmh/</argument>
+                                        <argument>target/classes/</argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                         </executions>
