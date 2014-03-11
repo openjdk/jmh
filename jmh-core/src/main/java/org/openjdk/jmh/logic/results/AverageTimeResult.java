@@ -72,7 +72,7 @@ public class AverageTimeResult extends Result {
     /** {@inheritDoc} */
     @Override
     public double getScore() {
-        return (durationNs / (double) outputTimeUnit.toNanos(1)) / operations;
+        return 1.0D * durationNs / (operations * outputTimeUnit.toNanos(1));
     }
 
     public Aggregator<AverageTimeResult> getIterationAggregator() {
