@@ -78,6 +78,8 @@ public class JMHSample_27_Params {
      *    $ mvn clean install
      *    $ java -jar target/microbenchmarks.jar ".*JMHSample_27.*"
      *
+     *    You can juggle parameters through the command line, e.g. with "-p arg=41,42"
+     *
      * b) Via the Java API:
      */
 
