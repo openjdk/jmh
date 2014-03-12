@@ -69,18 +69,16 @@ public class APGeneratorSource implements GeneratorSource {
         // depth, we need to do a few rounds. Hopefully we will just do a single stride in most
         // cases.
 
-        List<TypeElement> front = new ArrayList<TypeElement>();
-
         for (Element e : roundEnv.getRootElements()) {
             if (e.getKind() != ElementKind.CLASS) continue;
-            front.add((TypeElement) e);
+            discoveredClasses.add((TypeElement) e);
         }
 
-        while (!front.isEmpty()) {
-            discoveredClasses.addAll(front);
-
+        int lastSize = 0;
+        while (discoveredClasses.size() > lastSize) {
+            lastSize = discoveredClasses.size();
             List<TypeElement> newClasses = new ArrayList<TypeElement>();
-            for (Element e : front) {
+            for (Element e : discoveredClasses) {
                 TypeElement walk = (TypeElement) e;
                 do {
                     for (TypeElement nested : ElementFilter.typesIn(walk.getEnclosedElements())) {
@@ -88,7 +86,7 @@ public class APGeneratorSource implements GeneratorSource {
                     }
                 } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
             }
-            front = newClasses;
+            discoveredClasses.addAll(newClasses);
         }
 
         classInfos = convert(discoveredClasses);
