@@ -26,8 +26,7 @@ package org.openjdk.jmh.util.internal;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Calculate statistics over a list of doubles.
@@ -38,10 +37,12 @@ public class ListStatistics extends AbstractStatistics {
 
     private static final long serialVersionUID = -90642978235578197L;
 
-    private final List<Double> values;
+    private double[] values;
+    private int count;
 
     public ListStatistics() {
-        values = new ArrayList<Double>();
+        values = new double[0];
+        count = 0;
     }
 
     public ListStatistics(double[] samples) {
@@ -59,15 +60,19 @@ public class ListStatistics extends AbstractStatistics {
     }
 
     public void addValue(double d) {
-        values.add(d);
+        if (count >= values.length) {
+            values = Arrays.copyOf(values, Math.max(1, values.length << 1));
+        }
+        values[count] = d;
+        count++;
     }
 
     @Override
     public double getMax() {
         if (getN() > 0) {
             double m = Double.NEGATIVE_INFINITY;
-            for (double d : values) {
-                m = Math.max(m, d);
+            for (int i = 0; i < count; i++) {
+                m = Math.max(m, values[i]);
             }
             return m;
         } else {
@@ -79,8 +84,8 @@ public class ListStatistics extends AbstractStatistics {
     public double getMin() {
         if (getN() > 0) {
             double m = Double.POSITIVE_INFINITY;
-            for (double d : values) {
-                m = Math.min(m, d);
+            for (int i = 0; i < count; i++) {
+                m = Math.min(m, values[i]);
             }
             return m;
         } else {
@@ -90,15 +95,15 @@ public class ListStatistics extends AbstractStatistics {
 
     @Override
     public long getN() {
-        return values.size();
+        return count;
     }
 
     @Override
     public double getSum() {
         if (getN() > 0) {
             double s = 0;
-            for (double d : values) {
-                s += d;
+            for (int i = 0; i < count; i++) {
+                s += values[i];
             }
             return s;
         } else {
@@ -108,7 +113,7 @@ public class ListStatistics extends AbstractStatistics {
 
     @Override
     public double getPercentile(double rank) {
-        if (values.size() == 0) {
+        if (count == 0) {
             return Double.NaN;
         }
 
@@ -116,13 +121,11 @@ public class ListStatistics extends AbstractStatistics {
             return getMin();
         }
 
-        double[] vs = new double[values.size()];
-        for (int i = 0; i < values.size(); i++) {
-            vs[i] = values.get(i);
-        }
+        // trim
+        values = Arrays.copyOf(values, count);
 
         Percentile p = new Percentile();
-        return p.evaluate(vs, rank);
+        return p.evaluate(values, rank);
     }
 
     @Override
@@ -130,8 +133,8 @@ public class ListStatistics extends AbstractStatistics {
         if (getN() > 0) {
             double v = 0;
             double m = getMean();
-            for (double d : values) {
-                v += Math.pow(d - m, 2);
+            for (int i = 0; i < count; i++) {
+                v += Math.pow(values[i] - m, 2);
             }
             return v / (getN() - 1);
         } else {

@@ -72,6 +72,15 @@ public class MultisetStatistics extends AbstractStatistics {
         return sum;
     }
 
+    private double get(long index) {
+        long cur = 0;
+        for (double d : values.keys()) {
+            cur += values.count(d);
+            if (cur >= index) return d;
+        }
+        return getMax();
+    }
+
     @Override
     public double getPercentile(double rank) {
         if (rank < 0.0d || rank > 100.0d)
@@ -81,15 +90,13 @@ public class MultisetStatistics extends AbstractStatistics {
             return getMin();
         }
 
-        int cur = 0;
-        double[] vs = new double[values.size()];
-        for (double d : values.keys()) {
-            Arrays.fill(vs, cur, cur + values.count(d), d);
-            cur += values.count(d);
-        }
+        double pos = rank * (values.size() + 1) / 100;
+        double floorPos = Math.floor(pos);
 
-        Percentile p = new Percentile();
-        return p.evaluate(vs, rank);
+        double flooredValue = get((long) floorPos);
+        double nextValue = get((long) floorPos + 1);
+
+        return flooredValue + (nextValue - flooredValue) * (pos - floorPos);
     }
 
     @Override
