@@ -128,8 +128,7 @@ public class BenchmarkGenerator {
                 }
             }
         } catch (Throwable t) {
-            destination.printError("Annotation generators had thrown the exception: " + t);
-            t.printStackTrace(System.err);
+            destination.printError("Annotation generator had thrown the exception.", t);
         }
     }
 
@@ -177,7 +176,7 @@ public class BenchmarkGenerator {
 
             writer.close();
         } catch (IOException ex) {
-            destination.printError("Error writing MicroBenchmark list " + ex);
+            destination.printError("Error writing MicroBenchmark list", ex);
         }
     }
 
@@ -444,8 +443,7 @@ public class BenchmarkGenerator {
     /**
      * Create and generate Java code for a class and it's methods
      */
-    private void generateClass(GeneratorSource source, GeneratorDestination destination, ClassInfo classInfo, BenchmarkInfo info) {
-        try {
+    private void generateClass(GeneratorSource source, GeneratorDestination destination, ClassInfo classInfo, BenchmarkInfo info) throws IOException {
             // Create file and open an outputstream
             PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
 
@@ -507,9 +505,6 @@ public class BenchmarkGenerator {
             writer.println();
 
             writer.close();
-        } catch (IOException ex) {
-            throw new GenerationException("IOException", classInfo);
-        }
     }
 
     private void generatePadding(PrintWriter writer) {
