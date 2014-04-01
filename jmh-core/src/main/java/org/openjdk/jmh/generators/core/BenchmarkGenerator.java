@@ -213,7 +213,7 @@ public class BenchmarkGenerator {
      * Do basic benchmark validation.
      */
     private void validateBenchmark(ClassInfo clazz, Collection<MethodInfo> methods) {
-        if (clazz.getQualifiedName().isEmpty()) {
+        if (clazz.getPackageName().isEmpty()) {
             throw new GenerationException("Microbenchmark should have package other than default.", clazz);
         }
 
