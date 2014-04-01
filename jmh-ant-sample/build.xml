@@ -35,6 +35,7 @@ questions.
         of Maven build, but really, you can point it to the standalone JAR.
     -->
     <property name="jmh.jar" location="../jmh-core/target/jmh-core-1.0-SNAPSHOT.jar"/>
+    <property name="jmh-generator-annprocess.jar" location="../jmh-generator-annprocess/target/jmh-generator-annprocess-1.0-SNAPSHOT.jar"/>
 
     <!--
         Point this to joptsimple dependency. Again, we default to the one
@@ -54,11 +55,12 @@ questions.
 
     <!--
         The workflow is as follows:
-          - Compile the benchmarks with JMH in classpath.
+          - Compile the benchmarks with JMH and JMH Annotation processor in classpath.
               * Annotation processors will run and generate synthetic code.
               * Annotation processors will create the list of discovered microbenchmarks.
           - Pack the classes, generated code, microbenchmark lists in a JAR
-              * Bring the dependencies along in the JAR
+              * Bring the dependencies along in the JAR; Annotation processor is not
+                required in final JAR
               * (You might be able to run JMH without the self-contained JAR,
                 take note of the META-INF/* files in that case)
               * Filter out META-INF/services/ to disable JMH processors for the future
@@ -67,7 +69,7 @@ questions.
         <delete dir="${build}"/>
         <mkdir dir="${build}"/>
 
-        <javac srcdir="${src}" destdir="${build}" classpath="${jmh.jar}"/>
+        <javac srcdir="${src}" destdir="${build}" classpath="${jmh.jar};${jmh-generator-annprocess.jar}"/>
 
         <delete dir="${dist} "/>
         <mkdir dir="${dist}"/>
