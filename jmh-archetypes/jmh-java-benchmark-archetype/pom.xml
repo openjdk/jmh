@@ -35,7 +35,7 @@ questions.
 
     <name>JMH Benchmark Archetype: Java</name>
     <artifactId>jmh-java-benchmark-archetype</artifactId>
-    <packaging>jar</packaging>
+    <packaging>maven-archetype</packaging>
 
     <organization>
         <name>Oracle</name>
