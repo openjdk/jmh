@@ -45,6 +45,10 @@ public class JMHSample_09_Blackholes {
 
     /*
      * Should you need returning multiple results, you have to consider two options.
+     *
+     * NOTE: If you are only producing a single result, it is more readable to use
+     * the implicit return, as in org.openjdk.jmh.samples.JMHSample_08_DeadCode.
+     * Do not make your benchmark code less readable with explicit Blackholes!
      */
 
     double x1 = Math.PI;
