@@ -33,24 +33,15 @@ questions.
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <name>JMH Benchmark Archetype: Java</name>
+    <groupId>org.openjdk.jmh</groupId>
     <artifactId>jmh-java-benchmark-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
-    <organization>
-        <name>Oracle</name>
-        <url>http://openjdk.java.net/</url>
-    </organization>
-
-    <inceptionYear>2012</inceptionYear>
+    <name>JMH Benchmark Archetype: Java</name>
 
     <description>
         Generates Java benchmarking project, uses JMH annotation processors
     </description>
-
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
 
     <build>
         <extensions>
@@ -60,6 +51,15 @@ questions.
                 <version>2.2</version>
             </extension>
         </extensions>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-archetype-plugin</artifactId>
+                    <version>2.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
         <plugins>
             <plugin>
