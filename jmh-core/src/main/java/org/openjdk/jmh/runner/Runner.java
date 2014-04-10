@@ -164,7 +164,7 @@ public class Runner extends BaseRunner {
 
             out.flush();
             out.close();
-            return null;
+            return new TreeMap<BenchmarkRecord, RunResult>();
         }
 
         // override the benchmark types;
