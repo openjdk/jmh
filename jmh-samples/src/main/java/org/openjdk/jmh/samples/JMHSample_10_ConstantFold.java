@@ -57,8 +57,9 @@ public class JMHSample_10_ConstantFold {
     private double x = Math.PI;
 
     @GenerateMicroBenchmark
-    public void baseline() {
-        // do nothing, this is a baseline
+    public double baseline() {
+        // simply return the value, this is a baseline
+        return Math.PI;
     }
 
     @GenerateMicroBenchmark
