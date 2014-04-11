@@ -64,13 +64,13 @@ public class JMHSample_10_ConstantFold {
 
     @GenerateMicroBenchmark
     public double measureWrong() {
-        // This is wrong: the result is provably the same, optimized out.
+        // This is wrong: the source is predictable, and computation is foldable.
         return Math.log(Math.PI);
     }
 
     @GenerateMicroBenchmark
     public double measureRight() {
-        // This is correct: the result is being used.
+        // This is correct: the source is not predictable.
         return Math.log(x);
     }
 
