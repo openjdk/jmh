@@ -156,15 +156,16 @@ class JSONResultFormat implements ResultFormat {
         StringBuilder sb = new StringBuilder();
         sb.append("\"scorePercentiles\" : {");
         boolean firstPercentile = true;
-        for (double p : new double[]{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999, 1.0}) {
+        for (double p : new double[]{0.00, 50.0, 90, 95, 99, 99.9, 99.99, 99.999, 99.9999, 100}) {
             if (firstPercentile) {
                 firstPercentile = false;
             } else {
                 sb.append(",");
             }
 
-            double v = stats.getPercentile(p * 100);
-            sb.append(String.format("\"%.4f\" : %.3f", p * 100, v));
+            double v = stats.getPercentile(p);
+            sb.append("\"").append(emit(p)).append("\" : ");
+            sb.append(emit(v));
         }
         sb.append("},");
         return sb.toString();
@@ -194,7 +195,7 @@ class JSONResultFormat implements ResultFormat {
             return "\"-INF\"";
         if (d == Double.POSITIVE_INFINITY)
             return "\"+INF\"";
-        return String.format("%.3f", d);
+        return String.valueOf(d);
     }
 
     private String tidy(String s) {
