@@ -154,17 +154,9 @@ public class Runner extends BaseRunner {
         SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
-            out.println("No matching benchmarks. Miss-spelled regexp?");
-
-            if (options.verbosity().orElse(Defaults.VERBOSITY) != VerboseMode.EXTRA) {
-                out.println("Use " + VerboseMode.EXTRA + " verbose mode to debug the pattern matching.");
-            } else {
-                list();
-            }
-
             out.flush();
             out.close();
-            return new TreeMap<BenchmarkRecord, RunResult>();
+            throw new NoBenchmarksException();
         }
 
         // override the benchmark types;

@@ -24,10 +24,13 @@
  */
 package org.openjdk.jmh;
 
+import org.openjdk.jmh.runner.NoBenchmarksException;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.CommandLineOptionException;
 import org.openjdk.jmh.runner.options.CommandLineOptions;
+import org.openjdk.jmh.runner.options.VerboseMode;
+import org.openjdk.jmh.runner.parameters.Defaults;
 
 import java.io.IOException;
 
@@ -69,7 +72,18 @@ public class Main {
                 return;
             }
 
-            runner.run();
+            try {
+                runner.run();
+            } catch (NoBenchmarksException e) {
+                System.err.println("No matching benchmarks. Miss-spelled regexp?");
+
+                if (cmdOptions.verbosity().orElse(Defaults.VERBOSITY) != VerboseMode.EXTRA) {
+                    System.err.println("Use " + VerboseMode.EXTRA + " verbose mode to debug the pattern matching.");
+                } else {
+                    runner.list();
+                }
+            }
+
         } catch (CommandLineOptionException e) {
             System.err.println("Error parsing command line:");
             System.err.println(" " + e.getMessage());
