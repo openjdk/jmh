@@ -146,6 +146,11 @@ public class APClassInfo extends APMetadataInfo implements ClassInfo {
         return el.getModifiers().contains(Modifier.FINAL);
     }
 
+    @Override
+    public boolean isInner() {
+        return (getDeclaringClass() != null) && !el.getModifiers().contains(Modifier.STATIC);
+    }
+
     public String toString() {
         return getQualifiedName();
     }

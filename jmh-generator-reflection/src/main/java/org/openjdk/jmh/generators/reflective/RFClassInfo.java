@@ -143,6 +143,11 @@ public class RFClassInfo implements ClassInfo {
     }
 
     @Override
+    public boolean isInner() {
+        return (klass.getEnclosingClass() != null);
+    }
+
+    @Override
     public String toString() {
         return getQualifiedName();
     }

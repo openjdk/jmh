@@ -263,6 +263,11 @@ public class BenchmarkGenerator {
                         " annotation only supports non-final classes.", state);
             }
 
+            if (state.isInner()) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation only supports non-inner classes, make sure your class is static.", state);
+            }
+
             boolean hasDefaultConstructor = false;
             for (MethodInfo constructor : state.getConstructors()) {
                 hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());

@@ -194,6 +194,11 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
+    public boolean isInner() {
+        return (declaringClass != null) && (access & Opcodes.ACC_STATIC) == 0;
+    }
+
+    @Override
     public String toString() {
         return qualifiedName;
     }

@@ -99,5 +99,10 @@ public interface ClassInfo extends MetadataInfo {
      * @return true, if class is final
      */
     boolean isFinal();
+
+    /**
+     * @return true, if class is inner
+     */
+    boolean isInner();
 }
 
