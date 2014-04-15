@@ -208,12 +208,18 @@ public class StateObjectHandler {
         for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
             Setup setupAnn = mi.getAnnotation(Setup.class);
             if (setupAnn != null) {
+                if (!mi.getParameters().isEmpty()) {
+                    throw new GenerationException("@" + Setup.class.getSimpleName() + " methods should have no arguments.", mi);
+                }
                 helpersByState.put(so, new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));
                 compileControl.defaultForceInline(mi);
             }
 
             TearDown tearDownAnn = mi.getAnnotation(TearDown.class);
             if (tearDownAnn != null) {
+                if (!mi.getParameters().isEmpty()) {
+                    throw new GenerationException("@" + TearDown.class.getSimpleName() + " methods should have no arguments.", mi);
+                }
                 helpersByState.put(so, new HelperMethodInvocation(mi, so, tearDownAnn.value(), HelperType.TEARDOWN));
                 compileControl.defaultForceInline(mi);
             }
