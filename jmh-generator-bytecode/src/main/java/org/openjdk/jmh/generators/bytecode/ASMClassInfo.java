@@ -57,6 +57,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private final ClassInfoRepo classInfos;
     private String superName;
     private String declaringClass;
+    private boolean isInner;
 
     public ASMClassInfo(ClassInfoRepo classInfos) {
         super(Opcodes.ASM4);
@@ -165,6 +166,11 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     }
 
     @Override
+    public void visitOuterClass(String owner, String name, String desc) {
+        isInner = true;
+    }
+
+    @Override
     public ClassInfo getDeclaringClass() {
         if (declaringClass != null) {
             return classInfos.get(declaringClass);
@@ -195,7 +201,7 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
 
     @Override
     public boolean isInner() {
-        return (declaringClass != null) && (access & Opcodes.ACC_STATIC) == 0;
+        return isInner;
     }
 
     @Override
