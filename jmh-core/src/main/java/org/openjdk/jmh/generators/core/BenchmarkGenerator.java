@@ -275,8 +275,7 @@ public class BenchmarkGenerator {
 
             if (!hasDefaultConstructor) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation can only be applied to the classes having the default public constructor." +
-                        " Make sure the class is nested (static).",
+                        " annotation can only be applied to the classes having the default public constructor.",
                         state);
             }
         }
