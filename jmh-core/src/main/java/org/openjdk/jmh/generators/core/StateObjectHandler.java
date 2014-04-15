@@ -34,7 +34,6 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.logic.Control;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.TreesetMultimap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +51,6 @@ public class StateObjectHandler {
     private final Multimap<String, StateObject> args;
     private final Map<String, StateObject> implicits;
     private final Set<StateObject> stateObjects;
-    private final Multimap<StateObject, HelperMethodInvocation> helpersByState;
 
     private final Map<String, Integer> globalIndexByType = new HashMap<String, Integer>();
     private final Map<String, Integer> groupIndexByType = new HashMap<String, Integer>();
@@ -73,7 +71,6 @@ public class StateObjectHandler {
         this.args = new HashMultimap<String, StateObject>();
         this.implicits = new HashMap<String, StateObject>();
         this.stateObjects = new HashSet<StateObject>();
-        this.helpersByState = new TreesetMultimap<StateObject, HelperMethodInvocation>();
     }
 
     private String getJMHtype(String type) {
@@ -211,7 +208,7 @@ public class StateObjectHandler {
                 if (!mi.getParameters().isEmpty()) {
                     throw new GenerationException("@" + Setup.class.getSimpleName() + " methods should have no arguments.", mi);
                 }
-                helpersByState.put(so, new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));
+                so.addHelper(new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));
                 compileControl.defaultForceInline(mi);
             }
 
@@ -220,7 +217,7 @@ public class StateObjectHandler {
                 if (!mi.getParameters().isEmpty()) {
                     throw new GenerationException("@" + TearDown.class.getSimpleName() + " methods should have no arguments.", mi);
                 }
-                helpersByState.put(so, new HelperMethodInvocation(mi, so, tearDownAnn.value(), HelperType.TEARDOWN));
+                so.addHelper(new HelperMethodInvocation(mi, so, tearDownAnn.value(), HelperType.TEARDOWN));
                 compileControl.defaultForceInline(mi);
             }
         }
@@ -270,7 +267,7 @@ public class StateObjectHandler {
         // This will be used to skip the irrelevant blocks for state objects down the stream.
         Set<StateObject> hasHelpers = new HashSet<StateObject>();
         for (StateObject so : states) {
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+            for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel == helperLevel) hasHelpers.add(so);
             }
         }
@@ -284,7 +281,7 @@ public class StateObjectHandler {
 
             if (type == HelperType.SETUP) {
                 result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
-                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
                         result.add("    " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
@@ -295,7 +292,7 @@ public class StateObjectHandler {
 
             if (type == HelperType.TEARDOWN) {
                 result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
-                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
                         result.add("    " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
@@ -316,7 +313,7 @@ public class StateObjectHandler {
                 result.add("}");
                 result.add("try {");
                 result.add("    if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
-                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
                         result.add("        " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
@@ -334,7 +331,7 @@ public class StateObjectHandler {
                 result.add("}");
                 result.add("try {");
                 result.add("    if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
-                for (HelperMethodInvocation mi : helpersByState.get(so)) {
+                for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
                         result.add("        " + so.localIdentifier + "." + mi.method.getName() + "();");
                     }
@@ -399,7 +396,7 @@ public class StateObjectHandler {
                 result.add("            f.setAccessible(true);");
                 result.add("            f.set(" + so.fieldIdentifier + ", " + so.getParamAccessor(paramName) + ");");
             }
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+            for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
                 result.add("            " + so.fieldIdentifier + "." + hmi.method.getName() + "();");
@@ -427,7 +424,7 @@ public class StateObjectHandler {
                 result.add("        f.setAccessible(true);");
                 result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+            for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
                 result.add("        val." + hmi.method.getName() + "();");
@@ -462,7 +459,7 @@ public class StateObjectHandler {
                 result.add("            f.setAccessible(true);");
                 result.add("            f.set(local, " + so.getParamAccessor(paramName) + ");");
             }
-            for (HelperMethodInvocation hmi : helpersByState.get(so)) {
+            for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
                 result.add("            local." + hmi.method.getName() + "();");

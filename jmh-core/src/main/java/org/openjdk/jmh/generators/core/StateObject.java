@@ -29,7 +29,9 @@ import org.openjdk.jmh.annotations.Scope;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class StateObject {
 
@@ -46,6 +48,7 @@ public class StateObject {
     public final String localIdentifier;
     public final String fieldIdentifier;
     public final Map<String, FieldInfo> params;
+    public final SortedSet<HelperMethodInvocation> helpers;
 
     public StateObject(String userType, String jmhType, Scope scope, String fieldIdentifier, String localIdentifier) {
         this.userType = userType;
@@ -54,6 +57,7 @@ public class StateObject {
         this.localIdentifier = localIdentifier;
         this.fieldIdentifier = fieldIdentifier;
         this.params = new TreeMap<String, FieldInfo>();
+        this.helpers = new TreeSet<HelperMethodInvocation>();
     }
 
     @Override
@@ -132,4 +136,11 @@ public class StateObject {
         throw new IllegalStateException("Unknown type: " + type);
     }
 
+    public void addHelper(HelperMethodInvocation hmi) {
+        helpers.add(hmi);
+    }
+
+    public Collection<HelperMethodInvocation> getHelpers() {
+        return helpers;
+    }
 }
