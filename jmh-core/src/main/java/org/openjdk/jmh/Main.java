@@ -82,6 +82,8 @@ public class Main {
                 } else {
                     runner.list();
                 }
+            } catch (RunnerException e) {
+                System.err.println("ERROR: " + e.getMessage());
             }
 
         } catch (CommandLineOptionException e) {

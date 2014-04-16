@@ -267,12 +267,16 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private List<ActualParams> explodeAllParams(BenchmarkRecord br) {
+    private List<ActualParams> explodeAllParams(BenchmarkRecord br) throws RunnerException {
         Map<String, String[]> benchParams = br.getParams().orElse(Collections.<String, String[]>emptyMap());
         List<ActualParams> ps = new ArrayList<ActualParams>();
         List<ActualParams> newPs = new ArrayList<ActualParams>();
         for (String k : benchParams.keySet()) {
             Collection<String> values = options.getParameter(k).orElse(Arrays.asList(benchParams.get(k)));
+            if (values.isEmpty()) {
+                throw new RunnerException("Benchmark \"" + br.getUsername() + "\" defines the parameter \"" + k + "\", but its values are ambiguous.\n" +
+                        "Define the default values within the annotation, or provide the parameter values in runtime.");
+            }
             if (ps.isEmpty()) {
                 int idx = 0;
                 for (String v : values) {
