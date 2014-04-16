@@ -78,11 +78,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
             result.addAll(otherOptions.getIncludes());
         }
 
-        if (result.isEmpty()) {
-            return Collections.singletonList(".*");
-        } else {
-            return result;
-        }
+        return result;
     }
 
     // ---------------------------------------------------------------------------

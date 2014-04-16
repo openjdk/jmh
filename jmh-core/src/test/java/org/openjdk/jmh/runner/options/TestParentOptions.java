@@ -42,7 +42,7 @@ public class TestParentOptions {
     public void testIncludes_Empty() throws Exception {
         Options parent = new OptionsBuilder().build();
         Options builder = new OptionsBuilder().parent(parent).build();
-        Assert.assertEquals(Arrays.asList(".*"), builder.getIncludes());
+        Assert.assertTrue(builder.getIncludes().isEmpty());
     }
 
     @Test

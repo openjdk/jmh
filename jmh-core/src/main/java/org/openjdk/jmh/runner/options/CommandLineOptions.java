@@ -485,12 +485,7 @@ public class CommandLineOptions implements Options {
      */
     @Override
     public List<String> getIncludes() {
-        if (!regexps.isEmpty()) {
-            return regexps;
-        } else {
-            // assume user requested all benchmarks
-            return Collections.singletonList(".*");
-        }
+        return regexps;
     }
 
     /**

@@ -98,6 +98,11 @@ public class MicroBenchmarkList extends AbstractResourceReader {
      */
     public SortedSet<BenchmarkRecord> find(OutputFormat out, List<String> regexps, List<String> excludes) {
 
+        // assume we match all benchmarks when include is empty
+        if (regexps.isEmpty()) {
+            regexps.add(".*");
+        }
+
         // compile all patterns
         List<Pattern> includePatterns = new ArrayList<Pattern>(regexps.size());
         for (String regexp : regexps) {
