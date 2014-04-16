@@ -56,13 +56,13 @@ public class StateObjectHandler {
     private final Map<String, Integer> groupIndexByType = new HashMap<String, Integer>();
     private final Map<String, Integer> localIndexByType = new HashMap<String, Integer>();
 
-    private final HashMap<String, String> collapsedTypes = new HashMap<String, String>();
+    private final Map<String, String> collapsedTypes = new HashMap<String, String>();
     private int collapsedIndex = 0;
 
     private final CompilerControlPlugin compileControl;
 
     private final Set<String> claimedJmhTypes = new HashSet<String>();
-    private final HashMap<String, String> jmhTypes = new HashMap<String, String>();
+    private final Map<String, String> jmhTypes = new HashMap<String, String>();
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
@@ -97,10 +97,6 @@ public class StateObjectHandler {
         } else {
             throw new IllegalStateException("The method parameter is not a @State: " + pi);
         }
-    }
-
-    public void bindImplicit(ClassInfo ci, String label) {
-        bindImplicit(ci, label, Scope.Thread);
     }
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
