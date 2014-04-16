@@ -53,12 +53,49 @@ questions.
         </license>
     </licenses>
 
+    <!--
+       Hall of Fame: those who contributed *a lot* into JMH codebase are listed below.
+     -->
     <developers>
         <developer>
             <id>shade</id>
             <name>Aleksey Shipilev</name>
-            <organization>Oracle</organization>
-            <email>aleksey.shipilev@oracle.com</email>
+            <organization>Oracle/Sun</organization>
+            <roles>
+                <role>current-development</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>skuksenko</id>
+            <name>Sergey Kuksenko</name>
+            <organization>Oracle/Sun</organization>
+            <roles>
+                <role>current-development</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>aastrand</id>
+            <name>Anders Astrand</name>
+            <organization>Oracle/BEA</organization>
+            <roles>
+                <role>initial-development</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>sfriberg</id>
+            <name>Staffan Friberg</name>
+            <organization>Oracle/BEA</organization>
+            <roles>
+                <role>initial-development</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>hloef</id>
+            <name>Henrik Loef</name>
+            <organization>Oracle/BEA</organization>
+            <roles>
+                <role>initial-development</role>
+            </roles>
         </developer>
     </developers>
 
