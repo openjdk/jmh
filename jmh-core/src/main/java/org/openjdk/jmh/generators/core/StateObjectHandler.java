@@ -48,17 +48,14 @@ import java.util.TreeSet;
 
 public class StateObjectHandler {
 
+    private final CompilerControlPlugin compileControl;
+
+    private final Identifiers identifiers;
+
     private final Multimap<String, StateObject> args;
     private final Map<String, StateObject> implicits;
     private final Set<StateObject> stateObjects;
 
-    private final Map<String, String> collapsedTypes = new HashMap<String, String>();
-    private int collapsedIndex = 0;
-
-    private final CompilerControlPlugin compileControl;
-
-    private final Set<String> claimedJmhTypes = new HashSet<String>();
-    private final Map<String, String> jmhTypes = new HashMap<String, String>();
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
@@ -67,27 +64,11 @@ public class StateObjectHandler {
         this.args = new HashMultimap<String, StateObject>();
         this.implicits = new HashMap<String, StateObject>();
         this.stateObjects = new HashSet<StateObject>();
-    }
-
-    private String getJMHtype(String type) {
-        String jmhType = jmhTypes.get(type);
-        if (jmhType == null) {
-            int v = 1;
-            do {
-                jmhType = getBaseType(type) + "_" + v + "_jmh";
-                v++;
-            } while (!claimedJmhTypes.add(jmhType));
-            jmhTypes.put(type, jmhType);
-        }
-        return jmhType;
-    }
-
-    private String getBaseType(String type) {
-        return type.substring(type.lastIndexOf(".") + 1);
+        this.identifiers = new Identifiers();
     }
 
     public void bindMethodGroup(MethodGroup mg) {
-        Map<String, Integer> threadIndex = new HashMap<String, Integer>();
+        int index = 0;
 
         for (MethodInfo method : mg.methods()) {
             for (ParameterInfo p : method.getParameters()) {
@@ -99,31 +80,23 @@ public class StateObjectHandler {
                 }
 
                 Scope scope = ann.value();
-                String className = ci.getQualifiedName();
-                String identifier;
 
+                String identifier;
                 switch (scope) {
                     case Benchmark:
                     case Group: {
-                        identifier = collapseTypeName(className) + "G";
+                        identifier = "G";
                         break;
                     }
                     case Thread: {
-                        Integer index = threadIndex.get(className);
-                        if (index == null) {
-                            index = 0;
-                        } else {
-                            index++;
-                        }
-                        threadIndex.put(className, index);
-                        identifier = collapseTypeName(className) + index;
+                        identifier = String.valueOf(index++);
                         break;
                     }
                     default:
                         throw new GenerationException("Unknown scope: " + scope, ci);
                 }
 
-                StateObject so = new StateObject(className, getJMHtype(className), scope, identifier);
+                StateObject so = new StateObject(identifiers, ci.getQualifiedName(), scope, identifier);
                 stateObjects.add(so);
                 args.put(method.getName(), so);
                 bindState(method, so, ci);
@@ -133,7 +106,7 @@ public class StateObjectHandler {
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        StateObject so = new StateObject(ci.getQualifiedName(), getJMHtype(ci.getQualifiedName()), (ann != null) ? ann.value() : scope, label);
+        StateObject so = new StateObject(identifiers, ci.getQualifiedName(), (ann != null) ? ann.value() : scope, label);
         stateObjects.add(so);
         implicits.put(label, so);
         bindState(null, so, ci);
@@ -571,19 +544,6 @@ public class StateObjectHandler {
 
     public Collection<String> getFields() {
         return Collections.emptyList();
-    }
-
-    private String collapseTypeName(String e) {
-        if (collapsedTypes.containsKey(e)) {
-            return collapsedTypes.get(e);
-        }
-
-        String[] strings = e.split("\\.");
-        String name = strings[strings.length - 1].toLowerCase();
-
-        String collapsedName = name + (collapsedIndex++) + "_";
-        collapsedTypes.put(e, collapsedName);
-        return collapsedName;
     }
 
     public StateObject getImplicit(String label) {
