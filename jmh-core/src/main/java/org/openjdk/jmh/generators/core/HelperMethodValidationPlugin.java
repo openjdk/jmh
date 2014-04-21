@@ -28,6 +28,8 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
+import java.lang.annotation.Annotation;
+
 public class HelperMethodValidationPlugin implements Plugin {
 
     @Override
@@ -45,11 +47,7 @@ public class HelperMethodValidationPlugin implements Plugin {
                     }
                 }
 
-                if (!element.isPublic()) {
-                    destination.printError(
-                            "@" + Setup.class.getSimpleName() + " method should be public.",
-                            element);
-                }
+                check(destination, element, Setup.class);
             }
 
             for (MethodInfo element : BenchmarkGeneratorUtils.getMethodsAnnotatedWith(source, TearDown.class)) {
@@ -64,15 +62,25 @@ public class HelperMethodValidationPlugin implements Plugin {
                     }
                 }
 
-                if (!element.isPublic()) {
-                    destination.printError(
-                            "@" + TearDown.class.getSimpleName() + " method should be public.",
-                            element);
-                }
+                check(destination, element, TearDown.class);
             }
 
         } catch (Throwable t) {
             destination.printError("Helper method validation generators had thrown the unexpected exception.", t);
+        }
+    }
+
+    private void check(GeneratorDestination destination, MethodInfo element, Class<? extends Annotation> annClass) {
+        if (!element.isPublic()) {
+            destination.printError(
+                    "@" + annClass.getSimpleName() + " method should be public.",
+                    element);
+        }
+
+        if (!element.getReturnType().equalsIgnoreCase("void")) {
+            destination.printError(
+                    "@" + annClass.getSimpleName() + " method should not return anything.",
+                    element);
         }
     }
 
