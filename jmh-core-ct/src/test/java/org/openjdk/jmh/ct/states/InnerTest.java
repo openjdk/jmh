@@ -33,7 +33,7 @@ import org.openjdk.jmh.ct.CompileTest;
 public class InnerTest {
 
     @State(Scope.Benchmark)
-    public class S {
+    class S {
 
     }
 

@@ -33,7 +33,7 @@ import org.openjdk.jmh.ct.CompileTest;
 public class NestedTest {
 
     @State(Scope.Benchmark)
-    public static class S {
+    static class S {
 
     }
 
@@ -44,7 +44,7 @@ public class NestedTest {
 
     @Test
     public void compileTest() {
-        CompileTest.assertOK(this.getClass());
+        CompileTest.assertFail(this.getClass());
     }
 
 }
