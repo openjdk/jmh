@@ -30,13 +30,29 @@ import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;
 import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
 
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.ToolProvider;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CompileTest {
+
+    public static void assertFail(Class<?> klass) {
+        TestGeneratorDestination destination = doTest(klass);
+        if (!destination.hasErrors()) {
+            Assert.fail("Should have failed.");
+        }
+    }
 
     public static void assertOK(Class<?> klass) {
         TestGeneratorDestination destination = doTest(klass);
@@ -49,12 +65,35 @@ public class CompileTest {
             }
             Assert.fail(sb.toString());
         }
+
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+
+        JavaCompiler.CompilationTask task = ToolProvider.getSystemJavaCompiler().getTask(
+                null, null, diagnostics, null, null,
+                Arrays.asList(new JavaSourceFromString(destination.className, destination.getContents())));
+
+        boolean success = task.call();
+
+        if (!success) {
+            System.out.println(destination.getContents());
+            for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
+                System.out.println(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
+            }
+            Assert.fail("Unable to compile the generated code");
+        }
     }
 
-    public static void assertFail(Class<?> klass) {
-        TestGeneratorDestination destination = doTest(klass);
-        if (!destination.hasErrors()) {
-            Assert.fail("Should have failed.");
+    public static class JavaSourceFromString extends SimpleJavaFileObject {
+        final String code;
+
+        JavaSourceFromString(String name, String code) {
+            super(URI.create("string:///" + name.replace('.', '/') + JavaFileObject.Kind.SOURCE.extension), JavaFileObject.Kind.SOURCE);
+            this.code = code;
+        }
+
+        @Override
+        public CharSequence getCharContent(boolean iee) {
+            return code;
         }
     }
 
@@ -74,6 +113,9 @@ public class CompileTest {
 
         List<String> errors = new ArrayList<String>();
 
+        String className;
+        StringWriter sw = new StringWriter();
+
         @Override
         public Writer newResource(String resourcePath) throws IOException {
             return new PrintWriter(System.out, true);
@@ -81,7 +123,15 @@ public class CompileTest {
 
         @Override
         public Writer newClass(String className) throws IOException {
-            return new PrintWriter(System.out, true);
+            if (this.className != null) {
+                throw new IllegalStateException("Already writing the class");
+            }
+            this.className = className;
+            return new PrintWriter(sw, true);
+        }
+
+        public String getContents() {
+            return sw.toString();
         }
 
         @Override

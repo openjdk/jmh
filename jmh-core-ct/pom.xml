@@ -55,6 +55,13 @@ questions.
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <scope>system</scope>
+            <systemPath>${java.home}/../lib/tools.jar</systemPath>
+            <version>jdk</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.10</version>
