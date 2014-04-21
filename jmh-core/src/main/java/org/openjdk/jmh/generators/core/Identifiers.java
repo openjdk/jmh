@@ -24,6 +24,9 @@
  */
 package org.openjdk.jmh.generators.core;
 
+import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.Scope;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,6 +68,22 @@ public class Identifiers {
         String collapsedName = name + (collapsedIndex++) + "_";
         collapsedTypes.put(e, collapsedName);
         return collapsedName;
+    }
+
+    private int index = 0;
+
+    public String identifier(Scope scope) {
+        switch (scope) {
+            case Benchmark:
+            case Group: {
+                return "G";
+            }
+            case Thread: {
+                return String.valueOf(index++);
+            }
+            default:
+                throw new GenerationException("Unknown scope: " + scope, null);
+        }
     }
 
 }

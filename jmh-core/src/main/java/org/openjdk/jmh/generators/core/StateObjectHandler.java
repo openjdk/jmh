@@ -68,8 +68,6 @@ public class StateObjectHandler {
     }
 
     public void bindMethodGroup(MethodGroup mg) {
-        int index = 0;
-
         for (MethodInfo method : mg.methods()) {
             for (ParameterInfo p : method.getParameters()) {
                 ClassInfo ci = p.getType();
@@ -79,24 +77,7 @@ public class StateObjectHandler {
                     throw new GenerationException("The method parameter is not a @" + State.class.getSimpleName() + ": ", p);
                 }
 
-                Scope scope = ann.value();
-
-                String identifier;
-                switch (scope) {
-                    case Benchmark:
-                    case Group: {
-                        identifier = "G";
-                        break;
-                    }
-                    case Thread: {
-                        identifier = String.valueOf(index++);
-                        break;
-                    }
-                    default:
-                        throw new GenerationException("Unknown scope: " + scope, ci);
-                }
-
-                StateObject so = new StateObject(identifiers, ci.getQualifiedName(), scope, identifier);
+                StateObject so = new StateObject(identifiers, ci.getQualifiedName(), ann.value());
                 stateObjects.add(so);
                 args.put(method.getName(), so);
                 bindState(method, so, ci);
@@ -106,7 +87,7 @@ public class StateObjectHandler {
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        StateObject so = new StateObject(identifiers, ci.getQualifiedName(), (ann != null) ? ann.value() : scope, label);
+        StateObject so = new StateObject(identifiers, ci.getQualifiedName(), (ann != null) ? ann.value() : scope);
         stateObjects.add(so);
         implicits.put(label, so);
         bindState(null, so, ci);
