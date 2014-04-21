@@ -50,12 +50,12 @@ public class StateObject {
     public final Map<String, FieldInfo> params;
     public final SortedSet<HelperMethodInvocation> helpers;
 
-    public StateObject(String userType, String jmhType, Scope scope, String fieldIdentifier, String localIdentifier) {
+    public StateObject(String userType, String jmhType, Scope scope, String identifier) {
         this.userType = userType;
         this.type = jmhType;
         this.scope = scope;
-        this.localIdentifier = localIdentifier;
-        this.fieldIdentifier = fieldIdentifier;
+        this.localIdentifier = "l_" + identifier;
+        this.fieldIdentifier = "f_" + identifier;
         this.params = new TreeMap<String, FieldInfo>();
         this.helpers = new TreeSet<HelperMethodInvocation>();
     }

@@ -100,16 +100,12 @@ public class StateObjectHandler {
 
                 Scope scope = ann.value();
                 String className = ci.getQualifiedName();
+                String identifier;
 
                 switch (scope) {
                     case Benchmark:
                     case Group: {
-                        String identifier = collapseTypeName(className) + "G";
-                        StateObject so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
-                        stateObjects.add(so);
-                        args.put(method.getName(), so);
-
-                        bindState(method, so, ci);
+                        identifier = collapseTypeName(className) + "G";
                         break;
                     }
                     case Thread: {
@@ -120,25 +116,24 @@ public class StateObjectHandler {
                             index++;
                         }
                         threadIndex.put(className, index);
-
-                        String identifier = collapseTypeName(className) + index;
-                        StateObject so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
-                        stateObjects.add(so);
-                        args.put(method.getName(), so);
-
-                        bindState(method, so, ci);
+                        identifier = collapseTypeName(className) + index;
                         break;
                     }
                     default:
                         throw new GenerationException("Unknown scope: " + scope, ci);
                 }
+
+                StateObject so = new StateObject(className, getJMHtype(className), scope, identifier);
+                stateObjects.add(so);
+                args.put(method.getName(), so);
+                bindState(method, so, ci);
             }
         }
     }
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        StateObject so = new StateObject(ci.getQualifiedName(), getJMHtype(ci.getQualifiedName()), (ann != null) ? ann.value() : scope, "f_" + label, "l_" + label);
+        StateObject so = new StateObject(ci.getQualifiedName(), getJMHtype(ci.getQualifiedName()), (ann != null) ? ann.value() : scope, label);
         stateObjects.add(so);
         implicits.put(label, so);
         bindState(null, so, ci);
