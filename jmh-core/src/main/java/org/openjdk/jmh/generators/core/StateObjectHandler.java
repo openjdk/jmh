@@ -102,14 +102,14 @@ public class StateObjectHandler {
                 String className = ci.getQualifiedName();
 
                 switch (scope) {
-                    case Benchmark: {
-                        String identifier = collapseTypeName(className) + "G";
-                        bindState(method, ci, scope, identifier, false);
-                        break;
-                    }
+                    case Benchmark:
                     case Group: {
                         String identifier = collapseTypeName(className) + "G";
-                        bindState(method, ci, scope, identifier, false);
+                        StateObject so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
+                        stateObjects.add(so);
+                        args.put(method.getName(), so);
+
+                        bindState(method, so, ci);
                         break;
                     }
                     case Thread: {
@@ -120,8 +120,13 @@ public class StateObjectHandler {
                             index++;
                         }
                         threadIndex.put(className, index);
+
                         String identifier = collapseTypeName(className) + index;
-                        bindState(method, ci, scope, identifier, false);
+                        StateObject so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
+                        stateObjects.add(so);
+                        args.put(method.getName(), so);
+
+                        bindState(method, so, ci);
                         break;
                     }
                     default:
@@ -133,24 +138,16 @@ public class StateObjectHandler {
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        bindState(null, ci, (ann != null) ? ann.value() : scope, label, true);
+        StateObject so = new StateObject(ci.getQualifiedName(), getJMHtype(ci.getQualifiedName()), (ann != null) ? ann.value() : scope, "f_" + label, "l_" + label);
+        stateObjects.add(so);
+        implicits.put(label, so);
+        bindState(null, so, ci);
     }
 
-    private void bindState(MethodInfo execMethod, ClassInfo ci, Scope scope, String identifier, boolean isImplicit) {
-        String className = ci.getQualifiedName();
-
-        StateObject so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
-        stateObjects.add(so);
-
-        if (isImplicit) {
-            implicits.put(identifier, so);
-        } else {
-            args.put(execMethod.getName(), so);
-        }
-
+    private void bindState(MethodInfo execMethod, StateObject so, ClassInfo ci) {
         // auxiliary result, produce the accessors
         if (ci.getAnnotation(AuxCounters.class) != null) {
-            if (scope != Scope.Thread) {
+            if (so.scope != Scope.Thread) {
                 throw new GenerationException("@" + AuxCounters.class.getSimpleName() +
                         " can only be used with " + Scope.class.getSimpleName() + "." + Scope.Thread + " states.", ci);
             }
