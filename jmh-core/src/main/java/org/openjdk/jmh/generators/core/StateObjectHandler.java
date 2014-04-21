@@ -52,10 +52,6 @@ public class StateObjectHandler {
     private final Map<String, StateObject> implicits;
     private final Set<StateObject> stateObjects;
 
-    private final Map<String, Integer> globalIndexByType = new HashMap<String, Integer>();
-    private final Map<String, Integer> groupIndexByType = new HashMap<String, Integer>();
-    private final Map<String, Integer> localIndexByType = new HashMap<String, Integer>();
-
     private final Map<String, String> collapsedTypes = new HashMap<String, String>();
     private int collapsedIndex = 0;
 
@@ -90,59 +86,65 @@ public class StateObjectHandler {
         return type.substring(type.lastIndexOf(".") + 1);
     }
 
-    public void bindArg(MethodInfo mi, ParameterInfo pi) {
-        State ann = BenchmarkGeneratorUtils.getAnnSuper(pi.getType(), State.class);
-        if (ann != null) {
-            bindState(mi, pi.getType(), ann.value(), null);
-        } else {
-            throw new IllegalStateException("The method parameter is not a @State: " + pi);
+    public void bindMethodGroup(MethodGroup mg) {
+        Map<String, Integer> threadIndex = new HashMap<String, Integer>();
+
+        for (MethodInfo method : mg.methods()) {
+            for (ParameterInfo p : method.getParameters()) {
+                ClassInfo ci = p.getType();
+
+                State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
+                if (ann == null) {
+                    throw new GenerationException("The method parameter is not a @" + State.class.getSimpleName() + ": ", p);
+                }
+
+                Scope scope = ann.value();
+                String className = ci.getQualifiedName();
+
+                switch (scope) {
+                    case Benchmark: {
+                        String identifier = collapseTypeName(className) + "G";
+                        bindState(method, ci, scope, identifier, false);
+                        break;
+                    }
+                    case Group: {
+                        String identifier = collapseTypeName(className) + "G";
+                        bindState(method, ci, scope, identifier, false);
+                        break;
+                    }
+                    case Thread: {
+                        Integer index = threadIndex.get(className);
+                        if (index == null) {
+                            index = 0;
+                        } else {
+                            index++;
+                        }
+                        threadIndex.put(className, index);
+                        String identifier = collapseTypeName(className) + index;
+                        bindState(method, ci, scope, identifier, false);
+                        break;
+                    }
+                    default:
+                        throw new GenerationException("Unknown scope: " + scope, ci);
+                }
+            }
         }
     }
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        bindState(null, ci, (ann != null) ? ann.value() : scope, label);
+        bindState(null, ci, (ann != null) ? ann.value() : scope, label, true);
     }
 
-    private void bindState(MethodInfo execMethod, ClassInfo ci, Scope scope, String implicitLabel) {
-        Integer index;
+    private void bindState(MethodInfo execMethod, ClassInfo ci, Scope scope, String identifier, boolean isImplicit) {
         String className = ci.getQualifiedName();
-        switch (scope) {
-            case Benchmark: {
-                index = globalIndexByType.get(className);
-                if (index == null) {
-                    index = 0;
-                    globalIndexByType.put(className, index);
-                }
-                break;
-            }
-            case Group:
-                index = groupIndexByType.get(className);
-                if (index == null) {
-                    index = 0;
-                    groupIndexByType.put(className, index);
-                }
-                break;
-            case Thread: {
-                index = localIndexByType.get(className);
-                if (index == null) {
-                    index = -1;
-                }
-                index++;
-                localIndexByType.put(className, index);
-                break;
-            }
-            default:
-                throw new IllegalStateException("Unknown scope: " + scope);
-        }
 
-        StateObject so;
-        if (implicitLabel != null) {
-            so = new StateObject(className, getJMHtype(className), scope, "f_" + implicitLabel, "l_" + implicitLabel);
-            implicits.put(implicitLabel, so);
+        StateObject so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
+        stateObjects.add(so);
+
+        if (isImplicit) {
+            implicits.put(identifier, so);
         } else {
-            String identifier = collapseTypeName(className) + index;
-            so = new StateObject(className, getJMHtype(className), scope, "f_" + identifier, "l_" + identifier);
             args.put(execMethod.getName(), so);
         }
 
@@ -187,8 +189,6 @@ public class StateObjectHandler {
                 }
             }
         }
-
-        stateObjects.add(so);
 
         // walk the type hierarchy up to discover inherited @Params
         for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(ci)) {

@@ -475,17 +475,13 @@ public class BenchmarkGenerator {
 
         // Write all methods
         for (String groupName : info.methodGroups.keySet()) {
-            for (MethodInfo method : info.methodGroups.get(groupName).methods()) {
-                for (ParameterInfo p : method.getParameters()) {
-                    states.bindArg(method, p);
-                }
-            }
+            states.clearArgs();
+            states.bindMethodGroup(info.methodGroups.get(groupName));
 
             for (Mode benchmarkKind : Mode.values()) {
                 if (benchmarkKind == Mode.All) continue;
                 generateMethod(benchmarkKind, writer, info.methodGroups.get(groupName), states);
             }
-            states.clearArgs();
         }
 
         // Write out state initializers
