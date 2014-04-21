@@ -103,7 +103,8 @@ public class BenchmarkGenerator {
     /**
      * Execute the next phase of benchmark generation.
      * Multiple calls to this method are acceptable, even with the difference sources
-     * @param source generator source to get the metadata from
+     *
+     * @param source      generator source to get the metadata from
      * @param destination generator destination to write the results to
      */
     public void generate(GeneratorSource source, GeneratorDestination destination) {
@@ -308,7 +309,7 @@ public class BenchmarkGenerator {
                     throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
                             + " method can only be synchronized if the enclosing class is annotated with "
                             + "@" + State.class.getSimpleName() + ".", m);
-                    }
+                }
             }
         }
 
@@ -324,6 +325,7 @@ public class BenchmarkGenerator {
 
     /**
      * validate benchmark info
+     *
      * @param info benchmark info to validate
      */
     private void validateBenchmarkInfo(BenchmarkInfo info) {
@@ -369,7 +371,7 @@ public class BenchmarkGenerator {
      * Generate BenchmarkInfo for given class.
      * We will figure out method groups at this point.
      *
-     * @param clazz holder class
+     * @param clazz   holder class
      * @param methods annotated methods
      * @return BenchmarkInfo
      */
@@ -448,67 +450,67 @@ public class BenchmarkGenerator {
      * Create and generate Java code for a class and it's methods
      */
     private void generateClass(GeneratorSource source, GeneratorDestination destination, ClassInfo classInfo, BenchmarkInfo info) throws IOException {
-            // Create file and open an outputstream
-            PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
+        // Create file and open an outputstream
+        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
 
-            // Write package and imports
-            writer.println("package " + info.generatedPackageName + ';');
-            writer.println();
+        // Write package and imports
+        writer.println("package " + info.generatedPackageName + ';');
+        writer.println();
 
-            generateImport(writer);
+        generateImport(writer);
 
-            // Write class header
-            writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
-            writer.println("public final class " + info.generatedClassName + " {");
-            writer.println();
-            generatePadding(writer);
+        // Write class header
+        writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
+        writer.println("public final class " + info.generatedClassName + " {");
+        writer.println();
+        generatePadding(writer);
 
-            StateObjectHandler states = new StateObjectHandler(compilerControl);
+        StateObjectHandler states = new StateObjectHandler(compilerControl);
 
-            // benchmark instance is implicit
-            states.bindImplicit(classInfo, "bench", Scope.Thread);
+        // benchmark instance is implicit
+        states.bindImplicit(classInfo, "bench", Scope.Thread);
 
-            // default blackhole is implicit
-            states.bindImplicit(source.resolveClass(BlackHole.class.getCanonicalName()), "blackhole", Scope.Thread);
+        // default blackhole is implicit
+        states.bindImplicit(source.resolveClass(BlackHole.class.getCanonicalName()), "blackhole", Scope.Thread);
 
-            // Write all methods
-            for (String groupName : info.methodGroups.keySet()) {
-                for (MethodInfo method : info.methodGroups.get(groupName).methods()) {
-                    for (ParameterInfo p : method.getParameters()) {
-                        states.bindArg(method, p);
-                    }
+        // Write all methods
+        for (String groupName : info.methodGroups.keySet()) {
+            for (MethodInfo method : info.methodGroups.get(groupName).methods()) {
+                for (ParameterInfo p : method.getParameters()) {
+                    states.bindArg(method, p);
                 }
-
-                for (Mode benchmarkKind : Mode.values()) {
-                    if (benchmarkKind == Mode.All) continue;
-                    generateMethod(benchmarkKind, writer, info.methodGroups.get(groupName), states);
-                }
-                states.clearArgs();
             }
 
-            // Write out state initializers
-            for (String s : states.getStateInitializers()) {
-                writer.println(ident(1) + s);
+            for (Mode benchmarkKind : Mode.values()) {
+                if (benchmarkKind == Mode.All) continue;
+                generateMethod(benchmarkKind, writer, info.methodGroups.get(groupName), states);
             }
-            writer.println();
+            states.clearArgs();
+        }
 
-            // Write out the required fields
-            for (String s : states.getFields()) {
-                writer.println(ident(1) + s);
-            }
-            writer.println();
+        // Write out state initializers
+        for (String s : states.getStateInitializers()) {
+            writer.println(ident(1) + s);
+        }
+        writer.println();
 
-            // Write out the required objects
-            for (String s : states.getStateOverrides()) {
-                writer.println(ident(1) + s);
-            }
-            writer.println();
+        // Write out the required fields
+        for (String s : states.getFields()) {
+            writer.println(ident(1) + s);
+        }
+        writer.println();
 
-            // Finish class
-            writer.println("}");
-            writer.println();
+        // Write out the required objects
+        for (String s : states.getStateOverrides()) {
+            writer.println(ident(1) + s);
+        }
+        writer.println();
 
-            writer.close();
+        // Finish class
+        writer.println("}");
+        writer.println();
+
+        writer.close();
     }
 
     private void generatePadding(PrintWriter writer) {
@@ -525,7 +527,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateImport(PrintWriter writer) {
-        Class<?>[] imports = new Class<?>[] {
+        Class<?>[] imports = new Class<?>[]{
                 List.class, AtomicInteger.class, AtomicIntegerFieldUpdater.class,
                 Collection.class, Collections.class, ArrayList.class, Arrays.class,
                 TimeUnit.class, Generated.class, CompilerControl.class,
@@ -998,8 +1000,8 @@ public class BenchmarkGenerator {
     }
 
     public static String ident(int prefix) {
-        char[] chars = new char[prefix*4];
-        for (int i = 0; i < prefix*4; i++) {
+        char[] chars = new char[prefix * 4];
+        for (int i = 0; i < prefix * 4; i++) {
             chars[i] = ' ';
         }
         return new String(chars);
