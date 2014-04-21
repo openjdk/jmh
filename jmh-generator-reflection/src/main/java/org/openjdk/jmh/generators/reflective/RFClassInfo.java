@@ -84,7 +84,7 @@ public class RFClassInfo implements ClassInfo {
     @Override
     public Collection<MethodInfo> getConstructors() {
         Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
-        for (Constructor m : klass.getConstructors()) {
+        for (Constructor m : klass.getDeclaredConstructors()) {
             mis.add(new RFConstructorInfo(this, m));
         }
         return mis;
@@ -93,7 +93,7 @@ public class RFClassInfo implements ClassInfo {
     @Override
     public Collection<MethodInfo> getMethods() {
         Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
-        for (Method m : klass.getMethods()) {
+        for (Method m : klass.getDeclaredMethods()) {
             mis.add(new RFMethodInfo(this, m));
         }
         return mis;
