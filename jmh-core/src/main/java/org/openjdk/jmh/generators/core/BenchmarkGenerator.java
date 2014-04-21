@@ -261,12 +261,17 @@ public class BenchmarkGenerator {
 
             if (state.isFinal()) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation only supports non-final classes.", state);
+                        " annotation does not support final classes.", state);
             }
 
             if (state.isInner()) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation only supports non-inner classes, make sure your class is static.", state);
+                        " annotation does not support inner classes, make sure your class is static.", state);
+            }
+
+            if (state.isAbstract()) {
+                throw new GenerationException("The " + State.class.getSimpleName() +
+                        " annotation does not support abstract classes.", state);
             }
 
             boolean hasDefaultConstructor = false;
