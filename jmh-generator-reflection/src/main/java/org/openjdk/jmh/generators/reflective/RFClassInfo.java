@@ -144,7 +144,10 @@ public class RFClassInfo implements ClassInfo {
 
     @Override
     public boolean isInner() {
-        return (klass.getEnclosingClass() != null);
+        // LOL, Reflection: http://mail.openjdk.java.net/pipermail/core-libs-dev/2014-February/025246.html
+        return klass.isAnonymousClass() ||
+               klass.isLocalClass() ||
+                       (klass.isMemberClass() && !Modifier.isStatic(klass.getModifiers()));
     }
 
     @Override
