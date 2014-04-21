@@ -31,6 +31,7 @@ import org.openjdk.jmh.generators.core.GeneratorSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 public class ASMGeneratorSource implements GeneratorSource {
@@ -48,18 +49,22 @@ public class ASMGeneratorSource implements GeneratorSource {
     }
 
     public void processClass(File classFile) throws IOException {
-        final ASMClassInfo ci = new ASMClassInfo(classInfos);
         FileInputStream fos = null;
         try {
             fos = new FileInputStream(classFile);
-            ClassReader reader = new ClassReader(fos);
-            reader.accept(ci, 0);
-            classInfos.put(ci.getIdName(), ci);
+            processClass(fos);
         } finally {
             if (fos != null) {
                 fos.close();
             }
         }
+    }
+
+    public void processClass(InputStream stream) throws IOException {
+        final ASMClassInfo ci = new ASMClassInfo(classInfos);
+        ClassReader reader = new ClassReader(stream);
+        reader.accept(ci, 0);
+        classInfos.put(ci.getIdName(), ci);
     }
 
     @Override
