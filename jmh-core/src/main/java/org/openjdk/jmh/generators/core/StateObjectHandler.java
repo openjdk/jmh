@@ -257,14 +257,12 @@ public class StateObjectHandler {
 
     public Collection<String> getHelperBlock(MethodInfo method, Level helperLevel, HelperType type) {
 
-        Collection<StateObject> states = cons(args.get(method.getName()), implicits.values(), getControls());
-
         // Look for the offending methods.
         // This will be used to skip the irrelevant blocks for state objects down the stream.
-        Set<StateObject> hasHelpers = new HashSet<StateObject>();
-        for (StateObject so : states) {
+        Set<StateObject> states = new HashSet<StateObject>();
+        for (StateObject so : cons(args.get(method.getName()), implicits.values(), getControls())) {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
-                if (hmi.helperLevel == helperLevel) hasHelpers.add(so);
+                if (hmi.helperLevel == helperLevel) states.add(so);
             }
         }
 
@@ -273,7 +271,6 @@ public class StateObjectHandler {
         // Handle Thread object helpers
         for (StateObject so : states) {
             if (so.scope != Scope.Thread) continue;
-            if (!hasHelpers.contains(so)) continue;
 
             if (type == HelperType.SETUP) {
                 result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
@@ -301,7 +298,6 @@ public class StateObjectHandler {
         // Handle Benchmark/Group object helpers
         for (StateObject so : states) {
             if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
-            if (!hasHelpers.contains(so)) continue;
 
             if (type == HelperType.SETUP) {
                 result.add("while(!" + so.type + ".setup" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
