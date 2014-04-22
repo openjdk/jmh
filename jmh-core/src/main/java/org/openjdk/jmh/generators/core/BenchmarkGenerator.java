@@ -94,7 +94,6 @@ public class BenchmarkGenerator {
         compilerControl = new CompilerControlPlugin();
 
         plugins = new ArrayList<Plugin>();
-        plugins.add(new HelperMethodValidationPlugin());
         plugins.add(new ParamValidationPlugin());
         plugins.add(compilerControl);
     }

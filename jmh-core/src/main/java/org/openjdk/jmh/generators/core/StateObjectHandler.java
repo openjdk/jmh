@@ -35,6 +35,7 @@ import org.openjdk.jmh.logic.Control;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -147,21 +148,46 @@ public class StateObjectHandler {
         for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
             Setup setupAnn = mi.getAnnotation(Setup.class);
             if (setupAnn != null) {
-                if (!mi.getParameters().isEmpty()) {
-                    throw new GenerationException("@" + Setup.class.getSimpleName() + " methods should have no arguments.", mi);
-                }
+                checkHelpers(mi, Setup.class);
                 so.addHelper(new HelperMethodInvocation(mi, so, setupAnn.value(), HelperType.SETUP));
                 compileControl.defaultForceInline(mi);
             }
 
             TearDown tearDownAnn = mi.getAnnotation(TearDown.class);
             if (tearDownAnn != null) {
-                if (!mi.getParameters().isEmpty()) {
-                    throw new GenerationException("@" + TearDown.class.getSimpleName() + " methods should have no arguments.", mi);
-                }
+                checkHelpers(mi, TearDown.class);
                 so.addHelper(new HelperMethodInvocation(mi, so, tearDownAnn.value(), HelperType.TEARDOWN));
                 compileControl.defaultForceInline(mi);
             }
+        }
+    }
+
+    private void checkHelpers(MethodInfo mi, Class<? extends Annotation> annClass) {
+        if (!mi.getParameters().isEmpty()) {
+            throw new GenerationException("@" + annClass.getSimpleName() + " methods should have no arguments.", mi);
+        }
+
+        // OK to have these annotation for @State objects
+        if (BenchmarkGeneratorUtils.getAnnSuper(mi.getDeclaringClass(), State.class) == null) {
+            if (!mi.getDeclaringClass().isAbstract()) {
+                throw new GenerationException(
+                        "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
+                                "the class not having @" + State.class.getSimpleName() + " annotation. " +
+                                "This has no behavioral effect, and prohibited.",
+                        mi);
+            }
+        }
+
+        if (!mi.isPublic()) {
+            throw new GenerationException(
+                    "@" + annClass.getSimpleName() + " method should be public.",
+                    mi);
+        }
+
+        if (!mi.getReturnType().equalsIgnoreCase("void")) {
+            throw new GenerationException(
+                    "@" + annClass.getSimpleName() + " method should not return anything.",
+                    mi);
         }
     }
 
