@@ -612,32 +612,31 @@ public class StateObjectHandler {
     }
 
     public List<String> getStateGetters(MethodInfo method) {
-        List<String> result = new ArrayList<String>();
-
+        // Linearize @State dependency DAG
         List<StateObject> linearOrder = new ArrayList<StateObject>();
+
         List<StateObject> stratum = new ArrayList<StateObject>();
+
+        // These are roots
         stratum.addAll(args.get(method.getName()));
         stratum.addAll(implicits.values());
+        stratum.addAll(getControls());
 
+        // Recursively walk the DAG
         while (!stratum.isEmpty()) {
+            linearOrder.addAll(stratum);
             List<StateObject> newStratum = new ArrayList<StateObject>();
             for (StateObject so : stratum) {
-                linearOrder.addAll(stateObjectDeps.get(so));
                 newStratum.addAll(stateObjectDeps.get(so));
             }
-            stratum.clear();
-            stratum.addAll(newStratum);
+            stratum = newStratum;
         }
 
+        // The initialization order is reversed
         Collections.reverse(linearOrder);
 
-        LinkedHashSet<StateObject> initOrder = new LinkedHashSet<StateObject>();
-        initOrder.addAll(linearOrder);
-        initOrder.addAll(args.get(method.getName()));
-        initOrder.addAll(implicits.values());
-        initOrder.addAll(getControls());
-
-        for (StateObject so : initOrder) {
+        List<String> result = new ArrayList<String>();
+        for (StateObject so : new LinkedHashSet<StateObject>(linearOrder)) {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
