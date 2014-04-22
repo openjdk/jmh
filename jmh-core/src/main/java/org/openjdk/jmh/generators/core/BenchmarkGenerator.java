@@ -95,7 +95,6 @@ public class BenchmarkGenerator {
 
         plugins = new ArrayList<Plugin>();
         plugins.add(new HelperMethodValidationPlugin());
-        plugins.add(new GroupValidationPlugin());
         plugins.add(new ParamValidationPlugin());
         plugins.add(compilerControl);
     }
@@ -324,6 +323,17 @@ public class BenchmarkGenerator {
             if (opi != null && opi.value() < 1) {
                 throw new GenerationException("The " + OperationsPerInvocation.class.getSimpleName() +
                         " needs to be greater than 0.", m);
+            }
+        }
+
+        // validate @Group-s
+        for (MethodInfo m : methods) {
+            if (m.getAnnotation(Group.class) != null && m.getAnnotation(Threads.class) != null) {
+                throw new GenerationException("@" + Threads.class.getSimpleName() + " annotation is placed within " +
+                        "the benchmark method with @" + Group.class.getSimpleName() + " annotation. " +
+                        "This has ambiguous behavioral effect, and prohibited. " +
+                        "Did you mean @" + GroupThreads.class.getSimpleName() + " instead?",
+                        m);
             }
         }
     }
