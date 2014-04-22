@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.helpers;
+package org.openjdk.jmh.ct.states.helpers.implicit;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -33,10 +33,10 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
 
 @State(Scope.Benchmark)
-public class PrivateTest {
+public class PublicFinalTest {
 
     @Setup(Level.Trial)
-    private void setup() {}
+    public final void setup() {}
 
     @GenerateMicroBenchmark
     public void test() {
@@ -45,7 +45,7 @@ public class PrivateTest {
 
     @Test
     public void compileTest() {
-        CompileTest.assertFail(this.getClass());
+        CompileTest.assertOK(this.getClass());
     }
 
 }

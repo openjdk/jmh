@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.helpers;
+package org.openjdk.jmh.ct.states.helpers.implicit;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -31,23 +31,22 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
-
-import java.util.concurrent.atomic.AtomicInteger;
+import org.openjdk.jmh.logic.BlackHole;
 
 @State(Scope.Benchmark)
-public class PublicArgsTest {
+public class PublicArgsBlackholeTest {
 
     @Setup(Level.Trial)
-    public void setup() {}
+    public void setup(BlackHole bh) {}
 
     @GenerateMicroBenchmark
-    public void test(AtomicInteger v) {
+    public void test() {
 
     }
 
     @Test
     public void compileTest() {
-        CompileTest.assertFail(this.getClass());
+        CompileTest.assertOK(this.getClass());
     }
 
 }
