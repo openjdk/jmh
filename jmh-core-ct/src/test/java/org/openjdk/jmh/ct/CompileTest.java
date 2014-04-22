@@ -33,9 +33,13 @@ import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
+import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,6 +47,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class CompileTest {
@@ -68,8 +73,17 @@ public class CompileTest {
 
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 
-        JavaCompiler.CompilationTask task = ToolProvider.getSystemJavaCompiler().getTask(
-                null, null, diagnostics, null, null,
+        JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
+        StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);
+
+        try {
+            fm.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(System.getProperty("java.io.tmpdir"))));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        JavaCompiler.CompilationTask task = javac.getTask(
+                null, fm, diagnostics, null, null,
                 Arrays.asList(new JavaSourceFromString(destination.className, destination.getContents())));
 
         boolean success = task.call();
