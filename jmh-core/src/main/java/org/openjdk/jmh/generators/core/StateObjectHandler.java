@@ -364,17 +364,24 @@ public class StateObjectHandler {
 
         // Look for the offending methods.
         // This will be used to skip the irrelevant blocks for state objects down the stream.
-        Set<StateObject> states = new HashSet<StateObject>();
-        for (StateObject so : cons(args.get(method.getName()), implicits.values(), getControls())) {
+        List<StateObject> statesForward = new ArrayList<StateObject>();
+        for (StateObject so : stateOrder(method, true)) {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
-                if (hmi.helperLevel == helperLevel) states.add(so);
+                if (hmi.helperLevel == helperLevel) statesForward.add(so);
+            }
+        }
+
+        List<StateObject> statesReverse = new ArrayList<StateObject>();
+        for (StateObject so : stateOrder(method, false)) {
+            for (HelperMethodInvocation hmi : so.getHelpers()) {
+                if (hmi.helperLevel == helperLevel) statesReverse.add(so);
             }
         }
 
         List<String> result = new ArrayList<String>();
 
         // Handle Thread object helpers
-        for (StateObject so : states) {
+        for (StateObject so : statesForward) {
             if (so.scope != Scope.Thread) continue;
 
             if (type == HelperType.SETUP) {
@@ -388,6 +395,10 @@ public class StateObjectHandler {
                 result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = true;");
                 result.add("}");
             }
+        }
+
+        for (StateObject so : statesReverse) {
+            if (so.scope != Scope.Thread) continue;
 
             if (type == HelperType.TEARDOWN) {
                 result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
@@ -403,7 +414,7 @@ public class StateObjectHandler {
         }
 
         // Handle Benchmark/Group object helpers
-        for (StateObject so : states) {
+        for (StateObject so : statesForward) {
             if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
 
             if (type == HelperType.SETUP) {
@@ -424,6 +435,10 @@ public class StateObjectHandler {
                 result.add("    " + so.type + ".setup" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("}");
             }
+        }
+
+        for (StateObject so : statesReverse) {
+            if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
 
             if (type == HelperType.TEARDOWN) {
                 result.add("while(!" + so.type + ".tear" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
@@ -587,7 +602,7 @@ public class StateObjectHandler {
     }
 
     public Collection<String> getStateDestructors(MethodInfo method) {
-        Collection<StateObject> sos = cons(args.get(method.getName()), implicits.values());
+        Collection<StateObject> sos = stateOrder(method, false);
 
         List<String> result = new ArrayList<String>();
         for (StateObject so : sos) {
@@ -612,6 +627,24 @@ public class StateObjectHandler {
     }
 
     public List<String> getStateGetters(MethodInfo method) {
+        List<String> result = new ArrayList<String>();
+        for (StateObject so : stateOrder(method, true)) {
+            switch (so.scope) {
+                case Benchmark:
+                case Thread:
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, new " + so.type + "()" + soDependency_Args(so) + ");");
+                    break;
+                case Group:
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, threadControl.group, new " + so.type + "()" + soDependency_Args(so) + ");");
+                    break;
+                default:
+                    throw new IllegalStateException("Unhandled scope: " + so.scope);
+            }
+        }
+        return result;
+    }
+
+    private LinkedHashSet<StateObject> stateOrder(MethodInfo method, boolean reverse) {
         // Linearize @State dependency DAG
         List<StateObject> linearOrder = new ArrayList<StateObject>();
 
@@ -632,24 +665,11 @@ public class StateObjectHandler {
             stratum = newStratum;
         }
 
-        // The initialization order is reversed
-        Collections.reverse(linearOrder);
-
-        List<String> result = new ArrayList<String>();
-        for (StateObject so : new LinkedHashSet<StateObject>(linearOrder)) {
-            switch (so.scope) {
-                case Benchmark:
-                case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, new " + so.type + "()" + soDependency_Args(so) + ");");
-                    break;
-                case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, threadControl.group, new " + so.type + "()" + soDependency_Args(so) + ");");
-                    break;
-                default:
-                    throw new IllegalStateException("Unhandled scope: " + so.scope);
-            }
+        if (reverse) {
+            Collections.reverse(linearOrder);
         }
-        return result;
+
+        return new LinkedHashSet<StateObject>(linearOrder);
     }
 
     public List<String> getStateOverrides() {
