@@ -134,6 +134,9 @@ public class StateObjectHandler {
         stateObjects.add(so);
         implicits.put(label, so);
         bindState(null, so, ci);
+
+        Set<StateObject> seen = new HashSet<StateObject>();
+        recursiveStateResolve(null, ci, so, seen);
     }
 
     private void bindState(MethodInfo execMethod, StateObject so, ClassInfo ci) {
@@ -614,6 +617,7 @@ public class StateObjectHandler {
         List<StateObject> linearOrder = new ArrayList<StateObject>();
         List<StateObject> stratum = new ArrayList<StateObject>();
         stratum.addAll(args.get(method.getName()));
+        stratum.addAll(implicits.values());
 
         while (!stratum.isEmpty()) {
             List<StateObject> newStratum = new ArrayList<StateObject>();
