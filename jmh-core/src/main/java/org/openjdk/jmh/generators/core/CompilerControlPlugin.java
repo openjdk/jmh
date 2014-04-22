@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class CompilerControlPlugin implements Plugin {
+public class CompilerControlPlugin {
 
     private final List<String> lines = new ArrayList<String>();
 
@@ -98,7 +98,6 @@ public class CompilerControlPlugin implements Plugin {
         }
     }
 
-    @Override
     public void finish(GeneratorSource source, GeneratorDestination destination) {
         try {
             PrintWriter writer = new PrintWriter(destination.newResource(CompilerHints.LIST.substring(1)));

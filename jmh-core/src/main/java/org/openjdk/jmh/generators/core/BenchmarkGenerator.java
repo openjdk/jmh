@@ -84,7 +84,6 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 public class BenchmarkGenerator {
 
     private final Set<BenchmarkInfo> benchmarkInfos;
-    private final Collection<Plugin> plugins;
     private final CompilerControlPlugin compilerControl;
     private final Set<String> processedBenchmarks;
 
@@ -92,9 +91,6 @@ public class BenchmarkGenerator {
         benchmarkInfos = new HashSet<BenchmarkInfo>();
         processedBenchmarks = new HashSet<String>();
         compilerControl = new CompilerControlPlugin();
-
-        plugins = new ArrayList<Plugin>();
-        plugins.add(compilerControl);
     }
 
     /**
@@ -106,9 +102,7 @@ public class BenchmarkGenerator {
      */
     public void generate(GeneratorSource source, GeneratorDestination destination) {
         try {
-            for (Plugin sub : plugins) {
-                sub.process(source, destination);
-            }
+            compilerControl.process(source, destination);
 
             // Build a Set of classes with a list of annotated methods
             Multimap<ClassInfo, MethodInfo> clazzes = buildAnnotatedSet(source);
@@ -137,9 +131,7 @@ public class BenchmarkGenerator {
      * @param source source generator to use
      */
     public void complete(GeneratorSource source, GeneratorDestination destination) {
-        for (Plugin sub : plugins) {
-            sub.finish(source, destination);
-        }
+        compilerControl.finish(source, destination);
 
         // Processing completed, final round. Print all added methods to file
         try {
