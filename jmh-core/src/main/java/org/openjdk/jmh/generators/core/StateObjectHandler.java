@@ -140,6 +140,7 @@ public class StateObjectHandler {
         // walk the type hierarchy up to discover inherited @Params
         for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(ci)) {
             if (fi.getAnnotation(Param.class) != null) {
+                checkParam(fi);
                 so.addParam(fi);
             }
         }
@@ -160,6 +161,90 @@ public class StateObjectHandler {
                 compileControl.defaultForceInline(mi);
             }
         }
+    }
+
+    private void checkParam(FieldInfo fi) {
+        if (fi.isStatic()) {
+            throw new GenerationException(
+                    "@" + Param.class.getSimpleName() + " annotation is not acceptable on static fields.",
+                    fi);
+        }
+
+        if (BenchmarkGeneratorUtils.getAnnSyntax(fi.getDeclaringClass(), State.class) == null) {
+            throw new GenerationException(
+                    "@" + Param.class.getSimpleName() + " annotation should be placed in @" + State.class.getSimpleName() +
+                            "-annotated class.", fi);
+        }
+
+        String[] values = fi.getAnnotation(Param.class).value();
+
+        if (values.length >= 1 && !values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
+            String type = fi.getType();
+            for (String val : values) {
+                if (!isParamValueConforming(val, type)) {
+                    throw new GenerationException(
+                            "Some @" + Param.class.getSimpleName() + " values can not be converted to target type: " +
+                                    "\"" + val + "\" can not be converted to " + type,
+                            fi
+                    );
+                }
+            }
+        }
+    }
+
+    private boolean isParamValueConforming(String val, String type) {
+        if (type.equalsIgnoreCase("java.lang.String")) {
+            return true;
+        }
+        if (type.equalsIgnoreCase("boolean") || type.equalsIgnoreCase("java.lang.Boolean")) {
+            return (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("false"));
+        }
+        if (type.equalsIgnoreCase("byte") || type.equalsIgnoreCase("java.lang.Byte")) {
+            try {
+                Byte.valueOf(val);
+                return true;
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        if (type.equalsIgnoreCase("char") || type.equalsIgnoreCase("java.lang.Character")) {
+            return (val.length() == 1);
+        }
+        if (type.equalsIgnoreCase("short") || type.equalsIgnoreCase("java.lang.Short")) {
+            try {
+                Short.valueOf(val);
+                return true;
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("java.lang.Integer")) {
+            try {
+                Integer.valueOf(val);
+                return true;
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        if (type.equalsIgnoreCase("float") || type.equalsIgnoreCase("java.lang.Float")) {
+            try {
+                Float.valueOf(val);
+                return true;
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        if (type.equalsIgnoreCase("long") || type.equalsIgnoreCase("java.lang.Long")) {
+            try {
+                Long.valueOf(val);
+                return true;
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("java.lang.Double")) {
+            try {
+                Double.valueOf(val);
+                return true;
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        return false;
     }
 
     private void checkHelpers(MethodInfo mi, Class<? extends Annotation> annClass) {
