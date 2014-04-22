@@ -85,7 +85,7 @@ public class ParamValidationPlugin implements Plugin {
             }
         }
         if (type.equalsIgnoreCase("char") || type.equalsIgnoreCase("java.lang.Character")) {
-            return (val.length() != 0);
+            return (val.length() == 1);
         }
         if (type.equalsIgnoreCase("short") || type.equalsIgnoreCase("java.lang.Short")) {
             try {
