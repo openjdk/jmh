@@ -498,7 +498,7 @@ public class StateObjectHandler {
             result.add("");
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        if (" + so.fieldIdentifier + " == null) {");
             result.add("            " + so.fieldIdentifier + " = new " + so.type + "();");
@@ -531,7 +531,7 @@ public class StateObjectHandler {
             result.add("");
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
             result.add("        " + so.type + " val = new " + so.type + "();");
             if (!so.getParamsLabels().isEmpty()) {
@@ -561,7 +561,7 @@ public class StateObjectHandler {
             result.add("");
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, int groupId" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, int groupId" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(groupId);");
             result.add("        if (local == null) {");
@@ -632,10 +632,10 @@ public class StateObjectHandler {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control" + soDependency_Args(so) + ");");
+                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control" + soDependency_Args(so) + ");");
                     break;
                 case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, threadControl.group" + soDependency_Args(so) + ");");
+                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadControl.group" + soDependency_Args(so) + ");");
                     break;
                 default:
                     throw new IllegalStateException("Unhandled scope: " + so.scope);
