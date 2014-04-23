@@ -498,10 +498,10 @@ public class StateObjectHandler {
             result.add("");
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        if (" + so.fieldIdentifier + " == null) {");
-            result.add("            " + so.fieldIdentifier + " = val;");
+            result.add("            " + so.fieldIdentifier + " = new " + so.type + "();");
             result.add("        }");
             result.add("        if (!" + so.fieldIdentifier + ".ready" + Level.Trial + ") {");
             if (!so.getParamsLabels().isEmpty()) {
@@ -531,8 +531,9 @@ public class StateObjectHandler {
             result.add("");
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, " + so.type + " val" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    if (" + so.fieldIdentifier + " == null) {");
+            result.add("        " + so.type + " val = new " + so.type + "();");
             if (!so.getParamsLabels().isEmpty()) {
                 result.add("            Field f;");
             }
@@ -560,10 +561,11 @@ public class StateObjectHandler {
             result.add("");
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
-            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, int groupId, " + so.type + " val" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " tryInit_" + so.fieldIdentifier + "(InfraControl control, int groupId" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(groupId);");
             result.add("        if (local == null) {");
+            result.add("            " + so.type + " val = new " + so.type + "();");
             result.add("            " + so.fieldIdentifier + "_map.put(groupId, val);");
             result.add("            local = val;");
             result.add("        }");
@@ -574,7 +576,6 @@ public class StateObjectHandler {
             for (String paramName : so.getParamsLabels()) {
                 result.add("            f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
                 result.add("            f.setAccessible(true);");
-                result.add("            f.setAccessible(true);");
                 result.add("            f.set(local, " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : so.getHelpers()) {
@@ -584,7 +585,6 @@ public class StateObjectHandler {
                 result.add("            local." + hmi.method.getName() + "(" + getArgList(args) + ");");
             }
             result.add("            " + "local.ready" + Level.Trial + " = true;");
-            result.add("            " + so.fieldIdentifier + "_map.put(groupId, val);");
             result.add("        }");
             result.add("        return local;");
             result.add("    }");
@@ -632,10 +632,10 @@ public class StateObjectHandler {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, new " + so.type + "()" + soDependency_Args(so) + ");");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control" + soDependency_Args(so) + ");");
                     break;
                 case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, threadControl.group, new " + so.type + "()" + soDependency_Args(so) + ");");
+                    result.add(so.type + " " + so.localIdentifier + " = tryInit_" + so.fieldIdentifier + "(control, threadControl.group" + soDependency_Args(so) + ");");
                     break;
                 default:
                     throw new IllegalStateException("Unhandled scope: " + so.scope);
