@@ -476,6 +476,8 @@ public class BenchmarkGenerator {
         writer.println();
         generatePadding(writer);
 
+        writer.println(ident(1) + "int startRndMask;");
+
         StateObjectHandler states = new StateObjectHandler(compilerControl);
 
         // benchmark instance is implicit
@@ -830,8 +832,9 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
+            writer.println(ident(2) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, targetSamples, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -874,10 +877,10 @@ public class BenchmarkGenerator {
             writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
                     "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
                     "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" + "(InfraControl control, SampleBuffer buffer, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" + "(InfraControl control, SampleBuffer buffer, int targetSamples, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
-            writer.println(ident(2) + "int rndMask = 0;");
+            writer.println(ident(2) + "int rndMask = startRndMask;");
             writer.println(ident(2) + "long time = 0;");
             writer.println(ident(2) + "int currentStride = 0;");
             writer.println(ident(2) + "do {");
@@ -892,7 +895,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "" + emitCall(method, states) + ';');
             writer.println(ident(3) + "if (sample) {");
             writer.println(ident(4) + "buffer.add(System.nanoTime() - time);");
-            writer.println(ident(4) + "if (currentStride++ > 1000000) {");
+            writer.println(ident(4) + "if (currentStride++ > targetSamples) {");
             writer.println(ident(5) + "buffer.half();");
             writer.println(ident(5) + "currentStride = 0;");
             writer.println(ident(5) + "rndMask = (rndMask << 1) + 1;");
@@ -902,6 +905,7 @@ public class BenchmarkGenerator {
             invocationEpilog(writer, 3, method, states, true);
 
             writer.println(ident(2) + "} while(!control.isDone);");
+            writer.println(ident(2) + "startRndMask = Math.max(startRndMask, rndMask);");
 
             writer.println(ident(1) + "}");
             writer.println();
