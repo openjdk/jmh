@@ -99,6 +99,11 @@ public class RFMethodInfo implements MethodInfo {
     }
 
     @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(m.getModifiers());
+    }
+
+    @Override
     public int compareTo(MethodInfo o) {
         return getQualifiedName().compareTo(o.getQualifiedName());
     }

@@ -131,6 +131,11 @@ public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
     }
 
     @Override
+    public boolean isStatic() {
+        return (access & Opcodes.ACC_STATIC) > 0;
+    }
+
+    @Override
     public int compareTo(MethodInfo o) {
         return getQualifiedName().compareTo(o.getQualifiedName());
     }

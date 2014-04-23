@@ -97,6 +97,11 @@ public class APMethodInfo extends APMetadataInfo implements MethodInfo {
     }
 
     @Override
+    public boolean isStatic() {
+        return el.getModifiers().contains(Modifier.STATIC);
+    }
+
+    @Override
     public String getQualifiedName() {
         return ci.getQualifiedName() + "." + el.toString();
     }

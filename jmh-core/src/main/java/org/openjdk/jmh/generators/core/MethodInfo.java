@@ -84,4 +84,8 @@ public interface MethodInfo extends Comparable<MethodInfo>, MetadataInfo {
      */
     boolean isStrictFP();
 
+    /**
+     * @return true, if method is static
+     */
+    boolean isStatic();
 }

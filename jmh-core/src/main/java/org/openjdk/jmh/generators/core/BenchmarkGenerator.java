@@ -298,6 +298,12 @@ public class BenchmarkGenerator {
                 throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
                         + " method can not be abstract.", m);
             }
+
+            if (m.isStatic()) {
+                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                        + " method can not be static.", m);
+            }
+
             if (m.isSynchronized()) {
                 if (BenchmarkGeneratorUtils.getAnnSyntax(m, State.class) == null) {
                     throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
