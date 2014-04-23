@@ -58,8 +58,8 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>src/main/groovy</source>
-                                <source>target/generated-sources/jmh</source>
+                                <source>\${project.basedir}/src/main/groovy</source>
+                                <source>\${project.basedir}/target/generated-sources/jmh</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -105,9 +105,9 @@
                         <configuration>
                             <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
                             <arguments>
-                                <argument>target/classes/</argument>
-                                <argument>target/generated-sources/jmh/</argument>
-                                <argument>target/classes/</argument>
+                                <argument>\${project.basedir}/target/classes/</argument>
+                                <argument>\${project.basedir}/target/generated-sources/jmh/</argument>
+                                <argument>\${project.basedir}/target/classes/</argument>
                             </arguments>
                         </configuration>
                     </execution>
