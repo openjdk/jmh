@@ -24,7 +24,9 @@
  */
 package org.openjdk.jmh;
 
+import junit.framework.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.logic.BlackHole;
 
 public class BlackholeTest {
 
@@ -40,6 +42,16 @@ public class BlackholeTest {
                 tlr = 0;
 //                System.out.println(t);
             }
+        }
+    }
+
+    @Test
+    public void testUserConstructor() {
+        try {
+            new BlackHole();
+            Assert.fail("Should have failed");
+        } catch (IllegalStateException e) {
+            // expected
         }
     }
 

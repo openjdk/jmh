@@ -227,6 +227,38 @@ public class BlackHole extends BlackHoleL4 {
         }
     }
 
+
+    public BlackHole() {
+        /*
+         * Prevent instantiation by user code. Without additional countermeasures
+         * to properly escape BlackHole, its magic is not working. The instances
+         * of BlackHoles which are injected into benchmark methods are treated by JMH,
+         * and users are supposed to only use the injected instances.
+         *
+         * It only *seems* simple to make the constructor non-public, but then
+         * there is a lot of infrastructure code which assumes @State has a default
+         * constructor. One might suggest doing the internal factory method to instantiate,
+         * but that does not help when extending the BlackHole. There is a *messy* way to
+         * special-case most of these problems within the JMH code, but it does not seem
+         * to worth the effort.
+         *
+         * Therefore, we choose to fail at runtime. It will only affect the users who thought
+         * "new BlackHole()" is a good idea, and these users are rare. If you are reading this
+         * comment, you might be one of those users. Stay cool! Don't instantiate BlackHoles
+         * directly though.
+         */
+
+        IllegalStateException iae = new IllegalStateException("BlackHoles should not be instantiated directly.");
+        for (StackTraceElement el : iae.getStackTrace()) {
+            // Either we instantiate from the JMH generated code,
+            // or our user is a tricky bastard, and gets what's coming to him.
+            if (el.getMethodName().startsWith("_jmh_tryInit_") &&
+                    el.getClassName().contains("generated"))
+                return;
+        }
+        throw iae;
+    }
+
     /*
      * Need to clear the sinks to break the GC from keeping the
      * consumed objects forever.
