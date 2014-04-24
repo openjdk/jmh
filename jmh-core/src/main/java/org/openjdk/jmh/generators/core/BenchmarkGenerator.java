@@ -836,7 +836,7 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(2) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
+            writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, targetSamples, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
 
