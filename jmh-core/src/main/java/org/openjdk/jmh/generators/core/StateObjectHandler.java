@@ -736,10 +736,6 @@ public class StateObjectHandler {
         }
     }
 
-    public void clearArgs() {
-        args.clear();
-    }
-
     public Collection<String> getFields() {
         return Collections.emptyList();
     }

@@ -112,9 +112,11 @@ public class BenchmarkGenerator {
                 if (!processedBenchmarks.add(clazz.getQualifiedName())) continue;
                 try {
                     validateBenchmark(clazz, clazzes.get(clazz));
-                    BenchmarkInfo info = makeBenchmarkInfo(clazz, clazzes.get(clazz));
-                    generateClass(source, destination, clazz, info);
-                    benchmarkInfos.add(info);
+                    Collection<BenchmarkInfo> infos = makeBenchmarkInfo(clazz, clazzes.get(clazz));
+                    for (BenchmarkInfo info : infos) {
+                        generateClass(source, destination, clazz, info);
+                    }
+                    benchmarkInfos.addAll(infos);
                 } catch (GenerationException ge) {
                     destination.printError(ge.getMessage(), ge.getElement());
                 }
@@ -137,30 +139,29 @@ public class BenchmarkGenerator {
         try {
             PrintWriter writer = new PrintWriter(destination.newResource(MicroBenchmarkList.MICROBENCHMARK_LIST.substring(1)));
             for (BenchmarkInfo info : benchmarkInfos) {
-                for (String method : info.methodGroups.keySet()) {
-                    MethodGroup group = info.methodGroups.get(method);
-                    for (Mode m : group.getModes()) {
-                        BenchmarkRecord br = new BenchmarkRecord(
-                                info.userName + "." + method,
-                                info.generatedName + "." + method,
-                                m,
-                                group.getThreads(),
-                                group.getTotalThreadCount(),
-                                group.getWarmupIterations(),
-                                group.getWarmupTime(),
-                                group.getWarmupBatchSize(),
-                                group.getMeasurementIterations(),
-                                group.getMeasurementTime(),
-                                group.getMeasurementBatchSize(),
-                                group.getForks(),
-                                group.getWarmupForks(),
-                                group.getJVMArgs(),
-                                group.getJVMArgsPrepend(),
-                                group.getJVMArgsAppend(),
-                                group.getParams()
-                        );
-                        writer.println(br.toLine());
-                    }
+                MethodGroup group = info.methodGroup;
+                String method = group.getName();
+                for (Mode m : group.getModes()) {
+                    BenchmarkRecord br = new BenchmarkRecord(
+                            info.userName + "." + method,
+                            info.generatedName + "." + method,
+                            m,
+                            group.getThreads(),
+                            group.getTotalThreadCount(),
+                            group.getWarmupIterations(),
+                            group.getWarmupTime(),
+                            group.getWarmupBatchSize(),
+                            group.getMeasurementIterations(),
+                            group.getMeasurementTime(),
+                            group.getMeasurementBatchSize(),
+                            group.getForks(),
+                            group.getWarmupForks(),
+                            group.getJVMArgs(),
+                            group.getJVMArgsPrepend(),
+                            group.getJVMArgsAppend(),
+                            group.getParams()
+                    );
+                    writer.println(br.toLine());
                 }
             }
 
@@ -343,36 +344,35 @@ public class BenchmarkGenerator {
         // check the @Group preconditions,
         // ban some of the surprising configurations
         //
-        for (MethodGroup group : info.methodGroups.values()) {
-            if (group.methods().size() == 1) {
-                MethodInfo meth = group.methods().iterator().next();
-                if (meth.getAnnotation(Group.class) == null) {
-                    for (ParameterInfo param : meth.getParameters()) {
-                        State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(param.getType(), State.class);
-                        if (stateAnn != null && stateAnn.value() == Scope.Group) {
-                            throw new GenerationException(
-                                    "Only @" + Group.class.getSimpleName() + " methods can reference @" + State.class.getSimpleName()
-                                            + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
-                                    meth);
-                        }
-                    }
-
-                    State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(meth.getDeclaringClass(), State.class);
+        MethodGroup group = info.methodGroup;
+        if (group.methods().size() == 1) {
+            MethodInfo meth = group.methods().iterator().next();
+            if (meth.getAnnotation(Group.class) == null) {
+                for (ParameterInfo param : meth.getParameters()) {
+                    State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(param.getType(), State.class);
                     if (stateAnn != null && stateAnn.value() == Scope.Group) {
                         throw new GenerationException(
-                                "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
+                                "Only @" + Group.class.getSimpleName() + " methods can reference @" + State.class.getSimpleName()
                                         + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
                                 meth);
                     }
                 }
-            } else {
-                for (MethodInfo m : group.methods()) {
-                    if (m.getAnnotation(Group.class) == null) {
-                        throw new GenerationException(
-                                "Internal error: multiple methods per @" + Group.class.getSimpleName()
-                                        + ", but not all methods have @" + Group.class.getSimpleName(),
-                                m);
-                    }
+
+                State stateAnn = BenchmarkGeneratorUtils.getAnnSuper(meth.getDeclaringClass(), State.class);
+                if (stateAnn != null && stateAnn.value() == Scope.Group) {
+                    throw new GenerationException(
+                            "Only @" + Group.class.getSimpleName() + " methods can implicitly reference @" + State.class.getSimpleName()
+                                    + "(" + Scope.class.getSimpleName() + "." + Scope.Group + ") states.",
+                            meth);
+                }
+            }
+        } else {
+            for (MethodInfo m : group.methods()) {
+                if (m.getAnnotation(Group.class) == null) {
+                    throw new GenerationException(
+                            "Internal error: multiple methods per @" + Group.class.getSimpleName()
+                                    + ", but not all methods have @" + Group.class.getSimpleName(),
+                            m);
                 }
             }
         }
@@ -382,11 +382,12 @@ public class BenchmarkGenerator {
      * Generate BenchmarkInfo for given class.
      * We will figure out method groups at this point.
      *
+     *
      * @param clazz   holder class
      * @param methods annotated methods
      * @return BenchmarkInfo
      */
-    private BenchmarkInfo makeBenchmarkInfo(ClassInfo clazz, Collection<MethodInfo> methods) {
+    private Collection<BenchmarkInfo> makeBenchmarkInfo(ClassInfo clazz, Collection<MethodInfo> methods) {
         Map<String, MethodGroup> result = new TreeMap<String, MethodGroup>();
 
         for (MethodInfo method : methods) {
@@ -438,13 +439,18 @@ public class BenchmarkGenerator {
             }
         }
 
-        String sourcePackage = clazz.getPackageName();
-        String generatedPackageName = sourcePackage + ".generated";
-        String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz);
+        Collection<BenchmarkInfo> benchmarks = new ArrayList<BenchmarkInfo>();
+        for (MethodGroup group : result.values()) {
+            String sourcePackage = clazz.getPackageName();
+            String generatedPackageName = sourcePackage + ".generated";
+            String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz) + "_" + group.getName();
 
-        BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName(), generatedPackageName, generatedClassName, result);
-        validateBenchmarkInfo(info);
-        return info;
+            BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName(), generatedPackageName, generatedClassName, group);
+            validateBenchmarkInfo(info);
+            benchmarks.add(info);
+        }
+
+        return benchmarks;
     }
 
     public static boolean checkJavaIdentifier(String id) {
@@ -486,15 +492,13 @@ public class BenchmarkGenerator {
         // default blackhole is implicit
         states.bindImplicit(source.resolveClass(BlackHole.class.getCanonicalName()), "blackhole", Scope.Thread);
 
-        // Write all methods
-        for (String groupName : info.methodGroups.keySet()) {
-            states.clearArgs();
-            states.bindMethodGroup(info.methodGroups.get(groupName));
+        // bind all methods
+        states.bindMethodGroup(info.methodGroup);
 
-            for (Mode benchmarkKind : Mode.values()) {
-                if (benchmarkKind == Mode.All) continue;
-                generateMethod(benchmarkKind, writer, info.methodGroups.get(groupName), states);
-            }
+        // write all methods
+        for (Mode benchmarkKind : Mode.values()) {
+            if (benchmarkKind == Mode.All) continue;
+            generateMethod(benchmarkKind, writer, info.methodGroup, states);
         }
 
         // Write out state initializers

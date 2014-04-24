@@ -33,7 +33,6 @@ import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
-import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
@@ -46,9 +45,11 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CompileTest {
 
@@ -82,14 +83,19 @@ public class CompileTest {
             Assert.fail(e.getMessage());
         }
 
-        JavaCompiler.CompilationTask task = javac.getTask(
-                null, fm, diagnostics, null, null,
-                Arrays.asList(new JavaSourceFromString(destination.className, destination.getContents())));
+        Collection<JavaSourceFromString> sources = new ArrayList<JavaSourceFromString>();
+        for (String name : destination.classBodies.keySet()) {
+            sources.add(new JavaSourceFromString(name, destination.classBodies.get(name).toString()));
+        }
+
+        JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, null, null, sources);
 
         boolean success = task.call();
 
         if (!success) {
-            System.out.println(destination.getContents());
+            for (JavaSourceFromString src : sources) {
+                System.out.println(src.getCharContent(false));
+            }
             for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
                 System.out.println(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
             }
@@ -127,8 +133,7 @@ public class CompileTest {
 
         List<String> errors = new ArrayList<String>();
 
-        String className;
-        StringWriter sw = new StringWriter();
+        private Map<String, StringWriter> classBodies = new HashMap<String, StringWriter>();
 
         @Override
         public Writer newResource(String resourcePath) throws IOException {
@@ -137,15 +142,14 @@ public class CompileTest {
 
         @Override
         public Writer newClass(String className) throws IOException {
-            if (this.className != null) {
+            StringWriter sw = classBodies.get(className);
+            if (sw != null) {
                 throw new IllegalStateException("Already writing the class");
+            } else {
+                sw = new StringWriter();
+                classBodies.put(className, sw);
             }
-            this.className = className;
             return new PrintWriter(sw, true);
-        }
-
-        public String getContents() {
-            return sw.toString();
         }
 
         @Override
@@ -160,7 +164,7 @@ public class CompileTest {
 
         @Override
         public void printError(String message, Throwable throwable) {
-            errors.add(message);
+            errors.add(message + ":\n" + throwable.toString());
         }
 
         public boolean hasErrors() {

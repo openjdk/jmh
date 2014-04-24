@@ -24,22 +24,21 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import java.util.Map;
-
 public class BenchmarkInfo {
     public final String userName;
     public final String generatedName;
     public final String generatedPackageName;
     public final String generatedClassName;
-    public final Map<String, MethodGroup> methodGroups;
+    public final MethodGroup methodGroup;
 
-    public BenchmarkInfo(String userName, String generatedPackageName, String generatedClassName, Map<String, MethodGroup> methods) {
+    public BenchmarkInfo(String userName, String generatedPackageName, String generatedClassName, MethodGroup methodGroup) {
         this.userName = userName;
         this.generatedPackageName = generatedPackageName;
         this.generatedClassName = generatedClassName;
         this.generatedName = generatedPackageName + "." + generatedClassName;
-        this.methodGroups = methods;
+        this.methodGroup = methodGroup;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -48,6 +47,7 @@ public class BenchmarkInfo {
 
         BenchmarkInfo that = (BenchmarkInfo) o;
 
+        if (!methodGroup.equals(that.methodGroup)) return false;
         if (!userName.equals(that.userName)) return false;
 
         return true;
@@ -55,6 +55,8 @@ public class BenchmarkInfo {
 
     @Override
     public int hashCode() {
-        return userName.hashCode();
+        int result = userName.hashCode();
+        result = 31 * result + methodGroup.hashCode();
+        return result;
     }
 }
