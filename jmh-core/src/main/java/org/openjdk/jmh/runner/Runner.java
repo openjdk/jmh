@@ -239,6 +239,8 @@ public class Runner extends BaseRunner {
         ActionPlan embeddedPlan = new ActionPlan(ActionType.EMBEDDED);
         embeddedPlan.mixIn(base);
 
+        boolean addEmbedded = false;
+
         List<ActionPlan> result = new ArrayList<ActionPlan>();
         for (BenchmarkRecord br : benchmarks) {
             BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
@@ -249,6 +251,7 @@ public class Runner extends BaseRunner {
                 } else {
                     embeddedPlan.addMeasurement(br);
                 }
+                addEmbedded = true;
             }
 
             if (params.getForks() > 0) {
@@ -262,7 +265,10 @@ public class Runner extends BaseRunner {
                 result.add(r);
             }
         }
-        result.add(embeddedPlan);
+
+        if (addEmbedded) {
+            result.add(embeddedPlan);
+        }
 
         return result;
     }
