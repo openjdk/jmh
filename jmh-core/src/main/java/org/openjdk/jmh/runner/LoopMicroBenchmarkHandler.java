@@ -46,6 +46,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -120,16 +121,39 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             throw new BenchmarkException(ex);
         }
 
+        // wait for all workers to transit to measurement
+        while (control.warmupShouldWait) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+
         // profilers start when iteration starts
         startProfilers();
 
-        // wait for the iteration time to expire, then set the termination flag
+        // wait for the iteration time to expire
         try {
             runtime.sleep();
         } catch (InterruptedException e) {
             // regardless...
         }
+
+        // profilers stop when threads are still in full work
+        stopProfilers(iterationResults);
+
+        // now we communicate all worker threads should stop
         control.isDone = true;
+
+        // wait for all workers to transit to teardown
+        while (control.warmdownShouldWait) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
 
         // wait for all workers to complete run and ready to proceed
         try {
@@ -137,9 +161,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         } catch (InterruptedException ex) {
             throw new BenchmarkException(ex);
         }
-
-        // profilers stop when iteration ends
-        stopProfilers(iterationResults);
 
         // Wait for the result, continuously polling the worker threads.
         // The abrupt exception in any worker will float up here.
