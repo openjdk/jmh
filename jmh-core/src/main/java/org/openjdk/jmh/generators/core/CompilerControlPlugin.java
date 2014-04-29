@@ -117,7 +117,8 @@ public class CompilerControlPlugin {
     }
 
     private static String getName(ClassInfo ci) {
-      return ci.getQualifiedName().replaceAll("\\.", "/") + ".*";
+        String name = ci.getPackageName() + "." + BenchmarkGeneratorUtils.getNestedNames(ci);
+        return name.replaceAll("\\.", "/") + ".*";
     }
 
 }

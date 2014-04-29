@@ -124,4 +124,12 @@ public class BenchmarkGeneratorUtils {
         return name;
     }
 
+    public static String getNestedNames(ClassInfo ci) {
+        String name = "";
+        do {
+            name = ci.getName() + (name.isEmpty() ? "" : "$" + name);
+        } while ((ci = ci.getDeclaringClass()) != null);
+        return name;
+    }
+
 }
