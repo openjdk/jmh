@@ -33,11 +33,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class CompilerControlPlugin {
 
-    private final List<String> lines = new ArrayList<String>();
+    private final SortedSet<String> lines = new TreeSet<String>();
 
     private final Set<MethodInfo> defaultForceInlineMethods = new TreeSet<MethodInfo>(new Comparator<MethodInfo>() {
         @Override
