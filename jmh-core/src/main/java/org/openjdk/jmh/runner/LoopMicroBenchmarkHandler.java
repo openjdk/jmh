@@ -147,15 +147,18 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             }
         }
 
-        // We don't know the running time for SingleShot benchmarks,
-        // assume something long enough to wait in the loop below.
+        // Adjust waiting intervals:
+        //  - We don't know the running time for SingleShot benchmarks,
+        //    assume something long enough to wait in the loop below.
+        //  - For other benchmarks, we wait for twice the run time,
+        //    but at least 5 seconds to cover for low run times.
         long timeToWait;
         switch (microbenchmark.getMode()) {
             case SingleShotTime:
                 timeToWait = TimeUnit.SECONDS.toNanos(100);
                 break;
             default:
-                timeToWait = runtime.convertTo(TimeUnit.NANOSECONDS);
+                timeToWait = Math.max(runtime.convertTo(TimeUnit.NANOSECONDS) * 2, TimeUnit.SECONDS.toNanos(5));
         }
 
         // Wait for the result, continuously polling the worker threads.
