@@ -222,7 +222,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 runner = Thread.currentThread();
 
                 // go for the run
-                return invokeBenchmark(invocationHandler.get(), control, threadControl);
+                return (Collection<? extends Result>) method.invoke(invocationHandler.get(), control, threadControl);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
@@ -248,25 +248,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 // unbind the executor thread
                 runner = null;
             }
-        }
-
-        /**
-         * Helper method for running the benchmark in a given instance.
-         */
-        private Collection<? extends Result> invokeBenchmark(Object instance, InfraControl control, ThreadControl threadControl) throws Throwable {
-            Collection<? extends Result> result;
-            if (method != null) {
-                try {
-                    result = (Collection<? extends Result>) method.invoke(instance, control, threadControl);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Can't invoke " + method.getDeclaringClass().getName() + "." + method.getName(), e);
-                } catch (InvocationTargetException e) {
-                    throw e.getCause(); // unwrap
-                }
-            } else {
-                throw new IllegalStateException("Unable to find method to run");
-            }
-            return result;
         }
 
     }

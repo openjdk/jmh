@@ -25,6 +25,10 @@
 package org.openjdk.jmh.runner;
 
 public class BenchmarkException extends RuntimeException {
+    public BenchmarkException(String message) {
+        super(message);
+    }
+
     public BenchmarkException(Throwable ex) {
         super(ex);
     }
