@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
@@ -74,7 +75,10 @@ public class TextReportFormat extends AbstractOutputFormat {
             out.println("# Measurement: <none>");
         }
 
-        out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) + (mbParams.shouldSynchIterations() ? ", will synchronize iterations" : ""));
+        out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) +
+                (mbParams.shouldSynchIterations() ?
+                        ", will synchronize iterations" :
+                        (name.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***"));
         out.println("# Benchmark mode: " + name.getMode().longLabel());
         out.println("# Benchmark: " + name.getUsername());
         if (!name.getActualParams().isEmpty()) {
