@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.helpers.explicit;
+package org.openjdk.jmh.ct.states.helpers.implicit.blackholes;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -30,19 +30,21 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.ct.CompileTest;
 import org.openjdk.jmh.logic.BlackHole;
 
-public class PublicArgsBlackholeTest {
+@State(Scope.Benchmark)
+public class IterationBlackhole3Test {
 
-    @State(Scope.Benchmark)
-    public static class S {
-        @Setup(Level.Trial)
-        public void setup(BlackHole bh) {}
-    }
+    @Setup(Level.Iteration)
+    public void setup(BlackHole bh) {}
+
+    @TearDown(Level.Iteration)
+    public void tearDown(BlackHole bh) {}
 
     @GenerateMicroBenchmark
-    public void test(S s) {
+    public void test(BlackHole bh) {
 
     }
 

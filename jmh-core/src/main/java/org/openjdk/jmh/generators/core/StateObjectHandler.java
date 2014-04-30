@@ -317,8 +317,12 @@ public class StateObjectHandler {
         }
     }
 
-    public String getArgList(MethodInfo methodInfo) {
+    public String getGMBArgList(MethodInfo methodInfo) {
         return getArgList(args.get(methodInfo.getName()));
+    }
+
+    public String getArgList(MethodInfo methodInfo) {
+        return getArgList(stateOrder(methodInfo, false));
     }
 
     public String getArgList(Collection<StateObject> sos) {
@@ -335,7 +339,7 @@ public class StateObjectHandler {
     }
 
     public String getTypeArgList(MethodInfo methodInfo) {
-        return getTypeArgList(args.get(methodInfo.getName()));
+        return getTypeArgList(stateOrder(methodInfo, false));
     }
 
     public String getTypeArgList(Collection<StateObject> sos) {

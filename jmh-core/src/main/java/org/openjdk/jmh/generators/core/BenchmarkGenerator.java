@@ -618,7 +618,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
-                    "(control, res, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+                    "(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -671,7 +671,7 @@ public class BenchmarkGenerator {
             writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
                     "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
                     "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + loopMethodName + "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + loopMethodName + "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -727,7 +727,7 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, res, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -778,8 +778,7 @@ public class BenchmarkGenerator {
                     "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
                     "." + CompilerControl.Mode.DONT_INLINE + ")");
             writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
-                    "(InfraControl control, RawResults result, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() +
-                    prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+                    "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -848,7 +847,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, targetSamples, " + states.getImplicit("bench").toLocal() + ", " + states.getImplicit("blackhole").toLocal() + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, targetSamples" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -895,7 +894,7 @@ public class BenchmarkGenerator {
             writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
                     "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
                     "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" + "(InfraControl control, SampleBuffer buffer, int targetSamples, " + states.getImplicit("bench").toTypeDef() + ", " + states.getImplicit("blackhole").toTypeDef() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" + "(InfraControl control, SampleBuffer buffer, int targetSamples" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
             writer.println(ident(2) + "int rndMask = startRndMask;");
@@ -1022,9 +1021,9 @@ public class BenchmarkGenerator {
 
     private String emitCall(MethodInfo method, StateObjectHandler states) {
         if ("void".equalsIgnoreCase(method.getReturnType())) {
-            return states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getArgList(method) + ")";
+            return states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getGMBArgList(method) + ")";
         } else {
-            return states.getImplicit("blackhole").localIdentifier + ".consume(" + states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getArgList(method) + "))";
+            return states.getImplicit("blackhole").localIdentifier + ".consume(" + states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getGMBArgList(method) + "))";
         }
     }
 
