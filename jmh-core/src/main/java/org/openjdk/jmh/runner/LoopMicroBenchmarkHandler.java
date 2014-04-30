@@ -33,15 +33,14 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -109,16 +108,9 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         }
 
         // submit tasks to threadpool
-        List<Future<Collection<? extends Result>>> results = new ArrayList<Future<Collection<? extends Result>>>(numThreads);
+        Map<BenchmarkTask, Future<Collection<? extends Result>>> results = new HashMap<BenchmarkTask, Future<Collection<? extends Result>>>();
         for (BenchmarkTask runner : runners) {
-            results.add(executor.submit(runner));
-        }
-
-        // wait for all workers to initialize and ready to go
-        try {
-            preSetupBarrier.await();
-        } catch (InterruptedException ex) {
-            throw new BenchmarkException(ex);
+            results.put(runner, executor.submit(runner));
         }
 
         // wait for all workers to transit to measurement
@@ -155,20 +147,25 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             }
         }
 
-        // wait for all workers to complete run and ready to proceed
-        try {
-            preTearDownBarrier.await();
-        } catch (InterruptedException ex) {
-            throw new BenchmarkException(ex);
+        // We don't know the running time for SingleShot benchmarks,
+        // assume something long enough to wait in the loop below.
+        long timeToWait;
+        switch (microbenchmark.getMode()) {
+            case SingleShotTime:
+                timeToWait = TimeUnit.SECONDS.toNanos(100);
+                break;
+            default:
+                timeToWait = runtime.convertTo(TimeUnit.NANOSECONDS);
         }
 
         // Wait for the result, continuously polling the worker threads.
         // The abrupt exception in any worker will float up here.
         int expected = numThreads;
         while (expected > 0) {
-            for (Future<Collection<? extends Result>> fr : results) {
+            for (BenchmarkTask task : results.keySet()) {
+                Future<Collection<? extends Result>> fr = results.get(task);
                 try {
-                    fr.get(runtime.getTime() * 2, runtime.getTimeUnit());
+                    fr.get(timeToWait, TimeUnit.NANOSECONDS);
                     expected--;
                 } catch (InterruptedException ex) {
                     throw new BenchmarkException(ex);
@@ -176,7 +173,11 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                     Throwable cause = ex.getCause().getCause(); // unwrap
                     throw new BenchmarkException(cause);
                 } catch (TimeoutException e) {
-                    // do nothing, respin
+                    // try to kick the thread, if it was already started
+                    if (task.runner != null) {
+                        format.print("(*interrupt*) ");
+                        task.runner.interrupt();
+                    }
                 }
             }
         }
@@ -184,7 +185,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         // Get the results.
         // Should previous loop allow us to get to this point, we can fully expect
         // all the results ready without the exceptions.
-        for (Future<Collection<? extends Result>> fr : results) {
+        for (Future<Collection<? extends Result>> fr : results.values()) {
             try {
                 iterationResults.addResults(fr.get());
             } catch (InterruptedException ex) {
@@ -202,6 +203,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
      */
     class BenchmarkTask implements Callable<Collection<? extends Result>> {
 
+        private volatile Thread runner;
         private final ThreadLocal<Object> invocationHandler;
         private final InfraControl control;
         private final ThreadControl threadControl;
@@ -215,6 +217,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         @Override
         public Collection<? extends Result> call() throws Exception {
             try {
+                // bind the executor thread
+                runner = Thread.currentThread();
+
+                // go for the run
                 return invokeBenchmark(invocationHandler.get(), control, threadControl);
             } catch (Throwable e) {
                 // about to fail the iteration;
@@ -237,6 +243,9 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 }
 
                 throw new Exception(e); // wrapping Throwable
+            } finally {
+                // unbind the executor thread
+                runner = null;
             }
         }
 

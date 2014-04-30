@@ -113,13 +113,9 @@ public class InfraControl extends InfraControlL4 {
         }
     }
 
-    public void preTearDown() {
-        try {
-            preTearDown.countDown();
-            preTearDown.await();
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
+    public void preTearDown() throws InterruptedException {
+        preTearDown.countDown();
+        preTearDown.await();
     }
 
     public void preSetupForce() {

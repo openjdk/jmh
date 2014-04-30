@@ -42,6 +42,11 @@ public abstract class AbstractOutputFormat implements OutputFormat {
     }
 
     @Override
+    public void print(String s) {
+        out.print(s);
+    }
+
+    @Override
     public void println(String s) {
         out.println(s);
     }

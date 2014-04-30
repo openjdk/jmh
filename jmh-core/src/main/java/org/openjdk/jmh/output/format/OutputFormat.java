@@ -88,6 +88,8 @@ public interface OutputFormat {
 
     /* ------------- RAW OUTPUT METHODS ------------------- */
 
+    void print(String s);
+
     void println(String s);
 
     void flush();

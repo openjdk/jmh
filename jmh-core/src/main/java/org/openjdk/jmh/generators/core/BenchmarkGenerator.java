@@ -629,12 +629,17 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "control.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (control.warmdownShouldWait) {");
+            writer.println(ident(3) + "try {");
+            writer.println(ident(4) + "while (control.warmdownShouldWait) {");
 
-            invocationProlog(writer, 4, method, states, false);
-            writer.println(ident(4) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 4, method, states, false);
+            invocationProlog(writer, 5, method, states, false);
+            writer.println(ident(5) + emitCall(method, states) + ';');
+            invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(4) + "}");
+            writer.println(ident(4) + "control.preTearDown();");
+            writer.println(ident(3) + "} catch (InterruptedException ie) {");
+            writer.println(ident(4) + "control.preTearDownForce();");
             writer.println(ident(3) + "}");
 
             // iteration prolog
@@ -733,12 +738,17 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "control.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (control.warmdownShouldWait) {");
+            writer.println(ident(3) + "try {");
+            writer.println(ident(4) + "while (control.warmdownShouldWait) {");
 
-            invocationProlog(writer, 4, method, states, false);
-            writer.println(ident(4) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 4, method, states, false);
+            invocationProlog(writer, 5, method, states, false);
+            writer.println(ident(5) + emitCall(method, states) + ';');
+            invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(4) + "}");
+            writer.println(ident(4) + "control.preTearDown();");
+            writer.println(ident(3) + "} catch (InterruptedException ie) {");
+            writer.println(ident(4) + "control.preTearDownForce();");
             writer.println(ident(3) + "}");
 
             iterationEpilog(writer, 3, method, states);
@@ -849,14 +859,18 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "control.announceWarmdownReady();");
 
             // synchronize iterations epilog: catchup loop
-            writer.println(ident(3) + "while (control.warmdownShouldWait) {");
+            writer.println(ident(3) + "try {");
+            writer.println(ident(4) + "while (control.warmdownShouldWait) {");
 
-            invocationProlog(writer, 4, method, states, false);
-            writer.println(ident(4) + emitCall(method, states) + ';');
-            invocationEpilog(writer, 4, method, states, false);
+            invocationProlog(writer, 5, method, states, false);
+            writer.println(ident(5) + emitCall(method, states) + ';');
+            invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(4) + "}");
+            writer.println(ident(4) + "control.preTearDown();");
+            writer.println(ident(3) + "} catch (InterruptedException ie) {");
+            writer.println(ident(4) + "control.preTearDownForce();");
             writer.println(ident(3) + "}");
-            writer.println();
 
             iterationEpilog(writer, 3, method, states);
 
@@ -948,6 +962,8 @@ public class BenchmarkGenerator {
 
             invocationEpilog(writer, 3, method, states, false);
 
+            writer.println(ident(4) + "control.preTearDown();");
+
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
@@ -995,8 +1011,6 @@ public class BenchmarkGenerator {
     }
 
     private void iterationEpilog(PrintWriter writer, int prefix, MethodInfo method, StateObjectHandler states) {
-        writer.println(ident(prefix) + "control.preTearDown();");
-
         for (String s : states.getIterationTearDowns(method)) writer.println(ident(prefix) + s);
         writer.println();
 
