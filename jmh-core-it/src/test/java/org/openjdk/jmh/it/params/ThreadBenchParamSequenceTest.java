@@ -43,8 +43,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
-@Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MICROSECONDS)
-@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MICROSECONDS)
+@Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(1)
 @State(Scope.Thread)
 public class ThreadBenchParamSequenceTest {

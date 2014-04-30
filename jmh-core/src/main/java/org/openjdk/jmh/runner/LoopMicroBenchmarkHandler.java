@@ -174,9 +174,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                     throw new BenchmarkException(cause);
                 } catch (TimeoutException e) {
                     // try to kick the thread, if it was already started
-                    if (task.runner != null) {
+                    Thread runner = task.runner;
+                    if (runner != null) {
                         format.print("(*interrupt*) ");
-                        task.runner.interrupt();
+                        runner.interrupt();
                     }
                 }
             }
