@@ -76,7 +76,7 @@ questions.
                     <reuseForks>true</reuseForks>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <systemProperties>
-                        <it.reps>${reps}</it.reps>
+                        <it.reps>${it.reps}</it.reps>
                     </systemProperties>
                 </configuration>
             </plugin>
@@ -106,13 +106,6 @@ questions.
     </build>
 
     <profiles>
-        <profile>
-            <id>stress</id>
-            <properties>
-                <reps>100</reps>
-            </properties>
-        </profile>
-
         <profile>
             <id>default</id>
             <dependencies>
