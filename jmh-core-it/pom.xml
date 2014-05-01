@@ -75,9 +75,6 @@ questions.
                     <forkCount>2C</forkCount>
                     <reuseForks>true</reuseForks>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <systemProperties>
-                        <it.reps>${it.reps}</it.reps>
-                    </systemProperties>
                 </configuration>
             </plugin>
 
