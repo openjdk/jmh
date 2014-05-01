@@ -75,6 +75,9 @@ questions.
                     <forkCount>2C</forkCount>
                     <reuseForks>true</reuseForks>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <systemProperties>
+                        <it.reps>${reps}</it.reps>
+                    </systemProperties>
                 </configuration>
             </plugin>
 
@@ -103,6 +106,13 @@ questions.
     </build>
 
     <profiles>
+        <profile>
+            <id>stress</id>
+            <properties>
+                <reps>100</reps>
+            </properties>
+        </profile>
+
         <profile>
             <id>default</id>
             <dependencies>

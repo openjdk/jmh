@@ -25,6 +25,7 @@
 package org.openjdk.jmh.it.synciter;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -41,6 +42,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.lang.annotation.Repeatable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,12 +78,14 @@ public class SyncIterNotOnlyMeasurementTest {
 
     @Test
     public void invokeAPI() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .shouldFailOnError(true)
-                .syncIterations(true)
-                .build();
-        new Runner(opt).run();
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .shouldFailOnError(true)
+                    .syncIterations(true)
+                    .build();
+            new Runner(opt).run();
+        }
     }
 
 }

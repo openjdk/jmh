@@ -28,6 +28,12 @@ import java.util.concurrent.TimeUnit;
 
 public class Fixtures {
 
+    private static final int REPS = Integer.getInteger("it.reps", 1);
+
+    public static int repetitionCount() {
+        return REPS;
+    }
+
     public static String getTestMask(Class<?> klass) {
         return ".*" + klass.getCanonicalName().replaceAll("org\\.openjdk\\.jmh\\.it", "").replaceAll("\\.",".*\\\\.") + ".*";
     }
