@@ -25,7 +25,6 @@
 package org.openjdk.jmh.it.synciter;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -42,7 +41,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.lang.annotation.Repeatable;
 import java.util.concurrent.TimeUnit;
 
 /**
