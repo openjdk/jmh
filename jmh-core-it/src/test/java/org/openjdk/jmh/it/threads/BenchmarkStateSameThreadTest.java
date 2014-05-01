@@ -123,11 +123,13 @@ public class BenchmarkStateSameThreadTest {
 
     @Test
     public void invokeAPI() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .shouldFailOnError(true)
-                .build();
-        new Runner(opt).run();
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
     }
 
 }

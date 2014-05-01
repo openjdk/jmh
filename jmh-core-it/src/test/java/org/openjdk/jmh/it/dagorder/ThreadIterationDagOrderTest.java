@@ -116,20 +116,22 @@ public class ThreadIterationDagOrderTest {
 
     @Test
     public void invokeAPI() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .shouldFailOnError(true)
-                .syncIterations(false)
-                .build();
-        new Runner(opt).run();
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .shouldFailOnError(true)
+                    .syncIterations(false)
+                    .build();
+            new Runner(opt).run();
 
 
-        Assert.assertTrue(s3setup + " < " + s2setup, s3setup < s2setup);
-        Assert.assertTrue(s2setup + " < " + s1setup, s2setup < s1setup);
-        Assert.assertTrue(s1setup + " < " + run,     s1setup < run);
+            Assert.assertTrue(s3setup + " < " + s2setup, s3setup < s2setup);
+            Assert.assertTrue(s2setup + " < " + s1setup, s2setup < s1setup);
+            Assert.assertTrue(s1setup + " < " + run, s1setup < run);
 
-        Assert.assertTrue(       run + " < " + s1teardown,        run < s1teardown);
-        Assert.assertTrue(s1teardown + " < " + s2teardown, s1teardown < s2teardown);
-        Assert.assertTrue(s2teardown + " < " + s3teardown, s2teardown < s3teardown);
+            Assert.assertTrue(run + " < " + s1teardown, run < s1teardown);
+            Assert.assertTrue(s1teardown + " < " + s2teardown, s1teardown < s2teardown);
+            Assert.assertTrue(s2teardown + " < " + s3teardown, s2teardown < s3teardown);
+        }
     }
 }

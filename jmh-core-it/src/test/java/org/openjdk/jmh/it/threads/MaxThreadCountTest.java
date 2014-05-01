@@ -84,20 +84,24 @@ public class MaxThreadCountTest {
 
     @Test
     public void invokeAPI_1() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass())+".*test1")
-                .shouldFailOnError(true)
-                .build();
-        new Runner(opt).run();
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()) + ".*test1")
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
     }
 
     @Test
     public void invokeAPI_2() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass())+".*test2")
-                .shouldFailOnError(true)
-                .threads(Threads.MAX)
-                .build();
-        new Runner(opt).run();
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()) + ".*test2")
+                    .shouldFailOnError(true)
+                    .threads(Threads.MAX)
+                    .build();
+            new Runner(opt).run();
+        }
     }
 }

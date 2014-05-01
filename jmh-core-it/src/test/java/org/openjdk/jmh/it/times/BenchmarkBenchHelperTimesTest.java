@@ -161,10 +161,12 @@ public class BenchmarkBenchHelperTimesTest {
 
     @Test
     public void invokeAPI() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .build();
-        new Runner(opt).run();
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .build();
+            new Runner(opt).run();
+        }
     }
 
 }
