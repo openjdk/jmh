@@ -25,6 +25,7 @@
 package org.openjdk.jmh.it.synciter;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
@@ -75,6 +76,7 @@ public class SyncIterNotOnlyMeasurementTest {
     }
 
     @Test
+    @Ignore // this test is probabilistic
     public void invokeAPI() throws RunnerException {
         for (int c = 0; c < Fixtures.repetitionCount(); c++) {
             Options opt = new OptionsBuilder()
