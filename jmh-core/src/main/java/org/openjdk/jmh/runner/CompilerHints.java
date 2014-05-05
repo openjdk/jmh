@@ -36,6 +36,12 @@ import java.util.TreeSet;
 public class CompilerHints extends AbstractResourceReader {
 
     public static final String LIST = "/META-INF/CompilerHints";
+
+    // Both IcedTea and Zulu JVMs will report OpenJDK in java.vm.name
+    public static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "Oracle" };
+    // Zing is only compatible from post 5.10.*.* releases
+    private static final String JVM_ZING = "Zing";
+
     private static volatile CompilerHints defaultList;
     private static volatile String hintsFile;
 
@@ -86,16 +92,40 @@ public class CompilerHints extends AbstractResourceReader {
 
     private CompilerHints(String file, String resource, String line) {
         super(file, resource, line);
-
-        // naive protection
-        String name = System.getProperty("java.vm.name");
-
         hints = read();
-
-        if (!hints.isEmpty() && !(name.contains("HotSpot") || name.contains("OpenJDK"))) {
-            System.err.println("WARNING: Not the HotSpot VM (\"" + name + "\"), compilerHints are disabled.");
+        if (!hints.isEmpty() && !isHintCompatibleVM()) {
+            System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
+                    + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
+                    + "\"), compilerHints are disabled.");
             hints.clear();
         }
+    }
+
+    private boolean isHintCompatibleVM() {
+        String name = System.getProperty("java.vm.name");
+        for (String vmName : HINT_COMPATIBLE_JVMS) {
+            if (name.contains(vmName)) {
+                return true;
+            }
+        }
+        if (name.contains(JVM_ZING)) {
+            // 1.*.0-zing_*.*.*.*
+            String version = System.getProperty("java.version");
+            try {
+                // get the version digits
+                String[] versionDigits = version.substring(version.indexOf('_') + 1).split("\\.");
+                if (Integer.valueOf(versionDigits[0]) >= 5 && Integer.valueOf(versionDigits[1]) >= 10) {
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                // unknown Zing version format
+                System.err.println("ERROR: Zing version format does not match 1.*.0-zing_*.*.*.*");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // unknown Zing version format
+                System.err.println("ERROR: Zing version format does not match 1.*.0-zing_*.*.*.*");
+            }
+        }
+        return false;
     }
 
     public Set<String> get() {
