@@ -81,7 +81,7 @@ public class Optional<T> implements Serializable {
     /**
      * Parse the existing string value into the Option
      * @param source source string
-     * @param unmarshaller unmarshaller lambda parsing the (String -> T)
+     * @param unmarshaller unmarshaller lambda parsing the (String -&gt; T)
      * @param <T> type
      * @return value wrapped in the Option
      */

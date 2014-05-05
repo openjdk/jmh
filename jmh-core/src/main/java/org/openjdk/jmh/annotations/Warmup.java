@@ -47,16 +47,16 @@ public @interface Warmup {
     public static final int BLANK_TIME = -1;
     public static final int BLANK_BATCHSIZE = -1;
 
-    /** Amount of iterations */
+    /** @return amount of iterations */
     int iterations() default BLANK_ITERATIONS;
 
-    /** time of each iteration */
+    /** @return time of each iteration */
     int time() default BLANK_TIME;
 
-    /** time unit of the time value */
+    /** @return time unit of the time value */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-    /** Batch size: number of benchmark method calls per operation (some benchmark modes can ignore this setting) */
+    /** @return batch size: number of benchmark method calls per operation (some benchmark modes can ignore this setting) */
     int batchSize() default BLANK_BATCHSIZE;
 
 }

@@ -46,7 +46,6 @@ public class MicroBenchmarkList extends AbstractResourceReader {
 
     /** Location of the pre-compiled list of micro benchmarks */
     public static final String MICROBENCHMARK_LIST = "/META-INF/MicroBenchmarks";
-    /** String that points out our resource with micro benchmarks */
 
     public static MicroBenchmarkList defaultList() {
         return fromResource(MICROBENCHMARK_LIST);
@@ -71,6 +70,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
     /**
      * Gets all micro benchmarks from the list, sorted.
      *
+     * @param out Output the messages here
      * @param excludes List of regexps to match excludes against
      * @return A list of all benchmarks, excluding matched
      */
@@ -81,6 +81,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
     /**
      * Gets all the micro benchmarks that matches the given regexp, sorted.
      *
+     * @param out Output the messages here
      * @param regexp   Regexp to match against
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches the include and NOT matching excludes
@@ -92,6 +93,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
     /**
      * Gets all the micro benchmarks that matches the given regexp, sorted
      *
+     * @param out Output the messages here
      * @param regexps  List of regexps to match against
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches includes and NOT matching excludes

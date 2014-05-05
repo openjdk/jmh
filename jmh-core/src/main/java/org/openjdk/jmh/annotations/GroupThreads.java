@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GroupThreads {
 
-    /** Number of threads in this subgroup. */
+    /** @return number of threads in this subgroup. */
     int value() default 1;
 
 }

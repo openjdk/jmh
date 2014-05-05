@@ -86,19 +86,15 @@ public class InfraControl extends InfraControlL4 {
     }
 
     /**
-     * returns requested loop duration in milliseconds.
-     * the primary purpose of the method - integration tests.
-     * @return
+     * @return requested loop duration in milliseconds.
      */
     public long getDuration() {
         return getDuration(TimeUnit.MILLISECONDS);
     }
 
     /**
-     * returns requested loop duration in the requested unit.
-     * the primary purpose of the method - integration tests.
-     * @param unit
-     * @return
+     * @param unit timeunit to use
+     * @return requested loop duration in the requested unit.
      */
     public long getDuration(TimeUnit unit) {
         return unit.convert(duration, TimeUnit.NANOSECONDS);

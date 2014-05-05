@@ -45,9 +45,6 @@ public class BenchmarkParams implements Serializable {
     private final IterationParams warmup;
     private final IterationParams measurement;
 
-    /**
-     * Test entry method
-     */
     public BenchmarkParams(boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks,
                            int warmupIters, TimeValue warmupTime, int warmupBatchSize,
                            int measureIters, TimeValue measureTime, int measureBatchSize) {

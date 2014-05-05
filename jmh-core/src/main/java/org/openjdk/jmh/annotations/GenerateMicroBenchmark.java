@@ -32,11 +32,9 @@ import java.lang.annotation.Target;
 /**
  * Marks the payload method as the target for microbenchmark generation.
  * <p>
- * Annotation processors will translate methods marked with this annotation
- * to correct {@link MicroBenchmark}-annotated classes.
+ * JMH generators will synthesize the benchmarking code for this method.
  * <p>
- * This annotation only accepts parameters affecting the workload generation, now only {@link Mode}.
- * Other parameters for run control are available as separate annotations
+ * the parameters for run control are available as separate annotations
  * (e.g. {@link Measurement}, {@link Threads}, and {@link Fork}),
  * which can be used both for concrete {@link GenerateMicroBenchmark}-annotated methods,
  * as well as for the classes containing target methods. Class-level annotations will
@@ -46,18 +44,8 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>The arguments should be zero or more {@link org.openjdk.jmh.annotations.State}-bearing classes. See
  *     {@link org.openjdk.jmh.annotations.State} docs for the exact contract.
- *     <li>Target method should be either public or protected</li>
+ *     <li>Target method should public</li>
  * </ul>
- * <p>
- * {@link org.openjdk.jmh.logic.BlackHole}
- * provided is guaranteed to be thread-local and have minimal overhead for making
- * side-effects on consumed values. Consider sinking all the values computed in
- * the benchmark to prevent dead-code elimination. Return value is getting black-holed
- * automatically, so you might prefer using explicit black-holing only when
- * multiple values are getting sinked.
- * <b>Extra care</b> should be excersized when sinking multiple values; one should not sink two
- * results to the same black hole, as compiler can leave only the latest store. Use distinct black
- * holes to sink distinct results.
  * <p>
  * Annotated method can optionally throw Exceptions and Throwables. Any uncaught exception
  * is treated as microbenchmark failure.
@@ -68,6 +56,7 @@ import java.lang.annotation.Target;
  *      &#64;GenerateMicroBenchmark
  *      public void testCharConversion() {...}
  * }
+ * </pre></blockquote>
  *
  * @author Staffan Friberg
  * @author Anders Astrand

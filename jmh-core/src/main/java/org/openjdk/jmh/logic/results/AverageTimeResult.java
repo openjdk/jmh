@@ -38,20 +38,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class AverageTimeResult extends Result {
 
-    /** Total number of operations during iteration */
     private final long operations;
-    /** Duration of iteration in NanoSeconds */
     private final long durationNs;
-    /** The TimeUnit to use when calculating the score */
     private final TimeUnit outputTimeUnit;
 
-    /**
-     * Sets up the result
-     *
-     * @param operations     Total number of operations during iteration
-     * @param durationNs       Duration of iteration in NanoSeconds
-     * @param tu The TimeUnit to use when calculating the score
-     */
     public AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
         this(mode, label, operations, durationNs, tu, null);
     }

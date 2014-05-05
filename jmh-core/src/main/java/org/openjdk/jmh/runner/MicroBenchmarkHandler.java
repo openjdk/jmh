@@ -55,8 +55,7 @@ public interface MicroBenchmarkHandler {
     public void shutdown();
 
     /**
-     * returns benchmark name.
-     * @return
+     * @return benchmark name
      */
     public BenchmarkRecord getBenchmark();
 }

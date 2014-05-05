@@ -36,8 +36,6 @@ import java.util.Map;
 
 /**
  * Internal interface for OutputFormat.
- * <p/>
- * TODO: This interface might need touchups for formats that require symmetric headers or recursion (XML etc).
  *
  * @author anders.astrand@oracle.com
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
@@ -48,8 +46,9 @@ public interface OutputFormat {
      * Format for iteration start.
      *
      * @param benchmark benchmark name
-     * @param params
+     * @param params iteration params in use
      * @param iteration iteration-number
+     * @param type iteration type
      */
     public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type);
 
@@ -57,14 +56,17 @@ public interface OutputFormat {
      * Format for end-of-iteration.
      *
      * @param name      name of benchmark
-     * @param params
+     * @param params    iteration params in use
      * @param iteration iteration-number
+     * @param type      iteration type
      * @param data    result of iteration
      */
     public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data);
 
     /**
      * Format for start-of-benchmark output.
+     * @param name benchmark name
+     * @param mbParams benchmark params
      */
     public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams);
 
@@ -83,6 +85,7 @@ public interface OutputFormat {
 
     /**
      * Format for end-of-benchmark.
+     * @param result benchmark results
      */
     public void endRun(Map<BenchmarkRecord, RunResult> result);
 

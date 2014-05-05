@@ -47,11 +47,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * abstract runner - base class for Runner & ForkedRunner
+ * Abstract runner, the base class for Runner and ForkedRunner.
  *
  * @author sergey.kuksenko@oracle.com
  */
-
 public abstract class BaseRunner {
 
     private long projectedTotalTime;

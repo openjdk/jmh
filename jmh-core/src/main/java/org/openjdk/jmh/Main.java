@@ -41,11 +41,6 @@ import java.io.IOException;
  */
 public class Main {
 
-    /**
-     * Application main entry point
-     *
-     * @param argv Command line arguments
-     */
     public static void main(String[] argv) throws RunnerException, IOException {
         try {
             CommandLineOptions cmdOptions = new CommandLineOptions(argv);

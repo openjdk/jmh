@@ -32,11 +32,8 @@ import java.lang.annotation.Target;
 
 /**
  * Marks the state object.
- * <p />
- * State objects naturally encapsulate the state on which benchmark is working on.
- * The scope of state object defines to which extent it is shared among the worker threads.
- * <p />
- *
+ * <p>State objects naturally encapsulate the state on which benchmark is working on.
+ * The scope of state object defines to which extent it is shared among the worker threads.</p>
  */
 @Inherited
 @Target(ElementType.TYPE)

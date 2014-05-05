@@ -38,23 +38,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class SampleTimeResult extends Result {
 
-    /** Sample buffer */
     private final SampleBuffer buffer;
-    /** The TimeUnit to use when calculating the score */
     private final TimeUnit outputTimeUnit;
 
-    /** Sets up the result with the default output unit MilliSeconds */
     public SampleTimeResult(ResultRole mode, String label, SampleBuffer buffer) {
         this(mode, label, buffer, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Sets up the result
-     *
-     * @param outputTimeUnit The TimeUnit to use when calculating the score
-     */
-    public SampleTimeResult(ResultRole mode, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
-        super(mode, label, null);
+    public SampleTimeResult(ResultRole role, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
+        super(role, label, null);
         this.buffer = buffer;
         this.outputTimeUnit = outputTimeUnit;
     }

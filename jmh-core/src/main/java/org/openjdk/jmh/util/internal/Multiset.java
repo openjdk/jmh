@@ -31,7 +31,7 @@ import java.util.Collection;
  *
  * (Transitional interface)
  *
- * @param <T>
+ * @param <T> element type
  */
 public interface Multiset<T> {
 
@@ -71,7 +71,7 @@ public interface Multiset<T> {
 
     /**
      * Answers the collection of keys
-     * @return
+     * @return the collections of keys
      */
     Collection<T> keys();
 }

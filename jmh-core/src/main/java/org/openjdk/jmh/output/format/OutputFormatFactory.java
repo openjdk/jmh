@@ -35,7 +35,8 @@ public class OutputFormatFactory {
     /**
      * Factory method for OutputFormat instances
      *
-     * @param mode LogMode enum to use
+     * @param out  output stream to use
+     * @param mode how much verbosity to use
      * @return a new OutputFormat instance of given type
      */
     public static OutputFormat createFormatInstance(PrintStream out, VerboseMode mode) {
@@ -51,8 +52,8 @@ public class OutputFormatFactory {
     }
 
     /**
-     * Factory method - returns output format for forked JVM.
-     * @return
+     * @param link binary link to put the messages through
+     * @return option format sinking the messages to binary link
      */
     public static OutputFormat createBinaryHook(BinaryLinkClient link) {
         return (OutputFormat) Proxy.newProxyInstance(

@@ -46,19 +46,19 @@ public @interface Fork {
 
     public static final String BLANK_ARGS = "blank_blank_blank_2014";
 
-    /** specifies number of times harness should fork, zero means "no fork" */
+    /** @return the number of times harness should fork, zero means "no fork" */
     int value() default BLANK_FORKS;
 
-    /** enforce strict JVM args, replaces any implicit jvm args */
+    /** @return strict JVM args, replaces any implicit jvm args */
     String[] jvmArgs() default { BLANK_ARGS };
 
-    /** prepend these arguments in the command line */
+    /** @return JVM arguments to prepend in the command line */
     String[] jvmArgsPrepend() default { BLANK_ARGS };
 
-    /** append these arguments in the command line */
+    /** @return JVM arguments to append in the command line */
     String[] jvmArgsAppend() default { BLANK_ARGS };
 
-    /** ignore results first warmups forks */
+    /** @return how many forks to treat as warmup and ignore their results */
     int warmups() default BLANK_FORKS;
 
 }

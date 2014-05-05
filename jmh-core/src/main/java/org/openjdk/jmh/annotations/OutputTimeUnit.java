@@ -42,7 +42,8 @@ import java.util.concurrent.TimeUnit;
 public @interface OutputTimeUnit {
 
     /**
-     * What time unit to use in the result type of the generated method. */
+     * @return time unit to use in the result type of the generated method
+     */
     TimeUnit value();
 
 }

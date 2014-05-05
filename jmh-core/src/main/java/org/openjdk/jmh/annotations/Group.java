@@ -41,8 +41,8 @@ import java.lang.annotation.Target;
 public @interface Group {
 
     /**
-     * Group tag.
-     * Should be valid Java identifier.
+     * Group tag. Should be a valid Java identifier.
+     * @return group tag
      */
     String value() default "";
 }

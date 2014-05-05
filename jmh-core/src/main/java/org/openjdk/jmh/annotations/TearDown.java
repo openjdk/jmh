@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TearDown {
 
-    /** Level of this method. @see Level. Default is Trial.*/
+    /** @return level of this method. @see Level. Default is Trial.*/
     Level value() default Level.Trial;
 
 }

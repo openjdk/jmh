@@ -149,6 +149,7 @@ public class Runner extends BaseRunner {
      * Run benchmarks.
      *
      * @return map of benchmark results
+     * @throws org.openjdk.jmh.runner.RunnerException if something goes wrong
      */
     public SortedMap<BenchmarkRecord, RunResult> run() throws RunnerException {
         SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());

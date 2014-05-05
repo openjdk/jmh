@@ -38,6 +38,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BenchmarkMode {
 
+    /**
+     * @return Which benchmark modes to use.
+     */
     Mode[] value();
 
 }

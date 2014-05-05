@@ -48,7 +48,9 @@ public class ThroughputResult extends Result {
     /**
      * Sets up the result with the default output unit MilliSeconds
      *
-     * @param operations Total number of operations during iteration
+     * @param role         Result role
+     * @param label        Result label
+     * @param operations   Total number of operations during iteration
      * @param durationNs   Duration of iteration in NanoSeconds
      */
     public ThroughputResult(ResultRole role, String label, long operations, long durationNs) {
@@ -58,8 +60,10 @@ public class ThroughputResult extends Result {
     /**
      * Sets up the result
      *
+     * @param role           Result role
+     * @param label          Result label
      * @param operations     Total number of operations during iteration
-     * @param durationNs       Duration of iteration in NanoSeconds
+     * @param durationNs     Duration of iteration in NanoSeconds
      * @param outputTimeUnit The TimeUnit to use when calculating the score
      */
     public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {

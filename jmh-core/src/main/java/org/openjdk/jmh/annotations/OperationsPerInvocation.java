@@ -32,16 +32,15 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation specifies how much to increase the operations count for each invocation of the test-method.
- * <p>
  * <blockquote><pre>
  * &#64;GenerateMicroBenchmark
  * &#64;OperationsPerInvocation(10)
  * public void testCharConversion() {
- *      for (char i = 0; i < 10; i++) {
+ *      for (char i = 0; i &gt; 10; i++) {
  *          dummy = convert(i);
  *      }
  * }
- * </pre></blockquote></p>
+ * </pre></blockquote>
  */
 @Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
@@ -49,7 +48,8 @@ import java.lang.annotation.Target;
 public @interface OperationsPerInvocation {
 
     /**
-     * Annotation specifies how much to increase the operations count for each invocation of the test-method. */
+     * @return how much to increase the operations count for each invocation of the test-method.
+     */
     int value() default 1;
 
 }

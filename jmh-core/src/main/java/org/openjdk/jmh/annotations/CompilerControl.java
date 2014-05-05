@@ -30,15 +30,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Compiler control annotation is the VM-specific way to affect the compilation for
- * particular methods in the microbenchmarks.
- * <p/>
- * JMH interfaces with the JVM by the means of command-line switches,
+ * <p>Compiler control annotation is the VM-specific way to affect the compilation for
+ * particular methods in the microbenchmarks.</p>
+ *
+ * <p>JMH interfaces with the JVM by the means of command-line switches,
  * These annotations only work with forking enabled. Non-forked runs will not be
- * able to pass the hints to the compiler.
- * <p/>
- * Also, these control annotations might get freely ignored by the compiler,
- * reduced to no-ops, or otherwise invalidated. Be cautious.
+ * able to pass the hints to the compiler.</p>
+ *
+ * <p>Also, these control annotations might get freely ignored by the compiler,
+ * reduced to no-ops, or otherwise invalidated. Be cautious.</p>
  */
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

@@ -97,7 +97,7 @@ public class ClassUtils {
      * Make the collection of class names denser.
      *
      * @param src source class names
-     * @return map of <src class name, denser class name>
+     * @return map of [src class name, denser class name]
      */
     public static Map<String, String> denseClassNames(Collection<String> src) {
         if (src.isEmpty()) return Collections.emptyMap();

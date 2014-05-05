@@ -29,8 +29,8 @@ import java.io.Writer;
 
 /**
  * Generator destination.
- * <p/>
- * The exit point for {@link org.openjdk.jmh.generators.core.BenchmarkGenerator}.
+ *
+ * <p>The exit point for {@link org.openjdk.jmh.generators.core.BenchmarkGenerator}.</p>
  */
 public interface GeneratorDestination {
 

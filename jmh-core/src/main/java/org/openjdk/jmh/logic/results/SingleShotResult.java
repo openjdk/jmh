@@ -38,19 +38,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class SingleShotResult extends Result {
 
-    /** Duration of iteration in NanoSeconds */
     private final long duration;
-    /** The TimeUnit to use when calculating the time */
     private final TimeUnit outputTimeUnit;
 
-    /**
-     * Sets up the result
-     *
-     * @param duration       Duration of iteration in NanoSeconds
-     * @param outputTimeUnit The TimeUnit to use when calculating the score
-     */
-    public SingleShotResult(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit) {
-        this(mode, label, duration, outputTimeUnit, null);
+    public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
+        this(role, label, duration, outputTimeUnit, null);
     }
 
     SingleShotResult(ResultRole mode, String label, long duration, TimeUnit outputTimeUnit, Statistics stat) {
