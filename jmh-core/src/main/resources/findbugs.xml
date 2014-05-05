@@ -637,6 +637,13 @@
   </Match>
   <Match>
     <Bug pattern="UUF_UNUSED_FIELD"/>
+    <Not>
+        <Or>
+            <Class name="~.*L1.*" />
+            <Class name="~.*L2.*" />
+            <Class name="~.*L3.*" />
+        </Or>
+    </Not>
   </Match>
   <Match>
     <Bug pattern="URF_UNREAD_FIELD"/>
