@@ -49,9 +49,6 @@ import java.util.concurrent.TimeUnit;
  * Level.Invocation is useful sometimes to do some per-invocation work
  * which should not count as payload (e.g. sleep for some time to emulate
  * think time)
- * <p/>
- * One can run this sample with:
- * $ java -jar target/microbenchmarks.jar ".*JMHSample_07.*" -i 5 -r 1 -t 4
  */
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class JMHSample_07_FixtureLevelInvocation {
