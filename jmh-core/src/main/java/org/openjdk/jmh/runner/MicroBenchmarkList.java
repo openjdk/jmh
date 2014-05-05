@@ -119,44 +119,53 @@ public class MicroBenchmarkList extends AbstractResourceReader {
         SortedSet<BenchmarkRecord> result = new TreeSet<BenchmarkRecord>();
         try {
             for (Reader r : getReaders()) {
-                BufferedReader reader = new BufferedReader(r);
+                BufferedReader reader = null;
+                try {
+                    reader = new BufferedReader(r);
 
-                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                    if (line.startsWith("#")) {
-                        continue;
-                    }
+                    for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                        if (line.startsWith("#")) {
+                            continue;
+                        }
 
-                    if (line.trim().isEmpty()) {
-                        continue;
-                    }
+                        if (line.trim().isEmpty()) {
+                            continue;
+                        }
 
-                    BenchmarkRecord br = new BenchmarkRecord(line);
+                        BenchmarkRecord br = new BenchmarkRecord(line);
 
-                    for (Pattern pattern : includePatterns) {
-                        if (pattern.matcher(br.getUsername()).matches()) {
-                            boolean exclude = false;
+                        for (Pattern pattern : includePatterns) {
+                            if (pattern.matcher(br.getUsername()).matches()) {
+                                boolean exclude = false;
 
-                            // excludes override
-                            for (Pattern excludePattern : excludePatterns) {
-                                if (excludePattern.matcher(line).matches()) {
-                                    out.verbosePrintln("Excluding " + br.getUsername() + ", matches " + excludePattern);
+                                // excludes override
+                                for (Pattern excludePattern : excludePatterns) {
+                                    if (excludePattern.matcher(line).matches()) {
+                                        out.verbosePrintln("Excluding " + br.getUsername() + ", matches " + excludePattern);
 
-                                    exclude = true;
-                                    break;
+                                        exclude = true;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            if (!exclude) {
-                                result.add(br);
+                                if (!exclude) {
+                                    result.add(br);
+                                }
+                                break;
+                            } else {
+                                out.verbosePrintln("Excluding: " + br.getUsername() + ", does not match " + pattern);
                             }
-                            break;
-                        } else {
-                            out.verbosePrintln("Excluding: " + br.getUsername() + ", does not match " + pattern);
+                        }
+                    }
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            // ignore
                         }
                     }
                 }
-
-                reader.close();
             }
 
         } catch (IOException ex) {

@@ -29,6 +29,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A utility class for File creation and manipulation.
@@ -50,33 +52,74 @@ public class FileUtils {
      * @throws IOException if things go crazy
      */
     public static File extractFromResource(String name) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(FileUtils.class.getResourceAsStream(name));
-        String suffix = name;
+        InputStream fis = null;
+        OutputStream fos = null;
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        try {
+            fis = FileUtils.class.getResourceAsStream(name);
+            bis = new BufferedInputStream(fis);
+            String suffix = name;
 
-        if (suffix.contains("/")) {
-            suffix = name.substring(name.lastIndexOf('/') + 1);
+            if (suffix.contains("/")) {
+                suffix = name.substring(name.lastIndexOf('/') + 1);
+            }
+
+            File temp = File.createTempFile("extracted", suffix);
+
+            fos = new FileOutputStream(temp);
+            bos = new BufferedOutputStream(fos);
+            byte[] b = new byte[1024];
+
+            int available = bis.available();
+            while (available > 0) {
+                int length = Math.min(b.length, available);
+
+                int read = bis.read(b, 0, length);
+                bos.write(b, 0, read);
+
+                available = bis.available();
+            }
+
+            return temp;
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.flush();
+                } catch (IOException e) {
+                    // ignore
+                }
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
         }
-
-        File temp = File.createTempFile("extracted", suffix);
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(temp));
-        byte[] b = new byte[1024];
-
-        int available = bis.available();
-        while (available > 0) {
-            int length = Math.min(b.length, available);
-
-            int read = bis.read(b, 0, length);
-            bos.write(b, 0, read);
-
-            available = bis.available();
-        }
-
-        bos.flush();
-        bos.close();
-
-        bis.close();
-
-        return temp;
     }
 
 }

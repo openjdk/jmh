@@ -134,25 +134,33 @@ public class CompilerHints extends AbstractResourceReader {
 
     private Set<String> read() {
         Set<String> result = new TreeSet<String>();
+
         try {
             for (Reader r : getReaders()) {
-                BufferedReader reader = new BufferedReader(r);
+                BufferedReader reader = null;
+                try {
+                    reader = new BufferedReader(r);
+                    for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                        if (line.startsWith("#")) {
+                            continue;
+                        }
 
-                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                    if (line.startsWith("#")) {
-                        continue;
+                        if (line.trim().isEmpty()) {
+                            continue;
+                        }
+
+                        result.add(line);
                     }
-
-                    if (line.trim().isEmpty()) {
-                        continue;
+                } finally {
+                    try {
+                        if (reader != null) {
+                            reader.close();
+                        }
+                    } catch (IOException e) {
+                        // ignore
                     }
-
-                    result.add(line);
                 }
-
-                reader.close();
             }
-
         } catch (IOException ex) {
             throw new RuntimeException("Error reading compiler hints", ex);
         }
