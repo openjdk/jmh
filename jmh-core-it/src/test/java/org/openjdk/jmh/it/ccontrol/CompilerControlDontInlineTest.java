@@ -62,11 +62,13 @@ public class CompilerControlDontInlineTest {
                 .build();
         new Runner(opt).run();
 
+        boolean exists = false;
         for (String s : CompilerHints.defaultList().get()) {
             if (s.contains(this.getClass().getName().replace(".", "/"))) {
-                Assert.assertTrue(s, s.startsWith("dontinline"));
+                exists |= s.startsWith("dontinline");
             }
         }
+        Assert.assertTrue(exists);
     }
 
 }

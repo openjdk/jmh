@@ -37,8 +37,8 @@ public class CompilerHints extends AbstractResourceReader {
 
     public static final String LIST = "/META-INF/CompilerHints";
 
-    // Both IcedTea and Zulu JVMs will report OpenJDK in java.vm.name
-    public static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "Oracle" };
+    // All OpenJDK/HotSpot VMs are supported
+    public static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "HotSpot" };
     // Zing is only compatible from post 5.10.*.* releases
     private static final String JVM_ZING = "Zing";
 

@@ -62,11 +62,13 @@ public class CompilerControlExcludeTest {
                 .build();
         new Runner(opt).run();
 
+        boolean exists = false;
         for (String s : CompilerHints.defaultList().get()) {
             if (s.contains(this.getClass().getName().replace(".", "/"))) {
-                Assert.assertTrue(s, s.startsWith("exclude"));
+                exists |= s.startsWith("exclude");
             }
         }
+        Assert.assertTrue(exists);
     }
 
 }
