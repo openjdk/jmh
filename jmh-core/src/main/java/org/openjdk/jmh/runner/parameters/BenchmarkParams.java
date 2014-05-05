@@ -147,7 +147,7 @@ public class BenchmarkParams implements Serializable {
     }
 
     public int[] getThreadGroups() {
-        return threadGroups;
+        return Arrays.copyOf(threadGroups, threadGroups.length);
     }
 
     public int getForks() {

@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * as appropriate. This server assumes there is only the one and only
  * client at any given point of time.
  */
-public class BinaryLinkServer {
+public final class BinaryLinkServer {
 
     private final Options opts;
     private final OutputFormat out;

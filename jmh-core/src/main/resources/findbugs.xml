@@ -391,6 +391,9 @@
   </Match>
   <Match>
     <Bug pattern="NS_NON_SHORT_CIRCUIT"/>
+    <Not>
+        <Class name="~.*BlackHole"/>
+    </Not>
   </Match>
   <Match>
     <Bug pattern="TLW_TWO_LOCK_WAIT"/>
@@ -885,9 +888,9 @@
   <Match>
     <Bug pattern="MF_CLASS_MASKS_FIELD"/>
   </Match>
-  <Match>
-    <Bug pattern="WMI_WRONG_MAP_ITERATOR"/>
-  </Match>
+  <!--<Match>-->
+    <!--<Bug pattern="WMI_WRONG_MAP_ITERATOR"/>-->
+  <!--</Match>-->
   <Match>
     <Bug pattern="ISC_INSTANTIATE_STATIC_CLASS"/>
   </Match>
@@ -899,6 +902,9 @@
   </Match>
   <Match>
     <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    <Not>
+      <Class name="~.*BlackHole" />
+    </Not>
   </Match>
   <Match>
     <Bug pattern="UM_UNNECESSARY_MATH"/>
