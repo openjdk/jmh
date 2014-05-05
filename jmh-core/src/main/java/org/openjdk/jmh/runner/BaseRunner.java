@@ -175,9 +175,6 @@ public abstract class BaseRunner {
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
-            if (method == null) {
-                throw new BenchmarkException("Unable to find method to run for " + benchmark.getUsername());
-            }
 
             BenchmarkParams executionParams = new BenchmarkParams(options, benchmark, mode);
             handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);

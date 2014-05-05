@@ -33,6 +33,7 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,6 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
-        this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
         this.instances = new ThreadLocal<Object>() {
             @Override
             protected Object initialValue() {
@@ -83,6 +83,11 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         };
         this.format = format;
         this.timeUnit = options.getTimeUnit().orElse(null);
+        try {
+            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static List<Profiler> createProfilers(Options options) {
@@ -123,15 +128,11 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
          */
         FJP {
             @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) {
-                try {
-                    // (Aleksey):
-                    // requires some of the reflection magic to untie from JDK 7 compile-time dependencies
-                    Constructor<?> c = Class.forName("java.util.concurrent.ForkJoinPool").getConstructor(int.class);
-                    return (ExecutorService) c.newInstance(maxThreads);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
+            ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
+                // (Aleksey):
+                // requires some of the reflection magic to untie from JDK 7 compile-time dependencies
+                Constructor<?> c = Class.forName("java.util.concurrent.ForkJoinPool").getConstructor(int.class);
+                return (ExecutorService) c.newInstance(maxThreads);
             }
         },
 
@@ -140,15 +141,11 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
          */
         FJP_COMMON {
             @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) {
-                try {
-                    // (Aleksey):
-                    // requires some of the reflection magic to untie from JDK 8 compile-time dependencies
-                    Method m = Class.forName("java.util.concurrent.ForkJoinPool").getMethod("commonPool");
-                    return (ExecutorService) m.invoke(null);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
+            ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
+                // (Aleksey):
+                // requires some of the reflection magic to untie from JDK 8 compile-time dependencies
+                Method m = Class.forName("java.util.concurrent.ForkJoinPool").getMethod("commonPool");
+                return (ExecutorService) m.invoke(null);
             }
 
             @Override
@@ -161,20 +158,16 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
         CUSTOM {
             @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) {
-                try {
-                    String className = System.getProperty("harness.executor.class");
-                    return (ExecutorService) Class.forName(className).getConstructor(int.class, String.class)
-                            .newInstance(maxThreads, prefix);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
+            ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
+                String className = System.getProperty("harness.executor.class");
+                return (ExecutorService) Class.forName(className).getConstructor(int.class, String.class)
+                        .newInstance(maxThreads, prefix);
             }
         },
 
         ;
 
-        abstract ExecutorService createExecutor(int maxThreads, String prefix);
+        abstract ExecutorService createExecutor(int maxThreads, String prefix) throws Exception;
 
         boolean shutdownForbidden() {
             return false;

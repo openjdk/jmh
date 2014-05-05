@@ -38,9 +38,9 @@ public class CompilerHints extends AbstractResourceReader {
     public static final String LIST = "/META-INF/CompilerHints";
 
     // All OpenJDK/HotSpot VMs are supported
-    public static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "HotSpot" };
+    static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "HotSpot" };
     // Zing is only compatible from post 5.10.*.* releases
-    private static final String JVM_ZING = "Zing";
+    static final String JVM_ZING = "Zing";
 
     private static volatile CompilerHints defaultList;
     private static volatile String hintsFile;
