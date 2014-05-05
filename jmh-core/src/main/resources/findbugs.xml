@@ -50,6 +50,9 @@
   </Match>
   <Match>
     <Bug pattern="VO_VOLATILE_REFERENCE_TO_ARRAY"/>
+    <Not>
+      <Class name="~.*BlackHole.*" />
+    </Not>
   </Match>
   <Match>
     <Bug pattern="UI_INHERITANCE_UNSAFE_GETRESOURCE"/>
@@ -131,12 +134,9 @@
   </Match>
   <Match>
     <Bug pattern="DE_MIGHT_IGNORE"/>
-  </Match>
-  <Match>
-    <Bug pattern="DP_DO_INSIDE_DO_PRIVILEGED"/>
-  </Match>
-  <Match>
-    <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
+    <Not>
+       <Class name="~.*LoopMicroBenchmarkHandler.*BenchmarkTask" />
+    </Not>
   </Match>
   <Match>
     <Bug pattern="JCIP_FIELD_ISNT_FINAL_IN_IMMUTABLE_CLASS"/>
@@ -203,6 +203,9 @@
   </Match>
   <Match>
     <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED"/>
+    <Not>
+      <Class name="~.*CommandLineOptions" />
+    </Not>
   </Match>
   <Match>
     <Bug pattern="SE_METHOD_MUST_BE_PRIVATE"/>
