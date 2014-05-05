@@ -31,6 +31,7 @@ import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -244,7 +245,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     }
 
     public int[] getThreadGroups() {
-        return threadGroups;
+        return Arrays.copyOf(threadGroups, threadGroups.length);
     }
 
     @Override

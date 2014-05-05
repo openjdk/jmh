@@ -166,7 +166,6 @@ public abstract class BaseRunner {
         nanos -= mins * TimeUnit.MINUTES.toNanos(1);
 
         long secs = TimeUnit.NANOSECONDS.toSeconds(nanos);
-        nanos -= secs * TimeUnit.SECONDS.toNanos(1);
 
         return String.format("%s%02d:%02d:%02d", (days > 0) ? days + "days, " : "", hrs, mins, secs);
     }

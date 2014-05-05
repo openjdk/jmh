@@ -157,9 +157,9 @@ public class BenchmarkGenerator {
                             group.getMeasurementBatchSize(),
                             group.getForks(),
                             group.getWarmupForks(),
-                            group.getJVMArgs(),
-                            group.getJVMArgsPrepend(),
-                            group.getJVMArgsAppend(),
+                            group.getJvmArgs(),
+                            group.getJvmArgsPrepend(),
+                            group.getJvmArgsAppend(),
                             group.getParams()
                     );
                     writer.println(br.toLine());

@@ -37,4 +37,21 @@ public class MethodInvocation implements Comparable<MethodInvocation> {
     public int compareTo(MethodInvocation o) {
         return method.compareTo(o.method);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MethodInvocation that = (MethodInvocation) o;
+
+        if (!method.equals(that.method)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return method.hashCode();
+    }
 }

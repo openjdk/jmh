@@ -214,7 +214,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
-    public Optional<Collection<String>> getJVMArgs() {
+    public Optional<Collection<String>> getJvmArgs() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !(ann.jvmArgs().length == 1 && ann.jvmArgs()[0].equals(Fork.BLANK_ARGS))) {
             return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgs()));
@@ -222,7 +222,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
-    public Optional<Collection<String>> getJVMArgsAppend() {
+    public Optional<Collection<String>> getJvmArgsAppend() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !(ann.jvmArgsAppend().length == 1 && ann.jvmArgsAppend()[0].equals(Fork.BLANK_ARGS))) {
             return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsAppend()));
@@ -230,7 +230,7 @@ public class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
-    public Optional<Collection<String>> getJVMArgsPrepend() {
+    public Optional<Collection<String>> getJvmArgsPrepend() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !(ann.jvmArgsPrepend().length == 1 && ann.jvmArgsPrepend()[0].equals(Fork.BLANK_ARGS))) {
             return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsPrepend()));

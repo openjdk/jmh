@@ -154,6 +154,7 @@ public class SampleTimeResult extends Result {
                 tu = r.outputTimeUnit;
                 label = r.label;
                 buffer.addAll(r.buffer);
+                mode = r.role;
             }
 
             return new SampleTimeResult(mode, label, buffer, tu);
