@@ -48,7 +48,7 @@ public class FileSystemDestination implements GeneratorDestination {
     public Writer newResource(String resourcePath) throws IOException {
         String pathName = resourceDir.getAbsolutePath() + "/" + resourcePath;
         File p = new File(pathName.substring(0, pathName.lastIndexOf("/")));
-        if (!p.mkdirs()) {
+        if (!p.mkdirs() && !p.isDirectory()) {
             throw new IOException("Unable to create " + p.getAbsolutePath());
         }
         return new FileWriter(new File(pathName));
@@ -58,7 +58,7 @@ public class FileSystemDestination implements GeneratorDestination {
     public Writer newClass(String className) throws IOException {
         String pathName = sourceDir.getAbsolutePath() + "/" + className.replaceAll("\\.", "/");
         File p = new File(pathName.substring(0, pathName.lastIndexOf("/")));
-        if (!p.mkdirs()) {
+        if (!p.mkdirs() && !p.isDirectory()) {
             throw new IOException("Unable to create " + p.getAbsolutePath());
         }
         return new FileWriter(new File(pathName + ".java"));
