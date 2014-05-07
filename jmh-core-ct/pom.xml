@@ -100,7 +100,7 @@ questions.
                         <phase>process-sources</phase>
                         <configuration>
                             <header>file:///${project.basedir}/../src/license/gpl_cpe/header.txt</header>
-                            <skipExistingHeaders>false</skipExistingHeaders>
+                            <skipExistingHeaders>true</skipExistingHeaders>
                             <strictCheck>true</strictCheck>
                             <mapping>
                                 <java>PHP</java>
