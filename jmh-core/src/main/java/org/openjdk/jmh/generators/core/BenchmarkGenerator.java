@@ -289,6 +289,32 @@ public class BenchmarkGenerator {
             }
         }
 
+        // validate rogue annotations on classes
+        BenchmarkGeneratorUtils.checkAnnotations(clazz);
+        for (ClassInfo state : states) {
+            BenchmarkGeneratorUtils.checkAnnotations(state);
+        }
+
+        // validate rogue annotations on fields
+        for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
+            BenchmarkGeneratorUtils.checkAnnotations(fi);
+        }
+        for (ClassInfo state : states) {
+            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
+                BenchmarkGeneratorUtils.checkAnnotations(fi);
+            }
+        }
+
+        // validate rogue annotations on methods
+        for (MethodInfo mi : methods) {
+            BenchmarkGeneratorUtils.checkAnnotations(mi);
+        }
+        for (ClassInfo state : states) {
+            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(state)) {
+                BenchmarkGeneratorUtils.checkAnnotations(mi);
+            }
+        }
+
         // check modifiers
         for (MethodInfo m : methods) {
             if (!m.isPublic()) {
