@@ -32,6 +32,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.util.Random;
 
 /*
     See the rationale for BlackHoleL1..BlackHoleL4 classes below.
@@ -61,19 +62,61 @@ abstract class BlackHoleL1 extends BlackHoleL0 {
 }
 
 abstract class BlackHoleL2 extends BlackHoleL1 {
-    public volatile byte b1 = 1, b2 = 2;
-    public volatile boolean bool1 = false, bool2 = true;
-    public volatile char c1 = 'A', c2 = 'B';
-    public volatile short s1 = 1, s2 = 2;
-    public volatile int i1 = 1, i2 = 2;
-    public volatile long l1 = 1, l2 = 2;
-    public volatile float f1 = 1.0f, f2 = 2.0f;
-    public volatile double d1 = 1.0d, d2 = 2.0d;
-    public volatile Object obj1 = new Object();
-    public volatile Object[] objs1 = new Object[]{new Object()};
+    public volatile byte b1, b2;
+    public volatile boolean bool1, bool2;
+    public volatile char c1, c2;
+    public volatile short s1, s2;
+    public volatile int i1, i2;
+    public volatile long l1, l2;
+    public volatile float f1, f2;
+    public volatile double d1, d2;
+    public volatile Object obj1;
+    public volatile Object[] objs1;
     public volatile BlackHoleL2 nullBait = null;
-    public int tlr = (int) System.nanoTime();
-    public int tlrMask = 1;
+    public int tlr;
+    public int tlrMask;
+
+    public BlackHoleL2() {
+        Random r = new Random(System.nanoTime());
+        tlr = r.nextInt();
+        tlrMask = 1;
+        obj1 = new Object();
+        objs1 = new Object[]{new Object()};
+
+        b1 = (byte) r.nextInt(); b2 = (byte) (b1 + 1);
+        bool1 = r.nextBoolean(); bool2 = !bool1;
+        c1 = (char) r.nextInt(); c2 = (char) (c1 + 1);
+        s1 = (short) r.nextInt(); s2 = (short) (s1 + 1);
+        i1 = r.nextInt(); i2 = i1 + 1;
+        l1 = r.nextLong(); l2 = l1 + 1;
+        f1 = r.nextFloat(); f2 = f1 + Math.ulp(f1);
+        d1 = r.nextDouble(); d2 = d1 + Math.ulp(d1);
+
+        if (b1 == b2) {
+            throw new IllegalStateException("byte tombstones are equal");
+        }
+        if (bool1 == bool2) {
+            throw new IllegalStateException("boolean tombstones are equal");
+        }
+        if (c1 == c2) {
+            throw new IllegalStateException("char tombstones are equal");
+        }
+        if (s1 == s2) {
+            throw new IllegalStateException("short tombstones are equal");
+        }
+        if (i1 == i2) {
+            throw new IllegalStateException("int tombstones are equal");
+        }
+        if (l1 == l2) {
+            throw new IllegalStateException("long tombstones are equal");
+        }
+        if (f1 == f2) {
+            throw new IllegalStateException("float tombstones are equal");
+        }
+        if (d1 == d2) {
+            throw new IllegalStateException("double tombstones are equal");
+        }
+    }
 }
 
 abstract class BlackHoleL3 extends BlackHoleL2 {
