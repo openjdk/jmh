@@ -43,6 +43,12 @@ public class APMethodInfo extends APMetadataInfo implements MethodInfo {
 
     public APMethodInfo(ProcessingEnvironment processEnv, ClassInfo ci, ExecutableElement el) {
         super(processEnv, el);
+        if (ci == null) {
+            throw new IllegalArgumentException("ci is null");
+        }
+        if (el == null) {
+            throw new IllegalArgumentException("el is null");
+        }
         this.ci = ci;
         this.el = el;
     }

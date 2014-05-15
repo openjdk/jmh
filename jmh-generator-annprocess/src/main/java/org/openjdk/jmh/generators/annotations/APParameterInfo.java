@@ -28,22 +28,22 @@ import org.openjdk.jmh.generators.core.ClassInfo;
 import org.openjdk.jmh.generators.core.ParameterInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 public class APParameterInfo extends APMetadataInfo implements ParameterInfo {
     private final VariableElement ve;
-    private final TypeElement stateType;
 
     public APParameterInfo(ProcessingEnvironment processEnv, VariableElement ve) {
         super(processEnv, ve);
+        if (ve == null) {
+            throw new IllegalArgumentException("element is null");
+        }
         this.ve = ve;
-        this.stateType = (TypeElement) processEnv.getTypeUtils().asElement(ve.asType());
     }
 
     @Override
     public ClassInfo getType() {
-        return new APClassInfo(processEnv, stateType);
+        return new APClassInfo(processEnv, ve.asType());
     }
 
     public String toString() {

@@ -39,6 +39,9 @@ public class APFieldInfo extends APMetadataInfo implements FieldInfo {
 
     public APFieldInfo(ProcessingEnvironment processEnv, VariableElement ve) {
         super(processEnv, ve);
+        if (ve == null) {
+            throw new IllegalArgumentException("element is null");
+        }
         this.ve = ve;
     }
 
