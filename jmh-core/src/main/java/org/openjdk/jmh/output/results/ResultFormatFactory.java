@@ -75,6 +75,8 @@ public class ResultFormatFactory {
         switch (type) {
             case NONE:
                 throw new IllegalStateException(ResultFormatType.NONE + " should be handled already");
+            case TEXT:
+                return new TextResultFormat(writer);
             case CSV:
                 /*
                  * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180

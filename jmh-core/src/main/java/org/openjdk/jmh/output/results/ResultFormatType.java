@@ -27,6 +27,7 @@ package org.openjdk.jmh.output.results;
 public enum ResultFormatType {
 
     NONE,
+    TEXT,
     CSV,
     SCSV,
     JSON,

@@ -29,6 +29,7 @@ import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.output.results.TextResultFormat;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
@@ -38,6 +39,7 @@ import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -175,81 +177,10 @@ public class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void endRun(Map<BenchmarkRecord, RunResult> runResults) {
-        Collection<String> benchNames = new ArrayList<String>();
-        for (BenchmarkRecord key : runResults.keySet()) {
-            RunResult runResult = runResults.get(key);
-            benchNames.add(key.getUsername());
-            for (String label : runResult.getSecondaryResults().keySet()) {
-                benchNames.add(key.getUsername() + ":" + label);
-            }
-        }
-
-        Map<String, String> benchPrefixes = ClassUtils.denseClassNames(benchNames);
-
-        // determine max name
-        int nameLen = 1;
-        for (String prefix : benchPrefixes.values()) {
-            nameLen = Math.max(nameLen, prefix.length());
-        }
-        nameLen += 2;
-
-        Map<String, Integer> paramLengths = new HashMap<String, Integer>();
-        SortedSet<String> params = new TreeSet<String>();
-        for (BenchmarkRecord br : runResults.keySet()) {
-            for (String k : br.getActualParams().keys()) {
-                params.add(k);
-                Integer len = paramLengths.get(k);
-                if (len == null) {
-                    len = ("(" + k + ")").length();
-                }
-                paramLengths.put(k, Math.max(len, br.getActualParam(k).length()));
-            }
-        }
-
-        out.printf("%-" + nameLen + "s ", "Benchmark");
-        for (String k : params) {
-            out.printf("%" + paramLengths.get(k) + "s ", "(" + k + ")");
-        }
-
-        out.printf("%6s %9s %12s %12s %8s%n",
-                    "Mode", "Samples", "Mean", "Mean error", "Units");
-        for (BenchmarkRecord key : runResults.keySet()) {
-            RunResult res = runResults.get(key);
-            {
-                Statistics stats = res.getPrimaryResult().getStatistics();
-                out.printf("%-" + nameLen + "s ",
-                        benchPrefixes.get(key.getUsername()));
-
-                for (String k : params) {
-                    String v = key.getActualParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v);
-                }
-
-                out.printf("%6s %9d %12.3f %12.3f %8s%n",
-                        key.getMode().shortLabel(),
-                        stats.getN(),
-                        stats.getMean(), stats.getMeanErrorAt(0.999),
-                        res.getScoreUnit());
-            }
-
-            for (String label : res.getSecondaryResults().keySet()) {
-                Statistics stats = res.getSecondaryResults().get(label).getStatistics();
-
-                out.printf("%-" + nameLen + "s ",
-                        benchPrefixes.get(key.getUsername() + ":" + label));
-
-                for (String k : params) {
-                    String v = key.getActualParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v);
-                }
-
-                out.printf("%6s %9d %12.3f %12.3f %8s%n",
-                        key.getMode().shortLabel(),
-                        stats.getN(),
-                        stats.getMean(), stats.getMeanErrorAt(0.999),
-                        res.getScoreUnit());
-            }
-        }
+        PrintWriter pw = new PrintWriter(out);
+        new TextResultFormat(pw).writeOut(runResults);
+        pw.flush();
+        pw.close();
     }
 
 }
