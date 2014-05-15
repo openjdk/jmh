@@ -1015,6 +1015,7 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
             writer.println(ident(2) + "int batchSize = control.batchSize;");
             writer.println(ident(2) + "for (int b = 0; b < batchSize; b++) {");
+            writer.println(ident(3) + "if (control.volatileSpoiler) return;");
 
             invocationProlog(writer, 3, method, states, true);
 

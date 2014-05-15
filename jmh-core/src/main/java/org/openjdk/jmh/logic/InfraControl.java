@@ -159,6 +159,8 @@ abstract class InfraControlL2 extends InfraControlL1 {
      */
     public volatile boolean isDone;
 
+    public volatile boolean volatileSpoiler;
+
     /** How long we should loop */
     public final long duration;
 
