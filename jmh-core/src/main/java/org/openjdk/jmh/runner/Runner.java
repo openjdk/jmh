@@ -338,6 +338,8 @@ public class Runner extends BaseRunner {
                 }
             }
 
+            afterBenchmarks();
+
             SortedMap<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
             out.endRun(runResults);
             return runResults;

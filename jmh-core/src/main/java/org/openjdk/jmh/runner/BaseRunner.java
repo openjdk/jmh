@@ -155,6 +155,11 @@ public abstract class BaseRunner {
         out.println(String.format("# Run progress: %.2f%% complete, ETA %s", partsDone * 100, formatDuration(totalETA)));
     }
 
+    protected void afterBenchmarks() {
+        out.println(String.format("# Run complete. Total time: %s", formatDuration(actualRunningTime)));
+        out.println("");
+    }
+
     private String formatDuration(long nanos) {
         long days = TimeUnit.NANOSECONDS.toDays(nanos);
         nanos -= days * TimeUnit.DAYS.toNanos(1);
