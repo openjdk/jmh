@@ -32,6 +32,8 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 
 public class APGeneratorDestinaton implements GeneratorDestination {
@@ -66,7 +68,12 @@ public class APGeneratorDestinaton implements GeneratorDestination {
 
     @Override
     public void printError(String message, Throwable throwable) {
-        printError(message + " " + throwable);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+        pw.flush();
+        pw.close();
+        printError(message + " " + sw.toString());
     }
 
 }

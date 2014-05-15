@@ -60,6 +60,20 @@ public class CompileTest {
         }
     }
 
+    public static void assertFail(Class<?> klass, String error) {
+        TestGeneratorDestination destination = doTest(klass);
+        if (!destination.hasErrors()) {
+            Assert.fail("Should have failed.");
+        }
+
+        boolean contains = false;
+        for (String e : destination.getErrors()) {
+            System.err.println(e);
+            contains |= e.contains(error);
+        }
+        Assert.assertTrue("Failure message should contain \"" + error + "\"", contains);
+    }
+
     public static void assertOK(Class<?> klass) {
         TestGeneratorDestination destination = doTest(klass);
 
