@@ -61,6 +61,11 @@ public class SingleShotResult extends Result {
     @Override
     public double getScore() {
         return (duration / (double) outputTimeUnit.toNanos(1)) ;
+
+    }
+    @Override
+    public String extendedInfo(String label) {
+        return simpleExtendedInfo(label) + percentileExtendedInfo(label);
     }
 
     @Override
