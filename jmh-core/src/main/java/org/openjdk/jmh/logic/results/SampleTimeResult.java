@@ -103,38 +103,7 @@ public class SampleTimeResult extends Result {
 
     @Override
     public String extendedInfo(String label) {
-        Statistics stats = getStatistics();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Run result ").append((label == null) ? "" : "\"" + label + "\"").append(": \n");
-        sb.append("    samples = ").append(stats.getN()).append("\n");
-
-        if (stats.getN() > 2) {
-            double[] interval = stats.getConfidenceIntervalAt(0.999);
-            sb.append(String.format("        mean = %10.3f \u00B1(99.9%%) %.3f",
-                    stats.getMean(),
-                    (interval[1] - interval[0]) / 2
-            ));
-        } else {
-            sb.append(String.format("        mean = %10.3f (<= 2 iterations)",
-                    stats.getMean()
-            ));
-        }
-        sb.append(" ").append(getScoreUnit()).append("\n");
-
-        sb.append(String.format("         min = %10.3f %s\n", stats.getMin(), getScoreUnit()));
-
-        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
-            sb.append(String.format("  %9s = %10.3f %s\n",
-                    "p(" + String.format("%7.4f", p*100) + ")",
-                    stats.getPercentile(p*100),
-                    getScoreUnit()
-            ));
-        }
-
-        sb.append(String.format("         max = %10.3f %s\n", stats.getMax(), getScoreUnit()));
-
-        return sb.toString();
+        return simpleExtendedInfo(label) + percentileExtendedInfo(label);
     }
 
     /**

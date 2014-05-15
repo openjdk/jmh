@@ -87,27 +87,64 @@ public abstract class Result<T extends Result<T>> implements Serializable {
     }
 
     public String extendedInfo(String label) {
+        return simpleExtendedInfo(label);
+    }
+
+    protected String simpleExtendedInfo(String label) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
-        if (statistics.getN() > 2) {
-            double[] interval = statistics.getConfidenceIntervalAt(0.999);
-            pw.println(String.format("Result %s: %.3f \u00B1(99.9%%) %.3f %s",
-                    (label == null) ? "" : "\"" + label + "\"",
-                    statistics.getMean(), (interval[1] - interval[0]) / 2,
+        Statistics stats = getStatistics();
+        if (stats.getN() > 2) {
+            double[] interval = stats.getConfidenceIntervalAt(0.999);
+            pw.println(String.format("Result%s: %.3f \u00B1(99.9%%) %.3f %s",
+                    (label == null) ? "" : " \"" + label + "\"",
+                    stats.getMean(), (interval[1] - interval[0]) / 2,
                     getScoreUnit()));
             pw.println(String.format("  Statistics: (min, avg, max) = (%.3f, %.3f, %.3f), stdev = %.3f%n" +
                     "  Confidence interval (99.9%%): [%.3f, %.3f]",
-                    statistics.getMin(), statistics.getMean(), statistics.getMax(), statistics.getStandardDeviation(),
+                    stats.getMin(), stats.getMean(), stats.getMax(), stats.getStandardDeviation(),
                     interval[0], interval[1]));
         } else {
-            pw.println(String.format("Run result: %.2f (<= 2 iterations)", statistics.getMean()));
+            pw.println(String.format("Run result: %.2f (<= 2 iterations)", stats.getMean()));
         }
         pw.close();
         return sw.toString();
     }
 
+    protected String percentileExtendedInfo(String label) {
+        Statistics stats = getStatistics();
 
+        StringBuilder sb = new StringBuilder();
+        sb.append("  Samples, N = ").append(stats.getN()).append("\n");
+
+        if (stats.getN() > 2) {
+            double[] interval = stats.getConfidenceIntervalAt(0.999);
+            sb.append(String.format("        mean = %10.3f \u00B1(99.9%%) %.3f",
+                    stats.getMean(),
+                    (interval[1] - interval[0]) / 2
+            ));
+        } else {
+            sb.append(String.format("        mean = %10.3f (<= 2 iterations)",
+                    stats.getMean()
+            ));
+        }
+        sb.append(" ").append(getScoreUnit()).append("\n");
+
+        sb.append(String.format("         min = %10.3f %s\n", stats.getMin(), getScoreUnit()));
+
+        for (double p : new double[] {0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
+            sb.append(String.format("  %9s = %10.3f %s\n",
+                    "p(" + String.format("%7.4f", p*100) + ")",
+                    stats.getPercentile(p*100),
+                    getScoreUnit()
+            ));
+        }
+
+        sb.append(String.format("         max = %10.3f %s\n", stats.getMax(), getScoreUnit()));
+
+        return sb.toString();
+    }
 
     public String getLabel() {
         return label;
