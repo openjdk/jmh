@@ -323,6 +323,12 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 .orElse(getWarmupTime()
                         .orElse(Defaults.WARMUP_TIME));
 
+        if (opts.getBenchModes().contains(Mode.SingleShotTime)) {
+            // No way to tell how long it will execute,
+            // guess anything, and let ETA compensation to catch up.
+            return (wi + mi) * TimeUnit.MILLISECONDS.toNanos(1);
+        }
+
         return (wi * wt.getTime(TimeUnit.NANOSECONDS) + mi * mt.getTime(TimeUnit.NANOSECONDS));
     }
 
