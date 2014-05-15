@@ -964,8 +964,6 @@ public class BenchmarkGenerator {
 
         methodProlog(writer, methodGroup);
 
-        writer.println(ident(2) + "long realTime = 0;");
-
         boolean isSingleMethod = (methodGroup.methods().size() == 1);
         int subGroup = -1;
         for (MethodInfo method : methodGroup.methods()) {
@@ -979,12 +977,9 @@ public class BenchmarkGenerator {
 
             invocationProlog(writer, 3, method, states, false);
 
-            writer.println(ident(3) + "long time1 = System.nanoTime();");
-            writer.println(ident(3) + "int batchSize = control.batchSize;");
-            writer.println(ident(3) + "for (int b = 0; b < batchSize; b++) {");
-            writer.println(ident(4) + emitCall(method, states) + ';');
-            writer.println(ident(3) + "}");
-            writer.println(ident(3) + "long time2 = System.nanoTime();");
+            // measurement loop call
+            writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementStub(control, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
 
@@ -994,15 +989,45 @@ public class BenchmarkGenerator {
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
             writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
-            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", (realTime > 0) ? realTime : (time2 - time1), tu));");
+            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), tu));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", (realTime > 0) ? realTime : (time2 - time1), tu));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), tu));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
         writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
         writer.println(ident(1) + "}");
+
+        writer.println();
+
+        // measurement stub bodies
+        for (MethodInfo method : methodGroup.methods()) {
+            compilerControl.defaultForceInline(method);
+
+            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
+                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
+                    "." + CompilerControl.Mode.DONT_INLINE + ")");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementStub" +
+                    "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+
+            writer.println(ident(2) + "long realTime = 0;");
+            writer.println(ident(2) + "result.startTime = System.nanoTime();");
+            writer.println(ident(2) + "int batchSize = control.batchSize;");
+            writer.println(ident(2) + "for (int b = 0; b < batchSize; b++) {");
+
+            invocationProlog(writer, 3, method, states, true);
+
+            writer.println(ident(3) + emitCall(method, states) + ';');
+
+            invocationEpilog(writer, 3, method, states, true);
+
+            writer.println(ident(2) + "}");
+            writer.println(ident(2) + "result.stopTime = System.nanoTime();");
+            writer.println(ident(2) + "result.realTime = realTime;");
+            writer.println(ident(1) + "}");
+            writer.println();
+        }
     }
 
     private void invocationProlog(PrintWriter writer, int prefix, MethodInfo method, StateObjectHandler states, boolean pauseMeasurement) {
