@@ -643,7 +643,8 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
+            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
+            writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
 
@@ -753,7 +754,8 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
+            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
+            writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
@@ -978,7 +980,8 @@ public class BenchmarkGenerator {
             invocationProlog(writer, 3, method, states, false);
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(" + methodGroup.getOperationsPerInvocation() + "L);");
+            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
+            writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementStub(control, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);

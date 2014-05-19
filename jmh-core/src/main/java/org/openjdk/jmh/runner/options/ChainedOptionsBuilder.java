@@ -209,6 +209,14 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder timeUnit(TimeUnit tu);
 
     /**
+     * Operations per invocation.
+     * @param value operations per invocation.
+     * @return builder
+     * @see org.openjdk.jmh.annotations.OperationsPerInvocation
+     */
+    ChainedOptionsBuilder operationsPerInvocation(long value);
+
+    /**
      * Number of forks to use in the run
      * @param value number of forks
      * @return builder

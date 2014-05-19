@@ -170,6 +170,13 @@ public interface Options extends Serializable {
     Optional<TimeUnit> getTimeUnit();
 
     /**
+     * Operations per invocation.
+     * @return operations per invocation.
+     * @see org.openjdk.jmh.annotations.OperationsPerInvocation
+     */
+    Optional<Long> getOperationsPerInvocation();
+
+    /**
      * Fork count
      * @return fork count; 0, to prohibit forking
      */

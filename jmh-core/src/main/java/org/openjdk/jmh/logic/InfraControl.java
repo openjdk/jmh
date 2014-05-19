@@ -81,8 +81,8 @@ public class InfraControl extends InfraControlL4 {
         }
     }
 
-    public InfraControl(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, ActualParams params) {
-        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, params);
+    public InfraControl(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, Long opsPerInv, ActualParams params) {
+        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, opsPerInv, params);
     }
 
     /**
@@ -168,6 +168,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
     public final CountDownLatch preTearDown;
     public final boolean lastIteration;
     public final TimeUnit timeUnit;
+    public final Long opsPerInv;
     public final int threads;
     public final boolean syncIterations;
 
@@ -177,9 +178,10 @@ abstract class InfraControlL2 extends InfraControlL1 {
     public final int batchSize;
     private final ActualParams params;
 
-    public InfraControlL2(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, ActualParams params) {
+    public InfraControlL2(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, Long opsPerInv, ActualParams params) {
         this.threads = threads;
         this.syncIterations = syncIterations;
+        this.opsPerInv = opsPerInv;
         this.warmupVisited = new AtomicInteger();
         this.warmdownVisited = new AtomicInteger();
 
@@ -245,16 +247,16 @@ abstract class InfraControlL3 extends InfraControlL2 {
     private boolean q161, q162, q163, q164, q165, q166, q167, q168;
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 
-    public InfraControlL3(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, ActualParams params) {
-        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, params);
+    public InfraControlL3(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, Long opsPerInv, ActualParams params) {
+        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, opsPerInv, params);
     }
 }
 
 abstract class InfraControlL4 extends InfraControlL3 {
     public int markerEnd;
 
-    public InfraControlL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, ActualParams params) {
-        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, params);
+    public InfraControlL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, Long opsPerInv, ActualParams params) {
+        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, opsPerInv, params);
     }
 }
 

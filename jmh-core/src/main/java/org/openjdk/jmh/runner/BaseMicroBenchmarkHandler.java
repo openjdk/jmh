@@ -62,6 +62,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
     protected final OutputFormat format;
     protected final TimeUnit timeUnit;
+    protected final Long opsPerInvocation;
 
     private final List<Profiler> registeredProfilers;
 
@@ -82,6 +83,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         };
         this.format = format;
         this.timeUnit = options.getTimeUnit().orElse(null);
+        this.opsPerInvocation = options.getOperationsPerInvocation().orElse(null);
         try {
             this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
         } catch (Exception e) {

@@ -485,6 +485,25 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
+    private Optional<Long> opsPerInvocation = Optional.none();
+
+    @Override
+    public ChainedOptionsBuilder operationsPerInvocation(long opsPerInv) {
+        this.opsPerInvocation = Optional.of(opsPerInv);
+        return this;
+    }
+
+    @Override
+    public Optional<Long> getOperationsPerInvocation() {
+        if (otherOptions != null) {
+            return opsPerInvocation.orAnother(otherOptions.getOperationsPerInvocation());
+        } else {
+            return opsPerInvocation;
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+
     private Optional<Integer> forks = Optional.none();
 
     @Override

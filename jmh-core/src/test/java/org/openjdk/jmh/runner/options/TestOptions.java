@@ -388,6 +388,18 @@ public class TestOptions {
     }
 
     @Test
+    public void testOPI() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-opi", "42");
+        Options builder = new OptionsBuilder().operationsPerInvocation(42).build();
+        Assert.assertEquals(builder.getTimeUnit(), cmdLine.getTimeUnit());
+    }
+
+    @Test
+    public void testOPI_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getOperationsPerInvocation(), EMPTY_CMDLINE.getOperationsPerInvocation());
+    }
+
+    @Test
     public void testFork() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-f");
         Options builder = new OptionsBuilder().forks(1).build();
