@@ -24,7 +24,14 @@
  */
 package org.openjdk.jmh.util;
 
+import org.openjdk.jmh.output.format.OutputFormat;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Utils {
 
@@ -68,4 +75,60 @@ public class Utils {
             return ((v / quant) + 1)*quant;
         }
     }
+
+    static int cpuCount;
+
+    /**
+     * Warm up the CPU schedulers, bring all the CPUs online to get the
+     * reasonable estimate of the system capacity. Some systems, notably embedded Linuxes,
+     * power down the idle CPUs and so availableProcessors() may report lower CPU count
+     * than would be present after the load-up.
+     *
+     * @return max CPU count
+     */
+    public static int figureOutHotCPUs(OutputFormat out) {
+        // Cache for a particular JVM instance
+        if (cpuCount != 0) {
+            return cpuCount;
+        }
+
+        ExecutorService service = Executors.newCachedThreadPool();
+
+        out.print("# Actual CPU count: ");
+
+        int warmupTime = 1000;
+        long lastChange = System.currentTimeMillis();
+
+        List<Future<?>> futures = new ArrayList<Future<?>>();
+        futures.add(service.submit(new BurningTask()));
+
+        int max = 0;
+        while (System.currentTimeMillis() - lastChange < warmupTime) {
+            int cur = Runtime.getRuntime().availableProcessors();
+            if (cur > max) {
+                max = cur;
+                lastChange = System.currentTimeMillis();
+                futures.add(service.submit(new BurningTask()));
+            }
+        }
+
+        for (Future<?> f : futures) {
+            f.cancel(true);
+        }
+
+        service.shutdown();
+
+        out.println(max + " CPUs detected");
+
+        cpuCount = max;
+        return max;
+    }
+
+    static class BurningTask implements Runnable {
+        @Override
+        public void run() {
+            while (!Thread.interrupted()); // burn;
+        }
+    }
+
 }

@@ -243,7 +243,7 @@ public class Runner extends BaseRunner {
 
         List<ActionPlan> result = new ArrayList<ActionPlan>();
         for (BenchmarkRecord br : benchmarks) {
-            BenchmarkParams params = new BenchmarkParams(options, br, ActionMode.UNDEF);
+            BenchmarkParams params = new BenchmarkParams(out, options, br, ActionMode.UNDEF);
 
             if (params.getForks() <= 0) {
                 if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
@@ -379,7 +379,7 @@ public class Runner extends BaseRunner {
 
             String jvm = options.getJvm().orElse(getDefaultJvm());
 
-            BenchmarkParams params = new BenchmarkParams(options, benchmark, ActionMode.UNDEF);
+            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, ActionMode.UNDEF);
 
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();

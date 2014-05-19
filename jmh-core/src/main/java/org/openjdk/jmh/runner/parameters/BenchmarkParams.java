@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner.parameters;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.ActionMode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
@@ -57,7 +58,7 @@ public class BenchmarkParams implements Serializable {
         this.measurement = new IterationParams(this, measureIters, measureTime, measureBatchSize);
     }
 
-    public BenchmarkParams(Options options, BenchmarkRecord benchmark, ActionMode mode) {
+    public BenchmarkParams(OutputFormat out, Options options, BenchmarkRecord benchmark, ActionMode mode) {
         this.threadGroups = options.getThreadGroups().orElse(benchmark.getThreadGroups());
 
         int threads = options.getThreads().orElse(
@@ -65,7 +66,7 @@ public class BenchmarkParams implements Serializable {
                         Defaults.THREADS));
 
         if (threads == Threads.MAX) {
-            threads = Runtime.getRuntime().availableProcessors();
+            threads = Utils.figureOutHotCPUs(out);
         }
 
         this.threads = Utils.roundUp(threads, Utils.sum(threadGroups));
