@@ -52,7 +52,7 @@ public enum Mode {
     AverageTime("avgt", "Average time, time/op"),
 
     /**
-     * Sample time: samples the time for each operation.</p>
+     * <p>Sample time: samples the time for each operation.</p>
      *
      * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
      * and randomly samples the time needed for the call. This mode automatically adjusts the sampling
