@@ -94,12 +94,15 @@ public interface Options extends Serializable {
     /**
      * Number of threads to run
      * @return number of threads; 0 to use maximum number of threads
+     * @see org.openjdk.jmh.annotations.Threads
      */
     Optional<Integer> getThreads();
 
     /**
      * Thread subgroups distribution.
      * @return array of thread ratios
+     * @see org.openjdk.jmh.annotations.Group
+     * @see org.openjdk.jmh.annotations.GroupThreads
      */
     Optional<int[]> getThreadGroups();
 
@@ -112,24 +115,28 @@ public interface Options extends Serializable {
     /**
      * Number of warmup iterations
      * @return number of warmup iterations
+     * @see org.openjdk.jmh.annotations.Warmup
      */
     Optional<Integer> getWarmupIterations();
 
     /**
      * The duration for warmup iterations
      * @return duration
+     * @see org.openjdk.jmh.annotations.Warmup
      */
     Optional<TimeValue> getWarmupTime();
 
     /**
      * Number of batch size for warmup
      * @return number of batch size for warmup
+     * @see org.openjdk.jmh.annotations.Warmup
      */
     Optional<Integer> getWarmupBatchSize();
 
     /**
      * Warmup mode.
      * @return warmup mode
+     * @see org.openjdk.jmh.runner.options.WarmupMode
      */
     Optional<WarmupMode> getWarmupMode();
 
@@ -142,30 +149,35 @@ public interface Options extends Serializable {
     /**
      * Number of measurement iterations
      * @return number of measurement iterations
+     * @see org.openjdk.jmh.annotations.Measurement
      */
     Optional<Integer> getMeasurementIterations();
 
     /**
      * The duration for measurement iterations
      * @return duration
+     * @see org.openjdk.jmh.annotations.Measurement
      */
     Optional<TimeValue> getMeasurementTime();
 
     /**
      * Number of batch size for measurement
      * @return number of batch size for measurement
+     * @see org.openjdk.jmh.annotations.Measurement
      */
     Optional<Integer> getMeasurementBatchSize();
 
     /**
      * Benchmarks modes to execute.
      * @return modes to execute the benchmarks in; empty to use the default modes
+     * @see org.openjdk.jmh.annotations.BenchmarkMode
      */
     Collection<Mode> getBenchModes();
 
     /**
      * Timeunit to use in units.
      * @return timeunit
+     * @see org.openjdk.jmh.annotations.OutputTimeUnit
      */
     Optional<TimeUnit> getTimeUnit();
 
@@ -179,12 +191,14 @@ public interface Options extends Serializable {
     /**
      * Fork count
      * @return fork count; 0, to prohibit forking
+     * @see org.openjdk.jmh.annotations.Fork
      */
     Optional<Integer> getForkCount();
 
     /**
      * Number of initial forks to ignore the results for
      * @return initial fork count; 0, to disable
+     * @see org.openjdk.jmh.annotations.Fork
      */
     Optional<Integer> getWarmupForkCount();
 
@@ -197,6 +211,7 @@ public interface Options extends Serializable {
     /**
      * JVM parameters to use with forks
      * @return JVM parameters
+     * @see org.openjdk.jmh.annotations.Fork
      */
     Optional<Collection<String>> getJvmArgs();
 
@@ -204,6 +219,7 @@ public interface Options extends Serializable {
      * JVM parameters to use with forks (these options will be appended
      * after any other JVM option)
      * @return JVM parameters
+     * @see org.openjdk.jmh.annotations.Fork
      */
     Optional<Collection<String>> getJvmArgsAppend();
 
@@ -211,6 +227,7 @@ public interface Options extends Serializable {
      * JVM parameters to use with forks (these options will be prepended
      * before any other JVM option)
      * @return JVM parameters
+     * @see org.openjdk.jmh.annotations.Fork
      */
     Optional<Collection<String>> getJvmArgsPrepend();
 
@@ -218,6 +235,7 @@ public interface Options extends Serializable {
      * The overridden value of the parameter.
      * @param name parameter name
      * @return parameter
+     * @see org.openjdk.jmh.annotations.Param
      */
     Optional<Collection<String>> getParameter(String name);
 

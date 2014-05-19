@@ -119,6 +119,7 @@ public interface ChainedOptionsBuilder {
      * Number of threads to run the benchmark in
      * @param count number of threads
      * @return builder
+     * @see org.openjdk.jmh.annotations.Threads
      */
     ChainedOptionsBuilder threads(int count);
 
@@ -126,6 +127,8 @@ public interface ChainedOptionsBuilder {
      * Subgroups thread distribution.
      * @param groups thread distribution
      * @return builder
+     * @see org.openjdk.jmh.annotations.Group
+     * @see org.openjdk.jmh.annotations.GroupThreads
      */
     ChainedOptionsBuilder threadGroups(int... groups);
 
@@ -137,9 +140,10 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder syncIterations(boolean value);
 
     /**
-     * How many warmup measurementIterations to do?
+     * How many warmup iterations to do?
      * @param value flag
      * @return builder
+     * @see org.openjdk.jmh.annotations.Warmup
      */
     ChainedOptionsBuilder warmupIterations(int value);
 
@@ -147,6 +151,7 @@ public interface ChainedOptionsBuilder {
      * How large warmup batchSize should be?
      * @param value batch size
      * @return builder
+     * @see org.openjdk.jmh.annotations.Warmup
      */
     ChainedOptionsBuilder warmupBatchSize(int value);
 
@@ -154,6 +159,7 @@ public interface ChainedOptionsBuilder {
      * How long each warmup iteration should take?
      * @param value time
      * @return builder
+     * @see org.openjdk.jmh.annotations.Warmup
      */
     ChainedOptionsBuilder warmupTime(TimeValue value);
 
@@ -175,6 +181,7 @@ public interface ChainedOptionsBuilder {
      * How many measurement measurementIterations to do
      * @param count number of iterations
      * @return builder
+     * @see org.openjdk.jmh.annotations.Measurement
      */
     ChainedOptionsBuilder measurementIterations(int count);
 
@@ -182,6 +189,7 @@ public interface ChainedOptionsBuilder {
      * How large measurement batchSize should be?
      * @param value batch size
      * @return builder
+     * @see org.openjdk.jmh.annotations.Measurement
      */
     ChainedOptionsBuilder measurementBatchSize(int value);
 
@@ -189,6 +197,7 @@ public interface ChainedOptionsBuilder {
      * How long each measurement iteration should take?
      * @param value time
      * @return builder
+     * @see org.openjdk.jmh.annotations.Measurement
      */
     ChainedOptionsBuilder measurementTime(TimeValue value);
 
@@ -198,6 +207,7 @@ public interface ChainedOptionsBuilder {
      *
      * @param mode benchmark mode
      * @return builder
+     * @see org.openjdk.jmh.annotations.BenchmarkMode
      */
     ChainedOptionsBuilder mode(Mode mode);
 
@@ -205,6 +215,7 @@ public interface ChainedOptionsBuilder {
      * Timeunit to use in results
      * @param tu time unit
      * @return builder
+     * @see org.openjdk.jmh.annotations.OutputTimeUnit
      */
     ChainedOptionsBuilder timeUnit(TimeUnit tu);
 
@@ -220,6 +231,7 @@ public interface ChainedOptionsBuilder {
      * Number of forks to use in the run
      * @param value number of forks
      * @return builder
+     * @see org.openjdk.jmh.annotations.Fork
      */
     ChainedOptionsBuilder forks(int value);
 
@@ -227,6 +239,7 @@ public interface ChainedOptionsBuilder {
      * Number of ignored forks
      * @param value number of ignored forks
      * @return builder
+     * @see org.openjdk.jmh.annotations.Fork
      */
     ChainedOptionsBuilder warmupForks(int value);
 
@@ -243,6 +256,7 @@ public interface ChainedOptionsBuilder {
      *
      * @param value arguments to add to the run
      * @return builder
+     * @see org.openjdk.jmh.annotations.Fork
      */
     ChainedOptionsBuilder jvmArgs(String... value);
 
@@ -252,6 +266,7 @@ public interface ChainedOptionsBuilder {
      *
      * @param value arguments to add to the run
      * @return builder
+     * @see org.openjdk.jmh.annotations.Fork
      */
     ChainedOptionsBuilder jvmArgsAppend(String... value);
 
@@ -261,6 +276,7 @@ public interface ChainedOptionsBuilder {
      *
      * @param value arguments to add to the run
      * @return builder
+     * @see org.openjdk.jmh.annotations.Fork
      */
     ChainedOptionsBuilder jvmArgsPrepend(String... value);
 
@@ -277,6 +293,7 @@ public interface ChainedOptionsBuilder {
      * @param name parameter
      * @param values list of values to set
      * @return builder
+     * @see org.openjdk.jmh.annotations.Param
      */
     ChainedOptionsBuilder param(String name, String... values);
 

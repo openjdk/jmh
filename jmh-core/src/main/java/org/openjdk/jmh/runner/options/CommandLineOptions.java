@@ -94,6 +94,11 @@ public class CommandLineOptions implements Options {
 
     private final transient OptionParser parser;
 
+    /**
+     * Parses the given command line.
+     * @param argv argument list
+     * @throws CommandLineOptionException if some options are misspelled
+     */
     public CommandLineOptions(String... argv) throws CommandLineOptionException {
         parser = new OptionParser();
         parser.formatHelpWith(new OptionFormatter());
@@ -473,70 +478,47 @@ public class CommandLineOptions implements Options {
         System.out.println("Available formats: " + sb.toString());
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
+    public boolean shouldList() {
+        return list;
+    }
+
+    public boolean shouldListResultFormats() {
+        return listResultFormats;
+    }
+
+    public boolean shouldHelp() {
+        return help;
+    }
+
+    public boolean shouldListProfilers() {
+        return listProfilers;
+    }
+
     @Override
     public Optional<WarmupMode> getWarmupMode() {
         return warmupMode;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public List<String> getIncludes() {
         return regexps;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public List<String> getExcludes() {
         return excludes;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public List<String> getWarmupIncludes() {
         return warmupMicros;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    public boolean shouldList() {
-        return list;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<String> getJvm() {
         return jvm;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
@@ -562,31 +544,16 @@ public class CommandLineOptions implements Options {
         }
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getForkCount() {
         return fork;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getWarmupForkCount() {
         return warmupFork;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<String> getOutput() {
         return output;
@@ -602,94 +569,36 @@ public class CommandLineOptions implements Options {
         return result;
     }
 
-    public boolean shouldListResultFormats() {
-        return listResultFormats;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    public boolean shouldHelp() {
-        return help;
-    }
-
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
-    public boolean shouldListProfilers() {
-        return listProfilers;
-    }
-
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getMeasurementIterations() {
         return iterations;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getMeasurementBatchSize() {
         return batchSize;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<TimeValue> getMeasurementTime() {
         return runTime;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<TimeValue> getWarmupTime() {
         return warmupTime;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getWarmupIterations() {
         return warmupIterations;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getWarmupBatchSize() {
         return warmupBatchSize;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Integer> getThreads() {
         return threads;
@@ -708,41 +617,21 @@ public class CommandLineOptions implements Options {
         }
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Boolean> shouldDoGC() {
         return gcEachIteration;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<Boolean> shouldSyncIterations() {
         return synchIterations;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<VerboseMode> verbosity() {
         return verbose;
     }
 
-    /**
-     * Getter
-     *
-     * @return the value
-     */
     @Override
     public Optional<TimeUnit> getTimeUnit() {
         return timeUnit;
@@ -753,19 +642,11 @@ public class CommandLineOptions implements Options {
         return opsPerInvocation;
     }
 
-    /**
-     * Should fail the harness on test error?
-     * @return the value
-     */
     @Override
     public Optional<Boolean> shouldFailOnError() {
         return failOnError;
     }
 
-    /**
-     * Getter
-     * @return the value
-     */
     @Override
     public Set<ProfilerType> getProfilers() {
         return profilers;
