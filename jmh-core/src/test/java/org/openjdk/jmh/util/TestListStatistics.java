@@ -76,7 +76,7 @@ public class TestListStatistics {
      */
     @Test
     public strictfp void testGetN() {
-        assertEquals((long) VALUES.length, (long) instance.getN());
+        assertEquals((long) VALUES.length, instance.getN());
     }
 
     /**
