@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 
 import java.util.HashMap;

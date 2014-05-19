@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.ct.states.dag;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Scope;

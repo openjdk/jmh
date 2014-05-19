@@ -35,17 +35,10 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.util.ClassUtils;
-import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * TextReportFormat implementation of OutputFormat.

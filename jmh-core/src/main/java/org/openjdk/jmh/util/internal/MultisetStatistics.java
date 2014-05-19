@@ -24,10 +24,6 @@
  */
 package org.openjdk.jmh.util.internal;
 
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-
-import java.util.Arrays;
-
 public class MultisetStatistics extends AbstractStatistics {
 
     private final Multiset<Double> values;
