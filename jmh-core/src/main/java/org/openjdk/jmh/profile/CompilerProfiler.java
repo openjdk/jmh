@@ -27,7 +27,7 @@ package org.openjdk.jmh.profile;
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
 
-public class CompilerProfiler implements Profiler {
+class CompilerProfiler implements Profiler {
 
     private long startTime = -1;
     private long startCompTime = -1;

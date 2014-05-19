@@ -27,7 +27,7 @@ package org.openjdk.jmh.profile;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 
-public class GCProfiler implements Profiler {
+class GCProfiler implements Profiler {
 
     private long startTime = -1;
     private long startGCCount = -1;

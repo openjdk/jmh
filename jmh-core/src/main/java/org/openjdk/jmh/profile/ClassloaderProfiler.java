@@ -27,7 +27,7 @@ package org.openjdk.jmh.profile;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
 
-public class ClassloaderProfiler implements Profiler {
+class ClassloaderProfiler implements Profiler {
 
     private long startTime = -1;
     private long loadedClasses = -1;

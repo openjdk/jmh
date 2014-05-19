@@ -29,7 +29,7 @@ import sun.management.counter.Counter;
 
 import java.util.List;
 
-public class HotspotMemoryProfiler extends AbstractHotspotProfiler {
+class HotspotMemoryProfiler extends AbstractHotspotProfiler {
 
     public HotspotMemoryProfiler(String name, boolean verbose) {
         super(name, verbose);

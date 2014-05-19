@@ -35,7 +35,7 @@ import java.util.TreeMap;
 /**
  * @author Aleksey Shipilev
  */
-public abstract class AbstractHotspotProfiler implements Profiler {
+abstract class AbstractHotspotProfiler implements Profiler {
 
     private final String name;
     protected final boolean verbose;

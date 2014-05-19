@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
-public class EmptyResult implements ProfilerResult {
+class EmptyResult implements ProfilerResult {
     @Override
     public String getProfilerName() {
         return "N/A";

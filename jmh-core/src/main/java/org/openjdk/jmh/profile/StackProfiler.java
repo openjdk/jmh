@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Aleksey Shipilev
  */
-public class StackProfiler implements Profiler {
+class StackProfiler implements Profiler {
 
     /** Number of stack lines to save */
     private static final int SAMPLE_STACK_LINES = Integer.getInteger("jmh.stack.lines", 1);

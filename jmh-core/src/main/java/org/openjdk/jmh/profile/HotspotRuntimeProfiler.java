@@ -30,7 +30,7 @@ import sun.management.counter.Counter;
 import java.util.List;
 import java.util.Map;
 
-public class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
+class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
 
     public HotspotRuntimeProfiler(String name, boolean verbose) {
         super(name, verbose);
