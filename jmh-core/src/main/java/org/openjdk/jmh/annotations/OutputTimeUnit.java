@@ -32,9 +32,12 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Annotation specifies what time unit to use in the result type of the generated method.
+ * <p>OutputTimeUnit provides the default time unit to report the results in.</p>
  *
- * @author sergey.kuksenko@oracle.com
+ * <p>This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * method to have effect on that method only, or at the enclosing class instance
+ * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * in the class. This annotation may be overridden with the runtime options.</p>
  */
 @Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
@@ -42,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public @interface OutputTimeUnit {
 
     /**
-     * @return time unit to use in the result type of the generated method
+     * @return Time unit to use.
      */
     TimeUnit value();
 

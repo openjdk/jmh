@@ -30,11 +30,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Execution group.
+ * <p>Execution group.</p>
  *
- * Multiple {@link GenerateMicroBenchmark} methods can be bound in the execution group.
- * The label of the execution groups becomes the name of generated microbenchmark.
- * The results of each method is labelled by source method name.
+ * <p>Multiple {@link GenerateMicroBenchmark} methods can be bound in the execution group
+ * to produce the asymmetric benchmark. The group tag is used as the generated benchmark
+ * name. The result of each benchmark method in isolation is recorded as secondary result
+ * named by the original method name.</p>
+ *
+ * @see org.openjdk.jmh.annotations.GroupThreads
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

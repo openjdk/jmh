@@ -30,38 +30,33 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks the payload method as the target for microbenchmark generation.
- * <p>
- * JMH generators will synthesize the benchmarking code for this method.
- * <p>
- * the parameters for run control are available as separate annotations
- * (e.g. {@link Measurement}, {@link Threads}, and {@link Fork}),
- * which can be used both for concrete {@link GenerateMicroBenchmark}-annotated methods,
- * as well as for the classes containing target methods. Class-level annotations will
- * be honored first, then any method-level annotations.
- * <p>
- * Target method requirements:
- * <ul>
- *     <li>The arguments should be zero or more {@link org.openjdk.jmh.annotations.State}-bearing classes. See
- *     {@link org.openjdk.jmh.annotations.State} docs for the exact contract.
- *     <li>Target method should public</li>
- * </ul>
- * <p>
- * Annotated method can optionally throw Exceptions and Throwables. Any uncaught exception
- * is treated as microbenchmark failure.
- * <p>
- * Simple microbenchmark example:
- * <blockquote><pre>
- * public class CharConversion {
- *      &#64;GenerateMicroBenchmark
- *      public void testCharConversion() {...}
- * }
- * </pre></blockquote>
+ * <p>GenerateMicroBenchmark annotates the benchmark method.</p>
  *
- * @author Staffan Friberg
- * @author Anders Astrand
- * @author Aleksey Shipilev
- * @author Sergey Kuksenko
+ * <p>JMH will produce the generated benchmark code for this method during compilation,
+ * register this method as the benchmark in the benchmark list, read out the default
+ * values from the annotations, and generally prepare the environment for the benchmark
+ * to run.</p>
+ *
+ * <p>Benchmarks may use annotations to control different things in their operations.
+ * See {@link org.openjdk.jmh.annotations} package for available annotations, or
+ * look through
+ * <a href="http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/">
+ * JMH samples</a> for their canonical uses. As the rule of thumb, most annotations
+ * may be placed either at the {@link GenerateMicroBenchmark} method, or at enclosing
+ * class.</p>
+ *
+ * <p>JMH will fail to compile the benchmark if a method is missing the important properties, such as:</p>
+ * <ul>
+ *     <li>Arguments may include {@link org.openjdk.jmh.annotations.State} classes, which
+ *     JMH will inject while calling the method. See {@link org.openjdk.jmh.annotations.State} for
+ *     more details.</li>
+ *     <li>Arguments may include one of the JMH infrastructure classes, like {@link org.openjdk.jmh.logic.Control},
+ *     or {@link org.openjdk.jmh.logic.BlackHole}</li>
+ *     <li>Method should public</li>
+ * </ul>
+ *
+ * <p>Benchmark method may declare Exceptions and Throwables to throw. Any exception actually
+ * raised and throws will be treated as benchmark failure.</p>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

@@ -32,31 +32,35 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Annotation for a micro benchmark method which allows the setting of default
- * measurement parameters for the benchmark. Any parameter set with the annotation
- * can be overridden by specifying the corresponding command line option.
+ * <p>Measurement annotations allows to set the default measurement parameters for
+ * the benchmark.</p>
  *
- * @author sergey.kuksenko@oracle.com
+ * <p>This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * method to have effect on that method only, or at the enclosing class instance
+ * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * in the class. This annotation may be overridden with the runtime options.</p>
+ *
+ * @see org.openjdk.jmh.annotations.Warmup
  */
 @Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Measurement {
 
-    public static final int BLANK_ITERATIONS = -1;
-    public static final int BLANK_TIME = -1;
-    public static final int BLANK_BATCHSIZE = -1;
+    static final int BLANK_ITERATIONS = -1;
+    static final int BLANK_TIME = -1;
+    static final int BLANK_BATCHSIZE = -1;
 
-    /** @return amount of iterations */
+    /** @return Number of measurement iterations */
     int iterations() default BLANK_ITERATIONS;
 
-    /** @return time of each iteration */
+    /** @return Time of each measurement iteration */
     int time() default BLANK_TIME;
 
-    /** @return time unit of the time value */
+    /** @return Time unit for measurement iteration duration */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-    /** @return batch size: number of benchmark method calls per operation (some benchmark modes can ignore this setting) */
+    /** @return Batch size: number of benchmark method calls per operation (some benchmark modes may ignore this setting) */
     int batchSize() default BLANK_BATCHSIZE;
 
 }

@@ -30,14 +30,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for the setup method(s) for a micro benchmark.
- * Can only be used within {@link State}-bearing classes.
+ * <p>Setup marks the fixture method to be run before the benchmark.</p>
+ *
+ * <p>In order to figure out which thread should call the fixture, and what
+ * state this method can initialize, {@link Setup} methods can only be declared in
+ * {@link State} classes. Use {@link org.openjdk.jmh.annotations.Level} to decide
+ * when to run the fixture.</p>
+ *
+ * @see org.openjdk.jmh.annotations.State
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Setup {
 
-    /** @return Level of this method. @see Level. Default is Trial.*/
+    /**
+     * @return Level of this method.
+     * @see org.openjdk.jmh.annotations.Level
+     */
     Level value() default Level.Trial;
 
 }

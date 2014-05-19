@@ -31,9 +31,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks the state object.
+ * <p>Marks the state object.</p>
+ *
  * <p>State objects naturally encapsulate the state on which benchmark is working on.
- * The scope of state object defines to which extent it is shared among the worker threads.</p>
+ * The {@link org.openjdk.jmh.annotations.Scope} of state object defines to which extent
+ * it is shared among the worker threads.</p>
+ *
+ * <p>State objects are usually injected into {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * methods as arguments, and JMH takes care of their instantiation and sharing. State objects
+ * may also be injected into {@link org.openjdk.jmh.annotations.Setup} and {@link org.openjdk.jmh.annotations.TearDown}
+ * methods of other {@link org.openjdk.jmh.annotations.State} objects to get staged initialization.</p>
+ *
+ * <p>State objects may be inherited: you can place {@link org.openjdk.jmh.annotations.State}
+ * on a super class and use subclasses as states.</p>
  */
 @Inherited
 @Target(ElementType.TYPE)
@@ -43,6 +53,7 @@ public @interface State {
     /**
      * State scope.
      * @return state scope
+     * @see org.openjdk.jmh.annotations.Scope
      */
     Scope value();
 

@@ -28,44 +28,49 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Benchmark type.
- *
- * @author Staffan Friberg
- * @author Sergey Kuksenko
- * @author Aleksey Shipilev
+ * Benchmark mode.
  */
 public enum Mode {
 
     /**
-     * Operations per unit of time,
-     * {@link org.openjdk.jmh.logic.results.ThroughputResult}. */
+     * Throughput: operations per unit of time.
+     * Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * counting the total throughput over all worker threads.
+     */
     Throughput("thrpt", "Throughput, ops/time"),
 
     /**
-     * Average time per operation
-     * {@link org.openjdk.jmh.logic.results.AverageTimeResult}.
+     * Average time: average time per per operation.
+     * Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * counting the average time to call over all worker threads. This is the inverse of {@link Mode#Throughput},
+     * but with different aggregation policy.
      */
     AverageTime("avgt", "Average time, time/op"),
 
     /**
-     * Time distribution, percentile estimation
-     * {@link org.openjdk.jmh.logic.results.SampleTimeResult}.
+     * Sample time: samples the time for each operation.
+     * Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * and randomly samples the time needed for the call. This mode automatically adjusts the sampling
+     * frequency, but may omit some pauses which missed the sampling measurement.
      */
     SampleTime("sample", "Sampling time"),
 
     /**
-     * Time the single execution
-     * {@link org.openjdk.jmh.logic.results.SingleShotResult}.
+     * Single shot time: measures the time for a single operation.
+     * Runs by calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} once and measuring its time.
+     * This mode is useful to estimate the "cold" performance when you don't want to hide the warmup invocations
+     * at all. More warmup/measurement iterations are generally required in this mode.
      */
     SingleShotTime("ss", "Single shot invocation time"),
 
     /**
-     * Meta-mode: all the modes.
-     * This is mostly useful for testing.
+     * Meta-mode: all the benchmark modes.
+     * This is mostly useful for internal JMH testing.
      */
-    All("all", "TEST MODE"),
+    All("all", "All benchmark modes"),
 
     ;
+
     private final String shortLabel;
     private final String longLabel;
 

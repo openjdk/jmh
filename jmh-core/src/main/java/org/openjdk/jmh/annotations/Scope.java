@@ -30,37 +30,41 @@ package org.openjdk.jmh.annotations;
 public enum Scope {
 
     /**
-     * Benchmark state scope.
+     * <p>Benchmark state scope.</p>
      *
-     * The objects of this scope are always shared between all the threads, and all the
-     * identifiers. Note: the state objects of different types are naturally distinct.
+     * <p>With benchmark scope, all instances of the same type will be shared across all
+     * worker threads.</p>
      *
-     * {@link Setup} and {@link TearDown} methods on this state object would be performed
-     * by one of the worker threads. No other threads would ever touch the state object.
+     * <p>{@link Setup} and {@link TearDown} methods on this state object would be performed
+     * by one of the worker threads, and only once per {@link org.openjdk.jmh.annotations.Level}.
+     * No other threads would ever touch the state object.</p>
      */
     Benchmark,
 
     /**
-     * Group state scope.
+     * <p>Group state scope.</p>
      *
-     * The objects of this scope are shared within the execution group, across all the
-     * identifiers of the same type.
+     * <p>With group scope, all instances of the same type will be shared across all
+     * threads within the same group. Each thread group will be supplied with its own
+     * state object.</p>
      *
-     * {@link Setup} and {@link TearDown} methods on this state object would be performed
-     * by one of the group threads. No other threads would ever touch the state object.
+     * <p>{@link Setup} and {@link TearDown} methods on this state object would be performed
+     * by one of the group threads, and only once per {@link org.openjdk.jmh.annotations.Level}.
+     * No other threads would ever touch the state object.</p>
      *
      * @see Group
      */
     Group,
 
     /**
-     * Thread state scope.
+     * <p>Thread state scope.</p>
      *
-     * The objects of this scope are always unshared, even with multiple identifiers within
-     * the same worker thread.
+     * <p>With thread scope, all instances of the same type are distinct, even if multiple
+     * state objects are injected in the same benchmark</p>
      *
-     * {@link Setup} and {@link TearDown} methods on this state object would be performed
-     * by single worker thread exclusively. No other threads would ever touch the state object.
+     * <p>{@link Setup} and {@link TearDown} methods on this state object would be performed
+     * by single worker thread exclusively, and only once per {@link org.openjdk.jmh.annotations.Level}.
+     * No other threads would ever touch the state object.</p>
      *
      */
     Thread,

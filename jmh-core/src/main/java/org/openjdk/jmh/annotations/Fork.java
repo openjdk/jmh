@@ -31,25 +31,31 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for a micro benchmark method which allows the setting of default
- * fork parameters for the benchmark, means the benchmark should be started in
- * new (forked) JVM.
+ * Fork annotation allows to set the default forking parameters for the benchmark.
  *
- * @author sergey.kuksenko@oracle.com
+ * <p>
+ * This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * method to have effect on that method only, or at the enclosing class instance
+ * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * in the class. This annotation may be overridden with the runtime options.
+ * </p>
  */
 @Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Fork {
 
-    public static final int BLANK_FORKS = -1;
+    static final int BLANK_FORKS = -1;
 
-    public static final String BLANK_ARGS = "blank_blank_blank_2014";
+    static final String BLANK_ARGS = "blank_blank_blank_2014";
 
-    /** @return the number of times harness should fork, zero means "no fork" */
+    /** @return number of times harness should fork, zero means "no fork" */
     int value() default BLANK_FORKS;
 
-    /** @return strict JVM args, replaces any implicit jvm args */
+    /** @return number of times harness should fork and ignore the results */
+    int warmups() default BLANK_FORKS;
+
+    /** @return JVM arguments to replace in the command line */
     String[] jvmArgs() default { BLANK_ARGS };
 
     /** @return JVM arguments to prepend in the command line */
@@ -57,8 +63,5 @@ public @interface Fork {
 
     /** @return JVM arguments to append in the command line */
     String[] jvmArgsAppend() default { BLANK_ARGS };
-
-    /** @return how many forks to treat as warmup and ignore their results */
-    int warmups() default BLANK_FORKS;
 
 }

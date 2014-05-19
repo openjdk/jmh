@@ -31,11 +31,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for a micro benchmark method which allows the setting of default
- * value for amount of benchmark threads.
- * Zero value means max available hw threads aka Runtime.availableProcessors().
+ * <p>Threads annotation provides the default number of threads to run.</p>
  *
- * @author sergey.kuksenko@oracle.com
+ * <p>This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * method to have effect on that method only, or at the enclosing class instance
+ * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * in the class. This annotation may be overridden with the runtime options.</p>
  */
 @Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})
@@ -48,7 +49,9 @@ public @interface Threads {
      */
     public static int MAX = -1;
 
-    /** @return amount of threads */
+    /**
+     * @return Number of threads; use Threads.MAX to run with all available threads.
+     */
     int value();
 
 }

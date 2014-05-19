@@ -24,27 +24,30 @@
  */
 package org.openjdk.jmh.annotations;
 
-/** Level enumeration for Setup and TearDown */
+/**
+ * Control when to run the fixture methods.
+ *
+ * @see org.openjdk.jmh.annotations.Setup
+ * @see org.openjdk.jmh.annotations.TearDown
+ */
 public enum Level {
 
     /**
-     * Trial level.
+     * Trial level: to be executed before/after each run of the benchmark.
      *
-     * To be executed each run of the benchmark
+     * Trial is the set of benchmark iterations.
      */
     Trial,
 
     /**
-     * Iteration level.
+     * Iteration level: to be executed before/after each iteration of the benchmark.
      *
-     * To be executued for each iteration in a benchmark execution
+     * Iteration is the set of benchmark invocations.
      */
     Iteration,
 
     /**
-     * Invocation level.
-     *
-     * To be executed for each benchmark method execution.
+     * Invocation level: to be executed for each benchmark method execution.
      *
      * WARNING: HERE BE DRAGONS!
      * MAKE SURE YOU UNDERSTAND THE REASONING AND THE IMPLICATIONS
@@ -58,23 +61,23 @@ public enum Level {
      * small, then we saturate the system with timestamp requests, which
      * *both* make timestamp requests the critical part of the benchmark
      * time, and inhibit workload scalability, introducing the artificial
-     * scalability bottleneck.
+     * scalability bottleneck.</p>
      *
-     * Also, the hiccups in measurement can be hidden from these individual
+     * <p>Also, the hiccups in measurement can be hidden from these individual
      * timing measurement, which can introduce inconsistent results. The largest
      * caveat is measuring oversaturated system where the descheduling events
      * will be missed, and the benchmark will perceive the fictionally large
-     * throughput.
+     * throughput.</p>
      *
      * <p>WARNING #2: In order to maintain the basic interference behavior
      * of other Levels (e.g. the State(Scope.Benchmark) should only fire the
      * helper method once per invocation, regardless of the thread count),
      * we have to arbitrate the access to the state between worker thread,
-     * and do that on *critical path*, thus further offsetting the measurement.
+     * and do that on *critical path*, thus further offsetting the measurement.</p>
      *
      * <p>WARNING #3: Current implementation in JMH allows the helper method
      * execution to overlap with the benchmark method itself in order to simplify
-     * arbitrage. (To be redefined in future).
+     * arbitrage. (To be redefined in future).</p>
      */
     Invocation,
 }

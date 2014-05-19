@@ -32,31 +32,37 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Annotation for a micro benchmark method which allows the setting of default
- * warmup parameters for the benchmark. Any parameter set with the annotation
- * can be overridden by specifying the corresponding command line option.
+ * <p>
+ * Warmup annotation allows to set the default warmup parameters for the benchmark.
+ * </p>
+ * <p>
+ * This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * method to have effect on that method only, or at the enclosing class instance
+ * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * in the class. This annotation may be overridden with the runtime options.
+ * </p>
  *
- * @author sergey.kuksenko@oracle.com
+ * @see org.openjdk.jmh.annotations.Measurement
  */
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Warmup {
 
-    public static final int BLANK_ITERATIONS = -1;
-    public static final int BLANK_TIME = -1;
-    public static final int BLANK_BATCHSIZE = -1;
+    static final int BLANK_ITERATIONS = -1;
+    static final int BLANK_TIME = -1;
+    static final int BLANK_BATCHSIZE = -1;
 
-    /** @return amount of iterations */
+    /** @return Number of warmup iterations */
     int iterations() default BLANK_ITERATIONS;
 
-    /** @return time of each iteration */
+    /** @return Time for each warmup iteration */
     int time() default BLANK_TIME;
 
-    /** @return time unit of the time value */
+    /** @return Time unit for warmup iteration duration */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-    /** @return batch size: number of benchmark method calls per operation (some benchmark modes can ignore this setting) */
+    /** @return batch size: number of benchmark method calls per operation (some benchmark modes may ignore this setting) */
     int batchSize() default BLANK_BATCHSIZE;
 
 }
