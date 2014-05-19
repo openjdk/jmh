@@ -33,33 +33,49 @@ import java.util.List;
 public enum Mode {
 
     /**
-     * Throughput: operations per unit of time.
-     * Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
-     * counting the total throughput over all worker threads.
+     * <p>Throughput: operations per unit of time.</p>
+     *
+     * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * counting the total throughput over all worker threads. This mode is time-based, and it will
+     * run until the iteration time expires.</p>
      */
     Throughput("thrpt", "Throughput, ops/time"),
 
     /**
-     * Average time: average time per per operation.
-     * Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * <p>Average time: average time per per operation.</p>
+     *
+     * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
      * counting the average time to call over all worker threads. This is the inverse of {@link Mode#Throughput},
-     * but with different aggregation policy.
+     * but with different aggregation policy. This mode is time-based, and it will run until the iteration time
+     * expires.</p>
      */
     AverageTime("avgt", "Average time, time/op"),
 
     /**
-     * Sample time: samples the time for each operation.
-     * Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * Sample time: samples the time for each operation.</p>
+     *
+     * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
      * and randomly samples the time needed for the call. This mode automatically adjusts the sampling
-     * frequency, but may omit some pauses which missed the sampling measurement.
+     * frequency, but may omit some pauses which missed the sampling measurement. This mode is time-based, and it will
+     * run until the iteration time expires.</p>
      */
     SampleTime("sample", "Sampling time"),
 
     /**
-     * Single shot time: measures the time for a single operation.
-     * Runs by calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} once and measuring its time.
-     * This mode is useful to estimate the "cold" performance when you don't want to hide the warmup invocations
-     * at all. More warmup/measurement iterations are generally required in this mode.
+     * <p>Single shot time: measures the time for a single operation.</p>
+     *
+     * <p>Runs by calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} once and measuring its time.
+     * This mode is useful to estimate the "cold" performance when you don't want to hide the warmup invocations, or
+     * if you want to see the progress from call to call, or you want to record every single sample. This mode is
+     * work-based, and will run only for a single invocation of {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+     * method.</p>
+     *
+     * Caveats for this mode include:
+     * <ul>
+     *  <li>More warmup/measurement iterations are generally required.</li>
+     *  <li>Timers overhead might be significant if benchmarks are small; switch to {@link #SampleTime} mode if
+     *  that is a problem.</li>
+     * </ul>
      */
     SingleShotTime("ss", "Single shot invocation time"),
 
