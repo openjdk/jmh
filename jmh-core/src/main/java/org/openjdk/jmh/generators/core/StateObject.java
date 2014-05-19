@@ -70,7 +70,7 @@ public class StateObject {
 
         StateObject that = (StateObject) o;
 
-        if (fieldIdentifier != null ? !fieldIdentifier.equals(that.fieldIdentifier) : that.fieldIdentifier != null)
+        if (!fieldIdentifier.equals(that.fieldIdentifier))
             return false;
         if (scope != that.scope) return false;
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
@@ -82,7 +82,7 @@ public class StateObject {
     public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
         result = 31 * result + (scope != null ? scope.hashCode() : 0);
-        result = 31 * result + (fieldIdentifier != null ? fieldIdentifier.hashCode() : 0);
+        result = 31 * result + (fieldIdentifier.hashCode());
         return result;
     }
 
