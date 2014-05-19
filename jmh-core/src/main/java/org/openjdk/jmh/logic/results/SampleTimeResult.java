@@ -110,7 +110,7 @@ public class SampleTimeResult extends Result {
      * Always add up all the samples into final result.
      * This will allow aggregate result to achieve better accuracy.
      */
-    public static class JoiningAggregator implements Aggregator<SampleTimeResult> {
+    static class JoiningAggregator implements Aggregator<SampleTimeResult> {
 
         @Override
         public Result aggregate(Collection<SampleTimeResult> results) {

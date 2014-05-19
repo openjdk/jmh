@@ -81,7 +81,7 @@ public class SingleShotResult extends Result {
     /**
      * Averages the time on all levels.
      */
-    public static class AveragingAggregator implements Aggregator<SingleShotResult> {
+    static class AveragingAggregator implements Aggregator<SingleShotResult> {
         @Override
         public Result aggregate(Collection<SingleShotResult> results) {
             ResultRole role = null;

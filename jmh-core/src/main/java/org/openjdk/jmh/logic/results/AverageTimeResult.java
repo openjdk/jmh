@@ -78,7 +78,7 @@ public class AverageTimeResult extends Result {
      * Regardless of aggregation, we need to compute the aggregate time as:
      *   average time = (all time) / (all operations)
      */
-    public static class ResultAggregator implements Aggregator<AverageTimeResult> {
+    static class ResultAggregator implements Aggregator<AverageTimeResult> {
         @Override
         public AverageTimeResult aggregate(Collection<AverageTimeResult> results) {
             ListStatistics stat = new ListStatistics();
