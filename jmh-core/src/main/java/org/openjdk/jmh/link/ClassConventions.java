@@ -26,7 +26,7 @@ package org.openjdk.jmh.link;
 
 import java.lang.reflect.Method;
 
-public class ClassConventions {
+class ClassConventions {
 
     public static String getMethodName(Method m) {
         StringBuilder builder = new StringBuilder();

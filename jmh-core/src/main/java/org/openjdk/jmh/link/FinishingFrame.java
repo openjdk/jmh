@@ -22,21 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link.frames;
-
-import org.openjdk.jmh.runner.options.Options;
+package org.openjdk.jmh.link;
 
 import java.io.Serializable;
 
-public class OptionsFrame implements Serializable {
-
-    private final Options opts;
-
-    public OptionsFrame(Options opts) {
-        this.opts = opts;
-    }
-
-    public Options getOpts() {
-        return opts;
-    }
+class FinishingFrame implements Serializable {
 }

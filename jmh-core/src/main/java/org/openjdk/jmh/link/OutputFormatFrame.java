@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,20 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link.frames;
-
-import org.openjdk.jmh.runner.BenchmarkException;
+package org.openjdk.jmh.link;
 
 import java.io.Serializable;
 
-public class ExceptionFrame implements Serializable {
-    private final BenchmarkException error;
+/**
+ * Encapsulates the OutputFormat call
+ *   - method name
+ *   - arguments (assumed to be serializable)
+ */
+class OutputFormatFrame implements Serializable {
+    private static final long serialVersionUID = -7151852354574635295L;
+    public final String method;
+    public final Object[] args;
 
-    public ExceptionFrame(BenchmarkException error) {
-        this.error = error;
-    }
-
-    public BenchmarkException getError() {
-        return error;
+    public OutputFormatFrame(String method, Object[] args) {
+        this.method = method;
+        this.args = args;
     }
 }

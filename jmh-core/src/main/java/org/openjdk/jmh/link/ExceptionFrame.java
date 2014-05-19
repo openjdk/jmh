@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,20 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link.frames;
+package org.openjdk.jmh.link;
 
-import org.openjdk.jmh.runner.ActionPlan;
+import org.openjdk.jmh.runner.BenchmarkException;
 
 import java.io.Serializable;
 
-public class ActionPlanFrame implements Serializable {
-    private final ActionPlan actionPlan;
+class ExceptionFrame implements Serializable {
+    private final BenchmarkException error;
 
-    public ActionPlanFrame(ActionPlan actionPlan) {
-        this.actionPlan = actionPlan;
+    public ExceptionFrame(BenchmarkException error) {
+        this.error = error;
     }
 
-    public ActionPlan getActionPlan() {
-        return actionPlan;
+    public BenchmarkException getError() {
+        return error;
     }
 }

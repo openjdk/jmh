@@ -22,11 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link.frames;
+package org.openjdk.jmh.link;
 
 import java.io.Serializable;
 
-public class InfraFrame implements Serializable {
+class InfraFrame implements Serializable {
 
     private final Type type;
 

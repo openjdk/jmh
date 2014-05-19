@@ -22,9 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link.frames;
+package org.openjdk.jmh.link;
+
+import org.openjdk.jmh.runner.ActionPlan;
 
 import java.io.Serializable;
 
-public class FinishingFrame implements Serializable {
+class ActionPlanFrame implements Serializable {
+    private final ActionPlan actionPlan;
+
+    public ActionPlanFrame(ActionPlan actionPlan) {
+        this.actionPlan = actionPlan;
+    }
+
+    public ActionPlan getActionPlan() {
+        return actionPlan;
+    }
 }
