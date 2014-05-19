@@ -29,7 +29,7 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 import java.io.IOException;
 import java.io.PrintStream;
 
-public abstract class AbstractOutputFormat implements OutputFormat {
+abstract class AbstractOutputFormat implements OutputFormat {
 
     /** Verbose-mode? */
     final VerboseMode verbose;

@@ -29,7 +29,8 @@ import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
-import org.openjdk.jmh.output.results.TextResultFormat;
+import org.openjdk.jmh.output.results.ResultFormatFactory;
+import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
@@ -46,7 +47,7 @@ import java.util.Map;
  * @author Brian Doherty
  * @author Aleksey Shipilev
  */
-public class TextReportFormat extends AbstractOutputFormat {
+class TextReportFormat extends AbstractOutputFormat {
 
     public TextReportFormat(PrintStream out, VerboseMode verbose) {
         super(out, verbose);
@@ -171,7 +172,7 @@ public class TextReportFormat extends AbstractOutputFormat {
     @Override
     public void endRun(Map<BenchmarkRecord, RunResult> runResults) {
         PrintWriter pw = new PrintWriter(out);
-        new TextResultFormat(pw).writeOut(runResults);
+        ResultFormatFactory.getInstance(ResultFormatType.TEXT, pw).writeOut(runResults);
         pw.flush();
         pw.close();
     }

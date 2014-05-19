@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author anders.astrand@oracle.com
  */
-public class SilentFormat extends AbstractOutputFormat {
+class SilentFormat extends AbstractOutputFormat {
 
     public SilentFormat(PrintStream out, VerboseMode verbose) {
         super(out, verbose);

@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class TextResultFormat implements ResultFormat {
+class TextResultFormat implements ResultFormat {
     private final PrintWriter out;
 
     public TextResultFormat(PrintWriter writer) {
