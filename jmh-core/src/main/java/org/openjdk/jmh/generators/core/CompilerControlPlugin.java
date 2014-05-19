@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class CompilerControlPlugin {
+class CompilerControlPlugin {
 
     private final SortedSet<String> lines = new TreeSet<String>();
 

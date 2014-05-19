@@ -47,7 +47,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-public class MethodGroup implements Comparable<MethodGroup> {
+class MethodGroup implements Comparable<MethodGroup> {
     private final String name;
     private final Set<MethodInvocation> methods;
     private final EnumSet<Mode> modes;

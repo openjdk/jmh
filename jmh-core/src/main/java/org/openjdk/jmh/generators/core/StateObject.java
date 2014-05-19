@@ -33,7 +33,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class StateObject {
+class StateObject {
 
     public static final Comparator<StateObject> ID_COMPARATOR = new Comparator<StateObject>() {
         @Override

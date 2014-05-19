@@ -421,7 +421,7 @@ public class BenchmarkGenerator {
             Group groupAnn = method.getAnnotation(Group.class);
             String groupName = (groupAnn != null) ? groupAnn.value() : method.getName();
 
-            if (!checkJavaIdentifier(groupName)) {
+            if (!BenchmarkGeneratorUtils.checkJavaIdentifier(groupName)) {
                 throw new GenerationException("Group name should be the legal Java identifier.", method);
             }
 
@@ -478,16 +478,6 @@ public class BenchmarkGenerator {
         }
 
         return benchmarks;
-    }
-
-    public static boolean checkJavaIdentifier(String id) {
-        for (int i = 0; i < id.length(); i++) {
-            char c = id.charAt(i);
-            if (!Character.isJavaIdentifierPart(c)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -1084,7 +1074,7 @@ public class BenchmarkGenerator {
         }
     }
 
-    public static String ident(int prefix) {
+    static String ident(int prefix) {
         char[] chars = new char[prefix * 4];
         for (int i = 0; i < prefix * 4; i++) {
             chars[i] = ' ';

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-public enum HelperType {
+enum HelperType {
     SETUP,
     TEARDOWN,
 }

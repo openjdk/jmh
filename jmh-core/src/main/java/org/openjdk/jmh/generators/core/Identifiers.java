@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class Identifiers {
+class Identifiers {
 
     private final Map<String, String> collapsedTypes = new HashMap<String, String>();
     private int collapsedIndex = 0;

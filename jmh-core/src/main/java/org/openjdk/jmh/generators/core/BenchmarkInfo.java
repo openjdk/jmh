@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-public class BenchmarkInfo {
+class BenchmarkInfo {
     public final String userName;
     public final String generatedName;
     public final String generatedPackageName;

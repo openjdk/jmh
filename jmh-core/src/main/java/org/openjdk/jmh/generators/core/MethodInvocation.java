@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-public class MethodInvocation implements Comparable<MethodInvocation> {
+class MethodInvocation implements Comparable<MethodInvocation> {
     public final MethodInfo method;
     public final int threads;
 

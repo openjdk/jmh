@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class StateObjectHandler {
+class StateObjectHandler {
 
     private final CompilerControlPlugin compileControl;
 

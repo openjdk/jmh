@@ -51,7 +51,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class BenchmarkGeneratorUtils {
+class BenchmarkGeneratorUtils {
 
     private static final Collection<Class<? extends Annotation>> JMH_ANNOTATIONS;
 
@@ -76,6 +76,16 @@ public class BenchmarkGeneratorUtils {
                 }
             }
         }
+    }
+
+    public static boolean checkJavaIdentifier(String id) {
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+            if (!Character.isJavaIdentifierPart(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static <T extends Annotation> Collection<MethodInfo> getMethodsAnnotatedWith(GeneratorSource source, Class<T> annClass) {

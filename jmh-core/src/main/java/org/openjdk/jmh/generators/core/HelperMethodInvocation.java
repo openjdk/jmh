@@ -26,7 +26,7 @@ package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.Level;
 
-public class HelperMethodInvocation implements Comparable<HelperMethodInvocation> {
+class HelperMethodInvocation implements Comparable<HelperMethodInvocation> {
     public final MethodInfo method;
     public final StateObject state;
     public final Level helperLevel;
