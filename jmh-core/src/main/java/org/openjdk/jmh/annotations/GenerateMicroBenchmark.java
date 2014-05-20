@@ -45,18 +45,25 @@ import java.lang.annotation.Target;
  * may be placed either at the {@link GenerateMicroBenchmark} method, or at enclosing
  * class.</p>
  *
- * <p>JMH will fail to compile the benchmark if a method is missing the important properties, such as:</p>
+ * <p>{@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} demarcates the benchmark payload,
+ * and JMH treats it specifically as the wrapper which contains the benchmark code. In order to
+ * run the benchmark reliably, JMH enforces a few stringent properties for these wrapper methods,
+ * including, but not limited to:</p>
  * <ul>
- *     <li>Arguments may include {@link org.openjdk.jmh.annotations.State} classes, which
- *     JMH will inject while calling the method. See {@link org.openjdk.jmh.annotations.State} for
- *     more details.</li>
- *     <li>Arguments may include one of the JMH infrastructure classes, like {@link org.openjdk.jmh.logic.Control},
+ *     <li>Method should be public</li>
+ *     <li>Arguments may only include either {@link org.openjdk.jmh.annotations.State} classes, which
+ *     JMH will inject while calling the method (see {@link org.openjdk.jmh.annotations.State} for
+ *     more details), or JMH infrastructure classes, like {@link org.openjdk.jmh.logic.Control},
  *     or {@link org.openjdk.jmh.logic.BlackHole}</li>
- *     <li>Method should public</li>
+ *     <li>Method should not be synchronized</li>
+ *     <li>Method should not be static</li>
  * </ul>
+ * <p>If you want to benchmark methods which break these properties, you have to write them
+ * out specifically as the benchmark payload and call them from {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * method.</p>
  *
  * <p>Benchmark method may declare Exceptions and Throwables to throw. Any exception actually
- * raised and throws will be treated as benchmark failure.</p>
+ * raised and thrown will be treated as benchmark failure.</p>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
