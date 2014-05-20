@@ -77,7 +77,7 @@ public final class BinaryLinkServer {
         this.forbidden = new HashSet<String>();
 
         // enumerate methods
-        for (Method m : out.getClass().getMethods()) {
+        for (Method m : OutputFormat.class.getMethods()) {
 
             // start/end run callbacks are banned, since their effects are enforced by parent instead
             if (m.getName().equals("startRun")) { forbidden.add(ClassConventions.getMethodName(m)); }
