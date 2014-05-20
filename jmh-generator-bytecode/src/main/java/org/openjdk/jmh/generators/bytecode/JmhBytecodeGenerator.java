@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.generators.bytecode;
 
-import org.openjdk.jmh.generators.bytecode.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.FileSystemDestination;
 import org.openjdk.jmh.generators.core.SourceError;

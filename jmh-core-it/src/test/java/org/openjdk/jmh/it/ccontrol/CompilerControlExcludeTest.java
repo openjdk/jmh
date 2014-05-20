@@ -26,21 +26,11 @@ package org.openjdk.jmh.it.ccontrol;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.CompilerHints;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import java.util.concurrent.TimeUnit;
 
 public class CompilerControlExcludeTest {
 
