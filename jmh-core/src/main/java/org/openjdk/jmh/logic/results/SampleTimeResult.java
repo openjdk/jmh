@@ -49,13 +49,11 @@ public class SampleTimeResult extends Result {
         this.outputTimeUnit = outputTimeUnit;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
         return TimeValue.tuToString(outputTimeUnit) + "/op";
     }
 
-    /** {@inheritDoc} */
     @Override
     public double getScore() {
         return getStatistics().getMean();

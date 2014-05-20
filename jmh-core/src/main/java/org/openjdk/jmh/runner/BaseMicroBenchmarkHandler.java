@@ -225,9 +225,6 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public BenchmarkRecord getBenchmark() {
         return microbenchmark;
@@ -242,9 +239,6 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         return executor.isShutdown();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void shutdown() {
         shutdownExecutor(executor);

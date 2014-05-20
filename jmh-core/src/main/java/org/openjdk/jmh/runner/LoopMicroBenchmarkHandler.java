@@ -63,9 +63,6 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public IterationResult runIteration(IterationParams params, boolean last) {
         int numThreads = params.getBenchmarkParams().getThreads();

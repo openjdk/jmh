@@ -49,13 +49,11 @@ public class SingleShotResult extends Result {
         this.outputTimeUnit = outputTimeUnit;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
         return TimeValue.tuToString(outputTimeUnit);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double getScore() {
         return (duration / (double) outputTimeUnit.toNanos(1)) ;

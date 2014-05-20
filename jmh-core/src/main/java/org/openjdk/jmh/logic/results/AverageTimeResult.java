@@ -51,13 +51,11 @@ public class AverageTimeResult extends Result {
         this.outputTimeUnit = tu;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
         return TimeValue.tuToString(outputTimeUnit) + "/op";
     }
 
-    /** {@inheritDoc} */
     @Override
     public double getScore() {
         return 1.0D * durationNs / (operations * outputTimeUnit.toNanos(1));

@@ -75,13 +75,11 @@ public class ThroughputResult extends Result {
         this.outputTimeUnit = outputTimeUnit;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getScoreUnit() {
         return "ops/" + TimeValue.tuToString(outputTimeUnit);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double getScore() {
         return 1.0D * operations * outputTimeUnit.toNanos(1) / durationNs;
