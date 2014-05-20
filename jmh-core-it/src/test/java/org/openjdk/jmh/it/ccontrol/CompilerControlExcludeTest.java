@@ -44,27 +44,31 @@ import java.util.concurrent.TimeUnit;
 
 public class CompilerControlExcludeTest {
 
-    @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.All)
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(1)
     @CompilerControl(CompilerControl.Mode.EXCLUDE)
-    public void test() {
+    void sampleMethod() {}
+
+    @GenerateMicroBenchmark
+    @CompilerControl(CompilerControl.Mode.EXCLUDE)
+    public void dummyTest() {
         Fixtures.work();
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .shouldFailOnError(true)
-                .build();
-        new Runner(opt).run();
-
+    public void testGMB() throws RunnerException {
         boolean exists = false;
         for (String s : CompilerHints.defaultList().get()) {
-            if (s.contains(this.getClass().getName().replace(".", "/"))) {
+            if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("dummyTest")) {
+                exists |= s.startsWith("exclude");
+            }
+        }
+        Assert.assertTrue(exists);
+    }
+
+    @Test
+    public void testStandalone() throws RunnerException {
+        boolean exists = false;
+        for (String s : CompilerHints.defaultList().get()) {
+            if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("sampleMethod")) {
                 exists |= s.startsWith("exclude");
             }
         }

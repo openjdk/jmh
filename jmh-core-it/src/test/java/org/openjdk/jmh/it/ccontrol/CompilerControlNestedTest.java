@@ -46,30 +46,37 @@ public class CompilerControlNestedTest {
 
     @CompilerControl(CompilerControl.Mode.INLINE)
     public static class SpecimenClass {
-        void m() {}
+        void sampleMethod() {}
+    }
+
+
+    public static class SpecimenMethod {
+        @CompilerControl(CompilerControl.Mode.INLINE)
+        void sampleMethod() {}
     }
 
     @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.All)
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(1)
-    public void test() {
+    public void dummyTest() {
         Fixtures.work();
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .shouldFailOnError(true)
-                .build();
-        new Runner(opt).run();
-
+    public void testClass() throws RunnerException {
         boolean exists = false;
         for (String s : CompilerHints.defaultList().get()) {
-            if (s.startsWith("inline") && s.contains(this.getClass().getName().replace(".", "/")) && s.contains("$SpecimenClass")) {
-                exists = true;
+            if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("$SpecimenClass.*")) {
+                exists |= s.startsWith("inline");
+            }
+        }
+        Assert.assertTrue(exists);
+    }
+
+    @Test
+    public void testMethod() throws RunnerException {
+        boolean exists = false;
+        for (String s : CompilerHints.defaultList().get()) {
+            if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("$SpecimenMethod") && s.contains("sampleMethod")) {
+                exists |= s.startsWith("inline");
             }
         }
         Assert.assertTrue(exists);

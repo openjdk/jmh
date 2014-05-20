@@ -102,8 +102,6 @@ public class BenchmarkGenerator {
      */
     public void generate(GeneratorSource source, GeneratorDestination destination) {
         try {
-            compilerControl.process(source, destination);
-
             // Build a Set of classes with a list of annotated methods
             Multimap<ClassInfo, MethodInfo> clazzes = buildAnnotatedSet(source);
 
@@ -121,6 +119,7 @@ public class BenchmarkGenerator {
                     destination.printError(ge.getMessage(), ge.getElement());
                 }
             }
+            compilerControl.process(source, destination);
         } catch (Throwable t) {
             destination.printError("Annotation generator had thrown the exception.", t);
         }
@@ -515,7 +514,7 @@ public class BenchmarkGenerator {
         // write all methods
         for (Mode benchmarkKind : Mode.values()) {
             if (benchmarkKind == Mode.All) continue;
-            generateMethod(benchmarkKind, writer, info.methodGroup, states);
+            generateMethod(classInfo, benchmarkKind, writer, info.methodGroup, states);
         }
 
         // Write out state initializers
@@ -578,27 +577,27 @@ public class BenchmarkGenerator {
     /**
      * Generate the method for a specific benchmark method
      */
-    private void generateMethod(Mode benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
+    private void generateMethod(ClassInfo classInfo, Mode benchmarkKind, PrintWriter writer, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println();
         switch (benchmarkKind) {
             case Throughput:
-                generateThroughput(writer, benchmarkKind, methodGroup, states);
+                generateThroughput(classInfo, writer, benchmarkKind, methodGroup, states);
                 break;
             case AverageTime:
-                generateAverageTime(writer, benchmarkKind, methodGroup, states);
+                generateAverageTime(classInfo, writer, benchmarkKind, methodGroup, states);
                 break;
             case SampleTime:
-                generateSampleTime(writer, benchmarkKind, methodGroup, states);
+                generateSampleTime(classInfo, writer, benchmarkKind, methodGroup, states);
                 break;
             case SingleShotTime:
-                generateSingleShotTime(writer, benchmarkKind, methodGroup, states);
+                generateSingleShotTime(classInfo, writer, benchmarkKind, methodGroup, states);
                 break;
             default:
                 throw new AssertionError("Shouldn't be here");
         }
     }
 
-    private void generateThroughput(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
+    private void generateThroughput(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
@@ -682,14 +681,12 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String loopMethodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
+            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
 
             compilerControl.defaultForceInline(method);
+            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
-            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
-                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
-                    "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + loopMethodName + "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -709,7 +706,7 @@ public class BenchmarkGenerator {
         }
     }
 
-    private void generateAverageTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
+    private void generateAverageTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
@@ -791,12 +788,11 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
+            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
             compilerControl.defaultForceInline(method);
+            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
-            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
-                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
-                    "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
                     "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
@@ -829,7 +825,7 @@ public class BenchmarkGenerator {
         }
     }
 
-    private void generateSampleTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
+    private void generateSampleTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
@@ -909,12 +905,11 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
+            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
             compilerControl.defaultForceInline(method);
+            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
-            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
-                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
-                    "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementLoop" + "(InfraControl control, SampleBuffer buffer, int targetSamples, long opsPerInv" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, SampleBuffer buffer, int targetSamples, long opsPerInv" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
             writer.println(ident(2) + "int rndMask = startRndMask;");
@@ -949,10 +944,7 @@ public class BenchmarkGenerator {
         }
     }
 
-    private void generateSingleShotTime(PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
-                "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
-                "." + CompilerControl.Mode.DONT_INLINE + ")");
+    private void generateSingleShotTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -997,12 +989,11 @@ public class BenchmarkGenerator {
 
         // measurement stub bodies
         for (MethodInfo method : methodGroup.methods()) {
+            String methodName = method.getName() + "_" + benchmarkKind + "_measurementStub";
             compilerControl.defaultForceInline(method);
+            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
-            writer.println(ident(1) + "@" + CompilerControl.class.getSimpleName() +
-                    "(" + CompilerControl.class.getSimpleName() + "." + CompilerControl.Mode.class.getSimpleName() +
-                    "." + CompilerControl.Mode.DONT_INLINE + ")");
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + method.getName() + "_" + benchmarkKind + "_measurementStub" +
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
                     "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
 
             writer.println(ident(2) + "long realTime = 0;");

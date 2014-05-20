@@ -45,19 +45,14 @@ class CompilerControlPlugin {
         }
     });
 
-    private final Set<MethodInfo> defaultDontInlineMethods = new TreeSet<MethodInfo>(new Comparator<MethodInfo>() {
-        @Override
-        public int compare(MethodInfo o1, MethodInfo o2) {
-            return o1.getQualifiedName().compareTo(o2.getQualifiedName());
-        }
-    });
+    private final Set<String> defaultDontInlineMethods = new TreeSet<String>();
 
     public void defaultForceInline(MethodInfo methodInfo) {
         defaultForceInlineMethods.add(methodInfo);
     }
 
-    public void defaultDontInline(MethodInfo methodInfo) {
-        defaultDontInlineMethods.add(methodInfo);
+    public void alwaysDontInline(String className, String methodName) {
+        defaultDontInlineMethods.add(getName(className, methodName));
     }
 
     public void process(GeneratorSource source, GeneratorDestination destination) {
@@ -77,9 +72,8 @@ class CompilerControlPlugin {
                 lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
             }
 
-            for (MethodInfo element : defaultDontInlineMethods) {
-                if (element.getAnnotation(CompilerControl.class) != null) continue;
-                lines.add(CompilerControl.Mode.DONT_INLINE.command() + "," + getName(element));
+            for (String element : defaultDontInlineMethods) {
+                lines.add(CompilerControl.Mode.DONT_INLINE.command() + "," + element);
             }
 
             for (ClassInfo element : BenchmarkGeneratorUtils.getClassesAnnotatedWith(source, CompilerControl.class)) {
@@ -111,13 +105,20 @@ class CompilerControlPlugin {
         }
     }
 
+    private static String getName(String className, String methodName) {
+        return className.replaceAll("\\.", "/") + "." + methodName;
+    }
+
     private static String getName(MethodInfo mi) {
-       return mi.getDeclaringClass().getQualifiedName().replaceAll("\\.", "/") + "." + mi.getName();
+       return getName(getClassName(mi.getDeclaringClass()), mi.getName());
     }
 
     private static String getName(ClassInfo ci) {
-        String name = ci.getPackageName() + "." + BenchmarkGeneratorUtils.getNestedNames(ci);
-        return name.replaceAll("\\.", "/") + ".*";
+        return getName(getClassName(ci), "*");
+    }
+
+    private static String getClassName(ClassInfo ci) {
+        return ci.getPackageName() + "." + BenchmarkGeneratorUtils.getNestedNames(ci);
     }
 
 }
