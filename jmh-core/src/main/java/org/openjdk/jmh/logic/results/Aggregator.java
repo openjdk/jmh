@@ -33,7 +33,6 @@ import java.util.Collection;
  * This class is generic to save some of the unchecked casts in the code.
  *
  * @param <R> accepted result type
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public interface Aggregator<R extends Result> {
 

@@ -47,8 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests if harness honors warmup annotation settings.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @State(Scope.Thread)
 public class WarmupIterationCountAnnTest {

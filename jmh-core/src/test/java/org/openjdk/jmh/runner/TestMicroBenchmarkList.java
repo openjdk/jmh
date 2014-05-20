@@ -40,9 +40,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for MicroBenchmarkList
- *
- * @author anders.astrand@oracle.com
- *
  */
 @Ignore
 public class TestMicroBenchmarkList {

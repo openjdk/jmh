@@ -49,8 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests global setup -> run -> tearDown sequence.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class BenchmarkStateOrderTest {
 

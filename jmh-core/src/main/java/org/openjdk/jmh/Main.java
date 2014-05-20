@@ -36,8 +36,6 @@ import java.io.IOException;
 
 /**
  * Main program entry point
- *
- * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
 public class Main {
 

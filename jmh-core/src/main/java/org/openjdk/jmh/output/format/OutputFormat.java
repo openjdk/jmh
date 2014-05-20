@@ -36,9 +36,6 @@ import java.util.Map;
 
 /**
  * Internal interface for OutputFormat.
- *
- * @author anders.astrand@oracle.com
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public interface OutputFormat {
 

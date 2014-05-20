@@ -35,9 +35,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Holds the JMH global defaults.
- *
- * @author Sergey Kuksenko
- * @author Aleksey Shipilev
  */
 public class Defaults {
 

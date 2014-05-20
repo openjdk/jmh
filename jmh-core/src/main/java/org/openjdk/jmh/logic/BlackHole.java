@@ -148,8 +148,6 @@ abstract class BlackHoleL4 extends BlackHoleL3 {
  * <p>Black hole "consumes" the values, conceiving no information to JIT whether the
  * value is actually used afterwards. This can save from the dead-code elimination
  * of the computations resulting in the given values.</p>
- *
- * @author aleksey.shipilev@oracle.com
  */
 @State(Scope.Thread) // Blackholes are always acting like a thread-local state
 public class BlackHole extends BlackHoleL4 {

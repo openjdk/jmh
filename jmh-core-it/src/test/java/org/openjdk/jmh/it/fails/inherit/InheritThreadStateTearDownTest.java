@@ -44,8 +44,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Baseline test:
  * Checks if assertions are propagated back to integration tests.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @BenchmarkMode(Mode.All)
 public class InheritThreadStateTearDownTest {

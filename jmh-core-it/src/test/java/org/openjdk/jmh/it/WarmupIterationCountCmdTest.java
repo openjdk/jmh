@@ -45,8 +45,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests if harness honors warmup command line settings.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @State(Scope.Thread)
 public class WarmupIterationCountCmdTest {

@@ -36,8 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The InfraControl logic class.
  * This is the rendezvous class for benchmark handler and JMH.
- *
- * @author staffan.friberg@oracle.com, anders.astrand@oracle.com, aleksey.shipilev@oracle.com
  */
 public class InfraControl extends InfraControlL4 {
 

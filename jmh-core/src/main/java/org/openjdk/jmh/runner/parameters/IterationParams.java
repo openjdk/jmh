@@ -26,9 +26,6 @@ package org.openjdk.jmh.runner.parameters;
 
 import java.io.Serializable;
 
-/**
- * @author sergey.kuksenko@oracle.com
- */
 public class IterationParams implements Serializable {
 
     /**

@@ -34,8 +34,6 @@ import java.text.NumberFormat;
 
 /**
  * Base class for all types of results that can be returned by a microbenchmark.
- *
- * @author staffan.friberg@oracle.com
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
 

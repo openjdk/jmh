@@ -48,8 +48,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract runner, the base class for Runner and ForkedRunner.
- *
- * @author sergey.kuksenko@oracle.com
  */
 public abstract class BaseRunner {
 

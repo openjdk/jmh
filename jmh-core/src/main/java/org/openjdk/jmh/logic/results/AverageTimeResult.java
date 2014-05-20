@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Result class that stores average operation time.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class AverageTimeResult extends Result {
 

@@ -30,11 +30,6 @@ import org.openjdk.jmh.runner.parameters.IterationParams;
 /**
  * Handler for a single micro benchmark. Handles name and execution information (# iterations, et c). Executes the
  * benchmark according to above parameters.
- *
- * @author staffan.friberg@oracle.com
- * @author anders.astrand@oracle.com
- * @author aleksey.shipilev@oracle.com
- * @author sergey.kuksenko@oracle.com
  */
 public interface MicroBenchmarkHandler {
 

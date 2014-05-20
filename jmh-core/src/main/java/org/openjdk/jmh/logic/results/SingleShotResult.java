@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Result class that stores once operation execution time.
- *
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 public class SingleShotResult extends Result {
 

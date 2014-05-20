@@ -48,10 +48,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/**
- *
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
- */
 @BenchmarkMode(Mode.All)
 @State(Scope.Benchmark)
 public class TwoThreadCountTest {

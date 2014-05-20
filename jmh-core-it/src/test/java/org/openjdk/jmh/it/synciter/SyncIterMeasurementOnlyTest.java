@@ -41,9 +41,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
 @State(Scope.Benchmark)
 public class SyncIterMeasurementOnlyTest {
 

@@ -39,8 +39,6 @@ import java.util.Map;
 
 /**
  * A utility class for loading classes in various ways.
- *
- * @author anders.astrand@oracle.com
  */
 public class ClassUtils {
 

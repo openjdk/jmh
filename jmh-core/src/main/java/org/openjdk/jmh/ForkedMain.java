@@ -32,8 +32,6 @@ import java.io.IOException;
 
 /**
  * Main program entry point for forked JVM instance
- *
- * @author sergey.kuksenko@oracle.com
  */
 public class ForkedMain {
 

@@ -35,9 +35,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for AggregateResult
- *
- * @author anders.astrand@oracle.com
- *
  */
 public class TestAggregateResult {
 

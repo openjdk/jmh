@@ -45,9 +45,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static junit.framework.Assert.assertEquals;
 
-/**
- * @author Aleksey Shipilev
- */
 @State(Scope.Thread)
 public class NonForkedModesTest {
 

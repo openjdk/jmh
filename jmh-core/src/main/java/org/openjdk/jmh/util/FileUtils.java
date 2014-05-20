@@ -34,9 +34,6 @@ import java.io.OutputStream;
 
 /**
  * A utility class for File creation and manipulation.
- *
- * @author anders.astrand@oracle.com
- *
  */
 public class FileUtils {
     // Static access only

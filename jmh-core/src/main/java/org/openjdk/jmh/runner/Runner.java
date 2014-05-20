@@ -64,10 +64,6 @@ import java.util.logging.Logger;
 
 /**
  * Runner frontend class. Responsible for running micro benchmarks in this JVM.
- *
- * @author staffan.friberg@oracle.com,
- * @author anders.astrand@oracle.com
- * @author sergey.kuksenko@oracle.com
  */
 public class Runner extends BaseRunner {
 

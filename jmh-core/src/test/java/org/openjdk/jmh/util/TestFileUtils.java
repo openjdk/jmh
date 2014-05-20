@@ -32,9 +32,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test for FileUtils
- *
- * @author anders.astrand@oracle.com
- *
  */
 public class TestFileUtils {
 

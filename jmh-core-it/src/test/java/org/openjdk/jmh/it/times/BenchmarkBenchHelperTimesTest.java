@@ -47,9 +47,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
 @State(Scope.Benchmark)
 public class BenchmarkBenchHelperTimesTest {
 

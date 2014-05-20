@@ -33,8 +33,6 @@ import org.openjdk.jmh.logic.BlackHole;
 
 /**
  * Tests basic blackholing API.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @BenchmarkMode(Mode.All)
 public class BlackholeApiTest {

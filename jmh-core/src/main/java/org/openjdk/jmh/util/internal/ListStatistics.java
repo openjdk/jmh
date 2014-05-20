@@ -30,8 +30,6 @@ import java.util.Arrays;
 
 /**
  * Calculate statistics over a list of doubles.
- *
- * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
 public class ListStatistics extends AbstractStatistics {
 

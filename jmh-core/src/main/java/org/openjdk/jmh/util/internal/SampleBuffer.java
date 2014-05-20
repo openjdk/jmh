@@ -28,8 +28,6 @@ import java.io.Serializable;
 
 /**
  * Sampling buffer accepts samples.
- *
- * @author Aleksey Shipilev, aleksey.shipilev@oracle.com
  */
 public class SampleBuffer implements Serializable {
 

@@ -39,10 +39,6 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author anders.astrand@oracle.com
- * @author Aleksey Shipilev
- */
 public class TestOptions {
 
     private Options EMPTY_BUILDER;

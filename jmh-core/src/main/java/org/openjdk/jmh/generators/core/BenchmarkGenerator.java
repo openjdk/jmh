@@ -78,8 +78,6 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * <p>Benchmark generator is the agnostic piece of code which generates
  * synthetic Java code for JMH benchmarks. {@link GeneratorSource} is
  * used to feed the generator with the required metadata.</p>
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class BenchmarkGenerator {
 

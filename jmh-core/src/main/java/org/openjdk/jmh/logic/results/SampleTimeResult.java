@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Result class that samples operation time.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class SampleTimeResult extends Result {
 

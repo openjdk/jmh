@@ -32,9 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * @author Aleksey Shipilev
- */
 abstract class AbstractHotspotProfiler implements Profiler {
 
     private final String name;

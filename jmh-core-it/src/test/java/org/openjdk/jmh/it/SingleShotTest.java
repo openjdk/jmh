@@ -39,8 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests if harness had indeed executed different tests in different JVMs.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @BenchmarkMode(Mode.SingleShotTime)
 public class SingleShotTest {

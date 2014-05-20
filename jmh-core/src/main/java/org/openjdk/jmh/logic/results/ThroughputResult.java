@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Result class that counts the number of operations performed during a specified unit of time.
- *
- * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
 public class ThroughputResult extends Result {
 

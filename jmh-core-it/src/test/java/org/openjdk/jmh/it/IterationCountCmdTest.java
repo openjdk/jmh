@@ -45,8 +45,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests if harness favors the iteration count cmdline parameters.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @State(Scope.Thread)
 public class IterationCountCmdTest {

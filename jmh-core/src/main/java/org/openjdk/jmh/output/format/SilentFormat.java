@@ -37,8 +37,6 @@ import java.util.Map;
 
 /**
  * Silent format, does nothing.
- *
- * @author anders.astrand@oracle.com
  */
 class SilentFormat extends AbstractOutputFormat {
 

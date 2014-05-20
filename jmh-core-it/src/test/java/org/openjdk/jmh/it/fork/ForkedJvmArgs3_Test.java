@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * tests multiply spaces in jvmArgs annotations.
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @BenchmarkMode(Mode.All)
 public class ForkedJvmArgs3_Test {

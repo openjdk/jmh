@@ -50,10 +50,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Class that handles all the command line options.
- *
- * @author Anders Astrand
- * @author Sergey Kuksenko
- * @author Aleksey Shipilev
  */
 public class CommandLineOptions implements Options {
 

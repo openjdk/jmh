@@ -38,9 +38,6 @@ import java.util.TreeMap;
 /**
  * Complete run result.
  * Contains the iteration results.
- *
- * @author anders.astrand@oracle.com
- * @author aleksey.shipilev@oracle.com
  */
 public class RunResult implements Serializable {
 

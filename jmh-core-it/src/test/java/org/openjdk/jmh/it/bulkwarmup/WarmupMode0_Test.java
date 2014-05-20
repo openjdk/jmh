@@ -50,8 +50,6 @@ import static junit.framework.Assert.assertEquals;
  * -wm
  * -frw
  * ....
- *
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @State(Scope.Thread)
 public class WarmupMode0_Test {

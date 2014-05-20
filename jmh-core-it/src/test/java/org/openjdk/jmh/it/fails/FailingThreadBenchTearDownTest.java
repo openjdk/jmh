@@ -45,8 +45,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 /**
  * Baseline test:
  * Checks if assertions are propagated back to integration tests.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @State(Scope.Thread)
 public class FailingThreadBenchTearDownTest {

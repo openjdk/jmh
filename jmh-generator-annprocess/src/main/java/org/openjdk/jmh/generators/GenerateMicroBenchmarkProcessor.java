@@ -38,11 +38,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
-/**
- * @author staffan.friberg@oracle.com
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {

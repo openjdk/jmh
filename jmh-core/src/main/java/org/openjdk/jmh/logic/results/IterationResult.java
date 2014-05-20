@@ -39,8 +39,6 @@ import java.util.TreeMap;
 
 /**
  * Class contains all info returned by microbenchmark iteration or/and collected during microbenchmark iteration.
- *
- * @author sergey.kuksenko@oracle.com
  */
 public class IterationResult implements Serializable {
 

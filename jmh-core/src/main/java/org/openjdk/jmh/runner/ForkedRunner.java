@@ -34,8 +34,6 @@ import java.io.IOException;
 
 /**
  * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
- *
- * @author sergey.kuksenko@oracle.com
  */
 public class ForkedRunner extends BaseRunner {
 

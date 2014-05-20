@@ -38,8 +38,6 @@ import java.util.TreeMap;
 /**
  * Benchmark result.
  * Contains iteration results.
- *
- * @author Aleksey Shipilev
  */
 public class BenchResult implements Serializable {
 

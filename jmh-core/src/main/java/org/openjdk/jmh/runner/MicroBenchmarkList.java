@@ -39,8 +39,6 @@ import java.util.regex.Pattern;
 
 /**
  * Helper class for listing micro benchmarks.
- *
- * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
 public class MicroBenchmarkList extends AbstractResourceReader {
 

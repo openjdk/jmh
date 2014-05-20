@@ -41,8 +41,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Tests if harness had indeed executed different tests in different JVMs.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @BenchmarkMode(Mode.All)
 public class ForkedTest {

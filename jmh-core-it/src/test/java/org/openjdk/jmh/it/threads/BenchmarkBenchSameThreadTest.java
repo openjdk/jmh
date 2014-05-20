@@ -51,8 +51,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Tests if harness executes setup, run, and tearDown in the same workers.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @State(Scope.Benchmark)
 public class BenchmarkBenchSameThreadTest {

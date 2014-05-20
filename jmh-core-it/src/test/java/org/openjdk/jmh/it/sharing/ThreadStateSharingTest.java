@@ -48,9 +48,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
 public class ThreadStateSharingTest {
 
     @State(Scope.Thread)

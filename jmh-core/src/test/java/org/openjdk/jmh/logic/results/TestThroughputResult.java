@@ -31,10 +31,6 @@ import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 
-/**
- *
- * @author staffan.friberg@oracle.com
- */
 public class TestThroughputResult {
 
     /**

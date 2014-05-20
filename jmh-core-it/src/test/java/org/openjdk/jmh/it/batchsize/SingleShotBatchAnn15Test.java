@@ -47,8 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests if harness honors batch size annotation settings.
- *
- * @author Sergey Kuksenko (sergey.kuksenko@oracle.com)
  */
 @State(Scope.Thread)
 public class SingleShotBatchAnn15Test {

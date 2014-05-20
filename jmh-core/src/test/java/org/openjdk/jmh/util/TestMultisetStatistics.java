@@ -34,8 +34,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for Statistics
- *
- * @author staffan.friberg@oracle.com, anders.astrand@oracle.com
  */
 public class TestMultisetStatistics {
 

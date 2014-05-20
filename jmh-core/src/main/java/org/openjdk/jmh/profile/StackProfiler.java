@@ -37,8 +37,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Very basic and naive stack profiler.
- *
- * @author Aleksey Shipilev
  */
 class StackProfiler implements Profiler {
 

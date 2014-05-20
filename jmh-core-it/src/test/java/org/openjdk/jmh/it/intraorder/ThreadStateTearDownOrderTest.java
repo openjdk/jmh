@@ -47,8 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests if harness executes setup (instance) methods in lexicographical order.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class ThreadStateTearDownOrderTest {
 

@@ -40,10 +40,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
 @BenchmarkMode(Mode.All)
 public class ForkedJvmAppendPrependArgs1_Test {
 

@@ -43,9 +43,6 @@ import java.util.Map;
 
 /**
  * TextReportFormat implementation of OutputFormat.
- *
- * @author Brian Doherty
- * @author Aleksey Shipilev
  */
 class TextReportFormat extends AbstractOutputFormat {
 

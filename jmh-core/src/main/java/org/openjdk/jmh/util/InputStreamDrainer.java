@@ -34,9 +34,6 @@ import java.util.logging.Logger;
 
 /**
  * Will drain the output stream.
- *
- * @author stefan.karlsson@oracle.com
- * @author Aleksey Shipilev, aleksey.shipilev@oracle.com
  */
 public final class InputStreamDrainer extends Thread {
     private static final int BUF_SIZE = 1024;

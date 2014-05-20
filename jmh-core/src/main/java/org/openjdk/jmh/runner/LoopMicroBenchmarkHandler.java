@@ -51,11 +51,6 @@ import java.util.concurrent.TimeoutException;
  * Handler for a single micro benchmark (with InfraControl).
  * Handles name and execution information (# iterations, et c). Executes the
  * benchmark according to above parameters.
- *
- * @author staffan.friberg@oracle.com
- * @author anders.astrand@oracle.com
- * @author aleksey.shipilev@oracle.com
- * @author sergey.kuksenko@oracle.com
  */
 public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
