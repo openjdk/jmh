@@ -55,8 +55,8 @@ import java.lang.annotation.Target;
  *     JMH will inject while calling the method (see {@link org.openjdk.jmh.annotations.State} for
  *     more details), or JMH infrastructure classes, like {@link org.openjdk.jmh.logic.Control},
  *     or {@link org.openjdk.jmh.logic.BlackHole}</li>
- *     <li>Method should not be synchronized</li>
- *     <li>Method should not be static</li>
+ *     <li>Method can only be synchronized if a relevant {@link org.openjdk.jmh.annotations.State} is placed
+ *     on the enclosing class.</li>
  * </ul>
  * <p>If you want to benchmark methods which break these properties, you have to write them
  * out specifically as the benchmark payload and call them from {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}

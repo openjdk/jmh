@@ -26,18 +26,21 @@ package org.openjdk.jmh.ct.gmb;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class PublicStaticGMBTest {
+@State(Scope.Thread)
+public class PublicSynchronizedStaticThreadStateGMBTest {
 
     @GenerateMicroBenchmark
-    public static void test() {
+    public static synchronized void test() {
 
     }
 
     @Test
     public void compileTest() {
-        CompileTest.assertOK(this.getClass());
+        CompileTest.assertFail(this.getClass(), "@State(Scope.Benchmark)");
     }
 
 }

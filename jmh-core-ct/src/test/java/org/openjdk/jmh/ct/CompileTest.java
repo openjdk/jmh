@@ -71,7 +71,7 @@ public class CompileTest {
             System.err.println(e);
             contains |= e.contains(error);
         }
-        Assert.assertTrue("Failure message should contain \"" + error + "\"", contains);
+        Assert.assertTrue("Failure message should contain \"" + error + "\", but was \"" + destination.getErrors() + "\"", contains);
     }
 
     public static void assertOK(Class<?> klass) {

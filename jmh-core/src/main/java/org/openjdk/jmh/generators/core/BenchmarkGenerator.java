@@ -326,16 +326,18 @@ public class BenchmarkGenerator {
                         + " method can not be abstract.", m);
             }
 
-            if (m.isStatic()) {
-                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
-                        + " method can not be static.", m);
-            }
-
             if (m.isSynchronized()) {
-                if (BenchmarkGeneratorUtils.getAnnSyntax(m, State.class) == null) {
+                State annState = BenchmarkGeneratorUtils.getAnnSyntax(m, State.class);
+                if (annState == null) {
                     throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
                             + " method can only be synchronized if the enclosing class is annotated with "
                             + "@" + State.class.getSimpleName() + ".", m);
+                } else {
+                    if (m.isStatic() && annState.value() != Scope.Benchmark) {
+                        throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                                + " method can only be static and synchronized if the enclosing class is annotated with "
+                                + "@" + State.class.getSimpleName() + "(" + Scope.class.getSimpleName() + "." + Scope.Benchmark + ").", m);
+                    }
                 }
             }
         }
