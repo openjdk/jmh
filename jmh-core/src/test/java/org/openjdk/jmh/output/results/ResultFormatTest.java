@@ -61,7 +61,7 @@ public class ResultFormatTest {
 
         Random r = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
-            BenchmarkRecord record = new BenchmarkRecord("benchmark_" + b, JSONResultFormat.class.getName() + ".benchmark_" + b, Mode.AverageTime);
+            BenchmarkRecord record = new BenchmarkRecord("benchmark_" + b, JSONResultFormat.class.getName() + ".benchmark_" + b, Mode.Throughput);
             ActualParams ps = new ActualParams();
             for (int p = 0; p < 5; p++) {
                 ps.put("param" + p, "value" + p, p);

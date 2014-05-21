@@ -1,7 +1,7 @@
 [
     {
         "benchmark" : "benchmark_0",
-        "mode" : "avgt",
+        "mode" : "thrpt",
         "threads" : 80,
         "forks" : 828,
         "warmupIterations" : 84,
@@ -174,7 +174,7 @@
     ,
     {
         "benchmark" : "benchmark_1",
-        "mode" : "avgt",
+        "mode" : "thrpt",
         "threads" : 900,
         "forks" : 364,
         "warmupIterations" : 544,
@@ -272,7 +272,7 @@
     ,
     {
         "benchmark" : "benchmark_2",
-        "mode" : "avgt",
+        "mode" : "thrpt",
         "threads" : 466,
         "forks" : 677,
         "warmupIterations" : 384,
@@ -400,7 +400,7 @@
     ,
     {
         "benchmark" : "benchmark_3",
-        "mode" : "avgt",
+        "mode" : "thrpt",
         "threads" : 968,
         "forks" : 581,
         "warmupIterations" : 628,
@@ -555,7 +555,7 @@
     ,
     {
         "benchmark" : "benchmark_4",
-        "mode" : "avgt",
+        "mode" : "thrpt",
         "threads" : 739,
         "forks" : 670,
         "warmupIterations" : 997,
