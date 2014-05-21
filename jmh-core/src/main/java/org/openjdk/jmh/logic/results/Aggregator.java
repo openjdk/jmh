@@ -34,7 +34,7 @@ import java.util.Collection;
  *
  * @param <R> accepted result type
  */
-public interface Aggregator<R extends Result> {
+interface Aggregator<R extends Result> {
 
     /**
      * Aggregate the results.

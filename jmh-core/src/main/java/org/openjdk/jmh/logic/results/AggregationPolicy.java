@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.logic.results;
 
-public enum AggregationPolicy {
+enum AggregationPolicy {
 
     AVG,
 
