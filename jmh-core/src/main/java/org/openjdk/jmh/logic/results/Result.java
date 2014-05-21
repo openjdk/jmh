@@ -30,7 +30,6 @@ import org.openjdk.jmh.util.internal.Statistics;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.text.NumberFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -92,12 +91,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      */
     @Override
     public String toString() {
-        NumberFormat nf = NumberFormat.getInstance();
-        nf.setMaximumFractionDigits(3);
-        nf.setMinimumFractionDigits(3);
-        nf.setGroupingUsed(false);
-
-        return nf.format(getScore()) + ' ' + getScoreUnit();
+        return String.format("%.3f %s", getScore(), getScoreUnit());
     }
 
     public Statistics getStatistics() {
