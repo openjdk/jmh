@@ -31,6 +31,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.text.NumberFormat;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for all types of results that can be returned by a microbenchmark.
@@ -39,12 +40,22 @@ public abstract class Result<T extends Result<T>> implements Serializable {
 
     protected final ResultRole role;
     protected final String label;
+    protected final TimeUnit outputTimeUnit;
     protected final Statistics statistics;
+    protected final AggregationPolicy policy;
 
-    public Result(ResultRole role, String label, Statistics statistics) {
+    public Result(ResultRole role, String label, Statistics s, TimeUnit outputTimeUnit, AggregationPolicy policy) {
         this.role = role;
         this.label = label;
-        this.statistics = statistics == null ? new ListStatistics() : statistics;
+        this.outputTimeUnit = outputTimeUnit;
+        this.statistics = s;
+        this.policy = policy;
+    }
+
+    protected static Statistics of(double v) {
+        ListStatistics s = new ListStatistics();
+        s.addValue(v);
+        return s;
     }
 
     /**
@@ -59,7 +70,16 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      *
      * @return double representing the score
      */
-    public abstract double getScore();
+    public double getScore() {
+        switch (policy) {
+            case AVG:
+                return statistics.getMean();
+            case SUM:
+                return statistics.getSum();
+            default:
+                throw new IllegalStateException("Unknown aggregation policy: " + policy);
+        }
+    }
 
     public abstract Aggregator<T> getIterationAggregator();
 

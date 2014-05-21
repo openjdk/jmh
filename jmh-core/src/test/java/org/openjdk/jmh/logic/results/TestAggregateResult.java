@@ -31,6 +31,8 @@ import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -45,7 +47,7 @@ public class TestAggregateResult {
     public static void setupClass() {
         result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime), new IterationParams(null, 1, TimeValue.days(1), 1));
         for (double d : values) {
-            result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000));
+            result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000, TimeUnit.MILLISECONDS));
         }
     }
 
@@ -56,7 +58,7 @@ public class TestAggregateResult {
 
     @Test
     public void testScoreUnit() throws Exception {
-        assertEquals((new ThroughputResult(ResultRole.PRIMARY, "test1", 1, 1)).getScoreUnit(), result.getScoreUnit());
+        assertEquals((new ThroughputResult(ResultRole.PRIMARY, "test1", 1, 1, TimeUnit.MILLISECONDS)).getScoreUnit(), result.getScoreUnit());
     }
 
 }

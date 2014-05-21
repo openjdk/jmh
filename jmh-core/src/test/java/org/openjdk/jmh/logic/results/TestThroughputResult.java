@@ -38,11 +38,11 @@ public class TestThroughputResult {
      */
     @Test
     public void testGetScore() {
-        ThroughputResult instance = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L);
+        ThroughputResult instance = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MILLISECONDS);
         assertEquals(1000, instance.getScore(), 0.0);
         ThroughputResult instance2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
         assertEquals(1000000, instance2.getScore(), 0.0);
-        ThroughputResult instance3 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000L);
+        ThroughputResult instance3 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000L, TimeUnit.MILLISECONDS);
         assertEquals(1000 / (1000 / (double) 1000000), instance3.getScore(), 0.0);
     }
 

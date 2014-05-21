@@ -25,6 +25,8 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.internal.ListStatistics;
+import org.openjdk.jmh.util.internal.MultisetStatistics;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 import org.openjdk.jmh.util.internal.Statistics;
 
@@ -37,42 +39,22 @@ import java.util.concurrent.TimeUnit;
 public class SampleTimeResult extends Result {
 
     private final SampleBuffer buffer;
-    private final TimeUnit outputTimeUnit;
-
-    public SampleTimeResult(ResultRole mode, String label, SampleBuffer buffer) {
-        this(mode, label, buffer, TimeUnit.MILLISECONDS);
-    }
 
     public SampleTimeResult(ResultRole role, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
-        super(role, label, null);
+        super(role, label,
+                of(buffer, outputTimeUnit),
+                outputTimeUnit, AggregationPolicy.AVG);
         this.buffer = buffer;
-        this.outputTimeUnit = outputTimeUnit;
     }
 
-    @Override
-    public String getScoreUnit() {
-        return TimeValue.tuToString(outputTimeUnit) + "/op";
-    }
-
-    @Override
-    public double getScore() {
-        return getStatistics().getMean();
-    }
-
-    @Override
-    public Statistics getStatistics() {
+    private static Statistics of(SampleBuffer buffer, TimeUnit outputTimeUnit) {
         double tuMultiplier = 1.0D * outputTimeUnit.convert(1, TimeUnit.DAYS) / TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
         return buffer.getStatistics(tuMultiplier);
     }
 
     @Override
-    public Aggregator getIterationAggregator() {
-        return new JoiningAggregator();
-    }
-
-    @Override
-    public Aggregator getRunAggregator() {
-        return new JoiningAggregator();
+    public String getScoreUnit() {
+        return TimeValue.tuToString(outputTimeUnit) + "/op";
     }
 
     @Override
@@ -102,6 +84,16 @@ public class SampleTimeResult extends Result {
         return simpleExtendedInfo(label) + percentileExtendedInfo(label);
     }
 
+    @Override
+    public Aggregator getIterationAggregator() {
+        return new JoiningAggregator();
+    }
+
+    @Override
+    public Aggregator getRunAggregator() {
+        return new JoiningAggregator();
+    }
+
     /**
      * Always add up all the samples into final result.
      * This will allow aggregate result to achieve better accuracy.
@@ -118,8 +110,8 @@ public class SampleTimeResult extends Result {
             for (SampleTimeResult r : results) {
                 tu = r.outputTimeUnit;
                 label = r.label;
-                buffer.addAll(r.buffer);
                 mode = r.role;
+                buffer.addAll(r.buffer);
             }
 
             return new SampleTimeResult(mode, label, buffer, tu);

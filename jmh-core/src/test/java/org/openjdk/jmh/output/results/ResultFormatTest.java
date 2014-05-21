@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * These tests seal the machine-readable format.
@@ -84,9 +85,9 @@ public class ResultFormatTest {
                 Collection<IterationResult> iterResults = new ArrayList<IterationResult>();
                 for (int c = 0; c < r.nextInt(10); c++) {
                     IterationResult res = new IterationResult(record, params.getMeasurement());
-                    res.addResult(new ThroughputResult(ResultRole.PRIMARY, "test", r.nextInt(1000), 1000 * 1000));
-                    res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary1", r.nextInt(1000), 1000 * 1000));
-                    res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000));
+                    res.addResult(new ThroughputResult(ResultRole.PRIMARY, "test", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
+                    res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary1", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
+                    res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     iterResults.add(res);
                 }
                 benchResults.add(new BenchResult(iterResults));

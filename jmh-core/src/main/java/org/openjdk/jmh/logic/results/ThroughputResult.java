@@ -36,53 +36,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class ThroughputResult extends Result {
 
-    /** Total number of operations during iteration */
-    private final long operations;
-    /** Duration of iteration in NanoSeconds */
-    private final long durationNs;
-    /** The TimeUnit to use when calculating the score */
-    private final TimeUnit outputTimeUnit;
-
-    /**
-     * Sets up the result with the default output unit MilliSeconds
-     *
-     * @param role         Result role
-     * @param label        Result label
-     * @param operations   Total number of operations during iteration
-     * @param durationNs   Duration of iteration in NanoSeconds
-     */
-    public ThroughputResult(ResultRole role, String label, long operations, long durationNs) {
-        this(role, label, operations, durationNs, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * Sets up the result
-     *
-     * @param role           Result role
-     * @param label          Result label
-     * @param operations     Total number of operations during iteration
-     * @param durationNs     Duration of iteration in NanoSeconds
-     * @param outputTimeUnit The TimeUnit to use when calculating the score
-     */
     public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
-        this(role, label, operations, durationNs, outputTimeUnit, null);
+        this(role, label,
+                of(1.0D * operations * TimeUnit.NANOSECONDS.convert(1, outputTimeUnit) / durationNs),
+                outputTimeUnit, AggregationPolicy.SUM);
     }
 
-    ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit, Statistics stats) {
-        super(role, label, stats);
-        this.operations = operations;
-        this.durationNs = durationNs;
-        this.outputTimeUnit = outputTimeUnit;
+    ThroughputResult(ResultRole role, String label, Statistics s, TimeUnit outputTimeUnit, AggregationPolicy policy) {
+        super(role, label, s, outputTimeUnit, policy);
     }
 
     @Override
     public String getScoreUnit() {
         return "ops/" + TimeValue.tuToString(outputTimeUnit);
-    }
-
-    @Override
-    public double getScore() {
-        return 1.0D * operations * outputTimeUnit.toNanos(1) / durationNs;
     }
 
     @Override
@@ -94,25 +60,16 @@ public class ThroughputResult extends Result {
                 ListStatistics stat = new ListStatistics();
                 ResultRole mode = null;
                 String label = null;
-                double operations = 0;
                 TimeUnit tu = null;
 
-                final long normalizedDuration = TimeUnit.MINUTES.toNanos(1);
-
                 for (ThroughputResult r : results) {
-                    stat.addValue(r.getScore());
                     mode = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
-                    operations += 1.0D * r.operations * normalizedDuration / r.durationNs;
+                    stat.addValue(r.getScore());
                 }
 
-                // care about long underflow/overflow
-                if (Long.MIN_VALUE < operations && operations < Long.MAX_VALUE) {
-                    return new ThroughputResult(mode, label, (long) operations, normalizedDuration, tu, stat);
-                } else {
-                    throw new IllegalStateException("Internal error: the operation count does not fit into long: " + operations);
-                }
+                return new ThroughputResult(mode, label, stat, tu, AggregationPolicy.SUM);
             }
         };
     }
@@ -124,28 +81,18 @@ public class ThroughputResult extends Result {
             @Override
             public Result aggregate(Collection<ThroughputResult> results) {
                 ListStatistics stat = new ListStatistics();
-                ResultRole role = null;
+                ResultRole mode = null;
                 String label = null;
-                double operations = 0;
                 TimeUnit tu = null;
 
-                final long normalizedDuration = TimeUnit.MINUTES.toNanos(1);
-
                 for (ThroughputResult r : results) {
-                    stat.addValue(r.getScore());
-                    role = r.role;
+                    mode = r.role;
                     tu = r.outputTimeUnit;
                     label = r.label;
-                    operations += 1.0D * r.operations * normalizedDuration / r.durationNs;
+                    stat.addValue(r.getScore());
                 }
-                operations /= results.size();
 
-                // care about long underflow/overflow
-                if (Long.MIN_VALUE < operations && operations < Long.MAX_VALUE) {
-                    return new ThroughputResult(role, label, (long) operations, normalizedDuration, tu, stat);
-                } else {
-                    throw new IllegalStateException("Internal error: the operation count does not fit into long: " + operations);
-                }
+                return new ThroughputResult(mode, label, stat, tu, AggregationPolicy.AVG);
             }
         };
     }

@@ -36,29 +36,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class AverageTimeResult extends Result {
 
-    private final long operations;
-    private final long durationNs;
-    private final TimeUnit outputTimeUnit;
-
     public AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
-        this(mode, label, operations, durationNs, tu, null);
+        this(mode, label,
+                of(1.0D * durationNs / (operations * TimeUnit.NANOSECONDS.convert(1, tu))),
+                tu);
     }
 
-    AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu, Statistics stat) {
-        super(mode, label, stat);
-        this.operations = operations;
-        this.durationNs = durationNs;
-        this.outputTimeUnit = tu;
+    AverageTimeResult(ResultRole mode, String label, Statistics value, TimeUnit tu) {
+        super(mode, label, value, tu, AggregationPolicy.AVG);
     }
 
     @Override
     public String getScoreUnit() {
         return TimeValue.tuToString(outputTimeUnit) + "/op";
-    }
-
-    @Override
-    public double getScore() {
-        return 1.0D * durationNs / (operations * outputTimeUnit.toNanos(1));
     }
 
     public Aggregator<AverageTimeResult> getIterationAggregator() {
@@ -80,18 +70,14 @@ public class AverageTimeResult extends Result {
             ListStatistics stat = new ListStatistics();
             ResultRole role = null;
             String label = null;
-            long operations = 0;
-            long duration = 0;
             TimeUnit tu = null;
             for (AverageTimeResult r : results) {
                 role = r.role;
                 label = r.label;
                 tu = r.outputTimeUnit;
-                operations += r.operations;
-                duration += r.durationNs;
                 stat.addValue(r.getScore());
             }
-            return new AverageTimeResult(role, label, operations, duration, tu, stat);
+            return new AverageTimeResult(role, label, stat, tu);
         }
     }
 
