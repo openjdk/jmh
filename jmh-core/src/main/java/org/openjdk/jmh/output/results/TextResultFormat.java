@@ -77,48 +77,48 @@ class TextResultFormat implements ResultFormat {
             }
         }
 
-        out.printf("%-" + nameLen + "s ", "Benchmark");
+        out.print(String.format("%-" + nameLen + "s ", "Benchmark"));
         for (String k : params) {
-            out.printf("%" + paramLengths.get(k) + "s ", "(" + k + ")");
+            out.print(String.format("%" + paramLengths.get(k) + "s ", "(" + k + ")"));
         }
 
-        out.printf("%6s %9s %12s %12s %8s%n",
-                "Mode", "Samples", "Mean", "Mean error", "Units");
+        out.print(String.format("%6s %9s %12s %12s %8s%n",
+                "Mode", "Samples", "Mean", "Mean error", "Units"));
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult res = runResults.get(key);
             {
                 Statistics stats = res.getPrimaryResult().getStatistics();
-                out.printf("%-" + nameLen + "s ",
-                        benchPrefixes.get(key.getUsername()));
+                out.print(String.format("%-" + nameLen + "s ",
+                        benchPrefixes.get(key.getUsername())));
 
                 for (String k : params) {
                     String v = key.getActualParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v);
+                    out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
                 }
 
-                out.printf("%6s %9d %12.3f %12.3f %8s%n",
+                out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
-                        res.getScoreUnit());
+                        res.getScoreUnit()));
             }
 
             for (String label : res.getSecondaryResults().keySet()) {
                 Statistics stats = res.getSecondaryResults().get(label).getStatistics();
 
-                out.printf("%-" + nameLen + "s ",
-                        benchPrefixes.get(key.getUsername() + ":" + label));
+                out.print(String.format("%-" + nameLen + "s ",
+                        benchPrefixes.get(key.getUsername() + ":" + label)));
 
                 for (String k : params) {
                     String v = key.getActualParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v);
+                    out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
                 }
 
-                out.printf("%6s %9d %12.3f %12.3f %8s%n",
+                out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
-                        res.getScoreUnit());
+                        res.getScoreUnit()));
             }
         }
 
