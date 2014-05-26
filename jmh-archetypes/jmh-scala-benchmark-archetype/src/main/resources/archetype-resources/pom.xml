@@ -19,11 +19,6 @@
             <artifactId>jmh-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-bytecode</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!--
             Put the appropriate dependency on scala-library here:
               org.scala-lang:scala-library:2.10.3 is one of the choices.
@@ -102,6 +97,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
+                            <includePluginDependencies>true</includePluginDependencies>
                             <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
                             <arguments>
                                 <argument>\${project.basedir}/target/classes/</argument>
@@ -111,6 +107,13 @@
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.openjdk.jmh</groupId>
+                        <artifactId>jmh-generator-bytecode</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!--

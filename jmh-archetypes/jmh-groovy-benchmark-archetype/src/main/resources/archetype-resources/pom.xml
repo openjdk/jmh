@@ -19,11 +19,6 @@
             <artifactId>jmh-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-bytecode</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!--
            Put the dependency on Groovy here:
              org.codehaus.groovy:groovy:2.2.2 is on of the possible dependencies
@@ -103,6 +98,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
+                            <includePluginDependencies>true</includePluginDependencies>
                             <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
                             <arguments>
                                 <argument>\${project.basedir}/target/classes/</argument>
@@ -112,6 +108,13 @@
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.openjdk.jmh</groupId>
+                        <artifactId>jmh-generator-bytecode</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!--
