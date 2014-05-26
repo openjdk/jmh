@@ -215,4 +215,12 @@ class BenchmarkGeneratorUtils {
             }
         }
     }
+
+    public static boolean isEnum(ClassInfo type) {
+        if (type.getSuperClass() == null) {
+            return false;
+        } else {
+            return type.getSuperClass().getQualifiedName().equals("java.lang.Enum");
+        }
+    }
 }

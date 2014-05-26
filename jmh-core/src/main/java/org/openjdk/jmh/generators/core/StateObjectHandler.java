@@ -221,7 +221,7 @@ class StateObjectHandler {
                             "-annotated class.", fi);
         }
 
-        String type = fi.getType().getQualifiedName();
+        ClassInfo type = fi.getType();
 
         if (!isParamTypeAcceptable(type)) {
             throw new GenerationException(
@@ -232,9 +232,8 @@ class StateObjectHandler {
         String[] values = fi.getAnnotation(Param.class).value();
 
         if (values.length >= 1 && !values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
-
             for (String val : values) {
-                if (!isParamValueConforming(val, type)) {
+                if (!isParamValueConforming(fi, val, type)) {
                     throw new GenerationException(
                             "Some @" + Param.class.getSimpleName() + " values can not be converted to target type: " +
                                     "\"" + val + "\" can not be converted to " + type,
@@ -245,65 +244,82 @@ class StateObjectHandler {
         }
     }
 
-    private boolean isParamTypeAcceptable(String type) {
-        if (type.equals("java.lang.String")) return true;
-        if (type.equals("boolean") || type.equals("java.lang.Boolean")) return true;
-        if (type.equals("byte") || type.equals("java.lang.Byte")) return true;
-        if (type.equals("char") || type.equals("java.lang.Character")) return true;
-        if (type.equals("short") || type.equals("java.lang.Short")) return true;
-        if (type.equals("int") || type.equals("java.lang.Integer")) return true;
-        if (type.equals("float") || type.equals("java.lang.Float")) return true;
-        if (type.equals("long") || type.equals("java.lang.Long")) return true;
-        if (type.equals("double") || type.equals("java.lang.Double")) return true;
+    private boolean isParamTypeAcceptable(ClassInfo type) {
+        String typeName = type.getQualifiedName();
+        if (BenchmarkGeneratorUtils.isEnum(type)) return true;
+        if (typeName.equals("java.lang.String")) return true;
+        if (typeName.equals("boolean")  || typeName.equals("java.lang.Boolean")) return true;
+        if (typeName.equals("byte")     || typeName.equals("java.lang.Byte")) return true;
+        if (typeName.equals("char")     || typeName.equals("java.lang.Character")) return true;
+        if (typeName.equals("short")    || typeName.equals("java.lang.Short")) return true;
+        if (typeName.equals("int")      || typeName.equals("java.lang.Integer")) return true;
+        if (typeName.equals("float")    || typeName.equals("java.lang.Float")) return true;
+        if (typeName.equals("long")     || typeName.equals("java.lang.Long")) return true;
+        if (typeName.equals("double")   || typeName.equals("java.lang.Double")) return true;
         return false;
     }
 
-    private boolean isParamValueConforming(String val, String type) {
-        if (type.equalsIgnoreCase("java.lang.String")) {
+    private boolean isParamValueConforming(FieldInfo fi, String val, ClassInfo type) {
+        String typeName = type.getQualifiedName();
+
+        if (BenchmarkGeneratorUtils.isEnum(type)) {
+            try {
+                Class<? extends Enum> aClass = (Class<? extends Enum>) Class.forName(typeName);
+                for (Enum e : aClass.getEnumConstants()) {
+                    if (e.name().equals(val)) {
+                        return true;
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                throw new GenerationException("Unable to load " + typeName, fi);
+            }
+        }
+
+        if (typeName.equalsIgnoreCase("java.lang.String")) {
             return true;
         }
-        if (type.equalsIgnoreCase("boolean") || type.equalsIgnoreCase("java.lang.Boolean")) {
+        if (typeName.equalsIgnoreCase("boolean") || typeName.equalsIgnoreCase("java.lang.Boolean")) {
             return (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("false"));
         }
-        if (type.equalsIgnoreCase("byte") || type.equalsIgnoreCase("java.lang.Byte")) {
+        if (typeName.equalsIgnoreCase("byte") || typeName.equalsIgnoreCase("java.lang.Byte")) {
             try {
                 Byte.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (type.equalsIgnoreCase("char") || type.equalsIgnoreCase("java.lang.Character")) {
+        if (typeName.equalsIgnoreCase("char") || typeName.equalsIgnoreCase("java.lang.Character")) {
             return (val.length() == 1);
         }
-        if (type.equalsIgnoreCase("short") || type.equalsIgnoreCase("java.lang.Short")) {
+        if (typeName.equalsIgnoreCase("short") || typeName.equalsIgnoreCase("java.lang.Short")) {
             try {
                 Short.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("java.lang.Integer")) {
+        if (typeName.equalsIgnoreCase("int") || typeName.equalsIgnoreCase("java.lang.Integer")) {
             try {
                 Integer.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (type.equalsIgnoreCase("float") || type.equalsIgnoreCase("java.lang.Float")) {
+        if (typeName.equalsIgnoreCase("float") || typeName.equalsIgnoreCase("java.lang.Float")) {
             try {
                 Float.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (type.equalsIgnoreCase("long") || type.equalsIgnoreCase("java.lang.Long")) {
+        if (typeName.equalsIgnoreCase("long") || typeName.equalsIgnoreCase("java.lang.Long")) {
             try {
                 Long.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("java.lang.Double")) {
+        if (typeName.equalsIgnoreCase("double") || typeName.equalsIgnoreCase("java.lang.Double")) {
             try {
                 Double.valueOf(val);
                 return true;

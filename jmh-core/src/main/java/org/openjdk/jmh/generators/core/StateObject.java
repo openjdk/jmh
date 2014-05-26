@@ -136,7 +136,9 @@ class StateObject {
         if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("java.lang.Double")) {
             return "Double.valueOf(control.getParam(\"" + name + "\"))";
         }
-        throw new IllegalStateException("Unknown type: " + type);
+
+        // assume enum
+        return type + ".valueOf(control.getParam(\"" + name + "\"))";
     }
 
     public void addHelper(HelperMethodInvocation hmi) {
