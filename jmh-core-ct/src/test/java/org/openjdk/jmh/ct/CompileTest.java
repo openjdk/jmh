@@ -25,6 +25,7 @@
 package org.openjdk.jmh.ct;
 
 import junit.framework.Assert;
+import org.openjdk.jmh.generators.bytecode.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;
@@ -52,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 
 public class CompileTest {
+
+    private static final String GENERATOR_TYPE = System.getProperty("jmh.ct.generator", "notset");
 
     public static void assertFail(Class<?> klass) {
         TestGeneratorDestination destination = doTest(klass);
@@ -132,10 +135,36 @@ public class CompileTest {
     }
 
     private static TestGeneratorDestination doTest(Class<?> klass) {
+        if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
+            return doTestReflection(klass);
+        }
+        if (GENERATOR_TYPE.equalsIgnoreCase("bytecode")) {
+            return doTestBytecode(klass);
+        }
+        throw new IllegalStateException("Unhandled compile test generator: " + GENERATOR_TYPE);
+    }
+
+    private static TestGeneratorDestination doTestReflection(Class<?> klass) {
         RFGeneratorSource source = new RFGeneratorSource();
         TestGeneratorDestination destination = new TestGeneratorDestination();
-
         source.processClasses(klass);
+
+        BenchmarkGenerator gen = new BenchmarkGenerator();
+        gen.generate(source, destination);
+        gen.complete(source, destination);
+        return destination;
+    }
+
+    private static TestGeneratorDestination doTestBytecode(Class<?> klass) {
+        ASMGeneratorSource source = new ASMGeneratorSource();
+        TestGeneratorDestination destination = new TestGeneratorDestination();
+
+        String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".class";
+        try {
+            source.processClass(klass.getResourceAsStream(name));
+        } catch (IOException e) {
+            throw new IllegalStateException(name, e);
+        }
 
         BenchmarkGenerator gen = new BenchmarkGenerator();
         gen.generate(source, destination);

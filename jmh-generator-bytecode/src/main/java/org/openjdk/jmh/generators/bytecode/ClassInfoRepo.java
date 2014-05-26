@@ -42,6 +42,24 @@ public class ClassInfoRepo {
             return info;
         }
 
+        if (desc.equals(boolean.class.getCanonicalName()))  return new RFClassInfo(boolean.class);
+        if (desc.equals(byte.class.getCanonicalName()))     return new RFClassInfo(byte.class);
+        if (desc.equals(char.class.getCanonicalName()))     return new RFClassInfo(char.class);
+        if (desc.equals(short.class.getCanonicalName()))    return new RFClassInfo(short.class);
+        if (desc.equals(int.class.getCanonicalName()))      return new RFClassInfo(int.class);
+        if (desc.equals(float.class.getCanonicalName()))    return new RFClassInfo(float.class);
+        if (desc.equals(long.class.getCanonicalName()))     return new RFClassInfo(long.class);
+        if (desc.equals(double.class.getCanonicalName()))   return new RFClassInfo(double.class);
+
+        if (desc.equals(boolean[].class.getCanonicalName()))  return new RFClassInfo(boolean[].class);
+        if (desc.equals(byte[].class.getCanonicalName()))     return new RFClassInfo(byte[].class);
+        if (desc.equals(char[].class.getCanonicalName()))     return new RFClassInfo(char[].class);
+        if (desc.equals(short[].class.getCanonicalName()))    return new RFClassInfo(short[].class);
+        if (desc.equals(int[].class.getCanonicalName()))      return new RFClassInfo(int[].class);
+        if (desc.equals(float[].class.getCanonicalName()))    return new RFClassInfo(float[].class);
+        if (desc.equals(long[].class.getCanonicalName()))     return new RFClassInfo(long[].class);
+        if (desc.equals(double[].class.getCanonicalName()))   return new RFClassInfo(double[].class);
+
         try {
             return new RFClassInfo(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {
