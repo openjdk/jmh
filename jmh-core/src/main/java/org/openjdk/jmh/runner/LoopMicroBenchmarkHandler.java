@@ -140,13 +140,14 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
         // Adjust waiting intervals:
         //  - We don't know the running time for SingleShot benchmarks,
-        //    assume something long enough to wait in the loop below.
+        //    we wait for at least 10 minutes for benchmark to stop; this
+        //    can be adjusted with usual warmup/measurement duration settings;
         //  - For other benchmarks, we wait for twice the run time,
         //    but at least 5 seconds to cover for low run times.
         long timeToWait;
         switch (microbenchmark.getMode()) {
             case SingleShotTime:
-                timeToWait = TimeUnit.SECONDS.toNanos(100);
+                timeToWait = Math.max(TimeUnit.SECONDS.toNanos(600), runtime.convertTo(TimeUnit.NANOSECONDS));
                 break;
             default:
                 timeToWait = Math.max(runtime.convertTo(TimeUnit.NANOSECONDS) * 2, TimeUnit.SECONDS.toNanos(5));
