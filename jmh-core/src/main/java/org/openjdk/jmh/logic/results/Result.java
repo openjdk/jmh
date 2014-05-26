@@ -168,7 +168,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return role;
     }
 
-    static ResultRole aggregateRoles(Collection<? extends Result> results) {
+    public static ResultRole aggregateRoles(Collection<? extends Result> results) {
         ResultRole result = null;
         for (Result r : results) {
             if (result == null) {
@@ -182,7 +182,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return result;
     }
 
-    static String aggregateUnits(Collection<? extends Result> results) {
+    public static String aggregateUnits(Collection<? extends Result> results) {
         String result = null;
         for (Result r : results) {
             if (result == null) {
@@ -196,7 +196,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return result;
     }
 
-    static String aggregateLabels(Collection<? extends Result> results) {
+    public static String aggregateLabels(Collection<? extends Result> results) {
         String result = null;
         for (Result r : results) {
             if (result == null) {
