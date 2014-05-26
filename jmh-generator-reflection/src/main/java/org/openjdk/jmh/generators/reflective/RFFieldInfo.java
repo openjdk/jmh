@@ -51,8 +51,8 @@ public class RFFieldInfo implements FieldInfo {
     }
 
     @Override
-    public String getType() {
-        return f.getType().getCanonicalName();
+    public ClassInfo getType() {
+        return new RFClassInfo(f.getType());
     }
 
     @Override

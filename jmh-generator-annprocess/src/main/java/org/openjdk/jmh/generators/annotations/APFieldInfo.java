@@ -51,8 +51,8 @@ public class APFieldInfo extends APMetadataInfo implements FieldInfo {
     }
 
     @Override
-    public String getType() {
-        return ve.asType().toString();
+    public ClassInfo getType() {
+        return new APClassInfo(processEnv, ve.asType());
     }
 
     @Override

@@ -60,6 +60,10 @@ public class ClassInfoRepo {
         if (desc.equals(long[].class.getCanonicalName()))     return new RFClassInfo(long[].class);
         if (desc.equals(double[].class.getCanonicalName()))   return new RFClassInfo(double[].class);
 
+        if (desc.endsWith("[]")) {
+            desc = "[L" + desc.substring(0, desc.length() - 2) + ";";
+        }
+
         try {
             return new RFClassInfo(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {

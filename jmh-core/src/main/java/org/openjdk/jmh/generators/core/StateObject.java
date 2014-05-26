@@ -107,7 +107,7 @@ class StateObject {
     }
 
     public String getParamAccessor(String name) {
-        String type = params.get(name).getType();
+        String type = params.get(name).getType().getQualifiedName();
 
         if (type.equalsIgnoreCase("java.lang.String")) {
             return "control.getParam(\"" + name + "\")";

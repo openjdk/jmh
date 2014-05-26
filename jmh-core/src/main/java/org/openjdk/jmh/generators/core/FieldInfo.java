@@ -39,7 +39,7 @@ public interface FieldInfo extends MetadataInfo {
     /**
      * @return fully qualified field type
      */
-    String getType();
+    ClassInfo getType();
 
     /**
      * @return reference to syntactically-enclosing class

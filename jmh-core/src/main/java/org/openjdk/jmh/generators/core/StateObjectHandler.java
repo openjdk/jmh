@@ -149,7 +149,7 @@ class StateObjectHandler {
 
             for (FieldInfo sub : ci.getFields()) {
                 if (sub.isPublic()) {
-                    String fieldType = sub.getType();
+                    String fieldType = sub.getType().getQualifiedName();
                     if (fieldType.equals("int") || fieldType.equals("long")) {
                         String name = sub.getName();
                         String meth = execMethod.getName();
@@ -224,7 +224,7 @@ class StateObjectHandler {
         String[] values = fi.getAnnotation(Param.class).value();
 
         if (values.length >= 1 && !values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
-            String type = fi.getType();
+            String type = fi.getType().getQualifiedName();
             for (String val : values) {
                 if (!isParamValueConforming(val, type)) {
                     throw new GenerationException(
