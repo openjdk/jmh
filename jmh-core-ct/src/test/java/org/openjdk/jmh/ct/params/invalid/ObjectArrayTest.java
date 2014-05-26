@@ -44,7 +44,7 @@ public class ObjectArrayTest {
 
     @Test
     public void compileTest() {
-        CompileTest.assertFail(this.getClass());
+        CompileTest.assertFail(this.getClass(), "annotation-compatible types");
     }
 
 }

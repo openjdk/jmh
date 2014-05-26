@@ -221,10 +221,18 @@ class StateObjectHandler {
                             "-annotated class.", fi);
         }
 
+        String type = fi.getType().getQualifiedName();
+
+        if (!isParamTypeAcceptable(type)) {
+            throw new GenerationException(
+                    "@" + Param.class.getSimpleName() + " can only be placed over the annotation-compatible types:" +
+                            " primitives, primitive wrappers, Strings, or enums.", fi);
+        }
+
         String[] values = fi.getAnnotation(Param.class).value();
 
         if (values.length >= 1 && !values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
-            String type = fi.getType().getQualifiedName();
+
             for (String val : values) {
                 if (!isParamValueConforming(val, type)) {
                     throw new GenerationException(
@@ -235,6 +243,19 @@ class StateObjectHandler {
                 }
             }
         }
+    }
+
+    private boolean isParamTypeAcceptable(String type) {
+        if (type.equals("java.lang.String")) return true;
+        if (type.equals("boolean") || type.equals("java.lang.Boolean")) return true;
+        if (type.equals("byte") || type.equals("java.lang.Byte")) return true;
+        if (type.equals("char") || type.equals("java.lang.Character")) return true;
+        if (type.equals("short") || type.equals("java.lang.Short")) return true;
+        if (type.equals("int") || type.equals("java.lang.Integer")) return true;
+        if (type.equals("float") || type.equals("java.lang.Float")) return true;
+        if (type.equals("long") || type.equals("java.lang.Long")) return true;
+        if (type.equals("double") || type.equals("java.lang.Double")) return true;
+        return false;
     }
 
     private boolean isParamValueConforming(String val, String type) {
