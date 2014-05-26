@@ -275,51 +275,51 @@ class StateObjectHandler {
             }
         }
 
-        if (typeName.equalsIgnoreCase("java.lang.String")) {
+        if (typeName.equals("java.lang.String")) {
             return true;
         }
-        if (typeName.equalsIgnoreCase("boolean") || typeName.equalsIgnoreCase("java.lang.Boolean")) {
-            return (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("false"));
+        if (typeName.equals("boolean") || typeName.equals("java.lang.Boolean")) {
+            return (val.equals("true") || val.equals("false"));
         }
-        if (typeName.equalsIgnoreCase("byte") || typeName.equalsIgnoreCase("java.lang.Byte")) {
+        if (typeName.equals("byte") || typeName.equals("java.lang.Byte")) {
             try {
                 Byte.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (typeName.equalsIgnoreCase("char") || typeName.equalsIgnoreCase("java.lang.Character")) {
+        if (typeName.equals("char") || typeName.equals("java.lang.Character")) {
             return (val.length() == 1);
         }
-        if (typeName.equalsIgnoreCase("short") || typeName.equalsIgnoreCase("java.lang.Short")) {
+        if (typeName.equals("short") || typeName.equals("java.lang.Short")) {
             try {
                 Short.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (typeName.equalsIgnoreCase("int") || typeName.equalsIgnoreCase("java.lang.Integer")) {
+        if (typeName.equals("int") || typeName.equals("java.lang.Integer")) {
             try {
                 Integer.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (typeName.equalsIgnoreCase("float") || typeName.equalsIgnoreCase("java.lang.Float")) {
+        if (typeName.equals("float") || typeName.equals("java.lang.Float")) {
             try {
                 Float.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (typeName.equalsIgnoreCase("long") || typeName.equalsIgnoreCase("java.lang.Long")) {
+        if (typeName.equals("long") || typeName.equals("java.lang.Long")) {
             try {
                 Long.valueOf(val);
                 return true;
             } catch (NumberFormatException nfe) {
             }
         }
-        if (typeName.equalsIgnoreCase("double") || typeName.equalsIgnoreCase("java.lang.Double")) {
+        if (typeName.equals("double") || typeName.equals("java.lang.Double")) {
             try {
                 Double.valueOf(val);
                 return true;
