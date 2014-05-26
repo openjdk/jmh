@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.output.results;
 
+import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.ClassUtils;
@@ -104,7 +105,8 @@ class TextResultFormat implements ResultFormat {
             }
 
             for (String label : res.getSecondaryResults().keySet()) {
-                Statistics stats = res.getSecondaryResults().get(label).getStatistics();
+                Result subRes = res.getSecondaryResults().get(label);
+                Statistics stats = subRes.getStatistics();
 
                 out.print(String.format("%-" + nameLen + "s ",
                         benchPrefixes.get(key.getUsername() + ":" + label)));
@@ -118,7 +120,7 @@ class TextResultFormat implements ResultFormat {
                         key.getMode().shortLabel(),
                         stats.getN(),
                         stats.getMean(), stats.getMeanErrorAt(0.999),
-                        res.getScoreUnit()));
+                        subRes.getScoreUnit()));
             }
         }
 
