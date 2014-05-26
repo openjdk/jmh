@@ -22,16 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.gmb.args;
+package org.openjdk.jmh.ct.gmb.args.prims;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class NoStatePrimTest {
+public class PrimLongArrayTest {
 
     @GenerateMicroBenchmark
-    public void test(int reps) {
+    public void test(long[] v) {
 
     }
 

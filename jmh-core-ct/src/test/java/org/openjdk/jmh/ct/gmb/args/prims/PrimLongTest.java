@@ -22,22 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.gmb;
+package org.openjdk.jmh.ct.gmb.args.prims;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class PublicStaticGMBStringsTest {
+public class PrimLongTest {
 
     @GenerateMicroBenchmark
-    public static void test(String[] args) {
+    public void test(long v) {
 
     }
 
     @Test
     public void compileTest() {
-        CompileTest.assertFail(this.getClass());
+        CompileTest.assertFail(this.getClass(), "Method parameters should be");
     }
 
 }
