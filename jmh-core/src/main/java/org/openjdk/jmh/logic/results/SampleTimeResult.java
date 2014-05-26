@@ -37,22 +37,27 @@ import java.util.concurrent.TimeUnit;
 public class SampleTimeResult extends Result {
 
     private final SampleBuffer buffer;
+    private final TimeUnit outputTimeUnit;
 
     public SampleTimeResult(ResultRole role, String label, SampleBuffer buffer, TimeUnit outputTimeUnit) {
+        this(role, label,
+                buffer,
+                TimeValue.tuToString(outputTimeUnit) + "/op",
+                outputTimeUnit);
+    }
+
+    SampleTimeResult(ResultRole role, String label, SampleBuffer buffer, String unit, TimeUnit outputTimeUnit) {
         super(role, label,
                 of(buffer, outputTimeUnit),
-                outputTimeUnit, AggregationPolicy.AVG);
+                unit,
+                AggregationPolicy.AVG);
         this.buffer = buffer;
+        this.outputTimeUnit = outputTimeUnit;
     }
 
     private static Statistics of(SampleBuffer buffer, TimeUnit outputTimeUnit) {
         double tuMultiplier = 1.0D * outputTimeUnit.convert(1, TimeUnit.DAYS) / TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
         return buffer.getStatistics(tuMultiplier);
-    }
-
-    @Override
-    public String getScoreUnit() {
-        return TimeValue.tuToString(outputTimeUnit) + "/op";
     }
 
     @Override
@@ -101,14 +106,17 @@ public class SampleTimeResult extends Result {
         @Override
         public Result aggregate(Collection<SampleTimeResult> results) {
             SampleBuffer buffer = new SampleBuffer();
+            TimeUnit tu = null;
             for (SampleTimeResult r : results) {
                 buffer.addAll(r.buffer);
+                tu = r.outputTimeUnit;
             }
             return new SampleTimeResult(
                     Result.aggregateRoles(results),
                     Result.aggregateLabels(results),
                     buffer,
-                    Result.aggregateTimeunits(results)
+                    Result.aggregateUnits(results),
+                    tu
             );
         }
     }

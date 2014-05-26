@@ -39,16 +39,11 @@ public class SingleShotResult extends Result {
     public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
         this(role, label,
                 of(1.0D * duration / TimeUnit.NANOSECONDS.convert(1, outputTimeUnit)),
-                outputTimeUnit);
+                TimeValue.tuToString(outputTimeUnit));
     }
 
-    SingleShotResult(ResultRole mode, String label, Statistics s, TimeUnit outputTimeUnit) {
-        super(mode, label, s, outputTimeUnit, AggregationPolicy.AVG);
-    }
-
-    @Override
-    public String getScoreUnit() {
-        return TimeValue.tuToString(outputTimeUnit);
+    SingleShotResult(ResultRole mode, String label, Statistics s, String unit) {
+        super(mode, label, s, unit, AggregationPolicy.AVG);
     }
 
     @Override
@@ -80,7 +75,7 @@ public class SingleShotResult extends Result {
                     Result.aggregateRoles(results),
                     Result.aggregateLabels(results),
                     stat,
-                    Result.aggregateTimeunits(results)
+                    Result.aggregateUnits(results)
             );
         }
 

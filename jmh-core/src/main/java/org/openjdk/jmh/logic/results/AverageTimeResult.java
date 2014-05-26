@@ -39,16 +39,11 @@ public class AverageTimeResult extends Result {
     public AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
         this(mode, label,
                 of(1.0D * durationNs / (operations * TimeUnit.NANOSECONDS.convert(1, tu))),
-                tu);
+                TimeValue.tuToString(tu) + "/op");
     }
 
-    AverageTimeResult(ResultRole mode, String label, Statistics value, TimeUnit tu) {
-        super(mode, label, value, tu, AggregationPolicy.AVG);
-    }
-
-    @Override
-    public String getScoreUnit() {
-        return TimeValue.tuToString(outputTimeUnit) + "/op";
+    AverageTimeResult(ResultRole mode, String label, Statistics value, String unit) {
+        super(mode, label, value, unit, AggregationPolicy.AVG);
     }
 
     @Override
@@ -72,7 +67,7 @@ public class AverageTimeResult extends Result {
                     Result.aggregateRoles(results),
                     Result.aggregateLabels(results),
                     stat,
-                    Result.aggregateTimeunits(results)
+                    Result.aggregateUnits(results)
             );
         }
     }

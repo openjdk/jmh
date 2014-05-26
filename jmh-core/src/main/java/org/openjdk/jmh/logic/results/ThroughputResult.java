@@ -39,16 +39,12 @@ public class ThroughputResult extends Result {
     public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
         this(role, label,
                 of(1.0D * operations * TimeUnit.NANOSECONDS.convert(1, outputTimeUnit) / durationNs),
-                outputTimeUnit, AggregationPolicy.SUM);
+                "ops/" + TimeValue.tuToString(outputTimeUnit),
+                AggregationPolicy.SUM);
     }
 
-    ThroughputResult(ResultRole role, String label, Statistics s, TimeUnit outputTimeUnit, AggregationPolicy policy) {
-        super(role, label, s, outputTimeUnit, policy);
-    }
-
-    @Override
-    public String getScoreUnit() {
-        return "ops/" + TimeValue.tuToString(outputTimeUnit);
+    ThroughputResult(ResultRole role, String label, Statistics s, String unit, AggregationPolicy policy) {
+        super(role, label, s, unit, policy);
     }
 
     @Override
@@ -78,7 +74,7 @@ public class ThroughputResult extends Result {
                     Result.aggregateRoles(results),
                     Result.aggregateLabels(results),
                     stat,
-                    Result.aggregateTimeunits(results),
+                    Result.aggregateUnits(results),
                     policy
             );
         }

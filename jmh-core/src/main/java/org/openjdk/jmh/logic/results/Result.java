@@ -31,7 +31,6 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for all types of results that can be returned by a microbenchmark.
@@ -40,14 +39,14 @@ public abstract class Result<T extends Result<T>> implements Serializable {
 
     protected final ResultRole role;
     protected final String label;
-    protected final TimeUnit outputTimeUnit;
+    protected final String unit;
     protected final Statistics statistics;
     protected final AggregationPolicy policy;
 
-    public Result(ResultRole role, String label, Statistics s, TimeUnit outputTimeUnit, AggregationPolicy policy) {
+    public Result(ResultRole role, String label, Statistics s, String unit, AggregationPolicy policy) {
         this.role = role;
         this.label = label;
-        this.outputTimeUnit = outputTimeUnit;
+        this.unit = unit;
         this.statistics = s;
         this.policy = policy;
     }
@@ -63,7 +62,9 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      *
      * @return String representing the unit of the score
      */
-    public abstract String getScoreUnit();
+    public final String getScoreUnit() {
+        return unit;
+    }
 
     /**
      * The score of one iteration.
@@ -181,14 +182,14 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return result;
     }
 
-    static TimeUnit aggregateTimeunits(Collection<? extends Result> results) {
-        TimeUnit result = null;
+    static String aggregateUnits(Collection<? extends Result> results) {
+        String result = null;
         for (Result r : results) {
             if (result == null) {
-                result = r.outputTimeUnit;
+                result = r.unit;
             } else {
-                if (result != r.outputTimeUnit) {
-                    throw new IllegalStateException("Combining the results with different timeunits");
+                if (!result.equals(r.unit)) {
+                    throw new IllegalStateException("Combining the results with different units");
                 }
             }
         }
