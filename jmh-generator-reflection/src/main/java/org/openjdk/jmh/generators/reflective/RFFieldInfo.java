@@ -31,7 +31,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public class RFFieldInfo implements FieldInfo {
+class RFFieldInfo implements FieldInfo {
     private final ClassInfo declaringClass;
     private final Field f;
 

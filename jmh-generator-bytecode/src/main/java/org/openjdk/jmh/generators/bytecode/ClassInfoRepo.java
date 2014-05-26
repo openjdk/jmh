@@ -25,13 +25,13 @@
 package org.openjdk.jmh.generators.bytecode;
 
 import org.openjdk.jmh.generators.core.ClassInfo;
-import org.openjdk.jmh.generators.reflective.RFClassInfo;
+import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClassInfoRepo {
+class ClassInfoRepo {
 
     private final Map<String, ClassInfo> map = new HashMap<String, ClassInfo>();
 
@@ -42,30 +42,30 @@ public class ClassInfoRepo {
             return info;
         }
 
-        if (desc.equals(boolean.class.getCanonicalName()))  return new RFClassInfo(boolean.class);
-        if (desc.equals(byte.class.getCanonicalName()))     return new RFClassInfo(byte.class);
-        if (desc.equals(char.class.getCanonicalName()))     return new RFClassInfo(char.class);
-        if (desc.equals(short.class.getCanonicalName()))    return new RFClassInfo(short.class);
-        if (desc.equals(int.class.getCanonicalName()))      return new RFClassInfo(int.class);
-        if (desc.equals(float.class.getCanonicalName()))    return new RFClassInfo(float.class);
-        if (desc.equals(long.class.getCanonicalName()))     return new RFClassInfo(long.class);
-        if (desc.equals(double.class.getCanonicalName()))   return new RFClassInfo(double.class);
+        if (desc.equals(boolean.class.getCanonicalName()))  return RFGeneratorSource.resolveClass(boolean.class);
+        if (desc.equals(byte.class.getCanonicalName()))     return RFGeneratorSource.resolveClass(byte.class);
+        if (desc.equals(char.class.getCanonicalName()))     return RFGeneratorSource.resolveClass(char.class);
+        if (desc.equals(short.class.getCanonicalName()))    return RFGeneratorSource.resolveClass(short.class);
+        if (desc.equals(int.class.getCanonicalName()))      return RFGeneratorSource.resolveClass(int.class);
+        if (desc.equals(float.class.getCanonicalName()))    return RFGeneratorSource.resolveClass(float.class);
+        if (desc.equals(long.class.getCanonicalName()))     return RFGeneratorSource.resolveClass(long.class);
+        if (desc.equals(double.class.getCanonicalName()))   return RFGeneratorSource.resolveClass(double.class);
 
-        if (desc.equals(boolean[].class.getCanonicalName()))  return new RFClassInfo(boolean[].class);
-        if (desc.equals(byte[].class.getCanonicalName()))     return new RFClassInfo(byte[].class);
-        if (desc.equals(char[].class.getCanonicalName()))     return new RFClassInfo(char[].class);
-        if (desc.equals(short[].class.getCanonicalName()))    return new RFClassInfo(short[].class);
-        if (desc.equals(int[].class.getCanonicalName()))      return new RFClassInfo(int[].class);
-        if (desc.equals(float[].class.getCanonicalName()))    return new RFClassInfo(float[].class);
-        if (desc.equals(long[].class.getCanonicalName()))     return new RFClassInfo(long[].class);
-        if (desc.equals(double[].class.getCanonicalName()))   return new RFClassInfo(double[].class);
+        if (desc.equals(boolean[].class.getCanonicalName()))  return RFGeneratorSource.resolveClass(boolean[].class);
+        if (desc.equals(byte[].class.getCanonicalName()))     return RFGeneratorSource.resolveClass(byte[].class);
+        if (desc.equals(char[].class.getCanonicalName()))     return RFGeneratorSource.resolveClass(char[].class);
+        if (desc.equals(short[].class.getCanonicalName()))    return RFGeneratorSource.resolveClass(short[].class);
+        if (desc.equals(int[].class.getCanonicalName()))      return RFGeneratorSource.resolveClass(int[].class);
+        if (desc.equals(float[].class.getCanonicalName()))    return RFGeneratorSource.resolveClass(float[].class);
+        if (desc.equals(long[].class.getCanonicalName()))     return RFGeneratorSource.resolveClass(long[].class);
+        if (desc.equals(double[].class.getCanonicalName()))   return RFGeneratorSource.resolveClass(double[].class);
 
         if (desc.endsWith("[]")) {
             desc = "[L" + desc.substring(0, desc.length() - 2) + ";";
         }
 
         try {
-            return new RFClassInfo(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
+            return RFGeneratorSource.resolveClass(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Unable to resolve class: " + desc);
         }

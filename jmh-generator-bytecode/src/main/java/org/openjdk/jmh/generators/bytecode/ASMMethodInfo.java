@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
+class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
 
     private final ASMClassInfo declaringClass;
     private final Map<String, AnnotationInvocationHandler> annotations;

@@ -33,7 +33,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
 
-public class APFieldInfo extends APMetadataInfo implements FieldInfo {
+class APFieldInfo extends APMetadataInfo implements FieldInfo {
 
     private final VariableElement ve;
 

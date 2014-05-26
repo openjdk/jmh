@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class AnnotationInvocationHandler extends AnnotationVisitor implements InvocationHandler {
+class AnnotationInvocationHandler extends AnnotationVisitor implements InvocationHandler {
     private final Multimap<String, Object> values;
 
     public AnnotationInvocationHandler(AnnotationVisitor annotationVisitor) {

@@ -34,7 +34,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RFMethodInfo implements MethodInfo {
+class RFMethodInfo implements MethodInfo {
 
     private final RFClassInfo declaringClass;
     private final Method m;

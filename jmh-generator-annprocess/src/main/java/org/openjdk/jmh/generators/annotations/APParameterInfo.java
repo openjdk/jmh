@@ -30,7 +30,7 @@ import org.openjdk.jmh.generators.core.ParameterInfo;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.VariableElement;
 
-public class APParameterInfo extends APMetadataInfo implements ParameterInfo {
+class APParameterInfo extends APMetadataInfo implements ParameterInfo {
     private final VariableElement ve;
 
     public APParameterInfo(ProcessingEnvironment processEnv, VariableElement ve) {

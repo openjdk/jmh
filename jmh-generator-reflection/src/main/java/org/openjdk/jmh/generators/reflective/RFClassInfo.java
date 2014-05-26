@@ -36,7 +36,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RFClassInfo implements ClassInfo {
+class RFClassInfo implements ClassInfo {
     private final Class<?> klass;
 
     public RFClassInfo(Class<?> klass) {

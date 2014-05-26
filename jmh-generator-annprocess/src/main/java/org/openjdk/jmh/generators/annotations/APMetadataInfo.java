@@ -27,7 +27,7 @@ package org.openjdk.jmh.generators.annotations;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 
-public class APMetadataInfo {
+class APMetadataInfo {
 
     protected final ProcessingEnvironment processEnv;
     private final Element element;

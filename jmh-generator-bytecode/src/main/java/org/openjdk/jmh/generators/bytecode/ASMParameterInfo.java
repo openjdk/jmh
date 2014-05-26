@@ -27,7 +27,7 @@ package org.openjdk.jmh.generators.bytecode;
 import org.openjdk.jmh.generators.core.ClassInfo;
 import org.openjdk.jmh.generators.core.ParameterInfo;
 
-public class ASMParameterInfo implements ParameterInfo {
+class ASMParameterInfo implements ParameterInfo {
 
     private final ClassInfo ci;
 

@@ -36,7 +36,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class APMethodInfo extends APMetadataInfo implements MethodInfo {
+class APMethodInfo extends APMetadataInfo implements MethodInfo {
 
     private final ClassInfo ci;
     private final ExecutableElement el;

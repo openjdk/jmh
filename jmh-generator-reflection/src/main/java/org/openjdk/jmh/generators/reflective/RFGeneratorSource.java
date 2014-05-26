@@ -48,11 +48,15 @@ public class RFGeneratorSource implements GeneratorSource {
         return cis;
     }
 
+    public static ClassInfo resolveClass(Class<?> klass) {
+        return new RFClassInfo(klass);
+    }
+
     @Override
     public ClassInfo resolveClass(String className) {
         String desc = className.replace('/', '.');
         try {
-            return new RFClassInfo(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
+            return resolveClass(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Unable to resolve class: " + desc);
         }

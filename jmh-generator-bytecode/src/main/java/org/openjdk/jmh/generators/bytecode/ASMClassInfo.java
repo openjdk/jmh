@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ASMClassInfo extends ClassVisitor implements ClassInfo {
+class ASMClassInfo extends ClassVisitor implements ClassInfo {
 
     private String idName;
     private String packageName;

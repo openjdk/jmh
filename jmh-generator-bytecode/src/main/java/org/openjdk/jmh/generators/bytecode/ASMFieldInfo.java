@@ -36,7 +36,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ASMFieldInfo extends FieldVisitor implements FieldInfo {
+class ASMFieldInfo extends FieldVisitor implements FieldInfo {
 
     private final ClassInfo type;
     private final ASMClassInfo declaringClass;
