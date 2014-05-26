@@ -106,8 +106,8 @@ public class ASMClassInfo extends ClassVisitor implements ClassInfo {
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         ClassInfo type = classInfos.get(Type.getReturnType(desc).getClassName());
-        ASMFieldInfo fi = new ASMFieldInfo(super.visitField(access, name, desc, signature, value),
-                this, access, name, type, signature);
+        FieldVisitor fv = super.visitField(access, name, desc, signature, value);
+        ASMFieldInfo fi = new ASMFieldInfo(fv, this, access, name, type);
         fields.add(fi);
         return fi;
     }
