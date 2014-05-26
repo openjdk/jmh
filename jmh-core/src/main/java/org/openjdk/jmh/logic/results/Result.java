@@ -30,6 +30,7 @@ import org.openjdk.jmh.util.internal.Statistics;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -164,5 +165,47 @@ public abstract class Result<T extends Result<T>> implements Serializable {
 
     public ResultRole getRole() {
         return role;
+    }
+
+    static ResultRole aggregateRoles(Collection<? extends Result> results) {
+        ResultRole result = null;
+        for (Result r : results) {
+            if (result == null) {
+                result = r.role;
+            } else {
+                if (result != r.role) {
+                    throw new IllegalStateException("Combining the results with different roles");
+                }
+            }
+        }
+        return result;
+    }
+
+    static TimeUnit aggregateTimeunits(Collection<? extends Result> results) {
+        TimeUnit result = null;
+        for (Result r : results) {
+            if (result == null) {
+                result = r.outputTimeUnit;
+            } else {
+                if (result != r.outputTimeUnit) {
+                    throw new IllegalStateException("Combining the results with different timeunits");
+                }
+            }
+        }
+        return result;
+    }
+
+    static String aggregateLabels(Collection<? extends Result> results) {
+        String result = null;
+        for (Result r : results) {
+            if (result == null) {
+                result = r.label;
+            } else {
+                if (!result.equals(r.label)) {
+//                    throw new IllegalStateException("Combining the results with different labels");
+                }
+            }
+        }
+        return result;
     }
 }

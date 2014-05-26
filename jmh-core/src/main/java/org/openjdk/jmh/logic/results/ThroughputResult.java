@@ -53,48 +53,35 @@ public class ThroughputResult extends Result {
 
     @Override
     public Aggregator getIterationAggregator() {
-        // compute sum
-        return new Aggregator<ThroughputResult>() {
-            @Override
-            public Result aggregate(Collection<ThroughputResult> results) {
-                ListStatistics stat = new ListStatistics();
-                ResultRole mode = null;
-                String label = null;
-                TimeUnit tu = null;
-
-                for (ThroughputResult r : results) {
-                    mode = r.role;
-                    tu = r.outputTimeUnit;
-                    label = r.label;
-                    stat.addValue(r.getScore());
-                }
-
-                return new ThroughputResult(mode, label, stat, tu, AggregationPolicy.SUM);
-            }
-        };
+        return new ThroughputAggregator(AggregationPolicy.SUM);
     }
 
     @Override
     public Aggregator getRunAggregator() {
-        // compute mean
-        return new Aggregator<ThroughputResult>() {
-            @Override
-            public Result aggregate(Collection<ThroughputResult> results) {
-                ListStatistics stat = new ListStatistics();
-                ResultRole mode = null;
-                String label = null;
-                TimeUnit tu = null;
+        return new ThroughputAggregator(AggregationPolicy.AVG);
+    }
 
-                for (ThroughputResult r : results) {
-                    mode = r.role;
-                    tu = r.outputTimeUnit;
-                    label = r.label;
-                    stat.addValue(r.getScore());
-                }
+    static class ThroughputAggregator implements Aggregator<ThroughputResult> {
+        private final AggregationPolicy policy;
 
-                return new ThroughputResult(mode, label, stat, tu, AggregationPolicy.AVG);
+        ThroughputAggregator(AggregationPolicy policy) {
+            this.policy = policy;
+        }
+
+        @Override
+        public Result aggregate(Collection<ThroughputResult> results) {
+            ListStatistics stat = new ListStatistics();
+            for (ThroughputResult r : results) {
+                stat.addValue(r.getScore());
             }
-        };
+            return new ThroughputResult(
+                    Result.aggregateRoles(results),
+                    Result.aggregateLabels(results),
+                    stat,
+                    Result.aggregateTimeunits(results),
+                    policy
+            );
+        }
     }
 
 }

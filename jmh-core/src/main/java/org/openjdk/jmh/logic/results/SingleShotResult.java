@@ -73,16 +73,15 @@ public class SingleShotResult extends Result {
         @Override
         public Result aggregate(Collection<SingleShotResult> results) {
             ListStatistics stat = new ListStatistics();
-            ResultRole role = null;
-            String label = null;
-            TimeUnit tu = null;
             for (SingleShotResult r : results) {
-                role = r.role;
-                tu = r.outputTimeUnit;
-                label = r.label;
                 stat.addValue(r.getScore());
             }
-            return new SingleShotResult(role, label, stat, tu);
+            return new SingleShotResult(
+                    Result.aggregateRoles(results),
+                    Result.aggregateLabels(results),
+                    stat,
+                    Result.aggregateTimeunits(results)
+            );
         }
 
     }

@@ -25,8 +25,6 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.ListStatistics;
-import org.openjdk.jmh.util.internal.MultisetStatistics;
 import org.openjdk.jmh.util.internal.SampleBuffer;
 import org.openjdk.jmh.util.internal.Statistics;
 
@@ -102,19 +100,16 @@ public class SampleTimeResult extends Result {
 
         @Override
         public Result aggregate(Collection<SampleTimeResult> results) {
-            // generate new sample buffer
-            ResultRole mode = null;
-            String label = null;
             SampleBuffer buffer = new SampleBuffer();
-            TimeUnit tu = null;
             for (SampleTimeResult r : results) {
-                tu = r.outputTimeUnit;
-                label = r.label;
-                mode = r.role;
                 buffer.addAll(r.buffer);
             }
-
-            return new SampleTimeResult(mode, label, buffer, tu);
+            return new SampleTimeResult(
+                    Result.aggregateRoles(results),
+                    Result.aggregateLabels(results),
+                    buffer,
+                    Result.aggregateTimeunits(results)
+            );
         }
     }
 

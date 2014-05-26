@@ -51,33 +51,29 @@ public class AverageTimeResult extends Result {
         return TimeValue.tuToString(outputTimeUnit) + "/op";
     }
 
+    @Override
     public Aggregator<AverageTimeResult> getIterationAggregator() {
         return new ResultAggregator();
     }
 
+    @Override
     public Aggregator<AverageTimeResult> getRunAggregator() {
         return new ResultAggregator();
     }
 
-    /**
-     * Computes the aggregate result.
-     * Regardless of aggregation, we need to compute the aggregate time as:
-     *   average time = (all time) / (all operations)
-     */
     static class ResultAggregator implements Aggregator<AverageTimeResult> {
         @Override
         public AverageTimeResult aggregate(Collection<AverageTimeResult> results) {
             ListStatistics stat = new ListStatistics();
-            ResultRole role = null;
-            String label = null;
-            TimeUnit tu = null;
             for (AverageTimeResult r : results) {
-                role = r.role;
-                label = r.label;
-                tu = r.outputTimeUnit;
                 stat.addValue(r.getScore());
             }
-            return new AverageTimeResult(role, label, stat, tu);
+            return new AverageTimeResult(
+                    Result.aggregateRoles(results),
+                    Result.aggregateLabels(results),
+                    stat,
+                    Result.aggregateTimeunits(results)
+            );
         }
     }
 
