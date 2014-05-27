@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.logic.results;
 
-import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -46,14 +45,12 @@ public class IterationResult implements Serializable {
     private final IterationParams params;
     private final List<Result> primaryResults;
     private final Multimap<String, Result> secondaryResults;
-    private final List<ProfilerResult> profilerResults;
     private String scoreUnit;
 
     public IterationResult(BenchmarkRecord benchmark, IterationParams params) {
         this.benchmark = benchmark;
         this.params = params;
         this.primaryResults = new ArrayList<Result>();
-        this.profilerResults = new ArrayList<ProfilerResult>();
         this.secondaryResults = new TreeMultimap<String, Result>();
     }
 
@@ -125,14 +122,6 @@ public class IterationResult implements Serializable {
 
     public IterationParams getParams() {
         return params;
-    }
-
-    public void addProfileResult(ProfilerResult profilerResult) {
-        profilerResults.add(profilerResult);
-    }
-
-    public Collection<ProfilerResult> getProfilerResults() {
-        return profilerResults;
     }
 
     public String getScoreUnit() {

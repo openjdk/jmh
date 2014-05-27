@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,14 +24,24 @@
  */
 package org.openjdk.jmh.profile;
 
-class EmptyResult implements ProfilerResult {
-    @Override
-    public String getProfilerName() {
-        return "N/A";
-    }
+import org.openjdk.jmh.logic.results.Aggregator;
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.ListStatistics;
 
+import java.util.Collection;
+
+public class ProfilerResultAggregator implements Aggregator<ProfilerResult> {
     @Override
-    public boolean hasData() {
-        return false;
+    public Result aggregate(Collection<ProfilerResult> results) {
+        ListStatistics stats = new ListStatistics();
+        for (ProfilerResult r : results) {
+            stats.addValue(r.getScore());
+        }
+        return new ProfilerResult(
+                Result.aggregateLabels(results),
+                stats,
+                Result.aggregateUnits(results),
+                Result.aggregatePolicies(results)
+        );
     }
 }

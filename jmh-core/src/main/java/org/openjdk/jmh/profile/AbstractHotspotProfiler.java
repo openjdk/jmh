@@ -24,11 +24,16 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.Optional;
 import sun.management.counter.Counter;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -51,7 +56,37 @@ abstract class AbstractHotspotProfiler implements Profiler {
     protected abstract Collection<Counter> getCounters();
 
     @Override
-    public void startProfile() {
+    public InjectionPoint point() {
+        return InjectionPoint.FORKED_VM_CONTROL;
+    }
+
+    @Override
+    public Optional<List<String>> addJVMOptions() {
+        return Optional.none();
+    }
+
+    @Override
+    public void beforeTrial() {
+
+    }
+
+    @Override
+    public Collection<? extends Result> afterIteration() {
+        HotspotInternalResult res = counters();
+        Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
+        for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
+            results.add(new ProfilerResult("instrument@unknown." + e.getKey(), e.getValue(), "???"));
+        }
+        return results;
+    }
+
+    @Override
+    public Collection<? extends Result> afterTrial() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void beforeIteration() {
         prevs = new HashMap<String, Long>();
         for (Counter counter : getCounters()) {
             prevs.put(counter.getName(), convert(counter.getValue()));
@@ -67,8 +102,7 @@ abstract class AbstractHotspotProfiler implements Profiler {
         }
     }
 
-    @Override
-    public HotspotInternalResult endProfile() {
+    protected HotspotInternalResult counters() {
         long duration = System.currentTimeMillis() - startTime;
 
         Map<String, Long> difference = new TreeMap<String, Long>();
@@ -77,9 +111,7 @@ abstract class AbstractHotspotProfiler implements Profiler {
             Long prev = prevs.get(counter.getName());
             if (prev != null) {
                 long diff = convert(counter.getValue()) - prev;
-                if (verbose || diff != 0) {
-                    difference.put(counter.getName(), diff);
-                }
+                difference.put(counter.getName(), diff);
                 current.put(counter.getName(), convert(counter.getValue()));
             }
         }
@@ -118,7 +150,7 @@ abstract class AbstractHotspotProfiler implements Profiler {
     /**
      * Represents the HotSpot profiling result.
      */
-    static class HotspotInternalResult implements ProfilerResult {
+    static class HotspotInternalResult {
 
         private final String name;
         private final Map<String, Long> current;
@@ -134,16 +166,6 @@ abstract class AbstractHotspotProfiler implements Profiler {
 
         public HotspotInternalResult(HotspotInternalResult result) {
             this(result.name, result.current, result.diff, result.durationMsec);
-        }
-
-        @Override
-        public String getProfilerName() {
-            return name;
-        }
-
-        @Override
-        public boolean hasData() {
-            return true;
         }
 
         public Map<String, Long> getCurrent() {

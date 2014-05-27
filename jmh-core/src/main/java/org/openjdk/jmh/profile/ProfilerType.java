@@ -31,7 +31,7 @@ public enum ProfilerType {
     GC {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new GCProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
+            return new GCProfiler();
         }
 
         @Override
@@ -52,12 +52,12 @@ public enum ProfilerType {
     COMP {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new CompilerProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
+            return new CompilerProfiler();
         }
 
         @Override
         public boolean isSupported() {
-            return CompilerProfiler.isSupported();
+            return new CompilerProfiler().isSupported();
         }
 
         @Override
@@ -73,7 +73,7 @@ public enum ProfilerType {
     CL {
         @Override
         public Profiler createInstance(VerboseMode mode) {
-            return new ClassloaderProfiler(label(), mode.equalsOrHigherThan(VerboseMode.EXTRA));
+            return new ClassloaderProfiler();
         }
 
         @Override
@@ -198,27 +198,28 @@ public enum ProfilerType {
             return "HotSpot (tm) threading subsystem via implementation-specific MBeans";
         }
     },
-    STACK {
-        @Override
-        public String label() {
-            return "Stack";
-        }
-
-        @Override
-        public Profiler createInstance(VerboseMode mode) {
-            return new StackProfiler(label());
-        }
-
-        @Override
-        public boolean isSupported() {
-            return true;
-        }
-
-        @Override
-        public String description() {
-            return "Simple and naive Java stack profiler";
-        }
-    };
+//    STACK {
+//        @Override
+//        public String label() {
+//            return "Stack";
+//        }
+//
+//        @Override
+//        public Profiler createInstance(VerboseMode mode) {
+//            return new StackProfiler(label());
+//        }
+//
+//        @Override
+//        public boolean isSupported() {
+//            return true;
+//        }
+//
+//        @Override
+//        public String description() {
+//            return "Simple and naive Java stack profiler";
+//        }
+//    },
+    ;
 
     public abstract Profiler createInstance(VerboseMode mode);
 

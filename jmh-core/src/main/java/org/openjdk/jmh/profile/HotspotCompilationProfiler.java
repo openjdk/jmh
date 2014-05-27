@@ -24,11 +24,16 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
+import org.openjdk.jmh.logic.results.Result;
 import sun.management.HotspotCompilationMBean;
 import sun.management.counter.Counter;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 class HotspotCompilationProfiler extends AbstractHotspotProfiler {
 
@@ -42,64 +47,24 @@ class HotspotCompilationProfiler extends AbstractHotspotProfiler {
     }
 
     @Override
-    public HotspotInternalResult endProfile() {
-        return new HotspotCompilationResult(super.endProfile());
-    }
+    public Collection<? extends Result> afterIteration() {
+        Map<String, Long> current = counters().getCurrent();
+        return Arrays.asList(
+                new ProfilerResult("@compiler.totalTime", TimeUnit.NANOSECONDS.toMillis(current.get("java.ci.totalTime")), "ms", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.totalCompiles", current.get("sun.ci.totalCompiles"), "methods", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.totalBailouts", current.get("sun.ci.totalBailouts"), "methods", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.totalInvalidates", current.get("sun.ci.totalInvalidates"), "methods", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.nmethodCodeSize", current.get("sun.ci.nmethodCodeSize")/ 1024, "Kb", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.nmethodSize", current.get("sun.ci.nmethodSize") / 1024, "Kb", AggregationPolicy.MAX),
 
-    static class HotspotCompilationResult extends HotspotInternalResult {
+                new ProfilerResult("@compiler.osrCompiles", current.get("sun.ci.osrCompiles"), "methods", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.osrBytes", current.get("sun.ci.osrTime") / 1024, "Kb", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.osrTime", TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.osrBytes")), "ms", AggregationPolicy.MAX),
 
-        public final String result;
-
-        public HotspotCompilationResult(HotspotInternalResult s) {
-            super(s);
-
-            Map<String, Long> diff = s.getDiff();
-            Map<String, Long> current = s.getCurrent();
-
-            StringBuilder builder = new StringBuilder();
-
-            builder.append(
-                    String.format("wall time = %.3f secs, JIT time = %.3f secs, %d threads\n",
-                            s.getDurationMsec() / 1000.0, deNull(diff.get("java.ci.totalTime")) / 1000.0 / 1000.0, deNull(current.get("sun.ci.threads"))
-                    )
-            );
-
-            builder.append(
-                    String.format("%14s %+d compiles, %+d bailouts, %+d invalidates, %+d native bytes generated, %+d instructions\n",
-                            "",
-                            deNull(diff.get("sun.ci.totalCompiles")),
-                            deNull(diff.get("sun.ci.totalBailouts")),
-                            deNull(diff.get("sun.ci.totalInvalidates")),
-                            deNull(diff.get("sun.ci.nmethodCodeSize")),
-                            deNull(diff.get("sun.ci.nmethodSize"))
-                    )
-            );
-
-            builder.append(
-                    String.format("%14s %+d OSR compiles, %+d bytecode bytes compiled, %+d us spent\n",
-                            "",
-                            deNull(diff.get("sun.ci.osrCompiles")),
-                            deNull(diff.get("sun.ci.osrBytes")),
-                            deNull(diff.get("sun.ci.osrTime"))
-                    )
-            );
-
-            builder.append(
-                    String.format("%14s %+d normal compiles, %+d bytecode bytes compiled, %+d us spent\n",
-                            "",
-                            deNull(diff.get("sun.ci.standardCompiles")),
-                            deNull(diff.get("sun.ci.standardBytes")),
-                            deNull(diff.get("sun.ci.standardTime"))
-                    )
-            );
-
-            result = builder.toString();
-        }
-
-        @Override
-        public String toString() {
-            return result;
-        }
+                new ProfilerResult("@compiler.standardCompiles", current.get("sun.ci.standardCompiles"), "methods", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.standardBytes", current.get("sun.ci.standardBytes") / 1024, "Kb", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.standardTime", TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.standardTime")), "ms", AggregationPolicy.MAX)
+        );
     }
 
 }

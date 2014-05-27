@@ -24,25 +24,38 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.Optional;
+
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 class ClassloaderProfiler implements Profiler {
 
-    private long startTime = -1;
     private long loadedClasses = -1;
     private long unloadedClasses = -1;
-    private final String name;
-    private final boolean verbose;
 
-    public ClassloaderProfiler(String name, boolean verbose) {
-        this.name = name;
-        this.verbose = verbose;
+    @Override
+    public InjectionPoint point() {
+        return InjectionPoint.FORKED_VM_CONTROL;
     }
 
     @Override
-    public void startProfile() {
-        this.startTime = System.currentTimeMillis();
+    public Optional<List<String>> addJVMOptions() {
+        return Optional.none();
+    }
+
+    @Override
+    public void beforeTrial() {
+
+    }
+
+    @Override
+    public void beforeIteration() {
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
         try {
             loadedClasses = cl.getLoadedClassCount();
@@ -57,9 +70,7 @@ class ClassloaderProfiler implements Profiler {
     }
 
     @Override
-    public ProfilerResult endProfile() {
-        long endTime = System.currentTimeMillis();
-
+    public Collection<? extends Result> afterIteration() {
         long loaded;
         long unloaded;
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
@@ -74,47 +85,19 @@ class ClassloaderProfiler implements Profiler {
             unloaded = -1;
         }
 
-        if (verbose || (loaded > 0 || unloaded > 0)) {
-            return new ClassloaderProfilerResult(name, endTime - startTime, loaded, unloaded);
-        } else {
-            return new EmptyResult();
-        }
+        return Arrays.asList(
+                new ProfilerResult("@classload.loaded", loaded, "classes"),
+                new ProfilerResult("@classload.unloaded", unloaded, "classes")
+        );
+    }
+
+    @Override
+    public Collection<? extends Result> afterTrial() {
+        return Collections.emptyList();
     }
 
     public static boolean isSupported() {
-        return true; // assume always available
-    }
-
-    public static class ClassloaderProfilerResult implements ProfilerResult {
-
-        private final String name;
-        private final long profileIntervalMsec;
-        private final long loaded;
-        private final long unloaded;
-
-        public ClassloaderProfilerResult(String name, long profileIntervalMsec, long loaded, long unloaded) {
-            this.name = name;
-            this.profileIntervalMsec = profileIntervalMsec;
-            this.loaded = loaded;
-            this.unloaded = unloaded;
-        }
-
-        @Override
-        public String getProfilerName() {
-            return name;
-        }
-
-        @Override
-        public boolean hasData() {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("wall time = %.3f secs, loaded = %+d, unloaded = %+d",
-                    profileIntervalMsec / 1000.0, loaded, unloaded
-            );
-        }
+        return true; // always supported
     }
 
 }

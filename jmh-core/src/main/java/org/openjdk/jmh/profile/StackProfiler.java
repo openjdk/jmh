@@ -38,7 +38,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Very basic and naive stack profiler.
  */
-class StackProfiler implements Profiler {
+// FIXME: Enable back
+class StackProfiler {
 
     /** Number of stack lines to save */
     private static final int SAMPLE_STACK_LINES = Integer.getInteger("jmh.stack.lines", 1);
@@ -70,16 +71,16 @@ class StackProfiler implements Profiler {
         this.name = name;
     }
 
-    @Override
+//    @Override
     public void startProfile() {
         samplingTask = new SamplingTask();
         samplingTask.start();
     }
 
-    @Override
-    public ProfilerResult endProfile() {
+//    @Override
+    public void endProfile() {
         samplingTask.stop();
-        return new SamplingProfileResult(name, samplingTask.stacks);
+//        return new SamplingProfileResult(name, samplingTask.stacks);
     }
 
     public static class SamplingTask implements Runnable {
@@ -171,7 +172,7 @@ class StackProfiler implements Profiler {
         }
     }
 
-    private static class SamplingProfileResult implements ProfilerResult {
+    private static class SamplingProfileResult  {
         private final String name;
         private final Multiset<StackRecord> stacks;
 
@@ -180,12 +181,10 @@ class StackProfiler implements Profiler {
             this.stacks = stacks;
         }
 
-        @Override
         public String getProfilerName() {
             return name;
         }
 
-        @Override
         public boolean hasData() {
             return !stacks.isEmpty();
         }

@@ -22,14 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.logic.results;
+package org.openjdk.jmh.profile;
 
-public enum AggregationPolicy {
+/**
+ * When and where to inject the instrument
+ */
+public enum InjectionPoint {
 
-    AVG,
-
-    SUM,
-
-    MAX,
+    HOST_VM_CONTROL,
+    FORKED_VM_INVOKE,
+    FORKED_VM_CONTROL,
+    FORKED_VM_WORKERS,
 
 }

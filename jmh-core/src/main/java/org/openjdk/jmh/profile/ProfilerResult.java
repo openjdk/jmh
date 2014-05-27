@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,23 +24,32 @@
  */
 package org.openjdk.jmh.profile;
 
-import java.io.Serializable;
+import org.openjdk.jmh.logic.results.AggregationPolicy;
+import org.openjdk.jmh.logic.results.Aggregator;
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.results.ResultRole;
+import org.openjdk.jmh.util.internal.Statistics;
 
-/**
- * Profiling result
- */
-public interface ProfilerResult extends Serializable {
+public class ProfilerResult extends Result<ProfilerResult> {
+    public ProfilerResult(String label, double n, String unit) {
+        this(label, of(n), unit, AggregationPolicy.AVG);
+    }
 
-    /**
-     * Profiler name.
-     * @return name of the profiler that gathered the result.
-     */
-    String getProfilerName();
+    public ProfilerResult(String label, double n, String unit, AggregationPolicy policy) {
+        this(label, of(n), unit, policy);
+    }
 
-    /**
-     * Has any data?
-     * @return true, if has data
-     */
-    boolean hasData();
+    ProfilerResult(String label, Statistics s, String unit, AggregationPolicy policy) {
+        super(ResultRole.SECONDARY, label, s, unit, policy);
+    }
 
+    @Override
+    public Aggregator<ProfilerResult> getIterationAggregator() {
+        return new ProfilerResultAggregator();
+    }
+
+    @Override
+    public Aggregator<ProfilerResult> getRunAggregator() {
+        return new ProfilerResultAggregator();
+    }
 }

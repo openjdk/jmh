@@ -24,25 +24,40 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.Optional;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 class GCProfiler implements Profiler {
+    private long startGCCount;
+    private long startGCTime;
+    private long startTime;
 
-    private long startTime = -1;
-    private long startGCCount = -1;
-    private long startGCTime = -1;
-    private final String name;
-    private final boolean verbose;
-
-    public GCProfiler(String name, boolean verbose) {
-        this.name = name;
-        this.verbose = verbose;
+    @Override
+    public InjectionPoint point() {
+        return InjectionPoint.FORKED_VM_CONTROL;
     }
 
     @Override
-    public void startProfile() {
-        this.startTime = System.currentTimeMillis();
+    public Optional<List<String>> addJVMOptions() {
+        return Optional.none();
+    }
+
+    @Override
+    public void beforeTrial() {
+        // do nothing
+    }
+
+    @Override
+    public void beforeIteration() {
+        this.startTime = System.nanoTime();
         long gcTime = 0;
         long gcCount = 0;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
@@ -54,8 +69,8 @@ class GCProfiler implements Profiler {
     }
 
     @Override
-    public ProfilerResult endProfile() {
-        long endTime = System.currentTimeMillis();
+    public Collection<? extends Result> afterIteration() {
+        long endTime = System.nanoTime();
         long gcTime = -startGCTime;
         long gcCount = -startGCCount;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
@@ -63,45 +78,18 @@ class GCProfiler implements Profiler {
             gcTime += bean.getCollectionTime();
         }
 
-        if (verbose || (gcTime > 0 || gcCount > 0)) {
-            return new GCProfilerResult(name, endTime - startTime, gcCount, gcTime);
-        } else {
-            return new EmptyResult();
-        }
+        return Arrays.asList(
+                new ProfilerResult("@gc.count", gcCount, "counts"),
+                new ProfilerResult("@gc.time", 100.0 * gcTime / TimeUnit.NANOSECONDS.toMillis(endTime - startTime), "%")
+        );
+    }
+
+    @Override
+    public Collection<? extends Result> afterTrial() {
+        return Collections.emptyList();
     }
 
     public static boolean isSupported() {
-        return true;
-    }
-
-    static class GCProfilerResult implements ProfilerResult {
-
-        private final String name;
-        private final long profileIntervalInMillis;
-        private final long gcCount;
-        private final long gcTime;
-
-        public GCProfilerResult(String name, long profileIntervalInMillis, long gcCount, long gcTime) {
-            this.name = name;
-            this.profileIntervalInMillis = profileIntervalInMillis;
-            this.gcCount = gcCount;
-            this.gcTime = gcTime;
-        }
-
-        @Override
-        public String getProfilerName() {
-            return name;
-        }
-
-        @Override
-        public boolean hasData() {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("wall time = %.3f secs,  GC time = %.3f secs, GC%% = %.2f%%, GC count = %+d",
-                    profileIntervalInMillis / 1000.0, gcTime / 1000.0, ((double) gcTime / (double) profileIntervalInMillis * 100.0), gcCount);
-        }
+        return true; // always supported
     }
 }

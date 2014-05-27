@@ -24,24 +24,37 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.Optional;
+
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 class CompilerProfiler implements Profiler {
 
-    private long startTime = -1;
     private long startCompTime = -1;
-    private final String name;
-    private final boolean verbose;
 
-    public CompilerProfiler(String name, boolean verbose) {
-        this.name = name;
-        this.verbose = verbose;
+    @Override
+    public InjectionPoint point() {
+        return InjectionPoint.FORKED_VM_CONTROL;
     }
 
     @Override
-    public void startProfile() {
-        this.startTime = System.currentTimeMillis();
+    public Optional<List<String>> addJVMOptions() {
+        return Optional.none();
+    }
+
+    @Override
+    public void beforeTrial() {
+
+    }
+
+    @Override
+    public void beforeIteration() {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
             startCompTime = comp.getTotalCompilationTime();
@@ -51,8 +64,7 @@ class CompilerProfiler implements Profiler {
     }
 
     @Override
-    public ProfilerResult endProfile() {
-        long endTime = System.currentTimeMillis();
+    public Collection<? extends Result> afterIteration() {
         long compTime = -startCompTime;
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
@@ -60,48 +72,20 @@ class CompilerProfiler implements Profiler {
         } catch (UnsupportedOperationException e) {
             compTime = -1;
         }
-        if (verbose || (compTime > 0)) {
-            return new CompProfilerResult(name, endTime - startTime, compTime, comp.getName());
-        } else {
-            return new EmptyResult();
-        }
+
+        return Arrays.asList(
+                new ProfilerResult("@compiler.time", compTime, "ms")
+        );
     }
 
-    public static boolean isSupported() {
+    @Override
+    public Collection<? extends Result> afterTrial() {
+        return Collections.emptyList();
+    }
+
+    public boolean isSupported() {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         return comp.isCompilationTimeMonitoringSupported();
-    }
-
-    static class CompProfilerResult implements ProfilerResult {
-
-        private final long profileIntervalInMillis;
-        private final long compilationTime;
-        private final String compilerName;
-        private final String name;
-
-        public CompProfilerResult(String name, long profileIntervalInMillis, long compilationTime, String compilerName) {
-            this.name = name;
-            this.profileIntervalInMillis = profileIntervalInMillis;
-            this.compilationTime = compilationTime;
-            this.compilerName = compilerName;
-        }
-
-        @Override
-        public String getProfilerName() {
-            return name;
-        }
-
-        @Override
-        public boolean hasData() {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("wall time = %.3f secs, JIT time = %.3f secs (%s)",
-                    profileIntervalInMillis / 1000.0, compilationTime / 1000.0,
-                    compilerName);
-        }
     }
 
 }

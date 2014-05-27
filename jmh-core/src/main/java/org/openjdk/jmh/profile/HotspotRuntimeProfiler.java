@@ -24,11 +24,16 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
+import org.openjdk.jmh.logic.results.Result;
 import sun.management.HotspotRuntimeMBean;
 import sun.management.counter.Counter;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
 
@@ -42,55 +47,20 @@ class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
     }
 
     @Override
-    public HotspotRuntimeProfilerResult endProfile() {
-        return new HotspotRuntimeProfilerResult(super.endProfile());
-    }
-
-    static class HotspotRuntimeProfilerResult extends HotspotInternalResult {
-
-        public final String result;
-
-        public HotspotRuntimeProfilerResult(HotspotInternalResult s) {
-            super(s);
-
-            Map<String, Long> diff = s.getDiff();
-            Map<String, Long> current = s.getCurrent();
-
-            StringBuilder builder = new StringBuilder();
-
-            builder.append(
-                    String.format("%d fat monitors remaining, %+d monitors inflated, %+d monitors deflated\n",
-                            deNull(current.get("sun.rt._sync_MonExtant")),
-                            deNull(diff.get("sun.rt._sync_Inflations")), deNull(diff.get("sun.rt._sync_Deflations"))
-                    )
-            );
-
-            builder.append(
-                    String.format("%14s %+d contended lock attempts, %+d parks, %+d notify()'s, %+d futile wakeup(s)\n",
-                            "",
-                            deNull(diff.get("sun.rt._sync_ContendedLockAttempts")),
-                            deNull(diff.get("sun.rt._sync_Parks")),
-                            deNull(diff.get("sun.rt._sync_Notifications")),
-                            deNull(diff.get("sun.rt._sync_FutileWakeups"))
-                    )
-            );
-
-            builder.append(
-                    String.format("%14s %+d safepoints hit(s), %+d ms spent on sync safepoints, %+d ms spent on safepoints\n",
-                            "",
-                            deNull(diff.get("sun.rt.safepoints")),
-                            deNull(diff.get("sun.rt.safepointSyncTime")),
-                            deNull(diff.get("sun.rt.safepointTime"))
-                    )
-            );
-
-            result = builder.toString();
-        }
-
-        @Override
-        public String toString() {
-            return result;
-        }
+    public Collection<? extends Result> afterIteration() {
+        Map<String, Long> current = counters().getCurrent();
+        return Arrays.asList(
+                new ProfilerResult("@rt.sync.fatMonitors", current.get("sun.rt._sync_MonExtant"), "monitors", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.sync.monitorInflations", current.get("sun.rt._sync_Inflations"), "monitors", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.sync.monitorDeflations", current.get("sun.rt._sync_Deflations"), "monitors", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.sync.contendedLockAttempts", current.get("sun.rt._sync_ContendedLockAttempts"), "locks", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.sync.parks", current.get("sun.rt._sync_Parks"), "counts", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.sync.notifications", current.get("sun.rt._sync_Notifications"), "counts", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.sync.futileWakeups", current.get("sun.rt._sync_FutileWakeups"), "counts", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.safepoints", current.get("sun.rt.safepoints"), "counts", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.safepointSyncTime", TimeUnit.NANOSECONDS.toMillis(current.get("sun.rt.safepointSyncTime")), "ms", AggregationPolicy.MAX),
+                new ProfilerResult("@rt.safepointTime", TimeUnit.NANOSECONDS.toMillis(current.get("sun.rt.safepointTime")), "ms", AggregationPolicy.MAX)
+        );
     }
 
 }

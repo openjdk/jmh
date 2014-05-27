@@ -24,20 +24,27 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.util.internal.Optional;
+
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Profiler interface
  */
 public interface Profiler {
 
-    /**
-     * Start the profile.
-     */
-    public void startProfile();
+    InjectionPoint point();
 
-    /**
-     * Stop the profile.
-     * @return profiling result.
-     */
-    public ProfilerResult endProfile();
+    Optional<List<String>> addJVMOptions();
+
+    void beforeTrial();
+
+    void beforeIteration();
+
+    Collection<? extends Result> afterIteration();
+
+    Collection<? extends Result> afterTrial();
 
 }

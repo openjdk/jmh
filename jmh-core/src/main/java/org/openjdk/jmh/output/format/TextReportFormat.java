@@ -31,7 +31,6 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormatType;
-import org.openjdk.jmh.profile.ProfilerResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
@@ -126,28 +125,7 @@ class TextReportFormat extends AbstractOutputFormat {
             }
         }
 
-        out.print(String.format("%s", sb.toString()));
-
-        // also print out profiler information
-        if (type == IterationType.MEASUREMENT) {
-            boolean firstProfiler = true;
-            for (ProfilerResult profRes : data.getProfilerResults()) {
-                if (profRes.hasData()) {
-                    if (firstProfiler) {
-                        out.println("");
-                        firstProfiler = false;
-                    }
-                    String prefix = profRes.getProfilerName();
-                    for (String line : profRes.toString().split("\n")) {
-                        out.print(String.format("%12s | %s\n", prefix, line));
-                        prefix = "";
-                    }
-                    out.print(String.format("%12s |\n", ""));
-                }
-            }
-        }
-
-        out.println("");
+        out.print(String.format("%s%n", sb.toString()));
         out.flush();
     }
 

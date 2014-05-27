@@ -24,9 +24,13 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
+import org.openjdk.jmh.logic.results.Result;
 import sun.management.HotspotThreadMBean;
 import sun.management.counter.Counter;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -42,42 +46,13 @@ class HotspotThreadProfiler extends AbstractHotspotProfiler {
     }
 
     @Override
-    public HotspotThreadProfilerResult endProfile() {
-        return new HotspotThreadProfilerResult(super.endProfile());
-    }
-
-    static class HotspotThreadProfilerResult extends HotspotInternalResult {
-
-        private final Long curDaemon;
-        private final Long curAlive;
-        private final Long curStarted;
-
-        private final Long diffDaemon;
-        private final Long diffAlive;
-        private final Long diffStarted;
-
-        public HotspotThreadProfilerResult(HotspotInternalResult superResult) {
-            super(superResult);
-
-            Map<String, Long> current = superResult.getCurrent();
-            curDaemon = current.get("java.threads.daemon");
-            curAlive = current.get("java.threads.live");
-            curStarted = current.get("java.threads.started");
-
-            Map<String, Long> diff = superResult.getDiff();
-            diffDaemon = diff.get("java.threads.daemon");
-            diffAlive = diff.get("java.threads.live");
-            diffStarted = diff.get("java.threads.started");
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%d (%+d) threads started, %d (%+d) threads alive, %d (%+d) threads daemonized %s",
-                    curStarted, deNull(diffStarted),
-                    curAlive, deNull(diffAlive),
-                    curDaemon, deNull(diffDaemon),
-                    "");
-        }
+    public Collection<? extends Result> afterIteration() {
+        Map<String, Long> current = counters().getCurrent();
+        return Arrays.asList(
+                new ProfilerResult("@threads.alive", current.get("java.threads.live"), "threads", AggregationPolicy.AVG),
+                new ProfilerResult("@threads.daemon", current.get("java.threads.daemon"), "threads", AggregationPolicy.AVG),
+                new ProfilerResult("@threads.started", current.get("java.threads.started"), "threads", AggregationPolicy.MAX)
+        );
     }
 
 }

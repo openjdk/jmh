@@ -207,7 +207,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         // stop profilers
         for (Profiler prof : registeredProfilers) {
             try {
-                iterationResults.addProfileResult(prof.endProfile());
+                iterationResults.addResults(prof.afterIteration());
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }
@@ -218,7 +218,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         // start profilers
         for (Profiler prof : registeredProfilers) {
             try {
-                prof.startProfile();
+                prof.beforeIteration();
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }

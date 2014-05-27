@@ -77,6 +77,8 @@ public abstract class Result<T extends Result<T>> implements Serializable {
                 return statistics.getMean();
             case SUM:
                 return statistics.getSum();
+            case MAX:
+                return statistics.getMax();
             default:
                 throw new IllegalStateException("Unknown aggregation policy: " + policy);
         }
@@ -204,6 +206,20 @@ public abstract class Result<T extends Result<T>> implements Serializable {
             } else {
                 if (!result.equals(r.label)) {
 //                    throw new IllegalStateException("Combining the results with different labels");
+                }
+            }
+        }
+        return result;
+    }
+
+    public static AggregationPolicy aggregatePolicies(Collection<? extends Result> results) {
+        AggregationPolicy result = null;
+        for (Result r : results) {
+            if (result == null) {
+                result = r.policy;
+            } else {
+                if (!result.equals(r.policy)) {
+                    throw new IllegalStateException("Combining the results with different aggregation policies");
                 }
             }
         }
