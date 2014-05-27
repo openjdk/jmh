@@ -112,14 +112,15 @@ class TextReportFormat extends AbstractOutputFormat {
             Map<String, Result> secondary = data.getSecondaryResults();
             if (!secondary.isEmpty()) {
                 sb.append("\n");
-                for (Map.Entry<String, Result> res : secondary.entrySet()) {
-                    // rough estimate
-                    int threads = data.getRawSecondaryResults().get(res.getKey()).size();
 
+                int maxKeyLen = 0;
+                for (Map.Entry<String, Result> res : secondary.entrySet()) {
+                    maxKeyLen = Math.max(maxKeyLen, res.getKey().length());
+                }
+
+                for (Map.Entry<String, Result> res : secondary.entrySet()) {
                     sb.append(String.format("%" + prefixLen + "s", ""));
-                    sb.append("  \"").append(res.getKey()).append("\": ");
-                    sb.append(res.getValue().toString());
-                    sb.append(" (").append(threads).append(" threads)");
+                    sb.append(String.format("  %-" + (maxKeyLen + 1) + "s %s", res.getKey() + ":", res.getValue()));
                     sb.append("\n");
                 }
             }
