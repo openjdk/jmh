@@ -26,10 +26,22 @@ package org.openjdk.jmh.logic.results;
 
 public enum AggregationPolicy {
 
-    AVG,
+    AVG("Average"),
 
-    SUM,
+    SUM("Sum"),
 
-    MAX,
+    MAX("Maximum"),
+
+    ;
+
+    private String label;
+
+    AggregationPolicy(String label) {
+        this.label = label;
+    }
+
+    public String toString() {
+        return label;
+    }
 
 }

@@ -57,9 +57,9 @@ class XSVResultFormat implements ResultFormat {
         pw.write(delimiter);
         pw.write("\"Samples\"");
         pw.write(delimiter);
-        pw.write("\"Mean\"");
+        pw.write("\"Score\"");
         pw.write(delimiter);
-        pw.write("\"Mean Error (99.9%)\"");
+        pw.write("\"Score Error (99.9%)\"");
         pw.write(delimiter);
         pw.write("\"Unit\"");
         for (String k : params) {
@@ -81,11 +81,11 @@ class XSVResultFormat implements ResultFormat {
             pw.write(delimiter);
             pw.write(String.valueOf(runResult.getParams().getThreads()));
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getN()));
+            pw.write(String.valueOf(runResult.getPrimaryResult().getSampleCount()));
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMean()));
+            pw.write(String.valueOf(runResult.getPrimaryResult().getScore()));
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)));
+            pw.write(String.valueOf(runResult.getPrimaryResult().getScoreError()));
             pw.write(delimiter);
             pw.write("\"");
             pw.write(runResult.getPrimaryResult().getScoreUnit());

@@ -84,6 +84,35 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         }
     }
 
+    public double getScoreError() {
+        switch (policy) {
+            case AVG:
+                return statistics.getMeanErrorAt(0.999);
+            case SUM:
+            case MAX:
+                return 0.0;
+            default:
+                throw new IllegalStateException("Unknown aggregation policy: " + policy);
+        }
+    }
+
+    public double[] getScoreConfidence() {
+        switch (policy) {
+            case AVG:
+                return statistics.getConfidenceIntervalAt(0.999);
+            case MAX:
+            case SUM:
+                double score = getScore();
+                return new double[] {score, score};
+            default:
+                throw new IllegalStateException("Unknown aggregation policy: " + policy);
+        }
+    }
+
+    public long getSampleCount() {
+        return statistics.getN();
+    }
+
     public abstract Aggregator<T> getIterationAggregator();
 
     public abstract Aggregator<T> getRunAggregator();
@@ -112,11 +141,11 @@ public abstract class Result<T extends Result<T>> implements Serializable {
 
         Statistics stats = getStatistics();
         if (stats.getN() > 2) {
-            double[] interval = stats.getConfidenceIntervalAt(0.999);
-            pw.println(String.format("Result%s: %.3f \u00B1(99.9%%) %.3f %s",
+            double[] interval = getScoreConfidence();
+            pw.println(String.format("Result%s: %.3f \u00B1(99.9%%) %.3f %s [%s]",
                     (label == null) ? "" : " \"" + label + "\"",
-                    stats.getMean(), (interval[1] - interval[0]) / 2,
-                    getScoreUnit()));
+                    getScore(), (interval[1] - interval[0]) / 2,
+                    getScoreUnit(), policy));
             pw.println(String.format("  Statistics: (min, avg, max) = (%.3f, %.3f, %.3f), stdev = %.3f%n" +
                     "  Confidence interval (99.9%%): [%.3f, %.3f]",
                     stats.getMin(), stats.getMean(), stats.getMax(), stats.getStandardDeviation(),

@@ -1,4 +1,4 @@
-"Benchmark","Mode","Threads","Samples","Mean","Mean Error (99.9%)","Unit","Param: param0","Param: param1","Param: param2","Param: param3","Param: param4"
+"Benchmark","Mode","Threads","Samples","Score","Score Error (99.9%)","Unit","Param: param0","Param: param1","Param: param2","Param: param3","Param: param4"
 "benchmark_0","thrpt",80,14,528.8571428571429,278.1419529743147,"ops/ms","value0","value1","value2","value3","value4"
 "benchmark_1","thrpt",900,1,439.0,NaN,"ops/ms","value0","value1","value2","value3","value4"
 "benchmark_2","thrpt",466,9,545.0,553.3366994253071,"ops/ms","value0","value1","value2","value3","value4"

@@ -80,8 +80,8 @@ class JSONResultFormat implements ResultFormat {
 
             pw.println("\"primaryMetric\" : {");
             pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
-            pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getStatistics().getMeanErrorAt(0.999)) + ",");
-            pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getStatistics().getConfidenceIntervalAt(0.999)) + ",");
+            pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getScoreError()) + ",");
+            pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getScoreConfidence()) + ",");
             pw.println(emitPercentiles(runResult.getPrimaryResult().getStatistics()));
             pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
             pw.println("\"rawData\" :");
@@ -106,8 +106,8 @@ class JSONResultFormat implements ResultFormat {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\"").append(secondaryName).append("\" : {");
                 sb.append("\"score\" : ").append(emit(result.getScore())).append(",");
-                sb.append("\"scoreError\" : ").append(emit(result.getStatistics().getMeanErrorAt(0.999))).append(",");
-                sb.append("\"scoreConfidence\" : ").append(emit(result.getStatistics().getConfidenceIntervalAt(0.999))).append(",");
+                sb.append("\"scoreError\" : ").append(emit(result.getScoreError())).append(",");
+                sb.append("\"scoreConfidence\" : ").append(emit(result.getScoreConfidence())).append(",");
                 sb.append(emitPercentiles(result.getStatistics()));
                 sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
                 sb.append("\"rawData\" :");

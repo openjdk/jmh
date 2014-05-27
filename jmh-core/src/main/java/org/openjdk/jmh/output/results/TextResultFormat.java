@@ -84,11 +84,10 @@ class TextResultFormat implements ResultFormat {
         }
 
         out.print(String.format("%6s %9s %12s %12s %8s%n",
-                "Mode", "Samples", "Mean", "Mean error", "Units"));
+                "Mode", "Samples", "Score", "Score error", "Units"));
         for (BenchmarkRecord key : runResults.keySet()) {
             RunResult res = runResults.get(key);
             {
-                Statistics stats = res.getPrimaryResult().getStatistics();
                 out.print(String.format("%-" + nameLen + "s ",
                         benchPrefixes.get(key.getUsername())));
 
@@ -99,14 +98,13 @@ class TextResultFormat implements ResultFormat {
 
                 out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
                         key.getMode().shortLabel(),
-                        stats.getN(),
-                        stats.getMean(), stats.getMeanErrorAt(0.999),
+                        res.getPrimaryResult().getSampleCount(),
+                        res.getPrimaryResult().getScore(), res.getPrimaryResult().getScoreError(),
                         res.getScoreUnit()));
             }
 
             for (String label : res.getSecondaryResults().keySet()) {
                 Result subRes = res.getSecondaryResults().get(label);
-                Statistics stats = subRes.getStatistics();
 
                 out.print(String.format("%-" + nameLen + "s ",
                         benchPrefixes.get(key.getUsername() + ":" + label)));
@@ -118,8 +116,8 @@ class TextResultFormat implements ResultFormat {
 
                 out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
                         key.getMode().shortLabel(),
-                        stats.getN(),
-                        stats.getMean(), stats.getMeanErrorAt(0.999),
+                        subRes.getSampleCount(),
+                        subRes.getScore(), subRes.getScoreError(),
                         subRes.getScoreUnit()));
             }
         }
