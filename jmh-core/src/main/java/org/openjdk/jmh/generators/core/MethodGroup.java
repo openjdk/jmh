@@ -241,7 +241,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     private <T extends Annotation> T getFinal(Class<T> klass) {
         T finalAnn = null;
         for (MethodInvocation mi : methods) {
-            T ann = BenchmarkGeneratorUtils.getAnnSyntax(mi.method, klass);
+            T ann = BenchmarkGeneratorUtils.getAnnSuper(mi.method, klass);
             if (ann != null) {
                 // FIXME: Temporalily disabled before we figure the proxy annotations equals/hashCode
                 if (false && finalAnn != null && !finalAnn.equals(ann)) {

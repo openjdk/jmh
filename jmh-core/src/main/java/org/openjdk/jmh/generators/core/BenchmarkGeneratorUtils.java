@@ -173,6 +173,15 @@ class BenchmarkGeneratorUtils {
         }
     }
 
+    public static <T extends Annotation> T getAnnSuper(MethodInfo mi, Class<T> annClass) {
+        T ann = mi.getAnnotation(annClass);
+        if (ann != null) {
+            return ann;
+        } else {
+            return getAnnSuper(mi.getDeclaringClass(), annClass);
+        }
+    }
+
     public static String getGeneratedName(ClassInfo ci) {
         String name = "";
         do {

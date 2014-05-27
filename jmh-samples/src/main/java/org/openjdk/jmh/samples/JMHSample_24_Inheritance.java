@@ -40,8 +40,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.AverageTime)
-@Fork(1)
 public class JMHSample_24_Inheritance {
 
     /*
@@ -59,10 +57,12 @@ public class JMHSample_24_Inheritance {
      * session. That is, mixing in the subclass extending your benchmark class
      * *after* the JMH compilation would have no effect.
      *
-     * Note how annotations now have three possible places. The same rule apply:
-     * the lexically-closes annotation wins.
+     * Note how annotations now have two possible places. The closest annotation
+     * in the hierarchy wins.
      */
 
+    @BenchmarkMode(Mode.AverageTime)
+    @Fork(1)
     @State(Scope.Thread)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public static abstract class AbstractBenchmark {

@@ -30,9 +30,9 @@ import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.it.parameters.Parameters;
 
-@Threads(20)
 public class InheritedBenchMethodThreadsTest {
 
+    @Threads(20)
     public static abstract class AbstractBenchmark {
         @Threads(10)
         @GenerateMicroBenchmark

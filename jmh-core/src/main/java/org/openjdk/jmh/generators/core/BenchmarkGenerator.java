@@ -325,7 +325,7 @@ public class BenchmarkGenerator {
             }
 
             if (m.isSynchronized()) {
-                State annState = BenchmarkGeneratorUtils.getAnnSyntax(m, State.class);
+                State annState = BenchmarkGeneratorUtils.getAnnSuper(m, State.class);
                 if (annState == null) {
                     throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
                             + " method can only be synchronized if the enclosing class is annotated with "
@@ -342,7 +342,7 @@ public class BenchmarkGenerator {
 
         // check annotations
         for (MethodInfo m : methods) {
-            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnSyntax(m, OperationsPerInvocation.class);
+            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnSuper(m, OperationsPerInvocation.class);
             if (opi != null && opi.value() < 1) {
                 throw new GenerationException("The " + OperationsPerInvocation.class.getSimpleName() +
                         " needs to be greater than 0.", m);
@@ -430,7 +430,7 @@ public class BenchmarkGenerator {
                 result.put(groupName, group);
             }
 
-            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnSyntax(method, BenchmarkMode.class);
+            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnSuper(method, BenchmarkMode.class);
             if (mbAn != null) {
                 group.addModes(mbAn.value());
             }
