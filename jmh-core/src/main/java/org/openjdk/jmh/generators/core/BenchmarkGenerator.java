@@ -342,7 +342,7 @@ public class BenchmarkGenerator {
 
         // check annotations
         for (MethodInfo m : methods) {
-            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnSuper(m, OperationsPerInvocation.class);
+            OperationsPerInvocation opi = BenchmarkGeneratorUtils.getAnnSuper(m, clazz, OperationsPerInvocation.class);
             if (opi != null && opi.value() < 1) {
                 throw new GenerationException("The " + OperationsPerInvocation.class.getSimpleName() +
                         " needs to be greater than 0.", m);
@@ -426,11 +426,11 @@ public class BenchmarkGenerator {
 
             MethodGroup group = result.get(groupName);
             if (group == null) {
-                group = new MethodGroup(groupName);
+                group = new MethodGroup(clazz, groupName);
                 result.put(groupName, group);
             }
 
-            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnSuper(method, BenchmarkMode.class);
+            BenchmarkMode mbAn = BenchmarkGeneratorUtils.getAnnSuper(method, clazz, BenchmarkMode.class);
             if (mbAn != null) {
                 group.addModes(mbAn.value());
             }

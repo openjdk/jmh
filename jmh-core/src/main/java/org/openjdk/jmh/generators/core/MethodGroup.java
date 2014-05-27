@@ -48,13 +48,15 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 class MethodGroup implements Comparable<MethodGroup> {
+    private final ClassInfo ci;
     private final String name;
     private final Set<MethodInvocation> methods;
     private final EnumSet<Mode> modes;
     private final Map<String, String[]> params;
     private boolean strictFP;
 
-    public MethodGroup(String name) {
+    public MethodGroup(ClassInfo ci, String name) {
+        this.ci = ci;
         this.name = name;
         this.methods = new TreeSet<MethodInvocation>();
         this.modes = EnumSet.noneOf(Mode.class);
@@ -238,10 +240,10 @@ class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
-    private <T extends Annotation> T getFinal(Class<T> klass) {
+    private <T extends Annotation> T getFinal(Class<T> annClass) {
         T finalAnn = null;
         for (MethodInvocation mi : methods) {
-            T ann = BenchmarkGeneratorUtils.getAnnSuper(mi.method, klass);
+            T ann = BenchmarkGeneratorUtils.getAnnSuper(mi.method, ci, annClass);
             if (ann != null) {
                 // FIXME: Temporalily disabled before we figure the proxy annotations equals/hashCode
                 if (false && finalAnn != null && !finalAnn.equals(ann)) {
