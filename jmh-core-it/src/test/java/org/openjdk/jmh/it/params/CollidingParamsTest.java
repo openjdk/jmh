@@ -26,13 +26,10 @@ package org.openjdk.jmh.it.params;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
-import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
@@ -40,13 +37,10 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.SortedMap;
-import java.util.concurrent.TimeUnit;
 
-@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Fork(1)
 public class CollidingParamsTest {
 
     @State(Scope.Benchmark)
@@ -75,6 +69,11 @@ public class CollidingParamsTest {
     public void constrainedX() throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
+                .warmupIterations(1)
+                .warmupTime(TimeValue.milliseconds(100))
+                .measurementIterations(1)
+                .measurementTime(TimeValue.milliseconds(100))
+                .forks(1)
                 .shouldFailOnError(true)
                 .param("x", "2", "3")
                 .build();
