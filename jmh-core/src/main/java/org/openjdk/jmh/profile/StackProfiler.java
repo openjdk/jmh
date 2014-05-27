@@ -24,22 +24,29 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
+import org.openjdk.jmh.logic.results.Aggregator;
+import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.logic.results.ResultRole;
 import org.openjdk.jmh.util.internal.HashMultiset;
+import org.openjdk.jmh.util.internal.ListStatistics;
 import org.openjdk.jmh.util.internal.Multiset;
 import org.openjdk.jmh.util.internal.Multisets;
+import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Very basic and naive stack profiler.
  */
-// FIXME: Enable back
-class StackProfiler {
+class StackProfiler implements Profiler {
 
     /** Number of stack lines to save */
     private static final int SAMPLE_STACK_LINES = Integer.getInteger("jmh.stack.lines", 1);
@@ -64,23 +71,38 @@ class StackProfiler {
             "Attach Listener"
     };
 
-    private final String name;
     private volatile SamplingTask samplingTask;
 
-    public StackProfiler(String name) {
-        this.name = name;
-    }
-
-//    @Override
-    public void startProfile() {
+    @Override
+    public void beforeIteration() {
         samplingTask = new SamplingTask();
         samplingTask.start();
     }
 
-//    @Override
-    public void endProfile() {
+    @Override
+    public Collection<? extends Result> afterIteration() {
         samplingTask.stop();
-//        return new SamplingProfileResult(name, samplingTask.stacks);
+        return Arrays.asList(new StackResult(samplingTask.stacks));
+    }
+
+    @Override
+    public InjectionPoint point() {
+        return InjectionPoint.FORKED_VM_CONTROL;
+    }
+
+    @Override
+    public Optional<List<String>> addJVMOptions() {
+        return Optional.none();
+    }
+
+    @Override
+    public void beforeTrial() {
+
+    }
+
+    @Override
+    public Collection<? extends Result> afterTrial() {
+        return Collections.emptyList();
     }
 
     public static class SamplingTask implements Runnable {
@@ -172,27 +194,39 @@ class StackProfiler {
         }
     }
 
-    private static class SamplingProfileResult  {
-        private final String name;
+    public static class StackResult extends Result<StackResult> {
         private final Multiset<StackRecord> stacks;
 
-        public SamplingProfileResult(String name, Multiset<StackRecord> stacks) {
-            this.name = name;
+        public StackResult(Multiset<StackRecord> stacks) {
+            super(ResultRole.SECONDARY, "@stack", new ListStatistics(), "none", AggregationPolicy.AVG);
             this.stacks = stacks;
         }
 
-        public String getProfilerName() {
-            return name;
+        @Override
+        public Aggregator<StackResult> getIterationAggregator() {
+            return new StackResultAggregator();
         }
 
-        public boolean hasData() {
-            return !stacks.isEmpty();
+        @Override
+        public Aggregator<StackResult> getRunAggregator() {
+            return new StackResultAggregator();
         }
 
         @Override
         public String toString() {
+            return "<delayed till summary>";
+        }
+
+        @Override
+        public String extendedInfo(String label) {
+            return getStack(stacks);
+        }
+
+        public String getStack(Multiset<StackRecord> stacks) {
             Collection<StackRecord> cut = Multisets.countHighest(stacks, SAMPLE_TOP_STACKS);
             StringBuilder builder = new StringBuilder();
+
+            builder.append("Stack profiler:\n");
 
             int totalDisplayed = 0;
             int count = 0;
@@ -218,4 +252,18 @@ class StackProfiler {
             return builder.toString();
         }
     }
+
+    public static class StackResultAggregator implements Aggregator<StackResult> {
+        @Override
+        public Result aggregate(Collection<StackResult> results) {
+            Multiset<StackRecord> sum = new HashMultiset<StackRecord>();
+            for (StackResult r : results) {
+                for (StackRecord rec : r.stacks.keys()) {
+                    sum.add(rec, r.stacks.count(rec));
+                }
+            }
+            return new StackResult(sum);
+        }
+    }
+
 }

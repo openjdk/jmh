@@ -198,27 +198,27 @@ public enum ProfilerType {
             return "HotSpot (tm) threading subsystem via implementation-specific MBeans";
         }
     },
-//    STACK {
-//        @Override
-//        public String label() {
-//            return "Stack";
-//        }
-//
-//        @Override
-//        public Profiler createInstance(VerboseMode mode) {
-//            return new StackProfiler(label());
-//        }
-//
-//        @Override
-//        public boolean isSupported() {
-//            return true;
-//        }
-//
-//        @Override
-//        public String description() {
-//            return "Simple and naive Java stack profiler";
-//        }
-//    },
+    STACK {
+        @Override
+        public String label() {
+            return "Stack";
+        }
+
+        @Override
+        public Profiler createInstance(VerboseMode mode) {
+            return new StackProfiler();
+        }
+
+        @Override
+        public boolean isSupported() {
+            return true;
+        }
+
+        @Override
+        public String description() {
+            return "Simple and naive Java stack profiler";
+        }
+    },
     ;
 
     public abstract Profiler createInstance(VerboseMode mode);
