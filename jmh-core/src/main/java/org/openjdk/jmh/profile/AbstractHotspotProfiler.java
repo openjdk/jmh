@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.util.internal.Optional;
 import sun.management.counter.Counter;
@@ -75,7 +76,7 @@ abstract class AbstractHotspotProfiler implements Profiler {
         HotspotInternalResult res = counters();
         Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
-            results.add(new ProfilerResult("instrument@unknown." + e.getKey(), e.getValue(), "???"));
+            results.add(new ProfilerResult("instrument@unknown." + e.getKey(), e.getValue(), "???", AggregationPolicy.AVG));
         }
         return results;
     }

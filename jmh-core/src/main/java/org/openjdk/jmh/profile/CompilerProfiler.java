@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.util.internal.Optional;
 
@@ -74,7 +75,7 @@ class CompilerProfiler implements Profiler {
         }
 
         return Arrays.asList(
-                new ProfilerResult("@compiler.time", compTime, "ms")
+                new ProfilerResult("@compiler.time", compTime, "ms", AggregationPolicy.AVG)
         );
     }
 

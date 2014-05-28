@@ -31,10 +31,6 @@ import org.openjdk.jmh.logic.results.ResultRole;
 import org.openjdk.jmh.util.internal.Statistics;
 
 public class ProfilerResult extends Result<ProfilerResult> {
-    public ProfilerResult(String label, double n, String unit) {
-        this(label, of(n), unit, AggregationPolicy.AVG);
-    }
-
     public ProfilerResult(String label, double n, String unit, AggregationPolicy policy) {
         this(label, of(n), unit, policy);
     }

@@ -50,20 +50,53 @@ class HotspotCompilationProfiler extends AbstractHotspotProfiler {
     public Collection<? extends Result> afterIteration() {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
-                new ProfilerResult("@compiler.totalTime", TimeUnit.NANOSECONDS.toMillis(current.get("java.ci.totalTime")), "ms", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.totalCompiles", current.get("sun.ci.totalCompiles"), "methods", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.totalBailouts", current.get("sun.ci.totalBailouts"), "methods", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.totalInvalidates", current.get("sun.ci.totalInvalidates"), "methods", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.nmethodCodeSize", current.get("sun.ci.nmethodCodeSize")/ 1024, "Kb", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.nmethodSize", current.get("sun.ci.nmethodSize") / 1024, "Kb", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.totalTime",
+                        TimeUnit.NANOSECONDS.toMillis(current.get("java.ci.totalTime")),
+                        "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.osrCompiles", current.get("sun.ci.osrCompiles"), "methods", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.osrBytes", current.get("sun.ci.osrTime") / 1024, "Kb", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.osrTime", TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.osrBytes")), "ms", AggregationPolicy.MAX),
+                new ProfilerResult("@compiler.totalCompiles",
+                        current.get("sun.ci.totalCompiles"),
+                        "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.standardCompiles", current.get("sun.ci.standardCompiles"), "methods", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.standardBytes", current.get("sun.ci.standardBytes") / 1024, "Kb", AggregationPolicy.MAX),
-                new ProfilerResult("@compiler.standardTime", TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.standardTime")), "ms", AggregationPolicy.MAX)
+                new ProfilerResult("@compiler.totalBailouts",
+                        current.get("sun.ci.totalBailouts"),
+                        "methods", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.totalInvalidates",
+                        current.get("sun.ci.totalInvalidates"),
+                        "methods", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.nmethodCodeSize",
+                        current.get("sun.ci.nmethodCodeSize")/ 1024,
+                        "Kb", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.nmethodSize",
+                        current.get("sun.ci.nmethodSize") / 1024,
+                        "Kb", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.osrCompiles",
+                        current.get("sun.ci.osrCompiles"),
+                        "methods", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.osrBytes",
+                        current.get("sun.ci.osrTime") / 1024,
+                        "Kb", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.osrTime",
+                        TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.osrBytes")),
+                        "ms", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.standardCompiles",
+                        current.get("sun.ci.standardCompiles"),
+                        "methods", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.standardBytes",
+                        current.get("sun.ci.standardBytes") / 1024,
+                        "Kb", AggregationPolicy.MAX),
+
+                new ProfilerResult("@compiler.standardTime",
+                        TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.standardTime")),
+                        "ms", AggregationPolicy.MAX)
         );
     }
 

@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.util.internal.Optional;
 
@@ -86,8 +87,8 @@ class ClassloaderProfiler implements Profiler {
         }
 
         return Arrays.asList(
-                new ProfilerResult("@classload.loaded", loaded, "classes"),
-                new ProfilerResult("@classload.unloaded", unloaded, "classes")
+                new ProfilerResult("@classload.loaded", loaded, "classes", AggregationPolicy.AVG),
+                new ProfilerResult("@classload.unloaded", unloaded, "classes", AggregationPolicy.AVG)
         );
     }
 

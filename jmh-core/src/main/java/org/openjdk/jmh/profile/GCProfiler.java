@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.util.internal.Optional;
 
@@ -79,8 +80,13 @@ class GCProfiler implements Profiler {
         }
 
         return Arrays.asList(
-                new ProfilerResult("@gc.count", gcCount, "counts"),
-                new ProfilerResult("@gc.time", 100.0 * gcTime / TimeUnit.NANOSECONDS.toMillis(endTime - startTime), "%")
+                new ProfilerResult("@gc.count",
+                        gcCount,
+                        "counts", AggregationPolicy.AVG),
+
+                new ProfilerResult("@gc.time",
+                        100.0 * gcTime / TimeUnit.NANOSECONDS.toMillis(endTime - startTime),
+                        "%", AggregationPolicy.AVG)
         );
     }
 

@@ -49,9 +49,17 @@ class HotspotThreadProfiler extends AbstractHotspotProfiler {
     public Collection<? extends Result> afterIteration() {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
-                new ProfilerResult("@threads.alive", current.get("java.threads.live"), "threads", AggregationPolicy.AVG),
-                new ProfilerResult("@threads.daemon", current.get("java.threads.daemon"), "threads", AggregationPolicy.AVG),
-                new ProfilerResult("@threads.started", current.get("java.threads.started"), "threads", AggregationPolicy.MAX)
+                new ProfilerResult("@threads.alive",
+                        current.get("java.threads.live"),
+                        "threads", AggregationPolicy.AVG),
+
+                new ProfilerResult("@threads.daemon",
+                        current.get("java.threads.daemon"),
+                        "threads", AggregationPolicy.AVG),
+
+                new ProfilerResult("@threads.started",
+                        current.get("java.threads.started"),
+                        "threads", AggregationPolicy.MAX)
         );
     }
 
