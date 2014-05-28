@@ -24,23 +24,6 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.ForkedMain;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.link.BinaryLinkServer;
-import org.openjdk.jmh.logic.results.BenchResult;
-import org.openjdk.jmh.logic.results.RunResult;
-import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
-import org.openjdk.jmh.output.results.ResultFormat;
-import org.openjdk.jmh.output.results.ResultFormatFactory;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.Defaults;
-import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.internal.HashMultimap;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.TreeMultimap;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,11 +45,28 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openjdk.jmh.ForkedMain;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.link.BinaryLinkServer;
+import org.openjdk.jmh.logic.results.BenchResult;
+import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.output.format.OutputFormatFactory;
+import org.openjdk.jmh.output.results.ResultFormat;
+import org.openjdk.jmh.output.results.ResultFormatFactory;
+import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.Defaults;
+import org.openjdk.jmh.util.InputStreamDrainer;
+import org.openjdk.jmh.util.internal.HashMultimap;
+import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.internal.TreeMultimap;
+
 /**
  * Runner frontend class. Responsible for running micro benchmarks in this JVM.
  */
 public class Runner extends BaseRunner {
-
     private final MicroBenchmarkList list;
 
     /**
@@ -91,6 +91,10 @@ public class Runner extends BaseRunner {
 
     /** Setup helper method, creates OutputFormat according to argv options. */
     private static OutputFormat createOutputFormat(Options options) {
+        // sadly required here as the check cannot be made before calling this method in constructor
+        if (options == null) {
+            throw new IllegalArgumentException("Options not allowed to be null.");
+        }
         PrintStream out;
         // setup OutputFormat singleton
         if (options.getOutput().hasValue()) {
@@ -209,7 +213,9 @@ public class Runner extends BaseRunner {
         out.flush();
         out.close();
 
-        ResultFormat resultFormat = ResultFormatFactory.getInstance(options.getResultFormat().orElse(Defaults.RESULT_FORMAT), options.getResult().orElse(Defaults.RESULT_FILE));
+        ResultFormatType resultFormatType = options.getResultFormat().orElse(Defaults.RESULT_FORMAT);
+        String resultFormatFile = options.getResult().orElse(Defaults.RESULT_FILE);
+        ResultFormat resultFormat = ResultFormatFactory.getInstance(resultFormatType, resultFormatFile);
         resultFormat.writeOut(results);
 
         return results;
@@ -485,7 +491,7 @@ public class Runner extends BaseRunner {
         command.addAll(getJvmArgs(benchmark));
 
         // add any compiler oracle hints
-        command.add("-XX:CompileCommandFile=" + CompilerHints.hintsFile());
+        CompilerHints.addMergeCompileCommandLineArgs(command);
 
         // assemble final process command
         command.add("-cp");

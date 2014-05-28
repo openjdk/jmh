@@ -62,6 +62,12 @@ public abstract class BaseRunner {
     protected final OutputFormat out;
 
     public BaseRunner(Options options, OutputFormat handler) {
+        if (options == null) {
+            throw new IllegalArgumentException("Options is null.");
+        }
+        if (handler == null) {
+            throw new IllegalArgumentException("Handler is null.");
+        }
         this.options = options;
         this.out = handler;
     }

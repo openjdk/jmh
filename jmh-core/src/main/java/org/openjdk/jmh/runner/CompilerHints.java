@@ -26,12 +26,16 @@ package org.openjdk.jmh.runner;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.openjdk.jmh.util.FileUtils;
 
 public class CompilerHints extends AbstractResourceReader {
 
@@ -48,6 +52,8 @@ public class CompilerHints extends AbstractResourceReader {
 
     private final Set<String> hints;
 
+    static final String XX_COMPILE_COMMAND_FILE = "-XX:CompileCommandFile=";
+
     public static CompilerHints defaultList() {
         if (defaultList == null) {
             defaultList = fromResource(LIST);
@@ -58,19 +64,12 @@ public class CompilerHints extends AbstractResourceReader {
     public static String hintsFile() {
         if (hintsFile == null) {
             try {
-                File file = File.createTempFile("jmh", "compilecommand");
-
-                FileWriter writer = new FileWriter(file);
-                PrintWriter pw = new PrintWriter(writer);
-                pw.println("quiet");
-                pw.println("inline,org/openjdk/jmh/logic/BlackHole.*");
-                for (String l : defaultList().get()) {
-                    pw.println(l);
-                }
-                pw.close();
-                writer.close();
-
-                hintsFile = file.getAbsolutePath();
+                final Set<String> defaultHints = defaultList().get();
+                List<String> hints = new ArrayList<String>(defaultHints.size() + 2);
+                hints.add("quiet");
+                hints.add("inline,org/openjdk/jmh/logic/BlackHole.*");
+                hints.addAll(defaultHints);
+                hintsFile = FileUtils.createTempFileWithLines("jmh", "compilecommand", hints);
             } catch (IOException e) {
                 throw new IllegalStateException("Error creating compiler hints file", e);
             }
@@ -92,15 +91,21 @@ public class CompilerHints extends AbstractResourceReader {
 
     private CompilerHints(String file, String resource, String line) {
         super(file, resource, line);
-        hints = read();
-        if (!hints.isEmpty() && !isHintCompatibleVM()) {
+        final Set<String> defaultHints = read();
+        if (!defaultHints.isEmpty() && !isHintCompatibleVM()) {
             System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
                     + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
                     + "\"), compilerHints are disabled.");
-            hints.clear();
+            defaultHints.clear();
         }
+        // make the set unmodifiable so we need not copy it defensively each time we return it.
+        hints = Collections.unmodifiableSet(defaultHints);
     }
 
+    /**
+     * FIXME (low priority): check if supplied JVM is hint compatible. This test is applied to the Runner VM,
+     * not the Forked and may therefore be wrong if the forked VM is not the same JVM
+     */
     private boolean isHintCompatibleVM() {
         String name = System.getProperty("java.vm.name");
         for (String vmName : HINT_COMPATIBLE_JVMS) {
@@ -168,4 +173,72 @@ public class CompilerHints extends AbstractResourceReader {
         return result;
     }
 
+    /**
+     * @param command command arguments list
+     * @return the compiler hint files specified by the command
+     */
+    public static List<String> getCompileCommandFiles(List<String> command){
+        List<String> compileCommandFiles = new ArrayList<String>();
+        for (String cmdLineWord : command) {
+            if (cmdLineWord.startsWith(XX_COMPILE_COMMAND_FILE)) {
+                compileCommandFiles.add(cmdLineWord.substring(XX_COMPILE_COMMAND_FILE.length()));
+            }
+        }
+        return compileCommandFiles;
+    }
+
+    /**
+     * We need to generate a compiler hints file such that it includes:
+     * <ul>
+     * <li> No compile command files are specified and no .hotspotrc file is available, then do JMH hints only
+     * <li> No compile command files are specified and .hotspotrc file is available, then do JMH hints + .hotspotrc
+     * <li> 1 to N compile command files are specified, then do JMH hints + all specified hints in files
+     * </ul>
+     * <p>This is a departure from default JVM behavior as the JVM would normally just take the last hints file and ignore
+     * the rest.
+     *
+     * @param command all -XX:CompileCommandLine args will be removed and a merged file will be set
+     */
+    public static void addMergeCompileCommandLineArgs(List<String> command) {
+        List<String> hintFiles = new ArrayList<String>();
+        hintFiles.add(hintsFile());
+        removeCompileCommandFiles(command, hintFiles);
+        if (hintFiles.size() == 1) {
+            File hotspotCompilerFile = new File(".hotspot_compiler");
+            if (hotspotCompilerFile.exists()) {
+                hintFiles.add(hotspotCompilerFile.getAbsolutePath());
+            }
+        }
+        command.add(CompilerHints.XX_COMPILE_COMMAND_FILE + mergeHintFiles(hintFiles));
+    }
+
+    /**
+     * @param command the compile command file options will be removed from this command
+     * @param compileCommandFiles the compiler hint files specified by the command will be added to this list
+     */
+    private static void removeCompileCommandFiles(List<String> command, List<String> compileCommandFiles){
+        Iterator<String> iterator = command.iterator();
+        while (iterator.hasNext()) {
+            String cmdLineWord = iterator.next();
+            if(cmdLineWord.startsWith(XX_COMPILE_COMMAND_FILE)) {
+                compileCommandFiles.add(cmdLineWord.substring(XX_COMPILE_COMMAND_FILE.length()));
+                iterator.remove();
+            }
+        }
+    }
+
+    private static String mergeHintFiles(List<String> compileCommandFiles) {
+        if (compileCommandFiles.size() == 1) {
+            return compileCommandFiles.get(0);
+        }
+        try {
+            Set<String> hints = new TreeSet<String>();
+            for(String file : compileCommandFiles) {
+                hints.addAll(fromFile(file).get());
+            }
+            return FileUtils.createTempFileWithLines("jmh", "compilecommand", hints);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error merging compiler hints files", e);
+        }
+    }
 }
