@@ -59,13 +59,4 @@ public class ProfilerFactory {
         return "(Description is not available)";
     }
 
-    public static List<String> getSupportedProfilers() {
-        List<String> res = new ArrayList<String>();
-        for (ProfilerType p : ProfilerType.values()) {
-            if (p.isSupported()) {
-                res.add(p.id().toLowerCase());
-            }
-        }
-        return res;
-    }
 }
