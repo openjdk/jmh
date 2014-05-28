@@ -263,6 +263,9 @@ public final class BinaryLinkServer {
                     if (obj instanceof ExceptionFrame) {
                         handleException((ExceptionFrame)obj);
                     }
+                    if (obj instanceof OutputFrame) {
+                        handleOutput((OutputFrame)obj);
+                    }
                     if (obj instanceof FinishingFrame) {
                         // close the streams
                         break;
@@ -282,6 +285,21 @@ public final class BinaryLinkServer {
                 throw new IllegalStateException(e);
             } finally {
                 close();
+            }
+        }
+
+        private void handleOutput(OutputFrame obj) {
+            try {
+                switch (obj.getType()) {
+                    case OUT:
+                        System.out.write(obj.getData());
+                        break;
+                    case ERR:
+                        System.err.write(obj.getData());
+                        break;
+                }
+            } catch (IOException e) {
+                // swallow
             }
         }
 

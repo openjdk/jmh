@@ -34,9 +34,12 @@ import org.openjdk.jmh.util.internal.Multimap;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.Arrays;
 
 public final class BinaryLinkClient {
 
@@ -44,11 +47,15 @@ public final class BinaryLinkClient {
 
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
+    private ForwardingPrintStream streamErr;
+    private ForwardingPrintStream streamOut;
 
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.clientSocket = new Socket(hostName, hostPort);
         this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
         this.ois = new ObjectInputStream(clientSocket.getInputStream());
+        this.streamErr = new ForwardingPrintStream(OutputFrame.Type.ERR);
+        this.streamOut = new ForwardingPrintStream(OutputFrame.Type.OUT);
     }
 
     public Options requestOptions() throws IOException, ClassNotFoundException {
@@ -76,6 +83,10 @@ public final class BinaryLinkClient {
         oos.writeObject(new FinishingFrame());
         oos.flush();
         oos.close();
+        streamErr.flush();
+        streamErr.close();
+        streamOut.flush();
+        streamOut.close();
         clientSocket.close();
     }
 
@@ -100,4 +111,37 @@ public final class BinaryLinkClient {
         oos.writeObject(new ExceptionFrame(error));
         oos.flush();
     }
+
+    public PrintStream getErrStream() {
+        return streamErr;
+    }
+
+    public PrintStream getOutStream() {
+        return streamOut;
+    }
+
+    class ForwardingPrintStream extends PrintStream {
+        public ForwardingPrintStream(final OutputFrame.Type type) {
+            super(new OutputStream() {
+                @Override
+                public void write(int b) throws IOException {
+                    oos.writeObject(new OutputFrame(type, new byte[]{(byte) (b & 0xFF)}));
+                    oos.flush();
+                }
+
+                @Override
+                public void write(byte[] b) throws IOException {
+                    oos.writeObject(new OutputFrame(type, Arrays.copyOf(b, b.length)));
+                    oos.flush();
+                }
+
+                @Override
+                public void write(byte[] b, int off, int len) throws IOException {
+                    oos.writeObject(new OutputFrame(type, Arrays.copyOfRange(b, off, len + off)));
+                    oos.flush();
+                }
+            });
+        }
+    }
+
 }

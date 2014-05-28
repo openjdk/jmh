@@ -56,6 +56,10 @@ public class ForkedMain {
                 link = new BinaryLinkClient(hostName, hostPort);
                 Options options = link.requestOptions();
 
+                // dump outputs into binary link
+                System.setErr(link.getErrStream());
+                System.setOut(link.getOutStream());
+
                 // run!
                 ForkedRunner runner = new ForkedRunner(options, link);
                 runner.run();
