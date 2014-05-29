@@ -97,8 +97,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         // register the profilers
         for (Class<? extends Profiler> prof : options.getProfilers()) {
             if (!ProfilerFactory.isInternal(prof)) continue;
-            Class<? extends InternalProfiler> intProf = (Class<? extends InternalProfiler>) prof;
-            list.add((InternalProfiler) ProfilerFactory.prepareProfiler(intProf, options.verbosity().orElse(Defaults.VERBOSITY)));
+            list.add((InternalProfiler) ProfilerFactory.prepareProfiler(prof, options.verbosity().orElse(Defaults.VERBOSITY)));
         }
         return list;
     }

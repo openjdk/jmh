@@ -89,9 +89,7 @@ public class RunResult implements Serializable {
     public Collection<Result> getRawPrimaryResults() {
         Collection<Result> rs = new ArrayList<Result>();
         for (BenchResult br : benchResults) {
-            for (IterationResult ir : br.getRawIterationResults()) {
-                rs.add(ir.getPrimaryResult());
-            }
+            rs.addAll(br.getRawPrimaryResults());
         }
         return rs;
     }
@@ -99,9 +97,10 @@ public class RunResult implements Serializable {
     public Multimap<String, Result> getRawSecondaryResults() {
         Multimap<String, Result> rs = new HashMultimap<String, Result>();
         for (BenchResult br : benchResults) {
-            for (IterationResult ir : br.getRawIterationResults()) {
-                for (Map.Entry<String, Result> r : ir.getSecondaryResults().entrySet()) {
-                    rs.put(r.getKey(), r.getValue());
+            Multimap<String, Result> secondaries = br.getRawSecondaryResults();
+            for (String label : secondaries.keys()) {
+                for (Result r : secondaries.get(label)) {
+                    rs.put(r.getLabel(), r);
                 }
             }
         }

@@ -24,19 +24,20 @@
  */
 package org.openjdk.jmh.runner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.util.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RunnerTest {
     private static final String DUMMY_HOST = "host";
@@ -52,7 +53,7 @@ public class RunnerTest {
     public void testEmptyOptsHaveCompileCommandFile() {
         Runner blade = new Runner(new OptionsBuilder());
         BenchmarkRecord benchmark = new BenchmarkRecord("Foo","bar",Mode.Throughput);
-        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT);
+        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(Arrays.asList(command));
@@ -77,7 +78,7 @@ public class RunnerTest {
         Runner blade = new Runner(new OptionsBuilder().
                 jvmArgs(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints).build());
         BenchmarkRecord benchmark = new BenchmarkRecord("Foo","bar",Mode.Throughput);
-        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT);
+        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(Arrays.asList(command));
@@ -107,7 +108,7 @@ public class RunnerTest {
                 jvmArgs(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1,
                         CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2).build());
         BenchmarkRecord benchmark = new BenchmarkRecord("Foo","bar",Mode.Throughput);
-        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT);
+        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(Arrays.asList(command));

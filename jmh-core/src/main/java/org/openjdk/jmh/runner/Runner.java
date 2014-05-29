@@ -28,12 +28,14 @@ import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.link.BinaryLinkServer;
 import org.openjdk.jmh.logic.results.BenchResult;
+import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.options.Options;
@@ -387,7 +389,19 @@ public class Runner extends BaseRunner {
 
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
 
-            String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort());
+            List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
+
+            List<String> javaInvokeOptions = new ArrayList<String>();
+            List<String> javaOptions = new ArrayList<String>();
+            for (Class<? extends Profiler> p : options.getProfilers()) {
+                if (!ProfilerFactory.isExternal(p)) continue;
+                ExternalProfiler prof = (ExternalProfiler) ProfilerFactory.prepareProfiler(p, null);
+                profilers.add(prof);
+                javaInvokeOptions.addAll(prof.addJVMInvokeOptions());
+                javaOptions.addAll(prof.addJVMOptions());
+            }
+
+            String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
             String opts = merge(getJvmArgs(benchmark));
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
@@ -417,7 +431,21 @@ public class Runner extends BaseRunner {
                 out.println("# VM invoker: " + jvm);
                 out.println("# VM options: " + opts);
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
+
+                for (ExternalProfiler profiler : profilers) {
+                    profiler.beforeTrial();
+                }
+
                 Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
+
+                for (ExternalProfiler profiler : profilers) {
+                    for (Result profR : profiler.afterTrial()) {
+                        for (BenchResult r : result.values()) {
+                            r.amend(profR);
+                        }
+                    }
+                }
+
                 results.merge(result);
                 afterBenchmark(benchmark);
             }
@@ -489,20 +517,28 @@ public class Runner extends BaseRunner {
      * Helper method for assembling the command to execute the forked JVM with
      *
      *
+     *
      * @param benchmark benchmark to execute
      * @param host host VM host
      * @param port host VM port
-     * @return the final command to execute
+     * @param javaInvokeOptions
+     *@param javaOptions @return the final command to execute
      */
-    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String host, int port) {
+    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
 
         List<String> command = new ArrayList<String>();
+
+        // prefix java invoke options, if any profiler wants it
+        command.addAll(javaInvokeOptions);
 
         // use supplied jvm, if given
         command.add(options.getJvm().orElse(getDefaultJvm()));
 
         // use supplied jvm args, if given
         command.addAll(getJvmArgs(benchmark));
+
+        // add profiler JVM commands, if any profiler wants it
+        command.addAll(javaOptions);
 
         // add any compiler oracle hints
         CompilerHints.addCompilerHints(command);

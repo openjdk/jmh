@@ -44,6 +44,7 @@ public class ProfilerFactory {
         profs.add(HotspotRuntimeProfiler.class);
         profs.add(HotspotThreadProfiler.class);
         profs.add(StackProfiler.class);
+        profs.add(DummyExternalProfiler.class);
         return profs;
     }
 
@@ -96,7 +97,7 @@ public class ProfilerFactory {
         return null;
     }
 
-    public static Profiler prepareProfiler(Class<? extends InternalProfiler> klass, VerboseMode verboseMode) {
+    public static Profiler prepareProfiler(Class<? extends Profiler> klass, VerboseMode verboseMode) {
         try {
             return klass.newInstance();
         } catch (InstantiationException e) {

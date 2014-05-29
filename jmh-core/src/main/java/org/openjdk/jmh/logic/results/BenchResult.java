@@ -44,10 +44,12 @@ public class BenchResult implements Serializable {
     private static final long serialVersionUID = 6467912427356048369L;
 
     private final Collection<IterationResult> iterationResults;
+    private final Collection<Result> benchmarkResults;
     private final BenchmarkRecord benchmark;
     private final BenchmarkParams params;
 
     public BenchResult(Collection<IterationResult> data) {
+        this.benchmarkResults = new ArrayList<Result>();
         this.iterationResults = data;
 
         BenchmarkRecord myRecord = null;
@@ -72,8 +74,9 @@ public class BenchResult implements Serializable {
         this.params = myParams;
     }
 
-    public Collection<IterationResult> getRawIterationResults() {
-        return iterationResults;
+    public void amend(Result r) {
+        // FIXME: Assumes secondary result.
+        benchmarkResults.add(r);
     }
 
     public Result getPrimaryResult() {
@@ -87,7 +90,7 @@ public class BenchResult implements Serializable {
     public Collection<Result> getRawPrimaryResults() {
         Collection<Result> rs = new ArrayList<Result>();
         for (IterationResult k : iterationResults) {
-            rs.add(k.getPrimaryResult());
+            rs.addAll(k.getRawPrimaryResults());
         }
         return rs;
     }
@@ -95,9 +98,15 @@ public class BenchResult implements Serializable {
     public Multimap<String, Result> getRawSecondaryResults() {
         Multimap<String, Result> rs = new HashMultimap<String, Result>();
         for (IterationResult k : iterationResults) {
-            for (Map.Entry<String, Result> r : k.getSecondaryResults().entrySet()) {
-                rs.put(r.getKey(), r.getValue());
+            Multimap<String, Result> secondaries = k.getRawSecondaryResults();
+            for (String label : secondaries.keys()) {
+                for (Result r : secondaries.get(label)) {
+                    rs.put(r.getLabel(), r);
+                }
             }
+        }
+        for (Result r : benchmarkResults) {
+            rs.put(r.getLabel(), r);
         }
         return rs;
     }

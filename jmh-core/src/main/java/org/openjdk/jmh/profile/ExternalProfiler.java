@@ -33,7 +33,11 @@ import java.util.Collection;
  */
 public interface ExternalProfiler extends Profiler {
 
-    Collection<String> beforeTrial();
+    Collection<String> addJVMInvokeOptions();
+
+    Collection<String> addJVMOptions();
+
+    void beforeTrial();
 
     Collection<? extends Result> afterTrial();
 
