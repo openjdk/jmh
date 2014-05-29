@@ -28,7 +28,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -46,12 +47,10 @@ public class CompilerHintsTest {
     public void testListNotEmptyForCompliantJvms() {
         for (String name : CompilerHints.HINT_COMPATIBLE_JVMS) {
             System.setProperty("java.vm.name", name);
-            // load up some default hints
-            CompilerHints defaultList = CompilerHints.fromFile(CompilerHints.hintsFile());
-            Set<String> hints = defaultList.get();
-            assertFalse(hints.isEmpty());
+            List<String> args = new ArrayList<String>();
+            CompilerHints.addCompilerHints(args);
+            assertFalse(args.isEmpty());
         }
-
     }
 
     @Test
@@ -59,9 +58,9 @@ public class CompilerHintsTest {
         System.setProperty("java.vm.name", "Zing");
         System.setProperty("java.version", "1.7.0-zing_5.9.2.0");
         // load up some default hints
-        CompilerHints defaultList = CompilerHints.fromFile(CompilerHints.hintsFile());
-        Set<String> hints = defaultList.get();
-        assertTrue(hints.isEmpty());
+        List<String> args = new ArrayList<String>();
+        CompilerHints.addCompilerHints(args);
+        assertTrue(args.isEmpty());
     }
 
     @Test
@@ -69,18 +68,17 @@ public class CompilerHintsTest {
         System.setProperty("java.vm.name", "Zing");
         System.setProperty("java.version", "1.7.0-zing_5.10.2.0");
         // load up some default hints
-        CompilerHints defaultList = CompilerHints.fromFile(CompilerHints.hintsFile());
-        Set<String> hints = defaultList.get();
-        assertFalse(hints.isEmpty());
+        List<String> args = new ArrayList<String>();
+        CompilerHints.addCompilerHints(args);
+        assertFalse(args.isEmpty());
     }
 
     @Test
     public void testListEmptyForNonCompliantJvms() {
         System.setProperty("java.vm.name", "StupidVmCantTakeAHint");
-        // load up some default hints
-        CompilerHints defaultList = CompilerHints.fromFile(CompilerHints.hintsFile());
-        Set<String> hints = defaultList.get();
-        assertTrue(hints.isEmpty());
+        List<String> args = new ArrayList<String>();
+        CompilerHints.addCompilerHints(args);
+        assertTrue(args.isEmpty());
     }
 
     @After

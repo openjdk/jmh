@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.util.FileUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.openjdk.jmh.util.FileUtils;
 
 public class CompilerHints extends AbstractResourceReader {
 
@@ -91,22 +91,14 @@ public class CompilerHints extends AbstractResourceReader {
 
     private CompilerHints(String file, String resource, String line) {
         super(file, resource, line);
-        final Set<String> defaultHints = read();
-        if (!defaultHints.isEmpty() && !isHintCompatibleVM()) {
-            System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
-                    + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
-                    + "\"), compilerHints are disabled.");
-            defaultHints.clear();
-        }
-        // make the set unmodifiable so we need not copy it defensively each time we return it.
-        hints = Collections.unmodifiableSet(defaultHints);
+        hints = Collections.unmodifiableSet(read());
     }
 
     /**
      * FIXME (low priority): check if supplied JVM is hint compatible. This test is applied to the Runner VM,
      * not the Forked and may therefore be wrong if the forked VM is not the same JVM
      */
-    private boolean isHintCompatibleVM() {
+    private static boolean isHintCompatibleVM() {
         String name = System.getProperty("java.vm.name");
         for (String vmName : HINT_COMPATIBLE_JVMS) {
             if (name.contains(vmName)) {
@@ -199,7 +191,14 @@ public class CompilerHints extends AbstractResourceReader {
      *
      * @param command all -XX:CompileCommandLine args will be removed and a merged file will be set
      */
-    public static void addMergeCompileCommandLineArgs(List<String> command) {
+    public static void addCompilerHints(List<String> command) {
+        if (!isHintCompatibleVM()) {
+            System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
+                    + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
+                    + "\"), compilerHints are disabled.");
+            return;
+        }
+
         List<String> hintFiles = new ArrayList<String>();
         hintFiles.add(hintsFile());
         removeCompileCommandFiles(command, hintFiles);

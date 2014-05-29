@@ -24,27 +24,6 @@
  */
 package org.openjdk.jmh.runner;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.link.BinaryLinkServer;
@@ -65,6 +44,27 @@ import org.openjdk.jmh.util.NullOutputStream;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.TreeMultimap;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Runner frontend class. Responsible for running micro benchmarks in this JVM.
@@ -505,7 +505,7 @@ public class Runner extends BaseRunner {
         command.addAll(getJvmArgs(benchmark));
 
         // add any compiler oracle hints
-        CompilerHints.addMergeCompileCommandLineArgs(command);
+        CompilerHints.addCompilerHints(command);
 
         // assemble final process command
         command.add("-cp");
