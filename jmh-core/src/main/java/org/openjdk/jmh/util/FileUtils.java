@@ -43,6 +43,12 @@ public class FileUtils {
 
     }
 
+    public static File tempFile(String suffix) throws IOException {
+        File file = File.createTempFile("jmh", suffix);
+        file.deleteOnExit();
+        return file;
+    }
+
     /**
      * Helper method for extracting a given resource to File
      *
@@ -58,13 +64,8 @@ public class FileUtils {
         try {
             fis = FileUtils.class.getResourceAsStream(name);
             bis = new BufferedInputStream(fis);
-            String suffix = name;
 
-            if (suffix.contains("/")) {
-                suffix = name.substring(name.lastIndexOf('/') + 1);
-            }
-
-            File temp = File.createTempFile("extracted", suffix);
+            File temp = FileUtils.tempFile("extracted");
 
             fos = new FileOutputStream(temp);
             bos = new BufferedOutputStream(fos);
@@ -133,7 +134,7 @@ public class FileUtils {
      */
     public static String createTempFileWithLines(String prefix, String suffix, Iterable<String> lines)
             throws IOException {
-        File file = File.createTempFile(prefix, suffix);
+        File file = FileUtils.tempFile(suffix);
         PrintWriter pw = new PrintWriter(file);
         for (String l : lines) {
             pw.println(l);

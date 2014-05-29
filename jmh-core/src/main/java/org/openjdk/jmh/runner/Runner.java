@@ -41,6 +41,7 @@ import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;
+import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.NullOutputStream;
 import org.openjdk.jmh.util.internal.HashMultimap;
@@ -422,8 +423,8 @@ public class Runner extends BaseRunner {
                     out.println("# VM options: " + opts);
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
 
-                    File stdErr = File.createTempFile("jmh", "stderr");
-                    File stdOut = File.createTempFile("jmh", "stdout");
+                    File stdErr = FileUtils.tempFile("stderr");
+                    File stdOut = FileUtils.tempFile("stdout");
 
                     doFork(server, commandString, stdOut, stdErr);
 
@@ -441,8 +442,8 @@ public class Runner extends BaseRunner {
                 out.println("# VM options: " + opts);
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
 
-                File stdErr = File.createTempFile("jmh", "stderr");
-                File stdOut = File.createTempFile("jmh", "stdout");
+                File stdErr = FileUtils.tempFile("stderr");
+                File stdOut = FileUtils.tempFile("stdout");
 
                 for (ExternalProfiler profiler : profilers) {
                     profiler.beforeTrial();

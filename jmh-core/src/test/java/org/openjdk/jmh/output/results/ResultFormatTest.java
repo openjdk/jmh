@@ -36,6 +36,7 @@ import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.util.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -110,7 +111,7 @@ public class ResultFormatTest {
 
     @Test
     public void jsonTest() throws IOException {
-        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         ResultFormatFactory.getInstance(
                     ResultFormatType.JSON,
@@ -122,7 +123,7 @@ public class ResultFormatTest {
 
     @Test
     public void jsonTest_Stream() throws IOException {
-        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         PrintWriter pw = new PrintWriter(actualFile);
         ResultFormatFactory.getInstance(
@@ -136,7 +137,7 @@ public class ResultFormatTest {
 
     @Test
     public void csvTest() throws IOException {
-        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+        String actualFile = FileUtils.tempFile("jmh").getAbsolutePath();
 
         ResultFormatFactory.getInstance(
                     ResultFormatType.CSV,
@@ -148,7 +149,7 @@ public class ResultFormatTest {
 
     @Test
     public void csvTest_Stream() throws IOException {
-        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         PrintWriter pw = new PrintWriter(actualFile);
         ResultFormatFactory.getInstance(
@@ -162,7 +163,7 @@ public class ResultFormatTest {
 
     @Test
     public void scsvTest() throws IOException {
-        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         ResultFormatFactory.getInstance(
                     ResultFormatType.SCSV,
@@ -174,7 +175,7 @@ public class ResultFormatTest {
 
     @Test
     public void scsvTest_Stream() throws IOException {
-        String actualFile = File.createTempFile("jmh", "test").getAbsolutePath();
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         PrintWriter pw = new PrintWriter(actualFile);
         ResultFormatFactory.getInstance(
