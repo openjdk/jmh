@@ -115,4 +115,15 @@ public class ProfilerFactory {
             return "(unable to instantiate the profiler)";
         }
     }
+
+    public static InjectionPoint getInjectionPoint(Class<? extends Profiler> klass) {
+        try {
+            Profiler prof = klass.newInstance();
+            return prof.point();
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }

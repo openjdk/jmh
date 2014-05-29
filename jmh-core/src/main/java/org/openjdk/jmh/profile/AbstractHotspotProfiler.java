@@ -65,7 +65,7 @@ abstract class AbstractHotspotProfiler implements Profiler {
 
     @Override
     public InjectionPoint point() {
-        return InjectionPoint.FORKED_VM_CONTROL;
+        return InjectionPoint.BENCHMARK_VM_CONTROL;
     }
 
     @Override

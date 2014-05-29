@@ -29,9 +29,14 @@ package org.openjdk.jmh.profile;
  */
 public enum InjectionPoint {
 
-    HOST_VM_CONTROL,
-    FORKED_VM_INVOKE,
-    FORKED_VM_CONTROL,
-    FORKED_VM_WORKERS,
+    /**
+     * Inject in harness VM, and run in the control thread there.
+     */
+    HARNESS_VM_CONTROL,
+
+    /**
+     * Inject in VM which does the actual benchmark, and run in the control thread there.
+     */
+    BENCHMARK_VM_CONTROL,
 
 }

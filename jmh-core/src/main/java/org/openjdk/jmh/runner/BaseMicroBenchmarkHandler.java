@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.profile.InjectionPoint;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.options.Options;
@@ -95,6 +96,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         List<Profiler> list = new ArrayList<Profiler>();
         // register the profilers
         for (Class<? extends Profiler> prof : options.getProfilers()) {
+            if (ProfilerFactory.getInjectionPoint(prof) != InjectionPoint.BENCHMARK_VM_CONTROL) continue;
             list.add(ProfilerFactory.prepareProfiler(prof, options.verbosity().orElse(Defaults.VERBOSITY)));
         }
         return list;

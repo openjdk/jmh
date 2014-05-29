@@ -53,5 +53,4 @@ public interface Profiler {
 
     Collection<? extends Result> afterTrial();
 
-
 }
