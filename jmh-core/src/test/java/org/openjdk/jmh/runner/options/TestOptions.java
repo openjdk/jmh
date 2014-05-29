@@ -30,7 +30,8 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.output.results.ResultFormatType;
-import org.openjdk.jmh.profile.ProfilerType;
+import org.openjdk.jmh.profile.ClassloaderProfiler;
+import org.openjdk.jmh.profile.CompilerProfiler;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.io.ByteArrayOutputStream;
@@ -173,8 +174,8 @@ public class TestOptions {
     @Test
     public void testProfilers() throws Exception {
         // TODO: Should be able to accept multiple values without concat?
-        CommandLineOptions cmdLine = new CommandLineOptions("-prof", ProfilerType.CL.id() + "," + ProfilerType.COMP.id());
-        Options builder = new OptionsBuilder().addProfiler(ProfilerType.CL).addProfiler(ProfilerType.COMP).build();
+        CommandLineOptions cmdLine = new CommandLineOptions("-prof", "cl,comp");
+        Options builder = new OptionsBuilder().addProfiler(ClassloaderProfiler.class).addProfiler(CompilerProfiler.class).build();
         Assert.assertEquals(builder.getProfilers(), cmdLine.getProfilers());
     }
 

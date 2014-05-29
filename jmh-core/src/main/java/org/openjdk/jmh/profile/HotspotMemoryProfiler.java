@@ -29,15 +29,20 @@ import sun.management.counter.Counter;
 
 import java.util.List;
 
-class HotspotMemoryProfiler extends AbstractHotspotProfiler {
-
-    public HotspotMemoryProfiler(String name, boolean verbose) {
-        super(name, verbose);
-    }
+public class HotspotMemoryProfiler extends AbstractHotspotProfiler {
 
     @Override
     public List<Counter> getCounters() {
         return AbstractHotspotProfiler.<HotspotMemoryMBean>getInstance("HotspotMemoryMBean").getInternalMemoryCounters();
     }
 
+    @Override
+    public String label() {
+        return "hs_gc";
+    }
+
+    @Override
+    public String getDescription() {
+        return "HotSpot (tm) memory manager (GC) profiling via implementation-specific MBeans";
+    }
 }

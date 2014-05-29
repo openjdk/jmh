@@ -36,10 +36,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-class GCProfiler implements Profiler {
+public class GCProfiler implements Profiler {
     private long startGCCount;
     private long startGCTime;
     private long startTime;
+
+    @Override
+    public String getDescription() {
+        return "GC profiling via standard MBeans";
+    }
+
+    @Override
+    public Collection<String> checkSupport() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String label() {
+        return "gc";
+    }
 
     @Override
     public InjectionPoint point() {
@@ -95,7 +110,4 @@ class GCProfiler implements Profiler {
         return Collections.emptyList();
     }
 
-    public static boolean isSupported() {
-        return true; // always supported
-    }
 }

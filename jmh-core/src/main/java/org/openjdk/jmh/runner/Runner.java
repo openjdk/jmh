@@ -55,6 +55,8 @@ import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.profile.Profiler;
+import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;
@@ -152,6 +154,17 @@ public class Runner extends BaseRunner {
      * @throws org.openjdk.jmh.runner.RunnerException if something goes wrong
      */
     public SortedMap<BenchmarkRecord, RunResult> run() throws RunnerException {
+        for (Class<? extends Profiler> p : options.getProfilers()) {
+            Collection<String> initMessages = ProfilerFactory.checkSupport(p);
+            if (!initMessages.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (String im : initMessages) {
+                    sb.append(String.format("%5s %s\n", "", im));
+                }
+                throw new RunnerException("The requested profiler (" + p.getName() + ") is not supported: \n" + sb.toString());
+            }
+        }
+
         SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {

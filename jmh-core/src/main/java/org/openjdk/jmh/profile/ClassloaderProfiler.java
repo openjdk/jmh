@@ -35,14 +35,29 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-class ClassloaderProfiler implements Profiler {
+public class ClassloaderProfiler implements Profiler {
 
     private long loadedClasses = -1;
     private long unloadedClasses = -1;
 
     @Override
+    public String getDescription() {
+        return "Classloader profiling via standard MBeans";
+    }
+
+    @Override
     public InjectionPoint point() {
         return InjectionPoint.FORKED_VM_CONTROL;
+    }
+
+    @Override
+    public Collection<String> checkSupport() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String label() {
+        return "cl";
     }
 
     @Override
@@ -95,10 +110,6 @@ class ClassloaderProfiler implements Profiler {
     @Override
     public Collection<? extends Result> afterTrial() {
         return Collections.emptyList();
-    }
-
-    public static boolean isSupported() {
-        return true; // always supported
     }
 
 }

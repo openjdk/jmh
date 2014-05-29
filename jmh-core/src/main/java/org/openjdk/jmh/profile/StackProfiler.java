@@ -86,6 +86,22 @@ class StackProfiler implements Profiler {
     }
 
     @Override
+    public Collection<String> checkSupport() {
+        return Collections.emptyList();
+    }
+
+
+    @Override
+    public String label() {
+        return "stack";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Simple and naive Java stack profiler";
+    }
+
+    @Override
     public InjectionPoint point() {
         return InjectionPoint.FORKED_VM_CONTROL;
     }

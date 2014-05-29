@@ -40,21 +40,28 @@ import java.util.TreeMap;
 
 abstract class AbstractHotspotProfiler implements Profiler {
 
-    private final String name;
-    protected final boolean verbose;
     private Map<String, Long> prevs;
     private long startTime;
-
-    public AbstractHotspotProfiler(String name, boolean verbose) {
-        this.name = name;
-        this.verbose = verbose;
-    }
 
     /**
      * Returns internal counters for specific MXBean
      * @return list of internal counters.
      */
     protected abstract Collection<Counter> getCounters();
+
+    /**
+     * Checks if this profiler is accessible
+     * @return true, if accessible; false otherwise
+     */
+    @Override
+    public Collection<String> checkSupport() {
+        try {
+            Class.forName("sun.management.ManagementFactoryHelper");
+            return Collections.emptyList();
+        } catch (ClassNotFoundException e) {
+            return Collections.singleton("Class not found: " + e.getMessage() + ", are you running HotSpot VM?");
+        }
+    }
 
     @Override
     public InjectionPoint point() {
@@ -117,7 +124,7 @@ abstract class AbstractHotspotProfiler implements Profiler {
             }
         }
 
-        return new HotspotInternalResult(name, current, difference, duration);
+        return new HotspotInternalResult(current, difference, duration);
     }
 
     public static <T> T getInstance(String name) {
@@ -136,37 +143,22 @@ abstract class AbstractHotspotProfiler implements Profiler {
     }
 
     /**
-     * Checks if this profiler is accessible
-     * @return true, if accessible; false otherwise
-     */
-    public static boolean isSupported() {
-        try {
-            Class.forName("sun.management.ManagementFactoryHelper");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    /**
      * Represents the HotSpot profiling result.
      */
     static class HotspotInternalResult {
 
-        private final String name;
         private final Map<String, Long> current;
         private final Map<String, Long> diff;
         private final long durationMsec;
 
-        public HotspotInternalResult(String name, Map<String, Long> current, Map<String, Long> diff, long durationMsec) {
-            this.name = name;
+        public HotspotInternalResult(Map<String, Long> current, Map<String, Long> diff, long durationMsec) {
             this.current = current;
             this.diff = diff;
             this.durationMsec = durationMsec;
         }
 
         public HotspotInternalResult(HotspotInternalResult result) {
-            this(result.name, result.current, result.diff, result.durationMsec);
+            this(result.current, result.diff, result.durationMsec);
         }
 
         public Map<String, Long> getCurrent() {

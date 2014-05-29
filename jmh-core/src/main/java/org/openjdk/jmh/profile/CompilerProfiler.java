@@ -35,13 +35,33 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-class CompilerProfiler implements Profiler {
+public class CompilerProfiler implements Profiler {
 
     private long startCompTime = -1;
 
     @Override
+    public String getDescription() {
+        return "JIT compiler profiling via standard MBeans";
+    }
+
+    @Override
     public InjectionPoint point() {
         return InjectionPoint.FORKED_VM_CONTROL;
+    }
+
+    @Override
+    public String label() {
+        return "comp";
+    }
+
+    @Override
+    public Collection<String> checkSupport() {
+        CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
+        if (comp.isCompilationTimeMonitoringSupported()) {
+            return Collections.emptyList();
+        } else {
+            return Collections.singleton("The MXBean is available, but compilation time monitoring is disabled.");
+        }
     }
 
     @Override
@@ -82,11 +102,6 @@ class CompilerProfiler implements Profiler {
     @Override
     public Collection<? extends Result> afterTrial() {
         return Collections.emptyList();
-    }
-
-    public boolean isSupported() {
-        CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
-        return comp.isCompilationTimeMonitoringSupported();
     }
 
 }

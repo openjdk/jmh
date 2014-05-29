@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
-import org.openjdk.jmh.profile.ProfilerType;
+import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.TimeUnit;
@@ -96,10 +96,10 @@ public interface ChainedOptionsBuilder {
 
     /**
      * Add the profiler in the run
-     * @param prof profiler type
+     * @param profiler profiler class
      * @return builder
      */
-    ChainedOptionsBuilder addProfiler(ProfilerType prof);
+    ChainedOptionsBuilder addProfiler(Class<? extends Profiler> profiler);
 
     /**
      * Control verbosity level.

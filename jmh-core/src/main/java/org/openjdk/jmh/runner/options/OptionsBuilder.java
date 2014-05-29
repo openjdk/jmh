@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
-import org.openjdk.jmh.profile.ProfilerType;
+import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -180,16 +181,16 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private EnumSet<ProfilerType> profilers = EnumSet.noneOf(ProfilerType.class);
+    private Set<Class<? extends Profiler>> profilers = new HashSet<Class<? extends Profiler>>();
 
     @Override
-    public ChainedOptionsBuilder addProfiler(ProfilerType prof) {
+    public ChainedOptionsBuilder addProfiler(Class<? extends Profiler> prof) {
         this.profilers.add(prof);
         return this;
     }
 
     @Override
-    public Set<ProfilerType> getProfilers() {
+    public Set<Class<? extends Profiler>> getProfilers() {
         if (otherOptions != null) {
             profilers.addAll(otherOptions.getProfilers());
         }

@@ -37,13 +37,19 @@ import java.util.concurrent.TimeUnit;
 
 class HotspotCompilationProfiler extends AbstractHotspotProfiler {
 
-    public HotspotCompilationProfiler(String name, boolean verbose) {
-        super(name, verbose);
-    }
-
     @Override
     public List<Counter> getCounters() {
         return AbstractHotspotProfiler.<HotspotCompilationMBean>getInstance("HotspotCompilationMBean").getInternalCompilerCounters();
+    }
+
+    @Override
+    public String label() {
+        return "hs_comp";
+    }
+
+    @Override
+    public String getDescription() {
+        return "HotSpot (tm) JIT compiler profiling via implementation-specific MBeans";
     }
 
     @Override

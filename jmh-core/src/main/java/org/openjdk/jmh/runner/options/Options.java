@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
-import org.openjdk.jmh.profile.ProfilerType;
+import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.internal.Optional;
 
@@ -77,7 +77,7 @@ public interface Options extends Serializable {
      * Profilers to use for the run.
      * @return profilers to use; empty collection if no profilers are required
      */
-    Collection<ProfilerType> getProfilers();
+    Collection<Class<? extends Profiler>> getProfilers();
 
     /**
      * How verbose should we be?

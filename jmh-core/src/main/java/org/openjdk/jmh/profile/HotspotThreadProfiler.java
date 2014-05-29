@@ -34,15 +34,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-class HotspotThreadProfiler extends AbstractHotspotProfiler {
-
-    public HotspotThreadProfiler(String name, boolean verbose) {
-        super(name, verbose);
-    }
+public class HotspotThreadProfiler extends AbstractHotspotProfiler {
 
     @Override
     public List<Counter> getCounters() {
         return AbstractHotspotProfiler.<HotspotThreadMBean>getInstance("HotspotThreadMBean").getInternalThreadingCounters();
+    }
+
+    @Override
+    public String label() {
+        return "hs_thr";
+    }
+
+    @Override
+    public String getDescription() {
+        return "HotSpot (tm) threading subsystem via implementation-specific MBeans";
     }
 
     @Override

@@ -35,15 +35,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
-
-    public HotspotRuntimeProfiler(String name, boolean verbose) {
-        super(name, verbose);
-    }
+public class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
 
     @Override
     public List<Counter> getCounters() {
         return AbstractHotspotProfiler.<HotspotRuntimeMBean>getInstance("HotspotRuntimeMBean").getInternalRuntimeCounters();
+    }
+
+    @Override
+    public String label() {
+        return "hs_rt";
+    }
+
+    @Override
+    public String getDescription() {
+        return "HotSpot (tm) runtime profiling via implementation-specific MBeans";
     }
 
     @Override

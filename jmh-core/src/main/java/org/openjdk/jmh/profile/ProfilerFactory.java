@@ -24,39 +24,95 @@
  */
 package org.openjdk.jmh.profile;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.openjdk.jmh.runner.options.VerboseMode;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 public class ProfilerFactory {
 
-    public static ProfilerType getProfiler(String id) {
-        for (ProfilerType p : ProfilerType.values()) {
-            if (p.id().toLowerCase().equals(id.toLowerCase())) {
-                return p;
+    public static Collection<Class<? extends Profiler>> getAvailableProfilers() {
+        return Arrays.asList(
+                ClassloaderProfiler.class,
+                CompilerProfiler.class,
+                GCProfiler.class,
+                HotspotClassloadingProfiler.class,
+                HotspotCompilationProfiler.class,
+                HotspotMemoryProfiler.class,
+                HotspotRuntimeProfiler.class,
+                HotspotThreadProfiler.class,
+                StackProfiler.class
+        );
+    }
+
+    public static Collection<String> checkSupport(Class<? extends Profiler> klass) {
+        try {
+            Profiler prof = klass.newInstance();
+            return prof.checkSupport();
+        } catch (InstantiationException e) {
+            return Collections.singleton("Unable to instantiate " + klass);
+        } catch (IllegalAccessException e) {
+            return Collections.singleton("Unable to instantiate " + klass);
+        }
+    }
+
+    public static String getDescription(Class<? extends Profiler> klass) {
+        try {
+            Profiler prof = klass.newInstance();
+            return prof.getDescription();
+        } catch (InstantiationException e) {
+            return "(unable to instantiate the profiler)";
+        } catch (IllegalAccessException e) {
+            return "(unable to instantiate the profiler)";
+        }
+    }
+
+    public static Class<? extends Profiler> getProfilerByName(String name) {
+        try {
+            Class<?> klass = Class.forName(name);
+            if (Profiler.class.isAssignableFrom(klass)) {
+                return (Class<? extends Profiler>) klass;
+            }
+        } catch (ClassNotFoundException e) {
+            // omit
+        }
+
+        Collection<Class<? extends Profiler>> profilers = getAvailableProfilers();
+        for (Class<? extends Profiler> p : profilers) {
+            try {
+                Profiler prof = p.newInstance();
+                if (prof.label().equalsIgnoreCase(name)) {
+                    return p;
+                }
+            } catch (InstantiationException e) {
+                // omit
+            } catch (IllegalAccessException e) {
+                // omit
             }
         }
+
         return null;
     }
 
-    public static List<String> getAvailableProfilers() {
-        List<String> res = new ArrayList<String>();
-        for (ProfilerType p : ProfilerType.values()) {
-            res.add(p.id().toLowerCase());
+    public static Profiler prepareProfiler(Class<? extends Profiler> klass, VerboseMode verboseMode) {
+        try {
+            return klass.newInstance();
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
-        return res;
     }
 
-    public static boolean isSupported(String id) {
-        ProfilerType profiler = getProfiler(id);
-        return (profiler != null) && profiler.isSupported();
-    }
-
-    public static String getDescription(String id) {
-        ProfilerType profiler = getProfiler(id);
-        if (profiler != null) {
-            return profiler.description();
+    public static String getLabel(Class<? extends Profiler> klass) {
+        try {
+            Profiler prof = klass.newInstance();
+            return prof.label();
+        } catch (InstantiationException e) {
+            return "(unable to instantiate the profiler)";
+        } catch (IllegalAccessException e) {
+            return "(unable to instantiate the profiler)";
         }
-        return "(Description is not available)";
     }
-
 }

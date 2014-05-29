@@ -29,15 +29,20 @@ import sun.management.counter.Counter;
 
 import java.util.List;
 
-class HotspotClassloadingProfiler extends AbstractHotspotProfiler {
-
-    public HotspotClassloadingProfiler(String name, boolean verbose) {
-        super(name, verbose);
-    }
+public class HotspotClassloadingProfiler extends AbstractHotspotProfiler {
 
     @Override
     public List<Counter> getCounters() {
         return AbstractHotspotProfiler.<HotspotClassLoadingMBean>getInstance("HotspotClassLoadingMBean").getInternalClassLoadingCounters();
     }
 
+    @Override
+    public String label() {
+        return "hs_cl";
+    }
+
+    @Override
+    public String getDescription() {
+        return "HotSpot (tm) classloader profiling via implementation-specific MBeans";
+    }
 }

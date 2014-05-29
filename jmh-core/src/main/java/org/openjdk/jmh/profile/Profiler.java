@@ -35,6 +35,12 @@ import java.util.List;
  */
 public interface Profiler {
 
+    Collection<String> checkSupport();
+
+    String label();
+
+    String getDescription();
+
     InjectionPoint point();
 
     Optional<List<String>> addJVMOptions();
@@ -46,5 +52,6 @@ public interface Profiler {
     Collection<? extends Result> afterIteration();
 
     Collection<? extends Result> afterTrial();
+
 
 }
