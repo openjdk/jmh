@@ -133,11 +133,13 @@ class TextReportFormat extends AbstractOutputFormat {
     @Override
     public void endBenchmark(BenchmarkRecord name, BenchResult result) {
         out.println();
-        out.println(result.getPrimaryResult().extendedInfo(null));
-        for (Result r : result.getSecondaryResults().values()) {
-            out.println(r.extendedInfo(r.getLabel()));
+        if (result != null) {
+            out.println(result.getPrimaryResult().extendedInfo(null));
+            for (Result r : result.getSecondaryResults().values()) {
+                out.println(r.extendedInfo(r.getLabel()));
+            }
+            out.println();
         }
-        out.println();
     }
 
     @Override

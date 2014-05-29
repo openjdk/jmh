@@ -80,21 +80,25 @@ public abstract class BaseRunner {
             BenchmarkRecord benchmark = action.getBenchmark();
             ActionMode mode = action.getMode();
 
+            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, mode);
+
             if (!forked) {
                 beforeBenchmark();
+                out.startBenchmark(benchmark, params);
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
 
+            BenchResult r = null;
             try {
                 switch (mode) {
                     case WARMUP: {
-                        runBenchmark(benchmark, mode);
+                        runBenchmark(benchmark, mode, params);
                         out.println("");
                         break;
                     }
                     case WARMUP_MEASUREMENT:
                     case MEASUREMENT: {
-                        BenchResult r = runBenchmark(benchmark, mode);
+                        r = runBenchmark(benchmark, mode, params);
                         results.put(benchmark, r);
                         break;
                     }
@@ -121,6 +125,7 @@ public abstract class BaseRunner {
 
             if (!forked) {
                 afterBenchmark(benchmark);
+                out.endBenchmark(benchmark, r);
             }
         }
 
@@ -179,13 +184,12 @@ public abstract class BaseRunner {
         return String.format("%s%02d:%02d:%02d", (days > 0) ? days + "days, " : "", hrs, mins, secs);
     }
 
-    BenchResult runBenchmark(BenchmarkRecord benchmark, ActionMode mode) {
+    BenchResult runBenchmark(BenchmarkRecord benchmark, ActionMode mode, BenchmarkParams executionParams) {
         MicroBenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
             Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
-            BenchmarkParams executionParams = new BenchmarkParams(out, options, benchmark, mode);
             handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
             return runBenchmark(executionParams, handler);
@@ -202,8 +206,6 @@ public abstract class BaseRunner {
 
     protected BenchResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
         List<IterationResult> allResults = new ArrayList<IterationResult>();
-
-        out.startBenchmark(handler.getBenchmark(), executionParams);
 
         // warmup
         IterationParams wp = executionParams.getWarmup();
@@ -237,9 +239,7 @@ public abstract class BaseRunner {
         }
 
         if (!allResults.isEmpty()) {
-            BenchResult result = new BenchResult(allResults);
-            out.endBenchmark(handler.getBenchmark(), result);
-            return result;
+            return new BenchResult(allResults);
         } else {
             // should be ignored in the caller
             return null;

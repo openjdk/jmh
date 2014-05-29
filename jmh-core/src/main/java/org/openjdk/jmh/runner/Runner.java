@@ -417,10 +417,12 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < warmupForkCount; i++) {
                     beforeBenchmark();
+                    out.startBenchmark(benchmark, params);
                     out.println("# VM invoker: " + jvm);
                     out.println("# VM options: " + opts);
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
                     doFork(server, commandString);
+                    out.endBenchmark(benchmark, null);
                     afterBenchmark(benchmark);
                 }
             }
@@ -428,6 +430,8 @@ public class Runner extends BaseRunner {
             out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < forkCount; i++) {
                 beforeBenchmark();
+                out.startBenchmark(benchmark, params);
+
                 out.println("# VM invoker: " + jvm);
                 out.println("# VM options: " + opts);
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
@@ -448,6 +452,14 @@ public class Runner extends BaseRunner {
 
                 results.merge(result);
                 afterBenchmark(benchmark);
+
+                // we have only a single benchmark, which will produce only a single result
+                // TODO: clean up doFork() to return only a single value
+                BenchResult r = null;
+                if (result.values().size() == 1) {
+                    r = result.values().iterator().next();
+                }
+                out.endBenchmark(benchmark, r);
             }
 
         } catch (IOException e) {
