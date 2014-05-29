@@ -29,6 +29,7 @@ import org.openjdk.jmh.logic.results.Aggregator;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -49,7 +50,7 @@ public class DummyExternalProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterTrial() {
+    public Collection<? extends Result> afterTrial(File stdOut, File stdErr) {
         return Collections.singleton(new MyResult());
     }
 

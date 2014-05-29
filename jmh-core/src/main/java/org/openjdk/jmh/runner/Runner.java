@@ -421,7 +421,12 @@ public class Runner extends BaseRunner {
                     out.println("# VM invoker: " + jvm);
                     out.println("# VM options: " + opts);
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
-                    doFork(server, commandString);
+
+                    File stdErr = File.createTempFile("jmh", "stderr");
+                    File stdOut = File.createTempFile("jmh", "stdout");
+
+                    doFork(server, commandString, stdOut, stdErr);
+
                     out.endBenchmark(benchmark, null);
                     afterBenchmark(benchmark);
                 }
@@ -436,14 +441,17 @@ public class Runner extends BaseRunner {
                 out.println("# VM options: " + opts);
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
 
+                File stdErr = File.createTempFile("jmh", "stderr");
+                File stdOut = File.createTempFile("jmh", "stdout");
+
                 for (ExternalProfiler profiler : profilers) {
                     profiler.beforeTrial();
                 }
 
-                Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString);
+                Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString, stdOut, stdErr);
 
                 for (ExternalProfiler profiler : profilers) {
-                    for (Result profR : profiler.afterTrial()) {
+                    for (Result profR : profiler.afterTrial(stdOut, stdErr)) {
                         for (BenchResult r : result.values()) {
                             r.amend(profR);
                         }
@@ -481,13 +489,13 @@ public class Runner extends BaseRunner {
         return sb.toString().trim();
     }
 
-    private Multimap<BenchmarkRecord, BenchResult> doFork(BinaryLinkServer reader, String[] commandString) {
+    private Multimap<BenchmarkRecord, BenchResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
             // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), new NullOutputStream());
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), new NullOutputStream());
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), new FileOutputStream(stdOut));
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), new FileOutputStream(stdErr));
 
             errDrainer.start();
             outDrainer.start();

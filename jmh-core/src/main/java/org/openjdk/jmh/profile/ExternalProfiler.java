@@ -26,6 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.logic.results.Result;
 
+import java.io.File;
 import java.util.Collection;
 
 /**
@@ -39,6 +40,6 @@ public interface ExternalProfiler extends Profiler {
 
     void beforeTrial();
 
-    Collection<? extends Result> afterTrial();
+    Collection<? extends Result> afterTrial(File stdOut, File stdErr);
 
 }
