@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class HotspotCompilationProfiler extends AbstractHotspotProfiler {
+public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
 
     @Override
     public List<Counter> getCounters() {

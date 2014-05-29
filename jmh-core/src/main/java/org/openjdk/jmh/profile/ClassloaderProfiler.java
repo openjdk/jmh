@@ -26,16 +26,14 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.util.internal.Optional;
 
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-public class ClassloaderProfiler implements Profiler {
+public class ClassloaderProfiler implements InternalProfiler {
 
     private long loadedClasses = -1;
     private long unloadedClasses = -1;
@@ -46,11 +44,6 @@ public class ClassloaderProfiler implements Profiler {
     }
 
     @Override
-    public InjectionPoint point() {
-        return InjectionPoint.BENCHMARK_VM_CONTROL;
-    }
-
-    @Override
     public Collection<String> checkSupport() {
         return Collections.emptyList();
     }
@@ -58,16 +51,6 @@ public class ClassloaderProfiler implements Profiler {
     @Override
     public String label() {
         return "cl";
-    }
-
-    @Override
-    public Optional<List<String>> addJVMOptions() {
-        return Optional.none();
-    }
-
-    @Override
-    public void beforeTrial() {
-
     }
 
     @Override
@@ -105,11 +88,6 @@ public class ClassloaderProfiler implements Profiler {
                 new ProfilerResult("@classload.loaded", loaded, "classes", AggregationPolicy.AVG),
                 new ProfilerResult("@classload.unloaded", unloaded, "classes", AggregationPolicy.AVG)
         );
-    }
-
-    @Override
-    public Collection<? extends Result> afterTrial() {
-        return Collections.emptyList();
     }
 
 }

@@ -32,7 +32,6 @@ import org.openjdk.jmh.util.internal.HashMultiset;
 import org.openjdk.jmh.util.internal.ListStatistics;
 import org.openjdk.jmh.util.internal.Multiset;
 import org.openjdk.jmh.util.internal.Multisets;
-import org.openjdk.jmh.util.internal.Optional;
 
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -40,13 +39,12 @@ import java.lang.management.ThreadInfo;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Very basic and naive stack profiler.
  */
-class StackProfiler implements Profiler {
+public class StackProfiler implements InternalProfiler {
 
     /** Number of stack lines to save */
     private static final int SAMPLE_STACK_LINES = Integer.getInteger("jmh.stack.lines", 1);
@@ -99,26 +97,6 @@ class StackProfiler implements Profiler {
     @Override
     public String getDescription() {
         return "Simple and naive Java stack profiler";
-    }
-
-    @Override
-    public InjectionPoint point() {
-        return InjectionPoint.BENCHMARK_VM_CONTROL;
-    }
-
-    @Override
-    public Optional<List<String>> addJVMOptions() {
-        return Optional.none();
-    }
-
-    @Override
-    public void beforeTrial() {
-
-    }
-
-    @Override
-    public Collection<? extends Result> afterTrial() {
-        return Collections.emptyList();
     }
 
     public static class SamplingTask implements Runnable {

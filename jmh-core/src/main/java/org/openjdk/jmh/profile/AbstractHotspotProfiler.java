@@ -26,7 +26,6 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.util.internal.Optional;
 import sun.management.counter.Counter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -34,11 +33,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-abstract class AbstractHotspotProfiler implements Profiler {
+abstract class AbstractHotspotProfiler implements InternalProfiler {
 
     private Map<String, Long> prevs;
     private long startTime;
@@ -64,21 +62,6 @@ abstract class AbstractHotspotProfiler implements Profiler {
     }
 
     @Override
-    public InjectionPoint point() {
-        return InjectionPoint.BENCHMARK_VM_CONTROL;
-    }
-
-    @Override
-    public Optional<List<String>> addJVMOptions() {
-        return Optional.none();
-    }
-
-    @Override
-    public void beforeTrial() {
-
-    }
-
-    @Override
     public Collection<? extends Result> afterIteration() {
         HotspotInternalResult res = counters();
         Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
@@ -86,11 +69,6 @@ abstract class AbstractHotspotProfiler implements Profiler {
             results.add(new ProfilerResult("instrument@unknown." + e.getKey(), e.getValue(), "???", AggregationPolicy.AVG));
         }
         return results;
-    }
-
-    @Override
-    public Collection<? extends Result> afterTrial() {
-        return Collections.emptyList();
     }
 
     @Override

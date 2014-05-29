@@ -26,17 +26,15 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.util.internal.Optional;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class GCProfiler implements Profiler {
+public class GCProfiler implements InternalProfiler {
     private long startGCCount;
     private long startGCTime;
     private long startTime;
@@ -54,21 +52,6 @@ public class GCProfiler implements Profiler {
     @Override
     public String label() {
         return "gc";
-    }
-
-    @Override
-    public InjectionPoint point() {
-        return InjectionPoint.BENCHMARK_VM_CONTROL;
-    }
-
-    @Override
-    public Optional<List<String>> addJVMOptions() {
-        return Optional.none();
-    }
-
-    @Override
-    public void beforeTrial() {
-        // do nothing
     }
 
     @Override
@@ -103,11 +86,6 @@ public class GCProfiler implements Profiler {
                         100.0 * gcTime / TimeUnit.NANOSECONDS.toMillis(endTime - startTime),
                         "%", AggregationPolicy.AVG)
         );
-    }
-
-    @Override
-    public Collection<? extends Result> afterTrial() {
-        return Collections.emptyList();
     }
 
 }

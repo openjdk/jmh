@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.logic.results.IterationResult;
 import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.profile.InjectionPoint;
+import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.options.Options;
@@ -65,7 +65,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     protected final TimeUnit timeUnit;
     protected final Long opsPerInvocation;
 
-    private final List<Profiler> registeredProfilers;
+    private final List<InternalProfiler> registeredProfilers;
 
     public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
         this.microbenchmark = microbenchmark;
@@ -92,12 +92,13 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         }
     }
 
-    private static List<Profiler> createProfilers(Options options) {
-        List<Profiler> list = new ArrayList<Profiler>();
+    private static List<InternalProfiler> createProfilers(Options options) {
+        List<InternalProfiler> list = new ArrayList<InternalProfiler>();
         // register the profilers
         for (Class<? extends Profiler> prof : options.getProfilers()) {
-            if (ProfilerFactory.getInjectionPoint(prof) != InjectionPoint.BENCHMARK_VM_CONTROL) continue;
-            list.add(ProfilerFactory.prepareProfiler(prof, options.verbosity().orElse(Defaults.VERBOSITY)));
+            if (!ProfilerFactory.isInternal(prof)) continue;
+            Class<? extends InternalProfiler> intProf = (Class<? extends InternalProfiler>) prof;
+            list.add((InternalProfiler) ProfilerFactory.prepareProfiler(intProf, options.verbosity().orElse(Defaults.VERBOSITY)));
         }
         return list;
     }
@@ -207,7 +208,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
     protected void stopProfilers(IterationResult iterationResults) {
         // stop profilers
-        for (Profiler prof : registeredProfilers) {
+        for (InternalProfiler prof : registeredProfilers) {
             try {
                 iterationResults.addResults(prof.afterIteration());
             } catch (Throwable ex) {
@@ -218,7 +219,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
 
     protected void startProfilers() {
         // start profilers
-        for (Profiler prof : registeredProfilers) {
+        for (InternalProfiler prof : registeredProfilers) {
             try {
                 prof.beforeIteration();
             } catch (Throwable ex) {

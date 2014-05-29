@@ -26,27 +26,20 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.util.internal.Optional;
 
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-public class CompilerProfiler implements Profiler {
+public class CompilerProfiler implements InternalProfiler {
 
     private long startCompTime = -1;
 
     @Override
     public String getDescription() {
         return "JIT compiler profiling via standard MBeans";
-    }
-
-    @Override
-    public InjectionPoint point() {
-        return InjectionPoint.BENCHMARK_VM_CONTROL;
     }
 
     @Override
@@ -62,16 +55,6 @@ public class CompilerProfiler implements Profiler {
         } else {
             return Collections.singleton("The MXBean is available, but compilation time monitoring is disabled.");
         }
-    }
-
-    @Override
-    public Optional<List<String>> addJVMOptions() {
-        return Optional.none();
-    }
-
-    @Override
-    public void beforeTrial() {
-
     }
 
     @Override
@@ -97,11 +80,6 @@ public class CompilerProfiler implements Profiler {
         return Arrays.asList(
                 new ProfilerResult("@compiler.time", compTime, "ms", AggregationPolicy.AVG)
         );
-    }
-
-    @Override
-    public Collection<? extends Result> afterTrial() {
-        return Collections.emptyList();
     }
 
 }

@@ -26,24 +26,25 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class ProfilerFactory {
 
-    public static Collection<Class<? extends Profiler>> getAvailableProfilers() {
-        return Arrays.asList(
-                ClassloaderProfiler.class,
-                CompilerProfiler.class,
-                GCProfiler.class,
-                HotspotClassloadingProfiler.class,
-                HotspotCompilationProfiler.class,
-                HotspotMemoryProfiler.class,
-                HotspotRuntimeProfiler.class,
-                HotspotThreadProfiler.class,
-                StackProfiler.class
-        );
+    public static List<Class<? extends Profiler>> getAvailableProfilers() {
+        List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
+        profs.add(ClassloaderProfiler.class);
+        profs.add(CompilerProfiler.class);
+        profs.add(GCProfiler.class);
+        profs.add(HotspotClassloadingProfiler.class);
+        profs.add(HotspotCompilationProfiler.class);
+        profs.add(HotspotMemoryProfiler.class);
+        profs.add(HotspotRuntimeProfiler.class);
+        profs.add(HotspotThreadProfiler.class);
+        profs.add(StackProfiler.class);
+        return profs;
     }
 
     public static Collection<String> checkSupport(Class<? extends Profiler> klass) {
@@ -95,7 +96,7 @@ public class ProfilerFactory {
         return null;
     }
 
-    public static Profiler prepareProfiler(Class<? extends Profiler> klass, VerboseMode verboseMode) {
+    public static Profiler prepareProfiler(Class<? extends InternalProfiler> klass, VerboseMode verboseMode) {
         try {
             return klass.newInstance();
         } catch (InstantiationException e) {
@@ -116,14 +117,11 @@ public class ProfilerFactory {
         }
     }
 
-    public static InjectionPoint getInjectionPoint(Class<? extends Profiler> klass) {
-        try {
-            Profiler prof = klass.newInstance();
-            return prof.point();
-        } catch (InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
+    public static boolean isInternal(Class<? extends Profiler> klass) {
+        return InternalProfiler.class.isAssignableFrom(klass);
+    }
+
+    public static boolean isExternal(Class<? extends Profiler> klass) {
+        return ExternalProfiler.class.isAssignableFrom(klass);
     }
 }

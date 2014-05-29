@@ -24,17 +24,17 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.logic.results.Result;
+
 import java.util.Collection;
 
 /**
  * Profiler interface
  */
-public interface Profiler {
+public interface ExternalProfiler extends Profiler {
 
-    Collection<String> checkSupport();
+    Collection<String> beforeTrial();
 
-    String label();
-
-    String getDescription();
+    Collection<? extends Result> afterTrial();
 
 }
