@@ -98,6 +98,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             runners[i] = new BenchmarkTask(instances, control, threadControl);
         }
 
+        // profilers start way before the workload starts to capture
+        // the edge behaviors.
+        startProfilers();
+
         // submit tasks to threadpool
         Map<BenchmarkTask, Future<Collection<? extends Result>>> results = new HashMap<BenchmarkTask, Future<Collection<? extends Result>>>();
         for (BenchmarkTask runner : runners) {
@@ -113,18 +117,12 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             }
         }
 
-        // profilers start when iteration starts
-        startProfilers();
-
         // wait for the iteration time to expire
         try {
             runtime.sleep();
         } catch (InterruptedException e) {
             // regardless...
         }
-
-        // profilers stop when threads are still in full work
-        stopProfilers(iterationResults);
 
         // now we communicate all worker threads should stop
         control.isDone = true;
@@ -190,6 +188,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 throw new IllegalStateException("Impossible to be here");
             }
         }
+
+        // profilers stop when after all threads are confirmed to be
+        // finished to capture the edge behaviors
+        stopProfilers(iterationResults);
 
         return iterationResults;
     }
