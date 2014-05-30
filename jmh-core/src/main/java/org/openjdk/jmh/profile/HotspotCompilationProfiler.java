@@ -85,11 +85,11 @@ public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
                         "methods", AggregationPolicy.MAX),
 
                 new ProfilerResult("@compiler.osrBytes",
-                        current.get("sun.ci.osrTime") / 1024,
+                        current.get("sun.ci.osrBytes") / 1024,
                         "Kb", AggregationPolicy.MAX),
 
                 new ProfilerResult("@compiler.osrTime",
-                        TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.osrBytes")),
+                        TimeUnit.NANOSECONDS.toMillis(current.get("sun.ci.osrTime")),
                         "ms", AggregationPolicy.MAX),
 
                 new ProfilerResult("@compiler.standardCompiles",
