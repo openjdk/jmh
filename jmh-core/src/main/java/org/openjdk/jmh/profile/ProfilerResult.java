@@ -48,4 +48,9 @@ public class ProfilerResult extends Result<ProfilerResult> {
     public Aggregator<ProfilerResult> getRunAggregator() {
         return new ProfilerResultAggregator();
     }
+
+    public String extendedInfo(String label) {
+        return String.format("Result %30s: %.3f ±(99.9%%) %.3f %s", "\"" + label + "\"", getScore(), getScoreError(), getScoreUnit());
+    }
+
 }
