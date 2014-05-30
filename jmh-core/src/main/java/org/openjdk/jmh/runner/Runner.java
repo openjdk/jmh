@@ -388,6 +388,7 @@ public class Runner extends BaseRunner {
             server.setPlan(actionPlan);
 
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
+            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, actionPlan.getMeasurementActions().get(0).getMode());
 
             List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
 
@@ -397,8 +398,8 @@ public class Runner extends BaseRunner {
                 if (!ProfilerFactory.isExternal(p)) continue;
                 ExternalProfiler prof = (ExternalProfiler) ProfilerFactory.prepareProfiler(p, null);
                 profilers.add(prof);
-                javaInvokeOptions.addAll(prof.addJVMInvokeOptions());
-                javaOptions.addAll(prof.addJVMOptions());
+                javaInvokeOptions.addAll(prof.addJVMInvokeOptions(params));
+                javaOptions.addAll(prof.addJVMOptions(params));
             }
 
             String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
@@ -408,8 +409,6 @@ public class Runner extends BaseRunner {
             }
 
             String jvm = options.getJvm().orElse(getDefaultJvm());
-
-            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, actionPlan.getMeasurementActions().get(0).getMode());
 
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();

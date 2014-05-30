@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Aggregator;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.InputStreamDrainer;
 
 import java.io.BufferedReader;
@@ -42,22 +43,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LinuxPerfProfiler implements ExternalProfiler {
 
     @Override
-    public Collection<String> addJVMInvokeOptions() {
+    public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
+        long delay = TimeUnit.NANOSECONDS.toMillis(
+                params.getWarmup().getCount() *
+                params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
+                + 1000 // loosely account for the JVM lag
+        );
         return Arrays.asList(
                 "perf",
                 "stat",
-                "-d"
+                "-d",
+                "-D " + delay
                 );
     }
 
     @Override
-    public Collection<String> addJVMOptions() {
+    public Collection<String> addJVMOptions(BenchmarkParams params) {
         return Collections.emptyList();
     }
 

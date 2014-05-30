@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Aggregator;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 
 import java.io.File;
 import java.util.Collection;
@@ -35,12 +36,12 @@ import java.util.Collections;
 
 public class DummyExternalProfiler implements ExternalProfiler {
     @Override
-    public Collection<String> addJVMInvokeOptions() {
+    public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         return Collections.emptyList();
     }
 
     @Override
-    public Collection<String> addJVMOptions() {
+    public Collection<String> addJVMOptions(BenchmarkParams params) {
         return Collections.emptyList();
     }
 

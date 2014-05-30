@@ -28,6 +28,7 @@ import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Aggregator;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Utils;
@@ -51,6 +52,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
@@ -66,17 +68,24 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<String> addJVMInvokeOptions() {
+    public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
+        long delay = TimeUnit.NANOSECONDS.toMillis(
+                params.getWarmup().getCount() *
+                        params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
+                        + 1000 // loosely account for the JVM lag
+        );
         return Arrays.asList(
                 "perf",
                 "record",
                 "-c 100000",
                 "-e " + Utils.join(EVENTS, ","),
-                "-o" + perfBinData);
+                "-D " + delay,
+                "-o" + perfBinData
+        );
     }
 
     @Override
-    public Collection<String> addJVMOptions() {
+    public Collection<String> addJVMOptions(BenchmarkParams params) {
         return Arrays.asList(
                 "-XX:+UnlockDiagnosticVMOptions",
                 "-XX:+PrintAssembly");

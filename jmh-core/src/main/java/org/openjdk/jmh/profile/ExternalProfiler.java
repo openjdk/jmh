@@ -25,6 +25,7 @@
 package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 
 import java.io.File;
 import java.util.Collection;
@@ -34,9 +35,9 @@ import java.util.Collection;
  */
 public interface ExternalProfiler extends Profiler {
 
-    Collection<String> addJVMInvokeOptions();
+    Collection<String> addJVMInvokeOptions(BenchmarkParams params);
 
-    Collection<String> addJVMOptions();
+    Collection<String> addJVMOptions(BenchmarkParams params);
 
     void beforeTrial();
 
