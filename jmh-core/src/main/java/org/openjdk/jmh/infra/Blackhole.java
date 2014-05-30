@@ -273,7 +273,7 @@ public class Blackhole extends BlackholeL4 {
         /*
          * Prevent instantiation by user code. Without additional countermeasures
          * to properly escape Blackhole, its magic is not working. The instances
-         * of BlackHoles which are injected into benchmark methods are treated by JMH,
+         * of Blackholes which are injected into benchmark methods are treated by JMH,
          * and users are supposed to only use the injected instances.
          *
          * It only *seems* simple to make the constructor non-public, but then
@@ -285,11 +285,11 @@ public class Blackhole extends BlackholeL4 {
          *
          * Therefore, we choose to fail at runtime. It will only affect the users who thought
          * "new Blackhole()" is a good idea, and these users are rare. If you are reading this
-         * comment, you might be one of those users. Stay cool! Don't instantiate BlackHoles
+         * comment, you might be one of those users. Stay cool! Don't instantiate Blackholes
          * directly though.
          */
 
-        IllegalStateException iae = new IllegalStateException("BlackHoles should not be instantiated directly.");
+        IllegalStateException iae = new IllegalStateException("Blackholes should not be instantiated directly.");
         for (StackTraceElement el : iae.getStackTrace()) {
             // Either we instantiate from the JMH generated code,
             // or our user is a tricky bastard, and gets what's coming to him.

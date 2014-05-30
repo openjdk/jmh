@@ -51,7 +51,7 @@
   <Match>
     <Bug pattern="VO_VOLATILE_REFERENCE_TO_ARRAY"/>
     <Not>
-      <Class name="~.*BlackHole.*" />
+      <Class name="~.*Blackhole.*" />
     </Not>
   </Match>
   <Match>
@@ -395,7 +395,7 @@
   <Match>
     <Bug pattern="NS_NON_SHORT_CIRCUIT"/>
     <Not>
-        <Class name="~.*BlackHole"/>
+        <Class name="~.*Blackhole"/>
     </Not>
   </Match>
   <Match>
@@ -906,7 +906,7 @@
   <Match>
     <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
     <Not>
-      <Class name="~.*BlackHole" />
+      <Class name="~.*Blackhole" />
     </Not>
   </Match>
   <Match>
