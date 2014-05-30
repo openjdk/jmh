@@ -117,7 +117,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 messages.add(baos.toString());
             }
         } catch (IOException ex) {
-            throw new IllegalStateException(ex);
+            return Collections.singleton(ex.getMessage());
         } catch (InterruptedException ex) {
             throw new IllegalStateException(ex);
         }
