@@ -50,7 +50,16 @@ public class ProfilerResult extends Result<ProfilerResult> {
     }
 
     public String extendedInfo(String label) {
-        return String.format("Result %30s: %.3f ±(99.9%%) %.3f %s", "\"" + label + "\"", getScore(), getScoreError(), getScoreUnit());
+        switch (policy) {
+            case AVG:
+                return String.format("Result %30s: %.3f ±(99.9%%) %.3f %s", "\"" + label + "\"", getScore(), getScoreError(), getScoreUnit());
+            case MAX:
+            case SUM:
+                return String.format("Result %30s: %.3f %s [%s]", "\"" + label + "\"", getScore(), getScoreUnit(), policy);
+            default:
+                throw new IllegalStateException("Unknown policy: " + policy);
+        }
+
     }
 
 }
