@@ -43,7 +43,6 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.NullOutputStream;
 import org.openjdk.jmh.util.internal.HashMultimap;
 import org.openjdk.jmh.util.internal.Multimap;
 import org.openjdk.jmh.util.internal.TreeMultimap;
@@ -495,8 +494,8 @@ public class Runner extends BaseRunner {
             Process p = Runtime.getRuntime().exec(commandString);
 
             // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), new FileOutputStream(stdOut));
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), new FileOutputStream(stdErr));
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), new FileOutputStream(stdErr));
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), new FileOutputStream(stdOut));
 
             errDrainer.start();
             outDrainer.start();
