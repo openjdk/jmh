@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.infra.BlackHole;
 
 import java.util.concurrent.TimeUnit;
 

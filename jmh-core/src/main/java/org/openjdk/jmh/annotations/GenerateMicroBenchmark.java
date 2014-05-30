@@ -53,8 +53,8 @@ import java.lang.annotation.Target;
  *     <li>Method should be public</li>
  *     <li>Arguments may only include either {@link org.openjdk.jmh.annotations.State} classes, which
  *     JMH will inject while calling the method (see {@link org.openjdk.jmh.annotations.State} for
- *     more details), or JMH infrastructure classes, like {@link org.openjdk.jmh.logic.Control},
- *     or {@link org.openjdk.jmh.logic.BlackHole}</li>
+ *     more details), or JMH infrastructure classes, like {@link org.openjdk.jmh.infra.Control},
+ *     or {@link org.openjdk.jmh.infra.BlackHole}</li>
  *     <li>Method can only be synchronized if a relevant {@link org.openjdk.jmh.annotations.State} is placed
  *     on the enclosing class.</li>
  * </ul>

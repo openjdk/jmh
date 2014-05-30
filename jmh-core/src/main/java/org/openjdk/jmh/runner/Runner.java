@@ -26,9 +26,9 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.logic.results.BenchResult;
-import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.infra.results.BenchResult;
+import org.openjdk.jmh.infra.results.Result;
+import org.openjdk.jmh.infra.results.RunResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormat;

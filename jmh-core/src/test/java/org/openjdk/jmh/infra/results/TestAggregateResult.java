@@ -22,22 +22,43 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner.link;
+package org.openjdk.jmh.infra.results;
 
-import org.openjdk.jmh.infra.results.BenchResult;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.runner.parameters.IterationParams;
+import org.openjdk.jmh.runner.parameters.TimeValue;
 
-import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
-class ResultsFrame implements Serializable {
-    private final Multimap<BenchmarkRecord, BenchResult> res;
+import static org.junit.Assert.assertEquals;
 
-    public ResultsFrame(Multimap<BenchmarkRecord, BenchResult> res) {
-        this.res = res;
+/**
+ * Tests for AggregateResult
+ */
+public class TestAggregateResult {
+
+    private static IterationResult result;
+    private static final double[] values = {10.0, 20.0, 30.0, 40.0, 50.0};
+
+    @BeforeClass
+    public static void setupClass() {
+        result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime), new IterationParams(null, 1, TimeValue.days(1), 1));
+        for (double d : values) {
+            result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000, TimeUnit.MILLISECONDS));
+        }
     }
 
-    public Multimap<BenchmarkRecord, BenchResult> getRes() {
-        return res;
+    @Test
+    public void testScore() throws Exception {
+        assertEquals(15.0, result.getPrimaryResult().getScore(), 0.00001);
     }
+
+    @Test
+    public void testScoreUnit() throws Exception {
+        assertEquals((new ThroughputResult(ResultRole.PRIMARY, "test1", 1, 1, TimeUnit.MILLISECONDS)).getScoreUnit(), result.getScoreUnit());
+    }
+
 }

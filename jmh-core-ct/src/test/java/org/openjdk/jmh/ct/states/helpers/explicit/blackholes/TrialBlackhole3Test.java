@@ -32,7 +32,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.infra.BlackHole;
 
 public class TrialBlackhole3Test {
 

@@ -26,7 +26,7 @@ package org.openjdk.jmh;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.infra.BlackHole;
 
 public class BlackholeTest {
 
