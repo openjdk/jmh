@@ -409,7 +409,7 @@ public class Runner extends BaseRunner {
 
             String jvm = options.getJvm().orElse(getDefaultJvm());
 
-            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, ActionMode.UNDEF);
+            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, actionPlan.getMeasurementActions().get(0).getMode());
 
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();
