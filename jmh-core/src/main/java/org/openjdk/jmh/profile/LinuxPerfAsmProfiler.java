@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -241,6 +242,11 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
             int linesToPrint = 0;
 
+            Map<String, Integer> sizes = new HashMap<String, Integer>();
+            for (String eventType : EVENTS) {
+                sizes.put(eventType, events.get(eventType).size());
+            }
+
             BufferedReader br = new BufferedReader(new FileReader(stdOut));
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
@@ -258,7 +264,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         if (eventCount > 0) {
                             for (String eventType : EVENTS) {
                                 int count = events.get(eventType).count(addr);
-                                bufferedLine += String.format("%6d ", count);
+                                bufferedLine += String.format("%5.2f%% ", 100.0 * count / sizes.get(eventType));
                             }
                             eventsPrinted = true;
                         }
@@ -287,7 +293,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 if (linesToPrint >= 0) {
                     pw.println(bufferedLine);
                     if (linesToPrint == 0) {
-                        pw.println("--------------------------------------------------");
+                        pw.println("---------------------------------------------------------------------------------");
                         for (String eventType : EVENTS_SHORT) {
                             pw.print(String.format("%6s ", eventType));
                         }
@@ -305,10 +311,20 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
             String hot = sw.toString();
             if (hot.trim().isEmpty()) {
-                hot = "No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly";
+                return new PerfResult("No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
+            } else {
+                String header = "Hottest generated code regions:\n";
+                header += "(values do not normally add up to 100%, the remaining parts are dispersed\n";
+                header += " across other warm generated code blocks, and VM native code itself; use\n";
+                header += " full-fledged profilers to get a cleaner picture)\n";
+                header += "---------------------------------------------------------------------------------\n";
+                for (String eventType : EVENTS_SHORT) {
+                    header += String.format("%6s ", eventType);
+                }
+                header += "\n";
+                hot = header + hot;
+                return new PerfResult(hot);
             }
-
-            return new PerfResult(hot);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -339,7 +355,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         @Override
         public String extendedInfo(String label) {
-            return "Hottest generated code:\n--------------------------------------------------\n" + output;
+            return output;
         }
     }
 
