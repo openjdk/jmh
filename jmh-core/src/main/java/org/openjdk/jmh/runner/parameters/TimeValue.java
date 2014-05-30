@@ -81,7 +81,7 @@ public class TimeValue implements Serializable {
         return time;
     }
 
-    public long getTime(TimeUnit tu) {
+    public long convertTo(TimeUnit tu) {
         return tu.convert(time, timeUnit);
     }
 
@@ -178,10 +178,6 @@ public class TimeValue implements Serializable {
             return new TimeValue(Integer.parseInt(timeString.substring(0, timeString.indexOf("day"))), TimeUnit.DAYS);
         }
         return new TimeValue(Integer.parseInt(timeString), TimeUnit.SECONDS);
-    }
-
-    public long convertTo(TimeUnit unit) {
-        return unit.convert(time, timeUnit);
     }
 
     public void sleep() throws InterruptedException {

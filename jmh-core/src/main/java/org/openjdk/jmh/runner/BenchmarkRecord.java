@@ -329,7 +329,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
             return (wi + mi) * TimeUnit.MILLISECONDS.toNanos(1);
         }
 
-        return (wi * wt.getTime(TimeUnit.NANOSECONDS) + mi * mt.getTime(TimeUnit.NANOSECONDS));
+        return (wi * wt.convertTo(TimeUnit.NANOSECONDS) + mi * mt.convertTo(TimeUnit.NANOSECONDS));
     }
 
     public long estimatedTime(Options opts) {
