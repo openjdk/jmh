@@ -31,18 +31,18 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 public class IterationBlackhole2Test {
 
     @State(Scope.Benchmark)
     public static class S {
         @Setup(Level.Iteration)
-        public void setup(BlackHole bh) {}
+        public void setup(Blackhole bh) {}
     }
 
     @GenerateMicroBenchmark
-    public void test(S s, BlackHole bh) {
+    public void test(S s, Blackhole bh) {
 
     }
 

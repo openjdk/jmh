@@ -29,7 +29,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 /**
  * Tests basic blackholing API.
@@ -52,16 +52,16 @@ public class BlackholeApiTest {
     }
 
     @GenerateMicroBenchmark
-    public void testBH(BlackHole bh) {
+    public void testBH(Blackhole bh) {
     }
 
     @GenerateMicroBenchmark
-    public Object testBH_ReturnObject(BlackHole bh) {
+    public Object testBH_ReturnObject(Blackhole bh) {
         return null;
     }
 
     @GenerateMicroBenchmark
-    public int testBH_ReturnInt(BlackHole bh) {
+    public int testBH_ReturnInt(Blackhole bh) {
         return 0;
     }
 

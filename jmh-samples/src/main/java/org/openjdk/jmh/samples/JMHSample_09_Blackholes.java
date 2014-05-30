@@ -30,7 +30,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -95,7 +95,7 @@ public class JMHSample_09_Blackholes {
      */
 
     @GenerateMicroBenchmark
-    public void measureRight_2(BlackHole bh) {
+    public void measureRight_2(Blackhole bh) {
         bh.consume(Math.log(x1));
         bh.consume(Math.log(x2));
     }

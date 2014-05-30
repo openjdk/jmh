@@ -32,7 +32,7 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
@@ -53,59 +53,59 @@ public class BlackholePipelineBench {
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1)
-    public void test_Obj_1(BlackHole bh) {
+    public void test_Obj_1(Blackhole bh) {
         doTestObj(bh, 1);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(10)
-    public void test_Obj_10(BlackHole bh) {
+    public void test_Obj_10(Blackhole bh) {
         doTestObj(bh, 10);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(100)
-    public void test_Obj_100(BlackHole bh) {
+    public void test_Obj_100(Blackhole bh) {
         doTestObj(bh, 100);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1000)
-    public void test_Obj_1000(BlackHole bh) {
+    public void test_Obj_1000(Blackhole bh) {
         doTestObj(bh, 1000);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1)
-    public void test_Int_1(BlackHole bh) {
+    public void test_Int_1(Blackhole bh) {
         doTestInt(bh, 1);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(10)
-    public void test_Int_10(BlackHole bh) {
+    public void test_Int_10(Blackhole bh) {
         doTestInt(bh, 10);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(100)
-    public void test_Int_100(BlackHole bh) {
+    public void test_Int_100(Blackhole bh) {
         doTestInt(bh, 100);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1000)
-    public void test_Int_1000(BlackHole bh) {
+    public void test_Int_1000(Blackhole bh) {
         doTestInt(bh, 1000);
     }
 
-    public void doTestObj(BlackHole bh, int count) {
+    public void doTestObj(Blackhole bh, int count) {
         for (int c = 0; c < count; c++) {
             bh.consume(data[c]);
         }
     }
 
-    public void doTestInt(BlackHole bh, int count) {
+    public void doTestInt(Blackhole bh, int count) {
         for (int c = 0; c < count; c++) {
             bh.consume(data[c].intValue());
         }

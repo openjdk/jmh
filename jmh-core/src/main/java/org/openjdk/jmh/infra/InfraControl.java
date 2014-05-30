@@ -149,7 +149,7 @@ abstract class InfraControlL1 extends InfraControlL0 {
 }
 
 /**
- * @see BlackHole for rationale
+ * @see Blackhole for rationale
  */
 abstract class InfraControlL2 extends InfraControlL1 {
     /* Flag for if we are done or not.

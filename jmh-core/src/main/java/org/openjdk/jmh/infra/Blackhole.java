@@ -35,14 +35,14 @@ import java.lang.reflect.Field;
 import java.util.Random;
 
 /*
-    See the rationale for BlackHoleL1..BlackHoleL4 classes below.
+    See the rationale for BlackholeL1..BlackholeL4 classes below.
  */
 
-abstract class BlackHoleL0 {
+abstract class BlackholeL0 {
     public int markerBegin;
 }
 
-abstract class BlackHoleL1 extends BlackHoleL0 {
+abstract class BlackholeL1 extends BlackholeL0 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -61,7 +61,7 @@ abstract class BlackHoleL1 extends BlackHoleL0 {
     private boolean p171, p172, p173, p174, p175, p176, p177, p178;
 }
 
-abstract class BlackHoleL2 extends BlackHoleL1 {
+abstract class BlackholeL2 extends BlackholeL1 {
     public volatile byte b1, b2;
     public volatile boolean bool1, bool2;
     public volatile char c1, c2;
@@ -72,11 +72,11 @@ abstract class BlackHoleL2 extends BlackHoleL1 {
     public volatile double d1, d2;
     public volatile Object obj1;
     public volatile Object[] objs1;
-    public volatile BlackHoleL2 nullBait = null;
+    public volatile BlackholeL2 nullBait = null;
     public int tlr;
     public int tlrMask;
 
-    public BlackHoleL2() {
+    public BlackholeL2() {
         Random r = new Random(System.nanoTime());
         tlr = r.nextInt();
         tlrMask = 1;
@@ -119,7 +119,7 @@ abstract class BlackHoleL2 extends BlackHoleL1 {
     }
 }
 
-abstract class BlackHoleL3 extends BlackHoleL2 {
+abstract class BlackholeL3 extends BlackholeL2 {
     private boolean q001, q002, q003, q004, q005, q006, q007, q008;
     private boolean q011, q012, q013, q014, q015, q016, q017, q018;
     private boolean q021, q022, q023, q024, q025, q026, q027, q028;
@@ -138,7 +138,7 @@ abstract class BlackHoleL3 extends BlackHoleL2 {
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 }
 
-abstract class BlackHoleL4 extends BlackHoleL3 {
+abstract class BlackholeL4 extends BlackholeL3 {
     public int markerEnd;
 }
 
@@ -150,7 +150,7 @@ abstract class BlackHoleL4 extends BlackHoleL3 {
  * of the computations resulting in the given values.</p>
  */
 @State(Scope.Thread) // Blackholes are always acting like a thread-local state
-public class BlackHole extends BlackHoleL4 {
+public class Blackhole extends BlackholeL4 {
 
     /**
      * IMPLEMENTATION NOTES:
@@ -261,7 +261,7 @@ public class BlackHole extends BlackHoleL4 {
 
     static long getOffset(String fieldName) {
         try {
-            Field f = BlackHole.class.getField(fieldName);
+            Field f = Blackhole.class.getField(fieldName);
             return U.objectFieldOffset(f);
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
@@ -269,22 +269,22 @@ public class BlackHole extends BlackHoleL4 {
     }
 
 
-    public BlackHole() {
+    public Blackhole() {
         /*
          * Prevent instantiation by user code. Without additional countermeasures
-         * to properly escape BlackHole, its magic is not working. The instances
+         * to properly escape Blackhole, its magic is not working. The instances
          * of BlackHoles which are injected into benchmark methods are treated by JMH,
          * and users are supposed to only use the injected instances.
          *
          * It only *seems* simple to make the constructor non-public, but then
          * there is a lot of infrastructure code which assumes @State has a default
          * constructor. One might suggest doing the internal factory method to instantiate,
-         * but that does not help when extending the BlackHole. There is a *messy* way to
+         * but that does not help when extending the Blackhole. There is a *messy* way to
          * special-case most of these problems within the JMH code, but it does not seem
          * to worth the effort.
          *
          * Therefore, we choose to fail at runtime. It will only affect the users who thought
-         * "new BlackHole()" is a good idea, and these users are rare. If you are reading this
+         * "new Blackhole()" is a good idea, and these users are rare. If you are reading this
          * comment, you might be one of those users. Stay cool! Don't instantiate BlackHoles
          * directly though.
          */

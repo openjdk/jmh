@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class BlackholeValueBench {
 
-    // TODO: Revisit BlackHole implementation
+    // TODO: Revisit Blackhole implementation
     // This benchmark highlights the problem with current consume code,
     // which is sensitive to what value we are going to hit inside.
     // Normally, this is solved with more forks, whereas Blackhole

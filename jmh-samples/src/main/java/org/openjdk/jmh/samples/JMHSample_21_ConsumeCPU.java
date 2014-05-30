@@ -28,7 +28,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -54,62 +54,62 @@ public class JMHSample_21_ConsumeCPU {
 
     @GenerateMicroBenchmark
     public void consume_0000() {
-        BlackHole.consumeCPU(0);
+        Blackhole.consumeCPU(0);
     }
 
     @GenerateMicroBenchmark
     public void consume_0001() {
-        BlackHole.consumeCPU(1);
+        Blackhole.consumeCPU(1);
     }
 
     @GenerateMicroBenchmark
     public void consume_0002() {
-        BlackHole.consumeCPU(2);
+        Blackhole.consumeCPU(2);
     }
 
     @GenerateMicroBenchmark
     public void consume_0004() {
-        BlackHole.consumeCPU(4);
+        Blackhole.consumeCPU(4);
     }
 
     @GenerateMicroBenchmark
     public void consume_0008() {
-        BlackHole.consumeCPU(8);
+        Blackhole.consumeCPU(8);
     }
 
     @GenerateMicroBenchmark
     public void consume_0016() {
-        BlackHole.consumeCPU(16);
+        Blackhole.consumeCPU(16);
     }
 
     @GenerateMicroBenchmark
     public void consume_0032() {
-        BlackHole.consumeCPU(32);
+        Blackhole.consumeCPU(32);
     }
 
     @GenerateMicroBenchmark
     public void consume_0064() {
-        BlackHole.consumeCPU(64);
+        Blackhole.consumeCPU(64);
     }
 
     @GenerateMicroBenchmark
     public void consume_0128() {
-        BlackHole.consumeCPU(128);
+        Blackhole.consumeCPU(128);
     }
 
     @GenerateMicroBenchmark
     public void consume_0256() {
-        BlackHole.consumeCPU(256);
+        Blackhole.consumeCPU(256);
     }
 
     @GenerateMicroBenchmark
     public void consume_0512() {
-        BlackHole.consumeCPU(512);
+        Blackhole.consumeCPU(512);
     }
 
     @GenerateMicroBenchmark
     public void consume_1024() {
-        BlackHole.consumeCPU(1024);
+        Blackhole.consumeCPU(1024);
     }
 
     /*

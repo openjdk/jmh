@@ -31,7 +31,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Thread)
 @BenchmarkMode(Mode.All)
@@ -99,47 +99,47 @@ public class BlackholeTypesTest {
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testByte(BlackHole bh) {
+    public void explicit_testByte(Blackhole bh) {
         bh.consume(b);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testBoolean(BlackHole bh) {
+    public void explicit_testBoolean(Blackhole bh) {
         bh.consume(bool);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testChar(BlackHole bh) {
+    public void explicit_testChar(Blackhole bh) {
         bh.consume(c);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testInt(BlackHole bh) {
+    public void explicit_testInt(Blackhole bh) {
         bh.consume(i);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testLong(BlackHole bh) {
+    public void explicit_testLong(Blackhole bh) {
         bh.consume(l);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testFloat(BlackHole bh) {
+    public void explicit_testFloat(Blackhole bh) {
         bh.consume(f);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testDouble(BlackHole bh) {
+    public void explicit_testDouble(Blackhole bh) {
         bh.consume(d);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testObject(BlackHole bh) {
+    public void explicit_testObject(Blackhole bh) {
         bh.consume(o);
     }
 
     @GenerateMicroBenchmark
-    public void explicit_testArray(BlackHole bh) {
+    public void explicit_testArray(Blackhole bh) {
         bh.consume(os);
     }
 

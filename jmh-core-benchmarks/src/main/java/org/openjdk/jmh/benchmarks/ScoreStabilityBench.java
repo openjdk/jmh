@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
@@ -86,27 +86,27 @@ public class ScoreStabilityBench {
 
     @GenerateMicroBenchmark
     public void test_X(Sleep_X_State s) {
-        BlackHole.consumeCPU(10000);
+        Blackhole.consumeCPU(10000);
     }
 
     @GenerateMicroBenchmark
     public void test_X1(Sleep_X1_State s) {
-        BlackHole.consumeCPU(10000);
+        Blackhole.consumeCPU(10000);
     }
 
     @GenerateMicroBenchmark
     public void test_X10(Sleep_X10_State x) {
-        BlackHole.consumeCPU(10000);
+        Blackhole.consumeCPU(10000);
     }
 
     @GenerateMicroBenchmark
     public void test_X100(Sleep_X100_State x) {
-        BlackHole.consumeCPU(10000);
+        Blackhole.consumeCPU(10000);
     }
 
     @GenerateMicroBenchmark
     public void test_X500(Sleep_X500_State x) {
-        BlackHole.consumeCPU(10000);
+        Blackhole.consumeCPU(10000);
     }
 
 }

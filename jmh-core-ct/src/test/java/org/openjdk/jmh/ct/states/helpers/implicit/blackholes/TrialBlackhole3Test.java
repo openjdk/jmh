@@ -32,19 +32,19 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Benchmark)
 public class TrialBlackhole3Test {
 
     @Setup(Level.Trial)
-    public void setup(BlackHole bh) {}
+    public void setup(Blackhole bh) {}
 
     @TearDown(Level.Trial)
-    public void tearDown(BlackHole bh) {}
+    public void tearDown(Blackhole bh) {}
 
     @GenerateMicroBenchmark
-    public void test(BlackHole bh) {
+    public void test(Blackhole bh) {
 
     }
 

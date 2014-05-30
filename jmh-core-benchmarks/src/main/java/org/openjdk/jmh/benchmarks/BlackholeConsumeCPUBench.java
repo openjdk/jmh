@@ -32,7 +32,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
@@ -46,108 +46,108 @@ public class BlackholeConsumeCPUBench {
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1)
     public void consume_00000() {
-        BlackHole.consumeCPU(0);
+        Blackhole.consumeCPU(0);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1)
     public void consume_00001() {
-        BlackHole.consumeCPU(1);
+        Blackhole.consumeCPU(1);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(2)
     public void consume_00002() {
-        BlackHole.consumeCPU(2);
+        Blackhole.consumeCPU(2);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(4)
     public void consume_00004() {
-        BlackHole.consumeCPU(4);
+        Blackhole.consumeCPU(4);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(8)
     public void consume_00008() {
-        BlackHole.consumeCPU(8);
+        Blackhole.consumeCPU(8);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(16)
     public void consume_00016() {
-        BlackHole.consumeCPU(16);
+        Blackhole.consumeCPU(16);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(32)
     public void consume_00032() {
-        BlackHole.consumeCPU(32);
+        Blackhole.consumeCPU(32);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(64)
     public void consume_00064() {
-        BlackHole.consumeCPU(64);
+        Blackhole.consumeCPU(64);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(128)
     public void consume_00128() {
-        BlackHole.consumeCPU(128);
+        Blackhole.consumeCPU(128);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(256)
     public void consume_00256() {
-        BlackHole.consumeCPU(256);
+        Blackhole.consumeCPU(256);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(512)
     public void consume_00512() {
-        BlackHole.consumeCPU(512);
+        Blackhole.consumeCPU(512);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(1024)
     public void consume_01024() {
-        BlackHole.consumeCPU(1024);
+        Blackhole.consumeCPU(1024);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(2048)
     public void consume_02048() {
-        BlackHole.consumeCPU(2048);
+        Blackhole.consumeCPU(2048);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(4096)
     public void consume_04096() {
-        BlackHole.consumeCPU(4096);
+        Blackhole.consumeCPU(4096);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(8192)
     public void consume_08192() {
-        BlackHole.consumeCPU(8192);
+        Blackhole.consumeCPU(8192);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(16384)
     public void consume_16384() {
-        BlackHole.consumeCPU(16384);
+        Blackhole.consumeCPU(16384);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(32768)
     public void consume_32768() {
-        BlackHole.consumeCPU(32768);
+        Blackhole.consumeCPU(32768);
     }
 
     @GenerateMicroBenchmark
     @OperationsPerInvocation(65536)
     public void consume_65536() {
-        BlackHole.consumeCPU(65536);
+        Blackhole.consumeCPU(65536);
     }
 }

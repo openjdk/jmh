@@ -38,7 +38,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.infra.InfraControl;
 import org.openjdk.jmh.infra.ThreadControl;
 import org.openjdk.jmh.infra.results.AverageTimeResult;
@@ -506,7 +506,7 @@ public class BenchmarkGenerator {
         states.bindImplicit(classInfo, "bench", Scope.Thread);
 
         // default blackhole is implicit
-        states.bindImplicit(source.resolveClass(BlackHole.class.getCanonicalName()), "blackhole", Scope.Thread);
+        states.bindImplicit(source.resolveClass(Blackhole.class.getCanonicalName()), "blackhole", Scope.Thread);
 
         // bind all methods
         states.bindMethodGroup(info.methodGroup);
@@ -560,7 +560,7 @@ public class BenchmarkGenerator {
                 List.class, AtomicInteger.class, AtomicIntegerFieldUpdater.class,
                 Collection.class, Collections.class, ArrayList.class, Arrays.class,
                 TimeUnit.class, Generated.class, CompilerControl.class,
-                InfraControl.class, ThreadControl.class, BlackHole.class,
+                InfraControl.class, ThreadControl.class, Blackhole.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,

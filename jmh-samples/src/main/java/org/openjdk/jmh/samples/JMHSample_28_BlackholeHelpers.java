@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -71,7 +71,7 @@ public class JMHSample_28_BlackholeHelpers {
     private Worker workerWrong;
 
     @Setup
-    public void setup(final BlackHole bh) {
+    public void setup(final Blackhole bh) {
         workerBaseline = new Worker() {
             double x;
 
