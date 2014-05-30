@@ -42,10 +42,10 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.internal.HashMultimap;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.TreeMultimap;
+import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.TreeMultimap;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

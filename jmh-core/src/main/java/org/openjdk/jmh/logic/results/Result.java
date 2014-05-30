@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.logic.results;
 
-import org.openjdk.jmh.util.internal.ListStatistics;
-import org.openjdk.jmh.util.internal.Statistics;
+import org.openjdk.jmh.util.ListStatistics;
+import org.openjdk.jmh.util.Statistics;
 
 import java.io.PrintWriter;
 import java.io.Serializable;

@@ -28,7 +28,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.Optional;
+import org.openjdk.jmh.util.Optional;
 
 import java.io.Serializable;
 import java.util.Arrays;

@@ -28,10 +28,10 @@ import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Aggregator;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
-import org.openjdk.jmh.util.internal.HashMultiset;
-import org.openjdk.jmh.util.internal.ListStatistics;
-import org.openjdk.jmh.util.internal.Multiset;
-import org.openjdk.jmh.util.internal.Multisets;
+import org.openjdk.jmh.util.HashMultiset;
+import org.openjdk.jmh.util.ListStatistics;
+import org.openjdk.jmh.util.Multiset;
+import org.openjdk.jmh.util.Multisets;
 
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;

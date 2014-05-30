@@ -31,9 +31,9 @@ import org.openjdk.jmh.logic.results.ResultRole;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
+import org.openjdk.jmh.util.Multiset;
+import org.openjdk.jmh.util.TreeMultiset;
 import org.openjdk.jmh.util.Utils;
-import org.openjdk.jmh.util.internal.Multiset;
-import org.openjdk.jmh.util.internal.TreeMultiset;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

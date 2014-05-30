@@ -22,45 +22,61 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
-import java.util.ArrayList;
+
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
 
-public class Multisets {
+/**
+ * Basic Multimap.
+ *
+ * @param <K> key type
+ * @param <V> value type
+ */
+public interface Multimap<K, V> {
 
-    public static <T> Collection<T> countHighest(Multiset<T> set, int top) {
-        // crude and inefficient
-        PriorityQueue<Pair<T, Integer>> q = new PriorityQueue<Pair<T, Integer>>(10, new Comparator<Pair<T, Integer>>() {
-            @Override
-            public int compare(Pair<T, Integer> o1, Pair<T, Integer> o2) {
-                return o2.k2.compareTo(o1.k2);
-            }
-        });
+    /**
+     * Put the element pair.
+     *
+     * @param key key
+     * @param value value
+     */
+    void put(K key, V value);
 
-        for (T key : set.keys()) {
-            q.add(new Pair<T, Integer>(key, set.count(key)));
-        }
+    /**
+     * Put multiple pairs.
+     * @param k key
+     * @param vs values
+     */
+    void putAll(K k, Collection<V> vs);
 
-        List<T> result = new ArrayList<T>();
-        for (int t = 0; (t < top && !q.isEmpty()); t++) {
-            result.add(q.poll().k1);
-        }
+    /**
+     * Get all values associated with the key
+     * @param key key
+     * @return collection of values
+     */
+    Collection<V> get(K key);
 
-        return result;
-    }
+    /**
+     * Checks if multimap is empty
+     * @return true, if empty
+     */
+    boolean isEmpty();
 
-    private static class Pair<K1, K2> {
-        public final K1 k1;
-        public final K2 k2;
+    /**
+     * Clears the multimap
+     */
+    void clear();
 
-        private Pair(K1 k1, K2 k2) {
-            this.k1 = k1;
-            this.k2 = k2;
-        }
-    }
+    /**
+     * Keys in the map
+     * @return collection of keys
+     */
+    Collection<K> keys();
 
+    Collection<V> values();
+
+    void remove(K key);
+
+    void merge(Multimap<K, V> other);
 }

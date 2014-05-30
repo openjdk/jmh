@@ -26,8 +26,8 @@ package org.openjdk.jmh.generators.bytecode;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
-import org.openjdk.jmh.util.internal.HashMultimap;
-import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.HashMultimap;
+import org.openjdk.jmh.util.Multimap;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;

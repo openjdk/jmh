@@ -40,8 +40,8 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.util.internal.HashMultimap;
-import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.HashMultimap;
+import org.openjdk.jmh.util.Multimap;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;

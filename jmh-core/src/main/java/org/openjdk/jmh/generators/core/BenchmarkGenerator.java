@@ -50,9 +50,9 @@ import org.openjdk.jmh.logic.results.SingleShotResult;
 import org.openjdk.jmh.logic.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.MicroBenchmarkList;
-import org.openjdk.jmh.util.internal.HashMultimap;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.SampleBuffer;
+import org.openjdk.jmh.util.HashMultimap;
+import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.SampleBuffer;
 
 import javax.annotation.Generated;
 import java.io.IOException;

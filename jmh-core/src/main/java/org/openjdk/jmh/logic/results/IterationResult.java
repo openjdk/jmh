@@ -26,8 +26,8 @@ package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.TreeMultimap;
+import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.TreeMultimap;
 
 import java.io.Serializable;
 import java.util.ArrayList;

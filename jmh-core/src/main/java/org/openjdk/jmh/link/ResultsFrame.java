@@ -26,7 +26,7 @@ package org.openjdk.jmh.link;
 
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
 

@@ -28,7 +28,7 @@ import org.openjdk.jmh.logic.results.AggregationPolicy;
 import org.openjdk.jmh.logic.results.Aggregator;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.ResultRole;
-import org.openjdk.jmh.util.internal.Statistics;
+import org.openjdk.jmh.util.Statistics;
 
 public class ProfilerResult extends Result<ProfilerResult> {
     public ProfilerResult(String label, double n, String unit, AggregationPolicy policy) {

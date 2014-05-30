@@ -28,7 +28,7 @@ import org.openjdk.jmh.link.BinaryLinkClient;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.Multimap;
 
 import java.io.IOException;
 

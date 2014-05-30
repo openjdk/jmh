@@ -22,56 +22,45 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 
-/**
- * Basic Multiset.
- *
- * (Transitional interface)
- *
- * @param <T> element type
- */
-public interface Multiset<T> {
+public class Multisets {
 
-    /**
-     * Add the element to the multiset
-     * @param element element to add
-     */
-    void add(T element);
+    public static <T> Collection<T> countHighest(Multiset<T> set, int top) {
+        // crude and inefficient
+        PriorityQueue<Pair<T, Integer>> q = new PriorityQueue<Pair<T, Integer>>(10, new Comparator<Pair<T, Integer>>() {
+            @Override
+            public int compare(Pair<T, Integer> o1, Pair<T, Integer> o2) {
+                return o2.k2.compareTo(o1.k2);
+            }
+        });
 
-    /**
-     * Add the element to the multiset
-     * @param element element to add
-     * @param count number of elements to add
-     */
-    void add(T element, int count);
+        for (T key : set.keys()) {
+            q.add(new Pair<T, Integer>(key, set.count(key)));
+        }
 
-    /**
-     * Count the elements in multiset
-     * @param element element
-     * @return number of matching elements in the set; zero, if no elements
-     */
-    int count(T element);
+        List<T> result = new ArrayList<T>();
+        for (int t = 0; (t < top && !q.isEmpty()); t++) {
+            result.add(q.poll().k1);
+        }
 
-    /**
-     * Answers if Multiset is empty
-     * @return true, if set is empty
-     */
-    boolean isEmpty();
+        return result;
+    }
 
-    /**
-     * Answers the size of multiset.
-     * Equivalent to number of elements, counting duplications.
-     *
-     * @return number of elements
-     */
-    int size();
+    private static class Pair<K1, K2> {
+        public final K1 k1;
+        public final K2 k2;
 
-    /**
-     * Answers the collection of keys
-     * @return the collections of keys
-     */
-    Collection<T> keys();
+        private Pair(K1 k1, K2 k2) {
+            this.k1 = k1;
+            this.k2 = k2;
+        }
+    }
+
 }

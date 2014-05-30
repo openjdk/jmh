@@ -28,7 +28,6 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.ClassUtils;
-import org.openjdk.jmh.util.internal.Statistics;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

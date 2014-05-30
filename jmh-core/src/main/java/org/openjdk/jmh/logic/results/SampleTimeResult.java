@@ -25,8 +25,8 @@
 package org.openjdk.jmh.logic.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.SampleBuffer;
-import org.openjdk.jmh.util.internal.Statistics;
+import org.openjdk.jmh.util.SampleBuffer;
+import org.openjdk.jmh.util.Statistics;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;

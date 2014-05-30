@@ -33,8 +33,8 @@ import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.ClassUtils;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.TreeMultimap;
+import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.TreeMultimap;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

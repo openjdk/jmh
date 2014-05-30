@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 

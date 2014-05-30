@@ -25,7 +25,7 @@
 package org.openjdk.jmh.logic.results;
 
 import org.junit.Test;
-import org.openjdk.jmh.util.internal.SampleBuffer;
+import org.openjdk.jmh.util.SampleBuffer;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;

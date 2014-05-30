@@ -29,7 +29,7 @@ import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.internal.Multimap;
+import org.openjdk.jmh.util.Multimap;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

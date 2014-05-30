@@ -22,47 +22,47 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
+public class TreeMultiset<T extends Comparable<T>> implements Multiset<T>, Serializable {
 
-    private final Map<K, Collection<V>> map;
+    private final Map<T, Integer> map;
+    private int size;
 
-    public TreeMultimap() {
-        map = new TreeMap<K, Collection<V>>();
+    public TreeMultiset() {
+        map = new TreeMap<T, Integer>();
     }
 
     @Override
-    public void put(K key, V value) {
-        Collection<V> vs = map.get(key);
-        if (vs == null) {
-            vs = new ArrayList<V>();
-            map.put(key, vs);
+    public void add(T element) {
+        add(element, 1);
+    }
+
+    @Override
+    public void add(T element, int add) {
+        Integer count = map.get(element);
+        if (count == null) {
+            count = 0;
         }
-        vs.add(value);
-    }
-
-    @Override
-    public void putAll(K key, Collection<V> vvs) {
-        Collection<V> vs = map.get(key);
-        if (vs == null) {
-            vs = new ArrayList<V>();
-            map.put(key, vs);
+        count += add;
+        size += add;
+        if (count != 0) {
+            map.put(element, count);
+        } else {
+            map.remove(element);
         }
-        vs.addAll(vvs);
     }
 
     @Override
-    public Collection<V> get(K key) {
-        Collection<V> vs = map.get(key);
-        return (vs == null) ? Collections.<V>emptyList() : Collections.unmodifiableCollection(vs);
+    public int count(T element) {
+        Integer count = map.get(element);
+        return (count == null) ? 0 : count;
     }
 
     @Override
@@ -71,34 +71,13 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
     }
 
     @Override
-    public void clear() {
-        map.clear();
+    public int size() {
+        return size;
     }
 
     @Override
-    public Collection<K> keys() {
-        return map.keySet();
-    }
-
-    @Override
-    public Collection<V> values() {
-        Collection<V> result = new ArrayList<V>();
-        for (K key : map.keySet()) {
-            result.addAll(map.get(key));
-        }
-        return result;
-    }
-
-    @Override
-    public void remove(K key) {
-        map.remove(key);
-    }
-
-    @Override
-    public void merge(Multimap<K, V> other) {
-        for (K k : other.keys()) {
-            putAll(k, other.get(k));
-        }
+    public Collection<T> keys() {
+        return Collections.unmodifiableCollection(map.keySet());
     }
 
     @Override
@@ -106,8 +85,9 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TreeMultimap that = (TreeMultimap) o;
+        TreeMultiset that = (TreeMultiset) o;
 
+        if (size != that.size) return false;
         if (!map.equals(that.map)) return false;
 
         return true;
@@ -115,6 +95,8 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
 
     @Override
     public int hashCode() {
-        return map.hashCode();
+        int result = map.hashCode();
+        result = 31 * result + size;
+        return result;
     }
 }

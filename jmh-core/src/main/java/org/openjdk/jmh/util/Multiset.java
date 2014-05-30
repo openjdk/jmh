@@ -22,61 +22,56 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
-
+package org.openjdk.jmh.util;
 
 import java.util.Collection;
 
 /**
- * Basic Multimap.
+ * Basic Multiset.
  *
- * @param <K> key type
- * @param <V> value type
+ * (Transitional interface)
+ *
+ * @param <T> element type
  */
-public interface Multimap<K, V> {
+public interface Multiset<T> {
 
     /**
-     * Put the element pair.
-     *
-     * @param key key
-     * @param value value
+     * Add the element to the multiset
+     * @param element element to add
      */
-    void put(K key, V value);
+    void add(T element);
 
     /**
-     * Put multiple pairs.
-     * @param k key
-     * @param vs values
+     * Add the element to the multiset
+     * @param element element to add
+     * @param count number of elements to add
      */
-    void putAll(K k, Collection<V> vs);
+    void add(T element, int count);
 
     /**
-     * Get all values associated with the key
-     * @param key key
-     * @return collection of values
+     * Count the elements in multiset
+     * @param element element
+     * @return number of matching elements in the set; zero, if no elements
      */
-    Collection<V> get(K key);
+    int count(T element);
 
     /**
-     * Checks if multimap is empty
-     * @return true, if empty
+     * Answers if Multiset is empty
+     * @return true, if set is empty
      */
     boolean isEmpty();
 
     /**
-     * Clears the multimap
+     * Answers the size of multiset.
+     * Equivalent to number of elements, counting duplications.
+     *
+     * @return number of elements
      */
-    void clear();
+    int size();
 
     /**
-     * Keys in the map
-     * @return collection of keys
+     * Answers the collection of keys
+     * @return the collections of keys
      */
-    Collection<K> keys();
-
-    Collection<V> values();
-
-    void remove(K key);
-
-    void merge(Multimap<K, V> other);
+    Collection<T> keys();
 }

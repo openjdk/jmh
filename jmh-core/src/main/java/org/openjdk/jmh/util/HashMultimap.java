@@ -22,47 +22,47 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HashMultiset<T> implements Multiset<T>, Serializable {
+public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
 
-    private final Map<T, Integer> map;
-    private int size;
+    private final Map<K, Collection<V>> map;
 
-    public HashMultiset() {
-        map = new HashMap<T, Integer>();
+    public HashMultimap() {
+        map = new HashMap<K, Collection<V>>();
     }
 
     @Override
-    public void add(T element) {
-        add(element, 1);
-    }
-
-    @Override
-    public void add(T element, int add) {
-        Integer count = map.get(element);
-        if (count == null) {
-            count = 0;
+    public void put(K key, V value) {
+        Collection<V> vs = map.get(key);
+        if (vs == null) {
+            vs = new ArrayList<V>();
+            map.put(key, vs);
         }
-        count += add;
-        size += add;
-        if (count != 0) {
-            map.put(element, count);
-        } else {
-            map.remove(element);
-        }
+        vs.add(value);
     }
 
     @Override
-    public int count(T element) {
-        Integer count = map.get(element);
-        return (count == null) ? 0 : count;
+    public void putAll(K key, Collection<V> vvs) {
+        Collection<V> vs = map.get(key);
+        if (vs == null) {
+            vs = new ArrayList<V>();
+            map.put(key, vs);
+        }
+        vs.addAll(vvs);
+    }
+
+    @Override
+    public Collection<V> get(K key) {
+        Collection<V> vs = map.get(key);
+        return (vs == null) ? Collections.<V>emptyList() : Collections.unmodifiableCollection(vs);
     }
 
     @Override
@@ -71,13 +71,34 @@ public class HashMultiset<T> implements Multiset<T>, Serializable {
     }
 
     @Override
-    public int size() {
-        return size;
+    public void clear() {
+        map.clear();
     }
 
     @Override
-    public Collection<T> keys() {
-        return Collections.unmodifiableCollection(map.keySet());
+    public Collection<K> keys() {
+        return map.keySet();
+    }
+
+    @Override
+    public Collection<V> values() {
+        Collection<V> result = new ArrayList<V>();
+        for (K key : map.keySet()) {
+            result.addAll(map.get(key));
+        }
+        return result;
+    }
+
+    @Override
+    public void remove(K key) {
+        map.remove(key);
+    }
+
+    @Override
+    public void merge(Multimap<K, V> other) {
+        for (K k : other.keys()) {
+            putAll(k, other.get(k));
+        }
     }
 
     @Override
@@ -85,9 +106,8 @@ public class HashMultiset<T> implements Multiset<T>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        HashMultiset that = (HashMultiset) o;
+        HashMultimap that = (HashMultimap) o;
 
-        if (size != that.size) return false;
         if (!map.equals(that.map)) return false;
 
         return true;
@@ -95,8 +115,11 @@ public class HashMultiset<T> implements Multiset<T>, Serializable {
 
     @Override
     public int hashCode() {
-        int result = map.hashCode();
-        result = 31 * result + size;
-        return result;
+        return map.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return map.toString();
     }
 }

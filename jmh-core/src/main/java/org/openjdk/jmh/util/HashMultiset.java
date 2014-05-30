@@ -22,21 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
-public class TreeMultiset<T extends Comparable<T>> implements Multiset<T>, Serializable {
+public class HashMultiset<T> implements Multiset<T>, Serializable {
 
     private final Map<T, Integer> map;
     private int size;
 
-    public TreeMultiset() {
-        map = new TreeMap<T, Integer>();
+    public HashMultiset() {
+        map = new HashMap<T, Integer>();
     }
 
     @Override
@@ -85,7 +85,7 @@ public class TreeMultiset<T extends Comparable<T>> implements Multiset<T>, Seria
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TreeMultiset that = (TreeMultiset) o;
+        HashMultiset that = (HashMultiset) o;
 
         if (size != that.size) return false;
         if (!map.equals(that.map)) return false;

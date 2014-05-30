@@ -22,21 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util.internal;
+package org.openjdk.jmh.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
+public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
 
     private final Map<K, Collection<V>> map;
 
-    public HashMultimap() {
-        map = new HashMap<K, Collection<V>>();
+    public TreeMultimap() {
+        map = new TreeMap<K, Collection<V>>();
     }
 
     @Override
@@ -106,7 +106,7 @@ public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        HashMultimap that = (HashMultimap) o;
+        TreeMultimap that = (TreeMultimap) o;
 
         if (!map.equals(that.map)) return false;
 
@@ -116,10 +116,5 @@ public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
     @Override
     public int hashCode() {
         return map.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return map.toString();
     }
 }

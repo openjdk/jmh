@@ -27,7 +27,6 @@ package org.openjdk.jmh.util;
 import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openjdk.jmh.util.internal.ListStatistics;
 
 import static org.junit.Assert.assertEquals;
 

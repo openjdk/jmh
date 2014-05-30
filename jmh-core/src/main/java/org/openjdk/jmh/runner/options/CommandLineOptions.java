@@ -34,9 +34,9 @@ import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.HashMultimap;
-import org.openjdk.jmh.util.internal.Multimap;
-import org.openjdk.jmh.util.internal.Optional;
+import org.openjdk.jmh.util.HashMultimap;
+import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.Optional;
 
 import java.io.IOException;
 import java.util.ArrayList;

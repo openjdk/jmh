@@ -29,7 +29,7 @@ import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
 import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.util.internal.Statistics;
+import org.openjdk.jmh.util.Statistics;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

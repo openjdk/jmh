@@ -33,7 +33,7 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.parameters.TimeValue;
-import org.openjdk.jmh.util.internal.Optional;
+import org.openjdk.jmh.util.Optional;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
