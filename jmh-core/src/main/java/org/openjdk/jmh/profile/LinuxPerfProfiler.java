@@ -49,6 +49,8 @@ import java.util.regex.Pattern;
 
 public class LinuxPerfProfiler implements ExternalProfiler {
 
+    private boolean useDelay;
+
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         long delay = TimeUnit.NANOSECONDS.toMillis(
@@ -56,12 +58,12 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                 params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
                 + 1000 // loosely account for the JVM lag
         );
-        return Arrays.asList(
-                "perf",
-                "stat",
-                "-d",
-                "-D " + delay
-                );
+
+        if (useDelay) {
+            return Arrays.asList("perf", "stat", "-d", "-D " + delay);
+        } else {
+            return Arrays.asList("perf", "stat", "-d");
+        }
     }
 
     @Override
@@ -82,9 +84,19 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> checkSupport() {
+        Collection<String> delay = tryWith("perf stat -D 1 echo 1");
+        if (delay.isEmpty()) {
+            useDelay = true;
+            return delay;
+        }
+
+        return tryWith("perf stat echo 1");
+    }
+
+    private Collection<String> tryWith(String cmd) {
         Collection<String> messages = new ArrayList<String>();
         try {
-            Process p = Runtime.getRuntime().exec("perf stat -D 1 echo 1");
+            Process p = Runtime.getRuntime().exec(cmd);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 

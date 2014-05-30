@@ -55,12 +55,12 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class LinuxPerfAsmProfiler implements ExternalProfiler {
-
     private static final String[] EVENTS = {"cycles", "instructions"};
     private static final String[] EVENTS_SHORT = {"clk", "insn"};
 
     private String perfBinData;
     private String perfParsedData;
+    private boolean useDelay;
 
     public LinuxPerfAsmProfiler() throws IOException {
         perfBinData = FileUtils.tempFile("perfbin").getAbsolutePath();
@@ -74,14 +74,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
                         + 1000 // loosely account for the JVM lag
         );
-        return Arrays.asList(
-                "perf",
-                "record",
-                "-c 100000",
-                "-e " + Utils.join(EVENTS, ","),
-                "-D " + delay,
-                "-o" + perfBinData
-        );
+
+        if (useDelay) {
+            return Arrays.asList("perf", "record", "-c 100000", "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData, "-D " + delay);
+        } else {
+            return Arrays.asList("perf", "record", "-c 100000", "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData);
+        }
     }
 
     @Override
@@ -104,9 +102,19 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> checkSupport() {
+        Collection<String> delay = tryWith("perf stat -D 1 echo 1");
+        if (delay.isEmpty()) {
+            useDelay = true;
+            return delay;
+        }
+
+        return tryWith("perf stat echo 1");
+    }
+
+    public Collection<String> tryWith(String cmd) {
         Collection<String> messages = new ArrayList<String>();
         try {
-            Process p = Runtime.getRuntime().exec("perf stat -D 1 echo 1");
+            Process p = Runtime.getRuntime().exec(cmd);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
