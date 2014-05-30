@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
-import org.openjdk.jmh.logic.results.AggregationPolicy;
-import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.infra.results.AggregationPolicy;
+import org.openjdk.jmh.infra.results.Result;
 
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;

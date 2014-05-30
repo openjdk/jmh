@@ -67,7 +67,7 @@ public class CompilerHints extends AbstractResourceReader {
                 final Set<String> defaultHints = defaultList().get();
                 List<String> hints = new ArrayList<String>(defaultHints.size() + 2);
                 hints.add("quiet");
-                hints.add("inline,org/openjdk/jmh/logic/BlackHole.*");
+                hints.add("inline,org/openjdk/jmh/infra/BlackHole.*");
                 hints.addAll(defaultHints);
                 hintsFile = FileUtils.createTempFileWithLines("jmh", "compilecommand", hints);
             } catch (IOException e) {

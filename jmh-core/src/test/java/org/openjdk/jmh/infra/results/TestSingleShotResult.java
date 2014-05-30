@@ -22,43 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.logic.results;
+package org.openjdk.jmh.infra.results;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 
-/**
- * Tests for AggregateResult
- */
-public class TestAggregateResult {
+public class TestSingleShotResult {
 
-    private static IterationResult result;
-    private static final double[] values = {10.0, 20.0, 30.0, 40.0, 50.0};
+    @Test
+    public void testRunAggregator1() {
+        SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
+        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
 
-    @BeforeClass
-    public static void setupClass() {
-        result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime), new IterationParams(null, 1, TimeValue.days(1), 1));
-        for (double d : values) {
-            result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000, TimeUnit.MILLISECONDS));
-        }
+        assertEquals(1.5, result.getScore());
+        assertEquals("us", result.getScoreUnit());
     }
 
     @Test
-    public void testScore() throws Exception {
-        assertEquals(15.0, result.getPrimaryResult().getScore(), 0.00001);
-    }
+    public void testIterationAggregator1() {
+        SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
+        SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
+        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-    @Test
-    public void testScoreUnit() throws Exception {
-        assertEquals((new ThroughputResult(ResultRole.PRIMARY, "test1", 1, 1, TimeUnit.MILLISECONDS)).getScoreUnit(), result.getScoreUnit());
+        assertEquals(1.5, result.getScore());
+        assertEquals("us", result.getScoreUnit());
     }
 
 }

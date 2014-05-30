@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.output.results;
 
-import org.openjdk.jmh.logic.results.Result;
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.infra.results.Result;
+import org.openjdk.jmh.infra.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.ClassUtils;
 

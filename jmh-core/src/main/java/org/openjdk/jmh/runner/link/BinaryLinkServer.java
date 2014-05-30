@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner.link;
 
-import org.openjdk.jmh.logic.results.BenchResult;
+import org.openjdk.jmh.infra.results.BenchResult;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;

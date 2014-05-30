@@ -26,10 +26,10 @@ package org.openjdk.jmh.runner;
 
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.logic.InfraControl;
-import org.openjdk.jmh.logic.ThreadControl;
-import org.openjdk.jmh.logic.results.IterationResult;
-import org.openjdk.jmh.logic.results.Result;
+import org.openjdk.jmh.infra.InfraControl;
+import org.openjdk.jmh.infra.ThreadControl;
+import org.openjdk.jmh.infra.results.IterationResult;
+import org.openjdk.jmh.infra.results.Result;
 import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;

@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.output.format;
 
-import org.openjdk.jmh.logic.results.BenchResult;
-import org.openjdk.jmh.logic.results.IterationResult;
-import org.openjdk.jmh.logic.results.RunResult;
+import org.openjdk.jmh.infra.results.BenchResult;
+import org.openjdk.jmh.infra.results.IterationResult;
+import org.openjdk.jmh.infra.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.logic.results;
+package org.openjdk.jmh.infra.results;
 
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.ListStatistics;
@@ -32,53 +32,52 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Result class that stores once operation execution time.
+ * Result class that counts the number of operations performed during a specified unit of time.
  */
-public class SingleShotResult extends Result {
+public class ThroughputResult extends Result {
 
-    public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
+    public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
         this(role, label,
-                of(1.0D * duration / TimeUnit.NANOSECONDS.convert(1, outputTimeUnit)),
-                TimeValue.tuToString(outputTimeUnit));
+                of(1.0D * operations * TimeUnit.NANOSECONDS.convert(1, outputTimeUnit) / durationNs),
+                "ops/" + TimeValue.tuToString(outputTimeUnit),
+                AggregationPolicy.SUM);
     }
 
-    SingleShotResult(ResultRole mode, String label, Statistics s, String unit) {
-        super(mode, label, s, unit, AggregationPolicy.AVG);
-    }
-
-    @Override
-    public String extendedInfo(String label) {
-        return simpleExtendedInfo(label) + percentileExtendedInfo(label);
+    ThroughputResult(ResultRole role, String label, Statistics s, String unit, AggregationPolicy policy) {
+        super(role, label, s, unit, policy);
     }
 
     @Override
     public Aggregator getIterationAggregator() {
-        return new AveragingAggregator();
+        return new ThroughputAggregator(AggregationPolicy.SUM);
     }
 
     @Override
     public Aggregator getRunAggregator() {
-        return new AveragingAggregator();
+        return new ThroughputAggregator(AggregationPolicy.AVG);
     }
 
-    /**
-     * Averages the time on all levels.
-     */
-    static class AveragingAggregator implements Aggregator<SingleShotResult> {
+    static class ThroughputAggregator implements Aggregator<ThroughputResult> {
+        private final AggregationPolicy policy;
+
+        ThroughputAggregator(AggregationPolicy policy) {
+            this.policy = policy;
+        }
+
         @Override
-        public Result aggregate(Collection<SingleShotResult> results) {
+        public Result aggregate(Collection<ThroughputResult> results) {
             ListStatistics stat = new ListStatistics();
-            for (SingleShotResult r : results) {
+            for (ThroughputResult r : results) {
                 stat.addValue(r.getScore());
             }
-            return new SingleShotResult(
+            return new ThroughputResult(
                     Result.aggregateRoles(results),
                     Result.aggregateLabels(results),
                     stat,
-                    Result.aggregateUnits(results)
+                    Result.aggregateUnits(results),
+                    policy
             );
         }
-
     }
 
 }

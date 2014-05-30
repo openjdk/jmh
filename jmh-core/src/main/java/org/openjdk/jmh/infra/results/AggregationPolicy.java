@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,31 +22,26 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.helpers.implicit.blackholes;
+package org.openjdk.jmh.infra.results;
 
-import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.infra.BlackHole;
+public enum AggregationPolicy {
 
-@State(Scope.Benchmark)
-public class IterationBlackhole2Test {
+    AVG("Average"),
 
-    @Setup(Level.Iteration)
-    public void setup(BlackHole bh) {}
+    SUM("Sum"),
 
-    @GenerateMicroBenchmark
-    public void test(BlackHole bh) {
+    MAX("Maximum"),
 
+    ;
+
+    private String label;
+
+    AggregationPolicy(String label) {
+        this.label = label;
     }
 
-    @Test
-    public void compileTest() {
-        CompileTest.assertOK(this.getClass());
+    public String toString() {
+        return label;
     }
 
 }

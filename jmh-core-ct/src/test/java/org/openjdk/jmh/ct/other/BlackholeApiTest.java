@@ -29,7 +29,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.infra.BlackHole;
 
 /**
  * Tests basic blackholing API.

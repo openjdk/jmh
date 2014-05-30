@@ -30,7 +30,7 @@ import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.logic.Control;
+import org.openjdk.jmh.infra.Control;
 
 public class ControlTest {
 

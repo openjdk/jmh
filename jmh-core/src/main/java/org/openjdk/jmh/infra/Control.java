@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.logic;
+package org.openjdk.jmh.infra;
 
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;

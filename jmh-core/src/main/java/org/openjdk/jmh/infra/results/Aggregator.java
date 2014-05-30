@@ -22,26 +22,24 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.logic.results;
+package org.openjdk.jmh.infra.results;
 
-public class RawResults {
+import java.util.Collection;
 
-    private final long opsPerInv;
-    public long operations;
-    public long realTime;
-    public long startTime;
-    public long stopTime;
+/**
+ * Aggregator composes multiple results into one.
+ *
+ * It is assumed the collection has the results of specified type.
+ * This class is generic to save some of the unchecked casts in the code.
+ *
+ * @param <R> accepted result type
+ */
+public interface Aggregator<R extends Result> {
 
-    public long getOperations() {
-        return opsPerInv * operations;
-    }
-
-    public long getTime() {
-        return (realTime > 0) ? realTime : (stopTime - startTime);
-    }
-
-    public RawResults(long opsPerInv) {
-        this.opsPerInv = opsPerInv;
-    }
-
+    /**
+     * Aggregate the results.
+     * @param results results to aggregate
+     * @return aggregated result; may throw exceptions on validation errors
+     */
+    Result aggregate(Collection<R> results);
 }
