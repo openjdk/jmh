@@ -66,7 +66,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
         HotspotInternalResult res = counters();
         Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
-            results.add(new ProfilerResult("instrument@unknown." + e.getKey(), e.getValue(), "???", AggregationPolicy.AVG));
+            results.add(new ProfilerResult("@unknown." + e.getKey(), e.getValue(), "unit?", AggregationPolicy.AVG));
         }
         return results;
     }
