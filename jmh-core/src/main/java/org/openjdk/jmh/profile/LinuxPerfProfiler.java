@@ -84,7 +84,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
     public Collection<String> checkSupport() {
         Collection<String> messages = new ArrayList<String>();
         try {
-            Process p = Runtime.getRuntime().exec("perf list");
+            Process p = Runtime.getRuntime().exec("perf stat -D 1 echo 1");
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
