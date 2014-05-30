@@ -22,25 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link;
+package org.openjdk.jmh.runner.link;
+
+import org.openjdk.jmh.runner.options.Options;
 
 import java.io.Serializable;
 
-class InfraFrame implements Serializable {
+class OptionsFrame implements Serializable {
 
-    private final Type type;
+    private final Options opts;
 
-    public InfraFrame(Type type) {
-        this.type = type;
+    public OptionsFrame(Options opts) {
+        this.opts = opts;
     }
 
-    public Type getType() {
-        return type;
+    public Options getOpts() {
+        return opts;
     }
-
-    public enum Type {
-        OPTIONS_REQUEST,
-        ACTION_PLAN_REQUEST,
-    }
-
 }

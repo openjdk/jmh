@@ -22,20 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link;
-
-import org.openjdk.jmh.runner.ActionPlan;
+package org.openjdk.jmh.runner.link;
 
 import java.io.Serializable;
 
-class ActionPlanFrame implements Serializable {
-    private final ActionPlan actionPlan;
+class InfraFrame implements Serializable {
 
-    public ActionPlanFrame(ActionPlan actionPlan) {
-        this.actionPlan = actionPlan;
+    private final Type type;
+
+    public InfraFrame(Type type) {
+        this.type = type;
     }
 
-    public ActionPlan getActionPlan() {
-        return actionPlan;
+    public Type getType() {
+        return type;
     }
+
+    public enum Type {
+        OPTIONS_REQUEST,
+        ACTION_PLAN_REQUEST,
+    }
+
 }

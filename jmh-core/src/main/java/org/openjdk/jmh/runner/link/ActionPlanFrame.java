@@ -22,22 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link;
+package org.openjdk.jmh.runner.link;
+
+import org.openjdk.jmh.runner.ActionPlan;
 
 import java.io.Serializable;
 
-/**
- * Encapsulates the OutputFormat call
- *   - method name
- *   - arguments (assumed to be serializable)
- */
-class OutputFormatFrame implements Serializable {
-    private static final long serialVersionUID = -7151852354574635295L;
-    public final String method;
-    public final Object[] args;
+class ActionPlanFrame implements Serializable {
+    private final ActionPlan actionPlan;
 
-    public OutputFormatFrame(String method, Object[] args) {
-        this.method = method;
-        this.args = args;
+    public ActionPlanFrame(ActionPlan actionPlan) {
+        this.actionPlan = actionPlan;
+    }
+
+    public ActionPlan getActionPlan() {
+        return actionPlan;
     }
 }

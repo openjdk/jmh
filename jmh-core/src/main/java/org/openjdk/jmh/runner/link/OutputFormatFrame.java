@@ -22,21 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link;
-
-import org.openjdk.jmh.runner.options.Options;
+package org.openjdk.jmh.runner.link;
 
 import java.io.Serializable;
 
-class OptionsFrame implements Serializable {
+/**
+ * Encapsulates the OutputFormat call
+ *   - method name
+ *   - arguments (assumed to be serializable)
+ */
+class OutputFormatFrame implements Serializable {
+    private static final long serialVersionUID = -7151852354574635295L;
+    public final String method;
+    public final Object[] args;
 
-    private final Options opts;
-
-    public OptionsFrame(Options opts) {
-        this.opts = opts;
-    }
-
-    public Options getOpts() {
-        return opts;
+    public OutputFormatFrame(String method, Object[] args) {
+        this.method = method;
+        this.args = args;
     }
 }

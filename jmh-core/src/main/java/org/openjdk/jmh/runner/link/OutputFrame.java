@@ -22,9 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link;
-
-import org.openjdk.jmh.runner.BenchmarkException;
+package org.openjdk.jmh.runner.link;
 
 import java.io.Serializable;
 

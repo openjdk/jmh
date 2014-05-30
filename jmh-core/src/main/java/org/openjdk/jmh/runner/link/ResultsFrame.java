@@ -22,9 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.link;
+package org.openjdk.jmh.runner.link;
+
+import org.openjdk.jmh.logic.results.BenchResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
 
-class FinishingFrame implements Serializable {
+class ResultsFrame implements Serializable {
+    private final Multimap<BenchmarkRecord, BenchResult> res;
+
+    public ResultsFrame(Multimap<BenchmarkRecord, BenchResult> res) {
+        this.res = res;
+    }
+
+    public Multimap<BenchmarkRecord, BenchResult> getRes() {
+        return res;
+    }
 }

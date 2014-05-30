@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.link.BinaryLinkServer;
 import org.openjdk.jmh.logic.results.BenchResult;
 import org.openjdk.jmh.logic.results.Result;
 import org.openjdk.jmh.logic.results.RunResult;
@@ -38,6 +37,7 @@ import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.Defaults;

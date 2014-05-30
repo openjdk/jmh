@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.output.format;
 
-import org.openjdk.jmh.link.BinaryLinkClient;
+import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
