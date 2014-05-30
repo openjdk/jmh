@@ -634,7 +634,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
             writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop" +
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop" +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
@@ -681,7 +681,7 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop";
 
             compilerControl.defaultForceInline(method);
             compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
@@ -743,7 +743,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
             writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -788,7 +788,7 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop";
             compilerControl.defaultForceInline(method);
             compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
@@ -863,7 +863,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementLoop(control, buffer, targetSamples, opsPerInv" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, opsPerInv" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -905,7 +905,7 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind + "_measurementLoop";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop";
             compilerControl.defaultForceInline(method);
             compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
@@ -965,7 +965,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
             writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind + "_measurementStub(control, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
 
@@ -989,7 +989,7 @@ public class BenchmarkGenerator {
 
         // measurement stub bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind + "_measurementStub";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub";
             compilerControl.defaultForceInline(method);
             compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 

@@ -67,7 +67,7 @@ public class SyncIterNotOnlyMeasurementTest {
     private boolean isInMeasurementLoop() {
         boolean inMeasurementLoop = false;
         for (StackTraceElement element : new Exception().getStackTrace()) {
-            inMeasurementLoop |= element.getMethodName().contains("measurementLoop");
+            inMeasurementLoop |= element.getMethodName().contains("jmhLoop");
         }
         return inMeasurementLoop;
     }
