@@ -27,6 +27,7 @@ package org.openjdk.jmh.util;
 import org.openjdk.jmh.output.format.OutputFormat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -58,6 +59,10 @@ public class Utils {
             sb.append(s);
         }
         return sb.toString();
+    }
+
+    public static String join(String[] src, String delim) {
+        return join(Arrays.asList(src), delim);
     }
 
     public static int sum(int[] arr) {
