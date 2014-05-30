@@ -60,7 +60,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                 "perf",
                 "stat",
                 "-d",
-                "-D " + delay
+                "-D dfsjjio " + delay
                 );
     }
 

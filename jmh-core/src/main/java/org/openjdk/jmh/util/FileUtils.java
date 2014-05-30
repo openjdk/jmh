@@ -26,13 +26,20 @@ package org.openjdk.jmh.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * A utility class for File creation and manipulation.
@@ -143,4 +150,24 @@ public class FileUtils {
         return file.getAbsolutePath();
     }
 
+    public static Collection<String> tail(File file, int num) throws IOException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            LinkedList<String> lines = new LinkedList<String>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+                if (lines.size() > num) {
+                    lines.remove(0);
+                }
+            }
+            return lines;
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
+        }
+    }
 }
