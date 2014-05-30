@@ -79,8 +79,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     public Collection<String> addJVMOptions() {
         return Arrays.asList(
                 "-XX:+UnlockDiagnosticVMOptions",
-                "-XX:+PrintCompilation",
-                "-XX:+PrintInlining",
                 "-XX:+PrintAssembly");
     }
 
@@ -293,11 +291,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 hot = "No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly";
             }
 
-            return new PerfResult(
-                    hot,
-                    (events.get("cycles") == null) ? 0 : events.get("cycles").size(),
-                    (events.get("instructions") == null) ? 0 : events.get("instructions").size()
-            );
+            return new PerfResult(hot);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -305,29 +299,25 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     static class PerfResult extends Result<PerfResult> {
         private final String output;
-        private final int cycles;
-        private final int instructions;
 
-        public PerfResult(String output, int cycles, int instructions) {
-            super(ResultRole.SECONDARY, "@cpi", of(1.0 * cycles / instructions), "CPI", AggregationPolicy.AVG);
+        public PerfResult(String output) {
+            super(ResultRole.SECONDARY, "@asm", of(Double.NaN), "N/A", AggregationPolicy.AVG);
             this.output = output;
-            this.cycles = cycles;
-            this.instructions = instructions;
         }
 
         @Override
         public Aggregator<PerfResult> getIterationAggregator() {
-            return new MyResultAggregator();
+            return new PerfResultAggregator();
         }
 
         @Override
         public Aggregator<PerfResult> getRunAggregator() {
-            return new MyResultAggregator();
+            return new PerfResultAggregator();
         }
 
         @Override
         public String toString() {
-            return String.format("%.3f cycles per instruction", 1.0 * cycles / instructions);
+            return "(text only)";
         }
 
         @Override
@@ -336,19 +326,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    static class MyResultAggregator implements Aggregator<PerfResult> {
-
+    static class PerfResultAggregator implements Aggregator<PerfResult> {
         @Override
         public Result aggregate(Collection<PerfResult> results) {
-            int cycles = 0;
-            int instructions = 0;
             String output = "";
             for (PerfResult r : results) {
-                cycles += r.cycles;
-                instructions += r.instructions;
                 output += r.output;
             }
-            return new PerfResult(output, cycles, instructions);
+            return new PerfResult(output);
         }
     }
 

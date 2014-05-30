@@ -172,12 +172,12 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
         @Override
         public Aggregator<PerfResult> getIterationAggregator() {
-            return new MyResultAggregator();
+            return new PerfResultAggregator();
         }
 
         @Override
         public Aggregator<PerfResult> getRunAggregator() {
-            return new MyResultAggregator();
+            return new PerfResultAggregator();
         }
 
         @Override
@@ -191,7 +191,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         }
     }
 
-    static class MyResultAggregator implements Aggregator<PerfResult> {
+    static class PerfResultAggregator implements Aggregator<PerfResult> {
 
         @Override
         public Result aggregate(Collection<PerfResult> results) {
