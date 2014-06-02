@@ -39,7 +39,6 @@ import java.util.TreeMap;
 abstract class AbstractHotspotProfiler implements InternalProfiler {
 
     private Map<String, Long> prevs;
-    private long startTime;
 
     /**
      * Returns internal counters for specific MXBean
@@ -77,7 +76,6 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
         for (Counter counter : getCounters()) {
             prevs.put(counter.getName(), convert(counter.getValue()));
         }
-        startTime = System.currentTimeMillis();
     }
 
     public static Long convert(Object o) {
@@ -89,8 +87,6 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     }
 
     protected HotspotInternalResult counters() {
-        long duration = System.currentTimeMillis() - startTime;
-
         Map<String, Long> difference = new TreeMap<String, Long>();
         Map<String, Long> current = new TreeMap<String, Long>();
         for (Counter counter : getCounters()) {
@@ -102,7 +98,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
             }
         }
 
-        return new HotspotInternalResult(current, difference, duration);
+        return new HotspotInternalResult(current, difference);
     }
 
     public static <T> T getInstance(String name) {
@@ -124,19 +120,12 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
      * Represents the HotSpot profiling result.
      */
     static class HotspotInternalResult {
-
         private final Map<String, Long> current;
         private final Map<String, Long> diff;
-        private final long durationMsec;
 
-        public HotspotInternalResult(Map<String, Long> current, Map<String, Long> diff, long durationMsec) {
+        public HotspotInternalResult(Map<String, Long> current, Map<String, Long> diff) {
             this.current = current;
             this.diff = diff;
-            this.durationMsec = durationMsec;
-        }
-
-        public HotspotInternalResult(HotspotInternalResult result) {
-            this(result.current, result.diff, result.durationMsec);
         }
 
         public Map<String, Long> getCurrent() {
@@ -145,14 +134,6 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
 
         public Map<String, Long> getDiff() {
             return diff;
-        }
-
-        public long getDurationMsec() {
-            return durationMsec;
-        }
-
-        protected long deNull(Long v) {
-            return v == null ? 0 : v;
         }
 
         @Override
