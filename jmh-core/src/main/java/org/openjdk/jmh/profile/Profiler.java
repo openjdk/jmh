@@ -27,14 +27,30 @@ package org.openjdk.jmh.profile;
 import java.util.Collection;
 
 /**
- * Profiler interface
+ * Root profiler interface.
+ *
+ * <p>Profilers normally implement one of the subinterfaces.</p>
+ * @see org.openjdk.jmh.profile.ExternalProfiler
+ * @see org.openjdk.jmh.profile.InternalProfiler
  */
 public interface Profiler {
 
+    /**
+     * Check the support for a given profiler.
+     * @return error messages; empty collections if no errors detected, and profiler is available.
+     */
     Collection<String> checkSupport();
 
+    /**
+     * Unique label for the profiler.
+     * @return label
+     */
     String label();
 
+    /**
+     * Human-readable one-line description of the profiler.
+     * @return description
+     */
     String getDescription();
 
 }

@@ -31,16 +31,41 @@ import java.io.File;
 import java.util.Collection;
 
 /**
- * Profiler interface
+ * External profiler: profilers to be run outside of JVM.
+ *
+ * <p>External profilers usually call external tools to get the performance data.
+ * It is futile to query any internal JVM facilities in external profiler
+ * Java code, because it may not be executed in the benchmarked VM at all.</p>
  */
 public interface ExternalProfiler extends Profiler {
 
+    /**
+     * Prepend JVM invocation with these commands.
+     * @param params benchmark parameters used for current launch
+     * @return commands to prepend for JVM launch
+     */
     Collection<String> addJVMInvokeOptions(BenchmarkParams params);
 
+    /**
+     * Add JVM these options to the run.
+     * @param params benchmark parameters used for current launch
+     * @return options to add to JVM launch
+     */
     Collection<String> addJVMOptions(BenchmarkParams params);
 
+    /**
+     * Run this code before starting the trial. This method will execute
+     * before starting the benchmark JVM.
+     */
     void beforeTrial();
 
+    /**
+     * Run this code after the trial is done. This method will execute
+     * after benchmark JVM had stopped.
+     * @param stdOut file containing the standard output from the benchmark JVM
+     * @param stdErr file containing the standard error from the benchmark JVM
+     * @return profiler results
+     */
     Collection<? extends Result> afterTrial(File stdOut, File stdErr);
 
 }

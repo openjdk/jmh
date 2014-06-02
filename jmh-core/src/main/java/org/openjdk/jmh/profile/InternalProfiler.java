@@ -28,10 +28,23 @@ import org.openjdk.jmh.infra.results.Result;
 
 import java.util.Collection;
 
+/**
+ * Internal profiler.
+ *
+ * <p>Internal profilers run in the benchmark JVM, and may query the internal
+ * JVM facilities.</p>
+ */
 public interface InternalProfiler extends Profiler {
 
+    /**
+     * Run this code before starting the next benchmark iteration.
+     */
     void beforeIteration();
 
+    /**
+     * Run this code after a benchmark iteration finished
+     * @return profiler result
+     */
     Collection<? extends Result> afterIteration();
 
 }
