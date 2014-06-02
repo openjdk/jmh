@@ -108,14 +108,6 @@ public class IterationResult implements Serializable {
         return aggregator.aggregate(primaryResults);
     }
 
-    public boolean isResultsEmpty() {
-        return primaryResults.isEmpty();
-    }
-
-    public void clearResults() {
-        primaryResults.clear();
-    }
-
     public BenchmarkRecord getBenchmark() {
         return benchmark;
     }
