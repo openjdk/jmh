@@ -49,16 +49,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Abstract runner, the base class for Runner and ForkedRunner.
  */
-public abstract class BaseRunner {
+abstract class BaseRunner {
 
     private long projectedTotalTime;
     private long projectedRunningTime;
     private long actualRunningTime;
     private long benchmarkStart;
 
-    /** Class holding all our runtime options/arguments */
     protected final Options options;
-
     protected final OutputFormat out;
 
     public BaseRunner(Options options, OutputFormat handler) {
@@ -245,7 +243,6 @@ public abstract class BaseRunner {
             return null;
         }
     }
-
 
     /**
      * Execute System.gc() if we the System.gc option is set.

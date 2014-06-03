@@ -46,6 +46,7 @@ import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -69,15 +70,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Runner frontend class. Responsible for running micro benchmarks in this JVM.
+ * Runner executes JMH benchmarks.
+ *
+ * <p>This is the entry point for JMH Java API.</p>
  */
 public class Runner extends BaseRunner {
     private final MicroBenchmarkList list;
 
     /**
-     * THIS IS AN EXPERIMENTAL API.
+     * Create runner with the custom OutputFormat.
      *
-     * Create runner with the custom OutputFormat
      * @param options options to use
      * @param format OutputFormat to use
      */
@@ -88,13 +90,14 @@ public class Runner extends BaseRunner {
 
     /**
      * Create Runner with the given options.
+     * This method sets up the {@link org.openjdk.jmh.output.format.OutputFormat} as
+     * mandated by options.
      * @param options options to use.
      */
     public Runner(Options options) {
         this(options, createOutputFormat(options));
     }
 
-    /** Setup helper method, creates OutputFormat according to argv options. */
     private static OutputFormat createOutputFormat(Options options) {
         // sadly required here as the check cannot be made before calling this method in constructor
         if (options == null) {
@@ -117,6 +120,9 @@ public class Runner extends BaseRunner {
         return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.VERBOSITY));
     }
 
+    /**
+     * Print matching benchmarks into output.
+     */
     public void list() {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
@@ -326,8 +332,6 @@ public class Runner extends BaseRunner {
         return ps;
     }
 
-
-
     private SortedMap<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
         out.startRun();
 
@@ -403,7 +407,7 @@ public class Runner extends BaseRunner {
             }
 
             String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
-            String opts = merge(getJvmArgs(benchmark));
+            String opts = Utils.join(getJvmArgs(benchmark), " ");
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
             }
@@ -480,14 +484,6 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private String merge(Collection<String> ss) {
-        StringBuilder sb = new StringBuilder();
-        for (String s : ss) {
-            sb.append(s).append(" ");
-        }
-        return sb.toString().trim();
-    }
-
     private Multimap<BenchmarkRecord, BenchResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
@@ -546,15 +542,14 @@ public class Runner extends BaseRunner {
     /**
      * Helper method for assembling the command to execute the forked JVM with
      *
-     *
-     *
      * @param benchmark benchmark to execute
      * @param host host VM host
      * @param port host VM port
-     * @param javaInvokeOptions
-     *@param javaOptions @return the final command to execute
+     * @param javaInvokeOptions prepend these commands before JVM invocation
+     * @param javaOptions add these options to JVM command string
+     * @return the final command to execute
      */
-    public String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
+    String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
 
         List<String> command = new ArrayList<String>();
 
@@ -596,14 +591,12 @@ public class Runner extends BaseRunner {
     }
 
     private String getDefaultJvm() {
-        StringBuilder javaExecutable = new StringBuilder();
-        javaExecutable.append(System.getProperty("java.home"));
-        javaExecutable.append(File.separator);
-        javaExecutable.append("bin");
-        javaExecutable.append(File.separator);
-        javaExecutable.append("java");
-        javaExecutable.append(isWindows() ? ".exe" : "");
-        return javaExecutable.toString();
+        return System.getProperty("java.home") +
+                File.separator +
+                "bin" +
+                File.separator +
+                "java" +
+                (isWindows() ? ".exe" : "");
     }
 
     private Collection<String> getJvmArgs(BenchmarkRecord benchmark) {
