@@ -110,7 +110,6 @@ public class Runner extends BaseRunner {
                 out = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(options.getOutput().get()))));
                 System.setOut(out); // override to print everything to file
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(Runner.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 throw new IllegalStateException(ex);
             }
         } else {

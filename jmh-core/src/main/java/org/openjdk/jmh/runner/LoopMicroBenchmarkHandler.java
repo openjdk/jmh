@@ -48,11 +48,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Handler for a single micro benchmark (with InfraControl).
- * Handles name and execution information (# iterations, et c). Executes the
- * benchmark according to above parameters.
+ * Handler for a single benchmark.
+ *
+ * Handles name and execution information (# iterations, etc).
+ * Executes the benchmark according to above parameters.
  */
-public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
+class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
 
     private final Method method;
     private final boolean shouldSynchIterations;
@@ -95,7 +96,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
             remainingSubgroupThreads--;
 
             ThreadControl threadControl = new ThreadControl(currentGroup, currentSubgroup);
-            runners[i] = new BenchmarkTask(instances, control, threadControl);
+            runners[i] = new BenchmarkTask(control, threadControl);
         }
 
         // profilers start way before the workload starts to capture
@@ -169,7 +170,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                     // try to kick the thread, if it was already started
                     Thread runner = task.runner;
                     if (runner != null) {
-                        format.print("(*interrupt*) ");
+                        out.print("(*interrupt*) ");
                         runner.interrupt();
                     }
                 }
@@ -202,12 +203,10 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
     class BenchmarkTask implements Callable<Collection<? extends Result>> {
 
         private volatile Thread runner;
-        private final ThreadLocal<Object> invocationHandler;
         private final InfraControl control;
         private final ThreadControl threadControl;
 
-        BenchmarkTask(ThreadLocal<Object> invocationHandler, InfraControl control, ThreadControl threadControl) {
-            this.invocationHandler = invocationHandler;
+        BenchmarkTask(InfraControl control, ThreadControl threadControl) {
             this.control = control;
             this.threadControl = threadControl;
         }
@@ -219,7 +218,7 @@ public class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
                 runner = Thread.currentThread();
 
                 // go for the run
-                return (Collection<? extends Result>) method.invoke(invocationHandler.get(), control, threadControl);
+                return (Collection<? extends Result>) method.invoke(instances.get(), control, threadControl);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore

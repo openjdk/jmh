@@ -40,13 +40,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 
 /**
  * Base class for all microbenchmarks handlers.
  */
-public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler{
+abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler{
 
     /**
      * Name of micro benchmark
@@ -61,13 +60,13 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
     // (Aleksey) Forgive me, Father, for I have sinned.
     protected final ThreadLocal<Object> instances;
 
-    protected final OutputFormat format;
+    protected final OutputFormat out;
     protected final TimeUnit timeUnit;
     protected final Long opsPerInvocation;
 
     private final List<InternalProfiler> registeredProfilers;
 
-    public BaseMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
+    public BaseMicroBenchmarkHandler(OutputFormat out, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
         this.instances = new ThreadLocal<Object>() {
@@ -82,7 +81,7 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
                 }
             }
         };
-        this.format = format;
+        this.out = out;
         this.timeUnit = options.getTimeUnit().orElse(null);
         this.opsPerInvocation = options.getOperationsPerInvocation().orElse(null);
         try {
@@ -177,34 +176,6 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         }
     }
 
-    /**
-     * Forces ExecutorService to terminate.
-     * This method returns only if requested executor had shut down.
-     * If executor is failing to shut down regardless of multiple shutdown()s, this method will never return.
-     *
-     * @param executor service to shutdown
-     */
-    static void shutdownExecutor(ExecutorService executor) {
-        if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
-            return;
-        }
-        while (true) {
-            executor.shutdown();
-
-            try {
-                if (executor.awaitTermination(10, TimeUnit.SECONDS)) {
-                    return;
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-
-            Logger.getLogger(BaseMicroBenchmarkHandler.class.getName())
-                    .warning("Failed to stop executor service " + executor + ", trying again; check for the unaccounted running threads");
-        }
-    }
-
     protected void stopProfilers(IterationResult iterationResults) {
         // stop profilers
         for (InternalProfiler prof : registeredProfilers) {
@@ -232,18 +203,25 @@ public abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler
         return microbenchmark;
     }
 
-    /**
-     * Status of the ExecutorPool
-     *
-     * @return true if it is shut down, else false
-     */
-    boolean isExecutorShutdown() {
-        return executor.isShutdown();
-    }
-
     @Override
     public void shutdown() {
-        shutdownExecutor(executor);
+        if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
+            return;
+        }
+        while (true) {
+            executor.shutdown();
+
+            try {
+                if (executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    return;
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            out.println("Failed to stop executor service " + executor + ", trying again; check for the unaccounted running threads");
+        }
     }
 
 }
