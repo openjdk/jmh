@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-public class AbstractResourceReader {
+class AbstractResourceReader {
 
     private final String file;
     private final String resource;
