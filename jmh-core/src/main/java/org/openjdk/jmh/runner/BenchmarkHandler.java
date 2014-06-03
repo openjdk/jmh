@@ -28,10 +28,9 @@ import org.openjdk.jmh.infra.results.IterationResult;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 /**
- * Handler for a single micro benchmark. Handles name and execution information (# iterations, et c). Executes the
- * benchmark according to above parameters.
+ * Handles the run of the concrete benchmark.
  */
-public interface MicroBenchmarkHandler {
+interface BenchmarkHandler {
 
     /**
      * Runs an iteration on the handled benchmark.
@@ -43,13 +42,12 @@ public interface MicroBenchmarkHandler {
     public IterationResult runIteration(IterationParams params, boolean last);
 
     /**
-     * Do required shutdown actions. Actions may be:
-     * - shutdowns the executor-pool (if required)
-     * - etc
+     * Do required shutdown actions.
      */
     public void shutdown();
 
     /**
+     * Return the benchmark the handler runs.
      * @return benchmark name
      */
     public BenchmarkRecord getBenchmark();

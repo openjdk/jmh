@@ -35,12 +35,12 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * Utility class for MicroBenchmarkHandlers.
+ * Utility class for BenchmarkHandlers.
  */
-public class MicroBenchmarkHandlers {
+class BenchmarkHandlers {
 
     // Suppresses default constructor, ensuring non-instantiability.
-    private MicroBenchmarkHandlers() {
+    private BenchmarkHandlers() {
     }
 
     public static Method findBenchmarkMethod(Class<?> clazz, String methodName) {
@@ -63,8 +63,8 @@ public class MicroBenchmarkHandlers {
         return method;
     }
 
-    public static MicroBenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BenchmarkParams executionParams, Options options) {
-        return new LoopMicroBenchmarkHandler(out, microbenchmark, clazz, method, options, executionParams);
+    public static BenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BenchmarkParams executionParams, Options options) {
+        return new LoopBenchmarkHandler(out, microbenchmark, clazz, method, options, executionParams);
     }
 
     /**

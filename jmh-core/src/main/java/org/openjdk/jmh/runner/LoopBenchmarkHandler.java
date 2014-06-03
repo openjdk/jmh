@@ -53,12 +53,12 @@ import java.util.concurrent.TimeoutException;
  * Handles name and execution information (# iterations, etc).
  * Executes the benchmark according to above parameters.
  */
-class LoopMicroBenchmarkHandler extends BaseMicroBenchmarkHandler {
+class LoopBenchmarkHandler extends BaseBenchmarkHandler {
 
     private final Method method;
     private final boolean shouldSynchIterations;
 
-    LoopMicroBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, Options options, BenchmarkParams executionParams) {
+    LoopBenchmarkHandler(OutputFormat format, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, Options options, BenchmarkParams executionParams) {
         super(format, microbenchmark, clazz, options, executionParams);
         this.method = method;
         this.shouldSynchIterations = (microbenchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();

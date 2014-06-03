@@ -183,12 +183,12 @@ abstract class BaseRunner {
     }
 
     BenchResult runBenchmark(BenchmarkRecord benchmark, ActionMode mode, BenchmarkParams executionParams) {
-        MicroBenchmarkHandler handler = null;
+        BenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
-            Method method = MicroBenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
+            Method method = BenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
 
-            handler = MicroBenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
+            handler = BenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
 
             return runBenchmark(executionParams, handler);
         } catch (BenchmarkException be) {
@@ -202,7 +202,7 @@ abstract class BaseRunner {
         }
     }
 
-    protected BenchResult runBenchmark(BenchmarkParams executionParams, MicroBenchmarkHandler handler) {
+    protected BenchResult runBenchmark(BenchmarkParams executionParams, BenchmarkHandler handler) {
         List<IterationResult> allResults = new ArrayList<IterationResult>();
 
         // warmup

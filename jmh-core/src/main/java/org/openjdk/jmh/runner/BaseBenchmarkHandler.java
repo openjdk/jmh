@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Base class for all microbenchmarks handlers.
  */
-abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler{
+abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     /**
      * Name of micro benchmark
@@ -66,7 +66,7 @@ abstract class BaseMicroBenchmarkHandler implements MicroBenchmarkHandler{
 
     private final List<InternalProfiler> registeredProfilers;
 
-    public BaseMicroBenchmarkHandler(OutputFormat out, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
+    public BaseBenchmarkHandler(OutputFormat out, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
         this.microbenchmark = microbenchmark;
         this.registeredProfilers = createProfilers(options);
         this.instances = new ThreadLocal<Object>() {
