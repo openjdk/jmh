@@ -40,28 +40,28 @@ import java.util.regex.Pattern;
 /**
  * Helper class for listing micro benchmarks.
  */
-public class MicroBenchmarkList extends AbstractResourceReader {
+public class BenchmarkList extends AbstractResourceReader {
 
     /** Location of the pre-compiled list of micro benchmarks */
-    public static final String MICROBENCHMARK_LIST = "/META-INF/MicroBenchmarks";
+    public static final String BENCHMARK_LIST = "/META-INF/BenchmarkList";
 
-    public static MicroBenchmarkList defaultList() {
-        return fromResource(MICROBENCHMARK_LIST);
+    public static BenchmarkList defaultList() {
+        return fromResource(BENCHMARK_LIST);
     }
 
-    public static MicroBenchmarkList fromResource(String resource) {
-        return new MicroBenchmarkList(null, resource, null);
+    public static BenchmarkList fromResource(String resource) {
+        return new BenchmarkList(null, resource, null);
     }
 
-    public static MicroBenchmarkList fromFile(String file) {
-        return new MicroBenchmarkList(file, null, null);
+    public static BenchmarkList fromFile(String file) {
+        return new BenchmarkList(file, null, null);
     }
 
-    public static MicroBenchmarkList fromString(String line) {
-        return new MicroBenchmarkList(null, null, line);
+    public static BenchmarkList fromString(String line) {
+        return new BenchmarkList(null, null, line);
     }
 
-    private MicroBenchmarkList(String file, String resource, String line) {
+    private BenchmarkList(String file, String resource, String line) {
         super(file, resource, line);
     }
 
@@ -167,7 +167,7 @@ public class MicroBenchmarkList extends AbstractResourceReader {
             }
 
         } catch (IOException ex) {
-            throw new RuntimeException("Error reading microbenchmark list", ex);
+            throw new RuntimeException("Error reading benchmark list", ex);
         }
 
         return result;

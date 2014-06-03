@@ -49,7 +49,7 @@ import org.openjdk.jmh.infra.results.SampleTimeResult;
 import org.openjdk.jmh.infra.results.SingleShotResult;
 import org.openjdk.jmh.infra.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.MicroBenchmarkList;
+import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
@@ -135,7 +135,7 @@ public class BenchmarkGenerator {
 
         // Processing completed, final round. Print all added methods to file
         try {
-            PrintWriter writer = new PrintWriter(destination.newResource(MicroBenchmarkList.MICROBENCHMARK_LIST.substring(1)));
+            PrintWriter writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
             for (BenchmarkInfo info : benchmarkInfos) {
                 MethodGroup group = info.methodGroup;
                 String method = group.getName();

@@ -39,18 +39,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Tests for MicroBenchmarkList
+ * Tests for BenchmarkList
  */
 @Ignore
-public class TestMicroBenchmarkList {
+public class TestBenchmarkList {
 
-    private static MicroBenchmarkList list;
+    private static BenchmarkList list;
     private static List<String> excludes;
     private static OutputFormat out;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        list = MicroBenchmarkList.fromResource("/org/openjdk/jmh/runner/MicroBenchmarks");
+        list = BenchmarkList.fromResource("/org/openjdk/jmh/runner/MicroBenchmarks");
         excludes = new ArrayList<String>();
         out = OutputFormatFactory.createFormatInstance(System.out, VerboseMode.NORMAL);
     }

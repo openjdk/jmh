@@ -26,8 +26,8 @@ package org.openjdk.jmh.it.parameters;
 
 import org.junit.Assert;
 import org.openjdk.jmh.output.format.OutputFormatFactory;
+import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.MicroBenchmarkList;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.Collections;
@@ -36,7 +36,7 @@ import java.util.Set;
 public class Parameters {
 
     public static BenchmarkRecord get(Class<?> klass) {
-        MicroBenchmarkList list = MicroBenchmarkList.fromFile("target/test-classes/META-INF/MicroBenchmarks");
+        BenchmarkList list = BenchmarkList.fromFile("target/test-classes" + BenchmarkList.BENCHMARK_LIST);
         Set<BenchmarkRecord> set = list.find(OutputFormatFactory.createFormatInstance(System.out, VerboseMode.EXTRA), ".*" + klass.getName().replaceAll("\\$",".") + ".*", Collections.<String>emptyList());
         Assert.assertEquals("The single benchmark exists", 1, set.size());
         return set.iterator().next();

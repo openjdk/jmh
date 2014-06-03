@@ -72,7 +72,7 @@ import java.util.TreeMap;
  * <p>This is the entry point for JMH Java API.</p>
  */
 public class Runner extends BaseRunner {
-    private final MicroBenchmarkList list;
+    private final BenchmarkList list;
 
     /**
      * Create runner with the custom OutputFormat.
@@ -82,7 +82,7 @@ public class Runner extends BaseRunner {
      */
     public Runner(Options options, OutputFormat format) {
         super(options, format);
-        this.list = MicroBenchmarkList.defaultList();
+        this.list = BenchmarkList.defaultList();
     }
 
     /**
