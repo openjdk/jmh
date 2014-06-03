@@ -24,15 +24,12 @@
  */
 package org.openjdk.jmh.runner.options;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ClassloaderProfiler;
 import org.openjdk.jmh.profile.CompilerProfiler;
-import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.Arrays;
 import java.util.Collection;

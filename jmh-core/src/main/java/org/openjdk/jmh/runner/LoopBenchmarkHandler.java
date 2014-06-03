@@ -34,7 +34,7 @@ import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.lang.reflect.Method;
 import java.util.Collection;

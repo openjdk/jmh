@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.io.Serializable;
 import java.util.Arrays;

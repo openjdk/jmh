@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.infra.results;
 
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.ListStatistics;
 import org.openjdk.jmh.util.Statistics;
 

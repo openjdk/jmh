@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner.parameters;
 
 import junit.framework.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.concurrent.TimeUnit;
 

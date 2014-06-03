@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.concurrent.TimeUnit;
 

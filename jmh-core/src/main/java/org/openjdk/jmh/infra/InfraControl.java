@@ -25,7 +25,7 @@
 package org.openjdk.jmh.infra;
 
 import org.openjdk.jmh.runner.ActualParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;

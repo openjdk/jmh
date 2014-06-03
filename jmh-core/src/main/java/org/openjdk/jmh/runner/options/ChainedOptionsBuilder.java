@@ -27,7 +27,6 @@ package org.openjdk.jmh.runner.options;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.Profiler;
-import org.openjdk.jmh.runner.parameters.TimeValue;
 
 import java.util.concurrent.TimeUnit;
 

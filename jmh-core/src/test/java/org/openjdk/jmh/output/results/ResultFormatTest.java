@@ -35,7 +35,7 @@ import org.openjdk.jmh.infra.results.ThroughputResult;
 import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.BufferedReader;

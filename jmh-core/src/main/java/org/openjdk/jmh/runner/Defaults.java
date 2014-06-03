@@ -27,12 +27,7 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.options.WarmupMode;
-import org.openjdk.jmh.runner.parameters.TimeValue;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 /**
  * JMH global defaults: these are used when no other values are available.

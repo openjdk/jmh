@@ -32,6 +32,7 @@ import org.openjdk.jmh.runner.ActionMode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;

@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.runner.parameters;
 
+import org.openjdk.jmh.runner.options.TimeValue;
+
 import java.io.Serializable;
 
 public class IterationParams implements Serializable {

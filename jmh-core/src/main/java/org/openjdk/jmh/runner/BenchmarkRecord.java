@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.parameters.TimeValue;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Optional;
 import org.openjdk.jmh.util.Utils;
 
