@@ -30,7 +30,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.CommandLineOptionException;
 import org.openjdk.jmh.runner.options.CommandLineOptions;
 import org.openjdk.jmh.runner.options.VerboseMode;
-import org.openjdk.jmh.runner.parameters.Defaults;
+import org.openjdk.jmh.runner.Defaults;
 
 import java.io.IOException;
 

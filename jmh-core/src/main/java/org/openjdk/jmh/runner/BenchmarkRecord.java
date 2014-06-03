@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.Optional;
 
@@ -313,7 +312,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
         TimeValue mt = opts.getMeasurementTime()
                 .orElse(getMeasurementTime()
-                        .orElse(Defaults.ITERATION_TIME));
+                        .orElse(Defaults.MEASUREMENT_TIME));
 
         int wi = opts.getWarmupIterations()
                 .orElse(getWarmupIterations()
@@ -335,7 +334,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     public long estimatedTime(Options opts) {
         int forks = opts.getForkCount()
                 .orElse(getForks()
-                        .orElse(Defaults.FORKS));
+                        .orElse(Defaults.MEASUREMENT_FORKS));
 
         int warmupForks = opts.getWarmupForkCount()
                 .orElse(getWarmupForks()

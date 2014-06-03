@@ -40,7 +40,6 @@ import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.Defaults;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -66,8 +65,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Runner executes JMH benchmarks.
