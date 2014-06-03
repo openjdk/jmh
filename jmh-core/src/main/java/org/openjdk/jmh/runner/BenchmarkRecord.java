@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.TimeValue;
 import org.openjdk.jmh.util.Optional;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -95,7 +96,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.userName = args[0].trim();
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());
-        this.threadGroups = convert(args[3].split("="));
+        this.threadGroups = Utils.unmarshalIntArray(args[3]);
         this.threads = Optional.of(args[4], Optional.INTEGER_UNMARSHALLER);
         this.warmupIterations = Optional.of(args[5], Optional.INTEGER_UNMARSHALLER);
         this.warmupTime = Optional.of(args[6], Optional.TIME_VALUE_UNMARSHALLER);
@@ -119,7 +120,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     }
 
     public String toLine() {
-        return userName + BR_SEPARATOR + generatedName + BR_SEPARATOR + mode + BR_SEPARATOR + convert(threadGroups) + BR_SEPARATOR +
+        return userName + BR_SEPARATOR + generatedName + BR_SEPARATOR + mode + BR_SEPARATOR + Utils.marshalIntArray(threadGroups) + BR_SEPARATOR +
                 threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
                 measurementIterations + BR_SEPARATOR + measurementTime + BR_SEPARATOR + measurementBatchSize + BR_SEPARATOR +
                 forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
@@ -155,25 +156,6 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         } else {
             return null;
         }
-    }
-
-    private int[] convert(String[] ss) {
-        int[] arr = new int[ss.length];
-        int cnt = 0;
-        for (String s : ss) {
-            arr[cnt] = Integer.valueOf(s.trim());
-            cnt++;
-        }
-        return arr;
-    }
-
-    private String convert(int[] arr) {
-        StringBuilder sb = new StringBuilder();
-        for (int i : arr) {
-            sb.append(i);
-            sb.append("=");
-        }
-        return sb.toString();
     }
 
     @Override

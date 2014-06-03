@@ -81,6 +81,26 @@ public class Utils {
         }
     }
 
+    public static int[] unmarshalIntArray(String src) {
+        String[] ss = src.split("=");
+        int[] arr = new int[ss.length];
+        int cnt = 0;
+        for (String s : ss) {
+            arr[cnt] = Integer.valueOf(s.trim());
+            cnt++;
+        }
+        return arr;
+    }
+
+    public static String marshalIntArray(int[] arr) {
+        StringBuilder sb = new StringBuilder();
+        for (int i : arr) {
+            sb.append(i);
+            sb.append("=");
+        }
+        return sb.toString();
+    }
+
     static int cpuCount;
 
     /**
