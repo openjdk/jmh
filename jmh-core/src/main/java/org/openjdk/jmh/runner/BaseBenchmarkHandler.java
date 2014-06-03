@@ -110,7 +110,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         CACHED_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newCachedThreadPool(new HarnessThreadFactory(prefix));
+                return Executors.newCachedThreadPool(new WorkerThreadFactory(prefix));
             }
         },
 
@@ -120,7 +120,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         FIXED_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newFixedThreadPool(maxThreads, new HarnessThreadFactory(prefix));
+                return Executors.newFixedThreadPool(maxThreads, new WorkerThreadFactory(prefix));
             }
         },
 

@@ -28,19 +28,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HarnessThreadFactory implements ThreadFactory {
+class WorkerThreadFactory implements ThreadFactory {
 
     private final AtomicInteger counter = new AtomicInteger();
     private final String prefix;
 
-    public HarnessThreadFactory(String prefix) {
+    public WorkerThreadFactory(String prefix) {
         this.prefix = prefix;
     }
 
     @Override
     public Thread newThread(Runnable r) {
         Thread thread = Executors.defaultThreadFactory().newThread(r);
-        thread.setName(prefix + "-worker" + counter.incrementAndGet());
+        thread.setName(prefix + "-jmh-worker-" + counter.incrementAndGet());
         thread.setDaemon(true);
         return thread;
     }
