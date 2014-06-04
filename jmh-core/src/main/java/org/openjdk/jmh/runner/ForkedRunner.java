@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * Runner frontend class. Responsible for running micro benchmarks in forked JVM.
  */
-public class ForkedRunner extends BaseRunner {
+class ForkedRunner extends BaseRunner {
 
     private final BinaryLinkClient link;
 

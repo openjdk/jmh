@@ -22,9 +22,8 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh;
+package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.runner.ForkedRunner;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
 
@@ -33,7 +32,7 @@ import java.io.IOException;
 /**
  * Main program entry point for forked JVM instance
  */
-public class ForkedMain {
+class ForkedMain {
 
     /**
      * Application main entry point

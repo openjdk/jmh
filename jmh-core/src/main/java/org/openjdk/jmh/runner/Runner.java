@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.ForkedMain;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.results.BenchResult;
 import org.openjdk.jmh.infra.results.Result;
