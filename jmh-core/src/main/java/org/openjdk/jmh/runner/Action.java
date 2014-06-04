@@ -24,14 +24,18 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+
 import java.io.Serializable;
 
 public class Action implements Serializable {
     private final BenchmarkRecord benchmark;
+    private final BenchmarkParams params;
     private final ActionMode mode;
 
-    public Action(BenchmarkRecord benchmark, ActionMode mode) {
+    public Action(BenchmarkRecord benchmark, BenchmarkParams params, ActionMode mode) {
         this.benchmark = benchmark;
+        this.params = params;
         this.mode = mode;
     }
 
@@ -41,5 +45,9 @@ public class Action implements Serializable {
 
     public ActionMode getMode() {
         return mode;
+    }
+
+    public BenchmarkParams getParams() {
+        return params;
     }
 }

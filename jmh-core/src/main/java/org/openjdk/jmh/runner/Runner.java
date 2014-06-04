@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
@@ -38,7 +39,9 @@ import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -252,7 +255,7 @@ public class Runner extends BaseRunner {
         }
 
         for (BenchmarkRecord wr : warmupBenches) {
-            base.addWarmup(wr);
+            base.add(newAction(wr, ActionMode.WARMUP));
         }
 
         ActionPlan embeddedPlan = new ActionPlan(ActionType.EMBEDDED);
@@ -266,9 +269,9 @@ public class Runner extends BaseRunner {
 
             if (params.getForks() <= 0) {
                 if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
-                    embeddedPlan.addWarmupMeasurement(br);
+                    embeddedPlan.add(newAction(br, ActionMode.WARMUP_MEASUREMENT));
                 } else {
-                    embeddedPlan.addMeasurement(br);
+                    embeddedPlan.add(newAction(br, ActionMode.MEASUREMENT));
                 }
                 addEmbedded = true;
             }
@@ -277,9 +280,9 @@ public class Runner extends BaseRunner {
                 ActionPlan r = new ActionPlan(ActionType.FORKED);
                 r.mixIn(base);
                 if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
-                    r.addWarmupMeasurement(br);
+                    r.add(newAction(br, ActionMode.WARMUP_MEASUREMENT));
                 } else {
-                    r.addMeasurement(br);
+                    r.add(newAction(br, ActionMode.MEASUREMENT));
                 }
                 result.add(r);
             }
@@ -290,6 +293,75 @@ public class Runner extends BaseRunner {
         }
 
         return result;
+    }
+
+    private Action newAction(BenchmarkRecord br, ActionMode mode) {
+        return new Action(br, newBenchmarkParams(br, mode), mode);
+    }
+
+    private BenchmarkParams newBenchmarkParams(BenchmarkRecord benchmark, ActionMode mode) {
+        int[] threadGroups = options.getThreadGroups().orElse(benchmark.getThreadGroups());
+
+        int threads = options.getThreads().orElse(
+                benchmark.getThreads().orElse(
+                        Defaults.THREADS));
+
+        if (threads == Threads.MAX) {
+            threads = Utils.figureOutHotCPUs(out);
+        }
+
+        threads = Utils.roundUp(threads, Utils.sum(threadGroups));
+
+        boolean synchIterations = options.shouldSyncIterations().orElse(
+                Defaults.SYNC_ITERATIONS);
+
+        IterationParams measurement = mode.doMeasurement() ?
+                new IterationParams(
+                        options.getMeasurementIterations().orElse(
+                                benchmark.getMeasurementIterations().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.MEASUREMENT_ITERATIONS_SINGLESHOT : Defaults.MEASUREMENT_ITERATIONS
+                                )),
+                        options.getMeasurementTime().orElse(
+                                benchmark.getMeasurementTime().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.MEASUREMENT_TIME
+                                )),
+                        (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
+                                options.getMeasurementBatchSize().orElse(
+                                        benchmark.getMeasurementBatchSize().orElse(
+                                                Defaults.MEASUREMENT_BATCHSIZE
+                                        )
+                                )
+                ) :
+                new IterationParams(0, TimeValue.NONE, 1);
+
+        IterationParams warmup = mode.doWarmup() ?
+                new IterationParams(
+                        options.getWarmupIterations().orElse(
+                                benchmark.getWarmupIterations().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.WARMUP_ITERATIONS_SINGLESHOT : Defaults.WARMUP_ITERATIONS
+                                )),
+                        options.getWarmupTime().orElse(
+                                benchmark.getWarmupTime().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.WARMUP_TIME
+                                )),
+                        (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
+                                options.getWarmupBatchSize().orElse(
+                                        benchmark.getWarmupBatchSize().orElse(
+                                                Defaults.WARMUP_BATCHSIZE
+                                        )
+                                )
+                ) :
+                new IterationParams(0, TimeValue.NONE, 1);
+
+        int forks = options.getForkCount().orElse(
+                benchmark.getForks().orElse(
+                        Defaults.MEASUREMENT_FORKS));
+
+        int warmupForks = options.getWarmupForkCount().orElse(
+                benchmark.getWarmupForks().orElse(
+                        Defaults.WARMUP_FORKS));
+
+        return new BenchmarkParams(synchIterations, threads, threadGroups, forks, warmupForks, warmup, measurement);
     }
 
     private List<ActualParams> explodeAllParams(BenchmarkRecord br) throws RunnerException {
@@ -387,7 +459,7 @@ public class Runner extends BaseRunner {
             server.setPlan(actionPlan);
 
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
-            BenchmarkParams params = newBenchmarkParams(benchmark, actionPlan.getMeasurementActions().get(0).getMode());
+            BenchmarkParams params = actionPlan.getMeasurementActions().get(0).getParams();
 
             List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
 

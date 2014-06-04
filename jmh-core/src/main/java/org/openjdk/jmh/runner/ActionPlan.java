@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ActionPlan implements Serializable {
@@ -43,34 +42,8 @@ public class ActionPlan implements Serializable {
         return type;
     }
 
-    void addWarmup(BenchmarkRecord record) {
-        actions.add(new Action(record, ActionMode.WARMUP));
-    }
-
-    void addWarmup(Collection<BenchmarkRecord> rs) {
-        for (BenchmarkRecord b : rs) {
-            addWarmup(b);
-        }
-    }
-
-    void addMeasurement(BenchmarkRecord record) {
-        actions.add(new Action(record, ActionMode.MEASUREMENT));
-    }
-
-    void addMeasurement(Collection<BenchmarkRecord> rs) {
-        for (BenchmarkRecord b : rs) {
-            addMeasurement(b);
-        }
-    }
-
-    void addWarmupMeasurement(BenchmarkRecord record) {
-        actions.add(new Action(record, ActionMode.WARMUP_MEASUREMENT));
-    }
-
-    void addWarmupMeasurement(Collection<BenchmarkRecord> rs) {
-        for (BenchmarkRecord b : rs) {
-            addWarmupMeasurement(b);
-        }
+    public void add(Action action) {
+        actions.add(action);
     }
 
     public void mixIn(ActionPlan other) {
