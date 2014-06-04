@@ -262,7 +262,7 @@ public class Runner extends BaseRunner {
 
         List<ActionPlan> result = new ArrayList<ActionPlan>();
         for (BenchmarkRecord br : benchmarks) {
-            BenchmarkParams params = new BenchmarkParams(out, options, br, ActionMode.UNDEF);
+            BenchmarkParams params = newBenchmarkParams(br, ActionMode.UNDEF);
 
             if (params.getForks() <= 0) {
                 if (options.getWarmupMode().orElse(Defaults.WARMUP_MODE).isIndi()) {
@@ -387,7 +387,7 @@ public class Runner extends BaseRunner {
             server.setPlan(actionPlan);
 
             BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
-            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, actionPlan.getMeasurementActions().get(0).getMode());
+            BenchmarkParams params = newBenchmarkParams(benchmark, actionPlan.getMeasurementActions().get(0).getMode());
 
             List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
 

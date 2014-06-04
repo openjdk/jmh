@@ -24,16 +24,20 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.format.IterationType;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -77,7 +81,7 @@ abstract class BaseRunner {
             BenchmarkRecord benchmark = action.getBenchmark();
             ActionMode mode = action.getMode();
 
-            BenchmarkParams params = new BenchmarkParams(out, options, benchmark, mode);
+            BenchmarkParams params = newBenchmarkParams(benchmark, mode);
 
             if (!forked) {
                 beforeBenchmark();
@@ -127,6 +131,71 @@ abstract class BaseRunner {
         }
 
         return results;
+    }
+
+    BenchmarkParams newBenchmarkParams(BenchmarkRecord benchmark, ActionMode mode) {
+        int[] threadGroups = options.getThreadGroups().orElse(benchmark.getThreadGroups());
+
+        int threads = options.getThreads().orElse(
+                benchmark.getThreads().orElse(
+                        Defaults.THREADS));
+
+        if (threads == Threads.MAX) {
+            threads = Utils.figureOutHotCPUs(out);
+        }
+
+        threads = Utils.roundUp(threads, Utils.sum(threadGroups));
+
+        boolean synchIterations = options.shouldSyncIterations().orElse(
+                Defaults.SYNC_ITERATIONS);
+
+        IterationParams measurement = mode.doMeasurement() ?
+                new IterationParams(
+                        options.getMeasurementIterations().orElse(
+                                benchmark.getMeasurementIterations().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.MEASUREMENT_ITERATIONS_SINGLESHOT : Defaults.MEASUREMENT_ITERATIONS
+                                )),
+                        options.getMeasurementTime().orElse(
+                                benchmark.getMeasurementTime().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.MEASUREMENT_TIME
+                                )),
+                        (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
+                                options.getMeasurementBatchSize().orElse(
+                                        benchmark.getMeasurementBatchSize().orElse(
+                                                Defaults.MEASUREMENT_BATCHSIZE
+                                        )
+                                )
+                ) :
+                new IterationParams(0, TimeValue.NONE, 1);
+
+        IterationParams warmup = mode.doWarmup() ?
+                new IterationParams(
+                        options.getWarmupIterations().orElse(
+                                benchmark.getWarmupIterations().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.WARMUP_ITERATIONS_SINGLESHOT : Defaults.WARMUP_ITERATIONS
+                                )),
+                        options.getWarmupTime().orElse(
+                                benchmark.getWarmupTime().orElse(
+                                        (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.WARMUP_TIME
+                                )),
+                        (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
+                                options.getWarmupBatchSize().orElse(
+                                        benchmark.getWarmupBatchSize().orElse(
+                                                Defaults.WARMUP_BATCHSIZE
+                                        )
+                                )
+                ) :
+                new IterationParams(0, TimeValue.NONE, 1);
+
+        int forks = options.getForkCount().orElse(
+                benchmark.getForks().orElse(
+                        Defaults.MEASUREMENT_FORKS));
+
+        int warmupForks = options.getWarmupForkCount().orElse(
+                benchmark.getWarmupForks().orElse(
+                        Defaults.WARMUP_FORKS));
+
+        return new BenchmarkParams(synchIterations, threads, threadGroups, forks, warmupForks, warmup, measurement);
     }
 
     protected void afterBenchmark(BenchmarkRecord name) {

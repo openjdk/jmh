@@ -36,6 +36,7 @@ import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.BufferedReader;
@@ -72,12 +73,8 @@ public class ResultFormatTest {
                     new int[]{ r.nextInt(1000) },
                     r.nextInt(1000),
                     r.nextInt(1000),
-                    r.nextInt(1000),
-                    TimeValue.seconds(r.nextInt(1000)),
-                    1,
-                    r.nextInt(1000),
-                    TimeValue.seconds(r.nextInt(1000)),
-                    1
+                    new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
+                    new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1)
             );
 
             Collection<BenchResult> benchResults = new ArrayList<BenchResult>();
