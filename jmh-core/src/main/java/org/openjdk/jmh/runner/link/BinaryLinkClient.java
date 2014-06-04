@@ -28,6 +28,7 @@ import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.Multimap;
 
@@ -38,6 +39,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.util.Arrays;
 
@@ -118,6 +120,14 @@ public final class BinaryLinkClient {
 
     public PrintStream getOutStream() {
         return streamOut;
+    }
+
+    public OutputFormat getOutputFormatHook() {
+        return (OutputFormat) Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class[]{OutputFormat.class},
+                getOutputFormatHandler()
+        );
     }
 
     class ForwardingPrintStream extends PrintStream {

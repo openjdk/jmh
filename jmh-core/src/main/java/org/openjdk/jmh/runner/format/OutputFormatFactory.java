@@ -24,11 +24,9 @@
  */
 package org.openjdk.jmh.runner.format;
 
-import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
-import java.lang.reflect.Proxy;
 
 public class OutputFormatFactory {
 
@@ -49,18 +47,6 @@ public class OutputFormatFactory {
             default:
                 throw new IllegalArgumentException("Mode " + mode + " not found!");
         }
-    }
-
-    /**
-     * @param link binary link to put the messages through
-     * @return option format sinking the messages to binary link
-     */
-    public static OutputFormat createBinaryHook(BinaryLinkClient link) {
-        return (OutputFormat) Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                new Class[]{OutputFormat.class},
-                link.getOutputFormatHandler()
-        );
     }
 
 }

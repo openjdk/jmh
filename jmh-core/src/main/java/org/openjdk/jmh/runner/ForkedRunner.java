@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.results.BenchResult;
-import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.Multimap;
@@ -40,7 +39,7 @@ class ForkedRunner extends BaseRunner {
     private final BinaryLinkClient link;
 
     public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, OutputFormatFactory.createBinaryHook(link));
+        super(options, link.getOutputFormatHook());
         this.link = link;
     }
 
