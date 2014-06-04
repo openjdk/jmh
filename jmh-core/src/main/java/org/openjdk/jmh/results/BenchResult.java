@@ -57,7 +57,7 @@ public class BenchResult implements Serializable {
 
         for (IterationResult ir : data) {
             BenchmarkRecord record = ir.getBenchmark();
-            BenchmarkParams params = ir.getParams().getBenchmarkParams();
+            BenchmarkParams params = ir.getBenchmarkParams();
             if (myRecord != null && !record.equals(myRecord)) {
                 throw new IllegalStateException("Aggregating the iteration results from different benchmarks");
             } else {

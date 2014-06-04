@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.results.IterationResult;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 /**
@@ -35,11 +36,12 @@ interface BenchmarkHandler {
     /**
      * Runs an iteration on the handled benchmark.
      *
+     * @param benchmarkParams Benchmark parameters
      * @param params  Iteration parameters
      * @param last    Should this iteration considered to be the last
      * @return IterationResult
      */
-    public IterationResult runIteration(IterationParams params, boolean last);
+    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last);
 
     /**
      * Do required shutdown actions.

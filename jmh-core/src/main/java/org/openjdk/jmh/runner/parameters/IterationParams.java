@@ -31,11 +31,6 @@ import java.io.Serializable;
 public class IterationParams implements Serializable {
 
     /**
-     * Benchmark parameters
-     */
-    private final BenchmarkParams benchmarkParams;
-
-    /**
      * amount of iterations
      */
     private final int count;
@@ -50,10 +45,9 @@ public class IterationParams implements Serializable {
      */
     private final int batchSize;
 
-    public IterationParams(BenchmarkParams params, int count, TimeValue time, int batchSize) {
+    public IterationParams(int count, TimeValue time, int batchSize) {
         this.count = count;
         this.timeValue = time;
-        this.benchmarkParams = params;
         this.batchSize = batchSize;
     }
 
@@ -94,10 +88,6 @@ public class IterationParams implements Serializable {
     @Override
     public String toString() {
         return "IterationParams("+ getCount()+", "+ getTime()+", "+ getBatchSize()+")";
-    }
-
-    public BenchmarkParams getBenchmarkParams() {
-        return benchmarkParams;
     }
 
 }

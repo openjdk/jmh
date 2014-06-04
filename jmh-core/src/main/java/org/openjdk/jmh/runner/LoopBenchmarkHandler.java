@@ -65,22 +65,22 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
     }
 
     @Override
-    public IterationResult runIteration(IterationParams params, boolean last) {
-        int numThreads = params.getBenchmarkParams().getThreads();
+    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
+        int numThreads = benchmarkParams.getThreads();
         TimeValue runtime = params.getTime();
 
         CountDownLatch preSetupBarrier = new CountDownLatch(numThreads);
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
         // result object to accumulate the results in
-        IterationResult iterationResults = new IterationResult(microbenchmark, params);
+        IterationResult iterationResults = new IterationResult(microbenchmark, benchmarkParams, params);
 
         InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit, params.getBatchSize(), opsPerInvocation, microbenchmark.getActualParams());
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
 
-        int[] groups = params.getBenchmarkParams().getThreadGroups();
+        int[] groups = benchmarkParams.getThreadGroups();
         int currentGroup = 0;
         int currentSubgroup = 0;
         int remainingSubgroupThreads = groups[currentSubgroup];

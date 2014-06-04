@@ -32,6 +32,7 @@ import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,10 @@ public class TestAggregateResult {
 
     @BeforeClass
     public static void setupClass() {
-        result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime), new IterationParams(null, 1, TimeValue.days(1), 1));
+        result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime),
+                new BenchmarkParams(false, 1, new int[]{1}, 1, 1, 1, TimeValue.seconds(1), 1, 1, TimeValue.seconds(1),1),
+                new IterationParams(1, TimeValue.days(1), 1)
+        );
         for (double d : values) {
             result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000, TimeUnit.MILLISECONDS));
         }
