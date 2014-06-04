@@ -23,17 +23,15 @@
  * questions.
  */
 
-package ${groupId} {
+package ${groupId}
 
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark
 
-  class MyBenchmark {
+class MyBenchmark {
 
-    @GenerateMicroBenchmark
-    def testMethod(): Any = {
-      // place your benchmark code here
-    }
-
+  @GenerateMicroBenchmark
+  def testMethod(): Any = {
+    // place your benchmark code here
   }
 
 }
