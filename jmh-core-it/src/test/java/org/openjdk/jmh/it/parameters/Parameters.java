@@ -25,9 +25,9 @@
 package org.openjdk.jmh.it.parameters;
 
 import org.junit.Assert;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.Collections;

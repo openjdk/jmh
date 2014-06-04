@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.runner.format.OutputFormat;
 
 import java.io.BufferedReader;
 import java.io.IOException;

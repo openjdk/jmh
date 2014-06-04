@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.format;
+package org.openjdk.jmh.runner.format;
 
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.VerboseMode;

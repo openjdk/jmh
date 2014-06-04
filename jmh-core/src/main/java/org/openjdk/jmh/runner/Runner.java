@@ -28,14 +28,14 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.results.BenchResult;
 import org.openjdk.jmh.infra.results.Result;
 import org.openjdk.jmh.infra.results.RunResult;
-import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormat;
 import org.openjdk.jmh.output.results.ResultFormatFactory;
 import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.runner.format.OutputFormat;
+import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
@@ -86,7 +86,7 @@ public class Runner extends BaseRunner {
 
     /**
      * Create Runner with the given options.
-     * This method sets up the {@link org.openjdk.jmh.output.format.OutputFormat} as
+     * This method sets up the {@link org.openjdk.jmh.runner.format.OutputFormat} as
      * mandated by options.
      * @param options options to use.
      */

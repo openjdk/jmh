@@ -27,8 +27,8 @@ package org.openjdk.jmh.runner;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openjdk.jmh.output.format.OutputFormat;
-import org.openjdk.jmh.output.format.OutputFormatFactory;
+import org.openjdk.jmh.runner.format.OutputFormat;
+import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.ArrayList;

@@ -25,10 +25,10 @@
 package org.openjdk.jmh.runner.link;
 
 import org.openjdk.jmh.infra.results.BenchResult;
-import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;

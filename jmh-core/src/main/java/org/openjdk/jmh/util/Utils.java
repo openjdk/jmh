@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.runner.format.OutputFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;

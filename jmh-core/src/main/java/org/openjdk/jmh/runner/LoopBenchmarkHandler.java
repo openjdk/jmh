@@ -30,11 +30,11 @@ import org.openjdk.jmh.infra.InfraControl;
 import org.openjdk.jmh.infra.ThreadControl;
 import org.openjdk.jmh.infra.results.IterationResult;
 import org.openjdk.jmh.infra.results.Result;
-import org.openjdk.jmh.output.format.OutputFormat;
+import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.parameters.IterationParams;
-import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.lang.reflect.Method;
 import java.util.Collection;

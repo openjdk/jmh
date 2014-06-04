@@ -25,10 +25,10 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.results.IterationResult;
-import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 

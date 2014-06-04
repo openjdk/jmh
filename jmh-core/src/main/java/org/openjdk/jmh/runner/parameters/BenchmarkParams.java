@@ -27,10 +27,10 @@ package org.openjdk.jmh.runner.parameters;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.output.format.OutputFormat;
 import org.openjdk.jmh.runner.ActionMode;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Defaults;
+import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
