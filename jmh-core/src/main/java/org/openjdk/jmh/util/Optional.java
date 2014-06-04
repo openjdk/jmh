@@ -24,13 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import org.openjdk.jmh.runner.options.TimeValue;
-
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Option class
@@ -152,75 +146,5 @@ public class Optional<T> implements Serializable {
     public interface Marshaller<T> {
         String valueOf(T val);
     }
-
-    public static final Unmarshaller<Integer> INTEGER_UNMARSHALLER = new Unmarshaller<Integer>() {
-        @Override
-        public Integer valueOf(String s) {
-            return Integer.valueOf(s);
-        }
-    };
-
-    public static final Unmarshaller<TimeValue> TIME_VALUE_UNMARSHALLER = new Unmarshaller<TimeValue>() {
-        @Override
-        public TimeValue valueOf(String s) {
-            return TimeValue.fromString(s);
-        }
-    };
-
-    public static final Unmarshaller<Collection<String>> STRING_COLLECTION_UNMARSHALLER = new Unmarshaller<Collection<String>>() {
-        @Override
-        public Collection<String> valueOf(String s) {
-            return Arrays.asList(s.split("===SEP==="));
-        }
-    };
-
-    public static final Marshaller<Collection<String>> STRING_COLLECTION_MARSHALLER = new Optional.Marshaller<Collection<String>>() {
-        @Override
-        public String valueOf(Collection<String> src) {
-            StringBuilder sb = new StringBuilder();
-            for (String s : src) {
-                sb.append(s).append("===SEP===");
-            }
-            return sb.toString();
-        }
-    };
-
-    public static final Unmarshaller<Map<String, String[]>> PARAM_COLLECTION_UNMARSHALLER = new Unmarshaller<Map<String, String[]>>() {
-        @Override
-        public Map<String, String[]> valueOf(String s) {
-            Map<String, String[]> map = new TreeMap<String, String[]>();
-            String[] pairs = s.split("===PAIR-SEP===");
-            for (String pair : pairs) {
-                String[] kv = pair.split("===SEP-K===");
-                if (kv[1].equalsIgnoreCase("===EMPTY===")) {
-                    map.put(kv[0], new String[0]);
-                } else {
-                    map.put(kv[0], kv[1].split("===SEP-V==="));
-                }
-            }
-            return map;
-        }
-    };
-
-    public static final Marshaller<Map<String, String[]>> PARAM_COLLECTION_MARSHALLER = new Optional.Marshaller<Map<String, String[]>>() {
-        @Override
-        public String valueOf(Map<String, String[]> src) {
-            StringBuilder sb = new StringBuilder();
-            for (String s : src.keySet()) {
-                sb.append(s);
-                sb.append("===SEP-K===");
-                if (src.get(s).length == 0) {
-                    sb.append("===EMPTY===");
-                } else {
-                    for (String v : src.get(s)) {
-                        sb.append(v);
-                        sb.append("===SEP-V===");
-                    }
-                }
-                sb.append("===PAIR-SEP===");
-            }
-            return sb.toString();
-        }
-    };
 
 }

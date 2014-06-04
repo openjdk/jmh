@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializable {
@@ -97,19 +98,19 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());
         this.threadGroups = Utils.unmarshalIntArray(args[3]);
-        this.threads = Optional.of(args[4], Optional.INTEGER_UNMARSHALLER);
-        this.warmupIterations = Optional.of(args[5], Optional.INTEGER_UNMARSHALLER);
-        this.warmupTime = Optional.of(args[6], Optional.TIME_VALUE_UNMARSHALLER);
-        this.warmupBatchSize = Optional.of(args[7], Optional.INTEGER_UNMARSHALLER);
-        this.measurementIterations = Optional.of(args[8], Optional.INTEGER_UNMARSHALLER);
-        this.measurementTime = Optional.of(args[9], Optional.TIME_VALUE_UNMARSHALLER);
-        this.measurementBatchSize = Optional.of(args[10], Optional.INTEGER_UNMARSHALLER);
-        this.forks = Optional.of(args[11], Optional.INTEGER_UNMARSHALLER);
-        this.warmupForks = Optional.of(args[12], Optional.INTEGER_UNMARSHALLER);
-        this.jvmArgs = Optional.of(args[13], Optional.STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsPrepend = Optional.of(args[14], Optional.STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsAppend = Optional.of(args[15], Optional.STRING_COLLECTION_UNMARSHALLER);
-        this.params = Optional.of(args[16], Optional.PARAM_COLLECTION_UNMARSHALLER);
+        this.threads = Optional.of(args[4], INTEGER_UNMARSHALLER);
+        this.warmupIterations = Optional.of(args[5], INTEGER_UNMARSHALLER);
+        this.warmupTime = Optional.of(args[6], TIME_VALUE_UNMARSHALLER);
+        this.warmupBatchSize = Optional.of(args[7], INTEGER_UNMARSHALLER);
+        this.measurementIterations = Optional.of(args[8], INTEGER_UNMARSHALLER);
+        this.measurementTime = Optional.of(args[9], TIME_VALUE_UNMARSHALLER);
+        this.measurementBatchSize = Optional.of(args[10], INTEGER_UNMARSHALLER);
+        this.forks = Optional.of(args[11], INTEGER_UNMARSHALLER);
+        this.warmupForks = Optional.of(args[12], INTEGER_UNMARSHALLER);
+        this.jvmArgs = Optional.of(args[13], STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsPrepend = Optional.of(args[14], STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsAppend = Optional.of(args[15], STRING_COLLECTION_UNMARSHALLER);
+        this.params = Optional.of(args[16], PARAM_COLLECTION_UNMARSHALLER);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
@@ -124,10 +125,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
                 measurementIterations + BR_SEPARATOR + measurementTime + BR_SEPARATOR + measurementBatchSize + BR_SEPARATOR +
                 forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
-                jvmArgs.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
-                jvmArgsPrepend.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
-                jvmArgsAppend.toString(Optional.STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
-                params.toString(Optional.PARAM_COLLECTION_MARSHALLER);
+                jvmArgs.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
+                jvmArgsPrepend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
+                jvmArgsAppend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
+                params.toString(PARAM_COLLECTION_MARSHALLER);
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {
@@ -328,5 +329,75 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     public Optional<Map<String, String[]>> getParams() {
         return params;
     }
+
+    static final Optional.Unmarshaller<Integer> INTEGER_UNMARSHALLER = new Optional.Unmarshaller<Integer>() {
+        @Override
+        public Integer valueOf(String s) {
+            return Integer.valueOf(s);
+        }
+    };
+
+    static final Optional.Unmarshaller<TimeValue> TIME_VALUE_UNMARSHALLER = new Optional.Unmarshaller<TimeValue>() {
+        @Override
+        public TimeValue valueOf(String s) {
+            return TimeValue.fromString(s);
+        }
+    };
+
+    static final Optional.Unmarshaller<Collection<String>> STRING_COLLECTION_UNMARSHALLER = new Optional.Unmarshaller<Collection<String>>() {
+        @Override
+        public Collection<String> valueOf(String s) {
+            return Arrays.asList(s.split("===SEP==="));
+        }
+    };
+
+    static final Optional.Marshaller<Collection<String>> STRING_COLLECTION_MARSHALLER = new Optional.Marshaller<Collection<String>>() {
+        @Override
+        public String valueOf(Collection<String> src) {
+            StringBuilder sb = new StringBuilder();
+            for (String s : src) {
+                sb.append(s).append("===SEP===");
+            }
+            return sb.toString();
+        }
+    };
+
+    static final Optional.Unmarshaller<Map<String, String[]>> PARAM_COLLECTION_UNMARSHALLER = new Optional.Unmarshaller<Map<String, String[]>>() {
+        @Override
+        public Map<String, String[]> valueOf(String s) {
+            Map<String, String[]> map = new TreeMap<String, String[]>();
+            String[] pairs = s.split("===PAIR-SEP===");
+            for (String pair : pairs) {
+                String[] kv = pair.split("===SEP-K===");
+                if (kv[1].equalsIgnoreCase("===EMPTY===")) {
+                    map.put(kv[0], new String[0]);
+                } else {
+                    map.put(kv[0], kv[1].split("===SEP-V==="));
+                }
+            }
+            return map;
+        }
+    };
+
+    static final Optional.Marshaller<Map<String, String[]>> PARAM_COLLECTION_MARSHALLER = new Optional.Marshaller<Map<String, String[]>>() {
+        @Override
+        public String valueOf(Map<String, String[]> src) {
+            StringBuilder sb = new StringBuilder();
+            for (String s : src.keySet()) {
+                sb.append(s);
+                sb.append("===SEP-K===");
+                if (src.get(s).length == 0) {
+                    sb.append("===EMPTY===");
+                } else {
+                    for (String v : src.get(s)) {
+                        sb.append(v);
+                        sb.append("===SEP-V===");
+                    }
+                }
+                sb.append("===PAIR-SEP===");
+            }
+            return sb.toString();
+        }
+    };
 
 }
