@@ -30,10 +30,10 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.results.ThroughputResult;
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.util.concurrent.TimeUnit;
 

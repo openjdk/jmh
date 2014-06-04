@@ -40,8 +40,6 @@ import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.IterationParams;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;

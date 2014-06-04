@@ -28,7 +28,7 @@ import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.util.InputStreamDrainer;
 
 import java.io.BufferedReader;

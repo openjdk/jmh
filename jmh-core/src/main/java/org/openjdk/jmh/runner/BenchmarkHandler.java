@@ -25,8 +25,6 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.IterationParams;
 
 /**
  * Handles the run of the concrete benchmark.

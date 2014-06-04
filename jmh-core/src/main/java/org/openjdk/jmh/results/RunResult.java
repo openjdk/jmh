@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.results;
 
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 

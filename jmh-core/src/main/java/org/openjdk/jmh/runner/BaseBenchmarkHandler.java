@@ -30,7 +30,6 @@ import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

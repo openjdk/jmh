@@ -31,10 +31,10 @@ import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.options.VerboseMode;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
-import org.openjdk.jmh.runner.parameters.IterationParams;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;

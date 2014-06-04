@@ -25,7 +25,7 @@
 package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
+import org.openjdk.jmh.runner.BenchmarkParams;
 
 import java.io.File;
 import java.util.Collection;
