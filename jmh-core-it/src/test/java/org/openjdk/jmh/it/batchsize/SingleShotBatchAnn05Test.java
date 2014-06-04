@@ -26,9 +26,9 @@ package org.openjdk.jmh.it.batchsize;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -83,7 +83,7 @@ public class SingleShotBatchAnn05Test {
         Assert.assertEquals((MEASUREMENT_ITERATIONS+WARMUP_ITERATIONS)+" iterations expected", (MEASUREMENT_ITERATIONS+WARMUP_ITERATIONS), iterationCount.get());
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = WARMUP_ITERATIONS, batchSize = WARMUP_BATCH)
     @Measurement(iterations = MEASUREMENT_ITERATIONS, batchSize = MEASUREMENT_BATCH)
     @BenchmarkMode(Mode.SingleShotTime)

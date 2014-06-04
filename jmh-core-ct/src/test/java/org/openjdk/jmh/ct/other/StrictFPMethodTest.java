@@ -26,14 +26,14 @@ package org.openjdk.jmh.ct.other;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.ct.CompileTest;
 
 @BenchmarkMode(Mode.All)
 public class StrictFPMethodTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public strictfp void test() {
         // intentionally blank
     }

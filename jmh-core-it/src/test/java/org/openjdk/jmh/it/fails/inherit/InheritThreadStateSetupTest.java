@@ -26,9 +26,9 @@ package org.openjdk.jmh.it.fails.inherit;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
@@ -50,7 +50,7 @@ public class InheritThreadStateSetupTest {
 
     public static class MyState extends InheritableThreadSetupState {}
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(1)

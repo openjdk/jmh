@@ -40,7 +40,7 @@ import java.util.Set;
 
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class GenerateMicroBenchmarkProcessor extends AbstractProcessor {
+public class BenchmarkProcessor extends AbstractProcessor {
 
     private final BenchmarkGenerator generator = new BenchmarkGenerator();
 

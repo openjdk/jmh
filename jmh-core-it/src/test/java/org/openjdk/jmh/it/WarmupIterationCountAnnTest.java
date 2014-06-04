@@ -26,9 +26,9 @@ package org.openjdk.jmh.it;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -63,7 +63,7 @@ public class WarmupIterationCountAnnTest {
         Assert.assertEquals("Four iterations expected", 4, count.get());
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.All)
     @Warmup(iterations = 3, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)

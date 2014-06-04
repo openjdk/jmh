@@ -26,7 +26,7 @@ package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -82,27 +82,27 @@ public class JMHSample_16_CompilerControl {
      * These method measures the calls performance.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void baseline() {
         // this method was intentionally left blank
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void blank() {
         target_blank();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void dontinline() {
         target_dontInline();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void inline() {
         target_inline();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void exclude() {
         target_exclude();
     }

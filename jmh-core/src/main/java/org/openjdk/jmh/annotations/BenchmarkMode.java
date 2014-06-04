@@ -35,9 +35,9 @@ import java.lang.annotation.Target;
  * would run. See {@link org.openjdk.jmh.annotations.Mode} for available
  * benchmark modes.</p>
  *
- * <p>This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * <p>This annotation may be put at {@link Benchmark}
  * method to have effect on that method only, or at the enclosing class instance
- * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * to have the effect over all {@link Benchmark} methods
  * in the class. This annotation may be overridden with the runtime options.</p>
  */
 @Inherited

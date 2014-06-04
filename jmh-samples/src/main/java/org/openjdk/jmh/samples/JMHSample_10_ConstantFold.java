@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -56,19 +56,19 @@ public class JMHSample_10_ConstantFold {
     // IDEs will say "Oh, you can convert this field to local variable". Don't. Trust. Them.
     private double x = Math.PI;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double baseline() {
         // simply return the value, this is a baseline
         return Math.PI;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double measureWrong() {
         // This is wrong: the source is predictable, and computation is foldable.
         return Math.log(Math.PI);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double measureRight() {
         // This is correct: the source is not predictable.
         return Math.log(x);

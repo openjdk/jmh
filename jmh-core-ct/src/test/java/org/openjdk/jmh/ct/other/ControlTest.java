@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.other;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -49,73 +49,73 @@ public class ControlTest {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("plain")
     public void plain_test1(Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("plain")
     public void plain_test2(Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("plain")
     public void plain_test3() {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("bench")
     public void bench_test1(BenchmarkState s, Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("bench")
     public void bench_test2(BenchmarkState s, Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("bench")
     public void bench_test3(BenchmarkState s) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("thread")
     public void thread_test1(ThreadState s, Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("thread")
     public void thread_test2(ThreadState s, Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("thread")
     public void thread_test3(ThreadState s) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("group")
     public void group_test1(GroupState s, Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("group")
     public void group_test2(GroupState s, Control cnt) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("group")
     public void group_test3(GroupState s) {
 

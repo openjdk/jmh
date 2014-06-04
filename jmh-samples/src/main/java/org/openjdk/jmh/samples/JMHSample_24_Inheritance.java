@@ -26,7 +26,7 @@ package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -68,7 +68,7 @@ public class JMHSample_24_Inheritance {
     public static abstract class AbstractBenchmark {
         public int x = 42;
 
-        @GenerateMicroBenchmark
+        @Benchmark
         @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
         @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
         public double bench() {

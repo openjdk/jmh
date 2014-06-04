@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -57,12 +57,12 @@ public class JMHSample_06_FixtureLevel {
         assert x > Math.PI : "Nothing changed?";
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureRight() {
         x++;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureWrong() {
         double x = 0;
         x++;

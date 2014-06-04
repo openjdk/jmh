@@ -26,7 +26,7 @@ package org.openjdk.jmh.it.bulkwarmup;
 
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -64,7 +64,7 @@ public class WarmupMode5_Test {
         recorded = false;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testBig(Control cnt) {
         if (!recorded) {
             recorded = true;
@@ -77,7 +77,7 @@ public class WarmupMode5_Test {
         Fixtures.work();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testSmall(Control cnt) {
         if (!recorded) {
             recorded = true;

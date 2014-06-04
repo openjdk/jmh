@@ -35,7 +35,7 @@ public enum Mode {
     /**
      * <p>Throughput: operations per unit of time.</p>
      *
-     * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * <p>Runs by continuously calling {@link Benchmark} methods,
      * counting the total throughput over all worker threads. This mode is time-based, and it will
      * run until the iteration time expires.</p>
      */
@@ -44,7 +44,7 @@ public enum Mode {
     /**
      * <p>Average time: average time per per operation.</p>
      *
-     * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * <p>Runs by continuously calling {@link Benchmark} methods,
      * counting the average time to call over all worker threads. This is the inverse of {@link Mode#Throughput},
      * but with different aggregation policy. This mode is time-based, and it will run until the iteration time
      * expires.</p>
@@ -54,7 +54,7 @@ public enum Mode {
     /**
      * <p>Sample time: samples the time for each operation.</p>
      *
-     * <p>Runs by continuously calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods,
+     * <p>Runs by continuously calling {@link Benchmark} methods,
      * and randomly samples the time needed for the call. This mode automatically adjusts the sampling
      * frequency, but may omit some pauses which missed the sampling measurement. This mode is time-based, and it will
      * run until the iteration time expires.</p>
@@ -64,10 +64,10 @@ public enum Mode {
     /**
      * <p>Single shot time: measures the time for a single operation.</p>
      *
-     * <p>Runs by calling {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} once and measuring its time.
+     * <p>Runs by calling {@link Benchmark} once and measuring its time.
      * This mode is useful to estimate the "cold" performance when you don't want to hide the warmup invocations, or
      * if you want to see the progress from call to call, or you want to record every single sample. This mode is
-     * work-based, and will run only for a single invocation of {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+     * work-based, and will run only for a single invocation of {@link Benchmark}
      * method.</p>
      *
      * Caveats for this mode include:

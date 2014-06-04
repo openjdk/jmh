@@ -25,10 +25,10 @@
 package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.AuxCounters;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
@@ -60,7 +60,7 @@ class BenchmarkGeneratorUtils {
     static {
         JMH_ANNOTATIONS = Arrays.asList(
                 AuxCounters.class, BenchmarkMode.class, CompilerControl.class, Fork.class,
-                GenerateMicroBenchmark.class, Group.class, GroupThreads.class, Measurement.class,
+                Benchmark.class, Group.class, GroupThreads.class, Measurement.class,
                 OperationsPerInvocation.class, OutputTimeUnit.class, Param.class, Setup.class,
                 State.class, TearDown.class, Threads.class, Warmup.class
         );

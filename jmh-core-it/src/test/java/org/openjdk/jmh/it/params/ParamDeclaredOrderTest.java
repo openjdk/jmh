@@ -27,7 +27,7 @@ package org.openjdk.jmh.it.params;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Param;
@@ -60,7 +60,7 @@ public class ParamDeclaredOrderTest {
         Assert.assertTrue("Running in different VM", prevV != 0);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     public void test() {

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -55,7 +55,7 @@ public class JMHSample_18_Control {
 
     public final AtomicBoolean flag = new AtomicBoolean();
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("pingpong")
     public void ping(Control cnt) {
         while (!cnt.stopMeasurement && !flag.compareAndSet(false, true)) {
@@ -63,7 +63,7 @@ public class JMHSample_18_Control {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("pingpong")
     public void pong(Control cnt) {
         while (!cnt.stopMeasurement && !flag.compareAndSet(true, false)) {

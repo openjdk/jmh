@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -54,18 +54,18 @@ public class JMHSample_08_DeadCode {
 
     private double x = Math.PI;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void baseline() {
         // do nothing, this is a baseline
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureWrong() {
         // This is wrong: result is not used, and the entire computation is optimized out.
         Math.log(x);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double measureRight() {
         // This is correct: the result is being used.
         return Math.log(x);

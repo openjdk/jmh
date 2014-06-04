@@ -26,9 +26,9 @@ package org.openjdk.jmh.it.fails;
 
 import junit.framework.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
@@ -49,7 +49,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @State(Scope.Group)
 public class FailingGroupBenchTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)

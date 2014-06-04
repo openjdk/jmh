@@ -25,8 +25,8 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.AuxCounters;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -78,7 +78,7 @@ public class JMHSample_23_AuxCounters {
      * calculations. Note how we reset the counters on each iteration.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measure(AdditionalCounters counters) {
         if (Math.random() < 0.1) {
             counters.case1++;

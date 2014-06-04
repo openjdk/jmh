@@ -24,13 +24,13 @@
  */
 package org.openjdk.jmh;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 
 import java.util.concurrent.TimeUnit;
 
 public class MyAntyBench {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void myTest() throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(1);
     }

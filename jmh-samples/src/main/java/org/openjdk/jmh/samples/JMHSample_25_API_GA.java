@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.results.Result;
@@ -55,7 +55,7 @@ public class JMHSample_25_API_GA {
 
     private int v;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int test() {
         return veryImportantCode(1000, v);
     }

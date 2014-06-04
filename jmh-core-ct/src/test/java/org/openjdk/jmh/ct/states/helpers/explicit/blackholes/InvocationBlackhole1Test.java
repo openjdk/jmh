@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.states.helpers.explicit.blackholes;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -41,7 +41,7 @@ public class InvocationBlackhole1Test {
         public void setup(Blackhole bh) {}
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test(S s) {
 
     }

@@ -26,9 +26,9 @@ package org.openjdk.jmh.it.fails.inherit;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
@@ -51,7 +51,7 @@ public class InheritGroupStateTearDownTest {
 
     public static class MyState extends InheritableGroupTearDownState {}
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(1)

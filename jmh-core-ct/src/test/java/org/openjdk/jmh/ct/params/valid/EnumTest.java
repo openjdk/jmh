@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.params.valid;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -38,7 +38,7 @@ public class EnumTest {
     @Param("VALUE_EXIST_1")
     public SampleEnum param;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test() {
 
     }

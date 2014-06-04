@@ -25,8 +25,8 @@
 package org.openjdk.jmh.ct.blackhole;
 
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -48,97 +48,97 @@ public class BlackholeTypesTest {
     public Object o;
     public Object[] os;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void baseline() {
         // do nothing
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public byte implicit_testByte() {
         return b;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public boolean implicit_testBoolean() {
         return bool;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public char implicit_testChar() {
         return c;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int implicit_testInt() {
         return i;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public long implicit_testLong() {
         return l;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public float implicit_testFloat() {
         return f;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double implicit_testDouble() {
         return d;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public Object implicit_testObject() {
         return o;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public Object[] implicit_testArray() {
         return os;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testByte(Blackhole bh) {
         bh.consume(b);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testBoolean(Blackhole bh) {
         bh.consume(bool);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testChar(Blackhole bh) {
         bh.consume(c);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testInt(Blackhole bh) {
         bh.consume(i);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testLong(Blackhole bh) {
         bh.consume(l);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testFloat(Blackhole bh) {
         bh.consume(f);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testDouble(Blackhole bh) {
         bh.consume(d);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testObject(Blackhole bh) {
         bh.consume(o);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void explicit_testArray(Blackhole bh) {
         bh.consume(os);
     }

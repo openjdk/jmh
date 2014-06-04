@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -71,13 +71,13 @@ public class JMHSample_30_Interrupts {
     }
 
     @Group("Q")
-    @GenerateMicroBenchmark
+    @Benchmark
     public Integer take() throws InterruptedException {
         return q.take();
     }
 
     @Group("Q")
-    @GenerateMicroBenchmark
+    @Benchmark
     public void put() throws InterruptedException {
         q.put(42);
     }

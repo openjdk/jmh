@@ -26,7 +26,7 @@ package org.openjdk.jmh.ct.exceptions;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -67,7 +67,7 @@ public class GroupStateExceptionSignaturesTest {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("T")
     public void test(MyState s) throws Exception {
     }

@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -61,7 +61,7 @@ public class IterationCountCmdTest {
         Assert.assertEquals("Single iteration expected", 1, count.get());
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.All)
     @Fork(1)
     public void test() {

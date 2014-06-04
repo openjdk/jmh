@@ -26,7 +26,7 @@ package org.openjdk.jmh.it.errors;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
@@ -44,17 +44,17 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 1, time = 10, timeUnit = TimeUnit.MILLISECONDS)
 public class EmbeddedErrorsTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test00_normal() throws InterruptedException {
         Thread.sleep(1);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test01_exceptional() {
         throw new IllegalStateException();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test02_normal() throws InterruptedException {
         Thread.sleep(1);
     }

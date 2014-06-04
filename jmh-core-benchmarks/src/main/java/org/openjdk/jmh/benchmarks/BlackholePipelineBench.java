@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.benchmarks;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -51,49 +51,49 @@ public class BlackholePipelineBench {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(1)
     public void test_Obj_1(Blackhole bh) {
         doTestObj(bh, 1);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(10)
     public void test_Obj_10(Blackhole bh) {
         doTestObj(bh, 10);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(100)
     public void test_Obj_100(Blackhole bh) {
         doTestObj(bh, 100);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(1000)
     public void test_Obj_1000(Blackhole bh) {
         doTestObj(bh, 1000);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(1)
     public void test_Int_1(Blackhole bh) {
         doTestInt(bh, 1);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(10)
     public void test_Int_10(Blackhole bh) {
         doTestInt(bh, 10);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(100)
     public void test_Int_100(Blackhole bh) {
         doTestInt(bh, 100);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @OperationsPerInvocation(1000)
     public void test_Int_1000(Blackhole bh) {
         doTestInt(bh, 1000);

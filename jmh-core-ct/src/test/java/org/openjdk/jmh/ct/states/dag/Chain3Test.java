@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.states.dag;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -51,7 +51,7 @@ public class Chain3Test {
         public void setup(B2 b2) {}
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test(B1 b) {
 
     }

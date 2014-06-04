@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -66,7 +66,7 @@ public class JMHSample_29_StatesDAG {
      * in helper method signatures. (Note that {@link org.openjdk.jmh.samples.JMHSample_28_BlackholeHelpers}
      * is just a special case of that.
      *
-     * Following the interface for @GenerateMicroBenchmark calls, all @Setups for
+     * Following the interface for @Benchmark calls, all @Setups for
      * referenced @State-s are fired before it becomes accessible to current @State.
      * Similarly, no @TearDown methods are fired for referenced @State before
      * current @State is done with it.
@@ -134,7 +134,7 @@ public class JMHSample_29_StatesDAG {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int test(Local local) {
         return local.cnt.inc();
     }

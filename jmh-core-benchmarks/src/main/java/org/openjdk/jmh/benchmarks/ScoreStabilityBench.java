@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.benchmarks;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -84,27 +84,27 @@ public class ScoreStabilityBench {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test_X(Sleep_X_State s) {
         Blackhole.consumeCPU(10000);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test_X1(Sleep_X1_State s) {
         Blackhole.consumeCPU(10000);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test_X10(Sleep_X10_State x) {
         Blackhole.consumeCPU(10000);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test_X100(Sleep_X100_State x) {
         Blackhole.consumeCPU(10000);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test_X500(Sleep_X500_State x) {
         Blackhole.consumeCPU(10000);
     }

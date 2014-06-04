@@ -25,8 +25,8 @@
 package org.openjdk.jmh.it.params;
 
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Param;
@@ -58,13 +58,13 @@ public class GroupStateParamSequenceTest {
         public String y;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("s")
     public void test1(MyState s) {
         Fixtures.work();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("s")
     public void test2(MyState s) {
         Fixtures.work();

@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
 /**
  * <p>Execution group.</p>
  *
- * <p>Multiple {@link GenerateMicroBenchmark} methods can be bound in the execution group
+ * <p>Multiple {@link Benchmark} methods can be bound in the execution group
  * to produce the asymmetric benchmark. The group tag is used as the generated benchmark
  * name. The result of each benchmark method in isolation is recorded as secondary result
  * named by the original method name.</p>

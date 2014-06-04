@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.states.helpers.explicit;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -42,7 +42,7 @@ public class PublicReturnTest {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test(S s) {
 
     }

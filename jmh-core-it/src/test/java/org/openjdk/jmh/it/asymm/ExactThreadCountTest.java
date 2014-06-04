@@ -26,9 +26,9 @@ package org.openjdk.jmh.it.asymm;
 
 import junit.framework.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
@@ -72,7 +72,7 @@ public class ExactThreadCountTest {
         Assert.assertEquals(2, test2threads.size());
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("test")
     @GroupThreads(1)
     public void test1() {
@@ -80,7 +80,7 @@ public class ExactThreadCountTest {
         Fixtures.work();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("test")
     @GroupThreads(2)
     public void test2() {

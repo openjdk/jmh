@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>GenerateMicroBenchmark annotates the benchmark method.</p>
+ * <p>Benchmark annotates the benchmark method.</p>
  *
  * <p>JMH will produce the generated benchmark code for this method during compilation,
  * register this method as the benchmark in the benchmark list, read out the default
@@ -42,10 +42,10 @@ import java.lang.annotation.Target;
  * look through
  * <a href="http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/">
  * JMH samples</a> for their canonical uses. As the rule of thumb, most annotations
- * may be placed either at the {@link GenerateMicroBenchmark} method, or at enclosing
+ * may be placed either at the {@link Benchmark} method, or at enclosing
  * class.</p>
  *
- * <p>{@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} demarcates the benchmark payload,
+ * <p>{@link Benchmark} demarcates the benchmark payload,
  * and JMH treats it specifically as the wrapper which contains the benchmark code. In order to
  * run the benchmark reliably, JMH enforces a few stringent properties for these wrapper methods,
  * including, but not limited to:</p>
@@ -59,7 +59,7 @@ import java.lang.annotation.Target;
  *     on the enclosing class.</li>
  * </ul>
  * <p>If you want to benchmark methods which break these properties, you have to write them
- * out specifically as the benchmark payload and call them from {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * out specifically as the benchmark payload and call them from {@link Benchmark}
  * method.</p>
  *
  * <p>Benchmark method may declare Exceptions and Throwables to throw. Any exception actually
@@ -67,6 +67,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GenerateMicroBenchmark {
+public @interface Benchmark {
 
 }

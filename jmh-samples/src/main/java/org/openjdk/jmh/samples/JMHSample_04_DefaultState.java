@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.Runner;
@@ -44,7 +44,7 @@ public class JMHSample_04_DefaultState {
 
     double x = Math.PI;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measure() {
         x++;
     }

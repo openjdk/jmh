@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.gmb;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
@@ -33,7 +33,7 @@ import org.openjdk.jmh.ct.CompileTest;
 @State(Scope.Benchmark)
 public class PublicSynchronizedStaticBenchmarkStateGMBTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public static synchronized void test() {
 
     }

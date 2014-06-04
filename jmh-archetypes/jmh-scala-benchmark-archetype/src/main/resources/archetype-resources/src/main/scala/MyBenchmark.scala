@@ -25,11 +25,11 @@
 
 package ${groupId}
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark
+import org.openjdk.jmh.annotations.Benchmark
 
 class MyBenchmark {
 
-  @GenerateMicroBenchmark
+  @Benchmark
   def testMethod(): Any = {
     // place your benchmark code here
   }

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.Runner;
@@ -69,7 +69,7 @@ public class JMHSample_03_States {
      * For this exercise, we have two methods.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureUnshared(ThreadState state) {
         // All benchmark threads will call in this method.
         //
@@ -79,7 +79,7 @@ public class JMHSample_03_States {
         state.x++;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureShared(BenchmarkState state) {
         // All benchmark threads will call in this method.
         //

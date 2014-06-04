@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.infra.Blackhole;
@@ -52,62 +52,62 @@ public class JMHSample_21_ConsumeCPU {
      * within the testing code, and propagating blackholes is tedious).
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0000() {
         Blackhole.consumeCPU(0);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0001() {
         Blackhole.consumeCPU(1);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0002() {
         Blackhole.consumeCPU(2);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0004() {
         Blackhole.consumeCPU(4);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0008() {
         Blackhole.consumeCPU(8);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0016() {
         Blackhole.consumeCPU(16);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0032() {
         Blackhole.consumeCPU(32);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0064() {
         Blackhole.consumeCPU(64);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0128() {
         Blackhole.consumeCPU(128);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0256() {
         Blackhole.consumeCPU(256);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_0512() {
         Blackhole.consumeCPU(512);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void consume_1024() {
         Blackhole.consumeCPU(1024);
     }

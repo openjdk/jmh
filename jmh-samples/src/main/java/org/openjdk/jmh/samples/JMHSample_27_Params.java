@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -62,7 +62,7 @@ public class JMHSample_27_Params {
     @Param({"0", "1", "2", "4", "8", "16", "32"})
     public int certainty;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public boolean bench() {
         return BigInteger.valueOf(arg).isProbablePrime(certainty);
     }

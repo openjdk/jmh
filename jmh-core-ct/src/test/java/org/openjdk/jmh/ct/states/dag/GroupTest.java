@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.states.dag;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -52,13 +52,13 @@ public class GroupTest {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("test")
     public void test1(L l) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("test")
     public void test2(L l) {
 

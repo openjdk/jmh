@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.states.dag;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -52,7 +52,7 @@ public class BasicTest {
     }
 
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test(L l) {
 
     }

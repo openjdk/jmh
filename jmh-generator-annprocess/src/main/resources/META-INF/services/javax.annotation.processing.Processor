@@ -21,4 +21,4 @@
 #    or visit www.oracle.com if you need additional information or have any
 #    questions.
 #
-org.openjdk.jmh.generators.GenerateMicroBenchmarkProcessor
+org.openjdk.jmh.generators.BenchmarkProcessor

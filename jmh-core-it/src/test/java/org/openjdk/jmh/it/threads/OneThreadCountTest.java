@@ -28,7 +28,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -59,7 +59,7 @@ public class OneThreadCountTest {
         Assert.assertEquals("amount of threads should be 1", threads.size(), 1);
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Warmup(iterations = 0)
     @Fork(1)
@@ -69,7 +69,7 @@ public class OneThreadCountTest {
         Fixtures.work();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Warmup(iterations = 0)
     @Fork(1)

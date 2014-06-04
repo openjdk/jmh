@@ -25,8 +25,8 @@
 package org.openjdk.jmh.ct.other;
 
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.ct.CompileTest;
 import org.openjdk.jmh.infra.Blackhole;
@@ -37,30 +37,30 @@ import org.openjdk.jmh.infra.Blackhole;
 @BenchmarkMode(Mode.All)
 public class BlackholeApiTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testNothing() {
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public Object testReturnObject() {
         return null;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int testReturnInt() {
         return 0;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testBH(Blackhole bh) {
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public Object testBH_ReturnObject(Blackhole bh) {
         return null;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int testBH_ReturnInt(Blackhole bh) {
         return 0;
     }

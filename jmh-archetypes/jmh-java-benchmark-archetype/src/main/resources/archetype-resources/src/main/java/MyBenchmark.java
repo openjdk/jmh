@@ -25,11 +25,11 @@
 
 package ${groupId};
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 
 public class MyBenchmark {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testMethod() {
         // place your benchmarked code here
     }

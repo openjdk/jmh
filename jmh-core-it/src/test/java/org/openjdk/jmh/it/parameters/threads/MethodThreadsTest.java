@@ -26,14 +26,14 @@ package org.openjdk.jmh.it.parameters.threads;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.it.parameters.Parameters;
 
 public class MethodThreadsTest {
 
     @Threads(10)
-    @GenerateMicroBenchmark
+    @Benchmark
     public void bench() {
         // do nothing
     }

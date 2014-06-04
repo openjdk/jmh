@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -55,7 +55,7 @@ public class FailingBenchmarkBenchSetupTest {
         Assert.fail();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1)
     @Fork(1)

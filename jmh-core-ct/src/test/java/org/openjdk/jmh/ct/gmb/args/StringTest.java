@@ -25,12 +25,12 @@
 package org.openjdk.jmh.ct.gmb.args;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.ct.CompileTest;
 
 public class StringTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test(String args) {
 
     }

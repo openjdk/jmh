@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -58,7 +58,7 @@ public class JMHSample_09_Blackholes {
      * Baseline measurement: how much single Math.log costs.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double baseline() {
         return Math.log(x1);
     }
@@ -68,7 +68,7 @@ public class JMHSample_09_Blackholes {
      * is redundant and optimized out.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double measureWrong() {
         Math.log(x1);
         return Math.log(x2);
@@ -82,7 +82,7 @@ public class JMHSample_09_Blackholes {
      * the results does not offset the results much.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double measureRight_1() {
         return Math.log(x1) + Math.log(x2);
     }
@@ -94,7 +94,7 @@ public class JMHSample_09_Blackholes {
      * (Background: Blackhole is just another @State object, bundled with JMH).
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureRight_2(Blackhole bh) {
         bh.consume(Math.log(x1));
         bh.consume(Math.log(x2));

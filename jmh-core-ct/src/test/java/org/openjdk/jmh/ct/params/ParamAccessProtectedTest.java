@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct.params;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -85,7 +85,7 @@ public class ParamAccessProtectedTest {
     @Param("null")
     protected String param_String;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test() {
 
     }

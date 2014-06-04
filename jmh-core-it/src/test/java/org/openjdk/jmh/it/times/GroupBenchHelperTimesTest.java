@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
@@ -146,7 +146,7 @@ public class GroupBenchHelperTimesTest {
 //        Assert.assertEquals("TearDown6 = invocation count", countInvocations.get(), countTearDownInvocation2.get());
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)

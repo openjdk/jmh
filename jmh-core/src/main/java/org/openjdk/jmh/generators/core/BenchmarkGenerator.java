@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.generators.core;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
@@ -187,7 +187,7 @@ public class BenchmarkGenerator {
                 if (currentClass.getQualifiedName().contains("generated")) continue;
                 if (currentClass.isAbstract()) continue;
                 for (MethodInfo mi : walk.getMethods()) {
-                    GenerateMicroBenchmark ann = mi.getAnnotation(GenerateMicroBenchmark.class);
+                    Benchmark ann = mi.getAnnotation(Benchmark.class);
                     if (ann != null) {
                         result.put(currentClass, mi);
                     }
@@ -315,24 +315,24 @@ public class BenchmarkGenerator {
         // check modifiers
         for (MethodInfo m : methods) {
             if (!m.isPublic()) {
-                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName() +
+                throw new GenerationException("@" + Benchmark.class.getSimpleName() +
                         " method should be public.", m);
             }
 
             if (m.isAbstract()) {
-                throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                throw new GenerationException("@" + Benchmark.class.getSimpleName()
                         + " method can not be abstract.", m);
             }
 
             if (m.isSynchronized()) {
                 State annState = BenchmarkGeneratorUtils.getAnnSuper(m, State.class);
                 if (annState == null) {
-                    throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                    throw new GenerationException("@" + Benchmark.class.getSimpleName()
                             + " method can only be synchronized if the enclosing class is annotated with "
                             + "@" + State.class.getSimpleName() + ".", m);
                 } else {
                     if (m.isStatic() && annState.value() != Scope.Benchmark) {
-                        throw new GenerationException("@" + GenerateMicroBenchmark.class.getSimpleName()
+                        throw new GenerationException("@" + Benchmark.class.getSimpleName()
                                 + " method can only be static and synchronized if the enclosing class is annotated with "
                                 + "@" + State.class.getSimpleName() + "(" + Scope.class.getSimpleName() + "." + Scope.Benchmark + ").", m);
                     }

@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * want to measure the performance of a single operation:</p>
  *
  * <blockquote><pre>
- * &#64;GenerateMicroBenchmark
+ * &#64;Benchmark
  * &#64;OperationsPerInvocation(10)
  * public void test() {
  *      for (int i = 0; i &lt; 10; i++) {
@@ -47,9 +47,9 @@ import java.lang.annotation.Target;
  * }
  * </pre></blockquote>
  *
- * <p>This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * <p>This annotation may be put at {@link Benchmark}
  * method to have effect on that method only, or at the enclosing class instance
- * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * to have the effect over all {@link Benchmark} methods
  * in the class.</p>
  */
 @Inherited
@@ -58,7 +58,7 @@ import java.lang.annotation.Target;
 public @interface OperationsPerInvocation {
 
     /**
-     * @return Number of operations per single {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} call.
+     * @return Number of operations per single {@link Benchmark} call.
      */
     int value() default 1;
 

@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.benchmarks;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -44,12 +44,12 @@ public class NanoTimerBench {
 
     private long last;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public long latency() {
         return System.nanoTime();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public long granularity() {
         long lst = last;
         long cur;

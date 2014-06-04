@@ -25,12 +25,12 @@
 package org.openjdk.jmh.ct.gmb;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.ct.CompileTest;
 
 public abstract class PublicAbstractGMBTest {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public abstract void test();
 
     @Test

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -81,7 +81,7 @@ public class JMHSample_05_StateFixtures {
      * we are always guaranteed to have at least one benchmark call.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureRight() {
         x++;
     }
@@ -92,7 +92,7 @@ public class JMHSample_05_StateFixtures {
      * not pass the check, and JMH will fail the run.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void measureWrong() {
         double x = 0;
         x++;

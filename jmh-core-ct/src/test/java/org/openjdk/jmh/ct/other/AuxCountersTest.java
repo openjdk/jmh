@@ -26,7 +26,7 @@ package org.openjdk.jmh.ct.other;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.AuxCounters;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -50,24 +50,24 @@ public class AuxCountersTest {
         public int z;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testThread(ThreadState s) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("test_gt")
     public void testGroupThread_1(GroupState gs, ThreadState ts) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("test_gt")
     public void testGroupThread_2(GroupState gs, ThreadState ts) {
 
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void testBenchThread(BenchmarkState bs, ThreadState ts) {
 
     }

@@ -34,9 +34,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * <p>OutputTimeUnit provides the default time unit to report the results in.</p>
  *
- * <p>This annotation may be put at {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * <p>This annotation may be put at {@link Benchmark}
  * method to have effect on that method only, or at the enclosing class instance
- * to have the effect over all {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark} methods
+ * to have the effect over all {@link Benchmark} methods
  * in the class. This annotation may be overridden with the runtime options.</p>
  */
 @Inherited

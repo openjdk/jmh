@@ -26,9 +26,9 @@ package org.openjdk.jmh.it.fork;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 @Fork(jvmArgsAppend = "-DappendedUp", jvmArgsPrepend = "-DprependedUp")
 public class ForkedJvmAppendPrependArgs2_Test {
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgs = "-Dmiddle", jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
@@ -57,7 +57,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("prependedUp"));
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsAppend = "-Dappended", jvmArgsPrepend = "-Dprepended")
@@ -70,7 +70,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("prependedUp"));
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsPrepend = "-Dprepended")
@@ -82,7 +82,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("appendedUp"));
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(jvmArgsAppend = "-Dappended")
@@ -95,7 +95,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("prependedUp"));
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork

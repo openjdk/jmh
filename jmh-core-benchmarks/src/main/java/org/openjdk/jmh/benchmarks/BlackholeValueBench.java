@@ -25,7 +25,7 @@
 package org.openjdk.jmh.benchmarks;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -47,12 +47,12 @@ public class BlackholeValueBench {
     private boolean x1 = true;
     private boolean x2 = false;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public boolean test1() {
         return x1;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public boolean test2() {
         return x2;
     }

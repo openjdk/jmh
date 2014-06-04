@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Mode;
@@ -77,14 +77,14 @@ public class JMHSample_15_Asymmetric {
         counter = new AtomicInteger();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("g")
     @GroupThreads(3)
     public int inc() {
         return counter.incrementAndGet();
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("g")
     @GroupThreads(1)
     public int get() {

@@ -26,8 +26,8 @@ package org.openjdk.jmh.it.ccontrol;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
@@ -37,7 +37,7 @@ public class CompilerControlDontInlineTest {
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     void sampleMethod() {}
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void dummyTest() {
         Fixtures.work();

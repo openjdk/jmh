@@ -27,7 +27,7 @@ package org.openjdk.jmh.it.params;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -59,7 +59,7 @@ public class MultipleParamTest {
     @Param({"7", "8", "9"})
     public int z;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test() {
         Fixtures.work();
     }

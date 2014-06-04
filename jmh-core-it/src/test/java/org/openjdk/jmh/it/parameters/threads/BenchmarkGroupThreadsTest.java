@@ -26,7 +26,7 @@ package org.openjdk.jmh.it.parameters.threads;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.it.parameters.Parameters;
@@ -35,13 +35,13 @@ import org.openjdk.jmh.it.parameters.Parameters;
 public class BenchmarkGroupThreadsTest {
 
     @Group("a")
-    @GenerateMicroBenchmark
+    @Benchmark
     public void bench1() {
         // do nothing
     }
 
     @Group("a")
-    @GenerateMicroBenchmark
+    @Benchmark
     public void bench2() {
         // do nothing
     }

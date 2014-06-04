@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.runner.Runner;
@@ -60,7 +60,7 @@ public class JMHSample_02_BenchmarkModes {
      * although you can use the default.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void measureThroughput() throws InterruptedException {
@@ -73,7 +73,7 @@ public class JMHSample_02_BenchmarkModes {
      * There are workloads where measuring times is more convenient though.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureAvgTime() throws InterruptedException {
@@ -90,7 +90,7 @@ public class JMHSample_02_BenchmarkModes {
      * JMH also tries to auto-adjust sampling frequency: if the method
      * is long enough, you will end up capturing all the samples.
      */
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureSamples() throws InterruptedException {
@@ -103,7 +103,7 @@ public class JMHSample_02_BenchmarkModes {
      * do not want to call the benchmark method continuously.
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.SingleShotTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureSingleShot() throws InterruptedException {
@@ -115,7 +115,7 @@ public class JMHSample_02_BenchmarkModes {
      * above can be replaced with just a single test like this:
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime, Mode.SingleShotTime})
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureMultiple() throws InterruptedException {
@@ -126,7 +126,7 @@ public class JMHSample_02_BenchmarkModes {
      * Or even...
      */
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @BenchmarkMode(Mode.All)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void measureAll() throws InterruptedException {

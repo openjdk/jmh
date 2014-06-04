@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * The {@link org.openjdk.jmh.annotations.Scope} of state object defines to which extent
  * it is shared among the worker threads.</p>
  *
- * <p>State objects are usually injected into {@link org.openjdk.jmh.annotations.GenerateMicroBenchmark}
+ * <p>State objects are usually injected into {@link Benchmark}
  * methods as arguments, and JMH takes care of their instantiation and sharing. State objects
  * may also be injected into {@link org.openjdk.jmh.annotations.Setup} and {@link org.openjdk.jmh.annotations.TearDown}
  * methods of other {@link org.openjdk.jmh.annotations.State} objects to get staged initialization.</p>

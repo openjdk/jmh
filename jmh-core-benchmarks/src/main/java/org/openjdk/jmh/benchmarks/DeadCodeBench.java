@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.benchmarks;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -41,17 +41,17 @@ public class DeadCodeBench {
     public int x = 1;
     public int y = 2;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void base() {
         //
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int constant() {
         return 3;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public int payload() {
         return x + y;
     }

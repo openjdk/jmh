@@ -1,10 +1,10 @@
 package ${groupId}
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark
+import org.openjdk.jmh.annotations.Benchmark
 
 open class MyBenchmark {
 
-    [GenerateMicroBenchmark]
+    [Benchmark]
     fun testMethod() {
         // Put your benchmark code here
     }

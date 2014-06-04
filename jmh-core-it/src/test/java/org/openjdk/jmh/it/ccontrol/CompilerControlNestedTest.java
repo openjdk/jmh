@@ -27,7 +27,7 @@ package org.openjdk.jmh.it.ccontrol;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
@@ -45,7 +45,7 @@ public class CompilerControlNestedTest {
         void sampleMethod() {}
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void dummyTest() {
         Fixtures.work();
     }

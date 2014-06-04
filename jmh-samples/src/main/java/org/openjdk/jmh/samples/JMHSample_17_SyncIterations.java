@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -47,7 +47,7 @@ public class JMHSample_17_SyncIterations {
 
     private double src;
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public double test() {
         double s = src;
         for (int i = 0; i < 1000; i++) {

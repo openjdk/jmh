@@ -25,8 +25,8 @@
 package org.openjdk.jmh.ct.exceptions;
 
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -66,7 +66,7 @@ public class BenchmarkStateExceptionSignaturesTest {
         }
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     public void test(MyState s) throws Exception {
     }
 

@@ -25,7 +25,7 @@
 package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -65,7 +65,7 @@ public class JMHSample_26_BatchSize {
 
     List<String> list = new LinkedList<String>();
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 5, time = 1)
     @Measurement(iterations = 5, time = 1)
     @BenchmarkMode(Mode.AverageTime)
@@ -74,7 +74,7 @@ public class JMHSample_26_BatchSize {
         return list;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 5, time = 5)
     @Measurement(iterations = 5, time = 5)
     @BenchmarkMode(Mode.AverageTime)
@@ -86,7 +86,7 @@ public class JMHSample_26_BatchSize {
     /*
      * This is what you do with JMH.
      */
-    @GenerateMicroBenchmark
+    @Benchmark
     @Warmup(iterations = 5, batchSize = 5000)
     @Measurement(iterations = 5, batchSize = 5000)
     @BenchmarkMode(Mode.SingleShotTime)

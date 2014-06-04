@@ -26,7 +26,7 @@ package org.openjdk.jmh.samples;
 
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -78,13 +78,13 @@ public class JMHSample_22_FalseSharing {
         int writeOnly;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("baseline")
     public int reader(StateBaseline s) {
         return s.readOnly;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("baseline")
     public void writer(StateBaseline s) {
         s.writeOnly++;
@@ -108,13 +108,13 @@ public class JMHSample_22_FalseSharing {
         int q11, q12, q13, q14, q15, q16, q17, q18;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("padded")
     public int reader(StatePadded s) {
         return s.readOnly;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("padded")
     public void writer(StatePadded s) {
         s.writeOnly++;
@@ -151,13 +151,13 @@ public class JMHSample_22_FalseSharing {
     public static class StateHierarchy extends StateHierarchy_4 {
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("hierarchy")
     public int reader(StateHierarchy s) {
         return s.readOnly;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("hierarchy")
     public void writer(StateHierarchy s) {
         s.writeOnly++;
@@ -176,13 +176,13 @@ public class JMHSample_22_FalseSharing {
         int[] arr = new int[128];
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("sparse")
     public int reader(StateArray s) {
         return s.arr[0];
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("sparse")
     public void writer(StateArray s) {
         s.arr[64]++;
@@ -204,13 +204,13 @@ public class JMHSample_22_FalseSharing {
         int writeOnly;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("contended")
     public int reader(StateContended s) {
         return s.readOnly;
     }
 
-    @GenerateMicroBenchmark
+    @Benchmark
     @Group("contended")
     public void writer(StateContended s) {
         s.writeOnly++;
