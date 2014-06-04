@@ -53,7 +53,7 @@ class BenchmarkHandlers {
                     }
                     method = m;
                 } else {
-                    throw new IllegalArgumentException("MicroBenchmark parameters does not match the signature contract.");
+                    throw new IllegalArgumentException("Benchmark parameters do not match the signature contract.");
                 }
             }
         }
@@ -63,12 +63,12 @@ class BenchmarkHandlers {
         return method;
     }
 
-    public static BenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord microbenchmark, Class<?> clazz, Method method, BenchmarkParams executionParams, Options options) {
-        return new LoopBenchmarkHandler(out, microbenchmark, clazz, method, options, executionParams);
+    public static BenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord benchmark, Class<?> clazz, Method method, BenchmarkParams executionParams, Options options) {
+        return new LoopBenchmarkHandler(out, benchmark, clazz, method, options, executionParams);
     }
 
     /**
-     * checks if method signature is valid microbenchmark signature,
+     * checks if method signature is valid benchmark signature,
      * besited checks if method signature corresponds to benchmark type.
      * @param m
      * @return

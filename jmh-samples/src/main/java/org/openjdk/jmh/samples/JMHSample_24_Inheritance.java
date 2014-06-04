@@ -106,7 +106,7 @@ public class JMHSample_24_Inheritance {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_24.*"
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_24.*"
      *
      * b) Via the Java API:
      */

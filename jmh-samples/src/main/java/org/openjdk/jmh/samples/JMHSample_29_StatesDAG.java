@@ -146,7 +146,7 @@ public class JMHSample_29_StatesDAG {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_29.*"
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_29.*"
      *
      * b) Via the Java API:
      */

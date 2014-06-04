@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class JMHSample_02_BenchmarkModes {
 
     /*
-     * JMH generates lots of synthetic code for the microbenchmarks for
+     * JMH generates lots of synthetic code for the benchmarks for
      * you during the compilation. JMH can measure the methods in lots
      * of modes, and it will generate all the needed code at once.
      * Users may select the default benchmark mode with the special
@@ -143,7 +143,7 @@ public class JMHSample_02_BenchmarkModes {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_02.*" -wi 5 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_02.*" -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:

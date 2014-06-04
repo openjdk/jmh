@@ -96,7 +96,7 @@ public class JMHSample_17_SyncIterations {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_17.*" \
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_17.*" \
      *        -i 20 -wi 1 -f 1 -t ${CPU*16} -si {true|false}
      *    (we requested 1 warmup iterations, 20 iterations, single fork,
      *     lots of threads, and changeable "synchronize iterations" option)

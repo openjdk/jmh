@@ -135,7 +135,7 @@
   <Match>
     <Bug pattern="DE_MIGHT_IGNORE"/>
     <Not>
-       <Class name="~.*LoopMicroBenchmarkHandler.*BenchmarkTask" />
+       <Class name="~.*LoopBenchmarkHandler.*BenchmarkTask" />
     </Not>
   </Match>
   <Match>

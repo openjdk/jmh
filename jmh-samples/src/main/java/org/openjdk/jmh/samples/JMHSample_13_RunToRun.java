@@ -102,7 +102,7 @@ public class JMHSample_13_RunToRun {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_13.*" -wi 0 -i 3
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_13.*" -wi 0 -i 3
      *    (we requested no warmup, 3 measurement iterations)
      *
      * b) Via the Java API:

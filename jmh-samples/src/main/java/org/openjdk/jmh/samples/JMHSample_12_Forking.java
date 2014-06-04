@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class JMHSample_12_Forking {
 
     /*
-     * JVMs are notoriously good at profile-guided optimizations. This is bad for microbenchmarks,
+     * JVMs are notoriously good at profile-guided optimizations. This is bad for benchmarks,
      * because different tests can mix their profiles together, and then render the "uniformly bad"
      * code for every test. Forking each test can help to evade this issue.
      *
@@ -166,7 +166,7 @@ public class JMHSample_12_Forking {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_12.*" -wi 5 -i 5
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_12.*" -wi 5 -i 5
      *    (we requested 5 warmup/measurement iterations)
      *
      * b) Via the Java API:

@@ -225,7 +225,7 @@ public class JMHSample_22_FalseSharing {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_22.*" -t $CPU
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_22.*" -t $CPU
      *
      * b) Via the Java API:
      */

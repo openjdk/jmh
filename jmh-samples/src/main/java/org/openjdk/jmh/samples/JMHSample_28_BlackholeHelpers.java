@@ -126,7 +126,7 @@ public class JMHSample_28_BlackholeHelpers {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_28.*"
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_28.*"
      *
      * b) Via the Java API:
      */

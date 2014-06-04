@@ -92,13 +92,13 @@ questions.
                 <version>2.0</version>
                 <executions>
                     <execution>
-                        <id>microbenchmarks</id>
+                        <id>benchmarks</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>microbenchmarks</finalName>
+                            <finalName>benchmarks</finalName>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">

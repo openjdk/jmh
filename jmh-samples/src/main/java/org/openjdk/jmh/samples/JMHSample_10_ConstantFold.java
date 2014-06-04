@@ -84,7 +84,7 @@ public class JMHSample_10_ConstantFold {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_10.*" -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_10.*" -i 5 -f 1
      *    (we requested 5 iterations, single fork)
      *
      * b) Via the Java API:

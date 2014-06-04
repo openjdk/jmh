@@ -122,7 +122,7 @@ public class JMHSample_21_ConsumeCPU {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_21.*" -w 1 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_21.*" -w 1 -i 5 -f 1
      *
      * b) Via the Java API:
      */

@@ -118,7 +118,7 @@ public class JMHSample_16_CompilerControl {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_16.*" -wi 1 -i 3 -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_16.*" -wi 1 -i 3 -f 1
      *    (we requested 1 warmup iterations, 3 iterations, single fork)
      *
      * b) Via the Java API:

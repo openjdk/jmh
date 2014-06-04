@@ -94,7 +94,7 @@ public class JMHSample_23_AuxCounters {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_23.*"
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_23.*"
      *
      * b) Via the Java API:
      */

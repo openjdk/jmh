@@ -87,7 +87,7 @@ public class ClassUtils {
             URLClassLoader loader = new URLClassLoader(classPathUrl);
             return loader.loadClass(className);
         } catch (ClassNotFoundException ex) {
-            throw new IllegalArgumentException("MicroBenchmark does not match a class", ex);
+            throw new IllegalArgumentException("Benchmark does not match a class", ex);
         }
     }
 

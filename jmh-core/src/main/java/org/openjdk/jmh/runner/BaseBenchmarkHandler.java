@@ -42,14 +42,14 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Base class for all microbenchmarks handlers.
+ * Base class for all benchmarks handlers.
  */
 abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     /**
      * Name of micro benchmark
      */
-    protected final BenchmarkRecord microbenchmark;
+    protected final BenchmarkRecord benchmark;
 
     /**
      * Thread-pool for threads executing the benchmark tasks
@@ -65,8 +65,8 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     private final List<InternalProfiler> registeredProfilers;
 
-    public BaseBenchmarkHandler(OutputFormat out, BenchmarkRecord microbenchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
-        this.microbenchmark = microbenchmark;
+    public BaseBenchmarkHandler(OutputFormat out, BenchmarkRecord benchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
+        this.benchmark = benchmark;
         this.registeredProfilers = createProfilers(options);
         this.instances = new ThreadLocal<Object>() {
             @Override
@@ -84,7 +84,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         this.timeUnit = options.getTimeUnit().orElse(null);
         this.opsPerInvocation = options.getOperationsPerInvocation().orElse(null);
         try {
-            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), microbenchmark.getUsername());
+            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), benchmark.getUsername());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -199,7 +199,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     @Override
     public BenchmarkRecord getBenchmark() {
-        return microbenchmark;
+        return benchmark;
     }
 
     @Override

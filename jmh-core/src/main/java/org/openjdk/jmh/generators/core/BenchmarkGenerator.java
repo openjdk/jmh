@@ -165,7 +165,7 @@ public class BenchmarkGenerator {
 
             writer.close();
         } catch (IOException ex) {
-            destination.printError("Error writing MicroBenchmark list", ex);
+            destination.printError("Error writing benchmark list", ex);
         }
     }
 
@@ -203,7 +203,7 @@ public class BenchmarkGenerator {
      */
     private void validateBenchmark(ClassInfo clazz, Collection<MethodInfo> methods) {
         if (clazz.getPackageName().isEmpty()) {
-            throw new GenerationException("Microbenchmark should have package other than default.", clazz);
+            throw new GenerationException("Benchmark class should have package other than default.", clazz);
         }
 
         if (clazz.isFinal()) {

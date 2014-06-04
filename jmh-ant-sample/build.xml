@@ -57,8 +57,8 @@ questions.
         The workflow is as follows:
           - Compile the benchmarks with JMH and JMH Annotation processor in classpath.
               * Annotation processors will run and generate synthetic code.
-              * Annotation processors will create the list of discovered microbenchmarks.
-          - Pack the classes, generated code, microbenchmark lists in a JAR
+              * Annotation processors will create the list of discovered benchmarks.
+          - Pack the classes, generated code, benchmark lists in a JAR
               * Bring the dependencies along in the JAR; Annotation processor is not
                 required in final JAR
               * (You might be able to run JMH without the self-contained JAR,
@@ -74,7 +74,7 @@ questions.
         <delete dir="${dist} "/>
         <mkdir dir="${dist}"/>
 
-        <jar jarfile="${dist}/microbenchmarks.jar" basedir="${build}">
+        <jar jarfile="${dist}/benchmarks.jar" basedir="${build}">
             <manifest>
                 <attribute name="Main-Class" value="org.openjdk.jmh.Main"/>
             </manifest>

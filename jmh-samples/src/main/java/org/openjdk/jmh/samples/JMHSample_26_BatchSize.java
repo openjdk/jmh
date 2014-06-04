@@ -114,7 +114,7 @@ public class JMHSample_26_BatchSize {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_26.*" -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_26.*" -f 1
      *
      * b) Via the Java API:
      */

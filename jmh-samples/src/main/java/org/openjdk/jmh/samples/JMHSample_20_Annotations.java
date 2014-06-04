@@ -49,7 +49,7 @@ public class JMHSample_20_Annotations {
      * In addition to all the command line options usable at run time,
      * we have the annotations which can provide the reasonable defaults
      * for the some of the benchmarks. This is very useful when you are
-     * dealing with lots of microbenchmarks, and some of them require
+     * dealing with lots of benchmarks, and some of them require
      * special treatment.
      *
      * Annotation can also be placed on class, to have the effect over
@@ -76,7 +76,7 @@ public class JMHSample_20_Annotations {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_20.*"
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_20.*"
      *
      * b) Via the Java API:
      */

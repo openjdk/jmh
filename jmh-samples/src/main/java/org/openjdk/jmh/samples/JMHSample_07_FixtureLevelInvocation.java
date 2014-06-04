@@ -154,7 +154,7 @@ public class JMHSample_07_FixtureLevelInvocation {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_07.*" -wi 5 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_07.*" -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      */
 

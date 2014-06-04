@@ -33,7 +33,7 @@ import java.io.StringWriter;
 import java.util.Collection;
 
 /**
- * Base class for all types of results that can be returned by a microbenchmark.
+ * Base class for all types of results that can be returned by a benchmark.
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
 

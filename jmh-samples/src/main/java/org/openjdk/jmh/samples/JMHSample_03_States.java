@@ -100,7 +100,7 @@ public class JMHSample_03_States {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/microbenchmarks.jar ".*JMHSample_03.*" -wi 5 -i 5 -t 4 -f 1
+     *    $ java -jar target/benchmarks.jar ".*JMHSample_03.*" -wi 5 -i 5 -t 4 -f 1
      *    (we requested 5 measurement/warmup iterations, with 4 threads, single fork)
      *
      * b) Via the Java API:
