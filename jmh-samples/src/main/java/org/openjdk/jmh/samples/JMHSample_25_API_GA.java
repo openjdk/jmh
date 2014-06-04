@@ -27,14 +27,14 @@ package org.openjdk.jmh.samples;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.results.Result;
-import org.openjdk.jmh.infra.results.RunResult;
+import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.ArrayList;
 import java.util.Collections;

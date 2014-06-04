@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
-import org.openjdk.jmh.infra.results.Aggregator;
-import org.openjdk.jmh.infra.results.Result;
+import org.openjdk.jmh.results.Aggregator;
+import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.util.ListStatistics;
 
 import java.util.Collection;

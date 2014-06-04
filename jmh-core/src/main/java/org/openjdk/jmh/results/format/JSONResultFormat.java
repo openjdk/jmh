@@ -22,11 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.results;
+package org.openjdk.jmh.results.format;
 
-import org.openjdk.jmh.infra.results.BenchResult;
-import org.openjdk.jmh.infra.results.Result;
-import org.openjdk.jmh.infra.results.RunResult;
+import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.Statistics;

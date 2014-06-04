@@ -25,6 +25,9 @@
 package org.openjdk.jmh.infra.results;
 
 import org.junit.Test;
+import org.openjdk.jmh.results.AverageTimeResult;
+import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.ResultRole;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;

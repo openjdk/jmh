@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.SampleBuffer;
@@ -112,10 +112,10 @@ public class SampleTimeResult extends Result {
                 tu = r.outputTimeUnit;
             }
             return new SampleTimeResult(
-                    Result.aggregateRoles(results),
-                    Result.aggregateLabels(results),
+                    aggregateRoles(results),
+                    aggregateLabels(results),
                     buffer,
-                    Result.aggregateUnits(results),
+                    aggregateUnits(results),
                     tu
             );
         }

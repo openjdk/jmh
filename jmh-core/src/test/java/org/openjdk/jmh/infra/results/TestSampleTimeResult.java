@@ -25,6 +25,9 @@
 package org.openjdk.jmh.infra.results;
 
 import org.junit.Test;
+import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.results.SampleTimeResult;
 import org.openjdk.jmh.util.SampleBuffer;
 
 import java.util.Arrays;

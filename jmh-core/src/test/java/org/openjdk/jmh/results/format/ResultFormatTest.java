@@ -22,20 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.results;
+package org.openjdk.jmh.results.format;
 
 import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.infra.results.BenchResult;
-import org.openjdk.jmh.infra.results.IterationResult;
-import org.openjdk.jmh.infra.results.ResultRole;
-import org.openjdk.jmh.infra.results.RunResult;
-import org.openjdk.jmh.infra.results.ThroughputResult;
+import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.IterationResult;
+import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkRecord;
-import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.BufferedReader;
@@ -99,7 +99,7 @@ public class ResultFormatTest {
 
     private void compare(String actualFile, String goldenFile) throws IOException {
         BufferedReader actualReader = new BufferedReader(new FileReader(actualFile));
-        BufferedReader goldenReader = new BufferedReader(new InputStreamReader(ResultFormatTest.class.getResourceAsStream("/org/openjdk/jmh/output/results/" + goldenFile)));
+        BufferedReader goldenReader = new BufferedReader(new InputStreamReader(ResultFormatTest.class.getResourceAsStream("/org/openjdk/jmh/results/format/" + goldenFile)));
         while (true) {
             String goldenLine = goldenReader.readLine();
             String actualLine = actualReader.readLine();

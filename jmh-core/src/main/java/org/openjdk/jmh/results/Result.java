@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.util.ListStatistics;
 import org.openjdk.jmh.util.Statistics;

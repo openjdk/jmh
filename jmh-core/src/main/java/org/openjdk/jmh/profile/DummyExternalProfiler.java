@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.profile;
 
-import org.openjdk.jmh.infra.results.AggregationPolicy;
-import org.openjdk.jmh.infra.results.Aggregator;
-import org.openjdk.jmh.infra.results.Result;
-import org.openjdk.jmh.infra.results.ResultRole;
+import org.openjdk.jmh.results.AggregationPolicy;
+import org.openjdk.jmh.results.Aggregator;
+import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;
 
 import java.io.File;

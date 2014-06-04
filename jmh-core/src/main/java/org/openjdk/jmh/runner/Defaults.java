@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.options.WarmupMode;
-import org.openjdk.jmh.runner.options.TimeValue;
 
 /**
  * JMH global defaults: these are used when no other values are available.
@@ -105,7 +105,7 @@ public class Defaults {
     public static final boolean DO_GC = false;
 
     /**
-     * The default {@link org.openjdk.jmh.output.results.ResultFormatType} to use.
+     * The default {@link org.openjdk.jmh.results.format.ResultFormatType} to use.
      */
     public static final ResultFormatType RESULT_FORMAT = ResultFormatType.NONE;
 

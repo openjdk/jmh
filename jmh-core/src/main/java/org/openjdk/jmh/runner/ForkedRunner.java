@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.infra.results.BenchResult;
+import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;

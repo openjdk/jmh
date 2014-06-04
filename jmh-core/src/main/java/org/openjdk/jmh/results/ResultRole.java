@@ -22,14 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.results;
+package org.openjdk.jmh.results;
 
-public enum ResultFormatType {
+public enum ResultRole {
+    PRIMARY,
+    SECONDARY
+    ;
 
-    NONE,
-    TEXT,
-    CSV,
-    SCSV,
-    JSON,
+    public boolean isPrimary() {
+        return this == PRIMARY;
+    }
+
+    public boolean isSecondary() {
+        return this == SECONDARY;
+    }
 
 }

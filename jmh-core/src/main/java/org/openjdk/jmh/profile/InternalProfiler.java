@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
-import org.openjdk.jmh.infra.results.Result;
+import org.openjdk.jmh.results.Result;
 
 import java.util.Collection;
 

@@ -22,24 +22,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results.format;
 
-import java.util.Collection;
+public enum ResultFormatType {
 
-/**
- * Aggregator composes multiple results into one.
- *
- * It is assumed the collection has the results of specified type.
- * This class is generic to save some of the unchecked casts in the code.
- *
- * @param <R> accepted result type
- */
-public interface Aggregator<R extends Result> {
+    NONE,
+    TEXT,
+    CSV,
+    SCSV,
+    JSON,
 
-    /**
-     * Aggregate the results.
-     * @param results results to aggregate
-     * @return aggregated result; may throw exceptions on validation errors
-     */
-    Result aggregate(Collection<R> results);
 }

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.ListStatistics;
@@ -72,10 +72,10 @@ public class SingleShotResult extends Result {
                 stat.addValue(r.getScore());
             }
             return new SingleShotResult(
-                    Result.aggregateRoles(results),
-                    Result.aggregateLabels(results),
+                    aggregateRoles(results),
+                    aggregateLabels(results),
                     stat,
-                    Result.aggregateUnits(results)
+                    aggregateUnits(results)
             );
         }
 

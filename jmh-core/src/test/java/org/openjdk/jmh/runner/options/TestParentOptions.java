@@ -27,9 +27,9 @@ package org.openjdk.jmh.runner.options;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ClassloaderProfiler;
 import org.openjdk.jmh.profile.CompilerProfiler;
+import org.openjdk.jmh.results.format.ResultFormatType;
 
 import java.util.Arrays;
 import java.util.Collection;

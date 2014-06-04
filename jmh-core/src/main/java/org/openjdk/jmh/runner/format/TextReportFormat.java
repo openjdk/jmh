@@ -25,12 +25,12 @@
 package org.openjdk.jmh.runner.format;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.infra.results.BenchResult;
-import org.openjdk.jmh.infra.results.IterationResult;
-import org.openjdk.jmh.infra.results.Result;
-import org.openjdk.jmh.infra.results.RunResult;
-import org.openjdk.jmh.output.results.ResultFormatFactory;
-import org.openjdk.jmh.output.results.ResultFormatType;
+import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.IterationResult;
+import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.results.format.ResultFormatFactory;
+import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.parameters.BenchmarkParams;

@@ -22,16 +22,26 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.output.results;
+package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.infra.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+public class RawResults {
 
-import java.util.Map;
+    private final long opsPerInv;
+    public long operations;
+    public long realTime;
+    public long startTime;
+    public long stopTime;
 
-class NoneResultFormat implements ResultFormat {
-    @Override
-    public void writeOut(Map<BenchmarkRecord, RunResult> results) {
-        // do nothing
+    public long getOperations() {
+        return opsPerInv * operations;
     }
+
+    public long getTime() {
+        return (realTime > 0) ? realTime : (stopTime - startTime);
+    }
+
+    public RawResults(long opsPerInv) {
+        this.opsPerInv = opsPerInv;
+    }
+
 }

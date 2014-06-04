@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,26 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results.format;
 
-public enum AggregationPolicy {
+import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.runner.BenchmarkRecord;
 
-    AVG("Average"),
+import java.util.Map;
 
-    SUM("Sum"),
+public interface ResultFormat {
 
-    MAX("Maximum"),
-
-    ;
-
-    private String label;
-
-    AggregationPolicy(String label) {
-        this.label = label;
-    }
-
-    public String toString() {
-        return label;
-    }
+    void writeOut(Map<BenchmarkRecord, RunResult> results);
 
 }

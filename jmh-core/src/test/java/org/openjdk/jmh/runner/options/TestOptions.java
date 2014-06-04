@@ -29,9 +29,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.output.results.ResultFormatType;
 import org.openjdk.jmh.profile.ClassloaderProfiler;
 import org.openjdk.jmh.profile.CompilerProfiler;
+import org.openjdk.jmh.results.format.ResultFormatType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
