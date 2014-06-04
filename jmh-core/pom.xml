@@ -166,7 +166,6 @@ questions.
                 <configuration>
                     <detectLinks/>
                     <quiet>true</quiet>
-                    <excludePackageNames>org.openjdk.jmh.runner,org.openjdk.jmh.results,*.internal</excludePackageNames>
                     <links>
                         <link>http://download.oracle.com/javase/6/docs/api</link>
                     </links>
