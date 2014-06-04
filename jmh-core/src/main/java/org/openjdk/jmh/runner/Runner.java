@@ -75,6 +75,7 @@ import java.util.TreeMap;
  */
 public class Runner extends BaseRunner {
     private final BenchmarkList list;
+    private int cpuCount;
 
     /**
      * Create runner with the custom OutputFormat.
@@ -307,7 +308,12 @@ public class Runner extends BaseRunner {
                         Defaults.THREADS));
 
         if (threads == Threads.MAX) {
-            threads = Utils.figureOutHotCPUs(out);
+            if (cpuCount == 0) {
+                out.print("# Detecting actual CPU count: ");
+                cpuCount = Utils.figureOutHotCPUs();
+                out.println(cpuCount + " detected");
+            }
+            threads = cpuCount;
         }
 
         threads = Utils.roundUp(threads, Utils.sum(threadGroups));

@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.util;
 
-import org.openjdk.jmh.runner.format.OutputFormat;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,8 +99,6 @@ public class Utils {
         return sb.toString();
     }
 
-    static int cpuCount;
-
     /**
      * Warm up the CPU schedulers, bring all the CPUs online to get the
      * reasonable estimate of the system capacity. Some systems, notably embedded Linuxes,
@@ -111,15 +107,8 @@ public class Utils {
      *
      * @return max CPU count
      */
-    public static int figureOutHotCPUs(OutputFormat out) {
-        // Cache for a particular JVM instance
-        if (cpuCount != 0) {
-            return cpuCount;
-        }
-
+    public static int figureOutHotCPUs() {
         ExecutorService service = Executors.newCachedThreadPool();
-
-        out.print("# Actual CPU count: ");
 
         int warmupTime = 1000;
         long lastChange = System.currentTimeMillis();
@@ -143,9 +132,6 @@ public class Utils {
 
         service.shutdown();
 
-        out.println(max + " CPUs detected");
-
-        cpuCount = max;
         return max;
     }
 
