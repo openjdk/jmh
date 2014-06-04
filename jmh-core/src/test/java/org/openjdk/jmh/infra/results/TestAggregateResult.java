@@ -52,7 +52,8 @@ public class TestAggregateResult {
         result = new IterationResult(new BenchmarkRecord("blah", "blah", Mode.AverageTime),
                 new BenchmarkParams(false, 1, new int[]{1}, 1, 1,
                         new IterationParams(1, TimeValue.seconds(1), 1),
-                        new IterationParams(1, TimeValue.seconds(1), 1)),
+                        new IterationParams(1, TimeValue.seconds(1), 1),
+                        Mode.Throughput),
                 new IterationParams(1, TimeValue.days(1), 1)
         );
         for (double d : values) {

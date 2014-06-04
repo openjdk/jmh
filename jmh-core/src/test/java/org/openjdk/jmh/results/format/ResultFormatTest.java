@@ -74,7 +74,8 @@ public class ResultFormatTest {
                     r.nextInt(1000),
                     r.nextInt(1000),
                     new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
-                    new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1)
+                    new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
+                    Mode.Throughput
             );
 
             Collection<BenchResult> benchResults = new ArrayList<BenchResult>();

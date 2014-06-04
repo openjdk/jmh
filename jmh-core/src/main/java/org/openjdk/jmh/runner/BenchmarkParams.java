@@ -24,8 +24,12 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.runner.options.Options;
+
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class BenchmarkParams implements Serializable {
 
@@ -36,9 +40,10 @@ public class BenchmarkParams implements Serializable {
     private final int warmupForks;
     private final IterationParams warmup;
     private final IterationParams measurement;
+    private final Mode mode;
 
     public BenchmarkParams(boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks,
-                           IterationParams warmup, IterationParams measurement) {
+                           IterationParams warmup, IterationParams measurement, Mode mode) {
         this.synchIterations = synchIterations;
         this.threads = threads;
         this.threadGroups = threadGroups;
@@ -46,6 +51,7 @@ public class BenchmarkParams implements Serializable {
         this.warmupForks = warmupForks;
         this.warmup = warmup;
         this.measurement = measurement;
+        this.mode = mode;
     }
 
     public boolean shouldSynchIterations() {
@@ -76,6 +82,10 @@ public class BenchmarkParams implements Serializable {
         return warmupForks;
     }
 
+    public Mode getMode() {
+        return mode;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -90,6 +100,7 @@ public class BenchmarkParams implements Serializable {
         if (!measurement.equals(that.measurement)) return false;
         if (!Arrays.equals(threadGroups, that.threadGroups)) return false;
         if (!warmup.equals(that.warmup)) return false;
+        if (!mode.equals(that.mode)) return false;
 
         return true;
     }
@@ -103,7 +114,23 @@ public class BenchmarkParams implements Serializable {
         result = 31 * result + warmupForks;
         result = 31 * result + warmup.hashCode();
         result = 31 * result + measurement.hashCode();
+        result = 31 * result + mode.hashCode();
         return result;
+    }
+
+    public long estimatedTimeSingleFork() {
+        if (mode == Mode.SingleShotTime) {
+            // No way to tell how long it will execute,
+            // guess anything, and let ETA compensation to catch up.
+            return (warmup.getCount() + measurement.getCount()) * TimeUnit.MILLISECONDS.toNanos(1);
+        }
+
+        return (warmup.getCount() * warmup.getTime().convertTo(TimeUnit.NANOSECONDS) +
+                measurement.getCount() * measurement.getTime().convertTo(TimeUnit.NANOSECONDS));
+    }
+
+    public long estimatedTime() {
+        return (Math.max(1, forks) + warmupForks) * estimatedTimeSingleFork();
     }
 
 }

@@ -118,7 +118,7 @@ abstract class BaseRunner {
             }
 
             if (!forked) {
-                afterBenchmark(benchmark);
+                afterBenchmark(benchmark, params);
                 out.endBenchmark(benchmark, r);
             }
         }
@@ -126,9 +126,9 @@ abstract class BaseRunner {
         return results;
     }
 
-    protected void afterBenchmark(BenchmarkRecord name) {
+    protected void afterBenchmark(BenchmarkRecord name, BenchmarkParams params) {
         long current = System.nanoTime();
-        projectedRunningTime += name.estimatedTimeSingleFork(options);
+        projectedRunningTime += params.estimatedTimeSingleFork();
         actualRunningTime += (current - benchmarkStart);
         benchmarkStart = current;
     }
@@ -137,7 +137,7 @@ abstract class BaseRunner {
         projectedTotalTime = 0;
         for (ActionPlan plan : plans) {
             for (Action act : plan.getActions()) {
-                projectedTotalTime += act.getBenchmark().estimatedTime(options);
+                projectedTotalTime += act.getParams().estimatedTime();
             }
         }
     }

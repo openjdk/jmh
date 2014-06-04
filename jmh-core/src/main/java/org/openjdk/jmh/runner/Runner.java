@@ -365,7 +365,7 @@ public class Runner extends BaseRunner {
                 benchmark.getWarmupForks().orElse(
                         Defaults.WARMUP_FORKS));
 
-        return new BenchmarkParams(synchIterations, threads, threadGroups, forks, warmupForks, warmup, measurement);
+        return new BenchmarkParams(synchIterations, threads, threadGroups, forks, warmupForks, warmup, measurement, benchmark.getMode());
     }
 
     private List<ActualParams> explodeAllParams(BenchmarkRecord br) throws RunnerException {
@@ -502,7 +502,7 @@ public class Runner extends BaseRunner {
                     doFork(server, commandString, stdOut, stdErr);
 
                     out.endBenchmark(benchmark, null);
-                    afterBenchmark(benchmark);
+                    afterBenchmark(benchmark, params);
                 }
             }
 
@@ -533,7 +533,7 @@ public class Runner extends BaseRunner {
                 }
 
                 results.merge(result);
-                afterBenchmark(benchmark);
+                afterBenchmark(benchmark, params);
 
                 // we have only a single benchmark, which will produce only a single result
                 // TODO: clean up doFork() to return only a single value

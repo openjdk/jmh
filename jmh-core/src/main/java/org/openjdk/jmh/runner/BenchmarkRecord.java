@@ -288,44 +288,6 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return threads;
     }
 
-    public long estimatedTimeSingleFork(Options opts) {
-        int mi = opts.getMeasurementIterations()
-                .orElse(getMeasurementIterations()
-                        .orElse(Defaults.MEASUREMENT_ITERATIONS));
-
-        TimeValue mt = opts.getMeasurementTime()
-                .orElse(getMeasurementTime()
-                        .orElse(Defaults.MEASUREMENT_TIME));
-
-        int wi = opts.getWarmupIterations()
-                .orElse(getWarmupIterations()
-                        .orElse(Defaults.WARMUP_ITERATIONS));
-
-        TimeValue wt = opts.getWarmupTime()
-                .orElse(getWarmupTime()
-                        .orElse(Defaults.WARMUP_TIME));
-
-        if (opts.getBenchModes().contains(Mode.SingleShotTime)) {
-            // No way to tell how long it will execute,
-            // guess anything, and let ETA compensation to catch up.
-            return (wi + mi) * TimeUnit.MILLISECONDS.toNanos(1);
-        }
-
-        return (wi * wt.convertTo(TimeUnit.NANOSECONDS) + mi * mt.convertTo(TimeUnit.NANOSECONDS));
-    }
-
-    public long estimatedTime(Options opts) {
-        int forks = opts.getForkCount()
-                .orElse(getForks()
-                        .orElse(Defaults.MEASUREMENT_FORKS));
-
-        int warmupForks = opts.getWarmupForkCount()
-                .orElse(getWarmupForks()
-                        .orElse(Defaults.WARMUP_FORKS));
-
-        return (Math.max(1, forks) + warmupForks) * estimatedTimeSingleFork(opts);
-    }
-
     public Optional<Map<String, String[]>> getParams() {
         return params;
     }
