@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
@@ -125,6 +126,11 @@ public class Defaults {
      * Default {@link org.openjdk.jmh.runner.options.VerboseMode}.
      */
     public static final VerboseMode VERBOSITY = VerboseMode.NORMAL;
+
+    /**
+     * Default running mode.
+     */
+    public static final Mode BENCHMARK_MODE = Mode.Throughput;
 
     /**
      * Default output time unit.

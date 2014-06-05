@@ -50,6 +50,7 @@ import org.openjdk.jmh.results.SingleShotResult;
 import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
@@ -463,7 +464,7 @@ public class BenchmarkGenerator {
         // enforce the default value
         for (MethodGroup group : result.values()) {
             if (group.getModes().isEmpty()) {
-                group.addModes(Mode.Throughput);
+                group.addModes(Defaults.BENCHMARK_MODE);
             }
         }
 
