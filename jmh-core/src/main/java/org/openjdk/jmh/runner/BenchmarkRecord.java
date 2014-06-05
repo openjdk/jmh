@@ -58,6 +58,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final Optional<Collection<String>> jvmArgsAppend;
     private final Optional<Map<String, String[]>> params;
     private final Optional<TimeUnit> tu;
+    private final Optional<Integer> opsPerInvocation;
 
     private ActualParams actualParams;
 
@@ -65,7 +66,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                            Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
                            Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
                            Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
-                           Optional<Map<String, String[]>> params, Optional<TimeUnit> tu) {
+                           Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -85,12 +86,13 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.params = params;
         this.actualParams = new ActualParams();
         this.tu = tu;
+        this.opsPerInvocation = opsPerInv;
     }
 
     public BenchmarkRecord(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 18) {
+        if (args.length != 19) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -113,13 +115,14 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.jvmArgsAppend = Optional.of(args[15], STRING_COLLECTION_UNMARSHALLER);
         this.params = Optional.of(args[16], PARAM_COLLECTION_UNMARSHALLER);
         this.tu = Optional.of(args[17], TIMEUNIT_UNMARSHALLER);
+        this.opsPerInvocation = Optional.of(args[18], INTEGER_UNMARSHALLER);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
-                Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none());
+                Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none(), Optional.<Integer>none());
     }
 
     public String toLine() {
@@ -130,21 +133,22 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 jvmArgs.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsPrepend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsAppend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
-                params.toString(PARAM_COLLECTION_MARSHALLER) + BR_SEPARATOR + tu.toString(TIMEUNIT_MARSHALLER);
+                params.toString(PARAM_COLLECTION_MARSHALLER) + BR_SEPARATOR + tu.toString(TIMEUNIT_MARSHALLER) + BR_SEPARATOR +
+                opsPerInvocation;
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {
         return new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu);
+                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
     }
 
     public BenchmarkRecord cloneWith(ActualParams p) {
         BenchmarkRecord br = new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu);
+                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
         br.actualParams = p;
         return br;
     }
@@ -296,6 +300,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
 
     public Optional<TimeUnit> getTimeUnit() {
         return tu;
+    }
+
+    public Optional<Integer> getOperationsPerInvocation() {
+        return opsPerInvocation;
     }
 
     static final Optional.Unmarshaller<Integer> INTEGER_UNMARSHALLER = new Optional.Unmarshaller<Integer>() {

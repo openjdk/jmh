@@ -142,9 +142,9 @@ class MethodGroup implements Comparable<MethodGroup> {
         return threads;
     }
 
-    public long getOperationsPerInvocation() {
+    public Optional<Integer> getOperationsPerInvocation() {
         OperationsPerInvocation ann = getFinal(OperationsPerInvocation.class);
-        return (ann != null) ? ann.value() : 1;
+        return (ann != null) ? Optional.of(ann.value()) : Optional.<Integer>none();
     }
 
     public Optional<TimeUnit> getOutputTimeUnit() {

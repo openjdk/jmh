@@ -472,14 +472,14 @@ public class TestParentOptions {
     public void testOPI_Parent() throws Exception {
         Options parent = new OptionsBuilder().operationsPerInvocation(42).build();
         Options builder = new OptionsBuilder().parent(parent).build();
-        Assert.assertEquals(Long.valueOf(42), builder.getOperationsPerInvocation().get());
+        Assert.assertEquals(Integer.valueOf(42), builder.getOperationsPerInvocation().get());
     }
 
     @Test
     public void testOPI_Merged() throws Exception {
         Options parent = new OptionsBuilder().operationsPerInvocation(42).build();
         Options builder = new OptionsBuilder().parent(parent).operationsPerInvocation(43).build();
-        Assert.assertEquals(Long.valueOf(43), builder.getOperationsPerInvocation().get());
+        Assert.assertEquals(Integer.valueOf(43), builder.getOperationsPerInvocation().get());
     }
 
     @Test

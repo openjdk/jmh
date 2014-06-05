@@ -224,7 +224,7 @@ public interface ChainedOptionsBuilder {
      * @return builder
      * @see org.openjdk.jmh.annotations.OperationsPerInvocation
      */
-    ChainedOptionsBuilder operationsPerInvocation(long value);
+    ChainedOptionsBuilder operationsPerInvocation(int value);
 
     /**
      * Number of forks to use in the run

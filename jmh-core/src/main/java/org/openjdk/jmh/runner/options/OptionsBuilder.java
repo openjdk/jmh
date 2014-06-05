@@ -485,16 +485,16 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private Optional<Long> opsPerInvocation = Optional.none();
+    private Optional<Integer> opsPerInvocation = Optional.none();
 
     @Override
-    public ChainedOptionsBuilder operationsPerInvocation(long opsPerInv) {
+    public ChainedOptionsBuilder operationsPerInvocation(int opsPerInv) {
         this.opsPerInvocation = Optional.of(opsPerInv);
         return this;
     }
 
     @Override
-    public Optional<Long> getOperationsPerInvocation() {
+    public Optional<Integer> getOperationsPerInvocation() {
         if (otherOptions != null) {
             return opsPerInvocation.orAnother(otherOptions.getOperationsPerInvocation());
         } else {

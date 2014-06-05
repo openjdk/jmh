@@ -185,7 +185,7 @@ public interface Options extends Serializable {
      * @return operations per invocation.
      * @see org.openjdk.jmh.annotations.OperationsPerInvocation
      */
-    Optional<Long> getOperationsPerInvocation();
+    Optional<Integer> getOperationsPerInvocation();
 
     /**
      * Fork count

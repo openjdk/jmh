@@ -130,4 +130,9 @@ public class Defaults {
      * Default output time unit.
      */
     public static final TimeUnit OUTPUT_TIMEUNIT = TimeUnit.MILLISECONDS;
+
+    /**
+     * Default operations per invocation.
+     */
+    public static final Integer OPS_PER_INVOCATION = 1;
 }

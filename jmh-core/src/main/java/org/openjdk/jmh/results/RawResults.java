@@ -26,7 +26,7 @@ package org.openjdk.jmh.results;
 
 public class RawResults {
 
-    private final long opsPerInv;
+    private final int opsPerInv;
     public long operations;
     public long realTime;
     public long startTime;
@@ -40,7 +40,7 @@ public class RawResults {
         return (realTime > 0) ? realTime : (stopTime - startTime);
     }
 
-    public RawResults(long opsPerInv) {
+    public RawResults(int opsPerInv) {
         this.opsPerInv = opsPerInv;
     }
 

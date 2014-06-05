@@ -60,7 +60,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     protected final OutputFormat out;
     protected final TimeUnit timeUnit;
-    protected final Long opsPerInvocation;
+    protected final int opsPerInvocation;
 
     private final List<InternalProfiler> registeredProfilers;
 
@@ -81,7 +81,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         };
         this.out = out;
         this.timeUnit = options.getTimeUnit().orElse(benchmark.getTimeUnit().orElse(Defaults.OUTPUT_TIMEUNIT));
-        this.opsPerInvocation = options.getOperationsPerInvocation().orElse(null);
+        this.opsPerInvocation = options.getOperationsPerInvocation().orElse(benchmark.getOperationsPerInvocation().orElse(Defaults.OPS_PER_INVOCATION));
         try {
             this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), benchmark.getUsername());
         } catch (Exception e) {

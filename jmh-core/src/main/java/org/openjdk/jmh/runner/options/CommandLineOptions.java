@@ -66,7 +66,7 @@ public class CommandLineOptions implements Options {
     private final Optional<Boolean> failOnError;
     private final Set<Class<? extends Profiler>> profilers = new HashSet<Class<? extends Profiler>>();
     private final Optional<TimeUnit> timeUnit;
-    private final Optional<Long> opsPerInvocation;
+    private final Optional<Integer> opsPerInvocation;
     private final List<String> regexps = new ArrayList<String>();
     private final Optional<Integer> fork;
     private final Optional<Integer> warmupFork;
@@ -177,8 +177,8 @@ public class CommandLineOptions implements Options {
         OptionSpec<String> optTU = parser.accepts("tu", "Output time unit. Available time units are: [m, s, ms, us, ns].")
                 .withRequiredArg().ofType(String.class).describedAs("TU");
 
-        OptionSpec<Long> optOPI = parser.accepts("opi", "Operations per invocation.")
-                .withRequiredArg().ofType(Long.class).describedAs("int");
+        OptionSpec<Integer> optOPI = parser.accepts("opi", "Operations per invocation.")
+                .withRequiredArg().ofType(Integer.class).describedAs("int");
 
         OptionSpec<String> optResultFormat = parser.accepts("rf", "Result format type. See the list of available result formats first.")
                 .withRequiredArg().ofType(String.class).describedAs("type");
@@ -635,7 +635,7 @@ public class CommandLineOptions implements Options {
     }
 
     @Override
-    public Optional<Long> getOperationsPerInvocation() {
+    public Optional<Integer> getOperationsPerInvocation() {
         return opsPerInvocation;
     }
 

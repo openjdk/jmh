@@ -158,7 +158,8 @@ public class BenchmarkGenerator {
                             group.getJvmArgsPrepend(),
                             group.getJvmArgsAppend(),
                             group.getParams(),
-                            group.getOutputTimeUnit()
+                            group.getOutputTimeUnit(),
+                            group.getOperationsPerInvocation()
                     );
                     writer.println(br.toLine());
                 }
@@ -633,8 +634,7 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
-            writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
+            writer.println(ident(3) + "RawResults res = new RawResults(control.opsPerInv);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop" +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
 
@@ -741,8 +741,7 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
-            writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
+            writer.println(ident(3) + "RawResults res = new RawResults(control.opsPerInv);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
@@ -860,9 +859,8 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
-            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, opsPerInv" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.opsPerInv" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -961,8 +959,7 @@ public class BenchmarkGenerator {
             invocationProlog(writer, 3, method, states, false);
 
             // measurement loop call
-            writer.println(ident(3) + "long opsPerInv = (control.opsPerInv != null) ? control.opsPerInv : " + methodGroup.getOperationsPerInvocation() + "L;");
-            writer.println(ident(3) + "RawResults res = new RawResults(opsPerInv);");
+            writer.println(ident(3) + "RawResults res = new RawResults(control.opsPerInv);");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
