@@ -147,9 +147,9 @@ class MethodGroup implements Comparable<MethodGroup> {
         return (ann != null) ? ann.value() : 1;
     }
 
-    public TimeUnit getOutputTimeUnit() {
+    public Optional<TimeUnit> getOutputTimeUnit() {
         OutputTimeUnit ann = getFinal(OutputTimeUnit.class);
-        return (ann != null) ? ann.value() : TimeUnit.MILLISECONDS;
+        return (ann != null) ? Optional.of(ann.value()) : Optional.<TimeUnit>none();
     }
 
     public Optional<Integer> getWarmupIterations() {

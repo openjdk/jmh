@@ -80,7 +80,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
             }
         };
         this.out = out;
-        this.timeUnit = options.getTimeUnit().orElse(null);
+        this.timeUnit = options.getTimeUnit().orElse(benchmark.getTimeUnit().orElse(Defaults.OUTPUT_TIMEUNIT));
         this.opsPerInvocation = options.getOperationsPerInvocation().orElse(null);
         try {
             this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), benchmark.getUsername());

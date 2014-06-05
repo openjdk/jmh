@@ -29,6 +29,8 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.runner.options.WarmupMode;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * JMH global defaults: these are used when no other values are available.
  */
@@ -124,4 +126,8 @@ public class Defaults {
      */
     public static final VerboseMode VERBOSITY = VerboseMode.NORMAL;
 
+    /**
+     * Default output time unit.
+     */
+    public static final TimeUnit OUTPUT_TIMEUNIT = TimeUnit.MILLISECONDS;
 }

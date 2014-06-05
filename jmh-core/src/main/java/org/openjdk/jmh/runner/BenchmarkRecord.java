@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Optional;
 import org.openjdk.jmh.util.Utils;
@@ -58,6 +57,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
     private final Optional<Collection<String>> jvmArgsPrepend;
     private final Optional<Collection<String>> jvmArgsAppend;
     private final Optional<Map<String, String[]>> params;
+    private final Optional<TimeUnit> tu;
 
     private ActualParams actualParams;
 
@@ -65,7 +65,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                            Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
                            Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
                            Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
-                           Optional<Map<String, String[]>> params) {
+                           Optional<Map<String, String[]>> params, Optional<TimeUnit> tu) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -84,12 +84,13 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.jvmArgsAppend = jvmArgsAppend;
         this.params = params;
         this.actualParams = new ActualParams();
+        this.tu = tu;
     }
 
     public BenchmarkRecord(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 17) {
+        if (args.length != 18) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -111,13 +112,14 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         this.jvmArgsPrepend = Optional.of(args[14], STRING_COLLECTION_UNMARSHALLER);
         this.jvmArgsAppend = Optional.of(args[15], STRING_COLLECTION_UNMARSHALLER);
         this.params = Optional.of(args[16], PARAM_COLLECTION_UNMARSHALLER);
+        this.tu = Optional.of(args[17], TIMEUNIT_UNMARSHALLER);
     }
 
     public BenchmarkRecord(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
-                Optional.<Map<String, String[]>>none());
+                Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none());
     }
 
     public String toLine() {
@@ -128,21 +130,21 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
                 jvmArgs.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsPrepend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsAppend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
-                params.toString(PARAM_COLLECTION_MARSHALLER);
+                params.toString(PARAM_COLLECTION_MARSHALLER) + BR_SEPARATOR + tu.toString(TIMEUNIT_MARSHALLER);
     }
 
     public BenchmarkRecord cloneWith(Mode mode) {
         return new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params);
+                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu);
     }
 
     public BenchmarkRecord cloneWith(ActualParams p) {
         BenchmarkRecord br = new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params);
+                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu);
         br.actualParams = p;
         return br;
     }
@@ -292,6 +294,10 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return params;
     }
 
+    public Optional<TimeUnit> getTimeUnit() {
+        return tu;
+    }
+
     static final Optional.Unmarshaller<Integer> INTEGER_UNMARSHALLER = new Optional.Unmarshaller<Integer>() {
         @Override
         public Integer valueOf(String s) {
@@ -303,6 +309,20 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         @Override
         public TimeValue valueOf(String s) {
             return TimeValue.fromString(s);
+        }
+    };
+
+    static final Optional.Unmarshaller<TimeUnit> TIMEUNIT_UNMARSHALLER = new Optional.Unmarshaller<TimeUnit>() {
+        @Override
+        public TimeUnit valueOf(String s) {
+            return TimeUnit.valueOf(s);
+        }
+    };
+
+    static final Optional.Marshaller<TimeUnit> TIMEUNIT_MARSHALLER = new Optional.Marshaller<TimeUnit>() {
+        @Override
+        public String valueOf(TimeUnit val) {
+            return val.toString();
         }
     };
 

@@ -157,7 +157,8 @@ public class BenchmarkGenerator {
                             group.getJvmArgs(),
                             group.getJvmArgsPrepend(),
                             group.getJvmArgsAppend(),
-                            group.getParams()
+                            group.getParams(),
+                            group.getOutputTimeUnit()
                     );
                     writer.println(br.toLine());
                 }
@@ -663,13 +664,12 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
-            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), tu));");
+            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), tu));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
             }
             for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), tu));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.timeUnit));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -770,13 +770,12 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
-            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), tu));");
+            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), tu));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
             }
             for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), tu));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.timeUnit));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -890,10 +889,9 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
-            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, tu));");
+            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.timeUnit));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, tu));");
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.timeUnit));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -974,10 +972,9 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "TimeUnit tu = (control.timeUnit != null) ? control.timeUnit : TimeUnit." + methodGroup.getOutputTimeUnit() + ";");
-            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), tu));");
+            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.timeUnit));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), tu));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.timeUnit));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
