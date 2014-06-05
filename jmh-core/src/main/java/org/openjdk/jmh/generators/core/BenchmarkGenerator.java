@@ -447,7 +447,8 @@ public class BenchmarkGenerator {
             for (ParameterInfo pi : method.getParameters()) {
                 for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(pi.getType())) {
                     if (fi.getAnnotation(Param.class) != null) {
-                        group.addParam(fi.getName(), fi.getAnnotation(Param.class).value());
+                        String[] values = fi.getAnnotation(Param.class).value();
+                        group.addParamValues(fi.getName(), values);
                     }
                 }
             }
@@ -456,7 +457,8 @@ public class BenchmarkGenerator {
             //  Walk the type hierarchy up to discover inherited @Param fields for class.
             for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
                 if (fi.getAnnotation(Param.class) != null) {
-                    group.addParam(fi.getName(), fi.getAnnotation(Param.class).value());
+                    String[] values = fi.getAnnotation(Param.class).value();
+                    group.addParamValues(fi.getName(), values);
                 }
             }
         }

@@ -109,7 +109,7 @@ class MethodGroup implements Comparable<MethodGroup> {
         return name;
     }
 
-    public void addParam(String name, String[] value) {
+    public void addParamValues(String name, String[] value) {
         params.put(name, value);
     }
 
