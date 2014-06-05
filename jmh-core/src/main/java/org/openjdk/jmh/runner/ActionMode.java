@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-public enum ActionMode {
+enum ActionMode {
 
     /**
      * No action.

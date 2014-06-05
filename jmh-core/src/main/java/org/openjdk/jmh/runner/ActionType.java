@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-public enum ActionType {
+enum ActionType {
     EMBEDDED,
     FORKED,
 }

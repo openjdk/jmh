@@ -26,7 +26,7 @@ package org.openjdk.jmh.runner;
 
 import java.io.Serializable;
 
-public class Action implements Serializable {
+class Action implements Serializable {
     private final BenchmarkRecord benchmark;
     private final BenchmarkParams params;
     private final ActionMode mode;
