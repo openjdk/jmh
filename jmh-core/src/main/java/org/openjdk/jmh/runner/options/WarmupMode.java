@@ -63,7 +63,4 @@ public enum WarmupMode {
         return indi;
     }
 
-    static WarmupMode defaultMode() {
-        return INDI;
-    }
 }
