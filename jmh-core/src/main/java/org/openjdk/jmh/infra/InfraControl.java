@@ -26,9 +26,8 @@ package org.openjdk.jmh.infra;
 
 import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.IterationParams;
-import sun.misc.Unsafe;
+import org.openjdk.jmh.util.Utils;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,44 +38,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class InfraControl extends InfraControlL4 {
 
-    private static final Unsafe U;
-
     static {
-        try {
-            Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafe.setAccessible(true);
-            U = (Unsafe) unsafe.get(null);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-
-        consistencyCheck();
-    }
-
-    static void consistencyCheck() {
-        // checking the fields are not reordered
-        check("isDone");
-    }
-
-    static void check(String fieldName) {
-        final long requiredGap = 128;
-        long markerBegin = getOffset("markerBegin");
-        long markerEnd = getOffset("markerEnd");
-        long off = getOffset(fieldName);
-        if (markerEnd - off < requiredGap || off - markerBegin < requiredGap) {
-            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerBegin = " + markerBegin + ", markerEnd = " + markerEnd);
-        }
-    }
-
-    static long getOffset(String fieldName) {
-        try {
-            Field f = InfraControl.class.getField(fieldName);
-            return U.objectFieldOffset(f);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException(e);
-        }
+        Utils.check(InfraControl.class, "isDone");
+        Utils.check(InfraControl.class, "volatileSpoiler");
+        Utils.check(InfraControl.class, "preSetup", "preTearDown");
+        Utils.check(InfraControl.class, "lastIteration");
+        Utils.check(InfraControl.class, "warmupVisited", "warmdownVisited");
+        Utils.check(InfraControl.class, "warmupShouldWait", "warmdownShouldWait");
+        Utils.check(InfraControl.class, "benchmarkParams", "iterationParams");
+        Utils.check(InfraControl.class, "shouldSynchIterations", "threads");
     }
 
     public InfraControl(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
@@ -126,7 +96,7 @@ public class InfraControl extends InfraControlL4 {
 }
 
 abstract class InfraControlL0 {
-    public int markerBegin;
+    private int markerBegin;
 }
 
 abstract class InfraControlL1 extends InfraControlL0 {
@@ -247,7 +217,7 @@ abstract class InfraControlL3 extends InfraControlL2 {
 }
 
 abstract class InfraControlL4 extends InfraControlL3 {
-    public int markerEnd;
+    private int markerEnd;
 
     public InfraControlL4(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
         super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);

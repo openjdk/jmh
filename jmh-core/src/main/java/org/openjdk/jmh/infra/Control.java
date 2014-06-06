@@ -28,18 +28,23 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.util.Utils;
 
 /**
  * Control object, used to communicate significant information from JMH to the benchmark.
  * WARNING: The API for this class is considered unstable, and can be changed without notice.
  */
 @State(Scope.Benchmark)
-public class Control extends ControlL3 {
+public class Control extends ControlL4 {
+
+    static {
+        Utils.check(Control.class, "startMeasurement", "stopMeasurement");
+    }
 
 }
 
 abstract class ControlL0 {
-    public int markerBegin;
+    private int markerBegin;
 }
 
 abstract class ControlL1 extends ControlL0 {
@@ -102,5 +107,9 @@ abstract class ControlL3 extends ControlL2 {
     private boolean q151, q152, q153, q154, q155, q156, q157, q158;
     private boolean q161, q162, q163, q164, q165, q166, q167, q168;
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
+}
+
+abstract class ControlL4 extends ControlL3 {
+    private int markerEnd;
 }
 

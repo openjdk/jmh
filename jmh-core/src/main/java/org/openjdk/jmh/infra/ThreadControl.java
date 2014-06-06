@@ -24,19 +24,23 @@
  */
 package org.openjdk.jmh.infra;
 
+import org.openjdk.jmh.util.Utils;
+
 /**
  * Thread-local control info.
  */
-public class ThreadControl extends ThreadControlL3 {
-    public int markerEnd;
-
+public class ThreadControl extends ThreadControlL4 {
     public ThreadControl(int group, int subgroup) {
         super(group, subgroup);
+    }
+
+    static {
+        Utils.check(ThreadControl.class, "group", "subgroup");
     }
 }
 
 abstract class ThreadControlL0 {
-    public int markerBegin;
+    private int markerBegin;
 }
 
 abstract class ThreadControlL1 extends ThreadControlL0 {
@@ -87,6 +91,14 @@ abstract class ThreadControlL3 extends ThreadControlL2 {
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 
     public ThreadControlL3(int group, int subgroup) {
+        super(group, subgroup);
+    }
+}
+
+abstract class ThreadControlL4 extends ThreadControlL3 {
+    private int markerEnd;
+
+    public ThreadControlL4(int group, int subgroup) {
         super(group, subgroup);
     }
 }

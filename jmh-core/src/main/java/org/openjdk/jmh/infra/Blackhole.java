@@ -29,9 +29,8 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import sun.misc.Unsafe;
+import org.openjdk.jmh.util.Utils;
 
-import java.lang.reflect.Field;
 import java.util.Random;
 
 /*
@@ -39,7 +38,7 @@ import java.util.Random;
  */
 
 abstract class BlackholeL0 {
-    public int markerBegin;
+    private int markerBegin;
 }
 
 abstract class BlackholeL1 extends BlackholeL0 {
@@ -139,7 +138,7 @@ abstract class BlackholeL3 extends BlackholeL2 {
 }
 
 abstract class BlackholeL4 extends BlackholeL3 {
-    public int markerEnd;
+    private int markerEnd;
 }
 
 /**
@@ -211,63 +210,17 @@ public class Blackhole extends BlackholeL4 {
      * to evade that effect.
      */
 
-    private static final Unsafe U;
-
     static {
-        try {
-            Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafe.setAccessible(true);
-            U = (Unsafe) unsafe.get(null);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-
-        consistencyCheck();
+        Utils.check(Blackhole.class, "b1", "b2");
+        Utils.check(Blackhole.class, "bool1", "bool2");
+        Utils.check(Blackhole.class, "c1", "c2");
+        Utils.check(Blackhole.class, "s1", "s2");
+        Utils.check(Blackhole.class, "i1", "i2");
+        Utils.check(Blackhole.class, "l1", "l2");
+        Utils.check(Blackhole.class, "f1", "f2");
+        Utils.check(Blackhole.class, "d1", "d2");
+        Utils.check(Blackhole.class, "obj1", "objs1");
     }
-
-    static void consistencyCheck() {
-        // checking the fields are not reordered
-        check("b1");
-        check("b2");
-        check("bool1");
-        check("bool2");
-        check("c1");
-        check("c2");
-        check("s1");
-        check("s2");
-        check("i1");
-        check("i2");
-        check("l1");
-        check("l2");
-        check("f1");
-        check("f2");
-        check("d1");
-        check("d2");
-        check("obj1");
-        check("objs1");
-    }
-
-    static void check(String fieldName) {
-        final long requiredGap = 128;
-        long markerBegin = getOffset("markerBegin");
-        long markerEnd = getOffset("markerEnd");
-        long off = getOffset(fieldName);
-        if (markerEnd - off < requiredGap || off - markerBegin < requiredGap) {
-            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerBegin = " + markerBegin + ", markerEnd = " + markerEnd);
-        }
-    }
-
-    static long getOffset(String fieldName) {
-        try {
-            Field f = Blackhole.class.getField(fieldName);
-            return U.objectFieldOffset(f);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
 
     public Blackhole() {
         /*
