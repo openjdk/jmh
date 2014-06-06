@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner.format;
 
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkParams;
@@ -57,7 +57,7 @@ class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endBenchmark(BenchResult result) {
+    public void endBenchmark(BenchmarkResult result) {
 
     }
 

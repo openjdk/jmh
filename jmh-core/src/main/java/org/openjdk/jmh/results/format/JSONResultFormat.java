@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.results.format;
 
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.ActualParams;
@@ -88,9 +88,9 @@ class JSONResultFormat implements ResultFormat {
 
             {
                 Collection<String> l1 = new ArrayList<String>();
-                for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                for (BenchmarkResult benchmarkResult : runResult.getRawBenchResults()) {
                     Collection<String> scores = new ArrayList<String>();
-                    for (Result r : benchResult.getRawPrimaryResults()) {
+                    for (Result r : benchmarkResult.getRawPrimaryResults()) {
                         scores.add(emit(r.getScore()));
                     }
                     l1.add(printMultiple(scores, "[", "]"));
@@ -113,9 +113,9 @@ class JSONResultFormat implements ResultFormat {
                 sb.append("\"rawData\" :");
 
                 Collection<String> l2 = new ArrayList<String>();
-                for (BenchResult benchResult : runResult.getRawBenchResults()) {
+                for (BenchmarkResult benchmarkResult : runResult.getRawBenchResults()) {
                     Collection<String> scores = new ArrayList<String>();
-                    for (Result r : benchResult.getRawSecondaryResults().get(secondaryName)) {
+                    for (Result r : benchmarkResult.getRawSecondaryResults().get(secondaryName)) {
                         scores.add(emit(r.getScore()));
                     }
                     l2.add(printMultiple(scores, "[", "]"));

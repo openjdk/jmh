@@ -29,7 +29,7 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormat;
@@ -428,14 +428,14 @@ public class Runner extends BaseRunner {
     private Collection<RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
         out.startRun();
 
-        Multimap<BenchmarkParams, BenchResult> results = new TreeMultimap<BenchmarkParams, BenchResult>();
+        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
         List<ActionPlan> plan = getActionPlans(benchmarks);
 
         beforeBenchmarks(plan);
 
         try {
             for (ActionPlan r : plan) {
-                Multimap<BenchmarkParams, BenchResult> res;
+                Multimap<BenchmarkParams, BenchmarkResult> res;
                 switch (r.getType()) {
                     case EMBEDDED:
                         res = runBenchmarks(false, r);
@@ -462,7 +462,7 @@ public class Runner extends BaseRunner {
         }
     }
 
-    private SortedSet<RunResult> mergeRunResults(Multimap<BenchmarkParams, BenchResult> results) {
+    private SortedSet<RunResult> mergeRunResults(Multimap<BenchmarkParams, BenchmarkResult> results) {
         SortedSet<RunResult> result = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
         for (BenchmarkParams key : results.keys()) {
             result.add(new RunResult(results.get(key)));
@@ -470,8 +470,8 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Multimap<BenchmarkParams, BenchResult> runSeparate(ActionPlan actionPlan) {
-        Multimap<BenchmarkParams, BenchResult> results = new HashMultimap<BenchmarkParams, BenchResult>();
+    private Multimap<BenchmarkParams, BenchmarkResult> runSeparate(ActionPlan actionPlan) {
+        Multimap<BenchmarkParams, BenchmarkResult> results = new HashMultimap<BenchmarkParams, BenchmarkResult>();
 
         if (actionPlan.getMeasurementActions().size() != 1) {
             throw new IllegalStateException("Expect only single benchmark in the action plan, but was " + actionPlan.getMeasurementActions().size());
@@ -542,11 +542,11 @@ public class Runner extends BaseRunner {
                     profiler.beforeTrial();
                 }
 
-                Multimap<BenchmarkParams, BenchResult> result = doFork(server, commandString, stdOut, stdErr);
+                Multimap<BenchmarkParams, BenchmarkResult> result = doFork(server, commandString, stdOut, stdErr);
 
                 for (ExternalProfiler profiler : profilers) {
                     for (Result profR : profiler.afterTrial(stdOut, stdErr)) {
-                        for (BenchResult r : result.values()) {
+                        for (BenchmarkResult r : result.values()) {
                             r.amend(profR);
                         }
                     }
@@ -557,7 +557,7 @@ public class Runner extends BaseRunner {
 
                 // we have only a single benchmark, which will produce only a single result
                 // TODO: clean up doFork() to return only a single value
-                BenchResult r = null;
+                BenchmarkResult r = null;
                 if (result.values().size() == 1) {
                     r = result.values().iterator().next();
                 }
@@ -575,7 +575,7 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private Multimap<BenchmarkParams, BenchResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
+    private Multimap<BenchmarkParams, BenchmarkResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 

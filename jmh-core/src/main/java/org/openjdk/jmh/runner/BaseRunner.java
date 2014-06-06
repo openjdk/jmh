@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.format.IterationType;
 import org.openjdk.jmh.runner.format.OutputFormat;
@@ -67,8 +67,8 @@ abstract class BaseRunner {
         this.out = handler;
     }
 
-    protected Multimap<BenchmarkParams, BenchResult> runBenchmarks(boolean forked, ActionPlan actionPlan) {
-        Multimap<BenchmarkParams, BenchResult> results = new TreeMultimap<BenchmarkParams, BenchResult>();
+    protected Multimap<BenchmarkParams, BenchmarkResult> runBenchmarks(boolean forked, ActionPlan actionPlan) {
+        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
 
         for (Action action : actionPlan.getActions()) {
 
@@ -81,7 +81,7 @@ abstract class BaseRunner {
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
 
-            BenchResult r = null;
+            BenchmarkResult r = null;
             try {
                 switch (mode) {
                     case WARMUP: {
@@ -177,7 +177,7 @@ abstract class BaseRunner {
         return String.format("%s%02d:%02d:%02d", (days > 0) ? days + "days, " : "", hrs, mins, secs);
     }
 
-    BenchResult runBenchmark(BenchmarkParams benchParams) {
+    BenchmarkResult runBenchmark(BenchmarkParams benchParams) {
         BenchmarkHandler handler = null;
         try {
             Class<?> clazz = ClassUtils.loadClass(benchParams.generatedClass());
@@ -197,7 +197,7 @@ abstract class BaseRunner {
         }
     }
 
-    protected BenchResult runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler) {
+    protected BenchmarkResult runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler) {
         List<IterationResult> allResults = new ArrayList<IterationResult>();
 
         // warmup
@@ -232,7 +232,7 @@ abstract class BaseRunner {
         }
 
         if (!allResults.isEmpty()) {
-            return new BenchResult(allResults);
+            return new BenchmarkResult(allResults);
         } else {
             // should be ignored in the caller
             return null;

@@ -27,7 +27,7 @@ package org.openjdk.jmh.results.format;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.results.RunResult;
@@ -80,7 +80,7 @@ public class ResultFormatTest {
                     TimeUnit.SECONDS, 1,
                     Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList());
 
-            Collection<BenchResult> benchResults = new ArrayList<BenchResult>();
+            Collection<BenchmarkResult> benchmarkResults = new ArrayList<BenchmarkResult>();
             for (int f = 0; f < r.nextInt(10); f++) {
                 Collection<IterationResult> iterResults = new ArrayList<IterationResult>();
                 for (int c = 0; c < r.nextInt(10); c++) {
@@ -90,9 +90,9 @@ public class ResultFormatTest {
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     iterResults.add(res);
                 }
-                benchResults.add(new BenchResult(iterResults));
+                benchmarkResults.add(new BenchmarkResult(iterResults));
             }
-            results.add(new RunResult(benchResults));
+            results.add(new RunResult(benchmarkResults));
         }
         return results;
     }

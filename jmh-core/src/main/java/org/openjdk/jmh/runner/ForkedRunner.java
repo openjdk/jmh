@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.Multimap;
@@ -47,7 +47,7 @@ class ForkedRunner extends BaseRunner {
         ActionPlan actionPlan = link.requestPlan();
 
         try {
-            Multimap<BenchmarkParams,BenchResult> res = runBenchmarks(true, actionPlan);
+            Multimap<BenchmarkParams,BenchmarkResult> res = runBenchmarks(true, actionPlan);
             link.pushResults(res);
         } catch (BenchmarkException be) {
             link.pushException(be);

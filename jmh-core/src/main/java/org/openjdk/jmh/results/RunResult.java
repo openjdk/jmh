@@ -43,15 +43,15 @@ public class RunResult implements Serializable {
 
     private static final long serialVersionUID = 6467912427356048369L;
 
-    private final Collection<BenchResult> benchResults;
+    private final Collection<BenchmarkResult> benchmarkResults;
     private final BenchmarkParams params;
 
-    public RunResult(Collection<BenchResult> data) {
-        this.benchResults = data;
+    public RunResult(Collection<BenchmarkResult> data) {
+        this.benchmarkResults = data;
 
         BenchmarkParams myParams = null;
 
-        for (BenchResult br : data) {
+        for (BenchmarkResult br : data) {
             BenchmarkParams params = br.getParams();
 
             if (myParams != null && !params.equals(myParams)) {
@@ -64,12 +64,12 @@ public class RunResult implements Serializable {
         this.params = myParams;
     }
 
-    public Collection<BenchResult> getRawBenchResults() {
-        return benchResults;
+    public Collection<BenchmarkResult> getRawBenchResults() {
+        return benchmarkResults;
     }
 
     public Result getPrimaryResult() {
-        Result next = benchResults.iterator().next().getPrimaryResult();
+        Result next = benchmarkResults.iterator().next().getPrimaryResult();
 
         @SuppressWarnings("unchecked")
         Aggregator<Result> aggregator = next.getRunAggregator();
@@ -78,7 +78,7 @@ public class RunResult implements Serializable {
 
     public Collection<Result> getRawPrimaryResults() {
         Collection<Result> rs = new ArrayList<Result>();
-        for (BenchResult br : benchResults) {
+        for (BenchmarkResult br : benchmarkResults) {
             rs.addAll(br.getRawPrimaryResults());
         }
         return rs;
@@ -86,7 +86,7 @@ public class RunResult implements Serializable {
 
     public Multimap<String, Result> getRawSecondaryResults() {
         Multimap<String, Result> rs = new HashMultimap<String, Result>();
-        for (BenchResult br : benchResults) {
+        for (BenchmarkResult br : benchmarkResults) {
             Multimap<String, Result> secondaries = br.getRawSecondaryResults();
             for (String label : secondaries.keys()) {
                 for (Result r : secondaries.get(label)) {

@@ -38,7 +38,7 @@ import java.util.TreeMap;
  * Benchmark result.
  * Contains iteration results.
  */
-public class BenchResult implements Serializable {
+public class BenchmarkResult implements Serializable {
 
     private static final long serialVersionUID = 6467912427356048369L;
 
@@ -46,7 +46,7 @@ public class BenchResult implements Serializable {
     private final Collection<Result> benchmarkResults;
     private final BenchmarkParams params;
 
-    public BenchResult(Collection<IterationResult> data) {
+    public BenchmarkResult(Collection<IterationResult> data) {
         this.benchmarkResults = new ArrayList<Result>();
         this.iterationResults = data;
 

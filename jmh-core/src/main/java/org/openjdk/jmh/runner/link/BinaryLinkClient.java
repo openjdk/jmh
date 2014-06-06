@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner.link;
 
-import org.openjdk.jmh.results.BenchResult;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.BenchmarkParams;
@@ -92,7 +92,7 @@ public final class BinaryLinkClient {
         clientSocket.close();
     }
 
-    public void pushResults(Multimap<BenchmarkParams, BenchResult> res) throws IOException {
+    public void pushResults(Multimap<BenchmarkParams, BenchmarkResult> res) throws IOException {
         oos.writeObject(new ResultsFrame(res));
         oos.flush();
     }
