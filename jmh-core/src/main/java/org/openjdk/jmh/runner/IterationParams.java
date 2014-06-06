@@ -31,6 +31,11 @@ import java.io.Serializable;
 public class IterationParams implements Serializable {
 
     /**
+     * iteration type
+     */
+    private final IterationType type;
+
+    /**
      * amount of iterations
      */
     private final int count;
@@ -45,10 +50,15 @@ public class IterationParams implements Serializable {
      */
     private final int batchSize;
 
-    public IterationParams(int count, TimeValue time, int batchSize) {
+    public IterationParams(IterationType type, int count, TimeValue time, int batchSize) {
+        this.type = type;
         this.count = count;
         this.timeValue = time;
         this.batchSize = batchSize;
+    }
+
+    public IterationType getType() {
+        return type;
     }
 
     public int getCount() {

@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.runner.format.IterationType;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.ClassUtils;
@@ -208,10 +207,10 @@ abstract class BaseRunner {
                 out.verbosePrintln("System.gc() executed");
             }
 
-            out.iteration(benchParams, wp, i, IterationType.WARMUP);
+            out.iteration(benchParams, wp, i);
             boolean isLastIteration = (benchParams.getMeasurement().getCount() == 0);
             IterationResult iterData = handler.runIteration(benchParams, wp, isLastIteration);
-            out.iterationResult(benchParams, wp, i, IterationType.WARMUP, iterData);
+            out.iterationResult(benchParams, wp, i, iterData);
         }
 
         // measurement
@@ -223,11 +222,11 @@ abstract class BaseRunner {
             }
 
             // run benchmark iteration
-            out.iteration(benchParams, mp, i, IterationType.MEASUREMENT);
+            out.iteration(benchParams, mp, i);
 
             boolean isLastIteration = (i == mp.getCount());
             IterationResult iterData = handler.runIteration(benchParams, mp, isLastIteration);
-            out.iterationResult(benchParams, mp, i, IterationType.MEASUREMENT, iterData);
+            out.iterationResult(benchParams, mp, i, iterData);
             allResults.add(iterData);
         }
 

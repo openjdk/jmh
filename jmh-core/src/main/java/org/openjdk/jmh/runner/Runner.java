@@ -320,6 +320,7 @@ public class Runner extends BaseRunner {
 
         IterationParams measurement = mode.doMeasurement() ?
                 new IterationParams(
+                        IterationType.MEASUREMENT,
                         options.getMeasurementIterations().orElse(
                                 benchmark.getMeasurementIterations().orElse(
                                         (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.MEASUREMENT_ITERATIONS_SINGLESHOT : Defaults.MEASUREMENT_ITERATIONS
@@ -335,10 +336,11 @@ public class Runner extends BaseRunner {
                                         )
                                 )
                 ) :
-                new IterationParams(0, TimeValue.NONE, 1);
+                new IterationParams(IterationType.MEASUREMENT, 0, TimeValue.NONE, 1);
 
         IterationParams warmup = mode.doWarmup() ?
                 new IterationParams(
+                        IterationType.WARMUP,
                         options.getWarmupIterations().orElse(
                                 benchmark.getWarmupIterations().orElse(
                                         (benchmark.getMode() == Mode.SingleShotTime) ? Defaults.WARMUP_ITERATIONS_SINGLESHOT : Defaults.WARMUP_ITERATIONS
@@ -354,7 +356,7 @@ public class Runner extends BaseRunner {
                                         )
                                 )
                 ) :
-                new IterationParams(0, TimeValue.NONE, 1);
+                new IterationParams(IterationType.WARMUP, 0, TimeValue.NONE, 1);
 
         int forks = options.getForkCount().orElse(
                 benchmark.getForks().orElse(

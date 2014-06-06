@@ -33,6 +33,7 @@ import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.IterationParams;
+import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
@@ -79,8 +80,8 @@ class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iteration(BenchmarkParams benchmarkParams, IterationParams params, int iteration, IterationType type) {
-        switch (type) {
+    public void iteration(BenchmarkParams benchmarkParams, IterationParams params, int iteration) {
+        switch (params.getType()) {
             case WARMUP:
                 out.print(String.format("# Warmup Iteration %3d: ", iteration));
                 break;
@@ -88,7 +89,7 @@ class TextReportFormat extends AbstractOutputFormat {
                 out.print(String.format("Iteration %3d: ", iteration));
                 break;
             default:
-                throw new IllegalStateException("Unknown iteration type: " + type);
+                throw new IllegalStateException("Unknown iteration type: " + params.getType());
         }
         out.flush();
     }
@@ -102,11 +103,11 @@ class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkParams benchmParams, IterationParams params, int iteration, IterationType type, IterationResult data) {
+    public void iterationResult(BenchmarkParams benchmParams, IterationParams params, int iteration, IterationResult data) {
         StringBuilder sb = new StringBuilder();
         sb.append(data.getPrimaryResult().toString());
 
-        if (type == IterationType.MEASUREMENT) {
+        if (params.getType() == IterationType.MEASUREMENT) {
             int prefixLen = String.format("Iteration %3d: ", iteration).length();
 
             Map<String, Result> secondary = data.getSecondaryResults();

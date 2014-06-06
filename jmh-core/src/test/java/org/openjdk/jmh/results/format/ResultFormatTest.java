@@ -35,6 +35,7 @@ import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.IterationParams;
+import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
 
@@ -73,8 +74,8 @@ public class ResultFormatTest {
                     new int[]{ r.nextInt(1000) },
                     r.nextInt(1000),
                     r.nextInt(1000),
-                    new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
-                    new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
+                    new IterationParams(IterationType.WARMUP,      r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
+                    new IterationParams(IterationType.MEASUREMENT, r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
                     Mode.Throughput,
                     ps,
                     TimeUnit.SECONDS, 1,

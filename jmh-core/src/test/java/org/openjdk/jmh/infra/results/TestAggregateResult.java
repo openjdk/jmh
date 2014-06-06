@@ -32,6 +32,7 @@ import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.IterationParams;
+import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.Collections;
@@ -51,11 +52,11 @@ public class TestAggregateResult {
     public static void setupClass() {
         result = new IterationResult(
                 new BenchmarkParams("blah", "blah", false, 1, new int[]{1}, 1, 1,
-                        new IterationParams(1, TimeValue.seconds(1), 1),
-                        new IterationParams(1, TimeValue.seconds(1), 1),
+                        new IterationParams(IterationType.WARMUP, 1, TimeValue.seconds(1), 1),
+                        new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                         Mode.Throughput, null, TimeUnit.SECONDS, 1,
                         Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList()),
-                new IterationParams(1, TimeValue.days(1), 1)
+                new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.days(1), 1)
         );
         for (double d : values) {
             result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000, TimeUnit.MILLISECONDS));

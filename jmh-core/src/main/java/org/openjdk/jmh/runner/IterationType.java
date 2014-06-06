@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner.format;
+package org.openjdk.jmh.runner;
 
 public enum IterationType {
     WARMUP,

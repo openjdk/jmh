@@ -44,9 +44,8 @@ public interface OutputFormat {
      * @param benchParams benchmark parameters
      * @param params iteration params in use
      * @param iteration iteration-number
-     * @param type iteration type
      */
-    public void iteration(BenchmarkParams benchParams, IterationParams params, int iteration, IterationType type);
+    public void iteration(BenchmarkParams benchParams, IterationParams params, int iteration);
 
     /**
      * Format for end-of-iteration.
@@ -54,10 +53,9 @@ public interface OutputFormat {
      * @param benchParams      name of benchmark
      * @param params    iteration params in use
      * @param iteration iteration-number
-     * @param type      iteration type
      * @param data    result of iteration
      */
-    public void iterationResult(BenchmarkParams benchParams, IterationParams params, int iteration, IterationType type, IterationResult data);
+    public void iterationResult(BenchmarkParams benchParams, IterationParams params, int iteration, IterationResult data);
 
     /**
      * Format for start-of-benchmark output.

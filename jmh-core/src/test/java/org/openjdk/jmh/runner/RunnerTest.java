@@ -55,8 +55,8 @@ public class RunnerTest {
     public void testEmptyOptsHaveCompileCommandFile() {
         Runner blade = new Runner(new OptionsBuilder());
         BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
-                new IterationParams(1, TimeValue.seconds(1), 1),
-                new IterationParams(1, TimeValue.seconds(1), 1),
+                new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
+                new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList());
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
@@ -83,8 +83,8 @@ public class RunnerTest {
         Set<String> extraHints = CompilerHints.fromFile(tempHints).get();
         Runner blade = new Runner(new OptionsBuilder().build());
         BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
-                new IterationParams(1, TimeValue.seconds(1), 1),
-                new IterationParams(1, TimeValue.seconds(1), 1),
+                new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
+                new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Collections.<String>emptyList(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints), Collections.<String>emptyList());
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
@@ -115,8 +115,8 @@ public class RunnerTest {
         Set<String> extraHints2 = CompilerHints.fromFile(tempHints2).get();
         Runner blade = new Runner(new OptionsBuilder().build());
         BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
-                new IterationParams(1, TimeValue.seconds(1), 1),
-                new IterationParams(1, TimeValue.seconds(1), 1),
+                new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
+                new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Collections.<String>emptyList(),
                 Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
