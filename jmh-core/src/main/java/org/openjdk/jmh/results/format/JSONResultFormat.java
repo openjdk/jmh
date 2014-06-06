@@ -28,14 +28,13 @@ import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.ActualParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.util.Statistics;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 class JSONResultFormat implements ResultFormat {
 
@@ -46,44 +45,45 @@ class JSONResultFormat implements ResultFormat {
     }
 
     @Override
-    public void writeOut(Map<BenchmarkRecord, RunResult> results) {
+    public void writeOut(Collection<RunResult> results) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
         boolean first = true;
 
         pw.println("[");
-        for (BenchmarkRecord br : results.keySet()) {
+        for (RunResult runResult : results) {
+            BenchmarkParams params = runResult.getParams();
+
             if (first) {
                 first = false;
             } else {
                 pw.println(",");
             }
 
-            RunResult runResult = results.get(br);
-
             pw.println("{");
-            pw.println("\"benchmark\" : \"" + br.getUsername() + "\",");
-            pw.println("\"mode\" : \"" + br.getMode().shortLabel() + "\",");
-            pw.println("\"threads\" : " + runResult.getParams().getThreads() + ",");
-            pw.println("\"forks\" : " + runResult.getParams().getForks() + ",");
-            pw.println("\"warmupIterations\" : " + runResult.getParams().getWarmup().getCount() + ",");
-            pw.println("\"warmupTime\" : \"" + runResult.getParams().getWarmup().getTime() + "\",");
-            pw.println("\"measurementIterations\" : " + runResult.getParams().getMeasurement().getCount() + ",");
-            pw.println("\"measurementTime\" : \"" + runResult.getParams().getMeasurement().getTime() + "\",");
+            pw.println("\"benchmark\" : \"" + params.getBenchmark() + "\",");
+            pw.println("\"mode\" : \"" + params.getMode().shortLabel() + "\",");
+            pw.println("\"threads\" : " + params.getThreads() + ",");
+            pw.println("\"forks\" : " + params.getForks() + ",");
+            pw.println("\"warmupIterations\" : " + params.getWarmup().getCount() + ",");
+            pw.println("\"warmupTime\" : \"" + params.getWarmup().getTime() + "\",");
+            pw.println("\"measurementIterations\" : " + params.getMeasurement().getCount() + ",");
+            pw.println("\"measurementTime\" : \"" + params.getMeasurement().getTime() + "\",");
 
-            if (!br.getActualParams().isEmpty()) {
+            if (!params.getParams().isEmpty()) {
                 pw.println("\"params\" : {");
-                pw.println(emitParams(br.getActualParams()));
+                pw.println(emitParams(params.getParams()));
                 pw.println("},");
             }
 
+            Result primaryResult = runResult.getPrimaryResult();
             pw.println("\"primaryMetric\" : {");
-            pw.println("\"score\" : " + emit(runResult.getPrimaryResult().getScore()) + ",");
-            pw.println("\"scoreError\" : " + emit(runResult.getPrimaryResult().getScoreError()) + ",");
-            pw.println("\"scoreConfidence\" : " + emit(runResult.getPrimaryResult().getScoreConfidence()) + ",");
-            pw.println(emitPercentiles(runResult.getPrimaryResult().getStatistics()));
-            pw.println("\"scoreUnit\" : \"" + runResult.getPrimaryResult().getScoreUnit() + "\",");
+            pw.println("\"score\" : " + emit(primaryResult.getScore()) + ",");
+            pw.println("\"scoreError\" : " + emit(primaryResult.getScoreError()) + ",");
+            pw.println("\"scoreConfidence\" : " + emit(primaryResult.getScoreConfidence()) + ",");
+            pw.println(emitPercentiles(primaryResult.getStatistics()));
+            pw.println("\"scoreUnit\" : \"" + primaryResult.getScoreUnit() + "\",");
             pw.println("\"rawData\" :");
 
             {

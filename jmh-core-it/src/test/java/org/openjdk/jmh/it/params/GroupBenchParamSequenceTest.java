@@ -34,14 +34,11 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MICROSECONDS)
@@ -75,8 +72,7 @@ public class GroupBenchParamSequenceTest {
                 .shouldFailOnError(true)
                 .build();
 
-        SortedMap<BenchmarkRecord,RunResult> params = new Runner(opts).run();
-        Shared.compare(params, new int[] {1, 2, 3}, new String[] { "a", "b", "c"});
+        Shared.compare(new Runner(opts).run(), new int[] {1, 2, 3}, new String[] { "a", "b", "c"});
     }
 
     @Test
@@ -87,8 +83,7 @@ public class GroupBenchParamSequenceTest {
                 .param("x", "2", "3")
                 .build();
 
-        SortedMap<BenchmarkRecord,RunResult> params = new Runner(opts).run();
-        Shared.compare(params, new int[] {2, 3}, new String[] { "a", "b", "c"});
+        Shared.compare(new Runner(opts).run(), new int[] {2, 3}, new String[] { "a", "b", "c"});
     }
 
     @Test
@@ -99,8 +94,7 @@ public class GroupBenchParamSequenceTest {
                 .param("y", "b", "c")
                 .build();
 
-        SortedMap<BenchmarkRecord,RunResult> params = new Runner(opts).run();
-        Shared.compare(params, new int[] {1, 2, 3}, new String[] { "b", "c" });
+        Shared.compare(new Runner(opts).run(), new int[] {1, 2, 3}, new String[] { "b", "c" });
     }
 
 }

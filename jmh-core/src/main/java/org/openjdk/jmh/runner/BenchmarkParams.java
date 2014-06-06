@@ -25,14 +25,16 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.runner.options.Options;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-public class BenchmarkParams implements Serializable {
+public class BenchmarkParams implements Serializable, Comparable<BenchmarkParams> {
 
+    private final String benchmark;
+    private final String generatedTarget;
     private final boolean synchIterations;
     private final int threads;
     private final int[] threadGroups;
@@ -41,9 +43,19 @@ public class BenchmarkParams implements Serializable {
     private final IterationParams warmup;
     private final IterationParams measurement;
     private final Mode mode;
+    private final ActualParams params;
+    private final TimeUnit timeUnit;
+    private final int opsPerInvocation;
+    private final Collection<String> jvmArgsPrepend;
+    private final Collection<String> jvmArgs;
+    private final Collection<String> jvmArgsAppend;
 
-    public BenchmarkParams(boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks,
-                           IterationParams warmup, IterationParams measurement, Mode mode) {
+    public BenchmarkParams(String benchmark, String generatedTarget, boolean synchIterations, int threads, int[] threadGroups, int forks, int warmupForks,
+                           IterationParams warmup, IterationParams measurement, Mode mode, ActualParams params,
+                           TimeUnit timeUnit, int opsPerInvocation,
+                           Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
+        this.benchmark = benchmark;
+        this.generatedTarget = generatedTarget;
         this.synchIterations = synchIterations;
         this.threads = threads;
         this.threadGroups = threadGroups;
@@ -52,6 +64,12 @@ public class BenchmarkParams implements Serializable {
         this.warmup = warmup;
         this.measurement = measurement;
         this.mode = mode;
+        this.params = params;
+        this.timeUnit = timeUnit;
+        this.opsPerInvocation = opsPerInvocation;
+        this.jvmArgsPrepend = jvmArgsPrepend;
+        this.jvmArgs = jvmArgs;
+        this.jvmArgsAppend = jvmArgsAppend;
     }
 
     public boolean shouldSynchIterations() {
@@ -86,6 +104,52 @@ public class BenchmarkParams implements Serializable {
         return mode;
     }
 
+    public String getBenchmark() {
+        return benchmark;
+    }
+
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    public int getOpsPerInvocation() {
+        return opsPerInvocation;
+    }
+
+    public ActualParams getParams() {
+        return params;
+    }
+
+    public String getParam(String key) {
+        if (params != null) {
+            return params.get(key);
+        } else {
+            return null;
+        }
+    }
+
+    public String generatedClass() {
+        String s = generatedTarget;
+        return s.substring(0, s.lastIndexOf('.'));
+    }
+
+    public String generatedMethod() {
+        String s = generatedTarget;
+        return s.substring(s.lastIndexOf('.') + 1);
+    }
+
+    public Collection<String> getJvmArgsPrepend() {
+        return jvmArgsPrepend;
+    }
+
+    public Collection<String> getJvmArgs() {
+        return jvmArgs;
+    }
+
+    public Collection<String> getJvmArgsAppend() {
+        return jvmArgsAppend;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -93,28 +157,18 @@ public class BenchmarkParams implements Serializable {
 
         BenchmarkParams that = (BenchmarkParams) o;
 
-        if (forks != that.forks) return false;
-        if (synchIterations != that.synchIterations) return false;
-        if (threads != that.threads) return false;
-        if (warmupForks != that.warmupForks) return false;
-        if (!measurement.equals(that.measurement)) return false;
-        if (!Arrays.equals(threadGroups, that.threadGroups)) return false;
-        if (!warmup.equals(that.warmup)) return false;
-        if (!mode.equals(that.mode)) return false;
+        if (!benchmark.equals(that.benchmark)) return false;
+        if (mode != that.mode) return false;
+        if (!params.equals(that.params)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = (synchIterations ? 1 : 0);
-        result = 31 * result + threads;
-        result = 31 * result + Arrays.hashCode(threadGroups);
-        result = 31 * result + forks;
-        result = 31 * result + warmupForks;
-        result = 31 * result + warmup.hashCode();
-        result = 31 * result + measurement.hashCode();
+        int result = benchmark.hashCode();
         result = 31 * result + mode.hashCode();
+        result = 31 * result + params.hashCode();
         return result;
     }
 
@@ -131,6 +185,25 @@ public class BenchmarkParams implements Serializable {
 
     public long estimatedTime() {
         return (Math.max(1, forks) + warmupForks) * estimatedTimeSingleFork();
+    }
+
+    @Override
+    public int compareTo(BenchmarkParams o) {
+        int v = mode.compareTo(o.mode);
+        if (v != 0) {
+            return v;
+        }
+
+        int v1 = benchmark.compareTo(o.benchmark);
+        if (v1 != 0) {
+            return v1;
+        }
+
+        if (params == null || o.params == null) {
+            return 0;
+        }
+
+        return params.compareTo(o.params);
     }
 
 }

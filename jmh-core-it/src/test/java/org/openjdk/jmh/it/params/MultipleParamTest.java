@@ -26,22 +26,19 @@ package org.openjdk.jmh.it.params;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MICROSECONDS)
@@ -71,8 +68,7 @@ public class MultipleParamTest {
                 .shouldFailOnError(true)
                 .build();
 
-        SortedMap<BenchmarkRecord,RunResult> params = new Runner(opts).run();
-        Assert.assertEquals(3*3*3, params.size());
+        Assert.assertEquals(3*3*3, new Runner(opts).run().size());
     }
 
 }

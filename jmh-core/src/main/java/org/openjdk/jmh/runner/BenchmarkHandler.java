@@ -46,11 +46,6 @@ interface BenchmarkHandler {
      */
     public void shutdown();
 
-    /**
-     * Return the benchmark the handler runs.
-     * @return benchmark name
-     */
-    public BenchmarkRecord getBenchmark();
 }
 
 

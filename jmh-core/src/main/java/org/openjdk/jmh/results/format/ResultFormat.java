@@ -25,12 +25,11 @@
 package org.openjdk.jmh.results.format;
 
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 
-import java.util.Map;
+import java.util.Collection;
 
 public interface ResultFormat {
 
-    void writeOut(Map<BenchmarkRecord, RunResult> results);
+    void writeOut(Collection<RunResult> results);
 
 }

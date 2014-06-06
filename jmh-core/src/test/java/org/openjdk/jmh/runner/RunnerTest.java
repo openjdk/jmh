@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.File;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -52,8 +54,12 @@ public class RunnerTest {
     @Test
     public void testEmptyOptsHaveCompileCommandFile() {
         Runner blade = new Runner(new OptionsBuilder());
-        BenchmarkRecord benchmark = new BenchmarkRecord("Foo","bar",Mode.Throughput);
-        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
+        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
+                new IterationParams(1, TimeValue.seconds(1), 1),
+                new IterationParams(1, TimeValue.seconds(1), 1),
+                Mode.Throughput, null, TimeUnit.SECONDS, 1,
+                Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList());
+        String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(Arrays.asList(command));
@@ -75,10 +81,13 @@ public class RunnerTest {
         String tempHints = FileUtils.createTempFileWithLines("test", "fileWithLines",
                 Arrays.asList("inline,we/like/to/move/it.*"));
         Set<String> extraHints = CompilerHints.fromFile(tempHints).get();
-        Runner blade = new Runner(new OptionsBuilder().
-                jvmArgs(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints).build());
-        BenchmarkRecord benchmark = new BenchmarkRecord("Foo","bar",Mode.Throughput);
-        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
+        Runner blade = new Runner(new OptionsBuilder().build());
+        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
+                new IterationParams(1, TimeValue.seconds(1), 1),
+                new IterationParams(1, TimeValue.seconds(1), 1),
+                Mode.Throughput, null, TimeUnit.SECONDS, 1,
+                Collections.<String>emptyList(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints), Collections.<String>emptyList());
+        String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(Arrays.asList(command));
@@ -104,11 +113,15 @@ public class RunnerTest {
         String tempHints2 = FileUtils.createTempFileWithLines("test", "fileWithLines",
                 Arrays.asList("inline,we/like/to/move/it.*"));
         Set<String> extraHints2 = CompilerHints.fromFile(tempHints2).get();
-        Runner blade = new Runner(new OptionsBuilder().
-                jvmArgs(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1,
-                        CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2).build());
-        BenchmarkRecord benchmark = new BenchmarkRecord("Foo","bar",Mode.Throughput);
-        String[] command = blade.getSeparateExecutionCommand(benchmark, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
+        Runner blade = new Runner(new OptionsBuilder().build());
+        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
+                new IterationParams(1, TimeValue.seconds(1), 1),
+                new IterationParams(1, TimeValue.seconds(1), 1),
+                Mode.Throughput, null, TimeUnit.SECONDS, 1,
+                Collections.<String>emptyList(),
+                Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
+                Collections.<String>emptyList());
+        String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(Arrays.asList(command));

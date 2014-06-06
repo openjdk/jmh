@@ -67,18 +67,17 @@ abstract class BaseRunner {
         this.out = handler;
     }
 
-    protected Multimap<BenchmarkRecord, BenchResult> runBenchmarks(boolean forked, ActionPlan actionPlan) {
-        Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
+    protected Multimap<BenchmarkParams, BenchResult> runBenchmarks(boolean forked, ActionPlan actionPlan) {
+        Multimap<BenchmarkParams, BenchResult> results = new TreeMultimap<BenchmarkParams, BenchResult>();
 
         for (Action action : actionPlan.getActions()) {
 
-            BenchmarkRecord benchmark = action.getBenchmark();
             BenchmarkParams params = action.getParams();
             ActionMode mode = action.getMode();
 
             if (!forked) {
                 beforeBenchmark();
-                out.startBenchmark(benchmark, params);
+                out.startBenchmark(params);
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
 
@@ -86,14 +85,14 @@ abstract class BaseRunner {
             try {
                 switch (mode) {
                     case WARMUP: {
-                        runBenchmark(benchmark, mode, params);
+                        runBenchmark(params);
                         out.println("");
                         break;
                     }
                     case WARMUP_MEASUREMENT:
                     case MEASUREMENT: {
-                        r = runBenchmark(benchmark, mode, params);
-                        results.put(benchmark, r);
+                        r = runBenchmark(params);
+                        results.put(params, r);
                         break;
                     }
                     default:
@@ -118,15 +117,15 @@ abstract class BaseRunner {
             }
 
             if (!forked) {
-                afterBenchmark(benchmark, params);
-                out.endBenchmark(benchmark, r);
+                afterBenchmark(params);
+                out.endBenchmark(r);
             }
         }
 
         return results;
     }
 
-    protected void afterBenchmark(BenchmarkRecord name, BenchmarkParams params) {
+    protected void afterBenchmark(BenchmarkParams params) {
         long current = System.nanoTime();
         projectedRunningTime += params.estimatedTimeSingleFork();
         actualRunningTime += (current - benchmarkStart);
@@ -178,15 +177,15 @@ abstract class BaseRunner {
         return String.format("%s%02d:%02d:%02d", (days > 0) ? days + "days, " : "", hrs, mins, secs);
     }
 
-    BenchResult runBenchmark(BenchmarkRecord benchmark, ActionMode mode, BenchmarkParams executionParams) {
+    BenchResult runBenchmark(BenchmarkParams benchParams) {
         BenchmarkHandler handler = null;
         try {
-            Class<?> clazz = ClassUtils.loadClass(benchmark.generatedClass());
-            Method method = BenchmarkHandlers.findBenchmarkMethod(clazz, benchmark.generatedMethod());
+            Class<?> clazz = ClassUtils.loadClass(benchParams.generatedClass());
+            Method method = BenchmarkHandlers.findBenchmarkMethod(clazz, benchParams.generatedMethod());
 
-            handler = BenchmarkHandlers.getInstance(out, benchmark, clazz, method, executionParams, options);
+            handler = BenchmarkHandlers.getInstance(out, clazz, method, benchParams, options);
 
-            return runBenchmark(executionParams, handler);
+            return runBenchmark(benchParams, handler);
         } catch (BenchmarkException be) {
             throw be;
         } catch (Throwable ex) {
@@ -198,25 +197,25 @@ abstract class BaseRunner {
         }
     }
 
-    protected BenchResult runBenchmark(BenchmarkParams executionParams, BenchmarkHandler handler) {
+    protected BenchResult runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler) {
         List<IterationResult> allResults = new ArrayList<IterationResult>();
 
         // warmup
-        IterationParams wp = executionParams.getWarmup();
+        IterationParams wp = benchParams.getWarmup();
         for (int i = 1; i <= wp.getCount(); i++) {
             // will run system gc if we should
             if (runSystemGC()) {
                 out.verbosePrintln("System.gc() executed");
             }
 
-            out.iteration(handler.getBenchmark(), wp, i, IterationType.WARMUP);
-            boolean isLastIteration = (executionParams.getMeasurement().getCount() == 0);
-            IterationResult iterData = handler.runIteration(executionParams, wp, isLastIteration);
-            out.iterationResult(handler.getBenchmark(), wp, i, IterationType.WARMUP, iterData);
+            out.iteration(benchParams, wp, i, IterationType.WARMUP);
+            boolean isLastIteration = (benchParams.getMeasurement().getCount() == 0);
+            IterationResult iterData = handler.runIteration(benchParams, wp, isLastIteration);
+            out.iterationResult(benchParams, wp, i, IterationType.WARMUP, iterData);
         }
 
         // measurement
-        IterationParams mp = executionParams.getMeasurement();
+        IterationParams mp = benchParams.getMeasurement();
         for (int i = 1; i <= mp.getCount(); i++) {
             // will run system gc if we should
             if (runSystemGC()) {
@@ -224,11 +223,11 @@ abstract class BaseRunner {
             }
 
             // run benchmark iteration
-            out.iteration(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT);
+            out.iteration(benchParams, mp, i, IterationType.MEASUREMENT);
 
             boolean isLastIteration = (i == mp.getCount());
-            IterationResult iterData = handler.runIteration(executionParams, mp, isLastIteration);
-            out.iterationResult(handler.getBenchmark(), mp, i, IterationType.MEASUREMENT, iterData);
+            IterationResult iterData = handler.runIteration(benchParams, mp, isLastIteration);
+            out.iterationResult(benchParams, mp, i, IterationType.MEASUREMENT, iterData);
             allResults.add(iterData);
         }
 

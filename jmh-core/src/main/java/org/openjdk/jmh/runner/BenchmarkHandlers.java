@@ -62,8 +62,8 @@ class BenchmarkHandlers {
         return method;
     }
 
-    public static BenchmarkHandler getInstance(OutputFormat out, BenchmarkRecord benchmark, Class<?> clazz, Method method, BenchmarkParams executionParams, Options options) {
-        return new LoopBenchmarkHandler(out, benchmark, clazz, method, options, executionParams);
+    public static BenchmarkHandler getInstance(OutputFormat out, Class<?> clazz, Method method, BenchmarkParams executionParams, Options options) {
+        return new LoopBenchmarkHandler(out, clazz, method, options, executionParams);
     }
 
     /**

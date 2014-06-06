@@ -56,10 +56,10 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
     private final Method method;
     private final boolean shouldSynchIterations;
 
-    LoopBenchmarkHandler(OutputFormat format, BenchmarkRecord benchmark, Class<?> clazz, Method method, Options options, BenchmarkParams executionParams) {
-        super(format, benchmark, clazz, options, executionParams);
+    LoopBenchmarkHandler(OutputFormat format, Class<?> clazz, Method method, Options options, BenchmarkParams executionParams) {
+        super(format, clazz, options, executionParams);
         this.method = method;
-        this.shouldSynchIterations = (benchmark.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
+        this.shouldSynchIterations = (executionParams.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
     }
 
     @Override
@@ -71,9 +71,10 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
         // result object to accumulate the results in
-        IterationResult iterationResults = new IterationResult(benchmark, benchmarkParams, params);
+        IterationResult iterationResults = new IterationResult(benchmarkParams, params);
 
-        InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier, last, timeUnit, params.getBatchSize(), opsPerInvocation, benchmark.getActualParams());
+        InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier,
+                last, benchmarkParams.getTimeUnit(), params.getBatchSize(), benchmarkParams.getOpsPerInvocation(), benchmarkParams.getParams());
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
@@ -142,7 +143,7 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         //  - For other benchmarks, we wait for twice the run time,
         //    but at least 5 seconds to cover for low run times.
         long timeToWait;
-        switch (benchmark.getMode()) {
+        switch (benchmarkParams.getMode()) {
             case SingleShotTime:
                 timeToWait = Math.max(TimeUnit.SECONDS.toNanos(600), runtime.convertTo(TimeUnit.NANOSECONDS));
                 break;

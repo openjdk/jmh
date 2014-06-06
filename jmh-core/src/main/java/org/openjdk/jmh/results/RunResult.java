@@ -25,13 +25,13 @@
 package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -44,24 +44,15 @@ public class RunResult implements Serializable {
     private static final long serialVersionUID = 6467912427356048369L;
 
     private final Collection<BenchResult> benchResults;
-    private final BenchmarkRecord benchmark;
     private final BenchmarkParams params;
 
     public RunResult(Collection<BenchResult> data) {
         this.benchResults = data;
 
-        BenchmarkRecord myRecord = null;
         BenchmarkParams myParams = null;
 
         for (BenchResult br : data) {
-            BenchmarkRecord record = br.getBenchmark();
             BenchmarkParams params = br.getParams();
-
-            if (myRecord != null && !record.equals(myRecord)) {
-                throw new IllegalStateException("Aggregating the benchmark results from different benchmarks");
-            } else {
-                myRecord = record;
-            }
 
             if (myParams != null && !params.equals(myParams)) {
                 throw new IllegalStateException("Aggregating the benchmark results from different benchmarks");
@@ -70,7 +61,6 @@ public class RunResult implements Serializable {
             }
         }
 
-        this.benchmark = myRecord;
         this.params = myParams;
     }
 
@@ -127,11 +117,15 @@ public class RunResult implements Serializable {
         return getPrimaryResult().getScoreUnit();
     }
 
-    public BenchmarkRecord getBenchmark() {
-        return benchmark;
-    }
-
     public BenchmarkParams getParams() {
         return params;
     }
+
+    public static final Comparator<RunResult> DEFAULT_SORT_COMPARATOR = new Comparator<RunResult>() {
+        @Override
+        public int compare(RunResult o1, RunResult o2) {
+            return o1.params.compareTo(o2.params);
+        }
+    };
+
 }

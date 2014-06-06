@@ -32,12 +32,12 @@ import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -50,36 +50,36 @@ class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams) {
-        if (mbParams.getWarmup().getCount() > 0) {
-            out.println("# Warmup: " + mbParams.getWarmup().getCount() + " iterations, " +
-                    mbParams.getWarmup().getTime() + " each" +
-                    (mbParams.getWarmup().getBatchSize() <= 1 ? "" : ", " + mbParams.getWarmup().getBatchSize() + " calls per batch"));
+    public void startBenchmark(BenchmarkParams params) {
+        if (params.getWarmup().getCount() > 0) {
+            out.println("# Warmup: " + params.getWarmup().getCount() + " iterations, " +
+                    params.getWarmup().getTime() + " each" +
+                    (params.getWarmup().getBatchSize() <= 1 ? "" : ", " + params.getWarmup().getBatchSize() + " calls per batch"));
         } else {
             out.println("# Warmup: <none>");
         }
 
-        if (mbParams.getMeasurement().getCount() > 0) {
-            out.println("# Measurement: " + mbParams.getMeasurement().getCount() + " iterations, " +
-                    mbParams.getMeasurement().getTime() + " each" +
-                    (mbParams.getMeasurement().getBatchSize() <= 1 ? "" : ", " + mbParams.getMeasurement().getBatchSize() + " calls per batch"));
+        if (params.getMeasurement().getCount() > 0) {
+            out.println("# Measurement: " + params.getMeasurement().getCount() + " iterations, " +
+                    params.getMeasurement().getTime() + " each" +
+                    (params.getMeasurement().getBatchSize() <= 1 ? "" : ", " + params.getMeasurement().getBatchSize() + " calls per batch"));
         } else {
             out.println("# Measurement: <none>");
         }
 
-        out.println("# Threads: " + mbParams.getThreads() + " " + getThreadsString(mbParams.getThreads()) +
-                (mbParams.shouldSynchIterations() ?
+        out.println("# Threads: " + params.getThreads() + " " + getThreadsString(params.getThreads()) +
+                (params.shouldSynchIterations() ?
                         ", will synchronize iterations" :
-                        (name.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***"));
-        out.println("# Benchmark mode: " + name.getMode().longLabel());
-        out.println("# Benchmark: " + name.getUsername());
-        if (!name.getActualParams().isEmpty()) {
-            out.println("# Parameters: " + name.getActualParams());
+                        (params.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***"));
+        out.println("# Benchmark mode: " + params.getMode().longLabel());
+        out.println("# Benchmark: " + params.getBenchmark());
+        if (!params.getParams().isEmpty()) {
+            out.println("# Parameters: " + params.getParams());
         }
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
+    public void iteration(BenchmarkParams benchmarkParams, IterationParams params, int iteration, IterationType type) {
         switch (type) {
             case WARMUP:
                 out.print(String.format("# Warmup Iteration %3d: ", iteration));
@@ -102,7 +102,7 @@ class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data) {
+    public void iterationResult(BenchmarkParams benchmParams, IterationParams params, int iteration, IterationType type, IterationResult data) {
         StringBuilder sb = new StringBuilder();
         sb.append(data.getPrimaryResult().toString());
 
@@ -131,7 +131,7 @@ class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endBenchmark(BenchmarkRecord name, BenchResult result) {
+    public void endBenchmark(BenchResult result) {
         out.println();
         if (result != null) {
             out.println(result.getPrimaryResult().extendedInfo(null));
@@ -148,7 +148,7 @@ class TextReportFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endRun(Map<BenchmarkRecord, RunResult> runResults) {
+    public void endRun(Collection<RunResult> runResults) {
         PrintWriter pw = new PrintWriter(out);
         ResultFormatFactory.getInstance(ResultFormatType.TEXT, pw).writeOut(runResults);
         pw.flush();

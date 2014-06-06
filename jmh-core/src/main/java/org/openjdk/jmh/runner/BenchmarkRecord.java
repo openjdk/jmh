@@ -29,14 +29,13 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Optional;
 import org.openjdk.jmh.util.Utils;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializable {
+public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
 
     private static final String BR_SEPARATOR = "===,===";
 
@@ -157,14 +156,6 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return actualParams;
     }
 
-    public String getActualParam(String key) {
-        if (actualParams != null) {
-            return actualParams.get(key);
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public int compareTo(BenchmarkRecord o) {
         int v = mode.compareTo(o.mode);
@@ -206,22 +197,8 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord>, Serializabl
         return result;
     }
 
-    public String generatedTarget(Mode type) {
-        return generatedName + "_" + type;
-    }
-
     public String generatedTarget() {
-        return generatedTarget(mode);
-    }
-
-    public String generatedClass() {
-        String s = generatedTarget();
-        return s.substring(0, s.lastIndexOf('.'));
-    }
-
-    public String generatedMethod() {
-        String s = generatedTarget();
-        return s.substring(s.lastIndexOf('.') + 1);
+        return generatedName + "_" + mode;
     }
 
     public String getUsername() {

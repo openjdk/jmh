@@ -47,7 +47,7 @@ class ForkedRunner extends BaseRunner {
         ActionPlan actionPlan = link.requestPlan();
 
         try {
-            Multimap<BenchmarkRecord,BenchResult> res = runBenchmarks(true, actionPlan);
+            Multimap<BenchmarkParams,BenchResult> res = runBenchmarks(true, actionPlan);
             link.pushResults(res);
         } catch (BenchmarkException be) {
             link.pushException(be);

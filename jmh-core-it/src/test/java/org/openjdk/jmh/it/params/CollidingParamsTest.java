@@ -31,15 +31,11 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-
-import java.util.SortedMap;
 
 public class CollidingParamsTest {
 
@@ -78,8 +74,7 @@ public class CollidingParamsTest {
                 .param("x", "2", "3")
                 .build();
 
-        SortedMap<BenchmarkRecord,RunResult> params = new Runner(opts).run();
-        Assert.assertEquals(4, params.size());
+        Assert.assertEquals(4, new Runner(opts).run().size());
     }
 
 }

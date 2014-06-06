@@ -25,13 +25,12 @@
 package org.openjdk.jmh.results.format;
 
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 
-import java.util.Map;
+import java.util.Collection;
 
 class NoneResultFormat implements ResultFormat {
     @Override
-    public void writeOut(Map<BenchmarkRecord, RunResult> results) {
+    public void writeOut(Collection<RunResult> results) {
         // do nothing
     }
 }

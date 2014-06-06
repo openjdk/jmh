@@ -46,11 +46,6 @@ import java.util.concurrent.TimeUnit;
 abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     /**
-     * Name of micro benchmark
-     */
-    protected final BenchmarkRecord benchmark;
-
-    /**
      * Thread-pool for threads executing the benchmark tasks
      */
     protected final ExecutorService executor;
@@ -59,13 +54,10 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
     protected final ThreadLocal<Object> instances;
 
     protected final OutputFormat out;
-    protected final TimeUnit timeUnit;
-    protected final int opsPerInvocation;
 
     private final List<InternalProfiler> registeredProfilers;
 
-    public BaseBenchmarkHandler(OutputFormat out, BenchmarkRecord benchmark, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
-        this.benchmark = benchmark;
+    public BaseBenchmarkHandler(OutputFormat out, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
         this.registeredProfilers = createProfilers(options);
         this.instances = new ThreadLocal<Object>() {
             @Override
@@ -80,10 +72,8 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
             }
         };
         this.out = out;
-        this.timeUnit = options.getTimeUnit().orElse(benchmark.getTimeUnit().orElse(Defaults.OUTPUT_TIMEUNIT));
-        this.opsPerInvocation = options.getOperationsPerInvocation().orElse(benchmark.getOperationsPerInvocation().orElse(Defaults.OPS_PER_INVOCATION));
         try {
-            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), benchmark.getUsername());
+            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -194,11 +184,6 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
                 throw new BenchmarkException(ex);
             }
         }
-    }
-
-    @Override
-    public BenchmarkRecord getBenchmark() {
-        return benchmark;
     }
 
     @Override

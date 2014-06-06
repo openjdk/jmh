@@ -28,12 +28,11 @@ import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * Silent format, does nothing.
@@ -49,26 +48,26 @@ class SilentFormat extends AbstractOutputFormat {
     }
 
     @Override
-    public void endRun(Map<BenchmarkRecord, RunResult> results) {
+    public void endRun(Collection<RunResult> results) {
     }
 
     @Override
-    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams) {
-
-    }
-
-    @Override
-    public void endBenchmark(BenchmarkRecord name, BenchResult result) {
+    public void startBenchmark(BenchmarkParams benchmarkParams) {
 
     }
 
     @Override
-    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type) {
+    public void endBenchmark(BenchResult result) {
 
     }
 
     @Override
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data) {
+    public void iteration(BenchmarkParams benchmarkParams, IterationParams params, int iteration, IterationType type) {
+
+    }
+
+    @Override
+    public void iterationResult(BenchmarkParams benchmarkParams, IterationParams params, int iteration, IterationType type, IterationResult data) {
 
     }
 

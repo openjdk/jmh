@@ -26,7 +26,6 @@ package org.openjdk.jmh.results.format;
 
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.util.ClassUtils;
 
 import java.io.PrintWriter;
@@ -45,13 +44,12 @@ class TextResultFormat implements ResultFormat {
     }
 
     @Override
-    public void writeOut(Map<BenchmarkRecord, RunResult> runResults) {
+    public void writeOut(Collection<RunResult> runResults) {
         Collection<String> benchNames = new ArrayList<String>();
-        for (BenchmarkRecord key : runResults.keySet()) {
-            RunResult runResult = runResults.get(key);
-            benchNames.add(key.getUsername());
+        for (RunResult runResult : runResults) {
+            benchNames.add(runResult.getParams().getBenchmark());
             for (String label : runResult.getSecondaryResults().keySet()) {
-                benchNames.add(key.getUsername() + ":" + label);
+                benchNames.add(runResult.getParams().getBenchmark() + ":" + label);
             }
         }
 
@@ -66,14 +64,14 @@ class TextResultFormat implements ResultFormat {
 
         Map<String, Integer> paramLengths = new HashMap<String, Integer>();
         SortedSet<String> params = new TreeSet<String>();
-        for (BenchmarkRecord br : runResults.keySet()) {
-            for (String k : br.getActualParams().keys()) {
+        for (RunResult runResult : runResults) {
+            for (String k : runResult.getParams().getParams().keys()) {
                 params.add(k);
                 Integer len = paramLengths.get(k);
                 if (len == null) {
                     len = ("(" + k + ")").length();
                 }
-                paramLengths.put(k, Math.max(len, br.getActualParam(k).length()));
+                paramLengths.put(k, Math.max(len, runResult.getParams().getParam(k).length()));
             }
         }
 
@@ -84,19 +82,18 @@ class TextResultFormat implements ResultFormat {
 
         out.print(String.format("%6s %9s %12s %12s %8s%n",
                 "Mode", "Samples", "Score", "Score error", "Units"));
-        for (BenchmarkRecord key : runResults.keySet()) {
-            RunResult res = runResults.get(key);
+        for (RunResult res : runResults) {
             {
                 out.print(String.format("%-" + nameLen + "s ",
-                        benchPrefixes.get(key.getUsername())));
+                        benchPrefixes.get(res.getParams().getBenchmark())));
 
                 for (String k : params) {
-                    String v = key.getActualParam(k);
+                    String v = res.getParams().getParam(k);
                     out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
                 }
 
                 out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
-                        key.getMode().shortLabel(),
+                        res.getParams().getMode().shortLabel(),
                         res.getPrimaryResult().getSampleCount(),
                         res.getPrimaryResult().getScore(), res.getPrimaryResult().getScoreError(),
                         res.getScoreUnit()));
@@ -106,15 +103,15 @@ class TextResultFormat implements ResultFormat {
                 Result subRes = res.getSecondaryResults().get(label);
 
                 out.print(String.format("%-" + nameLen + "s ",
-                        benchPrefixes.get(key.getUsername() + ":" + label)));
+                        benchPrefixes.get(res.getParams().getBenchmark() + ":" + label)));
 
                 for (String k : params) {
-                    String v = key.getActualParam(k);
+                    String v = res.getParams().getParam(k);
                     out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
                 }
 
                 out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
-                        key.getMode().shortLabel(),
+                        res.getParams().getMode().shortLabel(),
                         subRes.getSampleCount(),
                         subRes.getScore(), subRes.getScoreError(),
                         subRes.getScoreUnit()));

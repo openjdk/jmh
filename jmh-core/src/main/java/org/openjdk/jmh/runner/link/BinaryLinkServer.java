@@ -27,7 +27,7 @@ package org.openjdk.jmh.runner.link;
 import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.HashMultimap;
@@ -66,7 +66,7 @@ public final class BinaryLinkServer {
     private final Set<String> forbidden;
     private final Acceptor acceptor;
     private final AtomicReference<Handler> handler;
-    private final AtomicReference<Multimap<BenchmarkRecord, BenchResult>> results;
+    private final AtomicReference<Multimap<BenchmarkParams, BenchResult>> results;
     private final AtomicReference<BenchmarkException> exception;
     private final AtomicReference<ActionPlan> plan;
 
@@ -94,7 +94,7 @@ public final class BinaryLinkServer {
         acceptor.start();
 
         handler = new AtomicReference<Handler>();
-        results = new AtomicReference<Multimap<BenchmarkRecord, BenchResult>>(new HashMultimap<BenchmarkRecord, BenchResult>());
+        results = new AtomicReference<Multimap<BenchmarkParams, BenchResult>>(new HashMultimap<BenchmarkParams, BenchResult>());
         exception = new AtomicReference<BenchmarkException>();
         plan = new AtomicReference<ActionPlan>();
     }
@@ -132,8 +132,8 @@ public final class BinaryLinkServer {
         return exception.getAndSet(null);
     }
 
-    public Multimap<BenchmarkRecord, BenchResult> getResults() {
-        Multimap<BenchmarkRecord, BenchResult> res = results.getAndSet(new HashMultimap<BenchmarkRecord, BenchResult>());
+    public Multimap<BenchmarkParams, BenchResult> getResults() {
+        Multimap<BenchmarkParams, BenchResult> res = results.getAndSet(new HashMultimap<BenchmarkParams, BenchResult>());
         if (res != null) {
             return res;
         } else {

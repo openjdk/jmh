@@ -25,11 +25,10 @@
 package org.openjdk.jmh.results.format;
 
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
+import java.util.Collection;
 
 public class ResultFormatFactory {
 
@@ -47,7 +46,7 @@ public class ResultFormatFactory {
         }
         return new ResultFormat() {
             @Override
-            public void writeOut(Map<BenchmarkRecord, RunResult> results) {
+            public void writeOut(Collection<RunResult> results) {
                 try {
                     PrintWriter pw = new PrintWriter(file);
                     ResultFormat rf = getInstance(type, pw);

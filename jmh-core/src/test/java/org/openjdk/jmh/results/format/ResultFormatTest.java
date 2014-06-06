@@ -34,7 +34,6 @@ import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
@@ -46,9 +45,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Random;
-import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,32 +56,35 @@ import java.util.concurrent.TimeUnit;
  */
 public class ResultFormatTest {
 
-    private Map<BenchmarkRecord, RunResult> getStub() {
-        Map<BenchmarkRecord, RunResult> results = new TreeMap<BenchmarkRecord, RunResult>();
+    private Collection<RunResult> getStub() {
+        Collection<RunResult> results = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
 
         Random r = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
-            BenchmarkRecord record = new BenchmarkRecord("benchmark_" + b, JSONResultFormat.class.getName() + ".benchmark_" + b, Mode.Throughput);
             ActualParams ps = new ActualParams();
             for (int p = 0; p < 5; p++) {
                 ps.put("param" + p, "value" + p, p);
             }
-            record = record.cloneWith(ps);
-            BenchmarkParams params = new BenchmarkParams(false,
+            BenchmarkParams params = new BenchmarkParams(
+                    "benchmark_" + b,
+                    JSONResultFormat.class.getName() + ".benchmark_" + b + "_" + Mode.Throughput,
+                    false,
                     r.nextInt(1000),
                     new int[]{ r.nextInt(1000) },
                     r.nextInt(1000),
                     r.nextInt(1000),
                     new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
                     new IterationParams(r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),
-                    Mode.Throughput
-            );
+                    Mode.Throughput,
+                    ps,
+                    TimeUnit.SECONDS, 1,
+                    Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList());
 
             Collection<BenchResult> benchResults = new ArrayList<BenchResult>();
             for (int f = 0; f < r.nextInt(10); f++) {
                 Collection<IterationResult> iterResults = new ArrayList<IterationResult>();
                 for (int c = 0; c < r.nextInt(10); c++) {
-                    IterationResult res = new IterationResult(record, params, params.getMeasurement());
+                    IterationResult res = new IterationResult(params, params.getMeasurement());
                     res.addResult(new ThroughputResult(ResultRole.PRIMARY, "test", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary1", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
@@ -90,7 +92,7 @@ public class ResultFormatTest {
                 }
                 benchResults.add(new BenchResult(iterResults));
             }
-            results.put(record, new RunResult(benchResults));
+            results.add(new RunResult(benchResults));
         }
         return results;
     }

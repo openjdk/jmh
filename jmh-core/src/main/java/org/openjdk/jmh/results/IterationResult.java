@@ -25,7 +25,6 @@
 package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
@@ -42,15 +41,13 @@ import java.util.TreeMap;
  */
 public class IterationResult implements Serializable {
 
-    private final BenchmarkRecord benchmark;
     private final BenchmarkParams benchmarkParams;
     private final IterationParams params;
     private final List<Result> primaryResults;
     private final Multimap<String, Result> secondaryResults;
     private String scoreUnit;
 
-    public IterationResult(BenchmarkRecord benchmark, BenchmarkParams benchmarkParams, IterationParams params) {
-        this.benchmark = benchmark;
+    public IterationResult(BenchmarkParams benchmarkParams, IterationParams params) {
         this.benchmarkParams = benchmarkParams;
         this.params = params;
         this.primaryResults = new ArrayList<Result>();
@@ -109,10 +106,6 @@ public class IterationResult implements Serializable {
         @SuppressWarnings("unchecked")
         Aggregator<Result> aggregator = next.getIterationAggregator();
         return aggregator.aggregate(primaryResults);
-    }
-
-    public BenchmarkRecord getBenchmark() {
-        return benchmark;
     }
 
     public IterationParams getParams() {

@@ -28,11 +28,10 @@ import org.openjdk.jmh.results.BenchResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.IterationParams;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * Internal interface for OutputFormat.
@@ -42,38 +41,36 @@ public interface OutputFormat {
     /**
      * Format for iteration start.
      *
-     * @param benchmark benchmark name
+     * @param benchParams benchmark parameters
      * @param params iteration params in use
      * @param iteration iteration-number
      * @param type iteration type
      */
-    public void iteration(BenchmarkRecord benchmark, IterationParams params, int iteration, IterationType type);
+    public void iteration(BenchmarkParams benchParams, IterationParams params, int iteration, IterationType type);
 
     /**
      * Format for end-of-iteration.
      *
-     * @param name      name of benchmark
+     * @param benchParams      name of benchmark
      * @param params    iteration params in use
      * @param iteration iteration-number
      * @param type      iteration type
      * @param data    result of iteration
      */
-    public void iterationResult(BenchmarkRecord name, IterationParams params, int iteration, IterationType type, IterationResult data);
+    public void iterationResult(BenchmarkParams benchParams, IterationParams params, int iteration, IterationType type, IterationResult data);
 
     /**
      * Format for start-of-benchmark output.
-     * @param name benchmark name
-     * @param mbParams benchmark params
+     * @param benchParams benchmark params
      */
-    public void startBenchmark(BenchmarkRecord name, BenchmarkParams mbParams);
+    public void startBenchmark(BenchmarkParams benchParams);
 
     /**
      * Format for end-of-benchmark.
      *
-     * @param name       benchmark name
      * @param result statistics of the run
      */
-    public void endBenchmark(BenchmarkRecord name, BenchResult result);
+    public void endBenchmark(BenchResult result);
 
     /**
      * Format for start-of-benchmark output.
@@ -84,7 +81,7 @@ public interface OutputFormat {
      * Format for end-of-benchmark.
      * @param result benchmark results
      */
-    public void endRun(Map<BenchmarkRecord, RunResult> result);
+    public void endRun(Collection<RunResult> result);
 
     /* ------------- RAW OUTPUT METHODS ------------------- */
 

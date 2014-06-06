@@ -24,11 +24,12 @@
  */
 package org.openjdk.jmh.results.format;
 
+import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.BenchmarkParams;
 
 import java.io.PrintWriter;
-import java.util.Map;
+import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -43,10 +44,10 @@ class XSVResultFormat implements ResultFormat {
     }
 
     @Override
-    public void writeOut(Map<BenchmarkRecord, RunResult> results) {
+    public void writeOut(Collection<RunResult> results) {
         SortedSet<String> params = new TreeSet<String>();
-        for (BenchmarkRecord br : results.keySet()) {
-            params.addAll(br.getActualParams().keys());
+        for (RunResult rs : results) {
+            params.addAll(rs.getParams().getParams().keys());
         }
 
         pw.write("\"Benchmark\"");
@@ -68,33 +69,34 @@ class XSVResultFormat implements ResultFormat {
         }
         pw.write("\r\n");
 
-        for (BenchmarkRecord br : results.keySet()) {
-            RunResult runResult = results.get(br);
+        for (RunResult runResult : results) {
+            BenchmarkParams benchmarkParams = runResult.getParams();
+            Result primaryResult = runResult.getPrimaryResult();
 
             pw.write("\"");
-            pw.write(br.getUsername());
+            pw.write(benchmarkParams.getBenchmark());
             pw.write("\"");
             pw.write(delimiter);
             pw.write("\"");
-            pw.write(br.getMode().shortLabel());
+            pw.write(benchmarkParams.getMode().shortLabel());
             pw.write("\"");
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getParams().getThreads()));
+            pw.write(String.valueOf(benchmarkParams.getThreads()));
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getPrimaryResult().getSampleCount()));
+            pw.write(String.valueOf(primaryResult.getSampleCount()));
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getPrimaryResult().getScore()));
+            pw.write(String.valueOf(primaryResult.getScore()));
             pw.write(delimiter);
-            pw.write(String.valueOf(runResult.getPrimaryResult().getScoreError()));
+            pw.write(String.valueOf(primaryResult.getScoreError()));
             pw.write(delimiter);
             pw.write("\"");
-            pw.write(runResult.getPrimaryResult().getScoreUnit());
+            pw.write(primaryResult.getScoreUnit());
             pw.write("\"");
 
             for (String p : params) {
                 pw.write(delimiter);
                 pw.write("\"");
-                String v = br.getActualParam(p);
+                String v = benchmarkParams.getParam(p);
                 if (v != null) {
                     pw.write(v);
                 }

@@ -26,18 +26,19 @@ package org.openjdk.jmh.it.params;
 
 import junit.framework.Assert;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.BenchmarkParams;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedMap;
 
 public class Shared {
 
-    public static void compare(SortedMap<BenchmarkRecord,RunResult> params, int[] xs, String[] ys) {
+    public static void compare(Collection<RunResult> res, int[] xs, String[] ys) {
         Set<String> actualPairs = new HashSet<String>();
-        for (BenchmarkRecord br : params.keySet()) {
-            actualPairs.add(br.getActualParam("x") + br.getActualParam("y"));
+        for (RunResult r : res) {
+            BenchmarkParams params = r.getParams();
+            actualPairs.add(params.getParam("x") + params.getParam("y"));
         }
 
         for (int x : xs) {

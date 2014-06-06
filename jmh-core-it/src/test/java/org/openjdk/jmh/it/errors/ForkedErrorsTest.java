@@ -31,7 +31,6 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkRecord;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -39,7 +38,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
-import java.util.SortedMap;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 @Measurement(iterations = 1, time = 10, timeUnit = TimeUnit.MILLISECONDS)
@@ -95,7 +94,7 @@ public class ForkedErrorsTest {
                 .forks(1)
                 .shouldFailOnError(false)
                 .build();
-        SortedMap<BenchmarkRecord,RunResult> results = new Runner(opt).run();
+        Collection<RunResult> results = new Runner(opt).run();
 
         Assert.assertEquals(4, results.size());
     }

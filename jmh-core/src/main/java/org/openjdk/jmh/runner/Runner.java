@@ -62,9 +62,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Runner executes JMH benchmarks.
@@ -140,8 +140,7 @@ public class Runner extends BaseRunner {
         Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.size() == 1) {
-            Map<BenchmarkRecord, RunResult> rs = run();
-            Collection<RunResult> values = rs.values();
+            Collection<RunResult> values = run();
             if (values.size() == 1) {
                 return values.iterator().next();
             } else {
@@ -158,7 +157,7 @@ public class Runner extends BaseRunner {
      * @return map of benchmark results
      * @throws org.openjdk.jmh.runner.RunnerException if something goes wrong
      */
-    public SortedMap<BenchmarkRecord, RunResult> run() throws RunnerException {
+    public Collection<RunResult> run() throws RunnerException {
         for (Class<? extends Profiler> p : options.getProfilers()) {
             Collection<String> initMessages = ProfilerFactory.checkSupport(p);
             if (!initMessages.isEmpty()) {
@@ -227,7 +226,7 @@ public class Runner extends BaseRunner {
             benchmarks.addAll(newBenchmarks);
         }
 
-        SortedMap<BenchmarkRecord, RunResult> results = runBenchmarks(benchmarks);
+        Collection<RunResult> results = runBenchmarks(benchmarks);
 
         out.flush();
         out.close();
@@ -295,7 +294,7 @@ public class Runner extends BaseRunner {
     }
 
     private Action newAction(BenchmarkRecord br, ActionMode mode) {
-        return new Action(br, newBenchmarkParams(br, mode), mode);
+        return new Action(newBenchmarkParams(br, mode), mode);
     }
 
     private BenchmarkParams newBenchmarkParams(BenchmarkRecord benchmark, ActionMode mode) {
@@ -365,7 +364,30 @@ public class Runner extends BaseRunner {
                 benchmark.getWarmupForks().orElse(
                         Defaults.WARMUP_FORKS));
 
-        return new BenchmarkParams(synchIterations, threads, threadGroups, forks, warmupForks, warmup, measurement, benchmark.getMode());
+        TimeUnit timeUnit = options.getTimeUnit().orElse(
+                benchmark.getTimeUnit().orElse(
+                        Defaults.OUTPUT_TIMEUNIT));
+
+        int opsPerInvocation = options.getOperationsPerInvocation().orElse(
+                benchmark.getOperationsPerInvocation().orElse(
+                        Defaults.OPS_PER_INVOCATION));
+
+        Collection<String> jvmArgsPrepend = options.getJvmArgsPrepend().orElse(
+                benchmark.getJvmArgsPrepend().orElse(
+                        Collections.<String>emptyList()));
+
+        Collection<String> jvmArgs = options.getJvmArgs().orElse(
+                benchmark.getJvmArgs().orElse(
+                        ManagementFactory.getRuntimeMXBean().getInputArguments()));
+
+        Collection<String> jvmArgsAppend = options.getJvmArgsAppend().orElse(
+                benchmark.getJvmArgsAppend().orElse(
+                        Collections.<String>emptyList()));
+
+        return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
+                threads, threadGroups, forks, warmupForks,
+                warmup, measurement, benchmark.getMode(), benchmark.getActualParams(), timeUnit, opsPerInvocation,
+                jvmArgsPrepend, jvmArgs, jvmArgsAppend);
     }
 
     private List<ActualParams> explodeAllParams(BenchmarkRecord br) throws RunnerException {
@@ -403,17 +425,17 @@ public class Runner extends BaseRunner {
         return ps;
     }
 
-    private SortedMap<BenchmarkRecord, RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
+    private Collection<RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
         out.startRun();
 
-        Multimap<BenchmarkRecord, BenchResult> results = new TreeMultimap<BenchmarkRecord, BenchResult>();
+        Multimap<BenchmarkParams, BenchResult> results = new TreeMultimap<BenchmarkParams, BenchResult>();
         List<ActionPlan> plan = getActionPlans(benchmarks);
 
         beforeBenchmarks(plan);
 
         try {
             for (ActionPlan r : plan) {
-                Multimap<BenchmarkRecord, BenchResult> res;
+                Multimap<BenchmarkParams, BenchResult> res;
                 switch (r.getType()) {
                     case EMBEDDED:
                         res = runBenchmarks(false, r);
@@ -425,14 +447,14 @@ public class Runner extends BaseRunner {
                         throw new IllegalStateException("Unknown action plan type: " + r.getType());
                 }
 
-                for (BenchmarkRecord br : res.keys()) {
+                for (BenchmarkParams br : res.keys()) {
                     results.putAll(br, res.get(br));
                 }
             }
 
             afterBenchmarks();
 
-            SortedMap<BenchmarkRecord, RunResult> runResults = mergeRunResults(results);
+            SortedSet<RunResult> runResults = mergeRunResults(results);
             out.endRun(runResults);
             return runResults;
         } catch (BenchmarkException be) {
@@ -440,17 +462,16 @@ public class Runner extends BaseRunner {
         }
     }
 
-    private SortedMap<BenchmarkRecord, RunResult> mergeRunResults(Multimap<BenchmarkRecord, BenchResult> results) {
-        SortedMap<BenchmarkRecord, RunResult> result = new TreeMap<BenchmarkRecord, RunResult>();
-        for (BenchmarkRecord key : results.keys()) {
-            Collection<BenchResult> rs = results.get(key);
-            result.put(key, new RunResult(rs));
+    private SortedSet<RunResult> mergeRunResults(Multimap<BenchmarkParams, BenchResult> results) {
+        SortedSet<RunResult> result = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
+        for (BenchmarkParams key : results.keys()) {
+            result.add(new RunResult(results.get(key)));
         }
         return result;
     }
 
-    private Multimap<BenchmarkRecord, BenchResult> runSeparate(ActionPlan actionPlan) {
-        Multimap<BenchmarkRecord, BenchResult> results = new HashMultimap<BenchmarkRecord, BenchResult>();
+    private Multimap<BenchmarkParams, BenchResult> runSeparate(ActionPlan actionPlan) {
+        Multimap<BenchmarkParams, BenchResult> results = new HashMultimap<BenchmarkParams, BenchResult>();
 
         if (actionPlan.getMeasurementActions().size() != 1) {
             throw new IllegalStateException("Expect only single benchmark in the action plan, but was " + actionPlan.getMeasurementActions().size());
@@ -462,7 +483,6 @@ public class Runner extends BaseRunner {
 
             server.setPlan(actionPlan);
 
-            BenchmarkRecord benchmark = actionPlan.getMeasurementActions().get(0).getBenchmark();
             BenchmarkParams params = actionPlan.getMeasurementActions().get(0).getParams();
 
             List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
@@ -477,8 +497,8 @@ public class Runner extends BaseRunner {
                 javaOptions.addAll(prof.addJVMOptions(params));
             }
 
-            String[] commandString = getSeparateExecutionCommand(benchmark, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
-            String opts = Utils.join(getJvmArgs(benchmark), " ");
+            String[] commandString = getSeparateExecutionCommand(params, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
+            String opts = Utils.join(getJvmArgs(params), " ");
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
             }
@@ -491,7 +511,7 @@ public class Runner extends BaseRunner {
                 out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < warmupForkCount; i++) {
                     beforeBenchmark();
-                    out.startBenchmark(benchmark, params);
+                    out.startBenchmark(params);
                     out.println("# VM invoker: " + jvm);
                     out.println("# VM options: " + opts);
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
@@ -501,15 +521,15 @@ public class Runner extends BaseRunner {
 
                     doFork(server, commandString, stdOut, stdErr);
 
-                    out.endBenchmark(benchmark, null);
-                    afterBenchmark(benchmark, params);
+                    out.endBenchmark(null);
+                    afterBenchmark(params);
                 }
             }
 
             out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < forkCount; i++) {
                 beforeBenchmark();
-                out.startBenchmark(benchmark, params);
+                out.startBenchmark(params);
 
                 out.println("# VM invoker: " + jvm);
                 out.println("# VM options: " + opts);
@@ -522,7 +542,7 @@ public class Runner extends BaseRunner {
                     profiler.beforeTrial();
                 }
 
-                Multimap<BenchmarkRecord, BenchResult> result = doFork(server, commandString, stdOut, stdErr);
+                Multimap<BenchmarkParams, BenchResult> result = doFork(server, commandString, stdOut, stdErr);
 
                 for (ExternalProfiler profiler : profilers) {
                     for (Result profR : profiler.afterTrial(stdOut, stdErr)) {
@@ -533,7 +553,7 @@ public class Runner extends BaseRunner {
                 }
 
                 results.merge(result);
-                afterBenchmark(benchmark, params);
+                afterBenchmark(params);
 
                 // we have only a single benchmark, which will produce only a single result
                 // TODO: clean up doFork() to return only a single value
@@ -541,7 +561,7 @@ public class Runner extends BaseRunner {
                 if (result.values().size() == 1) {
                     r = result.values().iterator().next();
                 }
-                out.endBenchmark(benchmark, r);
+                out.endBenchmark(r);
             }
 
         } catch (IOException e) {
@@ -555,7 +575,7 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private Multimap<BenchmarkRecord, BenchResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
+    private Multimap<BenchmarkParams, BenchResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
@@ -620,7 +640,7 @@ public class Runner extends BaseRunner {
      * @param javaOptions add these options to JVM command string
      * @return the final command to execute
      */
-    String[] getSeparateExecutionCommand(BenchmarkRecord benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
+    String[] getSeparateExecutionCommand(BenchmarkParams benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
 
         List<String> command = new ArrayList<String>();
 
@@ -670,11 +690,11 @@ public class Runner extends BaseRunner {
                 (isWindows() ? ".exe" : "");
     }
 
-    private Collection<String> getJvmArgs(BenchmarkRecord benchmark) {
+    private Collection<String> getJvmArgs(BenchmarkParams benchmark) {
         Collection<String> res = new ArrayList<String>();
-        res.addAll(options.getJvmArgsPrepend().orElse(benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList())));
-        res.addAll(options.getJvmArgs().orElse(benchmark.getJvmArgs().orElse(ManagementFactory.getRuntimeMXBean().getInputArguments())));
-        res.addAll(options.getJvmArgsAppend().orElse(benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
+        res.addAll(benchmark.getJvmArgsPrepend());
+        res.addAll(benchmark.getJvmArgs());
+        res.addAll(benchmark.getJvmArgsAppend());
         return res;
     }
 
