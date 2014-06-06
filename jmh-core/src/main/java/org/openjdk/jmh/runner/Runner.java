@@ -315,8 +315,8 @@ public class Runner extends BaseRunner {
 
         threads = Utils.roundUp(threads, Utils.sum(threadGroups));
 
-        boolean synchIterations = options.shouldSyncIterations().orElse(
-                Defaults.SYNC_ITERATIONS);
+        boolean synchIterations = (benchmark.getMode() != Mode.SingleShotTime) &&
+                options.shouldSyncIterations().orElse(Defaults.SYNC_ITERATIONS);
 
         IterationParams measurement = mode.doMeasurement() ?
                 new IterationParams(

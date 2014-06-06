@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.runner.ActualParams;
-import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.runner.BenchmarkParams;
+import org.openjdk.jmh.runner.IterationParams;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -79,8 +79,8 @@ public class InfraControl extends InfraControlL4 {
         }
     }
 
-    public InfraControl(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, int opsPerInv, ActualParams params) {
-        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, opsPerInv, params);
+    public InfraControl(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);
     }
 
     /**
@@ -95,7 +95,7 @@ public class InfraControl extends InfraControlL4 {
      * @return requested loop duration in the requested unit.
      */
     public long getDuration(TimeUnit unit) {
-        return unit.convert(duration, TimeUnit.NANOSECONDS);
+        return iterationParams.getTime().convertTo(unit);
     }
 
     public void preSetup() {
@@ -159,44 +159,39 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
     public volatile boolean volatileSpoiler;
 
-    /** How long we should loop */
-    public final long duration;
-
     public final CountDownLatch preSetup;
     public final CountDownLatch preTearDown;
     public final boolean lastIteration;
-    public final TimeUnit timeUnit;
-    public final int opsPerInv;
-    public final int threads;
-    public final boolean syncIterations;
 
     public final AtomicInteger warmupVisited, warmdownVisited;
     public volatile boolean warmupShouldWait, warmdownShouldWait;
 
-    public final int batchSize;
-    private final ActualParams params;
+    public final BenchmarkParams benchmarkParams;
+    public final IterationParams iterationParams;
 
-    public InfraControlL2(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, int opsPerInv, ActualParams params) {
-        this.threads = threads;
-        this.syncIterations = syncIterations;
-        this.opsPerInv = opsPerInv;
+    private final boolean shouldSynchIterations;
+    private final int threads;
+
+    public InfraControlL2(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
         this.warmupVisited = new AtomicInteger();
         this.warmdownVisited = new AtomicInteger();
 
-        warmupShouldWait = syncIterations;
-        warmdownShouldWait = syncIterations;
+        shouldSynchIterations = benchmarkParams.shouldSynchIterations();
+        threads = benchmarkParams.getThreads();
+
+        warmupShouldWait = shouldSynchIterations;
+        warmdownShouldWait = shouldSynchIterations;
         this.preSetup = preSetup;
         this.preTearDown = preTearDown;
-        this.duration = loopTime.convertTo(TimeUnit.NANOSECONDS);
         this.lastIteration = lastIteration;
-        this.timeUnit = timeUnit;
-        this.params = params;
-        this.batchSize = batchSize;
+        this.benchmarkParams = benchmarkParams;
+        this.iterationParams = iterationParams;
     }
 
     public void announceWarmupReady() {
-        if (!syncIterations) return;
+        if (!shouldSynchIterations) return;
         int v = warmupVisited.incrementAndGet();
+
         if (v == threads) {
             warmupShouldWait = false;
         }
@@ -207,7 +202,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
     }
 
     public void announceWarmdownReady() {
-        if (!syncIterations) return;
+        if (!shouldSynchIterations) return;
         int v = warmdownVisited.incrementAndGet();
         if (v == threads) {
             warmdownShouldWait = false;
@@ -219,10 +214,11 @@ abstract class InfraControlL2 extends InfraControlL1 {
     }
 
     public String getParam(String name) {
-        if (!params.containsKey(name)) {
+        String param = benchmarkParams.getParam(name);
+        if (param == null) {
             throw new IllegalStateException("The value for the parameter \"" + name + "\" is not set.");
         }
-        return params.get(name);
+        return param;
     }
 
 }
@@ -245,16 +241,16 @@ abstract class InfraControlL3 extends InfraControlL2 {
     private boolean q161, q162, q163, q164, q165, q166, q167, q168;
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 
-    public InfraControlL3(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, int opsPerInv, ActualParams params) {
-        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, opsPerInv, params);
+    public InfraControlL3(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);
     }
 }
 
 abstract class InfraControlL4 extends InfraControlL3 {
     public int markerEnd;
 
-    public InfraControlL4(int threads, boolean syncIterations, TimeValue loopTime, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration, TimeUnit timeUnit, int batchSize, int opsPerInv, ActualParams params) {
-        super(threads, syncIterations, loopTime, preSetup, preTearDown, lastIteration, timeUnit, batchSize, opsPerInv, params);
+    public InfraControlL4(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);
     }
 }
 

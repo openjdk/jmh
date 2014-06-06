@@ -637,7 +637,7 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(control.opsPerInv);");
+            writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop" +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
 
@@ -667,12 +667,12 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
+            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.timeUnit));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -744,7 +744,7 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(control.opsPerInv);");
+            writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, res" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
@@ -772,12 +772,12 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
+            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.timeUnit));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.timeUnit));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -863,7 +863,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.opsPerInv" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation()" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -890,9 +890,9 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.timeUnit));");
+            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.timeUnit));");
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -962,7 +962,7 @@ public class BenchmarkGenerator {
             invocationProlog(writer, 3, method, states, false);
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(control.opsPerInv);");
+            writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
@@ -972,9 +972,9 @@ public class BenchmarkGenerator {
             iterationEpilog(writer, 3, method, states);
 
             writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
-            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.timeUnit));");
+            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.timeUnit));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
@@ -995,7 +995,7 @@ public class BenchmarkGenerator {
 
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
-            writer.println(ident(2) + "int batchSize = control.batchSize;");
+            writer.println(ident(2) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(2) + "for (int b = 0; b < batchSize; b++) {");
             writer.println(ident(3) + "if (control.volatileSpoiler) return;");
 

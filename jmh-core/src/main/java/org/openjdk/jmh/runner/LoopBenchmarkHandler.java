@@ -54,12 +54,10 @@ import java.util.concurrent.TimeoutException;
 class LoopBenchmarkHandler extends BaseBenchmarkHandler {
 
     private final Method method;
-    private final boolean shouldSynchIterations;
 
     LoopBenchmarkHandler(OutputFormat format, Class<?> clazz, Method method, Options options, BenchmarkParams executionParams) {
         super(format, clazz, options, executionParams);
         this.method = method;
-        this.shouldSynchIterations = (executionParams.getMode() != Mode.SingleShotTime) && executionParams.shouldSynchIterations();
     }
 
     @Override
@@ -73,8 +71,7 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         // result object to accumulate the results in
         IterationResult iterationResults = new IterationResult(benchmarkParams, params);
 
-        InfraControl control = new InfraControl(numThreads, shouldSynchIterations, runtime, preSetupBarrier, preTearDownBarrier,
-                last, benchmarkParams.getTimeUnit(), params.getBatchSize(), benchmarkParams.getOpsPerInvocation(), benchmarkParams.getParams());
+        InfraControl control = new InfraControl(benchmarkParams, params, preSetupBarrier, preTearDownBarrier, last);
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
@@ -224,7 +221,7 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
                 control.preSetupForce();
                 control.preTearDownForce();
 
-                if (shouldSynchIterations) {
+                if (control.benchmarkParams.shouldSynchIterations()) {
                     try {
                         control.announceWarmupReady();
                     } catch (Exception e1) {
