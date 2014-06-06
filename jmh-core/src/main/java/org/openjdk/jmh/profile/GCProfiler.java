@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Result;
 
@@ -55,7 +57,7 @@ public class GCProfiler implements InternalProfiler {
     }
 
     @Override
-    public void beforeIteration() {
+    public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         this.startTime = System.nanoTime();
         long gcTime = 0;
         long gcCount = 0;
@@ -68,7 +70,7 @@ public class GCProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration() {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         long endTime = System.nanoTime();
         long gcTime = -startGCTime;
         long gcCount = -startGCCount;

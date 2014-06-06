@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
@@ -165,22 +166,22 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         }
     }
 
-    protected void stopProfilers(IterationResult iterationResults) {
+    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iterationResults) {
         // stop profilers
         for (InternalProfiler prof : registeredProfilers) {
             try {
-                iterationResults.addResults(prof.afterIteration());
+                iterationResults.addResults(prof.afterIteration(benchmarkParams, iterationParams));
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }
         }
     }
 
-    protected void startProfilers() {
+    protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         // start profilers
         for (InternalProfiler prof : registeredProfilers) {
             try {
-                prof.beforeIteration();
+                prof.beforeIteration(benchmarkParams, iterationParams);
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }

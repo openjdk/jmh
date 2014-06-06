@@ -96,7 +96,7 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
 
         // profilers start way before the workload starts to capture
         // the edge behaviors.
-        startProfilers();
+        startProfilers(benchmarkParams, params);
 
         // submit tasks to threadpool
         Map<BenchmarkTask, Future<Collection<? extends Result>>> results = new HashMap<BenchmarkTask, Future<Collection<? extends Result>>>();
@@ -187,7 +187,7 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
 
         // profilers stop when after all threads are confirmed to be
         // finished to capture the edge behaviors
-        stopProfilers(iterationResults);
+        stopProfilers(benchmarkParams, params, iterationResults);
 
         return iterationResults;
     }

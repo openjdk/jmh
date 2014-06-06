@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Result;
 
@@ -58,7 +60,7 @@ public class CompilerProfiler implements InternalProfiler {
     }
 
     @Override
-    public void beforeIteration() {
+    public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
             startCompTime = comp.getTotalCompilationTime();
@@ -68,7 +70,7 @@ public class CompilerProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration() {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         long compTime = -startCompTime;
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {

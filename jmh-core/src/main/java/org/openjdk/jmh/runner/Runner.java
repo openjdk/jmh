@@ -543,13 +543,13 @@ public class Runner extends BaseRunner {
                 File stdOut = FileUtils.tempFile("stdout");
 
                 for (ExternalProfiler profiler : profilers) {
-                    profiler.beforeTrial();
+                    profiler.beforeTrial(params);
                 }
 
                 Multimap<BenchmarkParams, BenchmarkResult> result = doFork(server, commandString, stdOut, stdErr);
 
                 for (ExternalProfiler profiler : profilers) {
-                    for (Result profR : profiler.afterTrial(stdOut, stdErr)) {
+                    for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
                         for (BenchmarkResult r : result.values()) {
                             r.amend(profR);
                         }

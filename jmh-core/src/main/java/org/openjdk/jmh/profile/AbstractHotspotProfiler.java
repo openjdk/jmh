@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Result;
 import sun.management.counter.Counter;
@@ -61,7 +63,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration() {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         HotspotInternalResult res = counters();
         Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
@@ -71,7 +73,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     }
 
     @Override
-    public void beforeIteration() {
+    public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         prevs = new HashMap<String, Long>();
         for (Counter counter : getCounters()) {
             prevs.put(counter.getName(), convert(counter.getValue()));

@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.Result;
 
 import java.util.Collection;
@@ -38,13 +40,19 @@ public interface InternalProfiler extends Profiler {
 
     /**
      * Run this code before starting the next benchmark iteration.
+     *
+     * @param benchmarkParams benchmark parameters used for current launch
+     * @param iterationParams iteration parameters used for current launch
      */
-    void beforeIteration();
+    void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams);
 
     /**
      * Run this code after a benchmark iteration finished
+     *
+     * @param benchmarkParams benchmark parameters used for current launch
+     * @param iterationParams iteration parameters used for current launch
      * @return profiler result
      */
-    Collection<? extends Result> afterIteration();
+    Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams);
 
 }

@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Result;
 import sun.management.HotspotCompilationMBean;
@@ -53,7 +55,7 @@ public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration() {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
                 new ProfilerResult("@compiler.totalTime",

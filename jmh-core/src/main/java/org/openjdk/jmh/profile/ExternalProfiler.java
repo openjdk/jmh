@@ -41,6 +41,7 @@ public interface ExternalProfiler extends Profiler {
 
     /**
      * Prepend JVM invocation with these commands.
+     *
      * @param params benchmark parameters used for current launch
      * @return commands to prepend for JVM launch
      */
@@ -48,6 +49,7 @@ public interface ExternalProfiler extends Profiler {
 
     /**
      * Add JVM these options to the run.
+     *
      * @param params benchmark parameters used for current launch
      * @return options to add to JVM launch
      */
@@ -56,16 +58,20 @@ public interface ExternalProfiler extends Profiler {
     /**
      * Run this code before starting the trial. This method will execute
      * before starting the benchmark JVM.
+     *
+     * @param benchmarkParams benchmark parameters used for current launch
      */
-    void beforeTrial();
+    void beforeTrial(BenchmarkParams benchmarkParams);
 
     /**
      * Run this code after the trial is done. This method will execute
      * after benchmark JVM had stopped.
+     *
+     * @param benchmarkParams benchmark parameters used for current launch
      * @param stdOut file containing the standard output from the benchmark JVM
      * @param stdErr file containing the standard error from the benchmark JVM
      * @return profiler results
      */
-    Collection<? extends Result> afterTrial(File stdOut, File stdErr);
+    Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, File stdOut, File stdErr);
 
 }

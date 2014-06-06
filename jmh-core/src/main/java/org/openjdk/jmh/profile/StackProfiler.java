@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
@@ -72,13 +74,13 @@ public class StackProfiler implements InternalProfiler {
     private volatile SamplingTask samplingTask;
 
     @Override
-    public void beforeIteration() {
+    public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         samplingTask = new SamplingTask();
         samplingTask.start();
     }
 
     @Override
-    public Collection<? extends Result> afterIteration() {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         samplingTask.stop();
         return Arrays.asList(new StackResult(samplingTask.stacks));
     }
