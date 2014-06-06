@@ -32,6 +32,8 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Control;
+import org.openjdk.jmh.runner.BenchmarkParams;
+import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
@@ -573,8 +575,19 @@ class StateObjectHandler {
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
             result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
-            result.add("    if (" + so.fieldIdentifier + " == null) {");
-            result.add("        " + so.type + " val = new " + so.type + "();");
+
+            // These classes are copying the external environment.
+            if (so.userType.equals(BenchmarkParams.class.getCanonicalName())) {
+                result.add("    if (true) {");
+                result.add("        " + so.type + " val = new " + so.type + "(control.benchmarkParams);");
+            } else if (so.userType.equals(IterationParams.class.getCanonicalName())) {
+                result.add("    if (true) {");
+                result.add("        " + so.type + " val = new " + so.type + "(control.iterationParams);");
+            } else {
+                result.add("    if (" + so.fieldIdentifier + " == null) {");
+                result.add("        " + so.type + " val = new " + so.type + "();");
+            }
+
             if (!so.getParamsLabels().isEmpty()) {
                 result.add("            Field f;");
             }
@@ -713,14 +726,26 @@ class StateObjectHandler {
         return new LinkedHashSet<StateObject>(linearOrder);
     }
 
+    public void addSuperCall(List<String> result, StateObject so, String suffix) {
+        // These classes have copying constructor:
+        if (so.userType.equals(BenchmarkParams.class.getCanonicalName()) ||
+            so.userType.equals(IterationParams.class.getCanonicalName())) {
+            result.add("    public " + so.type + suffix + "(" + so.userType + " other) {");
+            result.add("        super(other);");
+            result.add("    }");
+        }
+    }
+
     public List<String> getStateOverrides() {
         Set<String> visited = new HashSet<String>();
 
         List<String> result = new ArrayList<String>();
         for (StateObject so : cons(stateObjects)) {
             if (!visited.add(so.userType)) continue;
+
             result.add("static class " + so.type + "_B1 extends " + so.userType + " {");
             padding(result, "b1");
+            addSuperCall(result, so, "_B1");
             result.add("}");
             result.add("");
             result.add("static class " + so.type + "_B2 extends " + so.type + "_B1 {");
@@ -752,13 +777,17 @@ class StateObjectHandler {
                     throw new IllegalStateException("Unknown state scope: " + so.scope);
             }
 
+            addSuperCall(result, so, "_B2");
+
             result.add("}");
             result.add("");
             result.add("static class " + so.type + "_B3 extends " + so.type + "_B2 {");
             padding(result, "b3");
+            addSuperCall(result, so, "_B3");
             result.add("}");
             result.add("");
             result.add("static final class " + so.type + " extends " + so.type + "_B3 {");
+            addSuperCall(result, so, "");
             result.add("}");
             result.add("");
         }

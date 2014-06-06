@@ -25,6 +25,8 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
@@ -32,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+@State(Scope.Thread)
 public class BenchmarkParams extends BenchmarkParamsL4 {
     static {
         Utils.check(BenchmarkParams.class, "benchmark", "generatedTarget", "synchIterations");
@@ -40,6 +43,10 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
         Utils.check(BenchmarkParams.class, "mode", "params");
         Utils.check(BenchmarkParams.class, "timeUnit", "opsPerInvocation");
         Utils.check(BenchmarkParams.class, "jvmArgsPrepend", "jvmArgs", "jvmArgsAppend");
+    }
+
+    public BenchmarkParams(BenchmarkParams other) {
+        super(other);
     }
 
     public BenchmarkParams(String benchmark, String generatedTarget, boolean synchIterations,
@@ -73,6 +80,9 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
                 jvmArgsPrepend, jvmArgs, jvmArgsAppend);
     }
 
+    public BenchmarkParamsL4(BenchmarkParams other) {
+        super(other);
+    }
 }
 
 abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
@@ -105,6 +115,10 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
                 mode, params,
                 timeUnit, opsPerInvocation,
                 jvmArgsPrepend, jvmArgs, jvmArgsAppend);
+    }
+
+    public BenchmarkParamsL3(BenchmarkParams other) {
+        super(other);
     }
 }
 
@@ -171,6 +185,25 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.jvmArgsPrepend = jvmArgsPrepend;
         this.jvmArgs = jvmArgs;
         this.jvmArgsAppend = jvmArgsAppend;
+    }
+
+    public BenchmarkParamsL2(BenchmarkParams other) {
+        this.benchmark = other.benchmark;
+        this.generatedTarget = other.generatedTarget;
+        this.synchIterations = other.synchIterations;
+        this.threads = other.threads;
+        this.threadGroups = other.threadGroups;
+        this.forks = other.forks;
+        this.warmupForks = other.warmupForks;
+        this.warmup = other.warmup;
+        this.measurement = other.measurement;
+        this.mode = other.mode;
+        this.params = other.params;
+        this.timeUnit = other.timeUnit;
+        this.opsPerInvocation = other.opsPerInvocation;
+        this.jvmArgsPrepend = other.jvmArgsPrepend;
+        this.jvmArgs = other.jvmArgs;
+        this.jvmArgsAppend = other.jvmArgsAppend;
     }
 
     public boolean shouldSynchIterations() {

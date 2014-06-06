@@ -50,7 +50,9 @@ import org.openjdk.jmh.results.SingleShotResult;
 import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkListEntry;
+import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.Defaults;
+import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
@@ -269,6 +271,10 @@ public class BenchmarkGenerator {
             for (MethodInfo constructor : state.getConstructors()) {
                 hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
             }
+
+            // These classes use the special init sequence:
+            hasDefaultConstructor |= state.getQualifiedName().equals(BenchmarkParams.class.getCanonicalName());
+            hasDefaultConstructor |= state.getQualifiedName().equals(IterationParams.class.getCanonicalName());
 
             if (!hasDefaultConstructor) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
@@ -570,7 +576,7 @@ public class BenchmarkGenerator {
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
                 BenchmarkMode.class, RawResults.class, ResultRole.class,
-                Field.class
+                Field.class, BenchmarkParams.class, IterationParams.class
         };
 
         for (Class<?> c : imports) {

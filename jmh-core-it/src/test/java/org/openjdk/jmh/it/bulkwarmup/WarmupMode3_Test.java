@@ -31,8 +31,8 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.Control;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -64,26 +64,36 @@ public class WarmupMode3_Test {
     }
 
     @Benchmark
-    public void testBig(Control cnt) {
+    public void testBig(IterationParams params) {
         if (!recorded) {
             recorded = true;
-            if (cnt.iterationTime == 100) { // warmup
-                testSequence.add("W");
-            } else if (cnt.iterationTime == 200) {  // iteration
-                testSequence.add("I");
+            switch (params.getType()) {
+                case WARMUP:
+                    testSequence.add("W");
+                    break;
+                case MEASUREMENT:
+                    testSequence.add("I");
+                    break;
+                default:
+                    throw new IllegalStateException(params.getType().toString());
             }
         }
         Fixtures.work();
     }
 
     @Benchmark
-    public void testSmall(Control cnt) {
+    public void testSmall(IterationParams params) {
         if (!recorded) {
             recorded = true;
-            if (cnt.iterationTime == 100) { // warmup
-                testSequence.add("w");
-            } else if (cnt.iterationTime == 200) {  // iteration
-                testSequence.add("i");
+            switch (params.getType()) {
+                case WARMUP:
+                    testSequence.add("w");
+                    break;
+                case MEASUREMENT:
+                    testSequence.add("i");
+                    break;
+                default:
+                    throw new IllegalStateException(params.getType().toString());
             }
         }
         Fixtures.work();
