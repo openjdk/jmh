@@ -38,6 +38,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class InfraControl extends InfraControlL4 {
 
+    /**
+     * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
+     * @see org.openjdk.jmh.infra.Blackhole description for the rationale
+     */
     static {
         Utils.check(InfraControl.class, "isDone");
         Utils.check(InfraControl.class, "volatileSpoiler");
@@ -118,9 +122,6 @@ abstract class InfraControlL1 extends InfraControlL0 {
     private boolean p171, p172, p173, p174, p175, p176, p177, p178;
 }
 
-/**
- * @see Blackhole for rationale
- */
 abstract class InfraControlL2 extends InfraControlL1 {
     /* Flag for if we are done or not.
      * This is specifically the public field, so to spare one virtual call.

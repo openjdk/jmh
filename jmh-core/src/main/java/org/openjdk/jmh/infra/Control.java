@@ -37,6 +37,10 @@ import org.openjdk.jmh.util.Utils;
 @State(Scope.Benchmark)
 public class Control extends ControlL4 {
 
+    /**
+     * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
+     * @see org.openjdk.jmh.infra.Blackhole description for the rationale
+     */
     static {
         Utils.check(Control.class, "startMeasurement", "stopMeasurement");
     }

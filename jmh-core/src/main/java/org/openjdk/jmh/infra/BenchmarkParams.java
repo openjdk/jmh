@@ -33,10 +33,28 @@ import org.openjdk.jmh.util.Utils;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Benchmark parameters.
+ *
+ * <p>{@link BenchmarkParams} handles the parameters used in the current run.</p>
+ * <p>This class is dual-purpose:</p>
+ * <ol>
+ *     <li>It acts as the interface between host JVM and forked JVM, so that the latter
+ *     would not have to figure out the benchmark configuration again</li>
+ *     <li>It can be injected into benchmark methods to access the runtime configuration
+ *     info about the benchmark</li>
+ * </ol>
+ */
 @State(Scope.Thread)
 public class BenchmarkParams extends BenchmarkParamsL4 {
+
+    /**
+     * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
+     * @see org.openjdk.jmh.infra.Blackhole description for the rationale
+     */
     static {
         Utils.check(BenchmarkParams.class, "benchmark", "generatedTarget", "synchIterations");
         Utils.check(BenchmarkParams.class, "threads", "threadGroups", "forks", "warmupForks");
@@ -207,54 +225,95 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.jvmArgsAppend = other.jvmArgsAppend;
     }
 
+    /**
+     * @return do we synchronize iterations?
+     */
     public boolean shouldSynchIterations() {
         return synchIterations;
     }
 
+    /**
+     * @return iteration parameters for warmup phase
+     */
     public IterationParams getWarmup() {
         return warmup;
     }
 
+    /**
+     * @return iteration parameters for measurement phase
+     */
     public IterationParams getMeasurement() {
         return measurement;
     }
 
+    /**
+     * @return total measurement thread count
+     */
     public int getThreads() {
         return threads;
     }
 
+    /**
+     * @return thread distribution within the group
+     * @see org.openjdk.jmh.runner.options.ChainedOptionsBuilder#threadGroups(int...)
+     */
     public int[] getThreadGroups() {
         return Arrays.copyOf(threadGroups, threadGroups.length);
     }
 
+    /**
+     * @return number of forked VM runs, which we measure
+     */
     public int getForks() {
         return forks;
     }
 
+    /**
+     * @return number of forked VM runs, which we discard from the result
+     */
     public int getWarmupForks() {
         return warmupForks;
     }
 
+    /**
+     * @return benchmark mode
+     */
     public Mode getMode() {
         return mode;
     }
 
+    /**
+     * @return benchmark name
+     */
     public String getBenchmark() {
         return benchmark;
     }
 
+    /**
+     * @return timeUnit used in results
+     */
     public TimeUnit getTimeUnit() {
         return timeUnit;
     }
 
+    /**
+     * @return operations per invocation used
+     */
     public int getOpsPerInvocation() {
         return opsPerInvocation;
     }
 
+    /**
+     * @return all workload parameters
+     */
     public ActualParams getParams() {
         return params;
     }
 
+    /**
+     * @param key parameter key; usually the field name
+     * @return parameter value for given key
+     */
     public String getParam(String key) {
         if (params != null) {
             return params.get(key);
@@ -263,26 +322,32 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         }
     }
 
-    public String generatedClass() {
-        String s = generatedTarget;
-        return s.substring(0, s.lastIndexOf('.'));
+    /**
+     * @return generated benchmark name
+     */
+    public String generatedBenchmark() {
+        return generatedTarget;
     }
 
-    public String generatedMethod() {
-        String s = generatedTarget;
-        return s.substring(s.lastIndexOf('.') + 1);
-    }
-
+    /**
+     * @return prepended JVM options
+     */
     public Collection<String> getJvmArgsPrepend() {
-        return jvmArgsPrepend;
+        return Collections.unmodifiableCollection(jvmArgsPrepend);
     }
 
+    /**
+     * @return JVM options
+     */
     public Collection<String> getJvmArgs() {
-        return jvmArgs;
+        return Collections.unmodifiableCollection(jvmArgs);
     }
 
+    /**
+     * @return appended JVM options
+     */
     public Collection<String> getJvmArgsAppend() {
-        return jvmArgsAppend;
+        return Collections.unmodifiableCollection(jvmArgsAppend);
     }
 
     @Override
@@ -305,21 +370,6 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         result = 31 * result + mode.hashCode();
         result = 31 * result + params.hashCode();
         return result;
-    }
-
-    public long estimatedTimeSingleFork() {
-        if (mode == Mode.SingleShotTime) {
-            // No way to tell how long it will execute,
-            // guess anything, and let ETA compensation to catch up.
-            return (warmup.getCount() + measurement.getCount()) * TimeUnit.MILLISECONDS.toNanos(1);
-        }
-
-        return (warmup.getCount() * warmup.getTime().convertTo(TimeUnit.NANOSECONDS) +
-                measurement.getCount() * measurement.getTime().convertTo(TimeUnit.NANOSECONDS));
-    }
-
-    public long estimatedTime() {
-        return (Math.max(1, forks) + warmupForks) * estimatedTimeSingleFork();
     }
 
     @Override

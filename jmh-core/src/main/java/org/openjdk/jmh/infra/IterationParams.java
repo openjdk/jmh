@@ -32,6 +32,20 @@ import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
 
+/**
+ * Iteration parameters.
+ *
+ * <p>Iteration parameters are separated in at least two instances, with different {@link IterationType}-s.
+ * The complete benchmark parameters not specific for a particular iteration are available in
+ * {@link org.openjdk.jmh.infra.BenchmarkParams}.</p>
+ * <p>This class is dual-purpose:</p>
+ * <ol>
+ *     <li>It acts as the interface between host JVM and forked JVM, so that the latter
+ *     would not have to figure out the benchmark configuration again</li>
+ *     <li>It can be injected into benchmark methods to access the runtime configuration
+ *     info about the benchmark</li>
+ * </ol>
+ */
 @State(Scope.Thread)
 public class IterationParams extends IterationParamsL4 {
     static {
@@ -143,18 +157,34 @@ abstract class IterationParamsL2 extends IterationParamsL1 implements Serializab
         this.batchSize = other.batchSize;
     }
 
+    /**
+     * Iteration type: separates warmup iterations vs. measurement iterations.
+     * @return iteration type.
+     */
     public IterationType getType() {
         return type;
     }
 
+    /**
+     * Number of iterations.
+     * @return number of iterations of given type.
+     */
     public int getCount() {
         return count;
     }
 
+    /**
+     * Time for iteration.
+     * @return time
+     */
     public TimeValue getTime() {
         return timeValue;
     }
 
+    /**
+     * Batch size for iteration.
+     * @return batch size
+     */
     public int getBatchSize() {
         return batchSize;
     }

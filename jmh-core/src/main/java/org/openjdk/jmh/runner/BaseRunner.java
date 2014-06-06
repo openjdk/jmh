@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.BenchmarkResult;
@@ -128,7 +129,7 @@ abstract class BaseRunner {
 
     protected void afterBenchmark(BenchmarkParams params) {
         long current = System.nanoTime();
-        projectedRunningTime += params.estimatedTimeSingleFork();
+        projectedRunningTime += estimateTimeSingleFork(params);
         actualRunningTime += (current - benchmarkStart);
         benchmarkStart = current;
     }
@@ -137,9 +138,27 @@ abstract class BaseRunner {
         projectedTotalTime = 0;
         for (ActionPlan plan : plans) {
             for (Action act : plan.getActions()) {
-                projectedTotalTime += act.getParams().estimatedTime();
+                BenchmarkParams params = act.getParams();
+                projectedTotalTime += (Math.max(1, params.getForks()) + params.getWarmupForks()) * estimateTimeSingleFork(params);
             }
         }
+    }
+
+    private long estimateTimeSingleFork(BenchmarkParams params) {
+        IterationParams wp = params.getWarmup();
+        IterationParams mp = params.getMeasurement();
+
+        long estimatedTime;
+        if (params.getMode() == Mode.SingleShotTime) {
+            // No way to tell how long it will execute,
+            // guess anything, and let ETA compensation to catch up.
+            estimatedTime = (wp.getCount() + mp.getCount()) * TimeUnit.MILLISECONDS.toNanos(1);
+        } else {
+            estimatedTime =
+                    (wp.getCount() * wp.getTime().convertTo(TimeUnit.NANOSECONDS) +
+                     mp.getCount() * mp.getTime().convertTo(TimeUnit.NANOSECONDS));
+        }
+        return estimatedTime;
     }
 
     protected void beforeBenchmark() {
@@ -181,8 +200,10 @@ abstract class BaseRunner {
     BenchmarkResult runBenchmark(BenchmarkParams benchParams) {
         BenchmarkHandler handler = null;
         try {
-            Class<?> clazz = ClassUtils.loadClass(benchParams.generatedClass());
-            Method method = BenchmarkHandlers.findBenchmarkMethod(clazz, benchParams.generatedMethod());
+            String target = benchParams.generatedBenchmark();
+            int lastDot = target.lastIndexOf('.');
+            Class<?> clazz = ClassUtils.loadClass(target.substring(0, lastDot));
+            Method method = BenchmarkHandlers.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
 
             handler = BenchmarkHandlers.getInstance(out, clazz, method, benchParams, options);
 
