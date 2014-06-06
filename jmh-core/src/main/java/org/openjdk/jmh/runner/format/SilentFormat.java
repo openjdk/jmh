@@ -24,11 +24,11 @@
  */
 package org.openjdk.jmh.runner.format;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;

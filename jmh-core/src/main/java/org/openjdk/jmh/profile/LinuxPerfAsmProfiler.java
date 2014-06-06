@@ -24,11 +24,11 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Multiset;

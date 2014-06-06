@@ -31,7 +31,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.runner.BenchmarkParams;
+import org.openjdk.jmh.infra.BenchmarkParams;
 
 public class IterationBenchParams1Test {
 

@@ -22,11 +22,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.infra;
 
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;

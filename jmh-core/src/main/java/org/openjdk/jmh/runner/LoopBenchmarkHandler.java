@@ -25,8 +25,9 @@
 package org.openjdk.jmh.runner;
 
 
-import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.InfraControl;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.infra.ThreadControl;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;

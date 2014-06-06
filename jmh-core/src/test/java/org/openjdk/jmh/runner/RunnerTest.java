@@ -26,6 +26,8 @@ package org.openjdk.jmh.runner;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;

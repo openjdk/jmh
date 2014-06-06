@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.IterationParams;
 import org.openjdk.jmh.util.Utils;
 
 import java.util.concurrent.CountDownLatch;

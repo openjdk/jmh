@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;

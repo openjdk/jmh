@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.runner.link;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
-import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.Multimap;

@@ -32,7 +32,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.runner.IterationParams;
+import org.openjdk.jmh.infra.IterationParams;
 
 public class IterationIterParams3Test {
 

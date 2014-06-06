@@ -31,9 +31,9 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.Control;
-import org.openjdk.jmh.runner.BenchmarkParams;
-import org.openjdk.jmh.runner.IterationParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 

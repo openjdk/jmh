@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
+
 import java.io.Serializable;
 
 class Action implements Serializable {

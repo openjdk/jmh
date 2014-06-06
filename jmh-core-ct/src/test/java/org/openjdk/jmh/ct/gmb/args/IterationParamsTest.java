@@ -27,7 +27,7 @@ package org.openjdk.jmh.ct.gmb.args;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.runner.IterationParams;
+import org.openjdk.jmh.infra.IterationParams;
 
 public class IterationParamsTest {
 

@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.runner.link;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
-import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;

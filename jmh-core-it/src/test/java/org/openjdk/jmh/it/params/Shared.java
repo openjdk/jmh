@@ -25,8 +25,8 @@
 package org.openjdk.jmh.it.params;
 
 import junit.framework.Assert;
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.BenchmarkParams;
 
 import java.util.Collection;
 import java.util.HashSet;

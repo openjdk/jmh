@@ -24,11 +24,11 @@
  */
 package org.openjdk.jmh.results.format;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.ActualParams;
-import org.openjdk.jmh.runner.BenchmarkParams;
 import org.openjdk.jmh.util.Statistics;
 
 import java.io.PrintWriter;
