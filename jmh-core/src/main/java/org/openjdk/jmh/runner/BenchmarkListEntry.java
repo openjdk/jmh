@@ -59,7 +59,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     private final Optional<TimeUnit> tu;
     private final Optional<Integer> opsPerInvocation;
 
-    private ActualParams actualParams;
+    private WorkloadParams workloadParams;
 
     public BenchmarkListEntry(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
                               Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
@@ -83,7 +83,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.jvmArgsPrepend = jvmArgsPrepend;
         this.jvmArgsAppend = jvmArgsAppend;
         this.params = params;
-        this.actualParams = new ActualParams();
+        this.workloadParams = new WorkloadParams();
         this.tu = tu;
         this.opsPerInvocation = opsPerInv;
     }
@@ -95,7 +95,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
-        this.actualParams = new ActualParams();
+        this.workloadParams = new WorkloadParams();
         this.userName = args[0].trim();
         this.generatedName = args[1].trim();
         this.mode = Mode.deepValueOf(args[2].trim());
@@ -143,17 +143,17 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
     }
 
-    public BenchmarkListEntry cloneWith(ActualParams p) {
+    public BenchmarkListEntry cloneWith(WorkloadParams p) {
         BenchmarkListEntry br = new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
-        br.actualParams = p;
+        br.workloadParams = p;
         return br;
     }
 
-    public ActualParams getActualParams() {
-        return actualParams;
+    public WorkloadParams getWorkloadParams() {
+        return workloadParams;
     }
 
     @Override
@@ -168,11 +168,11 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
             return v1;
         }
 
-        if (actualParams == null || o.actualParams == null) {
+        if (workloadParams == null || o.workloadParams == null) {
             return 0;
         }
 
-        return actualParams.compareTo(o.actualParams);
+        return workloadParams.compareTo(o.workloadParams);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         BenchmarkListEntry record = (BenchmarkListEntry) o;
 
         if (mode != record.mode) return false;
-        if (actualParams != null ? !actualParams.equals(record.actualParams) : record.actualParams != null) return false;
+        if (workloadParams != null ? !workloadParams.equals(record.workloadParams) : record.workloadParams != null) return false;
         if (userName != null ? !userName.equals(record.userName) : record.userName != null) return false;
 
         return true;
@@ -193,7 +193,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     public int hashCode() {
         int result = userName != null ? userName.hashCode() : 0;
         result = 31 * result + (mode != null ? mode.hashCode() : 0);
-        result = 31 * result + (actualParams != null ? actualParams.hashCode() : 0);
+        result = 31 * result + (workloadParams != null ? workloadParams.hashCode() : 0);
         return result;
     }
 
@@ -219,7 +219,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 "userName='" + userName + '\'' +
                 ", generatedName='" + generatedName + '\'' +
                 ", mode=" + mode +
-                ", actualParams=" + actualParams +
+                ", workloadParams=" + workloadParams +
                 '}';
     }
 

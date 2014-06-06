@@ -28,7 +28,6 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.util.Statistics;
 
 import java.io.PrintWriter;
@@ -71,9 +70,9 @@ class JSONResultFormat implements ResultFormat {
             pw.println("\"measurementIterations\" : " + params.getMeasurement().getCount() + ",");
             pw.println("\"measurementTime\" : \"" + params.getMeasurement().getTime() + "\",");
 
-            if (!params.getParams().isEmpty()) {
+            if (!params.getParamsKeys().isEmpty()) {
                 pw.println("\"params\" : {");
-                pw.println(emitParams(params.getParams()));
+                pw.println(emitParams(params));
                 pw.println("},");
             }
 
@@ -137,17 +136,17 @@ class JSONResultFormat implements ResultFormat {
         out.println(tidy(sw.toString()));
     }
 
-    private String emitParams(ActualParams params) {
+    private String emitParams(BenchmarkParams params) {
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
-        for (String k : params.keys()) {
+        for (String k : params.getParamsKeys()) {
             if (isFirst) {
                 isFirst = false;
             } else {
                 sb.append(", ");
             }
             sb.append("\"").append(k).append("\" : ");
-            sb.append("\"").append(params.get(k)).append("\"");
+            sb.append("\"").append(params.getParam(k)).append("\"");
         }
         return sb.toString();
     }

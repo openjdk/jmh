@@ -217,7 +217,7 @@ public class Runner extends BaseRunner {
             List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
             for (BenchmarkListEntry br : benchmarks) {
                 if (br.getParams().hasValue()) {
-                    for (ActualParams p : explodeAllParams(br)) {
+                    for (WorkloadParams p : explodeAllParams(br)) {
                         newBenchmarks.add(br.cloneWith(p));
                     }
                 } else {
@@ -390,13 +390,13 @@ public class Runner extends BaseRunner {
 
         return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
                 threads, threadGroups, forks, warmupForks,
-                warmup, measurement, benchmark.getMode(), benchmark.getActualParams(), timeUnit, opsPerInvocation,
+                warmup, measurement, benchmark.getMode(), benchmark.getWorkloadParams(), timeUnit, opsPerInvocation,
                 jvmArgsPrepend, jvmArgs, jvmArgsAppend);
     }
 
-    private List<ActualParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
+    private List<WorkloadParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
         Map<String, String[]> benchParams = br.getParams().orElse(Collections.<String, String[]>emptyMap());
-        List<ActualParams> ps = new ArrayList<ActualParams>();
+        List<WorkloadParams> ps = new ArrayList<WorkloadParams>();
         for (String k : benchParams.keySet()) {
             Collection<String> values = options.getParameter(k).orElse(Arrays.asList(benchParams.get(k)));
             if (values.isEmpty()) {
@@ -407,17 +407,17 @@ public class Runner extends BaseRunner {
             if (ps.isEmpty()) {
                 int idx = 0;
                 for (String v : values) {
-                    ActualParams al = new ActualParams();
+                    WorkloadParams al = new WorkloadParams();
                     al.put(k, v, idx);
                     ps.add(al);
                     idx++;
                 }
             } else {
-                List<ActualParams> newPs = new ArrayList<ActualParams>();
-                for (ActualParams p : ps) {
+                List<WorkloadParams> newPs = new ArrayList<WorkloadParams>();
+                for (WorkloadParams p : ps) {
                     int idx = 0;
                     for (String v : values) {
-                        ActualParams al = p.copy();
+                        WorkloadParams al = p.copy();
                         al.put(k, v, idx);
                         newPs.add(al);
                         idx++;

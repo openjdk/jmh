@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.results.format;
 
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.ClassUtils;
@@ -65,13 +66,14 @@ class TextResultFormat implements ResultFormat {
         Map<String, Integer> paramLengths = new HashMap<String, Integer>();
         SortedSet<String> params = new TreeSet<String>();
         for (RunResult runResult : runResults) {
-            for (String k : runResult.getParams().getParams().keys()) {
+            BenchmarkParams bp = runResult.getParams();
+            for (String k : bp.getParamsKeys()) {
                 params.add(k);
                 Integer len = paramLengths.get(k);
                 if (len == null) {
                     len = ("(" + k + ")").length();
                 }
-                paramLengths.put(k, Math.max(len, runResult.getParams().getParam(k).length()));
+                paramLengths.put(k, Math.max(len, bp.getParam(k).length()));
             }
         }
 

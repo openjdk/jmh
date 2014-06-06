@@ -47,7 +47,7 @@ class XSVResultFormat implements ResultFormat {
     public void writeOut(Collection<RunResult> results) {
         SortedSet<String> params = new TreeSet<String>();
         for (RunResult rs : results) {
-            params.addAll(rs.getParams().getParams().keys());
+            params.addAll(rs.getParams().getParamsKeys());
         }
 
         pw.write("\"Benchmark\"");

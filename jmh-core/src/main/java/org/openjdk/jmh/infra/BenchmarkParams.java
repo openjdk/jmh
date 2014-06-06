@@ -27,7 +27,7 @@ package org.openjdk.jmh.infra;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.runner.ActualParams;
+import org.openjdk.jmh.runner.WorkloadParams;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
@@ -71,7 +71,7 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
     public BenchmarkParams(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
                              IterationParams warmup, IterationParams measurement,
-                             Mode mode, ActualParams params,
+                             Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
         super(benchmark, generatedTarget, synchIterations,
@@ -88,7 +88,7 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
     public BenchmarkParamsL4(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
                              IterationParams warmup, IterationParams measurement,
-                             Mode mode, ActualParams params,
+                             Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
         super(benchmark, generatedTarget, synchIterations,
@@ -125,7 +125,7 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
     public BenchmarkParamsL3(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
                              IterationParams warmup, IterationParams measurement,
-                             Mode mode, ActualParams params,
+                             Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
         super(benchmark, generatedTarget, synchIterations,
@@ -175,7 +175,7 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     protected final IterationParams warmup;
     protected final IterationParams measurement;
     protected final Mode mode;
-    protected final ActualParams params;
+    protected final WorkloadParams params;
     protected final TimeUnit timeUnit;
     protected final int opsPerInvocation;
     protected final Collection<String> jvmArgsPrepend;
@@ -185,7 +185,7 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     public BenchmarkParamsL2(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
                              IterationParams warmup, IterationParams measurement,
-                             Mode mode, ActualParams params,
+                             Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
         this.benchmark = benchmark;
@@ -306,8 +306,8 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     /**
      * @return all workload parameters
      */
-    public ActualParams getParams() {
-        return params;
+    public Collection<String> getParamsKeys() {
+        return params.keys();
     }
 
     /**

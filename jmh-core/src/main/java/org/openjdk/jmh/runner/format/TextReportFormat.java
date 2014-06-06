@@ -74,8 +74,18 @@ class TextReportFormat extends AbstractOutputFormat {
                         (params.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***"));
         out.println("# Benchmark mode: " + params.getMode().longLabel());
         out.println("# Benchmark: " + params.getBenchmark());
-        if (!params.getParams().isEmpty()) {
-            out.println("# Parameters: " + params.getParams());
+        if (!params.getParamsKeys().isEmpty()) {
+            String s = "";
+            boolean isFirst = true;
+            for (String k : params.getParamsKeys()) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    s += ", ";
+                }
+                s += k + " = " + params.getParam(k);
+            }
+            out.println("# Parameters: (" + s + ")");
         }
     }
 

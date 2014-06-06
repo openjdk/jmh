@@ -34,8 +34,8 @@ import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.ThroughputResult;
-import org.openjdk.jmh.runner.ActualParams;
 import org.openjdk.jmh.runner.IterationType;
+import org.openjdk.jmh.runner.WorkloadParams;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
 
@@ -62,7 +62,7 @@ public class ResultFormatTest {
 
         Random r = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
-            ActualParams ps = new ActualParams();
+            WorkloadParams ps = new WorkloadParams();
             for (int p = 0; p < 5; p++) {
                 ps.put("param" + p, "value" + p, p);
             }

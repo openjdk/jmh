@@ -29,21 +29,21 @@ import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class ActualParams implements Comparable<ActualParams>, Serializable {
+public class WorkloadParams implements Comparable<WorkloadParams>, Serializable {
 
     private final SortedMap<String, Value> params;
 
-    public ActualParams() {
+    public WorkloadParams() {
         params = new TreeMap<String, Value>();
     }
 
-    private ActualParams(SortedMap<String, Value> params) {
+    private WorkloadParams(SortedMap<String, Value> params) {
         this();
         this.params.putAll(params);
     }
 
     @Override
-    public int compareTo(ActualParams o) {
+    public int compareTo(WorkloadParams o) {
         if (!params.keySet().equals(o.params.keySet())) {
             throw new IllegalStateException("Comparing actual params with different key sets.");
         }
@@ -79,7 +79,7 @@ public class ActualParams implements Comparable<ActualParams>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ActualParams that = (ActualParams) o;
+        WorkloadParams that = (WorkloadParams) o;
 
         if (params != null ? !params.equals(that.params) : that.params != null) return false;
 
@@ -91,29 +91,8 @@ public class ActualParams implements Comparable<ActualParams>, Serializable {
         return params != null ? params.hashCode() : 0;
     }
 
-    @Override
-    public String toString() {
-        if (params.isEmpty()) {
-            return "<none>";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        boolean isFirst = true;
-        for (String k : params.keySet()) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                sb.append(", ");
-            }
-            sb.append(k).append(" = ").append(params.get(k).value);
-        }
-        sb.append(")");
-        return sb.toString();
-    }
-
-    public ActualParams copy() {
-        return new ActualParams(params);
+    public WorkloadParams copy() {
+        return new WorkloadParams(params);
     }
 
     public boolean isEmpty() {
