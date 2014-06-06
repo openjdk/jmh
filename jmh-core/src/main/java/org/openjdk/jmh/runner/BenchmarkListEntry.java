@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
+public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     private static final String BR_SEPARATOR = "===,===";
 
@@ -61,11 +61,11 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
 
     private ActualParams actualParams;
 
-    public BenchmarkRecord(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
-                           Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
-                           Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
-                           Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
-                           Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv) {
+    public BenchmarkListEntry(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
+                              Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
+                              Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
+                              Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
+                              Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -88,7 +88,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
         this.opsPerInvocation = opsPerInv;
     }
 
-    public BenchmarkRecord(String line) {
+    public BenchmarkListEntry(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
         if (args.length != 19) {
@@ -117,7 +117,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
         this.opsPerInvocation = Optional.of(args[18], INTEGER_UNMARSHALLER);
     }
 
-    public BenchmarkRecord(String userName, String generatedName, Mode mode) {
+    public BenchmarkListEntry(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
@@ -136,15 +136,15 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
                 opsPerInvocation;
     }
 
-    public BenchmarkRecord cloneWith(Mode mode) {
-        return new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
+    public BenchmarkListEntry cloneWith(Mode mode) {
+        return new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
     }
 
-    public BenchmarkRecord cloneWith(ActualParams p) {
-        BenchmarkRecord br = new BenchmarkRecord(userName, generatedName, mode, threadGroups, threads,
+    public BenchmarkListEntry cloneWith(ActualParams p) {
+        BenchmarkListEntry br = new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
@@ -157,7 +157,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
     }
 
     @Override
-    public int compareTo(BenchmarkRecord o) {
+    public int compareTo(BenchmarkListEntry o) {
         int v = mode.compareTo(o.mode);
         if (v != 0) {
             return v;
@@ -180,7 +180,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BenchmarkRecord record = (BenchmarkRecord) o;
+        BenchmarkListEntry record = (BenchmarkListEntry) o;
 
         if (mode != record.mode) return false;
         if (actualParams != null ? !actualParams.equals(record.actualParams) : record.actualParams != null) return false;
@@ -215,7 +215,7 @@ public class BenchmarkRecord implements Comparable<BenchmarkRecord> {
 
     @Override
     public String toString() {
-        return "BenchmarkRecord{" +
+        return "BenchmarkListEntry{" +
                 "userName='" + userName + '\'' +
                 ", generatedName='" + generatedName + '\'' +
                 ", mode=" + mode +

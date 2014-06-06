@@ -121,10 +121,10 @@ public class Runner extends BaseRunner {
      * Print matching benchmarks into output.
      */
     public void list() {
-        Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
+        Set<BenchmarkListEntry> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         out.println("Benchmarks: ");
-        for (BenchmarkRecord benchmark : benchmarks) {
+        for (BenchmarkListEntry benchmark : benchmarks) {
             out.println(benchmark.getUsername());
         }
     }
@@ -137,7 +137,7 @@ public class Runner extends BaseRunner {
      * @throws RunnerException if more than one benchmark is found, or no results are returned
      */
     public RunResult runSingle() throws RunnerException {
-        Set<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
+        Set<BenchmarkListEntry> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.size() == 1) {
             Collection<RunResult> values = run();
@@ -169,7 +169,7 @@ public class Runner extends BaseRunner {
             }
         }
 
-        SortedSet<BenchmarkRecord> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
+        SortedSet<BenchmarkListEntry> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
             out.flush();
@@ -180,8 +180,8 @@ public class Runner extends BaseRunner {
         // override the benchmark types;
         // this may yield new benchmark records
         if (!options.getBenchModes().isEmpty()) {
-            List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
-            for (BenchmarkRecord br : benchmarks) {
+            List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
+            for (BenchmarkListEntry br : benchmarks) {
                 for (Mode m : options.getBenchModes()) {
                     newBenchmarks.add(br.cloneWith(m));
                 }
@@ -194,8 +194,8 @@ public class Runner extends BaseRunner {
 
         // clone with all the modes
         {
-            List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
-            for (BenchmarkRecord br : benchmarks) {
+            List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
+            for (BenchmarkListEntry br : benchmarks) {
                 if (br.getMode() == Mode.All) {
                     for (Mode mode : Mode.values()) {
                         if (mode == Mode.All) continue;
@@ -212,8 +212,8 @@ public class Runner extends BaseRunner {
 
         // clone with all parameters
         {
-            List<BenchmarkRecord> newBenchmarks = new ArrayList<BenchmarkRecord>();
-            for (BenchmarkRecord br : benchmarks) {
+            List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
+            for (BenchmarkListEntry br : benchmarks) {
                 if (br.getParams().hasValue()) {
                     for (ActualParams p : explodeAllParams(br)) {
                         newBenchmarks.add(br.cloneWith(p));
@@ -239,10 +239,10 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private List<ActionPlan> getActionPlans(Set<BenchmarkRecord> benchmarks) {
+    private List<ActionPlan> getActionPlans(Set<BenchmarkListEntry> benchmarks) {
         ActionPlan base = new ActionPlan(ActionType.FORKED);
 
-        LinkedHashSet<BenchmarkRecord> warmupBenches = new LinkedHashSet<BenchmarkRecord>();
+        LinkedHashSet<BenchmarkListEntry> warmupBenches = new LinkedHashSet<BenchmarkListEntry>();
 
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
@@ -252,7 +252,7 @@ public class Runner extends BaseRunner {
             warmupBenches.addAll(benchmarks);
         }
 
-        for (BenchmarkRecord wr : warmupBenches) {
+        for (BenchmarkListEntry wr : warmupBenches) {
             base.add(newAction(wr, ActionMode.WARMUP));
         }
 
@@ -262,7 +262,7 @@ public class Runner extends BaseRunner {
         boolean addEmbedded = false;
 
         List<ActionPlan> result = new ArrayList<ActionPlan>();
-        for (BenchmarkRecord br : benchmarks) {
+        for (BenchmarkListEntry br : benchmarks) {
             BenchmarkParams params = newBenchmarkParams(br, ActionMode.UNDEF);
 
             if (params.getForks() <= 0) {
@@ -293,11 +293,11 @@ public class Runner extends BaseRunner {
         return result;
     }
 
-    private Action newAction(BenchmarkRecord br, ActionMode mode) {
+    private Action newAction(BenchmarkListEntry br, ActionMode mode) {
         return new Action(newBenchmarkParams(br, mode), mode);
     }
 
-    private BenchmarkParams newBenchmarkParams(BenchmarkRecord benchmark, ActionMode mode) {
+    private BenchmarkParams newBenchmarkParams(BenchmarkListEntry benchmark, ActionMode mode) {
         int[] threadGroups = options.getThreadGroups().orElse(benchmark.getThreadGroups());
 
         int threads = options.getThreads().orElse(
@@ -392,7 +392,7 @@ public class Runner extends BaseRunner {
                 jvmArgsPrepend, jvmArgs, jvmArgsAppend);
     }
 
-    private List<ActualParams> explodeAllParams(BenchmarkRecord br) throws RunnerException {
+    private List<ActualParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
         Map<String, String[]> benchParams = br.getParams().orElse(Collections.<String, String[]>emptyMap());
         List<ActualParams> ps = new ArrayList<ActualParams>();
         for (String k : benchParams.keySet()) {
@@ -427,7 +427,7 @@ public class Runner extends BaseRunner {
         return ps;
     }
 
-    private Collection<RunResult> runBenchmarks(SortedSet<BenchmarkRecord> benchmarks) throws RunnerException {
+    private Collection<RunResult> runBenchmarks(SortedSet<BenchmarkListEntry> benchmarks) throws RunnerException {
         out.startRun();
 
         Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();

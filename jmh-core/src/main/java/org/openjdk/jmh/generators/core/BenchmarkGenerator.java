@@ -49,7 +49,7 @@ import org.openjdk.jmh.results.SampleTimeResult;
 import org.openjdk.jmh.results.SingleShotResult;
 import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.BenchmarkList;
-import org.openjdk.jmh.runner.BenchmarkRecord;
+import org.openjdk.jmh.runner.BenchmarkListEntry;
 import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
@@ -141,7 +141,7 @@ public class BenchmarkGenerator {
                 MethodGroup group = info.methodGroup;
                 String method = group.getName();
                 for (Mode m : group.getModes()) {
-                    BenchmarkRecord br = new BenchmarkRecord(
+                    BenchmarkListEntry br = new BenchmarkListEntry(
                             info.userName + "." + method,
                             info.generatedName + "." + method,
                             m,

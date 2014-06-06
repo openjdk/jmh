@@ -72,7 +72,7 @@ public class BenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return A list of all benchmarks, excluding matched
      */
-    public Set<BenchmarkRecord> getAll(OutputFormat out, List<String> excludes) {
+    public Set<BenchmarkListEntry> getAll(OutputFormat out, List<String> excludes) {
         return find(out, ".*", excludes);
     }
 
@@ -84,7 +84,7 @@ public class BenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches the include and NOT matching excludes
      */
-    public Set<BenchmarkRecord> find(OutputFormat out, String regexp, List<String> excludes) {
+    public Set<BenchmarkListEntry> find(OutputFormat out, String regexp, List<String> excludes) {
         return find(out, Collections.singletonList(regexp), excludes);
     }
 
@@ -96,7 +96,7 @@ public class BenchmarkList extends AbstractResourceReader {
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches includes and NOT matching excludes
      */
-    public SortedSet<BenchmarkRecord> find(OutputFormat out, List<String> regexps, List<String> excludes) {
+    public SortedSet<BenchmarkListEntry> find(OutputFormat out, List<String> regexps, List<String> excludes) {
 
         // assume we match all benchmarks when include is empty
         if (regexps.isEmpty()) {
@@ -114,7 +114,7 @@ public class BenchmarkList extends AbstractResourceReader {
         }
 
         // find all benchmarks matching pattern
-        SortedSet<BenchmarkRecord> result = new TreeSet<BenchmarkRecord>();
+        SortedSet<BenchmarkListEntry> result = new TreeSet<BenchmarkListEntry>();
         try {
             for (Reader r : getReaders()) {
                 BufferedReader reader = null;
@@ -130,7 +130,7 @@ public class BenchmarkList extends AbstractResourceReader {
                             continue;
                         }
 
-                        BenchmarkRecord br = new BenchmarkRecord(line);
+                        BenchmarkListEntry br = new BenchmarkListEntry(line);
 
                         for (Pattern pattern : includePatterns) {
                             if (pattern.matcher(br.getUsername()).matches()) {
