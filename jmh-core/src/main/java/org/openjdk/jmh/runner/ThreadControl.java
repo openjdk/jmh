@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra;
+package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.util.Utils;
 

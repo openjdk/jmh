@@ -25,8 +25,6 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.InfraControl;
-import org.openjdk.jmh.infra.ThreadControl;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.ClassUtils;
