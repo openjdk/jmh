@@ -135,7 +135,7 @@ public class Defaults {
     /**
      * Default output time unit.
      */
-    public static final TimeUnit OUTPUT_TIMEUNIT = TimeUnit.MILLISECONDS;
+    public static final TimeUnit OUTPUT_TIMEUNIT = TimeUnit.SECONDS;
 
     /**
      * Default operations per invocation.
