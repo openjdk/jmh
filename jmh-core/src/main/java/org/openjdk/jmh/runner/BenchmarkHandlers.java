@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.ClassUtils;
@@ -85,7 +86,7 @@ class BenchmarkHandlers {
             return false;
         }
 
-        if (parameterTypes[1] != ThreadControl.class) {
+        if (parameterTypes[1] != ThreadParams.class) {
             return false;
         }
 

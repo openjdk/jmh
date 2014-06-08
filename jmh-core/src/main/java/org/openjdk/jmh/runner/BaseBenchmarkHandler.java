@@ -26,12 +26,14 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.util.Utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -90,6 +92,42 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         }
         return list;
     }
+
+    static ThreadParams[] distributeThreads(int threads, int[] groups) {
+        ThreadParams[] result = new ThreadParams[threads];
+        int totalGroupThreads = Utils.sum(groups);
+        int totalGroups = (int) Math.ceil(threads / totalGroupThreads);
+        int totalSubgroups = groups.length;
+
+        int currentGroupThread = 0;
+        int currentSubgroupThread = 0;
+        int currentGroup = 0;
+        int currentSubgroup = 0;
+        for (int t = 0; t < threads; t++) {
+            while (currentSubgroupThread >= groups[currentSubgroup]) {
+                currentSubgroup++;
+                if (currentSubgroup == groups.length) {
+                    currentGroup++;
+                    currentSubgroup = 0;
+                    currentGroupThread = 0;
+                }
+                currentSubgroupThread = 0;
+            }
+
+            result[t] = new ThreadParams(
+                    t, threads,
+                    currentGroup, totalGroups,
+                    currentSubgroup, totalSubgroups,
+                    currentGroupThread, totalGroupThreads,
+                    currentSubgroupThread, groups[currentSubgroup]
+                  );
+
+            currentGroupThread++;
+            currentSubgroupThread++;
+        }
+        return result;
+    }
+
 
     private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("harness.executor", ExecutorType.FIXED_TPE.name()));
 

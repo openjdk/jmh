@@ -34,6 +34,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.Control;
 import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
@@ -541,7 +542,7 @@ class StateObjectHandler {
             result.add("");
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
             result.add("        if (" + so.fieldIdentifier + " == null) {");
             result.add("            " + so.fieldIdentifier + " = new " + so.type + "();");
@@ -574,7 +575,7 @@ class StateObjectHandler {
             result.add("");
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
 
             // These classes are copying the external environment.
             if (so.userType.equals(BenchmarkParams.class.getCanonicalName())) {
@@ -583,6 +584,9 @@ class StateObjectHandler {
             } else if (so.userType.equals(IterationParams.class.getCanonicalName())) {
                 result.add("    if (true) {");
                 result.add("        " + so.type + " val = new " + so.type + "(control.iterationParams);");
+            } else if (so.userType.equals(ThreadParams.class.getCanonicalName())) {
+                result.add("    if (true) {");
+                result.add("        " + so.type + " val = new " + so.type + "(threadParams);");
             } else {
                 result.add("    if (" + so.fieldIdentifier + " == null) {");
                 result.add("        " + so.type + " val = new " + so.type + "();");
@@ -615,12 +619,12 @@ class StateObjectHandler {
             result.add("");
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
-            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, int groupId" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    synchronized(this.getClass()) {");
-            result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(groupId);");
+            result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(threadParams.getGroupIndex());");
             result.add("        if (local == null) {");
             result.add("            " + so.type + " val = new " + so.type + "();");
-            result.add("            " + so.fieldIdentifier + "_map.put(groupId, val);");
+            result.add("            " + so.fieldIdentifier + "_map.put(threadParams.getGroupIndex(), val);");
             result.add("            local = val;");
             result.add("        }");
             result.add("        if (!local.ready" + Level.Trial + ") {");
@@ -674,7 +678,7 @@ class StateObjectHandler {
         for (StateObject so : sos) {
             if (so.scope != Scope.Group) continue;
             result.add("synchronized(this.getClass()) {");
-            result.add("    " + so.fieldIdentifier + "_map.remove(threadControl.group);");
+            result.add("    " + so.fieldIdentifier + "_map.remove(threadParams.getGroupIndex());");
             result.add("}");
         }
         return result;
@@ -686,10 +690,10 @@ class StateObjectHandler {
             switch (so.scope) {
                 case Benchmark:
                 case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control" + soDependency_Args(so) + ");");
+                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadParams" + soDependency_Args(so) + ");");
                     break;
                 case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadControl.group" + soDependency_Args(so) + ");");
+                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadParams" + soDependency_Args(so) + ");");
                     break;
                 default:
                     throw new IllegalStateException("Unhandled scope: " + so.scope);
@@ -729,7 +733,8 @@ class StateObjectHandler {
     public void addSuperCall(List<String> result, StateObject so, String suffix) {
         // These classes have copying constructor:
         if (so.userType.equals(BenchmarkParams.class.getCanonicalName()) ||
-            so.userType.equals(IterationParams.class.getCanonicalName())) {
+            so.userType.equals(IterationParams.class.getCanonicalName()) ||
+            so.userType.equals(ThreadParams.class.getCanonicalName())) {
             result.add("    public " + so.type + suffix + "(" + so.userType + " other) {");
             result.add("        super(other);");
             result.add("    }");

@@ -41,6 +41,7 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.results.AverageTimeResult;
 import org.openjdk.jmh.results.RawResults;
 import org.openjdk.jmh.results.Result;
@@ -52,7 +53,6 @@ import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkListEntry;
 import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.runner.InfraControl;
-import org.openjdk.jmh.runner.ThreadControl;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
@@ -275,6 +275,7 @@ public class BenchmarkGenerator {
             // These classes use the special init sequence:
             hasDefaultConstructor |= state.getQualifiedName().equals(BenchmarkParams.class.getCanonicalName());
             hasDefaultConstructor |= state.getQualifiedName().equals(IterationParams.class.getCanonicalName());
+            hasDefaultConstructor |= state.getQualifiedName().equals(ThreadParams.class.getCanonicalName());
 
             if (!hasDefaultConstructor) {
                 throw new GenerationException("The " + State.class.getSimpleName() +
@@ -571,7 +572,7 @@ public class BenchmarkGenerator {
                 List.class, AtomicInteger.class, AtomicIntegerFieldUpdater.class,
                 Collection.class, Collections.class, ArrayList.class, Arrays.class,
                 TimeUnit.class, Generated.class, CompilerControl.class,
-                InfraControl.class, ThreadControl.class, Blackhole.class,
+                InfraControl.class, ThreadParams.class, Blackhole.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
@@ -610,7 +611,7 @@ public class BenchmarkGenerator {
 
     private void generateThroughput(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
-                "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+                "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -619,7 +620,7 @@ public class BenchmarkGenerator {
         for (MethodInfo method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
+            writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
@@ -717,7 +718,7 @@ public class BenchmarkGenerator {
 
     private void generateAverageTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
-                "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+                "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -726,7 +727,7 @@ public class BenchmarkGenerator {
         for (MethodInfo method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
+            writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
@@ -834,7 +835,7 @@ public class BenchmarkGenerator {
 
     private void generateSampleTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
         writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
-                "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+                "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -843,7 +844,7 @@ public class BenchmarkGenerator {
         for (MethodInfo method : methodGroup.methods()) {
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
+            writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 
@@ -950,7 +951,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateSingleShotTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadControl threadControl) throws Throwable {");
+        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -961,7 +962,7 @@ public class BenchmarkGenerator {
 
             subGroup++;
 
-            writer.println(ident(2) + "if (threadControl.subgroup == " + subGroup + ") {");
+            writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
 

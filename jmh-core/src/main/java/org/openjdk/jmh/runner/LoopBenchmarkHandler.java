@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.runner.format.OutputFormat;
@@ -75,23 +76,9 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
 
-        int[] groups = benchmarkParams.getThreadGroups();
-        int currentGroup = 0;
-        int currentSubgroup = 0;
-        int remainingSubgroupThreads = groups[currentSubgroup];
+        ThreadParams[] threadParamses = distributeThreads(numThreads, benchmarkParams.getThreadGroups());
         for (int i = 0; i < runners.length; i++) {
-            while (remainingSubgroupThreads == 0) {
-                currentSubgroup++;
-                if (currentSubgroup == groups.length) {
-                    currentSubgroup = 0;
-                    currentGroup++;
-                }
-                remainingSubgroupThreads = groups[currentSubgroup];
-            }
-            remainingSubgroupThreads--;
-
-            ThreadControl threadControl = new ThreadControl(currentGroup, currentSubgroup);
-            runners[i] = new BenchmarkTask(control, threadControl);
+            runners[i] = new BenchmarkTask(control, threadParamses[i]);
         }
 
         // profilers start way before the workload starts to capture
@@ -199,11 +186,11 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
 
         private volatile Thread runner;
         private final InfraControl control;
-        private final ThreadControl threadControl;
+        private final ThreadParams threadParams;
 
-        BenchmarkTask(InfraControl control, ThreadControl threadControl) {
+        BenchmarkTask(InfraControl control, ThreadParams threadParams) {
             this.control = control;
-            this.threadControl = threadControl;
+            this.threadParams = threadParams;
         }
 
         @Override
@@ -213,7 +200,7 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
                 runner = Thread.currentThread();
 
                 // go for the run
-                return (Collection<? extends Result>) method.invoke(instances.get(), control, threadControl);
+                return (Collection<? extends Result>) method.invoke(instances.get(), control, threadParams);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
