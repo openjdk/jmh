@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.results.AggregatorUtils;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.util.ListStatistics;
@@ -38,10 +39,10 @@ public class ProfilerResultAggregator implements Aggregator<ProfilerResult> {
             stats.addValue(r.getScore());
         }
         return new ProfilerResult(
-                Result.aggregateLabels(results),
+                AggregatorUtils.aggregateLabels(results),
                 stats,
-                Result.aggregateUnits(results),
-                Result.aggregatePolicies(results)
+                AggregatorUtils.aggregateUnits(results),
+                AggregatorUtils.aggregatePolicies(results)
         );
     }
 }

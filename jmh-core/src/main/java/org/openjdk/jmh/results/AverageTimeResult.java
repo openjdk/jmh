@@ -64,10 +64,10 @@ public class AverageTimeResult extends Result {
                 stat.addValue(r.getScore());
             }
             return new AverageTimeResult(
-                    Result.aggregateRoles(results),
-                    Result.aggregateLabels(results),
+                    AggregatorUtils.aggregateRoles(results),
+                    AggregatorUtils.aggregateLabels(results),
                     stat,
-                    Result.aggregateUnits(results)
+                    AggregatorUtils.aggregateUnits(results)
             );
         }
     }

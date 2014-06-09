@@ -112,10 +112,10 @@ public class SampleTimeResult extends Result {
                 tu = r.outputTimeUnit;
             }
             return new SampleTimeResult(
-                    aggregateRoles(results),
-                    aggregateLabels(results),
+                    AggregatorUtils.aggregateRoles(results),
+                    AggregatorUtils.aggregateLabels(results),
                     buffer,
-                    aggregateUnits(results),
+                    AggregatorUtils.aggregateUnits(results),
                     tu
             );
         }

@@ -71,10 +71,10 @@ public class ThroughputResult extends Result {
                 stat.addValue(r.getScore());
             }
             return new ThroughputResult(
-                    aggregateRoles(results),
-                    aggregateLabels(results),
+                    AggregatorUtils.aggregateRoles(results),
+                    AggregatorUtils.aggregateLabels(results),
                     stat,
-                    aggregateUnits(results),
+                    AggregatorUtils.aggregateUnits(results),
                     policy
             );
         }

@@ -72,10 +72,10 @@ public class SingleShotResult extends Result {
                 stat.addValue(r.getScore());
             }
             return new SingleShotResult(
-                    aggregateRoles(results),
-                    aggregateLabels(results),
+                    AggregatorUtils.aggregateRoles(results),
+                    AggregatorUtils.aggregateLabels(results),
                     stat,
-                    aggregateUnits(results)
+                    AggregatorUtils.aggregateUnits(results)
             );
         }
 
