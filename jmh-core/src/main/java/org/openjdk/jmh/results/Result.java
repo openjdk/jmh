@@ -58,18 +58,48 @@ public abstract class Result<T extends Result<T>> implements Serializable {
     }
 
     /**
-     * The unit of the score for one iteration.
+     * Return the result label.
+     * @return result label
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    /**
+     * Return the result role.
+     * @return result role
+     */
+    public ResultRole getRole() {
+        return role;
+    }
+
+    /**
+     * Return the statistics holding the subresults' values.
      *
-     * @return String representing the unit of the score
+     * <p>This method returns raw samples. The aggregation policy decides how to get the score
+     * out of these raw samples. Use {@link #getScore()}, {@link #getScoreError()}, and
+     * {@link #getScoreConfidence()} for scalar results.</p>
+     *
+     * @return statistics
+     */
+    public Statistics getStatistics() {
+        return statistics;
+    }
+
+    /**
+     * The unit of the score for this result.
+     *
+     * @return String representation of the unit
      */
     public final String getScoreUnit() {
         return unit;
     }
 
     /**
-     * The score of one iteration.
+     * The score for this result.
      *
      * @return double representing the score
+     * @see #getScoreError()
      */
     public double getScore() {
         switch (policy) {
@@ -84,6 +114,11 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         }
     }
 
+    /**
+     * The score error for this result.
+     * @return score error, if available
+     * @see #getScore()
+     */
     public double getScoreError() {
         switch (policy) {
             case AVG:
@@ -96,6 +131,11 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         }
     }
 
+    /**
+     * The score confidence interval for this result.
+     * @return score confidence interval, if available; if not, the CI will match {@link #getScore()}
+     * @see #getScore()
+     */
     public double[] getScoreConfidence() {
         switch (policy) {
             case AVG:
@@ -109,6 +149,10 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         }
     }
 
+    /**
+     * Get number of samples in the current result.
+     * @return number of samples
+     */
     public long getSampleCount() {
         return statistics.getN();
     }
@@ -117,13 +161,13 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      * Thread aggregator combines the thread results into iteration result.
      * @return thread aggregator
      */
-    public abstract Aggregator<T> getThreadAggregator();
+    protected abstract Aggregator<T> getThreadAggregator();
 
     /**
      * Iteration aggregator combines the iteration results into benchmar result.
      * @return iteration aggregator
      */
-    public abstract Aggregator<T> getIterationAggregator();
+    protected abstract Aggregator<T> getIterationAggregator();
 
     /**
      * Result as represented by a String.
@@ -135,10 +179,11 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return String.format("%.3f %s", getScore(), getScoreUnit());
     }
 
-    public Statistics getStatistics() {
-        return statistics;
-    }
-
+    /**
+     * Print extended result information
+     * @param label result label
+     * @return String with extended info
+     */
     public String extendedInfo(String label) {
         return simpleExtendedInfo(label);
     }
@@ -197,14 +242,6 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         sb.append(String.format("         max = %10.3f %s\n", stats.getMax(), getScoreUnit()));
 
         return sb.toString();
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public ResultRole getRole() {
-        return role;
     }
 
     public static ResultRole aggregateRoles(Collection<? extends Result> results) {

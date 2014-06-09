@@ -199,12 +199,12 @@ public class StackProfiler implements InternalProfiler {
         }
 
         @Override
-        public Aggregator<StackResult> getThreadAggregator() {
+        protected Aggregator<StackResult> getThreadAggregator() {
             return new StackResultAggregator();
         }
 
         @Override
-        public Aggregator<StackResult> getIterationAggregator() {
+        protected Aggregator<StackResult> getIterationAggregator() {
             return new StackResultAggregator();
         }
 

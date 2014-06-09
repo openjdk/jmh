@@ -22,16 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.results.ThroughputResult;
 import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.TimeValue;
 

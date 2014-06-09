@@ -52,12 +52,12 @@ public class SingleShotResult extends Result {
     }
 
     @Override
-    public Aggregator getThreadAggregator() {
+    protected Aggregator getThreadAggregator() {
         return new AveragingAggregator();
     }
 
     @Override
-    public Aggregator getIterationAggregator() {
+    protected Aggregator getIterationAggregator() {
         return new AveragingAggregator();
     }
 

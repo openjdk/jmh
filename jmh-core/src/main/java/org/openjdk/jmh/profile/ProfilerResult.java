@@ -40,12 +40,12 @@ public class ProfilerResult extends Result<ProfilerResult> {
     }
 
     @Override
-    public Aggregator<ProfilerResult> getThreadAggregator() {
+    protected Aggregator<ProfilerResult> getThreadAggregator() {
         return new ProfilerResultAggregator();
     }
 
     @Override
-    public Aggregator<ProfilerResult> getIterationAggregator() {
+    protected Aggregator<ProfilerResult> getIterationAggregator() {
         return new ProfilerResultAggregator();
     }
 

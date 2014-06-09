@@ -22,38 +22,52 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results;
 
 import org.junit.Test;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.results.SingleShotResult;
+import org.openjdk.jmh.util.SampleBuffer;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 
-public class TestSingleShotResult {
+public class TestSampleTimeResult {
 
     @Test
     public void testIterationAggregator1() {
-        SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
-        SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
+        SampleBuffer b1 = new SampleBuffer();
+        b1.add(1000);
+        b1.add(2000);
+
+        SampleBuffer b2 = new SampleBuffer();
+        b2.add(3000);
+        b2.add(4000);
+
+        SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
+        SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(1.5, result.getScore());
-        assertEquals("us", result.getScoreUnit());
+        assertEquals(2.5, result.getScore());
+        assertEquals("us/op", result.getScoreUnit());
     }
 
     @Test
     public void testThreadAggregator1() {
-        SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
-        SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
+        SampleBuffer b1 = new SampleBuffer();
+        b1.add(1000);
+        b1.add(2000);
+
+        SampleBuffer b2 = new SampleBuffer();
+        b2.add(3000);
+        b2.add(4000);
+
+        SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
+        SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(1.5, result.getScore());
-        assertEquals("us", result.getScoreUnit());
+        assertEquals(2.5, result.getScore());
+        assertEquals("us/op", result.getScoreUnit());
     }
 
 }

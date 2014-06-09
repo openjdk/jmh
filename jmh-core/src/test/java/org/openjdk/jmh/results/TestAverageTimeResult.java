@@ -22,12 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.infra.results;
+package org.openjdk.jmh.results;
 
 import org.junit.Test;
-import org.openjdk.jmh.results.AverageTimeResult;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;

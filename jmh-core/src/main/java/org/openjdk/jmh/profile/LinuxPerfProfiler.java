@@ -191,12 +191,12 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         }
 
         @Override
-        public Aggregator<PerfResult> getThreadAggregator() {
+        protected Aggregator<PerfResult> getThreadAggregator() {
             return new PerfResultAggregator();
         }
 
         @Override
-        public Aggregator<PerfResult> getIterationAggregator() {
+        protected Aggregator<PerfResult> getIterationAggregator() {
             return new PerfResultAggregator();
         }
 
