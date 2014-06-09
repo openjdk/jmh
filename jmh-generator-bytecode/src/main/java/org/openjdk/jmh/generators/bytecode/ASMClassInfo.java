@@ -59,6 +59,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private String superName;
     private String declaringClass;
     private boolean isInner;
+    private String origQualifiedName;
 
     public ASMClassInfo(ClassInfoRepo classInfos) {
         super(Opcodes.ASM4);
@@ -80,6 +81,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
         this.access = access;
         qualifiedName = name.replace("/", ".");
         packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
+        origQualifiedName = qualifiedName;
         qualifiedName = qualifiedName.replace('$', '.');
         this.name = qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
     }
@@ -216,12 +218,12 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
         if (isEnum()) {
             try {
                 Collection<String> res = new ArrayList<String>();
-                for (Object cnst : Class.forName(qualifiedName).getEnumConstants()) {
+                for (Object cnst : Class.forName(origQualifiedName).getEnumConstants()) {
                     res.add(cnst.toString());
                 }
                 return res;
             } catch (ClassNotFoundException e) {
-                throw new IllegalStateException("Can not find and instantiate enum: " + qualifiedName);
+                throw new IllegalStateException("Can not find and instantiate enum: " + origQualifiedName);
             }
         } else {
             return Collections.emptyList();

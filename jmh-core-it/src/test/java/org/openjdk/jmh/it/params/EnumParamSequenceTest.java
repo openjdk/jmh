@@ -89,4 +89,12 @@ public class EnumParamSequenceTest {
 
         Assert.assertEquals(1*3, new Runner(opts).run().size());
     }
+
+    public static enum SampleEnumA {
+        VALUE_A, VALUE_B, VALUE_C;
+    }
+
+    public static enum SampleEnumB {
+        VALUE_A, VALUE_B, VALUE_C;
+    }
 }
