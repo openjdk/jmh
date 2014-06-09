@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.results;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
@@ -32,7 +33,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -64,53 +67,36 @@ public class RunResult implements Serializable {
         this.params = myParams;
     }
 
-    public Collection<BenchmarkResult> getRawBenchResults() {
+    public Collection<BenchmarkResult> getBenchmarkResults() {
         return benchmarkResults;
     }
 
     public Result getPrimaryResult() {
-        Result next = benchmarkResults.iterator().next().getPrimaryResult();
-
-        @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = next.getRunAggregator();
-        return aggregator.aggregate(getRawPrimaryResults());
-    }
-
-    public Collection<Result> getRawPrimaryResults() {
-        Collection<Result> rs = new ArrayList<Result>();
-        for (BenchmarkResult br : benchmarkResults) {
-            rs.addAll(br.getRawPrimaryResults());
-        }
-        return rs;
-    }
-
-    public Multimap<String, Result> getRawSecondaryResults() {
-        Multimap<String, Result> rs = new HashMultimap<String, Result>();
-        for (BenchmarkResult br : benchmarkResults) {
-            Multimap<String, Result> secondaries = br.getRawSecondaryResults();
-            for (String label : secondaries.keys()) {
-                for (Result r : secondaries.get(label)) {
-                    rs.put(r.getLabel(), r);
-                }
-            }
-        }
-        return rs;
+         return getFakeResult().getPrimaryResult();
     }
 
     public Map<String, Result> getSecondaryResults() {
-        Multimap<String, Result> rs = getRawSecondaryResults();
+        return getFakeResult().getSecondaryResults();
+    }
 
-        Map<String, Result> answers = new TreeMap<String, Result>();
-        for (String k : rs.keys()) {
-            Collection<Result> results = rs.get(k);
-            Result next = results.iterator().next();
-
-            @SuppressWarnings("unchecked")
-            Aggregator<Result> aggregator = next.getRunAggregator();
-            answers.put(k, aggregator.aggregate(results));
+    /**
+     * Implementation note: RunResult tries to aggregate BenchmarkResult as if
+     * the underlying iterations are aggregated in the single run.
+     */
+    private BenchmarkResult getFakeResult() {
+        Collection<IterationResult> results = new ArrayList<IterationResult>();
+        for (BenchmarkResult r : benchmarkResults) {
+            for (IterationResult ir : r.getIterationResults()) {
+                results.add(ir);
+            }
         }
-
-        return answers;
+        BenchmarkResult result = new BenchmarkResult(results);
+        for (BenchmarkResult br : benchmarkResults) {
+            for (Result ar : br.getBenchmarkResults()) {
+                result.amend(ar);
+            }
+        }
+        return result;
     }
 
     public String getScoreUnit() {

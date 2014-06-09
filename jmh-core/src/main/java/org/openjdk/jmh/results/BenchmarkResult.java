@@ -31,7 +31,9 @@ import org.openjdk.jmh.util.Multimap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -69,49 +71,45 @@ public class BenchmarkResult implements Serializable {
         benchmarkResults.add(r);
     }
 
+    public Collection<IterationResult> getIterationResults() {
+        return iterationResults;
+    }
+
+    public Collection<Result> getBenchmarkResults() {
+        return benchmarkResults;
+    }
+
     public Result getPrimaryResult() {
-        Result next = iterationResults.iterator().next().getPrimaryResult();
-
         @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = next.getRunAggregator();
-        return aggregator.aggregate(getRawPrimaryResults());
-    }
+        Aggregator<Result> aggregator = iterationResults.iterator().next().getPrimaryResult().getRunAggregator();
 
-    public Collection<Result> getRawPrimaryResults() {
-        Collection<Result> rs = new ArrayList<Result>();
-        for (IterationResult k : iterationResults) {
-            rs.addAll(k.getRawPrimaryResults());
+        Collection<Result> aggrs = new ArrayList<Result>();
+        for (IterationResult r : iterationResults) {
+            aggrs.add(r.getPrimaryResult());
         }
-        return rs;
-    }
-
-    public Multimap<String, Result> getRawSecondaryResults() {
-        Multimap<String, Result> rs = new HashMultimap<String, Result>();
-        for (IterationResult k : iterationResults) {
-            Multimap<String, Result> secondaries = k.getRawSecondaryResults();
-            for (String label : secondaries.keys()) {
-                for (Result r : secondaries.get(label)) {
-                    rs.put(r.getLabel(), r);
-                }
-            }
-        }
-        for (Result r : benchmarkResults) {
-            rs.put(r.getLabel(), r);
-        }
-        return rs;
+        return aggregator.aggregate(aggrs);
     }
 
     public Map<String, Result> getSecondaryResults() {
-        Multimap<String, Result> rs = getRawSecondaryResults();
+        Set<String> labels = new HashSet<String>();
+        for (IterationResult r : iterationResults) {
+            labels.addAll(r.getSecondaryResults().keySet());
+        }
 
         Map<String, Result> answers = new TreeMap<String, Result>();
-        for (String k : rs.keys()) {
-            Collection<Result> results = rs.get(k);
-            Result next = results.iterator().next();
-
+        for (String label : labels) {
             @SuppressWarnings("unchecked")
-            Aggregator<Result> aggregator = next.getRunAggregator();
-            answers.put(k, aggregator.aggregate(results));
+            Aggregator<Result> aggregator = iterationResults.iterator().next().getSecondaryResults().get(label).getRunAggregator();
+
+            Collection<Result> results = new ArrayList<Result>();
+            for (IterationResult r : iterationResults) {
+                results.add(r.getSecondaryResults().get(label));
+            }
+            answers.put(label, aggregator.aggregate(results));
+        }
+
+        for (Result r : benchmarkResults) {
+            answers.put(r.getLabel(), r);
         }
 
         return answers;
