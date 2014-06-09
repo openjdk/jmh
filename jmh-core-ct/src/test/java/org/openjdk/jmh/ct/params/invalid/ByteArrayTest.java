@@ -34,7 +34,7 @@ import org.openjdk.jmh.ct.CompileTest;
 @State(Scope.Benchmark)
 public class ByteArrayTest {
 
-    @Param
+    @Param("0")
     public byte[] param;
 
     @Benchmark

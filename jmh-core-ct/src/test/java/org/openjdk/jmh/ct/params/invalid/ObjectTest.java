@@ -34,7 +34,7 @@ import org.openjdk.jmh.ct.CompileTest;
 @State(Scope.Benchmark)
 public class ObjectTest {
 
-    @Param
+    @Param("0")
     public Object param;
 
     @Benchmark
@@ -44,7 +44,7 @@ public class ObjectTest {
 
     @Test
     public void compileTest() {
-        CompileTest.assertFail(this.getClass());
+        CompileTest.assertFail(this.getClass(), "annotation-compatible types");
     }
 
 }

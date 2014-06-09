@@ -401,8 +401,8 @@ public class Runner extends BaseRunner {
             Collection<String> values = options.getParameter(k).orElse(Arrays.asList(benchParams.get(k)));
             if (values.isEmpty()) {
                 throw new RunnerException("Benchmark \"" + br.getUsername() +
-                        "\" defines the parameter \"" + k + "\", but its values are ambiguous.\n" +
-                        "Define the default values within the annotation, or provide the parameter values in runtime.");
+                        "\" defines the parameter \"" + k + "\", but no default values.\n" +
+                        "Define the default values within the annotation, or provide the parameter values at runtime.");
             }
             if (ps.isEmpty()) {
                 int idx = 0;

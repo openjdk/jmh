@@ -34,7 +34,7 @@ import org.openjdk.jmh.ct.CompileTest;
 @State(Scope.Benchmark)
 public class LongArrayTest {
 
-    @Param
+    @Param("0")
     public long[] param;
 
     @Benchmark

@@ -41,7 +41,7 @@ public class CollidingParamsTest {
 
     @State(Scope.Benchmark)
     public static class Benchmark1 {
-        @Param
+        @Param("1")
         private int x;
 
         @Benchmark
@@ -52,7 +52,7 @@ public class CollidingParamsTest {
 
     @State(Scope.Benchmark)
     public static class Benchmark2 {
-        @Param
+        @Param("2")
         private int x;
 
         @Benchmark

@@ -34,7 +34,7 @@ import org.openjdk.jmh.ct.CompileTest;
 @State(Scope.Benchmark)
 public class CharArrayTest {
 
-    @Param
+    @Param("0")
     public char[] param;
 
     @Benchmark

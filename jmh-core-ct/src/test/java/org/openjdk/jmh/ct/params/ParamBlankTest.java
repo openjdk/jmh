@@ -92,7 +92,7 @@ public class ParamBlankTest {
 
     @Test
     public void compileTest() {
-        CompileTest.assertOK(this.getClass());
+        CompileTest.assertFail(this.getClass(), "default parameters");
     }
 
 }
