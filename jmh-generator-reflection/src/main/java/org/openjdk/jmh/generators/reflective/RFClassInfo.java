@@ -65,6 +65,9 @@ class RFClassInfo implements ClassInfo {
     @Override
     public String getQualifiedName() {
         String name = klass.getCanonicalName();
+        if (name == null) {
+            name = klass.getName();
+        }
         if (name.contains("$")) {
             return name.replace("$", ".");
         } else {
