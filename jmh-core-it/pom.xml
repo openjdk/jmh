@@ -155,6 +155,10 @@ questions.
                         </configuration>
                         <executions>
                             <execution>
+                                <id>default-testCompile</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
                                 <id>compile-java</id>
                                 <phase>process-test-sources</phase>
                                 <goals>
@@ -237,6 +241,10 @@ questions.
                             <compilerArgument>-proc:none</compilerArgument>
                         </configuration>
                         <executions>
+                            <execution>
+                                <id>default-testCompile</id>
+                                <phase>none</phase>
+                            </execution>
                             <execution>
                                 <id>compile-java</id>
                                 <phase>process-test-sources</phase>
