@@ -29,7 +29,7 @@ import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.FileSystemDestination;
 import org.openjdk.jmh.generators.core.GeneratorSource;
 import org.openjdk.jmh.generators.core.SourceError;
-import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
+import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.File;

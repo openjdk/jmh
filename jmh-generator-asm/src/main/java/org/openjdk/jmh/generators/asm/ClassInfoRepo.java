@@ -25,7 +25,7 @@
 package org.openjdk.jmh.generators.asm;
 
 import org.openjdk.jmh.generators.core.ClassInfo;
-import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
+import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
 
 import java.util.Collection;
 import java.util.HashMap;

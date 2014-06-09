@@ -22,51 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.reflective;
+package org.openjdk.jmh.generators.reflection;
 
 import org.openjdk.jmh.generators.core.ClassInfo;
-import org.openjdk.jmh.generators.core.FieldInfo;
+import org.openjdk.jmh.generators.core.ParameterInfo;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+class RFParameterInfo implements ParameterInfo {
+    private final Class<?> cl;
 
-class RFFieldInfo implements FieldInfo {
-    private final ClassInfo declaringClass;
-    private final Field f;
-
-    public RFFieldInfo(ClassInfo declaringClass, Field f) {
-        this.declaringClass = declaringClass;
-        this.f = f;
-    }
-
-    @Override
-    public ClassInfo getDeclaringClass() {
-        return declaringClass;
-    }
-
-    @Override
-    public String getName() {
-        return f.getName();
+    public RFParameterInfo(Class<?> cl) {
+        this.cl = cl;
     }
 
     @Override
     public ClassInfo getType() {
-        return new RFClassInfo(f.getType());
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        return f.getAnnotation(annClass);
-    }
-
-    @Override
-    public boolean isPublic() {
-        return Modifier.isPublic(f.getModifiers());
-    }
-
-    @Override
-    public boolean isStatic() {
-        return Modifier.isStatic(f.getModifiers());
+        return new RFClassInfo(cl);
     }
 }

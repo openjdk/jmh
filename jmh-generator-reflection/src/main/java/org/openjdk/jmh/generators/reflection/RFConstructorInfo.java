@@ -22,24 +22,24 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.reflective;
+package org.openjdk.jmh.generators.reflection;
 
 import org.openjdk.jmh.generators.core.ClassInfo;
 import org.openjdk.jmh.generators.core.MethodInfo;
 import org.openjdk.jmh.generators.core.ParameterInfo;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
-class RFMethodInfo implements MethodInfo {
+class RFConstructorInfo implements MethodInfo {
 
     private final RFClassInfo declaringClass;
-    private final Method m;
+    private final Constructor m;
 
-    public RFMethodInfo(RFClassInfo declaringClass, Method m) {
+    public RFConstructorInfo(RFClassInfo declaringClass, Constructor m) {
         this.declaringClass = declaringClass;
         this.m = m;
     }
@@ -61,7 +61,7 @@ class RFMethodInfo implements MethodInfo {
 
     @Override
     public String getReturnType() {
-        return m.getReturnType().getCanonicalName();
+        throw new IllegalStateException("Asking the return type for constructor");
     }
 
     @Override
@@ -75,7 +75,7 @@ class RFMethodInfo implements MethodInfo {
 
     @Override
     public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        return m.getAnnotation(annClass);
+        throw new IllegalStateException("Asking annotations for constructor");
     }
 
     @Override

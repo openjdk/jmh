@@ -216,7 +216,7 @@ questions.
         </profile>
 
         <profile>
-            <id>reflect</id>
+            <id>reflection</id>
             <dependencies>
                 <dependency>
                     <groupId>org.openjdk.jmh</groupId>

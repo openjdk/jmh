@@ -29,7 +29,7 @@ import org.openjdk.jmh.generators.asm.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;
-import org.openjdk.jmh.generators.reflective.RFGeneratorSource;
+import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;

@@ -22,51 +22,51 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.reflective;
+package org.openjdk.jmh.generators.reflection;
 
 import org.openjdk.jmh.generators.core.ClassInfo;
-import org.openjdk.jmh.generators.core.GeneratorSource;
+import org.openjdk.jmh.generators.core.FieldInfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
-public class RFGeneratorSource implements GeneratorSource {
+class RFFieldInfo implements FieldInfo {
+    private final ClassInfo declaringClass;
+    private final Field f;
 
-    private final Collection<Class> classes;
-
-    public RFGeneratorSource() {
-        this.classes = new ArrayList<Class>();
+    public RFFieldInfo(ClassInfo declaringClass, Field f) {
+        this.declaringClass = declaringClass;
+        this.f = f;
     }
 
     @Override
-    public Collection<ClassInfo> getClasses() {
-        Collection<ClassInfo> cis = new ArrayList<ClassInfo>();
-        for (Class c : classes) {
-            cis.add(new RFClassInfo(c));
-        }
-        return cis;
-    }
-
-    public static ClassInfo resolveClass(Class<?> klass) {
-        return new RFClassInfo(klass);
+    public ClassInfo getDeclaringClass() {
+        return declaringClass;
     }
 
     @Override
-    public ClassInfo resolveClass(String className) {
-        String desc = className.replace('/', '.');
-        try {
-            return resolveClass(Class.forName(desc, false, Thread.currentThread().getContextClassLoader()));
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Unable to resolve class: " + desc);
-        }
+    public String getName() {
+        return f.getName();
     }
 
-    public void processClasses(Class... cs) {
-        processClasses(Arrays.asList(cs));
+    @Override
+    public ClassInfo getType() {
+        return new RFClassInfo(f.getType());
     }
 
-    public void processClasses(Collection<Class> cs) {
-        classes.addAll(cs);
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
+        return f.getAnnotation(annClass);
+    }
+
+    @Override
+    public boolean isPublic() {
+        return Modifier.isPublic(f.getModifiers());
+    }
+
+    @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(f.getModifiers());
     }
 }
