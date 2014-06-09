@@ -17,6 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jmh.version>${project.version}</jmh.version>
+        <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
     </properties>
 
     <prerequisites>
@@ -94,6 +95,7 @@
                                 <argument>\${project.basedir}/target/classes/</argument>
                                 <argument>\${project.basedir}/target/generated-sources/jmh/</argument>
                                 <argument>\${project.basedir}/target/classes/</argument>
+                                <argument>\${jmh.generator}</argument>
                             </arguments>
                         </configuration>
                     </execution>

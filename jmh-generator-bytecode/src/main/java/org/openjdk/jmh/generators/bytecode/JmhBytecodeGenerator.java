@@ -39,6 +39,7 @@ import java.util.Collection;
 
 public class JmhBytecodeGenerator {
 
+    public static final String GENERATOR_TYPE_DEFAULT = "default";
     public static final String GENERATOR_TYPE_ASM = "asm";
     public static final String GENERATOR_TYPE_REFLECTION = "reflection";
 
@@ -55,7 +56,9 @@ public class JmhBytecodeGenerator {
 
         String generatorType = DEFAULT_GENERATOR_TYPE;
         if (args.length < 4) {
-            generatorType = args[3];
+            if (!args[3].equalsIgnoreCase(GENERATOR_TYPE_DEFAULT)) {
+                generatorType = args[3];
+            }
         }
 
         // Include compiled bytecode on classpath, in case we need to
