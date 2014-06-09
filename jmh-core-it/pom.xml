@@ -205,6 +205,7 @@ questions.
                                         <argument>${project.build.testOutputDirectory}</argument>
                                         <argument>${project.build.testOutputDirectory}/generated-jmh-sources/</argument>
                                         <argument>${project.build.testOutputDirectory}</argument>
+                                        <argument>asm</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -219,7 +220,7 @@ questions.
             <dependencies>
                 <dependency>
                     <groupId>org.openjdk.jmh</groupId>
-                    <artifactId>jmh-generator-reflection</artifactId>
+                    <artifactId>jmh-generator-bytecode</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>
@@ -282,11 +283,12 @@ questions.
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>org.openjdk.jmh.generators.reflective.JmhReflectionGenerator</mainClass>
+                                    <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
                                     <arguments>
                                         <argument>${project.build.testOutputDirectory}</argument>
                                         <argument>${project.build.testOutputDirectory}/generated-jmh-sources/</argument>
                                         <argument>${project.build.testOutputDirectory}</argument>
+                                        <argument>reflection</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

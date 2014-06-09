@@ -25,7 +25,7 @@
 package org.openjdk.jmh.ct;
 
 import junit.framework.Assert;
-import org.openjdk.jmh.generators.bytecode.ASMGeneratorSource;
+import org.openjdk.jmh.generators.asm.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;

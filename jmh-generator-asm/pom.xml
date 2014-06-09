@@ -33,12 +33,12 @@ questions.
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <name>JMH Generators: Bytecode</name>
-    <artifactId>jmh-generator-bytecode</artifactId>
+    <name>JMH Generators: ASM</name>
+    <artifactId>jmh-generator-asm</artifactId>
     <packaging>jar</packaging>
 
     <description>
-        JMH benchmark generator, based on bytecode inspection.
+        JMH benchmark generator, based on ASM bytecode manipulation.
     </description>
 
     <dependencies>
@@ -53,9 +53,9 @@ questions.
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-asm</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>4.2</version>
         </dependency>
     </dependencies>
 
@@ -107,29 +107,6 @@ questions.
                             <mapping>
                                 <java>PHP</java>
                             </mapping>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jmh-bytecode-generator</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jmh.generators.bytecode.JmhBytecodeGenerator</mainClass>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

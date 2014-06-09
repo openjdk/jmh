@@ -160,6 +160,7 @@ questions.
         <module>jmh-core-benchmarks</module>
         <module>jmh-samples</module>
         <module>jmh-generator-annprocess</module>
+        <module>jmh-generator-asm</module>
         <module>jmh-generator-bytecode</module>
         <module>jmh-generator-reflection</module>
         <module>jmh-archetypes</module>

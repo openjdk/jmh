@@ -56,7 +56,7 @@ questions.
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-bytecode</artifactId>
+            <artifactId>jmh-generator-asm</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
