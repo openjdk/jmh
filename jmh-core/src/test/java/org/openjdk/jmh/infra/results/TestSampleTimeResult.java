@@ -38,24 +38,6 @@ import static junit.framework.Assert.assertEquals;
 public class TestSampleTimeResult {
 
     @Test
-    public void testRunAggregator1() {
-        SampleBuffer b1 = new SampleBuffer();
-        b1.add(1000);
-        b1.add(2000);
-
-        SampleBuffer b2 = new SampleBuffer();
-        b2.add(3000);
-        b2.add(4000);
-
-        SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
-        SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(2.5, result.getScore());
-        assertEquals("us/op", result.getScoreUnit());
-    }
-
-    @Test
     public void testIterationAggregator1() {
         SampleBuffer b1 = new SampleBuffer();
         b1.add(1000);
@@ -68,6 +50,24 @@ public class TestSampleTimeResult {
         SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
         SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
+
+        assertEquals(2.5, result.getScore());
+        assertEquals("us/op", result.getScoreUnit());
+    }
+
+    @Test
+    public void testThreadAggregator1() {
+        SampleBuffer b1 = new SampleBuffer();
+        b1.add(1000);
+        b1.add(2000);
+
+        SampleBuffer b2 = new SampleBuffer();
+        b2.add(3000);
+        b2.add(4000);
+
+        SampleTimeResult r1 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b1, TimeUnit.MICROSECONDS);
+        SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(2.5, result.getScore());
         assertEquals("us/op", result.getScoreUnit());

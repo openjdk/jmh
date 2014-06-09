@@ -37,20 +37,20 @@ import static junit.framework.Assert.assertEquals;
 public class TestSingleShotResult {
 
     @Test
-    public void testRunAggregator1() {
+    public void testIterationAggregator1() {
         SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
         SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
+        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
         assertEquals("us", result.getScoreUnit());
     }
 
     @Test
-    public void testIterationAggregator1() {
+    public void testThreadAggregator1() {
         SingleShotResult r1 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 1000L, TimeUnit.MICROSECONDS);
         SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
         assertEquals("us", result.getScoreUnit());

@@ -93,7 +93,7 @@ public class IterationResult implements Serializable {
             Result next = results.iterator().next();
 
             @SuppressWarnings("unchecked")
-            Aggregator<Result> aggregator = next.getIterationAggregator();
+            Aggregator<Result> aggregator = next.getThreadAggregator();
             Result result = aggregator.aggregate(results);
             answer.put(label, result);
         }
@@ -104,7 +104,7 @@ public class IterationResult implements Serializable {
         Result next = primaryResults.iterator().next();
 
         @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = next.getIterationAggregator();
+        Aggregator<Result> aggregator = next.getThreadAggregator();
         return aggregator.aggregate(primaryResults);
     }
 

@@ -37,40 +37,40 @@ import static junit.framework.Assert.assertEquals;
 public class TestAverageTimeResult {
 
     @Test
-    public void testRunAggregator1() {
+    public void testIterationAggregator1() {
         AverageTimeResult r1 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
         AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
+        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
         assertEquals("us/op", result.getScoreUnit());
     }
 
     @Test
-    public void testRunAggregator2() {
-        AverageTimeResult r1 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(1.0, result.getScore());
-        assertEquals("us/op", result.getScoreUnit());
-    }
-
-    @Test
-    public void testIterationAggregator1() {
-        AverageTimeResult r1 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(1.0, result.getScore());
-        assertEquals("us/op", result.getScoreUnit());
-    }
-
-    @Test
     public void testIterationAggregator2() {
         AverageTimeResult r1 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
-        AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
+        AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
+
+        assertEquals(1.0, result.getScore());
+        assertEquals("us/op", result.getScoreUnit());
+    }
+
+    @Test
+    public void testThreadAggregator1() {
+        AverageTimeResult r1 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
+
+        assertEquals(1.0, result.getScore());
+        assertEquals("us/op", result.getScoreUnit());
+    }
+
+    @Test
+    public void testThreadAggregator2() {
+        AverageTimeResult r1 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        AverageTimeResult r2 = new AverageTimeResult(ResultRole.PRIMARY, "test1", 1000L, 2000000L, TimeUnit.MICROSECONDS);
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
         assertEquals("us/op", result.getScoreUnit());

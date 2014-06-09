@@ -48,12 +48,12 @@ public class ThroughputResult extends Result {
     }
 
     @Override
-    public Aggregator getIterationAggregator() {
+    public Aggregator getThreadAggregator() {
         return new ThroughputAggregator(AggregationPolicy.SUM);
     }
 
     @Override
-    public Aggregator getRunAggregator() {
+    public Aggregator getIterationAggregator() {
         return new ThroughputAggregator(AggregationPolicy.AVG);
     }
 

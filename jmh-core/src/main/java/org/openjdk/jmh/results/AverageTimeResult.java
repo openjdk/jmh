@@ -47,12 +47,12 @@ public class AverageTimeResult extends Result {
     }
 
     @Override
-    public Aggregator<AverageTimeResult> getIterationAggregator() {
+    public Aggregator<AverageTimeResult> getThreadAggregator() {
         return new ResultAggregator();
     }
 
     @Override
-    public Aggregator<AverageTimeResult> getRunAggregator() {
+    public Aggregator<AverageTimeResult> getIterationAggregator() {
         return new ResultAggregator();
     }
 

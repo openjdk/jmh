@@ -25,8 +25,6 @@
 package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.util.HashMultimap;
-import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -81,7 +79,7 @@ public class BenchmarkResult implements Serializable {
 
     public Result getPrimaryResult() {
         @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = iterationResults.iterator().next().getPrimaryResult().getRunAggregator();
+        Aggregator<Result> aggregator = iterationResults.iterator().next().getPrimaryResult().getIterationAggregator();
 
         Collection<Result> aggrs = new ArrayList<Result>();
         for (IterationResult r : iterationResults) {
@@ -99,7 +97,7 @@ public class BenchmarkResult implements Serializable {
         Map<String, Result> answers = new TreeMap<String, Result>();
         for (String label : labels) {
             @SuppressWarnings("unchecked")
-            Aggregator<Result> aggregator = iterationResults.iterator().next().getSecondaryResults().get(label).getRunAggregator();
+            Aggregator<Result> aggregator = iterationResults.iterator().next().getSecondaryResults().get(label).getIterationAggregator();
 
             Collection<Result> results = new ArrayList<Result>();
             for (IterationResult r : iterationResults) {

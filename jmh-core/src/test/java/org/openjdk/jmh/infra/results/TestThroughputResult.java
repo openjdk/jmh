@@ -81,43 +81,13 @@ public class TestThroughputResult {
     }
 
     @Test
-    public void testRunAggregator1() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(150.0, result.getScore());
-        assertEquals("ops/ms", result.getScoreUnit());
-    }
-
-    @Test
-    public void testRunAggregator2() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(100.0, result.getScore());
-        assertEquals("ops/ms", result.getScoreUnit());
-    }
-
-    @Test // regression test, check for overflow
-    public void testRunAggregator3() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
-        Result result = r1.getRunAggregator().aggregate(Arrays.asList(r1, r2));
-
-        assertEquals(100000000.0, result.getScore());
-        assertEquals("ops/ms", result.getScoreUnit());
-    }
-
-    @Test
     public void testIterationAggregator1() {
         ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
         ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
+        assertEquals(150.0, result.getScore());
         assertEquals("ops/ms", result.getScoreUnit());
-        assertEquals(300.0, result.getScore());
     }
 
     @Test
@@ -126,15 +96,45 @@ public class TestThroughputResult {
         ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
+        assertEquals(100.0, result.getScore());
+        assertEquals("ops/ms", result.getScoreUnit());
+    }
+
+    @Test // regression test, check for overflow
+    public void testIterationAggregator3() {
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
+        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
+
+        assertEquals(100000000.0, result.getScore());
+        assertEquals("ops/ms", result.getScoreUnit());
+    }
+
+    @Test
+    public void testThreadAggregator1() {
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
+
+        assertEquals("ops/ms", result.getScoreUnit());
+        assertEquals(300.0, result.getScore());
+    }
+
+    @Test
+    public void testThreadAggregator2() {
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
+
         assertEquals("ops/ms", result.getScoreUnit());
         assertEquals(200.0, result.getScore());
     }
 
     @Test  // regression test, check for overflow
-    public void testIterationAggregator3() {
+    public void testThreadAggregator3() {
         ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
         ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
-        Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
+        Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
         assertEquals(200000000.0, result.getScore());

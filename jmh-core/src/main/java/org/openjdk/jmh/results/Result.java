@@ -113,9 +113,17 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return statistics.getN();
     }
 
-    public abstract Aggregator<T> getIterationAggregator();
+    /**
+     * Thread aggregator combines the thread results into iteration result.
+     * @return thread aggregator
+     */
+    public abstract Aggregator<T> getThreadAggregator();
 
-    public abstract Aggregator<T> getRunAggregator();
+    /**
+     * Iteration aggregator combines the iteration results into benchmar result.
+     * @return iteration aggregator
+     */
+    public abstract Aggregator<T> getIterationAggregator();
 
     /**
      * Result as represented by a String.

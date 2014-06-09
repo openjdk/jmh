@@ -88,12 +88,12 @@ public class SampleTimeResult extends Result {
     }
 
     @Override
-    public Aggregator getIterationAggregator() {
+    public Aggregator getThreadAggregator() {
         return new JoiningAggregator();
     }
 
     @Override
-    public Aggregator getRunAggregator() {
+    public Aggregator getIterationAggregator() {
         return new JoiningAggregator();
     }
 
