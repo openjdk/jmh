@@ -40,6 +40,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A utility class for File creation and manipulation.
@@ -170,4 +171,33 @@ public class FileUtils {
             }
         }
     }
+
+    public static Collection<File> getClasses(File root) {
+        Collection<File> result = new ArrayList<File>();
+
+        List<File> newDirs = new ArrayList<File>();
+        newDirs.add(root);
+        while (!newDirs.isEmpty()) {
+            List<File> add = new ArrayList<File>();
+            for (File dir : newDirs) {
+                File[] files = dir.listFiles();
+                if (files != null) {
+                    for (File f : files) {
+                        if (f.isDirectory()) {
+                            add.add(f);
+                        } else {
+                            if (f.getName().endsWith(".class")) {
+                                result.add(f);
+                            }
+                        }
+                    }
+                }
+            }
+            newDirs.clear();
+            newDirs = add;
+        }
+
+        return result;
+    }
+
 }

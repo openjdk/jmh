@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.bytecode;
+package org.openjdk.jmh.generators.reflective;
 
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.FileSystemDestination;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class JmhBytecodeGenerator {
+public class JmhReflectionGenerator {
 
     public static void main(String[] args) throws Exception {
         File compiledBytecodeDirectory = new File(args[0]);
@@ -51,13 +51,20 @@ public class JmhBytecodeGenerator {
 
         Thread.currentThread().setContextClassLoader(amendedCL);
 
-        ASMGeneratorSource source = new ASMGeneratorSource();
+        RFGeneratorSource source = new RFGeneratorSource();
         FileSystemDestination destination = new FileSystemDestination(outputResourceDirectory, outputSourceDirectory);
 
         Collection<File> classes = FileUtils.getClasses(compiledBytecodeDirectory);
         System.out.println("Processing " + classes.size() + " classes from " + compiledBytecodeDirectory);
         System.out.println("Writing out Java source to "  + outputSourceDirectory + " and resources to " + outputResourceDirectory);
-        source.processClasses(classes);
+        for (File f : classes) {
+            String name = f.getAbsolutePath().substring(compiledBytecodeDirectory.getAbsolutePath().length() + 1);
+            name = name.replaceAll("\\\\", ".");
+            name = name.replaceAll("/", ".");
+            if (name.endsWith(".class")) {
+                source.processClasses(Class.forName(name.substring(0, name.length() - 6), false, amendedCL));
+            }
+        }
 
         BenchmarkGenerator gen = new BenchmarkGenerator();
         gen.generate(source, destination);
@@ -70,5 +77,6 @@ public class JmhBytecodeGenerator {
             System.exit(1);
         }
     }
+
 
 }
