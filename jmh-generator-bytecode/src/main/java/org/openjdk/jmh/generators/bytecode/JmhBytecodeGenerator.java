@@ -29,20 +29,24 @@ import org.openjdk.jmh.generators.core.FileSystemDestination;
 import org.openjdk.jmh.generators.core.SourceError;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class JmhBytecodeGenerator {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         File compiledBytecodeDirectory = new File(args[0]);
         File outputSourceDirectory = new File(args[1]);
         File outputResourceDirectory = new File(args[2]);
 
         ASMGeneratorSource source = new ASMGeneratorSource();
         FileSystemDestination destination = new FileSystemDestination(outputResourceDirectory, outputSourceDirectory);
+
+        addClassPath(compiledBytecodeDirectory);
 
         Collection<File> classes = getClasses(compiledBytecodeDirectory);
         System.out.println("Processing " + classes.size() + " classes from " + compiledBytecodeDirectory);
@@ -59,6 +63,13 @@ public class JmhBytecodeGenerator {
             }
             System.exit(1);
         }
+    }
+
+    // TODO: This is a hack, redo cleanly
+    public static void addClassPath(File s) throws Exception {
+        Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+        method.setAccessible(true);
+        method.invoke(ClassLoader.getSystemClassLoader(), new URL[]{s.toURI().toURL()});
     }
 
     public static Collection<File> getClasses(File root) {

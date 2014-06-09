@@ -183,6 +183,23 @@ class APClassInfo extends APMetadataInfo implements ClassInfo {
         return (getDeclaringClass() != null) && !el.getModifiers().contains(Modifier.STATIC);
     }
 
+    @Override
+    public boolean isEnum() {
+        if (isPrimitive) return false;
+        return el.getKind() == ElementKind.ENUM;
+    }
+
+    @Override
+    public Collection<String> getEnumConstants() {
+        Collection<String> result = new ArrayList<String>();
+        for (Element e : el.getEnclosedElements()) {
+            if (e.getKind() == ElementKind.ENUM_CONSTANT) {
+                result.add(e.getSimpleName().toString());
+            }
+        }
+        return result;
+    }
+
     public String toString() {
         return getQualifiedName();
     }

@@ -38,6 +38,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,6 +204,28 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     @Override
     public boolean isInner() {
         return isInner;
+    }
+
+    @Override
+    public boolean isEnum() {
+        return (access & Opcodes.ACC_ENUM) > 0;
+    }
+
+    @Override
+    public Collection<String> getEnumConstants() {
+        if (isEnum()) {
+            try {
+                Collection<String> res = new ArrayList<String>();
+                for (Object cnst : Class.forName(qualifiedName).getEnumConstants()) {
+                    res.add(cnst.toString());
+                }
+                return res;
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException("Can not find and instantiate enum: " + qualifiedName);
+            }
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override

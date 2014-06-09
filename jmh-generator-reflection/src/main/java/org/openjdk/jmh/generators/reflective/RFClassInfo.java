@@ -151,6 +151,20 @@ class RFClassInfo implements ClassInfo {
     }
 
     @Override
+    public boolean isEnum() {
+        return klass.isEnum();
+    }
+
+    @Override
+    public Collection<String> getEnumConstants() {
+        Collection<String> res = new ArrayList<String>();
+        for (Object cnst : klass.getEnumConstants()) {
+            res.add(cnst.toString());
+        }
+        return res;
+    }
+
+    @Override
     public String toString() {
         return getQualifiedName();
     }

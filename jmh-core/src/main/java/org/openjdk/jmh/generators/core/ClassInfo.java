@@ -104,5 +104,16 @@ public interface ClassInfo extends MetadataInfo {
      * @return true, if class is inner
      */
     boolean isInner();
+
+    /**
+     * @return true, if class is enum
+     */
+    boolean isEnum();
+
+    /**
+     * @return if class is enum, the collection of its constant values;
+     * empty collection otherwise
+     */
+    Collection<String> getEnumConstants();
 }
 

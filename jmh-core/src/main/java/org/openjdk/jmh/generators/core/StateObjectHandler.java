@@ -253,7 +253,7 @@ class StateObjectHandler {
 
     private boolean isParamTypeAcceptable(ClassInfo type) {
         String typeName = type.getQualifiedName();
-        if (BenchmarkGeneratorUtils.isEnum(type)) return true;
+        if (type.isEnum()) return true;
         if (typeName.equals("java.lang.String")) return true;
         if (typeName.equals("boolean")  || typeName.equals("java.lang.Boolean")) return true;
         if (typeName.equals("byte")     || typeName.equals("java.lang.Byte")) return true;
@@ -269,16 +269,11 @@ class StateObjectHandler {
     private boolean isParamValueConforming(FieldInfo fi, String val, ClassInfo type) {
         String typeName = type.getQualifiedName();
 
-        if (BenchmarkGeneratorUtils.isEnum(type)) {
-            try {
-                Class<? extends Enum> aClass = (Class<? extends Enum>) Class.forName(typeName);
-                for (Enum e : aClass.getEnumConstants()) {
-                    if (e.name().equals(val)) {
-                        return true;
-                    }
+        if (type.isEnum()) {
+            for (String e : type.getEnumConstants()) {
+                if (e.equals(val)) {
+                    return true;
                 }
-            } catch (ClassNotFoundException e) {
-                throw new GenerationException("Unable to load " + typeName, fi);
             }
         }
 
