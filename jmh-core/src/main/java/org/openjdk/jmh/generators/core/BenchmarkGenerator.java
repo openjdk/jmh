@@ -306,7 +306,7 @@ public class BenchmarkGenerator {
             BenchmarkGeneratorUtils.checkAnnotations(fi);
         }
         for (ClassInfo state : states) {
-            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
+            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(state)) {
                 BenchmarkGeneratorUtils.checkAnnotations(fi);
             }
         }
