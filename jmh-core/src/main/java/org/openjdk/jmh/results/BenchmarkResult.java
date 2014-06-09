@@ -25,6 +25,8 @@
 package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.util.HashMultimap;
+import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,11 +45,11 @@ public class BenchmarkResult implements Serializable {
     private static final long serialVersionUID = 6467912427356048369L;
 
     private final Collection<IterationResult> iterationResults;
-    private final Collection<Result> benchmarkResults;
+    private final Multimap<String, Result> benchmarkResults;
     private final BenchmarkParams params;
 
     public BenchmarkResult(Collection<IterationResult> data) {
-        this.benchmarkResults = new ArrayList<Result>();
+        this.benchmarkResults = new HashMultimap<String, Result>();
         this.iterationResults = data;
 
         BenchmarkParams myParams = null;
@@ -65,14 +67,14 @@ public class BenchmarkResult implements Serializable {
     }
 
     public void addBenchmarkResult(Result r) {
-        benchmarkResults.add(r);
+        benchmarkResults.put(r.getLabel(), r);
     }
 
     public Collection<IterationResult> getIterationResults() {
         return iterationResults;
     }
 
-    public Collection<Result> getBenchmarkResults() {
+    public Multimap<String, Result> getBenchmarkResults() {
         return benchmarkResults;
     }
 
@@ -84,7 +86,7 @@ public class BenchmarkResult implements Serializable {
         for (IterationResult r : iterationResults) {
             aggrs.add(r.getPrimaryResult());
         }
-        for (Result r : benchmarkResults) {
+        for (Result r : benchmarkResults.values()) {
             if (r.getRole().isPrimary()) {
                 aggrs.add(r);
             }
@@ -110,9 +112,18 @@ public class BenchmarkResult implements Serializable {
             answers.put(label, aggregator.aggregate(results));
         }
 
-        for (Result r : benchmarkResults) {
-            if (r.getRole().isSecondary()) {
-                answers.put(r.getLabel(), r);
+        for (String label : benchmarkResults.keys()) {
+            @SuppressWarnings("unchecked")
+            Aggregator<Result> aggregator = benchmarkResults.get(label).iterator().next().getIterationAggregator();
+
+            Collection<Result> results = new ArrayList<Result>();
+            for (Result r : benchmarkResults.get(label)) {
+                if (r.getRole().isSecondary()) {
+                    results.add(r);
+                }
+            }
+            if (!results.isEmpty()) {
+                answers.put(label, aggregator.aggregate(results));
             }
         }
 

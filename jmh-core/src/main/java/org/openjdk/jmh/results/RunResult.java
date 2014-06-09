@@ -86,8 +86,10 @@ public class RunResult implements Serializable {
         }
         BenchmarkResult result = new BenchmarkResult(results);
         for (BenchmarkResult br : benchmarkResults) {
-            for (Result ar : br.getBenchmarkResults()) {
-                result.addBenchmarkResult(ar);
+            for (String k : br.getBenchmarkResults().keys()) {
+                for (Result r : br.getBenchmarkResults().get(k)) {
+                    result.addBenchmarkResult(r);
+                }
             }
         }
         return result;
