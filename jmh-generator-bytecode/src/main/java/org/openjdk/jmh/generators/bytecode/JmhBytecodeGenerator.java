@@ -43,7 +43,7 @@ public class JmhBytecodeGenerator {
     public static final String GENERATOR_TYPE_ASM = "asm";
     public static final String GENERATOR_TYPE_REFLECTION = "reflection";
 
-    public static final String DEFAULT_GENERATOR_TYPE = GENERATOR_TYPE_ASM;
+    public static final String DEFAULT_GENERATOR_TYPE = GENERATOR_TYPE_REFLECTION;
 
     public static void main(String[] args) throws Exception {
         if (args.length < 3) {
