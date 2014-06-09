@@ -24,19 +24,13 @@
  */
 package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.util.HashMultimap;
-import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Complete run result.
@@ -93,7 +87,7 @@ public class RunResult implements Serializable {
         BenchmarkResult result = new BenchmarkResult(results);
         for (BenchmarkResult br : benchmarkResults) {
             for (Result ar : br.getBenchmarkResults()) {
-                result.amend(ar);
+                result.addBenchmarkResult(ar);
             }
         }
         return result;

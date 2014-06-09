@@ -64,8 +64,7 @@ public class BenchmarkResult implements Serializable {
         this.params = myParams;
     }
 
-    public void amend(Result r) {
-        // FIXME: Assumes secondary result.
+    public void addBenchmarkResult(Result r) {
         benchmarkResults.add(r);
     }
 
@@ -84,6 +83,11 @@ public class BenchmarkResult implements Serializable {
         Collection<Result> aggrs = new ArrayList<Result>();
         for (IterationResult r : iterationResults) {
             aggrs.add(r.getPrimaryResult());
+        }
+        for (Result r : benchmarkResults) {
+            if (r.getRole().isPrimary()) {
+                aggrs.add(r);
+            }
         }
         return aggregator.aggregate(aggrs);
     }
@@ -107,7 +111,9 @@ public class BenchmarkResult implements Serializable {
         }
 
         for (Result r : benchmarkResults) {
-            answers.put(r.getLabel(), r);
+            if (r.getRole().isSecondary()) {
+                answers.put(r.getLabel(), r);
+            }
         }
 
         return answers;

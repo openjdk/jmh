@@ -46,7 +46,7 @@ public class ResultAggregationTest {
         Assert.assertEquals(2, ir.getRawSecondaryResults().get("sec").size());
 
         BenchmarkResult br = new BenchmarkResult(Arrays.asList(ir, ir));
-        br.amend(new ThroughputResult(ResultRole.SECONDARY, "bench", 3000, 1, TimeUnit.NANOSECONDS));
+        br.addBenchmarkResult(new ThroughputResult(ResultRole.SECONDARY, "bench", 3000, 1, TimeUnit.NANOSECONDS));
         Assert.assertEquals(20000.0, br.getPrimaryResult().getScore());
         Assert.assertEquals(10000.0, br.getSecondaryResults().get("sec").getScore());
         Assert.assertEquals(3000.0, br.getSecondaryResults().get("bench").getScore());
@@ -72,7 +72,7 @@ public class ResultAggregationTest {
         Assert.assertEquals(2, ir.getRawSecondaryResults().get("sec").size());
 
         BenchmarkResult br = new BenchmarkResult(Arrays.asList(ir, ir));
-        br.amend(new AverageTimeResult(ResultRole.SECONDARY, "bench", 1, 3000, TimeUnit.NANOSECONDS));
+        br.addBenchmarkResult(new AverageTimeResult(ResultRole.SECONDARY, "bench", 1, 3000, TimeUnit.NANOSECONDS));
         Assert.assertEquals(10000.0, br.getPrimaryResult().getScore());
         Assert.assertEquals(5000.0, br.getSecondaryResults().get("sec").getScore());
         Assert.assertEquals(3000.0, br.getSecondaryResults().get("bench").getScore());
@@ -107,7 +107,7 @@ public class ResultAggregationTest {
         Assert.assertEquals(2, ir.getRawSecondaryResults().get("sec").size());
 
         BenchmarkResult br = new BenchmarkResult(Arrays.asList(ir, ir));
-        br.amend(new SampleTimeResult(ResultRole.SECONDARY, "bench", sb3000, TimeUnit.NANOSECONDS));
+        br.addBenchmarkResult(new SampleTimeResult(ResultRole.SECONDARY, "bench", sb3000, TimeUnit.NANOSECONDS));
         Assert.assertEquals(10000.0, br.getPrimaryResult().getScore());
         Assert.assertEquals(5000.0, br.getSecondaryResults().get("sec").getScore());
         Assert.assertEquals(3000.0, br.getSecondaryResults().get("bench").getScore());
@@ -133,7 +133,7 @@ public class ResultAggregationTest {
         Assert.assertEquals(2, ir.getRawSecondaryResults().get("sec").size());
 
         BenchmarkResult br = new BenchmarkResult(Arrays.asList(ir, ir));
-        br.amend(new SingleShotResult(ResultRole.SECONDARY, "bench", 3000, TimeUnit.NANOSECONDS));
+        br.addBenchmarkResult(new SingleShotResult(ResultRole.SECONDARY, "bench", 3000, TimeUnit.NANOSECONDS));
         Assert.assertEquals(10000.0, br.getPrimaryResult().getScore());
         Assert.assertEquals(5000.0, br.getSecondaryResults().get("sec").getScore());
         Assert.assertEquals(3000.0, br.getSecondaryResults().get("bench").getScore());

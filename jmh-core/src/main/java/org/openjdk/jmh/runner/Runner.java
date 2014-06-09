@@ -551,7 +551,7 @@ public class Runner extends BaseRunner {
                 for (ExternalProfiler profiler : profilers) {
                     for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
                         for (BenchmarkResult r : result.values()) {
-                            r.amend(profR);
+                            r.addBenchmarkResult(profR);
                         }
                     }
                 }
