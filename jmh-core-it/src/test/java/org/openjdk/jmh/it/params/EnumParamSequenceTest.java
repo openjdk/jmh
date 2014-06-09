@@ -41,8 +41,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-@Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MICROSECONDS)
+@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MICROSECONDS)
 @Fork(1)
 @State(Scope.Thread)
 public class EnumParamSequenceTest {

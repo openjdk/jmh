@@ -36,7 +36,10 @@ import org.openjdk.jmh.ct.params.SampleEnum;
 public class EnumTest {
 
     @Param("VALUE_EXIST_1")
-    public SampleEnum param;
+    public SampleEnum paramExplicit;
+
+    @Param
+    public SampleEnum paramImplicit;
 
     @Benchmark
     public void test() {

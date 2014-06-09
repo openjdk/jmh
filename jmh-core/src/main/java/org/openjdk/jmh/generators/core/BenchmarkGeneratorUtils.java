@@ -234,4 +234,49 @@ class BenchmarkGeneratorUtils {
         }
     }
 
+    /**
+     * <p>Gets the parameter values to be used for this field. In most cases this will be the values declared
+     * in the {@code @Param} annotation.</p>
+     *
+     * <p>For an enum field type, an empty parameter list will be resolved to be the full list of enum constants
+     * of that type.</p>
+     *
+     * @param fi type of the field for which to find parameters
+     * @return string values representing the actual parameters
+     */
+    private static String[] toParameterValues(FieldInfo fi) {
+        String[] annotatedValues = fi.getAnnotation(Param.class).value();
+
+        boolean isBlankEnum = (annotatedValues.length == 1)
+                                && Param.BLANK_ARGS.equals(annotatedValues[0])
+                                && fi.getType().isEnum();
+
+        if (isBlankEnum) {
+            Collection<String> enumConstants = fi.getType().getEnumConstants();
+            if (enumConstants.isEmpty()) {
+                throw new GenerationException("Enum type of field had no constants. "
+                        + "Declare some constants or remove the @" + Param.class.getSimpleName() + ".",
+                        fi);
+            }
+            return enumConstants.toArray(new String[enumConstants.size()]);
+        } else {
+            return annotatedValues;
+        }
+    }
+
+    /**
+     * Compute the parameter space given by {@code @Param} annotations and add all them to the group.
+     *
+     * @param parameterInfoType type of the state {@code @State} in which to find {@code @Param}s
+     * @param group method group
+     */
+    static void addParameterValuesToGroup(ClassInfo parameterInfoType, MethodGroup group) {
+        for (FieldInfo fi : getAllFields(parameterInfoType)) {
+            if (fi.getAnnotation(Param.class) != null) {
+                String[] values = toParameterValues(fi);
+                group.addParamValues(fi.getName(), values);
+            }
+        }
+    }
+
 }

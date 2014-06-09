@@ -33,7 +33,6 @@ import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
-import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
@@ -452,22 +451,12 @@ public class BenchmarkGenerator {
             // Discovering @Params, part 1:
             //   For each parameter, walk the type hierarchy up to discover inherited @Param fields in @State objects.
             for (ParameterInfo pi : method.getParameters()) {
-                for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(pi.getType())) {
-                    if (fi.getAnnotation(Param.class) != null) {
-                        String[] values = fi.getAnnotation(Param.class).value();
-                        group.addParamValues(fi.getName(), values);
-                    }
-                }
+                BenchmarkGeneratorUtils.addParameterValuesToGroup(pi.getType(), group);
             }
 
             // Discovering @Params, part 2:
             //  Walk the type hierarchy up to discover inherited @Param fields for class.
-            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
-                if (fi.getAnnotation(Param.class) != null) {
-                    String[] values = fi.getAnnotation(Param.class).value();
-                    group.addParamValues(fi.getName(), values);
-                }
-            }
+            BenchmarkGeneratorUtils.addParameterValuesToGroup(clazz, group);
         }
 
         // enforce the default value

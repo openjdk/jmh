@@ -235,9 +235,12 @@ class StateObjectHandler {
         String[] values = fi.getAnnotation(Param.class).value();
 
         if (values.length == 1 && values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
-            throw new GenerationException(
-                    "@" + Param.class.getSimpleName() + " should provide the default parameters.",
-                    fi);
+            if (!fi.getType().isEnum()) {
+                throw new GenerationException(
+                    "@" + Param.class.getSimpleName() + " should provide the default parameters.", fi);
+            } else {
+                // if type is enum then don't need to check conformity
+            }
         } else {
             for (String val : values) {
                 if (!isParamValueConforming(fi, val, type)) {
@@ -270,10 +273,8 @@ class StateObjectHandler {
         String typeName = type.getQualifiedName();
 
         if (type.isEnum()) {
-            for (String e : type.getEnumConstants()) {
-                if (e.equals(val)) {
-                    return true;
-                }
+            if (type.getEnumConstants().contains(val)) {
+                return true;
             }
         }
 
