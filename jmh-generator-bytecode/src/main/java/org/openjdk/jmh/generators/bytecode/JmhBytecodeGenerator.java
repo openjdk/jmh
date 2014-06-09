@@ -72,7 +72,7 @@ public class JmhBytecodeGenerator {
         FileSystemDestination destination = new FileSystemDestination(outputResourceDirectory, outputSourceDirectory);
 
         Collection<File> classes = FileUtils.getClasses(compiledBytecodeDirectory);
-        System.out.println("Processing " + classes.size() + " classes from " + compiledBytecodeDirectory);
+        System.out.println("Processing " + classes.size() + " classes from " + compiledBytecodeDirectory + " with \"" + generatorType + "\" generator");
         System.out.println("Writing out Java source to "  + outputSourceDirectory + " and resources to " + outputResourceDirectory);
 
         GeneratorSource source = null;
