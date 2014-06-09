@@ -218,7 +218,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
         if (isEnum()) {
             try {
                 Collection<String> res = new ArrayList<String>();
-                for (Object cnst : Class.forName(origQualifiedName).getEnumConstants()) {
+                for (Object cnst : Class.forName(origQualifiedName, false, Thread.currentThread().getContextClassLoader()).getEnumConstants()) {
                     res.add(cnst.toString());
                 }
                 return res;
