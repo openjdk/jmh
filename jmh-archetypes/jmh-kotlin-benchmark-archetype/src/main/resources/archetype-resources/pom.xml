@@ -16,6 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jmh.version>${project.version}</jmh.version>
     </properties>
 
     <prerequisites>
@@ -26,7 +27,7 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>${project.version}</version>
+            <version>\${jmh.version}</version>
         </dependency>
         <!--
           Put the dependency on Kotlin stdlib here:
@@ -101,7 +102,7 @@
                     <dependency>
                         <groupId>org.openjdk.jmh</groupId>
                         <artifactId>jmh-generator-bytecode</artifactId>
-                        <version>${project.version}</version>
+                        <version>\${jmh.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
