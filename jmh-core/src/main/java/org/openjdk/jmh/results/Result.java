@@ -204,7 +204,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
                     stats.getMin(), stats.getMean(), stats.getMax(), stats.getStandardDeviation(),
                     interval[0], interval[1]));
         } else {
-            pw.println(String.format("Run result: %.2f (<= 2 iterations)", stats.getMean()));
+            pw.println(String.format("Run result: %.2f %s (<= 2 iterations)", stats.getMean(), getScoreUnit()));
         }
         pw.close();
         return sw.toString();
