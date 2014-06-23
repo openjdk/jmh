@@ -60,9 +60,9 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         );
 
         if (useDelay) {
-            return Arrays.asList("perf", "stat", "-d", "-D " + delay);
+            return Arrays.asList("perf", "stat", "-d", "-d", "-d", "-D " + delay);
         } else {
-            return Arrays.asList("perf", "stat", "-d");
+            return Arrays.asList("perf", "stat", "-d", "-d", "-d");
         }
     }
 
