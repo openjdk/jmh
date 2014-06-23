@@ -50,19 +50,15 @@ public class BenchmarkList extends AbstractResourceReader {
     }
 
     public static BenchmarkList fromResource(String resource) {
-        return new BenchmarkList(null, resource, null);
+        return new BenchmarkList(null, resource);
     }
 
     public static BenchmarkList fromFile(String file) {
-        return new BenchmarkList(file, null, null);
+        return new BenchmarkList(file, null);
     }
 
-    public static BenchmarkList fromString(String line) {
-        return new BenchmarkList(null, null, line);
-    }
-
-    private BenchmarkList(String file, String resource, String line) {
-        super(file, resource, line);
+    private BenchmarkList(String file, String resource) {
+        super(file, resource);
     }
 
     /**

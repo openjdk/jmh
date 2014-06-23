@@ -41,12 +41,10 @@ class AbstractResourceReader {
 
     private final String file;
     private final String resource;
-    private final String line;
 
-    protected AbstractResourceReader(String file, String resource, String line) {
+    protected AbstractResourceReader(String file, String resource) {
         this.file = file;
         this.resource = resource;
-        this.line = line;
     }
 
     /**
@@ -98,10 +96,6 @@ class AbstractResourceReader {
             } else {
                 throw new RuntimeException("Unable to find the resource");
             }
-        }
-
-        if (line != null) {
-            return Collections.<Reader>singletonList(new StringReader(line));
         }
 
         throw new IllegalStateException();

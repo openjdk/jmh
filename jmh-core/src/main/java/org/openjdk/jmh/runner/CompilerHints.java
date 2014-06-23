@@ -78,19 +78,15 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     public static CompilerHints fromResource(String resource) {
-        return new CompilerHints(null, resource, null);
+        return new CompilerHints(null, resource);
     }
 
     public static CompilerHints fromFile(String file) {
-        return new CompilerHints(file, null, null);
+        return new CompilerHints(file, null);
     }
 
-    public static CompilerHints fromString(String line) {
-        return new CompilerHints(null, null, line);
-    }
-
-    private CompilerHints(String file, String resource, String line) {
-        super(file, resource, line);
+    private CompilerHints(String file, String resource) {
+        super(file, resource);
         hints = Collections.unmodifiableSet(read());
     }
 
