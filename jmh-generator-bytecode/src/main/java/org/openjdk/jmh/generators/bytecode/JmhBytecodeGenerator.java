@@ -46,7 +46,7 @@ public class JmhBytecodeGenerator {
     public static final String DEFAULT_GENERATOR_TYPE = GENERATOR_TYPE_REFLECTION;
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 3) {
+        if (args.length < 3 || args.length > 4) {
             System.err.println("Usage: generator <compiled-bytecode-dir> <output-source-dir> <output-resource-dir> [generator-type]");
             System.exit(1);
         }
@@ -55,7 +55,7 @@ public class JmhBytecodeGenerator {
         File outputResourceDirectory = new File(args[2]);
 
         String generatorType = DEFAULT_GENERATOR_TYPE;
-        if (args.length < 4) {
+        if (args.length >= 4) {
             if (!args[3].equalsIgnoreCase(GENERATOR_TYPE_DEFAULT)) {
                 generatorType = args[3];
             }
