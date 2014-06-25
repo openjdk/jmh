@@ -288,9 +288,11 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder detectJvmArgs();
 
     /**
-     * Set benchmark parameter.
+     * Set benchmark parameter values.
+     * The parameter values would be taken in the order given by user.
+     *
      * @param name parameter
-     * @param values list of values to set
+     * @param values sequence of values to set
      * @return builder
      * @see org.openjdk.jmh.annotations.Param
      */

@@ -54,7 +54,9 @@ public @interface Param {
     static final String BLANK_ARGS = "blank_blank_blank_2014";
 
     /**
-     * Default values for the parameter.
+     * Default values sequence for the parameter. The parameter values
+     * would be taken in the order given by user.
+     *
      * @return values sequence to follow.
      */
     String[] value() default { BLANK_ARGS };
