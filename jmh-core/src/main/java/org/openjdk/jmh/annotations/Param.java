@@ -40,8 +40,13 @@ import java.lang.annotation.Target;
  * in any instance initializer and/or constructor of {@link State}.</p>
  *
  * <p>Parameters are acceptable on any primitive type, primitive wrapper type,
- * or a String. The annotation value is given in String, and will be
- * valueOf-ed as required to match the field type.</p>
+ * a String, or an Enum. The annotation value is given in String, and will be
+ * coerced as required to match the field type.</p>
+ *
+ * <p>Parameters should normally provide the default values which make
+ * benchmark runnable even without the explicit parameters set for the run.
+ * The only exception is {@link Param} over {@link java.lang.Enum}, which
+ * will implicitly have the default value set encompassing all enum constants.</p>
  *
  * <p>When multiple {@link Param}-s are needed for the benchmark run,
  * JMH will compute the outer product of all the parameters in the run.</p>
