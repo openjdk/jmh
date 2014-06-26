@@ -79,11 +79,23 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Delay collection for given time; -1 to detect automatically */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perfasm.delayMs", -1);
 
-    /** Save perf output to file */
-    private static final String SAVE_PERF_OUTPUT = System.getProperty("jmh.perfasm.savePerfTo");
+    /** Save perf output to file? */
+    private static final Boolean SAVE_PERF_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerf");
 
-    /** Save perf output to file */
-    private static final String SAVE_ASM_OUTPUT = System.getProperty("jmh.perfasm.saveAsmTo");
+    /** Override the perf output location */
+    private static final String SAVE_PERF_OUTPUT_TO = System.getProperty("jmh.perfasm.savePerfTo", ".");
+
+    /** Override the perf output filename */
+    private static final String SAVE_PERF_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.savePerfToFile");
+
+    /** Save annotated assembly to file */
+    private static final Boolean SAVE_ASM_OUTPUT = Boolean.getBoolean("jmh.perfasm.saveAsm");
+
+    /** Override the annotated assembly location */
+    private static final String SAVE_ASM_OUTPUT_TO = System.getProperty("jmh.perfasm.saveAsmTo", ".");
+
+    /** Override the annotated assembly filename */
+    private static final String SAVE_ASM_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveAsmToFile");
 
     private static final boolean IS_SUPPORTED;
     private static final Collection<String> INIT_MSGS;
@@ -247,12 +259,15 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         }
 
-        if (SAVE_PERF_OUTPUT != null) {
+        if (SAVE_PERF_OUTPUT) {
+            String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
+                    SAVE_PERF_OUTPUT_TO + "/" + params.getBenchmark() + "-perf" :
+                    SAVE_PERF_OUTPUT_TO_FILE;
             try {
-                FileUtils.copy(perfParsedData, SAVE_PERF_OUTPUT);
-                pw.println("Perf output saved to " + SAVE_PERF_OUTPUT);
+                FileUtils.copy(perfParsedData, target);
+                pw.println("Perf output saved to " + target);
             } catch (IOException e) {
-                pw.println("Unable to save perf output to " + SAVE_PERF_OUTPUT);
+                pw.println("Unable to save perf output to " + target);
             }
         }
 
@@ -361,9 +376,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * Print annotated assembly, if needed:
          */
         if (SAVE_ASM_OUTPUT != null) {
+            String target = (SAVE_ASM_OUTPUT_TO_FILE == null) ?
+                    SAVE_ASM_OUTPUT_TO + "/" + params.getBenchmark() + ".asm" :
+                    SAVE_ASM_OUTPUT_TO_FILE;
             FileOutputStream asm = null;
             try {
-                asm = new FileOutputStream(SAVE_ASM_OUTPUT);
+                asm = new FileOutputStream(target);
                 PrintWriter pwAsm = new PrintWriter(asm);
                 for (ASMLine line : assembly.lines) {
                     for (String event : EVENTS) {
@@ -379,9 +397,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 pwAsm.flush();
                 asm.close();
 
-                pw.println("Annotated assembly saved to " + SAVE_ASM_OUTPUT);
+                pw.println("Annotated assembly saved to " + target);
             } catch (IOException e) {
-                pw.println("Unable to save annotated assembly to " + SAVE_ASM_OUTPUT);
+                pw.println("Unable to save annotated assembly to " + target);
             }
         }
 
