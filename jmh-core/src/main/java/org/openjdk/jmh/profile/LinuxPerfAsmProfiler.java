@@ -70,6 +70,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Cutoff threshold for hot region: the regions with event count over threshold would be shown */
     private static final double THRESHOLD_RATE = Double.valueOf(System.getProperty("jmh.perfasm.hotThreshold", "0.10"));
 
+    /** Cutoff threshold for large region: the region larger than this would be truncated */
+    private static final int THRESHOLD_TOO_BIG = Integer.getInteger("jmh.perfasm.tooBigThreshold", 1000);
+
     /** Print margin: how many "context" lines without counters to show in each region */
     private static final int PRINT_MARGIN = Integer.getInteger("jmh.perfasm.printMargin", 10);
 
@@ -307,16 +310,20 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             int cnt = 1;
             for (Region r : interestingRegions) {
                 printDottedLine(pw, "Region " + cnt);
-                for (ASMLine line : r.code) {
-                    for (String event : EVENTS) {
-                        long count = (line.addr != null) ? r.events.get(event).count(line.addr) : 0;
-                        if (count > 0) {
-                            pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
-                        } else {
-                            pw.printf("%9s", "");
+                if (r.code.size() > THRESHOLD_TOO_BIG) {
+                    pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
+                } else {
+                    for (ASMLine line : r.code) {
+                        for (String event : EVENTS) {
+                            long count = (line.addr != null) ? r.events.get(event).count(line.addr) : 0;
+                            if (count > 0) {
+                                pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                            } else {
+                                pw.printf("%9s", "");
+                            }
                         }
+                        pw.println(line.code);
                     }
-                    pw.println(line.code);
                 }
 
                 printDottedLine(pw, null);
