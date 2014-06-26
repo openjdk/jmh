@@ -194,7 +194,20 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         PrintWriter pw = new PrintWriter(sw);
 
         /**
-         * 2. Read out perf output
+         * 2. Read out PrintAssembly output
+         */
+
+        Assembly assembly = readAssembly(stdOut);
+        if (!assembly.isEmpty()) {
+            pw.printf("PrintAssembly processed: %d total lines%n", assembly.size());
+        } else {
+            pw.println();
+            pw.println("No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
+            pw.println();
+        }
+
+        /**
+         * 3. Read out perf output
          */
 
         long delaySec = (params.getWarmup().getCount() *
@@ -207,26 +220,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println("Perf output processed:");
             int cnt = 1;
             for (String event : EVENTS) {
-                pw.printf(" Column %d: %s (%d total events)%n", cnt, event, events.get(event).size());
+                pw.printf(" Column %d: %s (%d events)%n", cnt, event, events.get(event).size());
                 cnt++;
             }
             pw.println();
         } else {
             pw.println();
             pw.println("No perf data, make sure \"perf stat echo\" is indeed working.");
-            pw.println();
-        }
-
-        /**
-         * 3. Read out PrintAssembly output
-         */
-
-        Assembly assembly = readAssembly(stdOut);
-        if (!assembly.isEmpty()) {
-            pw.printf("PrintAssembly processed: %d total lines%n", assembly.size());
-        } else {
-            pw.println();
-            pw.println("No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
             pw.println();
         }
 
@@ -261,7 +261,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         Multiset<String> accounted = new HashMultiset<String>();
         if (!interestingRegions.isEmpty()) {
             pw.println();
-            pw.printf("Hottest regions in generated code (>%.2f%% events):%n", THRESHOLD_RATE * 100);
+            pw.printf("Hottest regions in compiled code (>%.2f%% events):%n", THRESHOLD_RATE * 100);
 
             int cnt = 1;
             for (Region r : interestingRegions) {
@@ -298,7 +298,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 6. Print out all residuals
          */
 
-        printDottedLine(pw, "Other generated code");
+        printDottedLine(pw, "Other compiled code");
         Multiset<String> allRegions = new HashMultiset<String>();
         for (Region r : regions) {
             for (String event : EVENTS) {
@@ -319,7 +319,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.println();
 
 
-        printDottedLine(pw, "Other non-generated code");
+        printDottedLine(pw, "Other (non-compiled) code");
         for (String event : EVENTS) {
             long count = totalCounts.get(event) - allRegions.count(event);
             if (count > 0) {
