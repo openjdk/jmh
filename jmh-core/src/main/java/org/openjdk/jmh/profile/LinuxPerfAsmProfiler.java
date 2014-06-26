@@ -263,18 +263,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         }
 
-        if (SAVE_PERF_OUTPUT) {
-            String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
-                    SAVE_PERF_OUTPUT_TO + "/" + params.id() + "-perf" :
-                    SAVE_PERF_OUTPUT_TO_FILE;
-            try {
-                FileUtils.copy(perfParsedData, target);
-                pw.println("Perf output saved to " + target);
-            } catch (IOException e) {
-                pw.println("Unable to save perf output to " + target);
-            }
-        }
-
         /**
          * 4. Figure out generated code regions
          */
@@ -381,6 +369,21 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.println();
 
         /**
+         * Print perf output, if needed:
+         */
+        if (SAVE_PERF_OUTPUT) {
+            String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
+                    SAVE_PERF_OUTPUT_TO + "/" + params.id() + "-perf" :
+                    SAVE_PERF_OUTPUT_TO_FILE;
+            try {
+                FileUtils.copy(perfParsedData, target);
+                pw.println("Perf output saved to " + target);
+            } catch (IOException e) {
+                pw.println("Unable to save perf output to " + target);
+            }
+        }
+
+        /**
          * Print annotated assembly, if needed:
          */
         if (SAVE_ASM_OUTPUT) {
@@ -405,9 +408,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 pwAsm.flush();
                 asm.close();
 
-                pw.println("Annotated assembly saved to " + target);
+                pw.println("Perf-annotated assembly saved to " + target);
             } catch (IOException e) {
-                pw.println("Unable to save annotated assembly to " + target);
+                pw.println("Unable to save perf-annotated assembly to " + target);
             }
         }
 
