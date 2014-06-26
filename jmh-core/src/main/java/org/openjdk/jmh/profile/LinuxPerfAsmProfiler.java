@@ -83,6 +83,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Delay collection for given time; -1 to detect automatically */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perfasm.delayMs", -1);
 
+    /** Sampling frequency */
+    private static final long SAMPLE_FREQUENCY = Long.getLong("jmh.perfasm.frequency", 1000);
+
     /** Save perf output to file? */
     private static final Boolean SAVE_PERF_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerf");
 
@@ -119,7 +122,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList("perf", "record", "-c 100000", "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData);
+        return Arrays.asList("perf", "record", "-F " + SAMPLE_FREQUENCY, "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData);
     }
 
     @Override
