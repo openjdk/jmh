@@ -375,7 +375,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         /**
          * Print annotated assembly, if needed:
          */
-        if (SAVE_ASM_OUTPUT != null) {
+        if (SAVE_ASM_OUTPUT) {
             String target = (SAVE_ASM_OUTPUT_TO_FILE == null) ?
                     SAVE_ASM_OUTPUT_TO + "/" + params.id() + ".asm" :
                     SAVE_ASM_OUTPUT_TO_FILE;
