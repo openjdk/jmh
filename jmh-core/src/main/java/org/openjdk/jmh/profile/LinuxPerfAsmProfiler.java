@@ -76,9 +76,16 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Merge margin: the regions separated by less than the margin are considered the same */
     private static final int MERGE_MARGIN = Integer.getInteger("jmh.perfasm.mergeMargin", 32);
 
+    private static final boolean IS_SUPPORTED;
+    private static final Collection<String> INIT_MSGS;
+
+    static {
+        INIT_MSGS = tryWith("perf", "stat", "echo", "1");
+        IS_SUPPORTED = INIT_MSGS.isEmpty();
+    }
+
     private String perfBinData;
     private String perfParsedData;
-    private boolean useDelay;
 
     public LinuxPerfAsmProfiler() throws IOException {
         perfBinData = FileUtils.tempFile("perfbin").getAbsolutePath();
@@ -87,17 +94,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        long delay = TimeUnit.NANOSECONDS.toMillis(
-                params.getWarmup().getCount() *
-                        params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
-                        + 1000 // loosely account for the JVM lag
-        );
-
-        if (useDelay) {
-            return Arrays.asList("perf", "record", "-c 100000", "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData, "-D " + delay);
-        } else {
-            return Arrays.asList("perf", "record", "-c 100000", "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData);
-        }
+        return Arrays.asList("perf", "record", "-c 100000", "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData);
     }
 
     @Override
@@ -114,22 +111,16 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkParams params, File stdOut, File stdErr) {
-        PerfResult result = processAssembly(stdOut, stdErr);
+        PerfResult result = processAssembly(params, stdOut, stdErr);
         return Collections.singleton(result);
     }
 
     @Override
     public Collection<String> checkSupport() {
-        Collection<String> delay = tryWith("perf stat -D 1 echo 1");
-        if (delay.isEmpty()) {
-            useDelay = true;
-            return delay;
-        }
-
-        return tryWith("perf stat echo 1");
+        return IS_SUPPORTED ? INIT_MSGS : Collections.<String>emptyList();
     }
 
-    public Collection<String> tryWith(String cmd) {
+    public static Collection<String> tryWith(String... cmd) {
         Collection<String> messages = new ArrayList<String>();
         try {
             Process p = Runtime.getRuntime().exec(cmd);
@@ -169,7 +160,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         return "Linux perf + PrintAssembly Profiler";
     }
 
-    private PerfResult processAssembly(File stdOut, File stdErr) {
+    private PerfResult processAssembly(BenchmarkParams params, File stdOut, File stdErr) {
         /*
          * 1. Call perf to produce the machine-readable data.
          */
@@ -206,7 +197,11 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 2. Read out perf output
          */
 
-        Map<String, Multiset<Long>> events = readEvents();
+        long delaySec = (params.getWarmup().getCount() *
+                params.getWarmup().getTime().convertTo(TimeUnit.SECONDS))
+                + 1; // loosely account for the JVM lag
+
+        Map<String, Multiset<Long>> events = readEvents(delaySec);
 
         if (!events.isEmpty()) {
             pw.println("Perf output processed:");
@@ -335,12 +330,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
         pw.println("<unknown>");
         pw.println();
-
-        if (!useDelay) {
-            pw.println();
-            pw.println("WARNING: Your system uses old \"perf\", which can not delay the data collection.\n" +
-                    "Therefore, the performance data includes warmup.");
-        }
 
         pw.flush();
         pw.close();
@@ -510,7 +499,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    Map<String, Multiset<Long>> readEvents() {
+    Map<String, Multiset<Long>> readEvents(long skipSeconds) {
         try {
             FileInputStream fis = new FileInputStream(perfParsedData);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
@@ -520,6 +509,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
+            Double startTime = null;
+
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("#")) continue;
@@ -527,6 +518,20 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 String[] elements = line.split("[ ]+");
 
                 if (elements[0].equalsIgnoreCase("java")) {
+                    try {
+                        Double time = Double.valueOf(elements[2].replace(":", ""));
+                        if (startTime == null) {
+                            startTime = time;
+                        } else {
+                            if (time - startTime < skipSeconds) {
+                                continue;
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        // misformatted line, no timestamp
+                        continue;
+                    }
+
                     String evName = elements[3].replace(":", "");
                     Multiset<Long> evs = events.get(evName);
                     try {

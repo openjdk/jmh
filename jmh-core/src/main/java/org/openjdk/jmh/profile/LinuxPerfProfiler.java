@@ -49,7 +49,17 @@ import java.util.regex.Pattern;
 
 public class LinuxPerfProfiler implements ExternalProfiler {
 
-    private boolean useDelay;
+    private static final boolean IS_SUPPORTED;
+    private static final boolean IS_DELAYED;
+    private static final Collection<String> INIT_MSGS;
+
+    static {
+        INIT_MSGS = tryWith("perf", "stat", "echo", "1");
+        IS_SUPPORTED = INIT_MSGS.isEmpty();
+
+        Collection<String> delay = tryWith("perf", "stat", "-D 1", "echo", "1");
+        IS_DELAYED = delay.isEmpty();
+    }
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
@@ -59,7 +69,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                 + 1000 // loosely account for the JVM lag
         );
 
-        if (useDelay) {
+        if (IS_DELAYED) {
             return Arrays.asList("perf", "stat", "-d", "-d", "-d", "-D " + delay);
         } else {
             return Arrays.asList("perf", "stat", "-d", "-d", "-d");
@@ -84,16 +94,10 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> checkSupport() {
-        Collection<String> delay = tryWith("perf stat -D 1 echo 1");
-        if (delay.isEmpty()) {
-            useDelay = true;
-            return delay;
-        }
-
-        return tryWith("perf stat echo 1");
+        return IS_SUPPORTED ? INIT_MSGS : Collections.<String>emptyList();
     }
 
-    private Collection<String> tryWith(String cmd) {
+    private static Collection<String> tryWith(String... cmd) {
         Collection<String> messages = new ArrayList<String>();
         try {
             Process p = Runtime.getRuntime().exec(cmd);
@@ -166,10 +170,10 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                 }
             }
 
-            if (!useDelay) {
+            if (!IS_DELAYED) {
                 pw.println();
-                pw.println("WARNING: Your system uses old \"perf\", which can not delay the data collection.\n" +
-                        "Therefore, the performance data includes warmup.");
+                pw.println("WARNING: Your system uses old \"perf\", which can not delay data collection.\n" +
+                        "Therefore, perf performance data includes benchmark warmup.");
             }
 
             pw.flush();
