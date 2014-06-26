@@ -52,6 +52,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -278,7 +279,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 4. Figure out generated code regions
          */
 
-        Collection<Region> regions = makeRegions(combine(events), assembly, events);
+        Collection<Region> regions = makeRegions(assembly, events);
 
         /**
          * 5. Figure out interesting regions, and print them out
@@ -433,12 +434,31 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.println();
     }
 
-    Collection<Region> makeRegions(Set<AddrInterval> intervals, Assembly asms, Map<String, Multiset<Long>> events) {
+    Collection<Region> makeRegions(Assembly asms, Map<String, Multiset<Long>> events) {
         SortedSet<Region> regions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
 
-        for (AddrInterval interval : intervals) {
-            List<ASMLine> regionLines = asms.getLines(interval.begin, interval.end, PRINT_MARGIN);
-            regions.add(new Region(asms.getMethod(interval.begin), interval.begin, interval.end, regionLines));
+        SortedSet<Long> addrs = new TreeSet<Long>();
+        for (Map.Entry<String, Multiset<Long>> e : events.entrySet()) {
+            addrs.addAll(e.getValue().keys());
+        }
+
+        Set<Long> eventfulAddrs = new HashSet<Long>();
+        Long lastBegin = null;
+        Long lastAddr = null;
+        for (Long addr : addrs) {
+            if (lastAddr == null) {
+                lastAddr = addr;
+                lastBegin = addr;
+            } else {
+                if (addr - lastAddr > MERGE_MARGIN) {
+                    List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, PRINT_MARGIN);
+                    regions.add(new Region(asms.getMethod(lastBegin), lastBegin, lastAddr, regionLines, eventfulAddrs));
+                    lastBegin = addr;
+                    eventfulAddrs = new HashSet<Long>();
+                }
+                lastAddr = addr;
+            }
+            eventfulAddrs.add(addr);
         }
 
         return regions;
@@ -639,37 +659,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    Set<AddrInterval> combine(Map<String, Multiset<Long>> events) {
-        SortedSet<AddrInterval> intervals = new TreeSet<AddrInterval>(new Comparator<AddrInterval>() {
-            @Override
-            public int compare(AddrInterval o1, AddrInterval o2) {
-                return Long.valueOf(o1.begin).compareTo(o2.begin);
-            }
-        });
-
-        SortedSet<Long> addrs = new TreeSet<Long>();
-        for (Map.Entry<String, Multiset<Long>> e : events.entrySet()) {
-            addrs.addAll(e.getValue().keys());
-        }
-
-        Long lastBegin = null;
-        Long lastAddr = null;
-        for (Long addr : addrs) {
-            if (lastAddr == null) {
-                lastAddr = addr;
-                lastBegin = addr;
-            } else {
-                if (addr - lastAddr > MERGE_MARGIN) {
-                    intervals.add(new AddrInterval(lastBegin, lastAddr));
-                    lastBegin = addr;
-                }
-                lastAddr = addr;
-            }
-        }
-
-        return intervals;
-    }
-
     static class ASMLine {
         Long addr;
         String code;
@@ -681,16 +670,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         ASMLine(long addr, String code) {
             this.addr = addr;
             this.code = code;
-        }
-    }
-
-    static class AddrInterval {
-        long begin;
-        long end;
-
-        AddrInterval(long begin, long end) {
-            this.begin = begin;
-            this.end = end;
         }
     }
 
@@ -715,13 +694,15 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         final long begin;
         final long end;
         final Collection<ASMLine> code;
+        final Set<Long> eventfulAddrs;
         final Map<String, Long> eventCountCache;
 
-        Region(String method, long begin, long end, Collection<ASMLine> asms) {
+        Region(String method, long begin, long end, Collection<ASMLine> asms, Set<Long> eventfulAddrs) {
             this.method = method;
             this.begin = begin;
             this.end = end;
             this.code = asms;
+            this.eventfulAddrs = eventfulAddrs;
             this.eventCountCache = new HashMap<String, Long>();
         }
 
@@ -729,8 +710,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             if (!eventCountCache.containsKey(event)) {
                 Multiset<Long> evs = events.get(event);
                 long count = 0;
-                for (ASMLine line : code) {
-                    count += (line.addr != null) ? evs.count(line.addr) : 0;
+                for (Long addr : eventfulAddrs) {
+                    count += evs.count(addr);
                 }
                 eventCountCache.put(event, count);
             }
