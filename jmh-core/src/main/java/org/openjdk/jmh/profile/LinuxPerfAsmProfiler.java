@@ -291,12 +291,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         SortedSet<Region> interestingRegions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
         for (String event : EVENTS) {
-            TreeSet<Region> topRegions = new TreeSet<Region>(Region.getSortedEventComparator(event));
+            TreeSet<Region> topRegions = new TreeSet<Region>(Region.getSortedEventComparator(events, event));
             topRegions.addAll(regions);
 
             long threshold = (long) (THRESHOLD_RATE * totalCounts.get(event));
             for (Region r : topRegions) {
-                if (r.getEventCount(event) > threshold) {
+                if (r.getEventCount(events, event) > threshold) {
                     interestingRegions.add(r);
                 }
             }
@@ -316,7 +316,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 } else {
                     for (ASMLine line : r.code) {
                         for (String event : EVENTS) {
-                            long count = (line.addr != null) ? r.events.get(event).count(line.addr) : 0;
+                            long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                             if (count > 0) {
                                 pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                             } else {
@@ -329,7 +329,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
                 printDottedLine(pw, null);
                 for (String event : EVENTS) {
-                    long count = r.events.get(event).size();
+                    long count = r.getEventCount(events, event);
                     if (count > 0) {
                         pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                     } else {
@@ -351,8 +351,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         Multiset<String> allRegions = new HashMultiset<String>();
         for (Region r : regions) {
             for (String event : EVENTS) {
-                long count = r.events.get(event).size();
-                allRegions.add(event, count);
+                allRegions.add(event, r.getEventCount(events, event));
             }
         }
 
@@ -439,19 +438,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         for (AddrInterval interval : intervals) {
             List<ASMLine> regionLines = asms.getLines(interval.begin, interval.end, PRINT_MARGIN);
-
-            Map<String, Multiset<Long>> eventsByAddr = new LinkedHashMap<String, Multiset<Long>>();
-            for (String event : EVENTS) {
-                HashMultiset<Long> r = new HashMultiset<Long>();
-                for (ASMLine line : regionLines) {
-                    if (line.addr == null) continue;
-                    long count = events.get(event).count(line.addr);
-                    r.add(line.addr, count);
-                }
-                eventsByAddr.put(event, r);
-            }
-
-            regions.add(new Region(asms.getMethod(interval.begin), interval.begin, interval.end, regionLines, eventsByAddr));
+            regions.add(new Region(asms.getMethod(interval.begin), interval.begin, interval.end, regionLines));
         }
 
         return regions;
@@ -715,31 +702,39 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             }
         };
 
-        static Comparator<Region> getSortedEventComparator(final String event) {
+        static Comparator<Region> getSortedEventComparator(final Map<String, Multiset<Long>> events, final String event) {
             return new Comparator<Region>() {
                 @Override
                 public int compare(Region o1, Region o2) {
-                    return Long.valueOf(o2.getEventCount(event)).compareTo(o1.getEventCount(event));
+                    return Long.valueOf(o2.getEventCount(events, event)).compareTo(o1.getEventCount(events, event));
                 }
             };
         }
 
         final String method;
-        long begin;
-        long end;
-        Collection<ASMLine> code;
-        Map<String, Multiset<Long>> events;
+        final long begin;
+        final long end;
+        final Collection<ASMLine> code;
+        final Map<String, Long> eventCountCache;
 
-        Region(String method, long begin, long end, Collection<ASMLine> asms, Map<String, Multiset<Long>> events) {
+        Region(String method, long begin, long end, Collection<ASMLine> asms) {
             this.method = method;
             this.begin = begin;
             this.end = end;
             this.code = asms;
-            this.events = events;
+            this.eventCountCache = new HashMap<String, Long>();
         }
 
-        long getEventCount(String event) {
-            return events.get(event).size();
+        long getEventCount(Map<String, Multiset<Long>> events, String event) {
+            if (!eventCountCache.containsKey(event)) {
+                Multiset<Long> evs = events.get(event);
+                long count = 0;
+                for (ASMLine line : code) {
+                    count += (line.addr != null) ? evs.count(line.addr) : 0;
+                }
+                eventCountCache.put(event, count);
+            }
+            return eventCountCache.get(event);
         }
 
     }
