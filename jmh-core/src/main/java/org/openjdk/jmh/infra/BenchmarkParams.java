@@ -391,4 +391,14 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         return params.compareTo(o.params);
     }
 
+    public String id() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(benchmark).append("-");
+        sb.append(mode);
+        for (String key : params.keys()) {
+            sb.append("-");
+            sb.append(key).append("-").append(params.get(key));
+        }
+        return sb.toString();
+    }
 }

@@ -261,7 +261,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         if (SAVE_PERF_OUTPUT) {
             String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
-                    SAVE_PERF_OUTPUT_TO + "/" + params.getBenchmark() + "-perf" :
+                    SAVE_PERF_OUTPUT_TO + "/" + params.id() + "-perf" :
                     SAVE_PERF_OUTPUT_TO_FILE;
             try {
                 FileUtils.copy(perfParsedData, target);
@@ -377,7 +377,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          */
         if (SAVE_ASM_OUTPUT != null) {
             String target = (SAVE_ASM_OUTPUT_TO_FILE == null) ?
-                    SAVE_ASM_OUTPUT_TO + "/" + params.getBenchmark() + ".asm" :
+                    SAVE_ASM_OUTPUT_TO + "/" + params.id() + ".asm" :
                     SAVE_ASM_OUTPUT_TO_FILE;
             FileOutputStream asm = null;
             try {
