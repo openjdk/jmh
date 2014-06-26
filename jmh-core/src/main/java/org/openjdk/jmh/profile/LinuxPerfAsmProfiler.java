@@ -82,6 +82,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Save perf output to file */
     private static final String SAVE_PERF_OUTPUT = System.getProperty("jmh.perfasm.savePerfTo");
 
+    /** Save perf output to file */
+    private static final String SAVE_ASM_OUTPUT = System.getProperty("jmh.perfasm.saveAsmTo");
+
     private static final boolean IS_SUPPORTED;
     private static final Collection<String> INIT_MSGS;
 
@@ -353,6 +356,34 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
         pw.println("<unknown>");
         pw.println();
+
+        /**
+         * Print annotated assembly, if needed:
+         */
+        if (SAVE_ASM_OUTPUT != null) {
+            FileOutputStream asm = null;
+            try {
+                asm = new FileOutputStream(SAVE_ASM_OUTPUT);
+                PrintWriter pwAsm = new PrintWriter(asm);
+                for (ASMLine line : assembly.lines) {
+                    for (String event : EVENTS) {
+                        int count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
+                        if (count > 0) {
+                            pwAsm.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                        } else {
+                            pwAsm.printf("%9s", "");
+                        }
+                    }
+                    pwAsm.println(line.code);
+                }
+                pwAsm.flush();
+                asm.close();
+
+                pw.println("Annotated assembly saved to " + SAVE_ASM_OUTPUT);
+            } catch (IOException e) {
+                pw.println("Unable to save annotated assembly to " + SAVE_ASM_OUTPUT);
+            }
+        }
 
         pw.flush();
         pw.close();
