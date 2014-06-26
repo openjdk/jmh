@@ -52,7 +52,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -527,13 +526,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     } catch (NumberFormatException e) {
                         // should it be kernel code?
                     }
-                }
-            }
-
-            for (Iterator<String> iterator = events.keySet().iterator(); iterator.hasNext(); ) {
-                String key = iterator.next();
-                if (events.get(key).isEmpty()) {
-                    iterator.remove();
                 }
             }
 
