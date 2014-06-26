@@ -165,6 +165,13 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                     }
                 }
             }
+
+            if (!useDelay) {
+                pw.println();
+                pw.println("WARNING: Your system uses old \"perf\", which can not delay the data collection.\n" +
+                        "Therefore, the performance data includes warmup.");
+            }
+
             pw.flush();
             pw.close();
 

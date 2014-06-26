@@ -211,7 +211,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         if (!events.isEmpty()) {
             pw.println("Perf output processed:");
             int cnt = 1;
-            for (String event : events.keySet()) {
+            for (String event : EVENTS) {
                 pw.printf(" Column %d: %s (%d total events)%n", cnt, event, events.get(event).size());
                 cnt++;
             }
@@ -246,12 +246,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          */
 
         Map<String, Long> totalCounts = new HashMap<String, Long>();
-        for (String event : events.keySet()) {
+        for (String event : EVENTS) {
             totalCounts.put(event, (long) events.get(event).size());
         }
 
         SortedSet<Region> interestingRegions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
-        for (String event : events.keySet()) {
+        for (String event : EVENTS) {
             TreeSet<Region> topRegions = new TreeSet<Region>(Region.getSortedEventComparator(event));
             topRegions.addAll(regions);
 
@@ -272,7 +272,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             for (Region r : interestingRegions) {
                 printDottedLine(pw, "Region " + cnt);
                 for (ASMLine line : r.code) {
-                    for (String event : r.events.keySet()) {
+                    for (String event : EVENTS) {
                         int count = (line.addr != null) ? r.events.get(event).count(line.addr) : 0;
                         if (count > 0) {
                             pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
@@ -284,7 +284,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 }
 
                 printDottedLine(pw, null);
-                for (String event : r.events.keySet()) {
+                for (String event : EVENTS) {
                     int count = r.events.get(event).size();
                     if (count > 0) {
                         pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
@@ -306,13 +306,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         printDottedLine(pw, "Other generated code");
         Multiset<String> allRegions = new HashMultiset<String>();
         for (Region r : regions) {
-            for (String event : r.events.keySet()) {
+            for (String event : EVENTS) {
                 int count = r.events.get(event).size();
                 allRegions.add(event, count);
             }
         }
 
-        for (String event : totalCounts.keySet()) {
+        for (String event : EVENTS) {
             long count = allRegions.count(event) - accounted.count(event);
             if (count > 0) {
                 pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
@@ -325,7 +325,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
 
         printDottedLine(pw, "Other non-generated code");
-        for (String event : totalCounts.keySet()) {
+        for (String event : EVENTS) {
             long count = totalCounts.get(event) - allRegions.count(event);
             if (count > 0) {
                 pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
@@ -335,6 +335,15 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
         pw.println("<unknown>");
         pw.println();
+
+        if (!useDelay) {
+            pw.println();
+            pw.println("WARNING: Your system uses old \"perf\", which can not delay the data collection.\n" +
+                    "Therefore, the performance data includes warmup.");
+        }
+
+        pw.flush();
+        pw.close();
 
         return new PerfResult(sw.toString());
     }
@@ -363,7 +372,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             List<ASMLine> regionLines = asms.getLines(interval.begin, interval.end, PRINT_MARGIN);
 
             Map<String, Multiset<Long>> eventsByAddr = new LinkedHashMap<String, Multiset<Long>>();
-            for (String event : events.keySet()) {
+            for (String event : EVENTS) {
                 HashMultiset<Long> r = new HashMultiset<Long>();
                 for (ASMLine line : regionLines) {
                     if (line.addr == null) continue;
