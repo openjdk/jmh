@@ -46,14 +46,14 @@ public interface Multiset<T> {
      * @param element element to add
      * @param count number of elements to add
      */
-    void add(T element, int count);
+    void add(T element, long count);
 
     /**
      * Count the elements in multiset
      * @param element element
      * @return number of matching elements in the set; zero, if no elements
      */
-    int count(T element);
+    long count(T element);
 
     /**
      * Answers if Multiset is empty
@@ -67,7 +67,7 @@ public interface Multiset<T> {
      *
      * @return number of elements
      */
-    int size();
+    long size();
 
     /**
      * Answers the collection of keys

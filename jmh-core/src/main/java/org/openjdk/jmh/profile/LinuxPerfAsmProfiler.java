@@ -283,7 +283,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         Map<String, Long> totalCounts = new HashMap<String, Long>();
         for (String event : EVENTS) {
-            totalCounts.put(event, (long) events.get(event).size());
+            totalCounts.put(event, events.get(event).size());
         }
 
         SortedSet<Region> interestingRegions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
@@ -309,7 +309,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 printDottedLine(pw, "Region " + cnt);
                 for (ASMLine line : r.code) {
                     for (String event : EVENTS) {
-                        int count = (line.addr != null) ? r.events.get(event).count(line.addr) : 0;
+                        long count = (line.addr != null) ? r.events.get(event).count(line.addr) : 0;
                         if (count > 0) {
                             pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                         } else {
@@ -321,7 +321,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
                 printDottedLine(pw, null);
                 for (String event : EVENTS) {
-                    int count = r.events.get(event).size();
+                    long count = r.events.get(event).size();
                     if (count > 0) {
                         pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                     } else {
@@ -343,7 +343,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         Multiset<String> allRegions = new HashMultiset<String>();
         for (Region r : regions) {
             for (String event : EVENTS) {
-                int count = r.events.get(event).size();
+                long count = r.events.get(event).size();
                 allRegions.add(event, count);
             }
         }
@@ -385,7 +385,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 PrintWriter pwAsm = new PrintWriter(asm);
                 for (ASMLine line : assembly.lines) {
                     for (String event : EVENTS) {
-                        int count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
+                        long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                         if (count > 0) {
                             pwAsm.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                         } else {
@@ -437,7 +437,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 HashMultiset<Long> r = new HashMultiset<Long>();
                 for (ASMLine line : regionLines) {
                     if (line.addr == null) continue;
-                    int count = events.get(event).count(line.addr);
+                    long count = events.get(event).count(line.addr);
                     r.add(line.addr, count);
                 }
                 eventsByAddr.put(event, r);
@@ -688,7 +688,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             return new Comparator<Region>() {
                 @Override
                 public int compare(Region o1, Region o2) {
-                    return Integer.valueOf(o2.getEventCount(event)).compareTo(o1.getEventCount(event));
+                    return Long.valueOf(o2.getEventCount(event)).compareTo(o1.getEventCount(event));
                 }
             };
         }
@@ -705,7 +705,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             this.events = events;
         }
 
-        int getEventCount(String event) {
+        long getEventCount(String event) {
             return events.get(event).size();
         }
 

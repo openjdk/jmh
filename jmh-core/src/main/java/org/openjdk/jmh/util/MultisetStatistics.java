@@ -32,7 +32,7 @@ public class MultisetStatistics extends AbstractStatistics {
         values = new TreeMultiset<Double>();
     }
 
-    public void addValue(double d, int count) {
+    public void addValue(double d, long count) {
         values.add(d, count);
     }
 

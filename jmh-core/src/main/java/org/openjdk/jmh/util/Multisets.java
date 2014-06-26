@@ -34,15 +34,15 @@ public class Multisets {
 
     public static <T> Collection<T> countHighest(Multiset<T> set, int top) {
         // crude and inefficient
-        PriorityQueue<Pair<T, Integer>> q = new PriorityQueue<Pair<T, Integer>>(10, new Comparator<Pair<T, Integer>>() {
+        PriorityQueue<Pair<T, Long>> q = new PriorityQueue<Pair<T, Long>>(10, new Comparator<Pair<T, Long>>() {
             @Override
-            public int compare(Pair<T, Integer> o1, Pair<T, Integer> o2) {
+            public int compare(Pair<T, Long> o1, Pair<T, Long> o2) {
                 return o2.k2.compareTo(o1.k2);
             }
         });
 
         for (T key : set.keys()) {
-            q.add(new Pair<T, Integer>(key, set.count(key)));
+            q.add(new Pair<T, Long>(key, set.count(key)));
         }
 
         List<T> result = new ArrayList<T>();
