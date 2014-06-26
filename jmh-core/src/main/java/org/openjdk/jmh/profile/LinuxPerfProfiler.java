@@ -49,6 +49,9 @@ import java.util.regex.Pattern;
 
 public class LinuxPerfProfiler implements ExternalProfiler {
 
+    /** Delay collection for given time; -1 to detect automatically */
+    private static final int DELAY_MSEC = Integer.getInteger("jmh.perf.delayMs", -1);
+
     private static final boolean IS_SUPPORTED;
     private static final boolean IS_DELAYED;
     private static final Collection<String> INIT_MSGS;
@@ -63,11 +66,16 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        long delay = TimeUnit.NANOSECONDS.toMillis(
-                params.getWarmup().getCount() *
-                params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
-                + 1000 // loosely account for the JVM lag
-        );
+        long delay;
+        if (DELAY_MSEC == -1) { // not set
+            delay = TimeUnit.NANOSECONDS.toMillis(
+                    params.getWarmup().getCount() *
+                            params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
+                            + TimeUnit.SECONDS.toMillis(1) // loosely account for the JVM lag
+            );
+        } else {
+            delay = DELAY_MSEC;
+        }
 
         if (IS_DELAYED) {
             return Arrays.asList("perf", "stat", "-d", "-d", "-d", "-D " + delay);

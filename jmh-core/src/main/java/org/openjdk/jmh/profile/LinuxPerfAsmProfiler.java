@@ -76,6 +76,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Merge margin: the regions separated by less than the margin are considered the same */
     private static final int MERGE_MARGIN = Integer.getInteger("jmh.perfasm.mergeMargin", 32);
 
+    /** Delay collection for given time; -1 to detect automatically */
+    private static final int DELAY_MSEC = Integer.getInteger("jmh.perfasm.delayMs", -1);
+
     private static final boolean IS_SUPPORTED;
     private static final Collection<String> INIT_MSGS;
 
@@ -210,11 +213,16 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 3. Read out perf output
          */
 
-        long delaySec = (params.getWarmup().getCount() *
-                params.getWarmup().getTime().convertTo(TimeUnit.SECONDS))
-                + 1; // loosely account for the JVM lag
+        long delayNs;
+        if (DELAY_MSEC == -1) { // not set
+            delayNs = params.getWarmup().getCount() *
+                            params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
+                            + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
+        } else {
+            delayNs = TimeUnit.MILLISECONDS.toNanos(DELAY_MSEC);
+        }
 
-        Map<String, Multiset<Long>> events = readEvents(delaySec);
+        Map<String, Multiset<Long>> events = readEvents(delayNs);
 
         if (!events.isEmpty()) {
             pw.println("Perf output processed:");
@@ -499,7 +507,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    Map<String, Multiset<Long>> readEvents(long skipSeconds) {
+    Map<String, Multiset<Long>> readEvents(long skipNs) {
         try {
             FileInputStream fis = new FileInputStream(perfParsedData);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
@@ -509,6 +517,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
+            double skipSec = 1.0 * skipNs / TimeUnit.SECONDS.toNanos(1);
             Double startTime = null;
 
             String line;
@@ -523,7 +532,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         if (startTime == null) {
                             startTime = time;
                         } else {
-                            if (time - startTime < skipSeconds) {
+                            if (time - startTime < skipSec) {
                                 continue;
                             }
                         }
