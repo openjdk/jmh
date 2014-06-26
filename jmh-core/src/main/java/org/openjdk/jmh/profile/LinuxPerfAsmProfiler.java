@@ -310,6 +310,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             int cnt = 1;
             for (Region r : interestingRegions) {
                 printDottedLine(pw, "Region " + cnt);
+                pw.printf(" Starts in \"%s\"%n%n", r.method);
                 if (r.code.size() > THRESHOLD_TOO_BIG) {
                     pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
                 } else {
@@ -450,7 +451,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 eventsByAddr.put(event, r);
             }
 
-            regions.add(new Region(interval.begin, interval.end, regionLines, eventsByAddr));
+            regions.add(new Region(asms.getMethod(interval.begin), interval.begin, interval.end, regionLines, eventsByAddr));
         }
 
         return regions;
@@ -499,10 +500,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     static class Assembly {
         List<ASMLine> lines;
         SortedMap<Long, Integer> addressMap;
+        SortedMap<Long, String> methodMap;
 
-        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap) {
+        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap) {
             this.lines = lines;
             this.addressMap = addressMap;
+            this.methodMap = methodMap;
         }
 
         public boolean isEmpty() {
@@ -546,25 +549,46 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 return Collections.emptyList();
             }
         }
+
+        public String getMethod(long addr) {
+            SortedMap<Long, String> head = methodMap.headMap(addr);
+            if (head.isEmpty()) {
+                return "N/A";
+            } else {
+                return methodMap.get(head.lastKey());
+            }
+        }
     }
 
     Assembly readAssembly(File stdOut) {
         try {
             List<ASMLine> lines = new ArrayList<ASMLine>();
             SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
+            SortedMap<Long, String> methodMap = new TreeMap<Long, String>();
+
+            String method = null;
             String line;
             BufferedReader br = new BufferedReader(new FileReader(stdOut));
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 String[] elements = line.trim().split(" ");
 
-                if (elements.length >= 1) {
+                if (line.contains("{method}")) {
+                    if (elements.length == 7) {
+                        method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "") + "()";
+                    }
+                } else if (elements.length >= 1) {
                     // Seems to be assembly line
                     try {
                         Long addr = Long.valueOf(elements[0].replace("0x", "").replace(":", ""), 16);
                         int idx = lines.size();
                         lines.add(new ASMLine(addr, line));
                         addressMap.put(addr, idx);
+
+                        if (method != null) {
+                            methodMap.put(addr, method);
+                            method = null;
+                        }
                     } catch (NumberFormatException e) {
                         lines.add(new ASMLine(line));
                     }
@@ -572,9 +596,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     lines.add(new ASMLine(line));
                 }
             }
-            return new Assembly(lines, addressMap);
+            return new Assembly(lines, addressMap, methodMap);
         } catch (IOException e) {
-            return new Assembly(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>());
+            return new Assembly(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
         }
     }
 
@@ -700,12 +724,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             };
         }
 
+        final String method;
         long begin;
         long end;
         Collection<ASMLine> code;
         Map<String, Multiset<Long>> events;
 
-        Region(long begin, long end, Collection<ASMLine> asms, Map<String, Multiset<Long>> events) {
+        Region(String method, long begin, long end, Collection<ASMLine> asms, Map<String, Multiset<Long>> events) {
+            this.method = method;
             this.begin = begin;
             this.end = end;
             this.code = asms;
