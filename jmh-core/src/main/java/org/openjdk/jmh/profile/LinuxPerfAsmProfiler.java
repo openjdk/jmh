@@ -368,6 +368,18 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.println("<unresolved>");
         pw.println();
 
+        {
+            Set<Long> addrHistory = new HashSet<Long>();
+            for (Long addr : assembly.addressMap.keySet()) {
+                if (!addrHistory.add(addr)) {
+                    pw.println("WARNING: Duplicate instruction addresses detected. This is probably due to compiler reusing\n " +
+                            "the code arena for the new generated code. We can not differentiate between methods sharing\n" +
+                            "the same addresses, and therefore the profile might be wrong. Increasing generated code\n" +
+                            "storage might help.");
+                }
+            }
+        }
+
         /**
          * Print perf output, if needed:
          */
@@ -522,6 +534,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             this.methodMap = methodMap;
         }
 
+        public Assembly() {
+            this(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
+        }
+
         public boolean isEmpty() {
             return lines.isEmpty();
         }
@@ -612,7 +628,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             }
             return new Assembly(lines, addressMap, methodMap);
         } catch (IOException e) {
-            return new Assembly(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
+            return new Assembly();
         }
     }
 
