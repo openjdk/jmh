@@ -588,7 +588,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     if (elements.length == 7) {
                         method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "") + "()";
                     }
-                } else if (elements.length >= 1) {
+                } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be assembly line
                     try {
                         Long addr = Long.valueOf(elements[0].replace("0x", "").replace(":", ""), 16);
@@ -601,7 +601,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                             method = null;
                         }
                     } catch (NumberFormatException e) {
-                        lines.add(new ASMLine(line));
+                        throw new IllegalStateException("Should not be here", e);
                     }
                 } else {
                     lines.add(new ASMLine(line));
@@ -652,7 +652,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         Long element = Long.valueOf(elements[4], 16);
                         evs.add(element);
                     } catch (NumberFormatException e) {
-                        // should it be kernel code?
+                        // TODO: Kernel addresses like "ffffffff810c1b00" overflow signed long
                     }
                 }
             }
