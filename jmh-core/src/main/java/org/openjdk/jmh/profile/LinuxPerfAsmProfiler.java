@@ -222,10 +222,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             delayNs = TimeUnit.MILLISECONDS.toNanos(DELAY_MSEC);
         }
 
-        Map<String, Multiset<Long>> events = readEvents(delayNs);
+        double skipSec = 1.0 * delayNs / TimeUnit.SECONDS.toNanos(1);
+
+        Map<String, Multiset<Long>> events = readEvents(skipSec);
 
         if (!events.isEmpty()) {
-            pw.println("Perf output processed:");
+            pw.printf("Perf output processed (skipped %.3f seconds):%n", skipSec);
             int cnt = 1;
             for (String event : EVENTS) {
                 pw.printf(" Column %d: %s (%d events)%n", cnt, event, events.get(event).size());
@@ -234,7 +236,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         } else {
             pw.println();
-            pw.println("No perf data, make sure \"perf stat echo\" is indeed working.");
+            pw.println("No perf data, make sure \"perf stat echo\" is indeed working;\n " +
+                    "or the collection delay is not running past the benchmark time.");
             pw.println();
         }
 
@@ -507,7 +510,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    Map<String, Multiset<Long>> readEvents(long skipNs) {
+    Map<String, Multiset<Long>> readEvents(double skipSec) {
         try {
             FileInputStream fis = new FileInputStream(perfParsedData);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
@@ -517,7 +520,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
-            double skipSec = 1.0 * skipNs / TimeUnit.SECONDS.toNanos(1);
             Double startTime = null;
 
             String line;

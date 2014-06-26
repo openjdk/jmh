@@ -68,11 +68,9 @@ public class LinuxPerfProfiler implements ExternalProfiler {
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         long delay;
         if (DELAY_MSEC == -1) { // not set
-            delay = TimeUnit.NANOSECONDS.toMillis(
-                    params.getWarmup().getCount() *
-                            params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
-                            + TimeUnit.SECONDS.toMillis(1) // loosely account for the JVM lag
-            );
+            delay = TimeUnit.NANOSECONDS.toMillis(params.getWarmup().getCount() *
+                            params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS))
+                    + TimeUnit.SECONDS.toMillis(1); // loosely account for the JVM lag
         } else {
             delay = DELAY_MSEC;
         }
