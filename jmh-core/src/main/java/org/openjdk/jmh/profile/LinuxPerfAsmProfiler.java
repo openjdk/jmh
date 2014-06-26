@@ -79,6 +79,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Delay collection for given time; -1 to detect automatically */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perfasm.delayMs", -1);
 
+    /** Save perf output to file */
+    private static final String SAVE_PERF_OUTPUT = System.getProperty("jmh.perfasm.savePerfTo");
+
     private static final boolean IS_SUPPORTED;
     private static final Collection<String> INIT_MSGS;
 
@@ -239,6 +242,15 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println("No perf data, make sure \"perf stat echo\" is indeed working;\n " +
                     "or the collection delay is not running past the benchmark time.");
             pw.println();
+        }
+
+        if (SAVE_PERF_OUTPUT != null) {
+            try {
+                FileUtils.copy(perfParsedData, SAVE_PERF_OUTPUT);
+                pw.println("Perf output saved to " + SAVE_PERF_OUTPUT);
+            } catch (IOException e) {
+                pw.println("Unable to save perf output to " + SAVE_PERF_OUTPUT);
+            }
         }
 
         /**
