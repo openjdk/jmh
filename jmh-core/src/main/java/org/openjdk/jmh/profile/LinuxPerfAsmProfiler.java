@@ -373,7 +373,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          */
         if (SAVE_PERF_OUTPUT) {
             String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
-                    SAVE_PERF_OUTPUT_TO + "/" + params.id() + "-perf" :
+                    SAVE_PERF_OUTPUT_TO + "/" + params.id() + ".perf" :
                     SAVE_PERF_OUTPUT_TO_FILE;
             try {
                 FileUtils.copy(perfParsedData, target);
