@@ -356,7 +356,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 pw.printf("%9s", "");
             }
         }
-        pw.println("<unknown>");
+        pw.println("<..." + (regions.size() - interestingRegions.size()) + " warm regions...>");
         pw.println();
 
 
@@ -369,7 +369,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 pw.printf("%9s", "");
             }
         }
-        pw.println("<unknown>");
+        pw.println("<unresolved>");
         pw.println();
 
         /**
