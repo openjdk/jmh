@@ -311,7 +311,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             int cnt = 1;
             for (Region r : interestingRegions) {
                 printDottedLine(pw, "Region " + cnt);
-                pw.printf(" Starts in \"%s\"%n%n", r.method);
+                pw.printf(" Starts in \"%s\", spans [%x:%x]%n%n", r.method, r.begin, r.end);
                 if (r.code.size() > THRESHOLD_TOO_BIG) {
                     pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
                 } else {
@@ -452,7 +452,11 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             } else {
                 if (addr - lastAddr > MERGE_MARGIN) {
                     List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, PRINT_MARGIN);
-                    regions.add(new Region(asms.getMethod(lastBegin), lastBegin, lastAddr, regionLines, eventfulAddrs));
+                    if (!regionLines.isEmpty()) {
+                        regions.add(new Region(asms.getMethod(lastBegin), lastBegin, lastAddr, regionLines, eventfulAddrs));
+                    } else {
+                        // TODO: non-generated-code region
+                    }
                     lastBegin = addr;
                     eventfulAddrs = new HashSet<Long>();
                 }
