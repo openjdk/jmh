@@ -542,18 +542,28 @@ public class Runner extends BaseRunner {
                 File stdErr = FileUtils.tempFile("stderr");
                 File stdOut = FileUtils.tempFile("stdout");
 
-                for (ExternalProfiler profiler : profilers) {
-                    profiler.beforeTrial(params);
+                if (!profilers.isEmpty()) {
+                    out.print("# Preparing profilers: ");
+                    for (ExternalProfiler profiler : profilers) {
+                        out.print(profiler.label() + " ");
+                        profiler.beforeTrial(params);
+                    }
+                    out.println("");
                 }
 
                 Multimap<BenchmarkParams, BenchmarkResult> result = doFork(server, commandString, stdOut, stdErr);
 
-                for (ExternalProfiler profiler : profilers) {
-                    for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
-                        for (BenchmarkResult r : result.values()) {
-                            r.addBenchmarkResult(profR);
+                if (!profilers.isEmpty()) {
+                    out.print("# Processing profiler results: ");
+                    for (ExternalProfiler profiler : profilers) {
+                        out.print(profiler.label() + " ");
+                        for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
+                            for (BenchmarkResult r : result.values()) {
+                                r.addBenchmarkResult(profR);
+                            }
                         }
                     }
+                    out.println("");
                 }
 
                 results.merge(result);
