@@ -323,11 +323,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     for (ASMLine line : r.code) {
                         for (String event : EVENTS) {
                             long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                            if (count > 0) {
-                                pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
-                            } else {
-                                pw.printf("%9s", "");
-                            }
+                            printLine(pw, events, event, count);
                         }
                         pw.println(line.code);
                     }
@@ -335,12 +331,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
                 printDottedLine(pw, null);
                 for (String event : EVENTS) {
-                    long count = r.getEventCount(events, event);
-                    if (count > 0) {
-                        pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
-                    } else {
-                        pw.printf("%9s", "");
-                    }
+                    printLine(pw, events, event, r.getEventCount(events, event));
                 }
                 pw.println("<total for region " + cnt + ">");
                 pw.println();
@@ -360,12 +351,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         for (Region r : regions) {
             if (shown++ < SHOW_TOP) {
                 for (String event : EVENTS) {
-                    long count = r.getEventCount(events, event);
-                    if (count > 0) {
-                        pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
-                    } else {
-                        pw.printf("%9s", "");
-                    }
+                    printLine(pw, events, event, r.getEventCount(events, event));
                 }
                 pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
             } else {
@@ -380,24 +366,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         if (regions.size() - SHOW_TOP > 0) {
             for (String event : EVENTS) {
-                long count = other.count(event);
-                if (count > 0) {
-                    pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
-                } else {
-                    pw.printf("%9s", "");
-                }
+                printLine(pw, events, event, other.count(event));
             }
             pw.println("<...other " + (regions.size() - SHOW_TOP) + " warm regions...>");
         }
         printDottedLine(pw, null);
 
         for (String event : EVENTS) {
-            long count = accounted.count(event);
-            if (count > 0) {
-                pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
-            } else {
-                pw.printf("%9s", "");
-            }
+            printLine(pw, events, event, accounted.count(event));
         }
         pw.println("<totals>");
         pw.println();
@@ -447,11 +423,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 for (ASMLine line : assembly.lines) {
                     for (String event : EVENTS) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                        if (count > 0) {
-                            pwAsm.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
-                        } else {
-                            pwAsm.printf("%9s", "");
-                        }
+                        printLine(pwAsm, events, event, count);
                     }
                     pwAsm.println(line.code);
                 }
@@ -468,6 +440,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.close();
 
         return new PerfResult(sw.toString());
+    }
+
+    static void printLine(PrintWriter pw, PerfEvents events, String event, long count) {
+        if (count > 0) {
+            pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
+        } else {
+            pw.printf("%9s", "");
+        }
     }
 
     void printDottedLine(PrintWriter pw, String header) {
