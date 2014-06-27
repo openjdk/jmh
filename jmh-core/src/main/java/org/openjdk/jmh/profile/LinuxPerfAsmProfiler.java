@@ -33,7 +33,6 @@ import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Multiset;
-import org.openjdk.jmh.util.Multisets;
 import org.openjdk.jmh.util.TreeMultiset;
 import org.openjdk.jmh.util.Utils;
 
@@ -72,8 +71,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Cutoff threshold for hot region: the regions with event count over threshold would be shown */
     private static final double THRESHOLD_RATE = Double.valueOf(System.getProperty("jmh.perfasm.hotThreshold", "0.10"));
 
-    /** Show this number of top residuals in "other" compiled/non-compiled code */
-    private static final int SHOW_TOP_RESIDUALS = Integer.getInteger("jmh.perfasm.topResiduals", 10);
+    /** Show this number of top hottest code regions */
+    private static final int SHOW_TOP = Integer.getInteger("jmh.perfasm.top", 10);
 
     /** Cutoff threshold for large region: the region larger than this would be truncated */
     private static final int THRESHOLD_TOO_BIG = Integer.getInteger("jmh.perfasm.tooBigThreshold", 1000);
@@ -271,10 +270,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
 
         /**
-         * 4. Figure out generated code regions
+         * 4. Figure out code regions
          */
 
-        Collection<Region> regions = makeRegions(assembly, events);
+        String mainEvent = EVENTS[0];
+
+        List<Region> regions = makeRegions(assembly, events);
+        Collections.sort(regions, Region.getSortedEventComparator(events, mainEvent));
 
         /**
          * 5. Figure out interesting regions, and print them out
@@ -285,29 +287,20 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             totalCounts.put(event, events.get(event).size());
         }
 
-        String mainEvent = EVENTS[0];
-
-        SortedSet<Region> interestingRegions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
-
-        TreeSet<Region> topRegions = new TreeSet<Region>(Region.getSortedEventComparator(events, mainEvent));
-        topRegions.addAll(regions);
-
         long threshold = (long) (THRESHOLD_RATE * totalCounts.get(mainEvent));
-        for (Region r : topRegions) {
+
+        boolean headerPrinted = false;
+
+        int cnt = 1;
+        for (Region r : regions) {
             if (r.getEventCount(events, mainEvent) > threshold) {
-                interestingRegions.add(r);
-            }
-        }
+                if (!headerPrinted) {
+                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n", THRESHOLD_RATE * 100, mainEvent);
+                    headerPrinted = true;
+                }
 
-        Multiset<String> compiled = new HashMultiset<String>();
-        if (!interestingRegions.isEmpty()) {
-            pw.println();
-            pw.printf("Hottest regions in compiled code (>%.2f%% \"%s\" events):%n", THRESHOLD_RATE * 100, mainEvent);
-
-            int cnt = 1;
-            for (Region r : interestingRegions) {
                 printDottedLine(pw, "Region " + cnt);
-                pw.printf(" Starts in \"%s\", spans [0x%x:0x%x]%n%n", r.method, r.begin, r.end);
+                pw.printf(" [0x%x:0x%x] in %s%n%n", r.begin, r.end, r.method);
                 if (r.code.size() > THRESHOLD_TOO_BIG) {
                     pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
                 } else {
@@ -332,7 +325,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     } else {
                         pw.printf("%9s", "");
                     }
-                    compiled.add(event, count);
                 }
                 pw.println("<total for region " + cnt + ">");
                 pw.println();
@@ -341,108 +333,57 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
 
         /**
-         * 6. Print out residual compiled code
+         * 6. Print out residual code
          */
 
-        topRegions.removeAll(interestingRegions);
+        Multiset<String> accounted = new HashMultiset<String>();
+        Multiset<String> other = new HashMultiset<String>();
 
-        if (!topRegions.isEmpty()) {
-
-
-            Multiset<String> residualCompiled = new HashMultiset<String>();
-            Multiset<String> residualCompiledNonTop = new HashMultiset<String>();
-
-            printDottedLine(pw, "Other compiled code");
-            int shown = 0;
-            for (Region r : topRegions) {
-                if (++shown < SHOW_TOP_RESIDUALS) {
-                    for (String event : EVENTS) {
-                        long count = r.getEventCount(events, event);
-                        if (count > 0) {
-                            pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
-                        } else {
-                            pw.printf("%9s", "");
-                        }
-                    }
-                    pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
-                } else {
-                    for (String event : EVENTS) {
-                        residualCompiledNonTop.add(event, r.getEventCount(events, event));
-                    }
-                }
+        printDottedLine(pw, "Hottest regions");
+        int shown = 0;
+        for (Region r : regions) {
+            if (++shown < SHOW_TOP) {
                 for (String event : EVENTS) {
-                    residualCompiled.add(event, r.getEventCount(events, event));
-                    compiled.add(event, r.getEventCount(events, event));
-                }
-            }
-
-            if (topRegions.size() - SHOW_TOP_RESIDUALS > 0) {
-                for (String event : EVENTS) {
-                    long count = residualCompiledNonTop.count(event);
+                    long count = r.getEventCount(events, event);
                     if (count > 0) {
                         pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                     } else {
                         pw.printf("%9s", "");
                     }
                 }
-                pw.println("<...other " + (topRegions.size() - SHOW_TOP_RESIDUALS) + " warm regions...>");
+                pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
+            } else {
+                for (String event : EVENTS) {
+                    other.add(event, r.getEventCount(events, event));
+                }
             }
-            printDottedLine(pw, null);
-
             for (String event : EVENTS) {
-                long count = residualCompiled.count(event);
+                accounted.add(event, r.getEventCount(events, event));
+            }
+        }
+
+        if (regions.size() - SHOW_TOP > 0) {
+            for (String event : EVENTS) {
+                long count = other.count(event);
                 if (count > 0) {
                     pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
                 } else {
                     pw.printf("%9s", "");
                 }
             }
-            pw.println("<totals for other compiled code>");
-            pw.println();
+            pw.println("<...other " + (regions.size() - SHOW_TOP) + " warm regions...>");
         }
-
-        /**
-         * Print out the non-compiled code
-         */
-
-        printDottedLine(pw, "Other (non-compiled) code");
-
-        {
-            Set<Long> nativeAddresses = new HashSet<Long>();
-            nativeAddresses.addAll(events.get(mainEvent).keys());
-            nativeAddresses.removeAll(assembly.addressMap.keySet());
-
-            Multiset<Long> nativeEvents = new HashMultiset<Long>();
-            for (Long addr : nativeAddresses) {
-                nativeEvents.add(addr, events.get(mainEvent).count(addr));
-            }
-
-            Collection<Long> highest = Multisets.countHighest(nativeEvents, SHOW_TOP_RESIDUALS);
-
-            for (Long addr : highest) {
-                for (String event : EVENTS) {
-                    long count = nativeEvents.count(addr);
-                    if (count > 0) {
-                        pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
-                    } else {
-                        pw.printf("%9s", "");
-                    }
-                }
-                pw.printf("[0x%x] %s %n", addr, events.methods.get(addr));
-            }
-        }
-
         printDottedLine(pw, null);
 
         for (String event : EVENTS) {
-            long count = totalCounts.get(event) - compiled.count(event);
+            long count = accounted.count(event);
             if (count > 0) {
                 pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
             } else {
                 pw.printf("%9s", "");
             }
         }
-        pw.println("<totals for non-compiled code>");
+        pw.println("<totals>");
         pw.println();
 
         /**
@@ -530,8 +471,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.println();
     }
 
-    Collection<Region> makeRegions(Assembly asms, PerfEvents events) {
-        SortedSet<Region> regions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
+    List<Region> makeRegions(Assembly asms, PerfEvents events) {
+        List<Region> regions = new ArrayList<Region>();
 
         SortedSet<Long> addrs = events.getAllAddresses();
 
@@ -545,11 +486,20 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             } else {
                 if (addr - lastAddr > MERGE_MARGIN) {
                     List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, PRINT_MARGIN);
+
+                    String name;
                     if (!regionLines.isEmpty()) {
-                        regions.add(new Region(asms.getMethod(lastBegin), lastBegin, lastAddr, regionLines, eventfulAddrs));
+                        // Compiled code
+                        name = asms.getMethod(lastBegin);
                     } else {
-                        // TODO: non-generated-code region
+                        // Non-compiled code
+                        Set<String> methods = new HashSet<String>();
+                        for (Long ea : eventfulAddrs) {
+                            methods.add(events.methods.get(ea));
+                        }
+                        name = methods.toString();
                     }
+                    regions.add(new Region(name, lastBegin, lastAddr, regionLines, eventfulAddrs));
                     lastBegin = addr;
                     eventfulAddrs = new HashSet<Long>();
                 }
@@ -807,13 +757,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     static class Region {
-        static final Comparator<Region> BEGIN_COMPARATOR = new Comparator<Region>() {
-            @Override
-            public int compare(Region o1, Region o2) {
-                return Long.valueOf(o1.begin).compareTo(o2.begin);
-            }
-        };
-
         static Comparator<Region> getSortedEventComparator(final PerfEvents events, final String event) {
             return new Comparator<Region>() {
                 @Override
