@@ -306,7 +306,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             int cnt = 1;
             for (Region r : interestingRegions) {
                 printDottedLine(pw, "Region " + cnt);
-                pw.printf(" Starts in \"%s\", spans [%x:%x]%n%n", r.method, r.begin, r.end);
+                pw.printf(" Starts in \"%s\", spans [0x%x:0x%x]%n%n", r.method, r.begin, r.end);
                 if (r.code.size() > THRESHOLD_TOO_BIG) {
                     pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
                 } else {
@@ -363,7 +363,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                             pw.printf("%9s", "");
                         }
                     }
-                    pw.printf("[%x:%x] in %s%n", r.begin, r.end, r.method);
+                    pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
                 } else {
                     for (String event : EVENTS) {
                         residualCompiledNonTop.add(event, r.getEventCount(events, event));
@@ -657,7 +657,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
                 if (line.contains("{method}")) {
                     if (elements.length == 7) {
-                        method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "") + "()";
+                        method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "");
                     }
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be assembly line
