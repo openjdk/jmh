@@ -72,7 +72,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     private static final double THRESHOLD_RATE = Double.valueOf(System.getProperty("jmh.perfasm.hotThreshold", "0.10"));
 
     /** Show this number of top hottest code regions */
-    private static final int SHOW_TOP = Integer.getInteger("jmh.perfasm.top", 10);
+    private static final int SHOW_TOP = Integer.getInteger("jmh.perfasm.top", 20);
 
     /** Cutoff threshold for large region: the region larger than this would be truncated */
     private static final int THRESHOLD_TOO_BIG = Integer.getInteger("jmh.perfasm.tooBigThreshold", 1000);
