@@ -137,7 +137,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         if (!SKIP_ASSEMBLY) {
             return Arrays.asList(
                     "-XX:+UnlockDiagnosticVMOptions",
-                    "-XX:+PrintAssembly");
+                    "-XX:+PrintAssembly",
+                    "-XX:+PrintCompilation",
+                    "-XX:+PrintInlining"
+            );
         } else {
             return Collections.emptyList();
         }
