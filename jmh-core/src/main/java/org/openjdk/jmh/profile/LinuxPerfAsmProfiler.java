@@ -534,7 +534,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "");
                     }
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
-                    // Seems to be assembly line
+                    // Seems to be line with address.
                     try {
                         Long addr = Long.valueOf(elements[0].replace("0x", "").replace(":", ""), 16);
                         int idx = lines.size();
@@ -546,7 +546,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                             method = null;
                         }
                     } catch (NumberFormatException e) {
-                        throw new IllegalStateException("Should not be here", e);
+                        // Nope, not the address line.
+                        lines.add(new ASMLine(line));
                     }
                 } else {
                     lines.add(new ASMLine(line));
