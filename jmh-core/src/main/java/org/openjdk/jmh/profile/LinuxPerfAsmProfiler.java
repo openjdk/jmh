@@ -33,6 +33,7 @@ import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Multiset;
+import org.openjdk.jmh.util.Multisets;
 import org.openjdk.jmh.util.TreeMultiset;
 import org.openjdk.jmh.util.Utils;
 
@@ -405,6 +406,34 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          */
 
         printDottedLine(pw, "Other (non-compiled) code");
+
+        {
+            Set<Long> nativeAddresses = new HashSet<Long>();
+            nativeAddresses.addAll(events.get(mainEvent).keys());
+            nativeAddresses.removeAll(assembly.addressMap.keySet());
+
+            Multiset<Long> nativeEvents = new HashMultiset<Long>();
+            for (Long addr : nativeAddresses) {
+                nativeEvents.add(addr, events.get(mainEvent).count(addr));
+            }
+
+            Collection<Long> highest = Multisets.countHighest(nativeEvents, SHOW_TOP_RESIDUALS);
+
+            for (Long addr : highest) {
+                for (String event : EVENTS) {
+                    long count = nativeEvents.count(addr);
+                    if (count > 0) {
+                        pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                    } else {
+                        pw.printf("%9s", "");
+                    }
+                }
+                pw.printf("[0x%x]%n", addr);
+            }
+        }
+
+        printDottedLine(pw, null);
+
         for (String event : EVENTS) {
             long count = totalCounts.get(event) - compiled.count(event);
             if (count > 0) {
@@ -413,7 +442,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 pw.printf("%9s", "");
             }
         }
-        pw.println("<unresolved>");
+        pw.println("<totals for non-compiled code>");
         pw.println();
 
         /**
