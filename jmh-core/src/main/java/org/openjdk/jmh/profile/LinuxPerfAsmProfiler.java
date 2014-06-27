@@ -238,6 +238,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         Assembly assembly = readAssembly(stdOut);
         if (!assembly.isEmpty()) {
             pw.printf("PrintAssembly processed: %d total lines%n", assembly.size());
+        } else if (SKIP_ASSEMBLY) {
+            pw.println();
+            pw.println("PrintAssembly skipped, Java methods are not resolved.");
+            pw.println();
         } else {
             pw.println();
             pw.println("No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
