@@ -253,7 +253,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         double skipSec = 1.0 * delayNs / TimeUnit.SECONDS.toNanos(1);
 
-        Map<String, Multiset<Long>> events = readEvents(skipSec);
+        PerfEvents events = readEvents(skipSec);
 
         if (!events.isEmpty()) {
             pw.printf("Perf output processed (skipped %.3f seconds):%n", skipSec);
@@ -428,7 +428,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         pw.printf("%9s", "");
                     }
                 }
-                pw.printf("[0x%x]%n", addr);
+                pw.printf("[0x%x] %s %n", addr, events.methods.get(addr));
             }
         }
 
@@ -530,13 +530,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         pw.println();
     }
 
-    Collection<Region> makeRegions(Assembly asms, Map<String, Multiset<Long>> events) {
+    Collection<Region> makeRegions(Assembly asms, PerfEvents events) {
         SortedSet<Region> regions = new TreeSet<Region>(Region.BEGIN_COMPARATOR);
 
-        SortedSet<Long> addrs = new TreeSet<Long>();
-        for (Map.Entry<String, Multiset<Long>> e : events.entrySet()) {
-            addrs.addAll(e.getValue().keys());
-        }
+        SortedSet<Long> addrs = events.getAllAddresses();
 
         Set<Long> eventfulAddrs = new HashSet<Long>();
         Long lastBegin = null;
@@ -601,6 +598,36 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 output += r.output;
             }
             return new PerfResult(output);
+        }
+    }
+
+    static class PerfEvents {
+        final Map<String, Multiset<Long>> events;
+        final Map<Long, String> methods;
+
+        PerfEvents(Map<String, Multiset<Long>> events, Map<Long, String> methods) {
+            this.events = events;
+            this.methods = methods;
+        }
+
+        public PerfEvents() {
+            this(Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap());
+        }
+
+        public boolean isEmpty() {
+            return events.isEmpty();
+        }
+
+        public Multiset<Long> get(String event) {
+            return events.get(event);
+        }
+
+        public SortedSet<Long> getAllAddresses() {
+            SortedSet<Long> addrs = new TreeSet<Long>();
+            for (Multiset<Long> e : events.values()) {
+                addrs.addAll(e.keys());
+            }
+            return addrs;
         }
     }
 
@@ -713,11 +740,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    Map<String, Multiset<Long>> readEvents(double skipSec) {
+    PerfEvents readEvents(double skipSec) {
         try {
             FileInputStream fis = new FileInputStream(perfParsedData);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
 
+            Map<Long, String> methods = new HashMap<Long, String>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<String, Multiset<Long>>();
             for (String evName : EVENTS) {
                 events.put(evName, new TreeMultiset<Long>());
@@ -751,15 +779,16 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     try {
                         Long element = Long.valueOf(elements[4], 16);
                         evs.add(element);
+                        methods.put(element, elements[5]); // TODO: Deduplicate method names
                     } catch (NumberFormatException e) {
                         // TODO: Kernel addresses like "ffffffff810c1b00" overflow signed long
                     }
                 }
             }
 
-            return events;
+            return new PerfEvents(events, methods);
         } catch (IOException e) {
-            return Collections.emptyMap();
+            return new PerfEvents();
         }
     }
 
@@ -785,7 +814,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             }
         };
 
-        static Comparator<Region> getSortedEventComparator(final Map<String, Multiset<Long>> events, final String event) {
+        static Comparator<Region> getSortedEventComparator(final PerfEvents events, final String event) {
             return new Comparator<Region>() {
                 @Override
                 public int compare(Region o1, Region o2) {
@@ -810,7 +839,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             this.eventCountCache = new HashMap<String, Long>();
         }
 
-        long getEventCount(Map<String, Multiset<Long>> events, String event) {
+        long getEventCount(PerfEvents events, String event) {
             if (!eventCountCache.containsKey(event)) {
                 Multiset<Long> evs = events.get(event);
                 long count = 0;
