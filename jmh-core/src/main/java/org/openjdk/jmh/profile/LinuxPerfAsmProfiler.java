@@ -89,6 +89,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Sampling frequency */
     private static final long SAMPLE_FREQUENCY = Long.getLong("jmh.perfasm.frequency", 1000);
 
+    /** Do -XX:+PrintAssembly instrumentation? */
+    private static final Boolean SKIP_ASSEMBLY = Boolean.getBoolean("jmh.perfasm.skipAsm");
+
     /** Save perf output to file? */
     private static final Boolean SAVE_PERF_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerf");
 
@@ -130,9 +133,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMOptions(BenchmarkParams params) {
-        return Arrays.asList(
-                "-XX:+UnlockDiagnosticVMOptions",
-                "-XX:+PrintAssembly");
+        if (!SKIP_ASSEMBLY) {
+            return Arrays.asList(
+                    "-XX:+UnlockDiagnosticVMOptions",
+                    "-XX:+PrintAssembly");
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -304,6 +311,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 if (r.code.size() > THRESHOLD_TOO_BIG) {
                     pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
                 } else {
+                    if (r.code.isEmpty()) {
+                        pw.println(" <no assembly is recorded, native region?>");
+                    }
                     for (ASMLine line : r.code) {
                         for (String event : EVENTS) {
                             long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
@@ -333,7 +343,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
 
         /**
-         * 6. Print out residual code
+         * 6. Print out the hottest regions
          */
 
         Multiset<String> accounted = new HashMultiset<String>();
@@ -582,9 +592,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     static class Assembly {
-        List<ASMLine> lines;
-        SortedMap<Long, Integer> addressMap;
-        SortedMap<Long, String> methodMap;
+        final List<ASMLine> lines;
+        final SortedMap<Long, Integer> addressMap;
+        final SortedMap<Long, String> methodMap;
 
         public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap) {
             this.lines = lines;
@@ -743,14 +753,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     static class ASMLine {
-        Long addr;
-        String code;
+        final Long addr;
+        final String code;
 
         ASMLine(String code) {
-            this.code = code;
+            this(null, code);
         }
 
-        ASMLine(long addr, String code) {
+        ASMLine(Long addr, String code) {
             this.addr = addr;
             this.code = code;
         }
