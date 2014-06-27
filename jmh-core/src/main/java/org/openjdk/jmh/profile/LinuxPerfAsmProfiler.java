@@ -598,10 +598,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         evs.add(element);
                         methods.put(element, dedup.dedup(elements[5]));
                     } catch (NumberFormatException e) {
-                        // TODO: Kernel addresses like "ffffffff810c1b00" overflow signed long
+                        // kernel addresses like "ffffffff810c1b00" overflow signed long,
+                        // record them as dummy address
+                        evs.add(0L);
                     }
                 }
             }
+
+            methods.put(0L, "<kernel>");
 
             return new PerfEvents(events, methods);
         } catch (IOException e) {
