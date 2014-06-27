@@ -88,10 +88,6 @@ abstract class ControlL2 extends ControlL1 {
      */
     public volatile boolean stopMeasurement;
 
-    /**
-     * Iteration time
-     */
-    public volatile long iterationTime;
 }
 
 abstract class ControlL3 extends ControlL2 {

@@ -629,7 +629,6 @@ public class BenchmarkGenerator {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-                writer.println(ident(3) + so.localIdentifier + ".iterationTime = control.getDuration();");
             }
 
             // measurement loop call
@@ -736,7 +735,6 @@ public class BenchmarkGenerator {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-                writer.println(ident(3) + so.localIdentifier + ".iterationTime = control.getDuration();");
             }
 
             // measurement loop call
@@ -853,7 +851,6 @@ public class BenchmarkGenerator {
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-                writer.println(ident(3) + so.localIdentifier + ".iterationTime = control.getDuration();");
             }
 
             // measurement loop call
