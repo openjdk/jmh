@@ -263,7 +263,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
         double skipSec = 1.0 * delayNs / TimeUnit.SECONDS.toNanos(1);
 
-        PerfEvents events = readEvents(skipSec);
+        final PerfEvents events = readEvents(skipSec);
 
         if (!events.isEmpty()) {
             pw.printf("Perf output processed (skipped %.3f seconds):%n", skipSec);
@@ -275,7 +275,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         } else {
             pw.println();
-            pw.println("No perf data, make sure \"perf stat echo\" is indeed working;\n " +
+            pw.println("No perf data, make sure \"perf stat echo 1\" is indeed working;\n " +
                     "or the collection delay is not running past the benchmark time.");
             pw.println();
         }
@@ -284,21 +284,23 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 4. Figure out code regions
          */
 
-        String mainEvent = EVENTS[0];
-
         List<Region> regions = makeRegions(assembly, events);
-        Collections.sort(regions, Region.getSortedEventComparator(events, mainEvent));
 
         /**
          * 5. Figure out interesting regions, and print them out
          */
 
-        Map<String, Long> totalCounts = new HashMap<String, Long>();
-        for (String event : EVENTS) {
-            totalCounts.put(event, events.get(event).size());
-        }
+        final String mainEvent = EVENTS[0];
 
-        long threshold = (long) (THRESHOLD_RATE * totalCounts.get(mainEvent));
+        Collections.sort(regions, new Comparator<Region>() {
+            @Override
+            public int compare(Region o1, Region o2) {
+                return Long.valueOf(o2.getEventCount(events, mainEvent)).
+                        compareTo(o1.getEventCount(events, mainEvent));
+            }
+        });
+
+        long threshold = (long) (THRESHOLD_RATE * events.getTotalEvents(mainEvent));
 
         boolean headerPrinted = false;
 
@@ -310,7 +312,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     headerPrinted = true;
                 }
 
-                printDottedLine(pw, "Region " + cnt);
+                printDottedLine(pw, "Hottest Region " + cnt);
                 pw.printf(" [0x%x:0x%x] in %s%n%n", r.begin, r.end, r.method);
                 if (r.code.size() > THRESHOLD_TOO_BIG) {
                     pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
@@ -322,7 +324,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         for (String event : EVENTS) {
                             long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                             if (count > 0) {
-                                pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                                pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
                             } else {
                                 pw.printf("%9s", "");
                             }
@@ -335,7 +337,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 for (String event : EVENTS) {
                     long count = r.getEventCount(events, event);
                     if (count > 0) {
-                        pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                        pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
                     } else {
                         pw.printf("%9s", "");
                     }
@@ -353,14 +355,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         Multiset<String> accounted = new HashMultiset<String>();
         Multiset<String> other = new HashMultiset<String>();
 
-        printDottedLine(pw, "Hottest regions");
+        printDottedLine(pw, "Hottest Regions");
         int shown = 0;
         for (Region r : regions) {
-            if (++shown < SHOW_TOP) {
+            if (shown++ < SHOW_TOP) {
                 for (String event : EVENTS) {
                     long count = r.getEventCount(events, event);
                     if (count > 0) {
-                        pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                        pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
                     } else {
                         pw.printf("%9s", "");
                     }
@@ -380,7 +382,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             for (String event : EVENTS) {
                 long count = other.count(event);
                 if (count > 0) {
-                    pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                    pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
                 } else {
                     pw.printf("%9s", "");
                 }
@@ -392,7 +394,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         for (String event : EVENTS) {
             long count = accounted.count(event);
             if (count > 0) {
-                pw.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
             } else {
                 pw.printf("%9s", "");
             }
@@ -438,7 +440,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             String target = (SAVE_ASM_OUTPUT_TO_FILE == null) ?
                     SAVE_ASM_OUTPUT_TO + "/" + params.id() + ".asm" :
                     SAVE_ASM_OUTPUT_TO_FILE;
-            FileOutputStream asm = null;
+            FileOutputStream asm;
             try {
                 asm = new FileOutputStream(target);
                 PrintWriter pwAsm = new PrintWriter(asm);
@@ -446,7 +448,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     for (String event : EVENTS) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                         if (count > 0) {
-                            pwAsm.printf("%6.2f%%  ", 100.0 * count / totalCounts.get(event));
+                            pwAsm.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
                         } else {
                             pwAsm.printf("%9s", "");
                         }
@@ -469,7 +471,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     void printDottedLine(PrintWriter pw, String header) {
-        final int HEADER_WIDTH = 80;
+        final int HEADER_WIDTH = 100;
 
         pw.print("....");
         if (header != null) {
@@ -523,143 +525,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
 
         return regions;
-    }
-
-    static class PerfResult extends Result<PerfResult> {
-        private final String output;
-
-        public PerfResult(String output) {
-            super(ResultRole.SECONDARY, "@asm", of(Double.NaN), "N/A", AggregationPolicy.AVG);
-            this.output = output;
-        }
-
-        @Override
-        protected Aggregator<PerfResult> getThreadAggregator() {
-            return new PerfResultAggregator();
-        }
-
-        @Override
-        protected Aggregator<PerfResult> getIterationAggregator() {
-            return new PerfResultAggregator();
-        }
-
-        @Override
-        public String toString() {
-            return "(text only)";
-        }
-
-        @Override
-        public String extendedInfo(String label) {
-            return output;
-        }
-    }
-
-    static class PerfResultAggregator implements Aggregator<PerfResult> {
-        @Override
-        public Result aggregate(Collection<PerfResult> results) {
-            String output = "";
-            for (PerfResult r : results) {
-                output += r.output;
-            }
-            return new PerfResult(output);
-        }
-    }
-
-    static class PerfEvents {
-        final Map<String, Multiset<Long>> events;
-        final Map<Long, String> methods;
-
-        PerfEvents(Map<String, Multiset<Long>> events, Map<Long, String> methods) {
-            this.events = events;
-            this.methods = methods;
-        }
-
-        public PerfEvents() {
-            this(Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap());
-        }
-
-        public boolean isEmpty() {
-            return events.isEmpty();
-        }
-
-        public Multiset<Long> get(String event) {
-            return events.get(event);
-        }
-
-        public SortedSet<Long> getAllAddresses() {
-            SortedSet<Long> addrs = new TreeSet<Long>();
-            for (Multiset<Long> e : events.values()) {
-                addrs.addAll(e.keys());
-            }
-            return addrs;
-        }
-    }
-
-    static class Assembly {
-        final List<ASMLine> lines;
-        final SortedMap<Long, Integer> addressMap;
-        final SortedMap<Long, String> methodMap;
-
-        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap) {
-            this.lines = lines;
-            this.addressMap = addressMap;
-            this.methodMap = methodMap;
-        }
-
-        public Assembly() {
-            this(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
-        }
-
-        public boolean isEmpty() {
-            return lines.isEmpty();
-        }
-
-        public int size() {
-            return lines.size();
-        }
-
-        public List<ASMLine> getLines(long begin, long end, int window) {
-            SortedMap<Long, Integer> tailMap = addressMap.tailMap(begin);
-
-            Long beginAddr;
-            Integer beginIdx;
-            if (!tailMap.isEmpty()) {
-                beginAddr = tailMap.firstKey();
-                beginIdx = addressMap.get(beginAddr);
-            } else {
-                return Collections.emptyList();
-            }
-
-            SortedMap<Long, Integer> headMap = addressMap.headMap(end);
-
-            Long endAddr;
-            Integer endIdx;
-            if (!headMap.isEmpty()) {
-                endAddr = headMap.lastKey();
-                endIdx = addressMap.get(endAddr);
-            } else {
-                return Collections.emptyList();
-            }
-
-            beginIdx = Math.max(0, beginIdx - window);
-            endIdx = Math.min(lines.size(), endIdx + 2 + window);
-
-            // Compensate for minute discrepancies
-            if (beginIdx < endIdx) {
-                return lines.subList(beginIdx, endIdx);
-            } else {
-                return Collections.emptyList();
-            }
-        }
-
-        public String getMethod(long addr) {
-            SortedMap<Long, String> head = methodMap.headMap(addr);
-            if (head.isEmpty()) {
-                return "N/A";
-            } else {
-                return methodMap.get(head.lastKey());
-            }
-        }
     }
 
     Assembly readAssembly(File stdOut) {
@@ -756,6 +621,152 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
+    static class PerfResult extends Result<PerfResult> {
+        private final String output;
+
+        public PerfResult(String output) {
+            super(ResultRole.SECONDARY, "@asm", of(Double.NaN), "N/A", AggregationPolicy.AVG);
+            this.output = output;
+        }
+
+        @Override
+        protected Aggregator<PerfResult> getThreadAggregator() {
+            return new PerfResultAggregator();
+        }
+
+        @Override
+        protected Aggregator<PerfResult> getIterationAggregator() {
+            return new PerfResultAggregator();
+        }
+
+        @Override
+        public String toString() {
+            return "(text only)";
+        }
+
+        @Override
+        public String extendedInfo(String label) {
+            return output;
+        }
+    }
+
+    static class PerfResultAggregator implements Aggregator<PerfResult> {
+        @Override
+        public Result aggregate(Collection<PerfResult> results) {
+            String output = "";
+            for (PerfResult r : results) {
+                output += r.output;
+            }
+            return new PerfResult(output);
+        }
+    }
+
+    static class PerfEvents {
+        final Map<String, Multiset<Long>> events;
+        final Map<Long, String> methods;
+        final Map<String, Long> totalCounts;
+
+        PerfEvents(Map<String, Multiset<Long>> events, Map<Long, String> methods) {
+            this.events = events;
+            this.methods = methods;
+            this.totalCounts = new HashMap<String, Long>();
+            for (String event : EVENTS) {
+                totalCounts.put(event, events.get(event).size());
+            }
+        }
+
+        public PerfEvents() {
+            this(Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap());
+        }
+
+        public boolean isEmpty() {
+            return events.isEmpty();
+        }
+
+        public Multiset<Long> get(String event) {
+            return events.get(event);
+        }
+
+        public SortedSet<Long> getAllAddresses() {
+            SortedSet<Long> addrs = new TreeSet<Long>();
+            for (Multiset<Long> e : events.values()) {
+                addrs.addAll(e.keys());
+            }
+            return addrs;
+        }
+
+        public Long getTotalEvents(String event) {
+            return totalCounts.get(event);
+        }
+    }
+
+    static class Assembly {
+        final List<ASMLine> lines;
+        final SortedMap<Long, Integer> addressMap;
+        final SortedMap<Long, String> methodMap;
+
+        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap) {
+            this.lines = lines;
+            this.addressMap = addressMap;
+            this.methodMap = methodMap;
+        }
+
+        public Assembly() {
+            this(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
+        }
+
+        public boolean isEmpty() {
+            return lines.isEmpty();
+        }
+
+        public int size() {
+            return lines.size();
+        }
+
+        public List<ASMLine> getLines(long begin, long end, int window) {
+            SortedMap<Long, Integer> tailMap = addressMap.tailMap(begin);
+
+            Long beginAddr;
+            Integer beginIdx;
+            if (!tailMap.isEmpty()) {
+                beginAddr = tailMap.firstKey();
+                beginIdx = addressMap.get(beginAddr);
+            } else {
+                return Collections.emptyList();
+            }
+
+            SortedMap<Long, Integer> headMap = addressMap.headMap(end);
+
+            Long endAddr;
+            Integer endIdx;
+            if (!headMap.isEmpty()) {
+                endAddr = headMap.lastKey();
+                endIdx = addressMap.get(endAddr);
+            } else {
+                return Collections.emptyList();
+            }
+
+            beginIdx = Math.max(0, beginIdx - window);
+            endIdx = Math.min(lines.size(), endIdx + 2 + window);
+
+            // Compensate for minute discrepancies
+            if (beginIdx < endIdx) {
+                return lines.subList(beginIdx, endIdx);
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+        public String getMethod(long addr) {
+            SortedMap<Long, String> head = methodMap.headMap(addr);
+            if (head.isEmpty()) {
+                return "N/A";
+            } else {
+                return methodMap.get(head.lastKey());
+            }
+        }
+    }
+
     static class ASMLine {
         final Long addr;
         final String code;
@@ -771,15 +782,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     static class Region {
-        static Comparator<Region> getSortedEventComparator(final PerfEvents events, final String event) {
-            return new Comparator<Region>() {
-                @Override
-                public int compare(Region o1, Region o2) {
-                    return Long.valueOf(o2.getEventCount(events, event)).compareTo(o1.getEventCount(events, event));
-                }
-            };
-        }
-
         final String method;
         final long begin;
         final long end;
@@ -807,7 +809,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             }
             return eventCountCache.get(event);
         }
-
     }
 
 }
