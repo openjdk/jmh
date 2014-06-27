@@ -159,7 +159,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         return IS_SUPPORTED ? INIT_MSGS : Collections.<String>emptyList();
     }
 
-    public static Collection<String> tryWith(String... cmd) {
+    static Collection<String> tryWith(String... cmd) {
         Collection<String> messages = new ArrayList<String>();
         try {
             Process p = Runtime.getRuntime().exec(cmd);
@@ -288,7 +288,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         List<Region> regions = makeRegions(assembly, events);
 
         /**
-         * 5. Figure out interesting regions, and print them out
+         * 5. Figure out interesting regions, and print them out.
+         * We would sort the regions by the hotness of the first (main) event type.
          */
 
         final String mainEvent = EVENTS[0];
@@ -330,7 +331,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     }
                 }
 
-                printDottedLine(pw, null);
+                printDottedLine(pw);
                 for (String event : EVENTS) {
                     printLine(pw, events, event, r.getEventCount(events, event));
                 }
@@ -344,7 +345,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 6. Print out the hottest regions
          */
 
-        Multiset<String> accounted = new HashMultiset<String>();
+        Multiset<String> total = new HashMultiset<String>();
         Multiset<String> other = new HashMultiset<String>();
 
         printDottedLine(pw, "Hottest Regions");
@@ -361,7 +362,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 }
             }
             for (String event : EVENTS) {
-                accounted.add(event, r.getEventCount(events, event));
+                total.add(event, r.getEventCount(events, event));
             }
         }
 
@@ -371,10 +372,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             }
             pw.println("<...other " + (regions.size() - SHOW_TOP) + " warm regions...>");
         }
-        printDottedLine(pw, null);
+        printDottedLine(pw);
 
         for (String event : EVENTS) {
-            printLine(pw, events, event, accounted.count(event));
+            printLine(pw, events, event, total.count(event));
         }
         pw.println("<totals>");
         pw.println();
@@ -449,6 +450,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         } else {
             pw.printf("%9s", "");
         }
+    }
+
+    void printDottedLine(PrintWriter pw) {
+        printDottedLine(pw, null);
     }
 
     void printDottedLine(PrintWriter pw, String header) {
