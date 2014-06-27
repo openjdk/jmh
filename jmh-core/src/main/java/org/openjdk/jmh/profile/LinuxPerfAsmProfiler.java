@@ -29,6 +29,7 @@ import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.util.Deduplicator;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -551,6 +552,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     PerfEvents readEvents(double skipSec) {
         try {
+            Deduplicator<String> dedup = new Deduplicator<String>();
+
             FileInputStream fis = new FileInputStream(perfParsedData);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
 
@@ -588,7 +591,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     try {
                         Long element = Long.valueOf(elements[4], 16);
                         evs.add(element);
-                        methods.put(element, elements[5]); // TODO: Deduplicate method names
+                        methods.put(element, dedup.dedup(elements[5]));
                     } catch (NumberFormatException e) {
                         // TODO: Kernel addresses like "ffffffff810c1b00" overflow signed long
                     }
