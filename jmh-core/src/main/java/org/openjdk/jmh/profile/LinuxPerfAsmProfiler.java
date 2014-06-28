@@ -529,6 +529,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 if (line.trim().isEmpty()) continue;
                 String[] elements = line.trim().split(" ");
 
+                ASMLine asmLine = new ASMLine(line);
                 if (line.contains("{method}")) {
                     if (elements.length == 7) {
                         method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "");
@@ -538,20 +539,19 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     try {
                         Long addr = Long.valueOf(elements[0].replace("0x", "").replace(":", ""), 16);
                         int idx = lines.size();
-                        lines.add(new ASMLine(addr, line));
                         addressMap.put(addr, idx);
 
                         if (method != null) {
                             methodMap.put(addr, method);
                             method = null;
                         }
+
+                        asmLine = new ASMLine(addr, line);
                     } catch (NumberFormatException e) {
                         // Nope, not the address line.
-                        lines.add(new ASMLine(line));
                     }
-                } else {
-                    lines.add(new ASMLine(line));
                 }
+                lines.add(asmLine);
             }
             return new Assembly(lines, addressMap, methodMap);
         } catch (IOException e) {
