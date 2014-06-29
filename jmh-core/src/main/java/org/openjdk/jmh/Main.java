@@ -24,13 +24,13 @@
  */
 package org.openjdk.jmh;
 
+import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.runner.NoBenchmarksException;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.CommandLineOptionException;
 import org.openjdk.jmh.runner.options.CommandLineOptions;
 import org.openjdk.jmh.runner.options.VerboseMode;
-import org.openjdk.jmh.runner.Defaults;
 
 import java.io.IOException;
 
@@ -77,6 +77,7 @@ public class Main {
                 }
             } catch (RunnerException e) {
                 System.err.println("ERROR: " + e.getMessage());
+                e.printStackTrace(System.err);
             }
 
         } catch (CommandLineOptionException e) {
