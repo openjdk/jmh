@@ -54,11 +54,11 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
     private static final boolean IS_SUPPORTED;
     private static final boolean IS_DELAYED;
-    private static final Collection<String> INIT_MSGS;
+    private static final Collection<String> FAIL_MSGS;
 
     static {
-        INIT_MSGS = tryWith("perf", "stat", "echo", "1");
-        IS_SUPPORTED = INIT_MSGS.isEmpty();
+        FAIL_MSGS = tryWith("perf", "stat", "echo", "1");
+        IS_SUPPORTED = FAIL_MSGS.isEmpty();
 
         Collection<String> delay = tryWith("perf", "stat", "-D 1", "echo", "1");
         IS_DELAYED = delay.isEmpty();
@@ -100,7 +100,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> checkSupport() {
-        return IS_SUPPORTED ? INIT_MSGS : Collections.<String>emptyList();
+        return IS_SUPPORTED ? Collections.<String>emptyList() : FAIL_MSGS;
     }
 
     private static Collection<String> tryWith(String... cmd) {

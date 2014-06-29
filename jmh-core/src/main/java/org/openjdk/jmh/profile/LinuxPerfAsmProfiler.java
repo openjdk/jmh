@@ -112,11 +112,11 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     private static final String SAVE_ASM_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveAsmToFile");
 
     private static final boolean IS_SUPPORTED;
-    private static final Collection<String> INIT_MSGS;
+    private static final Collection<String> FAIL_MSGS;
 
     static {
-        INIT_MSGS = tryWith("perf", "stat", "echo", "1");
-        IS_SUPPORTED = INIT_MSGS.isEmpty();
+        FAIL_MSGS = tryWith("perf", "stat", "echo", "1");
+        IS_SUPPORTED = FAIL_MSGS.isEmpty();
     }
 
     private String perfBinData;
@@ -159,7 +159,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> checkSupport() {
-        return IS_SUPPORTED ? INIT_MSGS : Collections.<String>emptyList();
+        return IS_SUPPORTED ? Collections.<String>emptyList() : FAIL_MSGS;
     }
 
     static Collection<String> tryWith(String... cmd) {
