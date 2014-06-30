@@ -161,8 +161,8 @@ public class Runner extends BaseRunner {
      */
     public Collection<RunResult> run() throws RunnerException {
         for (Class<? extends Profiler> p : options.getProfilers()) {
-            Collection<String> initMessages = ProfilerFactory.checkSupport(p);
-            if (!initMessages.isEmpty()) {
+            List<String> initMessages = new ArrayList<String>();
+            if (!ProfilerFactory.checkSupport(p, initMessages)) {
                 StringBuilder sb = new StringBuilder();
                 for (String im : initMessages) {
                     sb.append(String.format("%5s %s\n", "", im));

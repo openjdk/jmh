@@ -33,7 +33,7 @@ import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public class ClassloaderProfiler implements InternalProfiler {
 
@@ -46,8 +46,8 @@ public class ClassloaderProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<String> checkSupport() {
-        return Collections.emptyList();
+    public boolean checkSupport(List<String> msgs) {
+        return true;
     }
 
     @Override

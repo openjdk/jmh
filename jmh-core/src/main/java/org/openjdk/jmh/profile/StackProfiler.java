@@ -40,7 +40,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,10 +86,9 @@ public class StackProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<String> checkSupport() {
-        return Collections.emptyList();
+    public boolean checkSupport(List<String> msg) {
+        return true;
     }
-
 
     @Override
     public String label() {

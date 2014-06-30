@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,8 +100,13 @@ public class LinuxPerfProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<String> checkSupport() {
-        return IS_SUPPORTED ? Collections.<String>emptyList() : FAIL_MSGS;
+    public boolean checkSupport(List<String> msgs) {
+        if (IS_SUPPORTED) {
+            return true;
+        } else {
+            msgs.addAll(FAIL_MSGS);
+            return false;
+        }
     }
 
     private static Collection<String> tryWith(String... cmd) {

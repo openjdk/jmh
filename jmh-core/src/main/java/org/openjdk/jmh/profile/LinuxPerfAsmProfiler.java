@@ -158,8 +158,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<String> checkSupport() {
-        return IS_SUPPORTED ? Collections.<String>emptyList() : FAIL_MSGS;
+    public boolean checkSupport(List<String> msgs) {
+        if (IS_SUPPORTED) {
+            return true;
+        } else {
+            msgs.addAll(FAIL_MSGS);
+            return false;
+        }
     }
 
     static Collection<String> tryWith(String... cmd) {

@@ -443,8 +443,8 @@ public class CommandLineOptions implements Options {
         StringBuilder supported = new StringBuilder();
         StringBuilder unsupported = new StringBuilder();
         for (Class<? extends Profiler> s : ProfilerFactory.getAvailableProfilers()) {
-            Collection<String> initMessages = ProfilerFactory.checkSupport(s);
-            if (initMessages.isEmpty()) {
+            List<String> initMessages = new ArrayList<String>();
+            if (ProfilerFactory.checkSupport(s, initMessages)) {
                 supported.append(String.format("%20s: %s\n", ProfilerFactory.getLabel(s), ProfilerFactory.getDescription(s)));
             } else {
                 unsupported.append(String.format("%20s: %s\n", ProfilerFactory.getLabel(s), ProfilerFactory.getDescription(s)));

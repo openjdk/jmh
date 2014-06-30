@@ -33,7 +33,7 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GCProfiler implements InternalProfiler {
@@ -47,8 +47,8 @@ public class GCProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<String> checkSupport() {
-        return Collections.emptyList();
+    public boolean checkSupport(List<String> msgs) {
+        return true;
     }
 
     @Override

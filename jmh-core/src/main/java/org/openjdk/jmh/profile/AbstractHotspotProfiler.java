@@ -33,8 +33,8 @@ import sun.management.counter.Counter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -53,12 +53,13 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
      * @return true, if accessible; false otherwise
      */
     @Override
-    public Collection<String> checkSupport() {
+    public boolean checkSupport(List<String> msgs) {
         try {
             Class.forName("sun.management.ManagementFactoryHelper");
-            return Collections.emptyList();
+            return true;
         } catch (ClassNotFoundException e) {
-            return Collections.singleton("Class not found: " + e.getMessage() + ", are you running HotSpot VM?");
+            msgs.add("Class not found: " + e.getMessage() + ", are you running HotSpot VM?");
+            return false;
         }
     }
 

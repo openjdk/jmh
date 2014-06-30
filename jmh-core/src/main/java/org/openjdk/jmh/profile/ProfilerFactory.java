@@ -28,7 +28,6 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ProfilerFactory {
@@ -49,14 +48,16 @@ public class ProfilerFactory {
         return profs;
     }
 
-    public static Collection<String> checkSupport(Class<? extends Profiler> klass) {
+    public static boolean checkSupport(Class<? extends Profiler> klass, List<String> msgs) {
         try {
             Profiler prof = klass.newInstance();
-            return prof.checkSupport();
+            return prof.checkSupport(msgs);
         } catch (InstantiationException e) {
-            return Collections.singleton("Unable to instantiate " + klass);
+            msgs.add("Unable to instantiate " + klass);
+            return false;
         } catch (IllegalAccessException e) {
-            return Collections.singleton("Unable to instantiate " + klass);
+            msgs.add("Unable to instantiate " + klass);
+            return false;
         }
     }
 

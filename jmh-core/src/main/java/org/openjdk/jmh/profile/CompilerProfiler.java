@@ -33,7 +33,7 @@ import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public class CompilerProfiler implements InternalProfiler {
 
@@ -50,12 +50,13 @@ public class CompilerProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<String> checkSupport() {
+    public boolean checkSupport(List<String> msgs) {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         if (comp.isCompilationTimeMonitoringSupported()) {
-            return Collections.emptyList();
+            return true;
         } else {
-            return Collections.singleton("The MXBean is available, but compilation time monitoring is disabled.");
+            msgs.add("The MXBean is available, but compilation time monitoring is disabled.");
+            return false;
         }
     }
 

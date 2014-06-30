@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Root profiler interface.
@@ -37,9 +37,10 @@ public interface Profiler {
 
     /**
      * Check the support for a given profiler.
-     * @return error messages; empty collections if no errors detected, and profiler is available.
+     * @param msgs where to put the diagnostic messages
+     * @return true, if suppported
      */
-    Collection<String> checkSupport();
+    boolean checkSupport(List<String> msgs);
 
     /**
      * Unique label for the profiler.
