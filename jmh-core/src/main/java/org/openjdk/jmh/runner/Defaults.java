@@ -48,7 +48,7 @@ public class Defaults {
     public static final int WARMUP_ITERATIONS_SINGLESHOT = 0;
 
     /**
-     * The batch width in warmup mode.
+     * The batch size in warmup mode.
      */
     public static final int WARMUP_BATCHSIZE = 1;
 
@@ -68,7 +68,7 @@ public class Defaults {
     public static final int MEASUREMENT_ITERATIONS_SINGLESHOT = 1;
 
     /**
-     * The batch width in measurement mode.
+     * The batch size in measurement mode.
      */
     public static final int MEASUREMENT_BATCHSIZE = 1;
 

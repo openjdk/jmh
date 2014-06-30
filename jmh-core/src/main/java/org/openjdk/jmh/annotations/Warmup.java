@@ -62,7 +62,7 @@ public @interface Warmup {
     /** @return Time unit for warmup iteration duration */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-    /** @return batch size: number of benchmark method calls per operation (some benchmark modes may ignore this setting) */
+    /** @return batch size: number of benchmark method calls per operation */
     int batchSize() default BLANK_BATCHSIZE;
 
 }

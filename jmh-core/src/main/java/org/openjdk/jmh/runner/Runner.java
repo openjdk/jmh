@@ -331,12 +331,11 @@ public class Runner extends BaseRunner {
                                 benchmark.getMeasurementTime().orElse(
                                         (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.MEASUREMENT_TIME
                                 )),
-                        (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
-                                options.getMeasurementBatchSize().orElse(
-                                        benchmark.getMeasurementBatchSize().orElse(
-                                                Defaults.MEASUREMENT_BATCHSIZE
-                                        )
+                        options.getMeasurementBatchSize().orElse(
+                                benchmark.getMeasurementBatchSize().orElse(
+                                        Defaults.MEASUREMENT_BATCHSIZE
                                 )
+                        )
                 ) :
                 new IterationParams(IterationType.MEASUREMENT, 0, TimeValue.NONE, 1);
 
@@ -351,12 +350,11 @@ public class Runner extends BaseRunner {
                                 benchmark.getWarmupTime().orElse(
                                         (benchmark.getMode() == Mode.SingleShotTime) ? TimeValue.NONE : Defaults.WARMUP_TIME
                                 )),
-                        (benchmark.getMode() != Mode.SingleShotTime) ? 1 :
-                                options.getWarmupBatchSize().orElse(
-                                        benchmark.getWarmupBatchSize().orElse(
-                                                Defaults.WARMUP_BATCHSIZE
-                                        )
+                        options.getWarmupBatchSize().orElse(
+                                benchmark.getWarmupBatchSize().orElse(
+                                        Defaults.WARMUP_BATCHSIZE
                                 )
+                        )
                 ) :
                 new IterationParams(IterationType.WARMUP, 0, TimeValue.NONE, 1);
 

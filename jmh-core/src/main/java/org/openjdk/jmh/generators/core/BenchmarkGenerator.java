@@ -636,6 +636,10 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop" +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
 
+            // pretend we did the batched run; there is no reason to have an additional loop,
+            // when _jmhLoop* already is optimized.
+            writer.println(ident(3) + "res.operations /= control.iterationParams.getBatchSize();");
+
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
                 writer.println(ident(3) + so.localIdentifier + ".stopMeasurement = true;");
@@ -740,6 +744,10 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, res" + prefix(states.getArgList(method)) + ");");
+
+            // pretend we did the batched run; there is no reason to have an additional loop,
+            // when _jmhLoop* already is optimized.
+            writer.println(ident(3) + "res.operations /= control.iterationParams.getBatchSize();");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -855,8 +863,9 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
+            writer.println(ident(2) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation()" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation(), batchSize" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -901,7 +910,7 @@ public class BenchmarkGenerator {
             compilerControl.defaultForceInline(method);
             compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, SampleBuffer buffer, int targetSamples, long opsPerInv" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, SampleBuffer buffer, int targetSamples, long opsPerInv, int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
             writer.println(ident(2) + "int rndMask = startRndMask;");
@@ -916,7 +925,12 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "if (sample) {");
             writer.println(ident(4) + "time = System.nanoTime();");
             writer.println(ident(3) + "}");
-            writer.println(ident(3) + "" + emitCall(method, states) + ';');
+
+            writer.println(ident(3) + "for (int b = 0; b < batchSize; b++) {");
+            writer.println(ident(4) + "if (control.volatileSpoiler) return;");
+            writer.println(ident(4) + "" + emitCall(method, states) + ';');
+            writer.println(ident(3) + "}");
+
             writer.println(ident(3) + "if (sample) {");
             writer.println(ident(4) + "buffer.add((System.nanoTime() - time) / opsPerInv);");
             writer.println(ident(4) + "if (currentStride++ > targetSamples) {");
@@ -956,7 +970,8 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(2) + "int batchSize = control.iterationParams.getBatchSize();");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
 
@@ -984,11 +999,10 @@ public class BenchmarkGenerator {
             compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
             writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
-                    "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+                    "(InfraControl control, int batchSize, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
 
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
-            writer.println(ident(2) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(2) + "for (int b = 0; b < batchSize; b++) {");
             writer.println(ident(3) + "if (control.volatileSpoiler) return;");
 

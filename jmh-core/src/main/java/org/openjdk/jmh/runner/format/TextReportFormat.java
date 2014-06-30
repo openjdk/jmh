@@ -55,7 +55,7 @@ class TextReportFormat extends AbstractOutputFormat {
         if (params.getWarmup().getCount() > 0) {
             out.println("# Warmup: " + params.getWarmup().getCount() + " iterations, " +
                     params.getWarmup().getTime() + " each" +
-                    (params.getWarmup().getBatchSize() <= 1 ? "" : ", " + params.getWarmup().getBatchSize() + " calls per batch"));
+                    (params.getWarmup().getBatchSize() <= 1 ? "" : ", " + params.getWarmup().getBatchSize() + " calls per op"));
         } else {
             out.println("# Warmup: <none>");
         }
@@ -63,7 +63,7 @@ class TextReportFormat extends AbstractOutputFormat {
         if (params.getMeasurement().getCount() > 0) {
             out.println("# Measurement: " + params.getMeasurement().getCount() + " iterations, " +
                     params.getMeasurement().getTime() + " each" +
-                    (params.getMeasurement().getBatchSize() <= 1 ? "" : ", " + params.getMeasurement().getBatchSize() + " calls per batch"));
+                    (params.getMeasurement().getBatchSize() <= 1 ? "" : ", " + params.getMeasurement().getBatchSize() + " calls per op"));
         } else {
             out.println("# Measurement: <none>");
         }

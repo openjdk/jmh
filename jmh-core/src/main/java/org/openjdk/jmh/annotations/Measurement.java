@@ -60,7 +60,7 @@ public @interface Measurement {
     /** @return Time unit for measurement iteration duration */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-    /** @return Batch size: number of benchmark method calls per operation (some benchmark modes may ignore this setting) */
+    /** @return Batch size: number of benchmark method calls per operation */
     int batchSize() default BLANK_BATCHSIZE;
 
 }
