@@ -193,7 +193,7 @@ public class FileUtils {
         }
     }
 
-    private static void safelyClose(InputStream in) {
+    public static void safelyClose(InputStream in) {
         if (in != null) {
             try {
                 in.close();
