@@ -138,8 +138,8 @@ public class CompileTest {
         if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
             return doTestReflection(klass);
         }
-        if (GENERATOR_TYPE.equalsIgnoreCase("bytecode")) {
-            return doTestBytecode(klass);
+        if (GENERATOR_TYPE.equalsIgnoreCase("asm")) {
+            return doTestAsm(klass);
         }
         throw new IllegalStateException("Unhandled compile test generator: " + GENERATOR_TYPE);
     }
@@ -155,7 +155,7 @@ public class CompileTest {
         return destination;
     }
 
-    private static TestGeneratorDestination doTestBytecode(Class<?> klass) {
+    private static TestGeneratorDestination doTestAsm(Class<?> klass) {
         ASMGeneratorSource source = new ASMGeneratorSource();
         TestGeneratorDestination destination = new TestGeneratorDestination();
 

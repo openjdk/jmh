@@ -151,7 +151,7 @@ questions.
                         <version>2.14.1</version>
                         <configuration>
                             <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                            <argLine>-Djmh.ct.generator=bytecode</argLine>
+                            <argLine>-Djmh.ct.generator=asm</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
