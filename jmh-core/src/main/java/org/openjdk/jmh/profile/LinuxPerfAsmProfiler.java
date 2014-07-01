@@ -102,14 +102,14 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     /** Override the perf output filename */
     private static final String SAVE_PERF_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.savePerfToFile");
 
-    /** Save annotated assembly to file */
-    private static final Boolean SAVE_ASM_OUTPUT = Boolean.getBoolean("jmh.perfasm.saveAsm");
+    /** Save annotated Hotspot log to file */
+    private static final Boolean SAVE_LOG_OUTPUT = Boolean.getBoolean("jmh.perfasm.saveLog");
 
-    /** Override the annotated assembly location */
-    private static final String SAVE_ASM_OUTPUT_TO = System.getProperty("jmh.perfasm.saveAsmTo", ".");
+    /** Override the annotated Hotspot log location */
+    private static final String SAVE_LOG_OUTPUT_TO = System.getProperty("jmh.perfasm.saveLogTo", ".");
 
-    /** Override the annotated assembly filename */
-    private static final String SAVE_ASM_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveAsmToFile");
+    /** Override the annotated Hotspot log filename */
+    private static final String SAVE_LOG_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveLogToFile");
 
     private static final boolean IS_SUPPORTED;
     private static final Collection<String> FAIL_MSGS;
@@ -427,10 +427,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         /**
          * Print annotated assembly, if needed:
          */
-        if (SAVE_ASM_OUTPUT) {
-            String target = (SAVE_ASM_OUTPUT_TO_FILE == null) ?
-                    SAVE_ASM_OUTPUT_TO + "/" + params.id() + ".asm" :
-                    SAVE_ASM_OUTPUT_TO_FILE;
+        if (SAVE_LOG_OUTPUT) {
+            String target = (SAVE_LOG_OUTPUT_TO_FILE == null) ?
+                    SAVE_LOG_OUTPUT_TO + "/" + params.id() + ".log" :
+                    SAVE_LOG_OUTPUT_TO_FILE;
             FileOutputStream asm;
             try {
                 asm = new FileOutputStream(target);
@@ -445,9 +445,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 pwAsm.flush();
                 asm.close();
 
-                pw.println("Perf-annotated assembly saved to " + target);
+                pw.println("Perf-annotated Hotspot log is saved to " + target);
             } catch (IOException e) {
-                pw.println("Unable to save perf-annotated assembly to " + target);
+                pw.println("Unable to save Hotspot log to " + target);
             }
         }
 
