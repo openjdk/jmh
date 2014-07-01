@@ -42,6 +42,7 @@ import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;
@@ -487,6 +488,8 @@ public class Runner extends BaseRunner {
 
             BenchmarkParams params = actionPlan.getMeasurementActions().get(0).getParams();
 
+            boolean printOut = true;
+            boolean printErr = true;
             List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
 
             List<String> javaInvokeOptions = new ArrayList<String>();
@@ -497,7 +500,13 @@ public class Runner extends BaseRunner {
                 profilers.add(prof);
                 javaInvokeOptions.addAll(prof.addJVMInvokeOptions(params));
                 javaOptions.addAll(prof.addJVMOptions(params));
+                printOut &= prof.allowPrintOut();
+                printErr &= prof.allowPrintErr();
             }
+
+            boolean forcePrint = options.verbosity().orElse(Defaults.VERBOSITY).equalsOrHigherThan(VerboseMode.EXTRA);
+            printOut = forcePrint || printOut;
+            printErr = forcePrint || printErr;
 
             String[] commandString = getSeparateExecutionCommand(params, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
             String opts = Utils.join(getJvmArgs(params), " ");
@@ -521,7 +530,7 @@ public class Runner extends BaseRunner {
                     File stdErr = FileUtils.tempFile("stderr");
                     File stdOut = FileUtils.tempFile("stdout");
 
-                    doFork(server, commandString, stdOut, stdErr);
+                    doFork(server, commandString, stdOut, stdErr, printOut, printErr);
 
                     out.endBenchmark(null);
                     afterBenchmark(params);
@@ -547,9 +556,16 @@ public class Runner extends BaseRunner {
                         profiler.beforeTrial(params);
                     }
                     out.println("");
+
+                    if (!printOut) {
+                        out.println("# Profilers consume stdout from target VM, use -v " + VerboseMode.EXTRA + " to copy to console");
+                    }
+                    if (!printErr) {
+                        out.println("# Profilers consume stderr from target VM, use -v " + VerboseMode.EXTRA + " to copy to console");
+                    }
                 }
 
-                Multimap<BenchmarkParams, BenchmarkResult> result = doFork(server, commandString, stdOut, stdErr);
+                Multimap<BenchmarkParams, BenchmarkResult> result = doFork(server, commandString, stdOut, stdErr, printOut, printErr);
 
                 if (!profilers.isEmpty()) {
                     out.print("# Processing profiler results: ");
@@ -587,13 +603,22 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private Multimap<BenchmarkParams, BenchmarkResult> doFork(BinaryLinkServer reader, String[] commandString, File stdOut, File stdErr) {
+    private Multimap<BenchmarkParams, BenchmarkResult> doFork(BinaryLinkServer reader, String[] commandString,
+                                                              File stdOut, File stdErr, boolean printOut, boolean printErr) {
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
             // drain streams, else we might lock up
             InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), new FileOutputStream(stdErr));
             InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), new FileOutputStream(stdOut));
+
+            if (printErr) {
+                errDrainer.addOutputStream(System.err);
+            }
+
+            if (printOut) {
+                outDrainer.addOutputStream(System.out);
+            }
 
             errDrainer.start();
             outDrainer.start();

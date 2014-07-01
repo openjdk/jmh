@@ -164,6 +164,16 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     }
 
     @Override
+    public boolean allowPrintOut() {
+        return false;
+    }
+
+    @Override
+    public boolean allowPrintErr() {
+        return false;
+    }
+
+    @Override
     public boolean checkSupport(List<String> msgs) {
         if (IS_SUPPORTED) {
             return true;

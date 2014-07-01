@@ -74,4 +74,21 @@ public interface ExternalProfiler extends Profiler {
      */
     Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, File stdOut, File stdErr);
 
+    /**
+     * If target VM communicates with profiler with standard output, this method
+     * can be used to shun the output to console. Profiler is responsible for consuming
+     * the standard output and printing the relevant data from there.
+     *
+     * @return returns true, if profiler allows harness to print out the standard output
+     */
+    boolean allowPrintOut();
+
+    /**
+     * If target VM communicates with profiler with standard error, this method
+     * can be used to shun the output to console. Profiler is responsible for consuming
+     * the standard error and printing the relevant data from there.
+     *
+     * @return returns true, if profiler allows harness to print out the standard errpr
+     */
+    boolean allowPrintErr();
 }
