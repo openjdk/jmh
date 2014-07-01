@@ -213,4 +213,19 @@ public class FileUtils {
 
         fis.close();
     }
+
+    public static void safelyClose(OutputStream out) {
+        if (out != null) {
+            try {
+                out.flush();
+            } catch (IOException e) {
+                // ignore
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+    }
 }

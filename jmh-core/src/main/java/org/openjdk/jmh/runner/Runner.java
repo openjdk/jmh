@@ -605,12 +605,17 @@ public class Runner extends BaseRunner {
 
     private Multimap<BenchmarkParams, BenchmarkResult> doFork(BinaryLinkServer reader, String[] commandString,
                                                               File stdOut, File stdErr, boolean printOut, boolean printErr) {
+        FileOutputStream fosErr = null;
+        FileOutputStream fosOut = null;
         try {
             Process p = Runtime.getRuntime().exec(commandString);
 
+            fosErr = new FileOutputStream(stdErr);
+            fosOut = new FileOutputStream(stdOut);
+
             // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), new FileOutputStream(stdErr));
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), new FileOutputStream(stdOut));
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), fosErr);
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), fosOut);
 
             if (printErr) {
                 errDrainer.addOutputStream(System.err);
@@ -657,6 +662,9 @@ public class Runner extends BaseRunner {
             throw new BenchmarkException(ex);
         } catch (InterruptedException ex) {
             throw new BenchmarkException(ex);
+        } finally {
+            FileUtils.safelyClose(fosErr);
+            FileUtils.safelyClose(fosOut);
         }
 
         BenchmarkException exception = reader.getException();
