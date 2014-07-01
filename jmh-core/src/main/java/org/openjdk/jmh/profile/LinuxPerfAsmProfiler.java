@@ -34,6 +34,7 @@ import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Multiset;
+import org.openjdk.jmh.util.Multisets;
 import org.openjdk.jmh.util.TreeMultiset;
 import org.openjdk.jmh.util.Utils;
 
@@ -298,7 +299,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 4. Figure out code regions
          */
 
-        List<Region> regions = makeRegions(assembly, events);
+        final List<Region> regions = makeRegions(assembly, events);
 
         /**
          * 5. Figure out interesting regions, and print them out.
@@ -357,41 +358,130 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         /**
          * 6. Print out the hottest regions
          */
+        {
+            Multiset<String> total = new HashMultiset<String>();
+            Multiset<String> other = new HashMultiset<String>();
 
-        Multiset<String> total = new HashMultiset<String>();
-        Multiset<String> other = new HashMultiset<String>();
-
-        printDottedLine(pw, "Hottest Regions");
-        int shown = 0;
-        for (Region r : regions) {
-            if (shown++ < SHOW_TOP) {
-                for (String event : EVENTS) {
-                    printLine(pw, events, event, r.getEventCount(events, event));
+            printDottedLine(pw, "Hottest Regions");
+            int shown = 0;
+            for (Region r : regions) {
+                if (shown++ < SHOW_TOP) {
+                    for (String event : EVENTS) {
+                        printLine(pw, events, event, r.getEventCount(events, event));
+                    }
+                    pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
+                } else {
+                    for (String event : EVENTS) {
+                        other.add(event, r.getEventCount(events, event));
+                    }
                 }
-                pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
-            } else {
                 for (String event : EVENTS) {
-                    other.add(event, r.getEventCount(events, event));
+                    total.add(event, r.getEventCount(events, event));
                 }
             }
-            for (String event : EVENTS) {
-                total.add(event, r.getEventCount(events, event));
+
+            if (regions.size() - SHOW_TOP > 0) {
+                for (String event : EVENTS) {
+                    printLine(pw, events, event, other.count(event));
+                }
+                pw.println("<...other " + (regions.size() - SHOW_TOP) + " warm regions...>");
             }
+            printDottedLine(pw);
+
+            for (String event : EVENTS) {
+                printLine(pw, events, event, total.count(event));
+            }
+            pw.println("<totals>");
+            pw.println();
         }
 
-        if (regions.size() - SHOW_TOP > 0) {
-            for (String event : EVENTS) {
-                printLine(pw, events, event, other.count(event));
-            }
-            pw.println("<...other " + (regions.size() - SHOW_TOP) + " warm regions...>");
-        }
-        printDottedLine(pw);
+        Multiset<String> methodsByType = new HashMultiset<String>();
 
-        for (String event : EVENTS) {
-            printLine(pw, events, event, total.count(event));
+        /**
+         * Print out hottest methods
+         */
+        {
+            printDottedLine(pw, "Hottest Methods (after inlining)");
+            final Multiset<String> methods = new HashMultiset<String>();
+            for (Region r : regions) {
+                long count = r.getEventCount(events, mainEvent);
+                methods.add(r.method, count);
+
+                if (!r.code.isEmpty()) {
+                    methodsByType.add("<generated code>", count);
+                } else {
+                    if (!r.method.contains("[[unknown]]")) {
+                        methodsByType.add("<known native code>", count);
+                    } else {
+                        methodsByType.add("<unknown native code>", count);
+                    }
+                }
+            }
+
+            List<String> strings = new ArrayList<String>();
+            strings.addAll(methods.keys());
+
+            Collections.sort(strings, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    return Long.valueOf(methods.count(o2)).compareTo(methods.count(o1));
+                }
+            });
+
+            Multiset<String> total = new HashMultiset<String>();
+            Multiset<String> other = new HashMultiset<String>();
+
+            int shownMethods = 0;
+            for (String m : strings) {
+                if (shownMethods++ < SHOW_TOP) {
+                    for (String event : EVENTS) {
+                        printLine(pw, events, event, methods.count(m));
+                    }
+                    pw.printf("%s%n", m);
+                } else {
+                    for (String event : EVENTS) {
+                        other.add(event, methods.count(m));
+                    }
+                }
+                for (String event : EVENTS) {
+                    total.add(event, methods.count(m));
+                }
+            }
+
+            printDottedLine(pw);
+
+            if (strings.size() - SHOW_TOP > 0) {
+                for (String event : EVENTS) {
+                    printLine(pw, events, event, other.count(event));
+                }
+                pw.println("<...other " + (strings.size() - SHOW_TOP) + " warm methods...>");
+            }
+            printDottedLine(pw);
+
+            for (String event : EVENTS) {
+                printLine(pw, events, event, total.count(event));
+            }
+            pw.println("<totals>");
+            pw.println();
         }
-        pw.println("<totals>");
-        pw.println();
+
+        /**
+         * Print hot methods distribution
+         */
+        {
+            printDottedLine(pw, "Distribution by Method Type");
+            for (String m : methodsByType.keys()) {
+                printLine(pw, events, mainEvent, methodsByType.count(m));
+                pw.printf("%s%n", m);
+            }
+
+            printDottedLine(pw);
+
+            printLine(pw, events, mainEvent, methodsByType.size());
+            pw.println("<totals>");
+            pw.println();
+
+        }
 
         /**
          * Final checks on assembly:
