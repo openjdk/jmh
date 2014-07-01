@@ -119,10 +119,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         IS_SUPPORTED = FAIL_MSGS.isEmpty();
     }
 
+    private String hsLog;
     private String perfBinData;
     private String perfParsedData;
 
     public LinuxPerfAsmProfiler() throws IOException {
+        hsLog = FileUtils.tempFile("hslog").getAbsolutePath();
         perfBinData = FileUtils.tempFile("perfbin").getAbsolutePath();
         perfParsedData = FileUtils.tempFile("perfparsed").getAbsolutePath();
     }
@@ -137,6 +139,9 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         if (!SKIP_ASSEMBLY) {
             return Arrays.asList(
                     "-XX:+UnlockDiagnosticVMOptions",
+                    "-XX:+TraceClassLoading",
+                    "-XX:+LogCompilation",
+                    "-XX:LogFile=" + hsLog,
                     "-XX:+PrintAssembly",
                     "-XX:+PrintCompilation",
                     "-XX:+PrintInlining"
@@ -244,7 +249,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * 2. Read out PrintAssembly output
          */
 
-        Assembly assembly = readAssembly(stdOut);
+        Assembly assembly = readAssembly(new File(hsLog));
         if (!assembly.isEmpty()) {
             pw.printf("PrintAssembly processed: %d total lines%n", assembly.size());
         } else if (SKIP_ASSEMBLY) {
@@ -537,7 +542,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 ASMLine asmLine = new ASMLine(line);
                 if (line.contains("{method}")) {
                     if (elements.length == 7) {
-                        method = elements[6].replace("'", "").replace("/", ".") + "::" + elements[3].replace("'", "");
+                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "").replace("&apos;", "");
                     }
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be line with address.
