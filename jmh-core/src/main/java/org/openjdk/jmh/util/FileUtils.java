@@ -89,42 +89,10 @@ public class FileUtils {
 
             return temp;
         } finally {
-            if (bos != null) {
-                try {
-                    bos.flush();
-                } catch (IOException e) {
-                    // ignore
-                }
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+            FileUtils.safelyClose(bis);
+            FileUtils.safelyClose(bos);
+            FileUtils.safelyClose(fis);
+            FileUtils.safelyClose(fos);
         }
     }
 
@@ -164,9 +132,7 @@ public class FileUtils {
             }
             return lines;
         } finally {
-            if (fis != null) {
-                fis.close();
-            }
+            FileUtils.safelyClose(fis);
         }
     }
 
@@ -208,10 +174,8 @@ public class FileUtils {
             fos.write(buf, 0, read);
         }
 
-        fos.flush();
-        fos.close();
-
-        fis.close();
+        FileUtils.safelyClose(fos);
+        FileUtils.safelyClose(fis);
     }
 
     public static void safelyClose(OutputStream out) {
@@ -228,4 +192,15 @@ public class FileUtils {
             }
         }
     }
+
+    private static void safelyClose(InputStream in) {
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+    }
+
 }

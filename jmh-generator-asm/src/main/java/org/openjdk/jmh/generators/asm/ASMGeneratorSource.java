@@ -27,6 +27,7 @@ package org.openjdk.jmh.generators.asm;
 import org.objectweb.asm.ClassReader;
 import org.openjdk.jmh.generators.core.ClassInfo;
 import org.openjdk.jmh.generators.core.GeneratorSource;
+import org.openjdk.jmh.util.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,14 +50,12 @@ public class ASMGeneratorSource implements GeneratorSource {
     }
 
     public void processClass(File classFile) throws IOException {
-        FileInputStream fos = null;
+        FileInputStream fis = null;
         try {
-            fos = new FileInputStream(classFile);
-            processClass(fos);
+            fis = new FileInputStream(classFile);
+            processClass(fis);
         } finally {
-            if (fos != null) {
-                fos.close();
-            }
+            FileUtils.safelyClose(fis);
         }
     }
 

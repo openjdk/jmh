@@ -245,8 +245,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             errDrainer.join();
             outDrainer.join();
 
-            fos.flush();
-            fos.close();
+            FileUtils.safelyClose(fos);
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         } catch (InterruptedException ex) {
@@ -526,7 +525,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     pwAsm.println(line.code);
                 }
                 pwAsm.flush();
-                asm.close();
+                FileUtils.safelyClose(asm);
 
                 pw.println("Perf-annotated Hotspot log is saved to " + target);
             } catch (IOException e) {

@@ -30,6 +30,7 @@ import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.Multimap;
 
 import java.io.IOException;
@@ -83,12 +84,9 @@ public final class BinaryLinkClient {
 
     public void close() throws IOException {
         oos.writeObject(new FinishingFrame());
-        oos.flush();
-        oos.close();
-        streamErr.flush();
-        streamErr.close();
-        streamOut.flush();
-        streamOut.close();
+        FileUtils.safelyClose(oos);
+        FileUtils.safelyClose(streamErr);
+        FileUtils.safelyClose(streamOut);
         clientSocket.close();
     }
 
