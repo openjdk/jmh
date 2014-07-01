@@ -26,6 +26,7 @@ package org.openjdk.jmh.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -51,6 +52,19 @@ public class Multisets {
         }
 
         return result;
+    }
+
+    public static <T> List<T> sortedDesc(final Multiset<T> set) {
+        List<T> sorted = new ArrayList<T>();
+        sorted.addAll(set.keys());
+
+        Collections.sort(sorted, new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return Long.valueOf(set.count(o2)).compareTo(set.count(o1));
+            }
+        });
+        return sorted;
     }
 
     private static class Pair<K1, K2> {

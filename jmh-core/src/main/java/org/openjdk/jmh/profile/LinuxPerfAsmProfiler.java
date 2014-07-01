@@ -329,21 +329,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 }
 
                 printDottedLine(pw, "Hottest Region " + cnt);
-                pw.printf(" [0x%x:0x%x] in %s%n%n", r.begin, r.end, r.method);
-                if (r.code.size() > THRESHOLD_TOO_BIG) {
-                    pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", r.code.size(), THRESHOLD_TOO_BIG);
-                } else {
-                    if (r.code.isEmpty()) {
-                        pw.println(" <no assembly is recorded, native region?>");
-                    }
-                    for (ASMLine line : r.code) {
-                        for (String event : EVENTS) {
-                            long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                            printLine(pw, events, event, count);
-                        }
-                        pw.println(line.code);
-                    }
-                }
+                pw.printf(" [0x%x:0x%x] in %s%n%n", r.begin, r.end, r.getName());
+                r.printCode(pw, events);
 
                 printDottedLine(pw);
                 for (String event : EVENTS) {
@@ -369,7 +356,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                     for (String event : EVENTS) {
                         printLine(pw, events, event, r.getEventCount(events, event));
                     }
-                    pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.method);
+                    pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.getName());
                 } else {
                     for (String event : EVENTS) {
                         other.add(event, r.getEventCount(events, event));
@@ -395,66 +382,56 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         }
 
-        Multiset<String> methodsByType = new HashMultiset<String>();
+        final Map<String, Multiset<String>> methodsByType = new HashMap<String, Multiset<String>>();
+        for (String event : EVENTS) {
+            methodsByType.put(event, new HashMultiset<String>());
+        }
 
         /**
          * Print out hottest methods
          */
         {
             printDottedLine(pw, "Hottest Methods (after inlining)");
-            final Multiset<String> methods = new HashMultiset<String>();
-            for (Region r : regions) {
-                long count = r.getEventCount(events, mainEvent);
-                methods.add(r.method, count);
 
-                if (!r.code.isEmpty()) {
-                    methodsByType.add("<generated code>", count);
-                } else {
-                    if (!r.method.contains("[[unknown]]")) {
-                        methodsByType.add("<known native code>", count);
-                    } else {
-                        methodsByType.add("<unknown native code>", count);
-                    }
-                }
+            Map<String, Multiset<String>> methods = new HashMap<String, Multiset<String>>();
+            for (String event : EVENTS) {
+                methods.put(event, new HashMultiset<String>());
             }
 
-            List<String> strings = new ArrayList<String>();
-            strings.addAll(methods.keys());
-
-            Collections.sort(strings, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return Long.valueOf(methods.count(o2)).compareTo(methods.count(o1));
+            for (Region r : regions) {
+                for (String event : EVENTS) {
+                    long count = r.getEventCount(events, event);
+                    methods.get(event).add(r.getName(), count);
+                    methodsByType.get(event).add(r.getType(), count);
                 }
-            });
+            }
 
             Multiset<String> total = new HashMultiset<String>();
             Multiset<String> other = new HashMultiset<String>();
 
             int shownMethods = 0;
-            for (String m : strings) {
+            List<String> top = Multisets.sortedDesc(methods.get(mainEvent));
+            for (String m : top) {
                 if (shownMethods++ < SHOW_TOP) {
                     for (String event : EVENTS) {
-                        printLine(pw, events, event, methods.count(m));
+                        printLine(pw, events, event, methods.get(event).count(m));
                     }
                     pw.printf("%s%n", m);
                 } else {
                     for (String event : EVENTS) {
-                        other.add(event, methods.count(m));
+                        other.add(event, methods.get(event).count(m));
                     }
                 }
                 for (String event : EVENTS) {
-                    total.add(event, methods.count(m));
+                    total.add(event, methods.get(event).count(m));
                 }
             }
 
-            printDottedLine(pw);
-
-            if (strings.size() - SHOW_TOP > 0) {
+            if (top.size() - SHOW_TOP > 0) {
                 for (String event : EVENTS) {
                     printLine(pw, events, event, other.count(event));
                 }
-                pw.println("<...other " + (strings.size() - SHOW_TOP) + " warm methods...>");
+                pw.println("<...other " + (top.size() - SHOW_TOP) + " warm methods...>");
             }
             printDottedLine(pw);
 
@@ -469,15 +446,21 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
          * Print hot methods distribution
          */
         {
-            printDottedLine(pw, "Distribution by Method Type");
-            for (String m : methodsByType.keys()) {
-                printLine(pw, events, mainEvent, methodsByType.count(m));
+            printDottedLine(pw, "Distribution by Area");
+
+            for (String m : Multisets.sortedDesc(methodsByType.get(mainEvent))) {
+                for (String event : EVENTS) {
+                    printLine(pw, events, event, methodsByType.get(event).count(m));
+                }
                 pw.printf("%s%n", m);
             }
 
             printDottedLine(pw);
 
-            printLine(pw, events, mainEvent, methodsByType.size());
+            for (String event : EVENTS) {
+                printLine(pw, events, event, methodsByType.get(event).size());
+            }
+
             pw.println("<totals>");
             pw.println();
 
@@ -585,26 +568,23 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         Long lastBegin = null;
         Long lastAddr = null;
         for (Long addr : addrs) {
+            if (addr == 0) {
+                regions.add(new KernelRegion());
+                continue;
+            }
+
             if (lastAddr == null) {
                 lastAddr = addr;
                 lastBegin = addr;
             } else {
                 if (addr - lastAddr > MERGE_MARGIN) {
                     List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, PRINT_MARGIN);
-
-                    String name;
                     if (!regionLines.isEmpty()) {
-                        // Compiled code
-                        name = asms.getMethod(lastBegin);
+                        regions.add(new GeneratedRegion(asms.getMethod(lastBegin), lastBegin, lastAddr, regionLines, eventfulAddrs));
                     } else {
-                        // Non-compiled code
-                        Set<String> methods = new HashSet<String>();
-                        for (Long ea : eventfulAddrs) {
-                            methods.add(events.methods.get(ea));
-                        }
-                        name = methods.toString();
+                        regions.add(new NativeRegion(events, lastBegin, lastAddr, eventfulAddrs));
                     }
-                    regions.add(new Region(name, lastBegin, lastAddr, regionLines, eventfulAddrs));
+
                     lastBegin = addr;
                     eventfulAddrs = new HashSet<Long>();
                 }
@@ -667,6 +647,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
 
             Map<Long, String> methods = new HashMap<Long, String>();
+            Map<Long, String> libs = new HashMap<Long, String>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<String, Multiset<Long>>();
             for (String evName : EVENTS) {
                 events.put(evName, new TreeMultiset<Long>());
@@ -701,6 +682,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         Long element = Long.valueOf(elements[4], 16);
                         evs.add(element);
                         methods.put(element, dedup.dedup(elements[5]));
+                        String lib = elements[6].substring(elements[6].lastIndexOf("/") + 1, elements[6].length() - 1);
+                        libs.put(element, dedup.dedup(lib));
                     } catch (NumberFormatException e) {
                         // kernel addresses like "ffffffff810c1b00" overflow signed long,
                         // record them as dummy address
@@ -711,7 +694,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
             methods.put(0L, "<kernel>");
 
-            return new PerfEvents(events, methods);
+            return new PerfEvents(events, methods, libs);
         } catch (IOException e) {
             return new PerfEvents();
         }
@@ -760,11 +743,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
     static class PerfEvents {
         final Map<String, Multiset<Long>> events;
         final Map<Long, String> methods;
+        final Map<Long, String> libs;
         final Map<String, Long> totalCounts;
 
-        PerfEvents(Map<String, Multiset<Long>> events, Map<Long, String> methods) {
+        PerfEvents(Map<String, Multiset<Long>> events, Map<Long, String> methods, Map<Long, String> libs) {
             this.events = events;
             this.methods = methods;
+            this.libs = libs;
             this.totalCounts = new HashMap<String, Long>();
             for (String event : EVENTS) {
                 totalCounts.put(event, events.get(event).size());
@@ -772,7 +757,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         }
 
         public PerfEvents() {
-            this(Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap());
+            this(Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap(), Collections.<Long, String>emptyMap());
         }
 
         public boolean isEmpty() {
@@ -856,7 +841,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         public String getMethod(long addr) {
             SortedMap<Long, String> head = methodMap.headMap(addr);
             if (head.isEmpty()) {
-                return "N/A";
+                return "<unresolved>";
             } else {
                 return methodMap.get(head.lastKey());
             }
@@ -881,15 +866,13 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         final String method;
         final long begin;
         final long end;
-        final Collection<ASMLine> code;
         final Set<Long> eventfulAddrs;
         final Map<String, Long> eventCountCache;
 
-        Region(String method, long begin, long end, Collection<ASMLine> asms, Set<Long> eventfulAddrs) {
+        Region(String method, long begin, long end, Set<Long> eventfulAddrs) {
             this.method = method;
             this.begin = begin;
             this.end = end;
-            this.code = asms;
             this.eventfulAddrs = eventfulAddrs;
             this.eventCountCache = new HashMap<String, Long>();
         }
@@ -905,7 +888,103 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             }
             return eventCountCache.get(event);
         }
+
+        public void printCode(PrintWriter pw, PerfEvents events) {
+            pw.println("<no code>");
+        }
+
+        public String getName() {
+            return method;
+        }
+
+        public String getType() {
+            return "<unknown>";
+        }
+    }
+
+    static class GeneratedRegion extends Region {
+        final Collection<ASMLine> code;
+
+        GeneratedRegion(String method, long begin, long end, Collection<ASMLine> code, Set<Long> eventfulAddrs) {
+            super(method, begin, end, eventfulAddrs);
+            this.code = code;
+        }
+
+        @Override
+        public void printCode(PrintWriter pw, PerfEvents events) {
+            if (code.size() > THRESHOLD_TOO_BIG) {
+                pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", code.size(), THRESHOLD_TOO_BIG);
+            } else {
+                for (ASMLine line : code) {
+                    for (String event : EVENTS) {
+                        long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
+                        printLine(pw, events, event, count);
+                    }
+                    pw.println(line.code);
+                }
+            }
+        }
+
+        @Override
+        public String getType() {
+            return "<generated code>";
+        }
+    }
+
+    static class NativeRegion extends Region {
+        private final String lib;
+
+        NativeRegion(PerfEvents events, long begin, long end, Set<Long> eventfulAddrs) {
+            super(generateName(events, eventfulAddrs), begin, end, eventfulAddrs);
+            lib = resolveLib(events, eventfulAddrs);
+        }
+
+        static String generateName(PerfEvents events, Set<Long> eventfulAddrs) {
+            Set<String> methods = new HashSet<String>();
+            for (Long ea : eventfulAddrs) {
+                methods.add(events.methods.get(ea));
+            }
+            return Utils.join(methods, ",");
+        }
+
+        static String resolveLib(PerfEvents events, Set<Long> eventfulAddrs) {
+            Set<String> libs = new HashSet<String>();
+            for (Long ea : eventfulAddrs) {
+                libs.add(events.libs.get(ea));
+            }
+            return Utils.join(libs, ",");
+        }
+
+        @Override
+        public void printCode(PrintWriter pw, PerfEvents events) {
+            pw.println(" <no assembly is recorded, native region>");
+        }
+
+        @Override
+        public String getType() {
+            return "<native code in (" + lib + ")>";
+        }
+
+        @Override
+        public String getName() {
+            return method + " (" + lib + ")";
+        }
+    }
+
+    static class KernelRegion extends Region {
+        KernelRegion() {
+            super("<kernel>", 0L, 0L, Collections.singleton(0L));
+        }
+
+        @Override
+        public void printCode(PrintWriter pw, PerfEvents events) {
+            pw.println(" <no assembly is recorded, kernel region>");
+        }
+
+        @Override
+        public String getType() {
+            return "<kernel>";
+        }
     }
 
 }
-
