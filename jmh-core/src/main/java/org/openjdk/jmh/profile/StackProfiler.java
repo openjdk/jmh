@@ -70,7 +70,6 @@ public class StackProfiler implements InternalProfiler {
             "Finalizer",
             "Signal Dispatcher",
             "Reference Handler",
-            "LoopTimer",
             "main",
             "Sampling Thread",
             "Attach Listener"
@@ -112,6 +111,9 @@ public class StackProfiler implements InternalProfiler {
 
         public SamplingTask() {
             stacks = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
+            for (Thread.State s : Thread.State.values()) {
+                stacks.put(s, new HashMultiset<StackRecord>());
+            }
             thread = new Thread(this);
             thread.setName("Sampling Thread");
         }
@@ -121,6 +123,7 @@ public class StackProfiler implements InternalProfiler {
 
             while (!Thread.interrupted()) {
                 ThreadInfo[] infos = ManagementFactory.getThreadMXBean().dumpAllThreads(false, false);
+
                 info:
                 for (ThreadInfo info : infos) {
 
@@ -140,9 +143,6 @@ public class StackProfiler implements InternalProfiler {
                                         + (SAMPLE_LINE ? ":" + stack[i].getLineNumber() : "");
                     }
                     Thread.State state = info.getThreadState();
-                    if (!stacks.containsKey(state)) {
-                        stacks.put(state, new HashMultiset<StackRecord>());
-                    }
                     stacks.get(state).add(new StackRecord(stackLines));
                 }
 
@@ -227,7 +227,7 @@ public class StackProfiler implements InternalProfiler {
 
                 private long stateSize(Thread.State state) {
                     Multiset<StackRecord> set = stacks.get(state);
-                    return set == null ? 0 : set.size();
+                    return (set == null) ? 0 : set.size();
                 }
 
                 @Override
@@ -244,48 +244,42 @@ public class StackProfiler implements InternalProfiler {
 
             builder.append(dottedLine("Thread state distributions"));
             for (Thread.State state : sortedStates) {
-                builder.append(String.format("%5.1f%% %7s %s%n", stacks.get(state).size() * 100.0 / totalSize, "", state));
+                if (isSignificant(stacks.get(state).size(), totalSize)) {
+                    builder.append(String.format("%5.1f%% %7s %s%n", stacks.get(state).size() * 100.0 / totalSize, "", state));
+                }
             }
             builder.append("\n");
 
             for (Thread.State state : sortedStates) {
                 Multiset<StackRecord> stateStacks = stacks.get(state);
                 if (isSignificant(stateStacks.size(), totalSize)) {
-                    Collection<StackRecord> cut = Multisets.countHighest(stateStacks, SAMPLE_TOP_STACKS);
                     builder.append(dottedLine("Thread state: " + state.toString()));
 
                     int totalDisplayed = 0;
-                    int count = 0;
-                    for (StackRecord s : cut) {
-                        if (count++ > SAMPLE_TOP_STACKS) {
-                            break;
-                        }
-
+                    for (StackRecord s : Multisets.countHighest(stateStacks, SAMPLE_TOP_STACKS)) {
                         String[] lines = s.lines;
                         if (lines.length > 0) {
                             totalDisplayed += stateStacks.count(s);
                             builder.append(String.format("%5.1f%% %5.1f%% %s%n", stateStacks.count(s) * 100.0 / totalSize, stateStacks.count(s) * 100.0 / stateStacks.size(), lines[0]));
                             if (lines.length > 1) {
                                 for (int i = 1; i < lines.length; i++) {
-                                    builder.append(String.format("%10s  %10s %s%n", "", "", lines[i]));
+                                    builder.append(String.format("%13s %s%n", "", lines[i]));
                                 }
                                 builder.append("\n");
                             }
                         }
                     }
                     if (isSignificant((stateStacks.size() - totalDisplayed), stateStacks.size())) {
-                        builder.append(String.format("%5.1f%% %5.1f%% %s%n", (stateStacks.size() - totalDisplayed) * 100.0 / totalSize, (stateStacks.size() - totalDisplayed) * 100.0 / stateStacks.size(), "(other)"));
+                        builder.append(String.format("%5.1f%% %5.1f%% %s%n", (stateStacks.size() - totalDisplayed) * 100.0 / totalSize, (stateStacks.size() - totalDisplayed) * 100.0 / stateStacks.size(), "<other>"));
                     }
 
                     builder.append("\n");
                 }
             }
-
-
-
             return builder.toString();
         }
 
+        // returns true, if part is >0.1% of total
         private boolean isSignificant(long part, long total) {
             // returns true if part*100.0/total is greater ot equals to 0.1
             return part * 1000 >= total;
@@ -298,10 +292,6 @@ public class StackProfiler implements InternalProfiler {
             }
             return sum;
         }
-    }
-
-    static String dottedLine() {
-        return dottedLine(null);
     }
 
     static String dottedLine(String header) {
