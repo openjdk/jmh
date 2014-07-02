@@ -38,9 +38,14 @@ import org.openjdk.jmh.util.Multisets;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -103,10 +108,10 @@ public class StackProfiler implements InternalProfiler {
     public static class SamplingTask implements Runnable {
 
         private final Thread thread;
-        private final Multiset<StackRecord> stacks;
+        private final Map<Thread.State, Multiset<StackRecord>> stacks;
 
         public SamplingTask() {
-            stacks = new HashMultiset<StackRecord>();
+            stacks = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
             thread = new Thread(this);
             thread.setName("Sampling Thread");
         }
@@ -116,7 +121,8 @@ public class StackProfiler implements InternalProfiler {
 
             while (!Thread.interrupted()) {
                 ThreadInfo[] infos = ManagementFactory.getThreadMXBean().dumpAllThreads(false, false);
-                info: for (ThreadInfo info : infos) {
+                info:
+                for (ThreadInfo info : infos) {
 
                     // filter out ignored threads
                     for (String ignore : IGNORED_THREADS) {
@@ -129,11 +135,15 @@ public class StackProfiler implements InternalProfiler {
                     String[] stackLines = new String[Math.min(stack.length, SAMPLE_STACK_LINES)];
                     for (int i = 0; i < Math.min(stack.length, SAMPLE_STACK_LINES); i++) {
                         stackLines[i] =
-                            stack[i].getClassName() +
-                                    '.' + stack[i].getMethodName()
-                                    + (SAMPLE_LINE ? ":" + stack[i].getLineNumber() : "");
+                                stack[i].getClassName() +
+                                        '.' + stack[i].getMethodName()
+                                        + (SAMPLE_LINE ? ":" + stack[i].getLineNumber() : "");
                     }
-                    stacks.add(new StackRecord(info.getThreadState(), stackLines));
+                    Thread.State state = info.getThreadState();
+                    if (!stacks.containsKey(state)) {
+                        stacks.put(state, new HashMultiset<StackRecord>());
+                    }
+                    stacks.get(state).add(new StackRecord(stackLines));
                 }
 
                 try {
@@ -160,11 +170,9 @@ public class StackProfiler implements InternalProfiler {
     }
 
     private static class StackRecord implements Serializable {
-        public final Thread.State threadState;
         public final String[] lines;
 
-        private StackRecord(Thread.State threadState, String[] lines) {
-            this.threadState = threadState;
+        private StackRecord(String[] lines) {
             this.lines = lines;
         }
 
@@ -176,23 +184,19 @@ public class StackProfiler implements InternalProfiler {
             StackRecord that = (StackRecord) o;
 
             if (!Arrays.equals(lines, that.lines)) return false;
-            if (threadState != that.threadState) return false;
-
             return true;
         }
 
         @Override
         public int hashCode() {
-            int result = threadState != null ? threadState.hashCode() : 0;
-            result = 31 * result + (lines != null ? Arrays.hashCode(lines) : 0);
-            return result;
+            return Arrays.hashCode(lines);
         }
     }
 
     public static class StackResult extends Result<StackResult> {
-        private final Multiset<StackRecord> stacks;
+        private final Map<Thread.State, Multiset<StackRecord>> stacks;
 
-        public StackResult(Multiset<StackRecord> stacks) {
+        public StackResult(Map<Thread.State, Multiset<StackRecord>> stacks) {
             super(ResultRole.SECONDARY, "@stack", new ListStatistics(), "none", AggregationPolicy.AVG);
             this.stacks = stacks;
         }
@@ -217,44 +221,121 @@ public class StackProfiler implements InternalProfiler {
             return getStack(stacks);
         }
 
-        public String getStack(Multiset<StackRecord> stacks) {
-            Collection<StackRecord> cut = Multisets.countHighest(stacks, SAMPLE_TOP_STACKS);
-            StringBuilder builder = new StringBuilder();
+        public String getStack(final Map<Thread.State, Multiset<StackRecord>> stacks) {
+            List<Thread.State> sortedStates = new ArrayList<Thread.State>(stacks.keySet());
+            Collections.sort(sortedStates, new Comparator<Thread.State>() {
 
-            builder.append("Stack profiler:\n");
-
-            int totalDisplayed = 0;
-            int count = 0;
-            for (StackRecord s : cut) {
-                if (count++ > SAMPLE_TOP_STACKS) {
-                    break;
+                private long stateSize(Thread.State state) {
+                    Multiset<StackRecord> set = stacks.get(state);
+                    return set == null ? 0 : set.size();
                 }
 
-                String[] lines = s.lines;
-                if (lines.length > 0) {
-                    totalDisplayed += stacks.count(s);
-                    builder.append(String.format("%5.1f%% %10s %s\n", stacks.count(s) * 100.0 / stacks.size(), s.threadState, lines[0]));
-                    if (lines.length > 1) {
-                        for (int i = 1; i < lines.length; i++) {
-                            builder.append(String.format("%5s  %10s %s\n", "", "", lines[i]));
+                @Override
+                public int compare(Thread.State s1, Thread.State s2) {
+                    return Long.valueOf(stateSize(s2)).compareTo(stateSize(s1));
+                }
+
+            });
+
+            long totalSize = getTotalSize(stacks);
+
+            StringBuilder builder = new StringBuilder();
+            builder.append("Stack profiler:\n\n");
+
+            builder.append(dottedLine("Thread state distributions"));
+            for (Thread.State state : sortedStates) {
+                builder.append(String.format("%5.1f%% %7s %s%n", stacks.get(state).size() * 100.0 / totalSize, "", state));
+            }
+            builder.append("\n");
+
+            for (Thread.State state : sortedStates) {
+                Multiset<StackRecord> stateStacks = stacks.get(state);
+                if (isSignificant(stateStacks.size(), totalSize)) {
+                    Collection<StackRecord> cut = Multisets.countHighest(stateStacks, SAMPLE_TOP_STACKS);
+                    builder.append(dottedLine("Thread state: " + state.toString()));
+
+                    int totalDisplayed = 0;
+                    int count = 0;
+                    for (StackRecord s : cut) {
+                        if (count++ > SAMPLE_TOP_STACKS) {
+                            break;
                         }
-                        builder.append("\n");
+
+                        String[] lines = s.lines;
+                        if (lines.length > 0) {
+                            totalDisplayed += stateStacks.count(s);
+                            builder.append(String.format("%5.1f%% %5.1f%% %s%n", stateStacks.count(s) * 100.0 / totalSize, stateStacks.count(s) * 100.0 / stateStacks.size(), lines[0]));
+                            if (lines.length > 1) {
+                                for (int i = 1; i < lines.length; i++) {
+                                    builder.append(String.format("%10s  %10s %s%n", "", "", lines[i]));
+                                }
+                                builder.append("\n");
+                            }
+                        }
                     }
+                    if (isSignificant((stateStacks.size() - totalDisplayed), stateStacks.size())) {
+                        builder.append(String.format("%5.1f%% %5.1f%% %s%n", (stateStacks.size() - totalDisplayed) * 100.0 / totalSize, (stateStacks.size() - totalDisplayed) * 100.0 / stateStacks.size(), "(other)"));
+                    }
+
+                    builder.append("\n");
                 }
             }
-            builder.append(String.format("%5.1f%% %10s %s\n", (stacks.size() - totalDisplayed) * 100.0 / stacks.size(), "", "(other)"));
+
+
 
             return builder.toString();
         }
+
+        private boolean isSignificant(long part, long total) {
+            // returns true if part*100.0/total is greater ot equals to 0.1
+            return part * 1000 >= total;
+        }
+
+        private long getTotalSize(Map<Thread.State, Multiset<StackRecord>> stacks) {
+            long sum = 0;
+            for (Multiset<StackRecord> set : stacks.values()) {
+                sum += set.size();
+            }
+            return sum;
+        }
+    }
+
+    static String dottedLine() {
+        return dottedLine(null);
+    }
+
+    static String dottedLine(String header) {
+        final int HEADER_WIDTH = 100;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("....");
+        if (header != null) {
+            header = "[" + header + "]";
+            sb.append(header);
+        } else {
+            header = "";
+        }
+
+        for (int c = 0; c < HEADER_WIDTH - 4 - header.length(); c++) {
+            sb.append(".");
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     public static class StackResultAggregator implements Aggregator<StackResult> {
         @Override
         public Result aggregate(Collection<StackResult> results) {
-            Multiset<StackRecord> sum = new HashMultiset<StackRecord>();
+            Map<Thread.State, Multiset<StackRecord>> sum = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
             for (StackResult r : results) {
-                for (StackRecord rec : r.stacks.keys()) {
-                    sum.add(rec, r.stacks.count(rec));
+                for (Map.Entry<Thread.State, Multiset<StackRecord>> entry : r.stacks.entrySet()) {
+                    if (!sum.containsKey(entry.getKey())) {
+                        sum.put(entry.getKey(), new HashMultiset<StackRecord>());
+                    }
+                    Multiset<StackRecord> sumSet = sum.get(entry.getKey());
+                    for (StackRecord rec : entry.getValue().keys()) {
+                        sumSet.add(rec, entry.getValue().count(rec));
+                    }
                 }
             }
             return new StackResult(sum);
