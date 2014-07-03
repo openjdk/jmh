@@ -66,18 +66,20 @@ public class RunResult implements Serializable {
     }
 
     public Result getPrimaryResult() {
-         return getFakeResult().getPrimaryResult();
+         return getAggregatedResult().getPrimaryResult();
     }
 
     public Map<String, Result> getSecondaryResults() {
-        return getFakeResult().getSecondaryResults();
+        return getAggregatedResult().getSecondaryResults();
     }
 
     /**
-     * Implementation note: RunResult tries to aggregate BenchmarkResult as if
-     * the underlying iterations are aggregated in the single run.
+     * Return the benchmark result, as if all iterations from all sub-benchmark results
+     * were merged in a single result.
+     *
+     * @return merged benchmark result
      */
-    private BenchmarkResult getFakeResult() {
+    public BenchmarkResult getAggregatedResult() {
         Collection<IterationResult> results = new ArrayList<IterationResult>();
         for (BenchmarkResult r : benchmarkResults) {
             for (IterationResult ir : r.getIterationResults()) {

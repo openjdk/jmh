@@ -434,7 +434,7 @@ public class Runner extends BaseRunner {
         Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
         List<ActionPlan> plan = getActionPlans(benchmarks);
 
-        beforeBenchmarks(plan);
+        etaBeforeBenchmarks(plan);
 
         try {
             for (ActionPlan r : plan) {
@@ -455,7 +455,7 @@ public class Runner extends BaseRunner {
                 }
             }
 
-            afterBenchmarks();
+            etaAfterBenchmarks();
 
             SortedSet<RunResult> runResults = mergeRunResults(results);
             out.endRun(runResults);
@@ -516,15 +516,17 @@ public class Runner extends BaseRunner {
 
             String jvm = options.getJvm().orElse(getDefaultJvm());
 
+            out.println("# VM invoker: " + jvm);
+            out.println("# VM options: " + opts);
+            out.startBenchmark(params);
+            out.println("");
+
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();
             if (warmupForkCount > 0) {
                 out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
                 for (int i = 0; i < warmupForkCount; i++) {
-                    beforeBenchmark();
-                    out.startBenchmark(params);
-                    out.println("# VM invoker: " + jvm);
-                    out.println("# VM options: " + opts);
+                    etaBeforeBenchmark();
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
 
                     File stdErr = FileUtils.tempFile("stderr");
@@ -532,18 +534,14 @@ public class Runner extends BaseRunner {
 
                     doFork(server, commandString, stdOut, stdErr, printOut, printErr);
 
-                    out.endBenchmark(null);
-                    afterBenchmark(params);
+                    etaAfterBenchmark(params);
+                    out.println("");
                 }
             }
 
             out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
             for (int i = 0; i < forkCount; i++) {
-                beforeBenchmark();
-                out.startBenchmark(params);
-
-                out.println("# VM invoker: " + jvm);
-                out.println("# VM options: " + opts);
+                etaBeforeBenchmark();
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
 
                 File stdErr = FileUtils.tempFile("stderr");
@@ -581,16 +579,11 @@ public class Runner extends BaseRunner {
                 }
 
                 results.merge(result);
-                afterBenchmark(params);
-
-                // we have only a single benchmark, which will produce only a single result
-                // TODO: clean up doFork() to return only a single value
-                BenchmarkResult r = null;
-                if (result.values().size() == 1) {
-                    r = result.values().iterator().next();
-                }
-                out.endBenchmark(r);
+                etaAfterBenchmark(params);
+                out.println("");
             }
+
+            out.endBenchmark(new RunResult(results.get(params)).getAggregatedResult());
 
         } catch (IOException e) {
             throw new IllegalStateException(e);

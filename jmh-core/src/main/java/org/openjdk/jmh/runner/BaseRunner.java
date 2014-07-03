@@ -78,7 +78,7 @@ abstract class BaseRunner {
             ActionMode mode = action.getMode();
 
             if (!forked) {
-                beforeBenchmark();
+                etaBeforeBenchmark();
                 out.startBenchmark(params);
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
@@ -119,7 +119,7 @@ abstract class BaseRunner {
             }
 
             if (!forked) {
-                afterBenchmark(params);
+                etaAfterBenchmark(params);
                 out.endBenchmark(r);
             }
         }
@@ -127,14 +127,14 @@ abstract class BaseRunner {
         return results;
     }
 
-    protected void afterBenchmark(BenchmarkParams params) {
+    protected void etaAfterBenchmark(BenchmarkParams params) {
         long current = System.nanoTime();
         projectedRunningTime += estimateTimeSingleFork(params);
         actualRunningTime += (current - benchmarkStart);
         benchmarkStart = current;
     }
 
-    protected void beforeBenchmarks(Collection<ActionPlan> plans) {
+    protected void etaBeforeBenchmarks(Collection<ActionPlan> plans) {
         projectedTotalTime = 0;
         for (ActionPlan plan : plans) {
             for (Action act : plan.getActions()) {
@@ -161,7 +161,7 @@ abstract class BaseRunner {
         return estimatedTime;
     }
 
-    protected void beforeBenchmark() {
+    protected void etaBeforeBenchmark() {
         if (benchmarkStart == 0) {
             benchmarkStart = System.nanoTime();
         }
@@ -177,7 +177,7 @@ abstract class BaseRunner {
         out.println(String.format("# Run progress: %.2f%% complete, ETA %s", partsDone * 100, formatDuration(totalETA)));
     }
 
-    protected void afterBenchmarks() {
+    protected void etaAfterBenchmarks() {
         out.println(String.format("# Run complete. Total time: %s", formatDuration(actualRunningTime)));
         out.println("");
     }
