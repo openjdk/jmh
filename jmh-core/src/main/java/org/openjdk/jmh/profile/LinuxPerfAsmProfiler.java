@@ -621,7 +621,10 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                 ASMLine asmLine = new ASMLine(line);
                 if (line.contains("{method}")) {
                     if (elements.length == 7) {
-                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "").replace("&apos;", "");
+                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
+                        method = method.replace("&apos;", "");
+                        method = method.replace("&lt;", "<");
+                        method = method.replace("&gt;", ">");
                     }
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be line with address.
