@@ -80,6 +80,10 @@ public class RunResult implements Serializable {
      * @return merged benchmark result
      */
     public BenchmarkResult getAggregatedResult() {
+        if (benchmarkResults.isEmpty()) {
+            return null;
+        }
+
         Collection<IterationResult> results = new ArrayList<IterationResult>();
         for (BenchmarkResult r : benchmarkResults) {
             for (IterationResult ir : r.getIterationResults()) {
