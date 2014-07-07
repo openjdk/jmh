@@ -55,6 +55,9 @@ public @interface Fork {
     /** @return number of times harness should fork and ignore the results */
     int warmups() default BLANK_FORKS;
 
+    /** @return JVM executable to run with */
+    String jvm() default BLANK_ARGS;
+
     /** @return JVM arguments to replace in the command line */
     String[] jvmArgs() default { BLANK_ARGS };
 

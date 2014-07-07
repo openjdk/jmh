@@ -375,22 +375,24 @@ public class Runner extends BaseRunner {
                 benchmark.getOperationsPerInvocation().orElse(
                         Defaults.OPS_PER_INVOCATION));
 
-        Collection<String> jvmArgsPrepend = options.getJvmArgsPrepend().orElse(
-                benchmark.getJvmArgsPrepend().orElse(
-                        Collections.<String>emptyList()));
+        String jvm = options.getJvm().orElse(
+                benchmark.getJvm().orElse(Utils.getCurrentJvm()));
 
-        Collection<String> jvmArgs = options.getJvmArgs().orElse(
-                benchmark.getJvmArgs().orElse(
-                        ManagementFactory.getRuntimeMXBean().getInputArguments()));
+        Collection<String> jvmArgs = new ArrayList<String>();
 
-        Collection<String> jvmArgsAppend = options.getJvmArgsAppend().orElse(
-                benchmark.getJvmArgsAppend().orElse(
-                        Collections.<String>emptyList()));
+        jvmArgs.addAll(options.getJvmArgsPrepend().orElse(
+                benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList())));
+
+        jvmArgs.addAll(options.getJvmArgs().orElse(
+                benchmark.getJvmArgs().orElse(ManagementFactory.getRuntimeMXBean().getInputArguments())));
+
+        jvmArgs.addAll(options.getJvmArgsAppend().orElse(
+                benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
 
         return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement, benchmark.getMode(), benchmark.getWorkloadParams(), timeUnit, opsPerInvocation,
-                jvmArgsPrepend, jvmArgs, jvmArgsAppend);
+                jvm, jvmArgs);
     }
 
     private List<WorkloadParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
@@ -509,14 +511,12 @@ public class Runner extends BaseRunner {
             printErr = forcePrint || printErr;
 
             String[] commandString = getSeparateExecutionCommand(params, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
-            String opts = Utils.join(getJvmArgs(params), " ");
+            String opts = Utils.join(params.getJvmArgs(), " ");
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
             }
 
-            String jvm = options.getJvm().orElse(getDefaultJvm());
-
-            out.println("# VM invoker: " + jvm);
+            out.println("# VM invoker: " + params.getJvm());
             out.println("# VM options: " + opts);
             out.startBenchmark(params);
             out.println("");
@@ -686,10 +686,10 @@ public class Runner extends BaseRunner {
         command.addAll(javaInvokeOptions);
 
         // use supplied jvm, if given
-        command.add(options.getJvm().orElse(getDefaultJvm()));
+        command.add(benchmark.getJvm());
 
         // use supplied jvm args, if given
-        command.addAll(getJvmArgs(benchmark));
+        command.addAll(benchmark.getJvmArgs());
 
         // add profiler JVM commands, if any profiler wants it
         command.addAll(javaOptions);
@@ -699,7 +699,7 @@ public class Runner extends BaseRunner {
 
         // assemble final process command
         command.add("-cp");
-        if (isWindows()) {
+        if (Utils.isWindows()) {
             command.add('"' + System.getProperty("java.class.path") + '"');
         } else {
             command.add(System.getProperty("java.class.path"));
@@ -713,27 +713,6 @@ public class Runner extends BaseRunner {
         command.add(String.valueOf(port));
 
         return command.toArray(new String[command.size()]);
-    }
-
-    private boolean isWindows() {
-        return System.getProperty("os.name").contains("indows");
-    }
-
-    private String getDefaultJvm() {
-        return System.getProperty("java.home") +
-                File.separator +
-                "bin" +
-                File.separator +
-                "java" +
-                (isWindows() ? ".exe" : "");
-    }
-
-    private Collection<String> getJvmArgs(BenchmarkParams benchmark) {
-        Collection<String> res = new ArrayList<String>();
-        res.addAll(benchmark.getJvmArgsPrepend());
-        res.addAll(benchmark.getJvmArgs());
-        res.addAll(benchmark.getJvmArgsAppend());
-        return res;
     }
 
 }

@@ -216,6 +216,14 @@ class MethodGroup implements Comparable<MethodGroup> {
         return Optional.none();
     }
 
+    public Optional<String> getJvm() {
+        Fork ann = getFinal(Fork.class);
+        if (ann != null && !(ann.jvm().equals(Fork.BLANK_ARGS))) {
+            return Optional.of(ann.jvm());
+        }
+        return Optional.none();
+    }
+
     public Optional<Collection<String>> getJvmArgs() {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !(ann.jvmArgs().length == 1 && ann.jvmArgs()[0].equals(Fork.BLANK_ARGS))) {

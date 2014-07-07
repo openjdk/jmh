@@ -52,6 +52,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     private final Optional<Integer> measurementBatchSize;
     private final Optional<Integer> forks;
     private final Optional<Integer> warmupForks;
+    private final Optional<String> jvm;
     private final Optional<Collection<String>> jvmArgs;
     private final Optional<Collection<String>> jvmArgsPrepend;
     private final Optional<Collection<String>> jvmArgsAppend;
@@ -64,7 +65,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     public BenchmarkListEntry(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
                               Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
                               Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
-                              Optional<Integer> forks, Optional<Integer> warmupForks, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
+                              Optional<Integer> forks, Optional<Integer> warmupForks,
+                              Optional<String> jvm, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
                               Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv) {
         this.userName = userName;
         this.generatedName = generatedName;
@@ -79,6 +81,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.measurementBatchSize = measurementBatchSize;
         this.forks = forks;
         this.warmupForks = warmupForks;
+        this.jvm = jvm;
         this.jvmArgs = jvmArgs;
         this.jvmArgsPrepend = jvmArgsPrepend;
         this.jvmArgsAppend = jvmArgsAppend;
@@ -91,7 +94,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     public BenchmarkListEntry(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 19) {
+        if (args.length != 20) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -109,18 +112,20 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.measurementBatchSize = Optional.of(args[10], INTEGER_UNMARSHALLER);
         this.forks = Optional.of(args[11], INTEGER_UNMARSHALLER);
         this.warmupForks = Optional.of(args[12], INTEGER_UNMARSHALLER);
-        this.jvmArgs = Optional.of(args[13], STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsPrepend = Optional.of(args[14], STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsAppend = Optional.of(args[15], STRING_COLLECTION_UNMARSHALLER);
-        this.params = Optional.of(args[16], PARAM_COLLECTION_UNMARSHALLER);
-        this.tu = Optional.of(args[17], TIMEUNIT_UNMARSHALLER);
-        this.opsPerInvocation = Optional.of(args[18], INTEGER_UNMARSHALLER);
+        this.jvm = Optional.of(args[13], STRING_UNMARSHALLER);
+        this.jvmArgs = Optional.of(args[14], STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsPrepend = Optional.of(args[15], STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsAppend = Optional.of(args[16], STRING_COLLECTION_UNMARSHALLER);
+        this.params = Optional.of(args[17], PARAM_COLLECTION_UNMARSHALLER);
+        this.tu = Optional.of(args[18], TIMEUNIT_UNMARSHALLER);
+        this.opsPerInvocation = Optional.of(args[19], INTEGER_UNMARSHALLER);
     }
 
     public BenchmarkListEntry(String userName, String generatedName, Mode mode) {
         this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
-                Optional.<Integer>none(), Optional.<Integer>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
+                Optional.<Integer>none(), Optional.<Integer>none(),
+                Optional.<String>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
                 Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none(), Optional.<Integer>none());
     }
 
@@ -129,6 +134,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
                 measurementIterations + BR_SEPARATOR + measurementTime + BR_SEPARATOR + measurementBatchSize + BR_SEPARATOR +
                 forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
+                jvm.toString(STRING_MARSHALLER) + BR_SEPARATOR +
                 jvmArgs.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsPrepend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsAppend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
@@ -140,14 +146,18 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         return new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
+                forks, warmupForks,
+                jvm, jvmArgs, jvmArgsPrepend, jvmArgsAppend,
+                params, tu, opsPerInvocation);
     }
 
     public BenchmarkListEntry cloneWith(WorkloadParams p) {
         BenchmarkListEntry br = new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
-                forks, warmupForks, jvmArgs, jvmArgsPrepend, jvmArgsAppend, params, tu, opsPerInvocation);
+                forks, warmupForks,
+                jvm, jvmArgs, jvmArgsPrepend, jvmArgsAppend,
+                params, tu, opsPerInvocation);
         br.workloadParams = p;
         return br;
     }
@@ -255,6 +265,10 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         return warmupForks;
     }
 
+    public Optional<String> getJvm() {
+        return jvm;
+    }
+
     public Optional<Collection<String>> getJvmArgs() {
         return jvmArgs;
     }
@@ -308,6 +322,20 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         @Override
         public String valueOf(TimeUnit val) {
             return val.toString();
+        }
+    };
+
+    static final Optional.Unmarshaller<String> STRING_UNMARSHALLER = new Optional.Unmarshaller<String>() {
+        @Override
+        public String valueOf(String s) {
+            return s;
+        }
+    };
+
+    static final Optional.Marshaller<String> STRING_MARSHALLER = new Optional.Marshaller<String>() {
+        @Override
+        public String valueOf(String s) {
+            return s;
         }
     };
 
@@ -366,5 +394,4 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
             return sb.toString();
         }
     };
-
 }

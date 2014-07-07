@@ -26,6 +26,7 @@ package org.openjdk.jmh.util;
 
 import sun.misc.Unsafe;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -186,6 +187,19 @@ public class Utils {
             klass = klass.getSuperclass();
         } while (klass != null);
         throw new IllegalStateException("Can't find field \"" + fieldName + "\"");
+    }
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").contains("indows");
+    }
+
+    public static String getCurrentJvm() {
+        return System.getProperty("java.home") +
+                File.separator +
+                "bin" +
+                File.separator +
+                "java" +
+                (isWindows() ? ".exe" : "");
     }
 
 }

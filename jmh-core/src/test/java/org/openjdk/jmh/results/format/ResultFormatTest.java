@@ -38,6 +38,7 @@ import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.WorkloadParams;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -79,7 +80,8 @@ public class ResultFormatTest {
                     Mode.Throughput,
                     ps,
                     TimeUnit.SECONDS, 1,
-                    Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList());
+                    Utils.getCurrentJvm(),
+                    Collections.<String>emptyList());
 
             Collection<BenchmarkResult> benchmarkResults = new ArrayList<BenchmarkResult>();
             for (int f = 0; f < r.nextInt(10); f++) {

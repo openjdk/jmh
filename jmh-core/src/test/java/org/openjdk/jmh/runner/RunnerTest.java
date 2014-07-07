@@ -31,6 +31,7 @@ import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public class RunnerTest {
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                Collections.<String>emptyList(), Collections.<String>emptyList(), Collections.<String>emptyList());
+                Utils.getCurrentJvm(), Collections.<String>emptyList());
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
@@ -88,7 +89,7 @@ public class RunnerTest {
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                Collections.<String>emptyList(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints), Collections.<String>emptyList());
+                Utils.getCurrentJvm(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints));
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
@@ -120,9 +121,8 @@ public class RunnerTest {
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                Collections.<String>emptyList(),
-                Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
-                Collections.<String>emptyList());
+                Utils.getCurrentJvm(),
+                Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2));
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file

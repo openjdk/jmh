@@ -61,7 +61,7 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
         Utils.check(BenchmarkParams.class, "warmup", "measurement");
         Utils.check(BenchmarkParams.class, "mode", "params");
         Utils.check(BenchmarkParams.class, "timeUnit", "opsPerInvocation");
-        Utils.check(BenchmarkParams.class, "jvmArgsPrepend", "jvmArgs", "jvmArgsAppend");
+        Utils.check(BenchmarkParams.class, "jvm", "jvmArgs");
     }
 
     public BenchmarkParams(BenchmarkParams other) {
@@ -73,13 +73,13 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
+                             String jvm, Collection<String> jvmArgs) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvmArgsPrepend, jvmArgs, jvmArgsAppend);
+                jvm, jvmArgs);
     }
 }
 
@@ -90,13 +90,13 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
+                             String jvm, Collection<String> jvmArgs) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvmArgsPrepend, jvmArgs, jvmArgsAppend);
+                jvm, jvmArgs);
     }
 
     public BenchmarkParamsL4(BenchmarkParams other) {
@@ -127,13 +127,13 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
+                             String jvm, Collection<String> jvmArgs) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvmArgsPrepend, jvmArgs, jvmArgsAppend);
+                jvm, jvmArgs);
     }
 
     public BenchmarkParamsL3(BenchmarkParams other) {
@@ -178,16 +178,15 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     protected final WorkloadParams params;
     protected final TimeUnit timeUnit;
     protected final int opsPerInvocation;
-    protected final Collection<String> jvmArgsPrepend;
+    protected final String jvm;
     protected final Collection<String> jvmArgs;
-    protected final Collection<String> jvmArgsAppend;
 
     public BenchmarkParamsL2(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             Collection<String> jvmArgsPrepend, Collection<String> jvmArgs, Collection<String> jvmArgsAppend) {
+                             String jvm, Collection<String> jvmArgs) {
         this.benchmark = benchmark;
         this.generatedTarget = generatedTarget;
         this.synchIterations = synchIterations;
@@ -201,9 +200,8 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.params = params;
         this.timeUnit = timeUnit;
         this.opsPerInvocation = opsPerInvocation;
-        this.jvmArgsPrepend = jvmArgsPrepend;
+        this.jvm = jvm;
         this.jvmArgs = jvmArgs;
-        this.jvmArgsAppend = jvmArgsAppend;
     }
 
     public BenchmarkParamsL2(BenchmarkParams other) {
@@ -220,9 +218,8 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.params = other.params;
         this.timeUnit = other.timeUnit;
         this.opsPerInvocation = other.opsPerInvocation;
-        this.jvmArgsPrepend = other.jvmArgsPrepend;
+        this.jvm = other.jvm;
         this.jvmArgs = other.jvmArgs;
-        this.jvmArgsAppend = other.jvmArgsAppend;
     }
 
     /**
@@ -329,11 +326,8 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         return generatedTarget;
     }
 
-    /**
-     * @return prepended JVM options
-     */
-    public Collection<String> getJvmArgsPrepend() {
-        return Collections.unmodifiableCollection(jvmArgsPrepend);
+    public String getJvm() {
+        return jvm;
     }
 
     /**
@@ -341,13 +335,6 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
      */
     public Collection<String> getJvmArgs() {
         return Collections.unmodifiableCollection(jvmArgs);
-    }
-
-    /**
-     * @return appended JVM options
-     */
-    public Collection<String> getJvmArgsAppend() {
-        return Collections.unmodifiableCollection(jvmArgsAppend);
     }
 
     @Override
@@ -401,4 +388,5 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         }
         return sb.toString();
     }
+
 }
