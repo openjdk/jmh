@@ -75,20 +75,30 @@ public class ClassloaderProfiler implements InternalProfiler {
         long loaded;
         long unloaded;
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
+
+        int loadedClassCount;
         try {
-            loaded = cl.getLoadedClassCount() - loadedClasses;
+            loadedClassCount = cl.getLoadedClassCount();
+            loaded = loadedClassCount - loadedClasses;
         } catch (UnsupportedOperationException e) {
             loaded = -1;
+            loadedClassCount = -1;
         }
+
+        long unloadedClassCount;
         try {
-            unloaded = cl.getUnloadedClassCount() - unloadedClasses;
+            unloadedClassCount = cl.getUnloadedClassCount();
+            unloaded = unloadedClassCount - unloadedClasses;
         } catch (UnsupportedOperationException e) {
             unloaded = -1;
+            unloadedClassCount = -1;
         }
 
         return Arrays.asList(
-                new ProfilerResult("@classload.loaded", loaded, "classes", AggregationPolicy.AVG),
-                new ProfilerResult("@classload.unloaded", unloaded, "classes", AggregationPolicy.AVG)
+                new ProfilerResult("@classload.loaded.profiled", loaded, "classes", AggregationPolicy.SUM),
+                new ProfilerResult("@classload.unloaded.profiled", unloaded, "classes", AggregationPolicy.SUM),
+                new ProfilerResult("@classload.loaded.total", loadedClassCount, "classes", AggregationPolicy.MAX),
+                new ProfilerResult("@classload.unloaded.total", unloadedClassCount, "classes", AggregationPolicy.MAX)
         );
     }
 

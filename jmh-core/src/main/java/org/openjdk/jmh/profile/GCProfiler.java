@@ -37,9 +37,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GCProfiler implements InternalProfiler {
-    private long startGCCount;
-    private long startGCTime;
-    private long startTime;
+    private long beforeGCCount;
+    private long beforeGCTime;
 
     @Override
     public String getDescription() {
@@ -58,35 +57,30 @@ public class GCProfiler implements InternalProfiler {
 
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        this.startTime = System.nanoTime();
         long gcTime = 0;
         long gcCount = 0;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
             gcCount += bean.getCollectionCount();
             gcTime += bean.getCollectionTime();
         }
-        this.startGCCount = gcCount;
-        this.startGCTime = gcTime;
+        this.beforeGCCount = gcCount;
+        this.beforeGCTime = gcTime;
     }
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        long endTime = System.nanoTime();
-        long gcTime = -startGCTime;
-        long gcCount = -startGCCount;
+        long gcTime = 0;
+        long gcCount = 0;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
             gcCount += bean.getCollectionCount();
             gcTime += bean.getCollectionTime();
         }
 
         return Arrays.asList(
-                new ProfilerResult("@gc.count",
-                        gcCount,
-                        "counts", AggregationPolicy.AVG),
-
-                new ProfilerResult("@gc.time",
-                        100.0 * gcTime / TimeUnit.NANOSECONDS.toMillis(endTime - startTime),
-                        "%", AggregationPolicy.AVG)
+                new ProfilerResult("@gc.count.profiled", gcCount - beforeGCCount, "counts", AggregationPolicy.SUM),
+                new ProfilerResult("@gc.count.total", gcCount, "counts", AggregationPolicy.MAX),
+                new ProfilerResult("@gc.time.profiled", 100.0 * (gcTime - beforeGCTime), "ms", AggregationPolicy.SUM),
+                new ProfilerResult("@gc.time.total", 100.0 * gcTime, "ms", AggregationPolicy.MAX)
         );
     }
 
