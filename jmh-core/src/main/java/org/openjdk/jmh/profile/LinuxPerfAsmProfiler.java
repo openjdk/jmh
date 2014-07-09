@@ -47,6 +47,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StreamTokenizer;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,55 +62,88 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
-    /** Events to gather **/
+    /**
+     * Events to gather *
+     */
     private static final String[] EVENTS = System.getProperty("jmh.perfasm.events", "cycles,instructions").split(",");
 
-    /** Cutoff threshold for hot region: the regions with event count over threshold would be shown */
+    /**
+     * Cutoff threshold for hot region: the regions with event count over threshold would be shown
+     */
     private static final double THRESHOLD_RATE = Double.valueOf(System.getProperty("jmh.perfasm.hotThreshold", "0.10"));
 
-    /** Show this number of top hottest code regions */
+    /**
+     * Show this number of top hottest code regions
+     */
     private static final int SHOW_TOP = Integer.getInteger("jmh.perfasm.top", 20);
 
-    /** Cutoff threshold for large region: the region larger than this would be truncated */
+    /**
+     * Cutoff threshold for large region: the region larger than this would be truncated
+     */
     private static final int THRESHOLD_TOO_BIG = Integer.getInteger("jmh.perfasm.tooBigThreshold", 1000);
 
-    /** Print margin: how many "context" lines without counters to show in each region */
+    /**
+     * Print margin: how many "context" lines without counters to show in each region
+     */
     private static final int PRINT_MARGIN = Integer.getInteger("jmh.perfasm.printMargin", 10);
 
-    /** Merge margin: the regions separated by less than the margin are considered the same */
+    /**
+     * Merge margin: the regions separated by less than the margin are considered the same
+     */
     private static final int MERGE_MARGIN = Integer.getInteger("jmh.perfasm.mergeMargin", 32);
 
-    /** Delay collection for given time; -1 to detect automatically */
+    /**
+     * Delay collection for given time; -1 to detect automatically
+     */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perfasm.delayMs", -1);
 
-    /** Sampling frequency */
+    /**
+     * Sampling frequency
+     */
     private static final long SAMPLE_FREQUENCY = Long.getLong("jmh.perfasm.frequency", 1000);
 
-    /** Do -XX:+PrintAssembly instrumentation? */
+    /**
+     * Do -XX:+PrintAssembly instrumentation?
+     */
     private static final Boolean SKIP_ASSEMBLY = Boolean.getBoolean("jmh.perfasm.skipAsm");
 
-    /** Save perf output to file? */
+    /**
+     * Save perf output to file?
+     */
     private static final Boolean SAVE_PERF_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerf");
 
-    /** Override the perf output location */
+    /**
+     * Override the perf output location
+     */
     private static final String SAVE_PERF_OUTPUT_TO = System.getProperty("jmh.perfasm.savePerfTo", ".");
 
-    /** Override the perf output filename */
+    /**
+     * Override the perf output filename
+     */
     private static final String SAVE_PERF_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.savePerfToFile");
 
-    /** Save annotated Hotspot log to file */
+    /**
+     * Save annotated Hotspot log to file
+     */
     private static final Boolean SAVE_LOG_OUTPUT = Boolean.getBoolean("jmh.perfasm.saveLog");
 
-    /** Override the annotated Hotspot log location */
+    /**
+     * Override the annotated Hotspot log location
+     */
     private static final String SAVE_LOG_OUTPUT_TO = System.getProperty("jmh.perfasm.saveLogTo", ".");
 
-    /** Override the annotated Hotspot log filename */
+    /**
+     * Override the annotated Hotspot log filename
+     */
     private static final String SAVE_LOG_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveLogToFile");
 
     private static final boolean IS_SUPPORTED;
@@ -279,8 +313,8 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
         long delayNs;
         if (DELAY_MSEC == -1) { // not set
             delayNs = params.getWarmup().getCount() *
-                            params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
-                            + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
+                    params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
+                    + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
         } else {
             delayNs = TimeUnit.MILLISECONDS.toNanos(DELAY_MSEC);
         }
@@ -667,15 +701,33 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
             Double startTime = null;
 
+            // Demangled symbol names can contain spaces, so we need to parse the lines
+            // in a complicated manner. Using regexps will not solve this without sacrificing
+            // lots of performance, so we need to get tricky, and merge the symbol names back
+            // after splitting.
+            //
+            // Sample input string:
+            //    java   598 11937.621044:  cycles:      7f7318c26a10 StringTable::intern(Symbol*, Thread*) (.../libjvm.so)
+
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("#")) continue;
-                line = line.trim();
-                String[] elements = line.split("[ ]+");
 
-                if (elements[0].equalsIgnoreCase("java")) {
+                String[] elems = line.trim().split("[ ]+");
+
+                if (elems.length < 7) continue;
+
+                String process = elems[0];
+                String strTime = elems[2].replace(":", "");
+                String evName = elems[3].replace(":", "");
+                String strAddr = elems[4];
+                String symbol = Utils.join(Arrays.copyOfRange(elems, 5, elems.length - 1), " ");
+                String lib = elems[elems.length - 1];
+                lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
+
+                if (process.equalsIgnoreCase("java")) {
                     try {
-                        Double time = Double.valueOf(elements[2].replace(":", ""));
+                        Double time = Double.valueOf(strTime);
                         if (startTime == null) {
                             startTime = time;
                         } else {
@@ -688,14 +740,12 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
                         continue;
                     }
 
-                    String evName = elements[3].replace(":", "");
                     Multiset<Long> evs = events.get(evName);
                     try {
-                        Long element = Long.valueOf(elements[4], 16);
-                        evs.add(element);
-                        methods.put(element, dedup.dedup(elements[5]));
-                        String lib = elements[6].substring(elements[6].lastIndexOf("/") + 1, elements[6].length() - 1);
-                        libs.put(element, dedup.dedup(lib));
+                        Long addr = Long.valueOf(strAddr, 16);
+                        evs.add(addr);
+                        methods.put(addr, dedup.dedup(symbol));
+                        libs.put(addr, dedup.dedup(lib));
                     } catch (NumberFormatException e) {
                         // kernel addresses like "ffffffff810c1b00" overflow signed long,
                         // record them as dummy address
