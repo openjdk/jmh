@@ -42,22 +42,21 @@ import java.lang.annotation.Target;
  * look through
  * <a href="http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/">
  * JMH samples</a> for their canonical uses. As the rule of thumb, most annotations
- * may be placed either at the {@link Benchmark} method, or at enclosing
- * class.</p>
+ * may be placed either at the {@link Benchmark} method, or at enclosing class.</p>
  *
- * <p>{@link Benchmark} demarcates the benchmark payload,
- * and JMH treats it specifically as the wrapper which contains the benchmark code. In order to
- * run the benchmark reliably, JMH enforces a few stringent properties for these wrapper methods,
- * including, but not limited to:</p>
+ * <p>{@link Benchmark} demarcates the benchmark payload, and JMH treats it specifically
+ * as the wrapper which contains the benchmark code. In order to run the benchmark reliably,
+ * JMH enforces a few stringent properties for these wrapper methods, including, but not
+ * limited to:</p>
  * <ul>
  *     <li>Method should be public</li>
- *     <li>Arguments may only include either {@link org.openjdk.jmh.annotations.State} classes, which
- *     JMH will inject while calling the method (see {@link org.openjdk.jmh.annotations.State} for
- *     more details), or JMH infrastructure classes, like {@link org.openjdk.jmh.infra.Control},
- *     or {@link org.openjdk.jmh.infra.Blackhole}</li>
- *     <li>Method can only be synchronized if a relevant {@link org.openjdk.jmh.annotations.State} is placed
+ *     <li>Arguments may only include either {@link State} classes, which JMH will inject
+ *     while calling the method (see {@link State} for more details), or JMH infrastructure
+ *     classes, like {@link org.openjdk.jmh.infra.Control}, or {@link org.openjdk.jmh.infra.Blackhole}</li>
+ *     <li>Method can only be synchronized if a relevant {@link State} is placed
  *     on the enclosing class.</li>
  * </ul>
+ *
  * <p>If you want to benchmark methods which break these properties, you have to write them
  * out specifically as the benchmark payload and call them from {@link Benchmark}
  * method.</p>

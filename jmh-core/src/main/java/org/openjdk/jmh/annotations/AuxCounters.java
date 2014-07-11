@@ -30,11 +30,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>{@link org.openjdk.jmh.annotations.AuxCounters} annotation can be used to mark
- * {@link State} objects as the bearers of auxiliary secondary results. Marking the
- * class with this annotation will enable JMH to look for public {int, long} fields,
- * as well as public methods returning {int, long} values, and treat their values as
- * the operation counts in current iteration.</p>
+ * <p>{@link AuxCounters} annotation can be used to mark {@link State} objects
+ * as the bearers of auxiliary secondary results. Marking the class with this annotation
+ * will enable JMH to look for public {int, long} fields, as well as public methods
+ * returning {int, long} values, and treat their values as the operation counts
+ * in current iteration.</p>
  *
  * <p><b>THIS IS AN EXPERIMENTAL API, which means, among other things:</b></p>
  *

@@ -25,7 +25,7 @@
 package org.openjdk.jmh.annotations;
 
 /**
- * {@link org.openjdk.jmh.annotations.State} scope.
+ * {@link State} scope.
  */
 public enum Scope {
 
@@ -36,7 +36,7 @@ public enum Scope {
      * worker threads.</p>
      *
      * <p>{@link Setup} and {@link TearDown} methods on this state object would be performed
-     * by one of the worker threads, and only once per {@link org.openjdk.jmh.annotations.Level}.
+     * by one of the worker threads, and only once per {@link Level}.
      * No other threads would ever touch the state object.</p>
      */
     Benchmark,
@@ -49,7 +49,7 @@ public enum Scope {
      * state object.</p>
      *
      * <p>{@link Setup} and {@link TearDown} methods on this state object would be performed
-     * by one of the group threads, and only once per {@link org.openjdk.jmh.annotations.Level}.
+     * by one of the group threads, and only once per {@link Level}.
      * No other threads would ever touch the state object.</p>
      *
      * @see Group
@@ -63,7 +63,7 @@ public enum Scope {
      * state objects are injected in the same benchmark</p>
      *
      * <p>{@link Setup} and {@link TearDown} methods on this state object would be performed
-     * by single worker thread exclusively, and only once per {@link org.openjdk.jmh.annotations.Level}.
+     * by single worker thread exclusively, and only once per {@link Level}.
      * No other threads would ever touch the state object.</p>
      *
      */

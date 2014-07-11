@@ -47,10 +47,9 @@ import java.lang.annotation.Target;
  * }
  * </pre></blockquote>
  *
- * <p>This annotation may be put at {@link Benchmark}
- * method to have effect on that method only, or at the enclosing class instance
- * to have the effect over all {@link Benchmark} methods
- * in the class.</p>
+ * <p>This annotation may be put at {@link Benchmark} method to have effect on that method
+ * only, or at the enclosing class instance to have the effect over all {@link Benchmark}
+ * methods in the class.</p>
  */
 @Inherited
 @Target({ElementType.METHOD,ElementType.TYPE})

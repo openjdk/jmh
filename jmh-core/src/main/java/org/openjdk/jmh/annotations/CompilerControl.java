@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * <p>Compiler control annotation may be used to affect the compilation of
  * particular methods in the benchmarks.</p>
  *
- * <p>JMH interfaces with the JVM by the means of command-line switches,
+ * <p>JMH interfaces with the JVM by the means of CompilerCommand interface,
  * These annotations only work with forking enabled. Non-forked runs will not be
  * able to pass the hints to the compiler. Also, these control annotations might
  * get freely ignored by the compiler, reduced to no-ops, or otherwise invalidated.

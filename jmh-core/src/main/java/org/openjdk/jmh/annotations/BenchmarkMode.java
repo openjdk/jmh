@@ -32,13 +32,12 @@ import java.lang.annotation.Target;
 
 /**
  * <p>Benchmark mode declares the default modes in which this benchmark
- * would run. See {@link org.openjdk.jmh.annotations.Mode} for available
- * benchmark modes.</p>
+ * would run. See {@link Mode} for available benchmark modes.</p>
  *
- * <p>This annotation may be put at {@link Benchmark}
- * method to have effect on that method only, or at the enclosing class instance
- * to have the effect over all {@link Benchmark} methods
- * in the class. This annotation may be overridden with the runtime options.</p>
+ * <p>This annotation may be put at {@link Benchmark} method to have effect
+ * on that method only, or at the enclosing class instance to have the effect
+ * over all {@link Benchmark} methods in the class. This annotation may be
+ * overridden with the runtime options.</p>
  */
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -47,7 +46,7 @@ public @interface BenchmarkMode {
 
     /**
      * @return Which benchmark modes to use.
-     * @see org.openjdk.jmh.annotations.Mode
+     * @see Mode
      */
     Mode[] value();
 

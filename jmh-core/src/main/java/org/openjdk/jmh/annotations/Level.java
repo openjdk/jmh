@@ -27,7 +27,7 @@ package org.openjdk.jmh.annotations;
 /**
  * Control when to run the fixture methods.
  *
- * @see org.openjdk.jmh.annotations.Setup
+ * @see Setup
  * @see TearDown
  */
 public enum Level {

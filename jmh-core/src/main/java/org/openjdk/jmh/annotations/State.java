@@ -34,16 +34,16 @@ import java.lang.annotation.Target;
  * <p>Marks the state object.</p>
  *
  * <p>State objects naturally encapsulate the state on which benchmark is working on.
- * The {@link org.openjdk.jmh.annotations.Scope} of state object defines to which extent
- * it is shared among the worker threads.</p>
+ * The {@link Scope} of state object defines to which extent it is shared among the
+ * worker threads.</p>
  *
- * <p>State objects are usually injected into {@link Benchmark}
- * methods as arguments, and JMH takes care of their instantiation and sharing. State objects
- * may also be injected into {@link org.openjdk.jmh.annotations.Setup} and {@link org.openjdk.jmh.annotations.TearDown}
- * methods of other {@link org.openjdk.jmh.annotations.State} objects to get staged initialization.</p>
+ * <p>State objects are usually injected into {@link Benchmark} methods as arguments,
+ * and JMH takes care of their instantiation and sharing. State objects* may also be
+ * injected into {@link Setup} and {@link TearDown} methods of other {@link State}
+ * objects to get staged initialization.</p>
  *
- * <p>State objects may be inherited: you can place {@link org.openjdk.jmh.annotations.State}
- * on a super class and use subclasses as states.</p>
+ * <p>State objects may be inherited: you can place {@link State} on a super class and
+ * use subclasses as states.</p>
  */
 @Inherited
 @Target(ElementType.TYPE)
@@ -53,7 +53,7 @@ public @interface State {
     /**
      * State scope.
      * @return state scope
-     * @see org.openjdk.jmh.annotations.Scope
+     * @see Scope
      */
     Scope value();
 

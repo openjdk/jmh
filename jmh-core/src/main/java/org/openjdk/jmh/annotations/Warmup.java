@@ -32,17 +32,13 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <p>
- * Warmup annotation allows to set the default warmup parameters for the benchmark.
- * </p>
- * <p>
- * This annotation may be put at {@link Benchmark}
- * method to have effect on that method only, or at the enclosing class instance
- * to have the effect over all {@link Benchmark} methods
- * in the class. This annotation may be overridden with the runtime options.
- * </p>
+ * <p>Warmup annotation allows to set the default warmup parameters for the benchmark.</p>
  *
- * @see org.openjdk.jmh.annotations.Measurement
+ * <p>This annotation may be put at {@link Benchmark} method to have effect on that method
+ * only, or at the enclosing class instance to have the effect over all {@link Benchmark}
+ * methods in the class. This annotation may be overridden with the runtime options.</p>
+ *
+ * @see Measurement
  */
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

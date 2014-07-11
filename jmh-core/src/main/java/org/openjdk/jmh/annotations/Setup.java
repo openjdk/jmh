@@ -34,10 +34,9 @@ import java.lang.annotation.Target;
  *
  * <p>In order to figure out which thread should call the fixture, and what
  * state this method can initialize, {@link Setup} methods can only be declared in
- * {@link State} classes. Use {@link org.openjdk.jmh.annotations.Level} to decide
- * when to run the fixture.</p>
+ * {@link State} classes. Use {@link Level} to decide when to run the fixture.</p>
  *
- * @see org.openjdk.jmh.annotations.State
+ * @see State
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -45,7 +44,7 @@ public @interface Setup {
 
     /**
      * @return Level of this method.
-     * @see org.openjdk.jmh.annotations.Level
+     * @see Level
      */
     Level value() default Level.Trial;
 
