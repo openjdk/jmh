@@ -26,14 +26,13 @@ package org.openjdk.jmh.generators.annotations;
 
 import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;
+import org.openjdk.jmh.util.Utils;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 
 public class APGeneratorDestinaton implements GeneratorDestination {
@@ -68,12 +67,7 @@ public class APGeneratorDestinaton implements GeneratorDestination {
 
     @Override
     public void printError(String message, Throwable throwable) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        throwable.printStackTrace(pw);
-        pw.flush();
-        pw.close();
-        printError(message + " " + sw.toString());
+        printError(message + " " + Utils.throwableToString(throwable));
     }
 
 }

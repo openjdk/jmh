@@ -34,14 +34,13 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -276,13 +275,7 @@ public final class BinaryLinkServer {
             } catch (Exception e) {
                 out.println("<binary link had failed, forked VM corrupted the stream? Use " + VerboseMode.EXTRA + " verbose to print exception>");
                 if (opts.verbosity().orElse(Defaults.VERBOSITY).equalsOrHigherThan(VerboseMode.EXTRA)) {
-                    StringWriter sw = new StringWriter();
-                    {
-                        PrintWriter pw = new PrintWriter(sw, true);
-                        e.printStackTrace(pw);
-                        pw.close();
-                    }
-                    out.println(sw.toString());
+                    out.println(Utils.throwableToString(e));
                 }
             } finally {
                 close();

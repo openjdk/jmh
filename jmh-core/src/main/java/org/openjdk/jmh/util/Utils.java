@@ -27,6 +27,8 @@ package org.openjdk.jmh.util;
 import sun.misc.Unsafe;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,6 +97,15 @@ public class Utils {
         } else {
             return ((v / quant) + 1)*quant;
         }
+    }
+
+    public static String throwableToString(Throwable t) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        pw.flush();
+        pw.close();
+        return sw.toString();
     }
 
     public static int[] unmarshalIntArray(String src) {

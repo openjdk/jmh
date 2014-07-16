@@ -24,8 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.openjdk.jmh.util.Utils;
 
 public class SourceThrowableError extends SourceError {
 
@@ -38,10 +37,6 @@ public class SourceThrowableError extends SourceError {
 
     @Override
     public String toString() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        element.printStackTrace(pw);
-        pw.close();
-        return super.toString() + "\n" + sw.toString();
+        return super.toString() + "\n" + Utils.throwableToString(element);
     }
 }

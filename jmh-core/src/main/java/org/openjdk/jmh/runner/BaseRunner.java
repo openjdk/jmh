@@ -34,9 +34,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
+import org.openjdk.jmh.util.Utils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -104,13 +103,7 @@ abstract class BaseRunner {
             } catch (BenchmarkException be) {
                 out.println("<failure>");
                 out.println("");
-                StringWriter sw = new StringWriter();
-                {
-                    PrintWriter pw = new PrintWriter(sw, true);
-                    be.getCause().printStackTrace(pw);
-                    pw.close();
-                }
-                out.println(sw.toString());
+                out.println(Utils.throwableToString(be.getCause()));
                 out.println("");
 
                 if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
