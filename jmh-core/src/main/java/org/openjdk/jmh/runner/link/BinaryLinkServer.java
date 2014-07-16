@@ -28,18 +28,20 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
+import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -271,18 +273,17 @@ public final class BinaryLinkServer {
                         break;
                     }
                 }
-            } catch (ObjectStreamException e) {
-                throw new IllegalStateException(e);
-            } catch (InterruptedIOException e) {
-                throw new IllegalStateException(e);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            } catch (ClassNotFoundException e) {
-                throw new IllegalStateException(e);
-            } catch (InvocationTargetException e) {
-                throw new IllegalStateException(e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
+            } catch (Exception e) {
+                out.println("<binary link had failed, forked VM corrupted the stream? Use " + VerboseMode.EXTRA + " verbose to print exception>");
+                if (opts.verbosity().orElse(Defaults.VERBOSITY).equalsOrHigherThan(VerboseMode.EXTRA)) {
+                    StringWriter sw = new StringWriter();
+                    {
+                        PrintWriter pw = new PrintWriter(sw, true);
+                        e.printStackTrace(pw);
+                        pw.close();
+                    }
+                    out.println(sw.toString());
+                }
             } finally {
                 close();
             }
