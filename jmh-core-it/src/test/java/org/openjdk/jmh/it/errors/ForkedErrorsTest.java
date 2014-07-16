@@ -87,6 +87,26 @@ public class ForkedErrorsTest {
         Thread.sleep(1);
     }
 
+    @Benchmark
+    public void test07_runtimeExit() throws InterruptedException {
+        Runtime.getRuntime().exit(1);
+    }
+
+    @Benchmark
+    public void test08_normal() throws InterruptedException {
+        Thread.sleep(1);
+    }
+
+    @Benchmark
+    public void test09_runtimeHalt() throws InterruptedException {
+        Runtime.getRuntime().halt(1);
+    }
+
+    @Benchmark
+    public void test10_normal() throws InterruptedException {
+        Thread.sleep(1);
+    }
+
     @Test
     public void test_FOE_false() throws RunnerException {
         Options opt = new OptionsBuilder()
@@ -96,7 +116,7 @@ public class ForkedErrorsTest {
                 .build();
         Collection<RunResult> results = new Runner(opt).run();
 
-        Assert.assertEquals(4, results.size());
+        Assert.assertEquals(6, results.size());
     }
 
     @Test
