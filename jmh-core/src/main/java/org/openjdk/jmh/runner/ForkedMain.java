@@ -53,6 +53,8 @@ class ForkedMain {
 
                 // establish the link to host VM and pull the options
                 link = new BinaryLinkClient(hostName, hostPort);
+                addShutdownHook(link);
+
                 Options options = link.requestOptions();
 
                 // dump outputs into binary link
@@ -66,16 +68,26 @@ class ForkedMain {
                 throw new IllegalArgumentException(ex.getMessage());
             } catch (ClassNotFoundException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
-            } finally {
-                if (link != null) {
-                    try {
-                        link.close();
-                    } catch (IOException e) {
-                        // swallow
-                    }
-                }
             }
         }
+    }
+
+    private static void addShutdownHook(final BinaryLinkClient link) {
+        Runtime.getRuntime().addShutdownHook(
+                new Thread() {
+                    @Override
+                    public void run() {
+                        if (link != null) {
+                            try {
+                                link.close();
+                            } catch (IOException e) {
+                                // swallow
+                            }
+                        }
+                    }
+                }
+        );
+
     }
 
 }
