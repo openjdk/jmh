@@ -34,6 +34,8 @@ import java.io.IOException;
  */
 class ForkedMain {
 
+    private static volatile boolean gracefullyFinished;
+
     /**
      * Application main entry point
      *
@@ -64,6 +66,8 @@ class ForkedMain {
                 // run!
                 ForkedRunner runner = new ForkedRunner(options, link);
                 runner.run();
+
+                gracefullyFinished = true;
             } catch (IOException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
             } catch (ClassNotFoundException ex) {
@@ -77,12 +81,24 @@ class ForkedMain {
                 new Thread() {
                     @Override
                     public void run() {
+                        if (!gracefullyFinished) {
+                            System.err.println("<failure: VM prematurely exited before JMH had finished with it, " +
+                                    "explicit System.exit was called?>");
+                        }
+
                         if (link != null) {
                             try {
                                 link.close();
                             } catch (IOException e) {
                                 // swallow
                             }
+                        }
+
+                        // If user did System.exit(0), we have to override the exit code
+                        // to let host VM know we encountered a problem. This should be done
+                        // after the link is flushed and down.
+                        if (!gracefullyFinished) {
+                            Runtime.getRuntime().halt(1);
                         }
                     }
                 }
