@@ -76,7 +76,7 @@ public class Main {
                     runner.list();
                 }
             } catch (RunnerException e) {
-                System.err.println("ERROR: " + e.getMessage());
+                System.err.print("ERROR: ");
                 e.printStackTrace(System.err);
             }
 

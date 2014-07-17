@@ -586,8 +586,10 @@ public class Runner extends BaseRunner {
             out.endBenchmark(new RunResult(results.get(params)).getAggregatedResult());
 
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            results.clear();
+            throw new BenchmarkException(e);
         } catch (BenchmarkException e) {
+            results.clear();
             if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
                 out.println("Benchmark had encountered error, and fail on error was requested");
                 throw e;

@@ -146,7 +146,8 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
                 } catch (InterruptedException ex) {
                     throw new BenchmarkException(ex);
                 } catch (ExecutionException ex) {
-                    Throwable cause = ex.getCause().getCause(); // unwrap
+                    // unwrap: ExecutionException -> Throwable-wrapper -> InvocationTargetException
+                    Throwable cause = ex.getCause().getCause().getCause();
                     throw new BenchmarkException(cause);
                 } catch (TimeoutException e) {
                     // try to kick the thread, if it was already started

@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.runner;
 
+/**
+ * Internal exception in JMH. Always wraps the real cause.
+ */
 public class BenchmarkException extends RuntimeException {
-    public BenchmarkException(String message) {
-        super(message);
-    }
 
     public BenchmarkException(Throwable ex) {
         super(ex);
