@@ -587,6 +587,11 @@ public class Runner extends BaseRunner {
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        } catch (BenchmarkException e) {
+            if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
+                out.println("Benchmark had encountered error, and fail on error was requested");
+                throw e;
+            }
         } finally {
             if (server != null) {
                 server.terminate();
@@ -644,11 +649,8 @@ public class Runner extends BaseRunner {
                 out.println("</stderr>");
 
                 out.println("");
-                if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
-                    throw new BenchmarkException(
-                        new IllegalStateException("Forked VM failed with exit code " + ecode)
-                    );
-                }
+
+                throw new BenchmarkException(new IllegalStateException("Forked VM failed with exit code " + ecode));
             }
 
         } catch (IOException ex) {
