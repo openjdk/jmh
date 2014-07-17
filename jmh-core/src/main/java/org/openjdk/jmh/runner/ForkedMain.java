@@ -89,7 +89,8 @@ class ForkedMain {
                                 try {
                                     link.pushException(new BenchmarkException(new IllegalStateException(msg)));
                                 } catch (IOException e) {
-                                    // do nothing
+                                    // last resort
+                                    System.err.println(msg);
                                 }
                             } else {
                                 // last resort
@@ -103,13 +104,6 @@ class ForkedMain {
                             } catch (IOException e) {
                                 // swallow
                             }
-                        }
-
-                        // If user did System.exit(0), we have to override the exit code
-                        // to let host VM know we encountered a problem. This should be done
-                        // after the link is flushed and down.
-                        if (!gracefullyFinished) {
-//                            Runtime.getRuntime().halt(1);
                         }
                     }
                 }
