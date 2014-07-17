@@ -136,6 +136,24 @@ public class FileUtils {
         }
     }
 
+    public static Collection<String> readAllLines(File file) throws IOException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            List<String> lines = new ArrayList<String>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+            return lines;
+        } finally {
+            FileUtils.safelyClose(fis);
+        }
+
+    }
+
+
     public static Collection<File> getClasses(File root) {
         Collection<File> result = new ArrayList<File>();
 

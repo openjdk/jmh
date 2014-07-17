@@ -82,8 +82,19 @@ class ForkedMain {
                     @Override
                     public void run() {
                         if (!gracefullyFinished) {
-                            System.err.println("<failure: VM prematurely exited before JMH had finished with it, " +
-                                    "explicit System.exit was called?>");
+                            String msg = "<failure: VM prematurely exited before JMH had finished with it, " +
+                                    "explicit System.exit was called?>";
+                            if (link != null) {
+                                link.getOutStream().println(msg);
+                                try {
+                                    link.pushException(new BenchmarkException(new IllegalStateException(msg)));
+                                } catch (IOException e) {
+                                    // do nothing
+                                }
+                            } else {
+                                // last resort
+                                System.err.println(msg);
+                            }
                         }
 
                         if (link != null) {
@@ -98,7 +109,7 @@ class ForkedMain {
                         // to let host VM know we encountered a problem. This should be done
                         // after the link is flushed and down.
                         if (!gracefullyFinished) {
-                            Runtime.getRuntime().halt(1);
+//                            Runtime.getRuntime().halt(1);
                         }
                     }
                 }
