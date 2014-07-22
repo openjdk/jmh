@@ -46,6 +46,8 @@ class TextResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Collection<RunResult> runResults) {
+        final int COLUMN_PAD = 2;
+
         Collection<String> benchNames = new ArrayList<String>();
         for (RunResult runResult : runResults) {
             benchNames.add(runResult.getParams().getBenchmark());
@@ -56,13 +58,14 @@ class TextResultFormat implements ResultFormat {
 
         Map<String, String> benchPrefixes = ClassUtils.denseClassNames(benchNames);
 
-        // determine max name
-        int nameLen = 1;
+        // determine name column length
+        int nameLen = "Benchmark".length();
         for (String prefix : benchPrefixes.values()) {
             nameLen = Math.max(nameLen, prefix.length());
         }
-        nameLen += 2;
+        nameLen += COLUMN_PAD;
 
+        // determine param lengths
         Map<String, Integer> paramLengths = new HashMap<String, Integer>();
         SortedSet<String> params = new TreeSet<String>();
         for (RunResult runResult : runResults) {
@@ -71,53 +74,90 @@ class TextResultFormat implements ResultFormat {
                 params.add(k);
                 Integer len = paramLengths.get(k);
                 if (len == null) {
-                    len = ("(" + k + ")").length();
+                    len = ("(" + k + ")").length() + COLUMN_PAD;
                 }
-                paramLengths.put(k, Math.max(len, bp.getParam(k).length()));
+                paramLengths.put(k, Math.max(len, bp.getParam(k).length() + COLUMN_PAD));
             }
         }
 
-        out.print(String.format("%-" + nameLen + "s ", "Benchmark"));
+        // determine column lengths for other columns
+        int modeLen     = "Mode".length();
+        int samplesLen  = "Samples".length();
+        int scoreLen    = "Score".length();
+        int scoreErrLen = "Score Error".length();
+        int unitLen     = "Units".length();
+
+        for (RunResult res : runResults) {
+            Result primRes = res.getPrimaryResult();
+
+            modeLen     = Math.max(modeLen,     res.getParams().getMode().shortLabel().length());
+            samplesLen  = Math.max(samplesLen,  String.format("%d",   primRes.getSampleCount()).length());
+            scoreLen    = Math.max(scoreLen,    String.format("%.3f", primRes.getScore()).length());
+            scoreErrLen = Math.max(scoreErrLen, String.format("%.3f", primRes.getScoreError()).length());
+            unitLen     = Math.max(unitLen,     primRes.getScoreUnit().length());
+
+            for (String label : res.getSecondaryResults().keySet()) {
+                Result subRes = res.getSecondaryResults().get(label);
+                samplesLen  = Math.max(samplesLen,  String.format("%d",   subRes.getSampleCount()).length());
+                scoreLen    = Math.max(scoreLen,    String.format("%.3f", subRes.getScore()).length());
+                scoreErrLen = Math.max(scoreErrLen, String.format("%.3f", subRes.getScoreError()).length());
+                unitLen     = Math.max(unitLen,     subRes.getScoreUnit().length());
+            }
+        }
+        modeLen     += COLUMN_PAD;
+        samplesLen  += COLUMN_PAD;
+        scoreLen    += COLUMN_PAD;
+        scoreErrLen += COLUMN_PAD;
+        unitLen     += COLUMN_PAD;
+
+        out.print(String.format("%-" + nameLen + "s", "Benchmark"));
         for (String k : params) {
-            out.print(String.format("%" + paramLengths.get(k) + "s ", "(" + k + ")"));
+            out.print(String.format("%" + paramLengths.get(k) + "s", "(" + k + ")"));
         }
 
-        out.print(String.format("%6s %9s %12s %12s %8s%n",
-                "Mode", "Samples", "Score", "Score error", "Units"));
+        out.print(String.format("%" + modeLen + "s",     "Mode"));
+        out.print(String.format("%" + samplesLen + "s",  "Samples"));
+        out.print(String.format("%" + scoreLen + "s",    "Score"));
+        out.print(String.format("%" + scoreErrLen + "s", "Score error"));
+        out.print(String.format("%" + unitLen + "s",     "Units"));
+        out.println();
+
         for (RunResult res : runResults) {
             {
-                out.print(String.format("%-" + nameLen + "s ",
+                out.print(String.format("%-" + nameLen + "s",
                         benchPrefixes.get(res.getParams().getBenchmark())));
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
+                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v));
                 }
 
                 Result pRes = res.getPrimaryResult();
-                out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
-                        res.getParams().getMode().shortLabel(),
-                        pRes.getSampleCount(),
-                        pRes.getScore(), pRes.getScoreError(),
-                        pRes.getScoreUnit()));
+                out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
+                out.print(String.format("%" + samplesLen + "d",     pRes.getSampleCount()));
+                out.print(String.format("%" + scoreLen + ".3f",     pRes.getScore()));
+                out.print(String.format("%" + scoreErrLen + ".3f",  pRes.getScoreError()));
+                out.print(String.format("%" + unitLen + "s",        pRes.getScoreUnit()));
+                out.println();
             }
 
             for (String label : res.getSecondaryResults().keySet()) {
                 Result subRes = res.getSecondaryResults().get(label);
 
-                out.print(String.format("%-" + nameLen + "s ",
+                out.print(String.format("%-" + nameLen + "s",
                         benchPrefixes.get(res.getParams().getBenchmark() + ":" + label)));
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
+                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v));
                 }
 
-                out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
-                        res.getParams().getMode().shortLabel(),
-                        subRes.getSampleCount(),
-                        subRes.getScore(), subRes.getScoreError(),
-                        subRes.getScoreUnit()));
+                out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
+                out.print(String.format("%" + samplesLen + "d",     subRes.getSampleCount()));
+                out.print(String.format("%" + scoreLen + ".3f",     subRes.getScore()));
+                out.print(String.format("%" + scoreErrLen + ".3f",  subRes.getScoreError()));
+                out.print(String.format("%" + unitLen + "s",        subRes.getScoreUnit()));
+                out.println();
             }
         }
 
