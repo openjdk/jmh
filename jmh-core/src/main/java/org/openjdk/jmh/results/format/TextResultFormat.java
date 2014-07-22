@@ -94,11 +94,12 @@ class TextResultFormat implements ResultFormat {
                     out.print(String.format("%" + paramLengths.get(k) + "s ", (v == null) ? "N/A" : v));
                 }
 
+                Result pRes = res.getPrimaryResult();
                 out.print(String.format("%6s %9d %12.3f %12.3f %8s%n",
                         res.getParams().getMode().shortLabel(),
-                        res.getPrimaryResult().getSampleCount(),
-                        res.getPrimaryResult().getScore(), res.getPrimaryResult().getScoreError(),
-                        res.getScoreUnit()));
+                        pRes.getSampleCount(),
+                        pRes.getScore(), pRes.getScoreError(),
+                        pRes.getScoreUnit()));
             }
 
             for (String label : res.getSecondaryResults().keySet()) {

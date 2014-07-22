@@ -101,10 +101,6 @@ public class RunResult implements Serializable {
         return result;
     }
 
-    public String getScoreUnit() {
-        return getPrimaryResult().getScoreUnit();
-    }
-
     public BenchmarkParams getParams() {
         return params;
     }
