@@ -39,7 +39,6 @@ import org.openjdk.jmh.util.TreeMultiset;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -47,7 +46,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StreamTokenizer;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,14 +60,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class LinuxPerfAsmProfiler implements ExternalProfiler {
+public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfiler {
 
     /**
      * Events to gather *
@@ -146,14 +141,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
      */
     private static final String SAVE_LOG_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveLogToFile");
 
-    private static final boolean IS_SUPPORTED;
-    private static final Collection<String> FAIL_MSGS;
-
-    static {
-        FAIL_MSGS = tryWith("perf", "stat", "echo", "1");
-        IS_SUPPORTED = FAIL_MSGS.isEmpty();
-    }
-
     private String hsLog;
     private String perfBinData;
     private String perfParsedData;
@@ -166,7 +153,7 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList("perf", "record", "-F " + SAMPLE_FREQUENCY, "-e " + Utils.join(EVENTS, ","), "-o" + perfBinData);
+        return Arrays.asList("perf", "record", "-F" + SAMPLE_FREQUENCY, "-e" + Utils.join(EVENTS, ","), "-o" + perfBinData);
     }
 
     @Override
@@ -215,36 +202,6 @@ public class LinuxPerfAsmProfiler implements ExternalProfiler {
             msgs.addAll(FAIL_MSGS);
             return false;
         }
-    }
-
-    static Collection<String> tryWith(String... cmd) {
-        Collection<String> messages = new ArrayList<String>();
-        try {
-            Process p = Runtime.getRuntime().exec(cmd);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
-
-            errDrainer.start();
-            outDrainer.start();
-
-            int err = p.waitFor();
-
-            errDrainer.join();
-            outDrainer.join();
-
-            if (err > 0) {
-                messages.add(baos.toString());
-            }
-        } catch (IOException ex) {
-            return Collections.singleton(ex.getMessage());
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException(ex);
-        }
-        return messages;
     }
 
     @Override

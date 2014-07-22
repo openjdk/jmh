@@ -29,17 +29,14 @@ import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.util.InputStreamDrainer;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,22 +45,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LinuxPerfProfiler implements ExternalProfiler {
+public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler {
 
     /** Delay collection for given time; -1 to detect automatically */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perf.delayMs", -1);
-
-    private static final boolean IS_SUPPORTED;
-    private static final boolean IS_DELAYED;
-    private static final Collection<String> FAIL_MSGS;
-
-    static {
-        FAIL_MSGS = tryWith("perf", "stat", "echo", "1");
-        IS_SUPPORTED = FAIL_MSGS.isEmpty();
-
-        Collection<String> delay = tryWith("perf", "stat", "-D 1", "echo", "1");
-        IS_DELAYED = delay.isEmpty();
-    }
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
@@ -77,9 +62,9 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         }
 
         if (IS_DELAYED) {
-            return Arrays.asList("perf", "stat", "-d", "-d", "-d", "-D " + delay);
+            return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d", "-D", String.valueOf(delay));
         } else {
-            return Arrays.asList("perf", "stat", "-d", "-d", "-d");
+            return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d");
         }
     }
 
@@ -117,36 +102,6 @@ public class LinuxPerfProfiler implements ExternalProfiler {
             msgs.addAll(FAIL_MSGS);
             return false;
         }
-    }
-
-    private static Collection<String> tryWith(String... cmd) {
-        Collection<String> messages = new ArrayList<String>();
-        try {
-            Process p = Runtime.getRuntime().exec(cmd);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
-
-            errDrainer.start();
-            outDrainer.start();
-
-            int err = p.waitFor();
-
-            errDrainer.join();
-            outDrainer.join();
-
-            if (err > 0) {
-                messages.add(baos.toString());
-            }
-        } catch (IOException ex) {
-            return Collections.singleton(ex.getMessage());
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException(ex);
-        }
-        return messages;
     }
 
     @Override
