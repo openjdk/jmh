@@ -14,16 +14,6 @@
        the plugin version set to most recent Kotlin compiler.
      -->
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jmh.version>${project.version}</jmh.version>
-        <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
-    </properties>
-
-    <prerequisites>
-        <maven>3.0.4</maven>
-    </prerequisites>
-
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
@@ -35,6 +25,17 @@
             org.jetbrains.kotlin:kotlin-stdlib:0.6.2517 is one of the choices
          -->
     </dependencies>
+
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jmh.version>${project.version}</jmh.version>
+        <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
+        <javac.target>1.6</javac.target>
+    </properties>
 
     <build>
         <plugins>
@@ -142,9 +143,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <compilerVersion>1.6</compilerVersion>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <compilerVersion>\${javac.target}</compilerVersion>
+                    <source>\${javac.target}</source>
+                    <target>\${javac.target}</target>
                     <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
             </plugin>
