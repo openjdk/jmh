@@ -30,7 +30,6 @@ import org.openjdk.jmh.util.Statistics;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.Collection;
 
 /**
  * Base class for all types of results that can be returned by a benchmark.
@@ -176,7 +175,11 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      */
     @Override
     public String toString() {
-        return String.format("%.3f \u00B1(99.9%%) %.3f %s", getScore(), getScoreError(), getScoreUnit());
+        if (getStatistics().getN() > 2) {
+            return String.format("%.3f \u00B1(99.9%%) %.3f %s", getScore(), getScoreError(), getScoreUnit());
+        } else {
+            return String.format("%.3f %s", getScore(), getScoreUnit());
+        }
     }
 
     /**
