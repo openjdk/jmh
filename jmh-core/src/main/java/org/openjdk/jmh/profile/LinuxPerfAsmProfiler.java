@@ -482,6 +482,18 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             }
         }
 
+        {
+            int sum = 0;
+            for (String ev : events.totalCounts.keySet()) {
+                sum += events.totalCounts.get(ev);
+            }
+
+            if (sum < 1000) {
+                pw.println("WARNING: The perf event count is suspiciously low (" + sum + "). The performance data might be\n" +
+                        "inaccurate or misleading. Try to do the profiling again, or tune up the sampling frequency.");
+            }
+        }
+
         /**
          * Print perf output, if needed:
          */
