@@ -665,6 +665,9 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             //
             // Sample input string:
             //    java   598 11937.621044:  cycles:      7f7318c26a10 StringTable::intern(Symbol*, Thread*) (.../libjvm.so)
+            //
+            // Old perfs skip the unresolved symbol names:
+            //    java  6118 171515.765683: instructions:          b4a84c58  (/tmp/perf-6108.map)
 
             String line;
             while ((line = reader.readLine()) != null) {
@@ -672,7 +675,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
                 String[] elems = line.trim().split("[ ]+");
 
-                if (elems.length < 7) continue;
+                if (elems.length < 6) continue;
 
                 String process = elems[0];
                 String strTime = elems[2].replace(":", "");
