@@ -73,10 +73,11 @@ public final class BinaryLinkClient {
 
     public void close() throws IOException {
         synchronized (lock) {
-            oos.writeObject(new FinishingFrame());
-            FileUtils.safelyClose(oos);
             FileUtils.safelyClose(streamErr);
             FileUtils.safelyClose(streamOut);
+            oos.writeObject(new FinishingFrame());
+            FileUtils.safelyClose(ois);
+            FileUtils.safelyClose(oos);
             clientSocket.close();
         }
     }
