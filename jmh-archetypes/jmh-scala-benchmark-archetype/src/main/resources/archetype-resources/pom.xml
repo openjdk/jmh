@@ -34,6 +34,7 @@
         <jmh.version>${project.version}</jmh.version>
         <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
         <javac.target>1.6</javac.target>
+        <uberjar.name>benchmarks</uberjar.name>
     </properties>
 
     <build>
@@ -151,7 +152,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>benchmarks</finalName>
+                            <finalName>\${uberjar.name}</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jmh.Main</mainClass>
