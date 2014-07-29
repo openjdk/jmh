@@ -63,6 +63,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfiler {
 
@@ -610,24 +612,47 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
     Assembly readAssembly(File stdOut) {
         try {
+            Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
+
             List<ASMLine> lines = new ArrayList<ASMLine>();
             SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
             SortedMap<Long, String> methodMap = new TreeMap<Long, String>();
 
-            String method = null;
+            Map<Long, String> writerToMethod = new HashMap<Long, String>();
+            Long writerId = -1L;
+
             String line;
             BufferedReader br = new BufferedReader(new FileReader(stdOut));
             while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] elements = line.trim().split(" ");
+                String trim = line.trim();
+
+                if (trim.isEmpty()) continue;
+                String[] elements = trim.split(" ");
 
                 ASMLine asmLine = new ASMLine(line);
-                if (line.contains("{method}")) {
+
+                // Parse the writer threads IDs:
+                //    <writer thread='140703710570240'/>
+                if (line.contains("<writer thread=")) {
+                    Matcher m = pWriterThread.matcher(line);
+                    if (m.matches()) {
+                        try {
+                            writerId = Long.valueOf(m.group(2));
+                        } catch (NumberFormatException e) {
+                            // something is wrong, try to recover
+                        }
+                    }
+                } else if (line.contains("{method}")) {
                     if (elements.length == 7) {
-                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
+                        String method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
                         method = method.replace("&apos;", "");
                         method = method.replace("&lt;", "<");
                         method = method.replace("&gt;", ">");
+                        writerToMethod.put(writerId, method);
+                    } else {
+                        // {method} line is corrupted, other writer had possibly interjected;
+                        // honestly say we can't figure the method name out instead of lying.
+                        writerToMethod.put(writerId, "<name unparseable>");
                     }
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be line with address.
@@ -636,9 +661,11 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                         int idx = lines.size();
                         addressMap.put(addr, idx);
 
+                        // Record the starting address for the method, if any,
+                        String method = writerToMethod.get(writerId);
                         if (method != null) {
                             methodMap.put(addr, method);
-                            method = null;
+                            writerToMethod.remove(writerId);
                         }
 
                         asmLine = new ASMLine(addr, line);
