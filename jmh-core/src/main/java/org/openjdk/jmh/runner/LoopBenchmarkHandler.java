@@ -101,10 +101,16 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         }
 
         // wait for the iteration time to expire
-        try {
-            runtime.sleep();
-        } catch (InterruptedException e) {
-            // regardless...
+        switch (benchmarkParams.getMode()) {
+            case SingleShotTime:
+                // don't wait here, block on timed result Future
+                break;
+            default:
+                try {
+                    runtime.sleep();
+                } catch (InterruptedException e) {
+                    // regardless...
+                }
         }
 
         // now we communicate all worker threads should stop
