@@ -156,6 +156,10 @@ public class JMHSample_07_FixtureLevelInvocation {
      *    $ mvn clean install
      *    $ java -jar target/benchmarks.jar ".*JMHSample_07.*" -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
+     *
+     * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

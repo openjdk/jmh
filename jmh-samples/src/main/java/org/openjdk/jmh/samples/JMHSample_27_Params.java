@@ -81,6 +81,8 @@ public class JMHSample_27_Params {
      *    You can juggle parameters through the command line, e.g. with "-p arg=41,42"
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

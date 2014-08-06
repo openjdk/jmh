@@ -112,6 +112,8 @@ public class JMHSample_05_StateFixtures {
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

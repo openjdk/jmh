@@ -149,6 +149,8 @@ public class JMHSample_29_StatesDAG {
      *    $ java -jar target/benchmarks.jar ".*JMHSample_29.*"
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

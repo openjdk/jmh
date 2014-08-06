@@ -129,6 +129,8 @@ public class JMHSample_28_BlackholeHelpers {
      *    $ java -jar target/benchmarks.jar ".*JMHSample_28.*"
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

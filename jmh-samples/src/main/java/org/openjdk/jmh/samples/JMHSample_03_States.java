@@ -104,6 +104,8 @@ public class JMHSample_03_States {
      *    (we requested 5 measurement/warmup iterations, with 4 threads, single fork)
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

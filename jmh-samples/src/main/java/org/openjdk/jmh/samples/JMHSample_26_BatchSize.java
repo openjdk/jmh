@@ -117,6 +117,8 @@ public class JMHSample_26_BatchSize {
      *    $ java -jar target/benchmarks.jar ".*JMHSample_26.*" -f 1
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

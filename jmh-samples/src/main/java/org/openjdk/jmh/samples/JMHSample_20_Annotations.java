@@ -79,6 +79,8 @@ public class JMHSample_20_Annotations {
      *    $ java -jar target/benchmarks.jar ".*JMHSample_20.*"
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

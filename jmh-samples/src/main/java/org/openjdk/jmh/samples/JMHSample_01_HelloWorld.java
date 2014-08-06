@@ -78,7 +78,9 @@ public class JMHSample_01_HelloWorld {
      * The runtime options for the JMH are available with "-h":
      *    $ java -jar target/benchmarks.jar -h
      *
-     * b) Via Java API:
+     * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

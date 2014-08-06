@@ -93,6 +93,8 @@ public class JMHSample_30_Interrupts {
      *    (we requested 5 warmup iterations, 5 iterations, 2 threads, and 5 forks)
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {

@@ -102,6 +102,8 @@ public class JMHSample_17_SyncIterations {
      *     lots of threads, and changeable "synchronize iterations" option)
      *
      * b) Via the Java API:
+     *    (see the JMH homepage for possible caveats when running from IDE:
+     *      http://openjdk.java.net/projects/code-tools/jmh/)
      */
 
     public static void main(String[] args) throws RunnerException {
