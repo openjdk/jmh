@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Mode;
@@ -52,22 +52,23 @@ public class JMHSample_15_Asymmetric {
      * which can bind several methods together, and all the threads are distributed among
      * the test methods.
      *
-     * Each execution group contains of two or more threads. If more threads are requested
-     * to be run via the command line option, then more execution groups are created.
-     * JMH will always round up the actual thread count to the execution group size, this
-     * will only allow the full execution groups.
+     * Each execution group contains of one or more threads. Each thread within a particular
+     * execution group executes one of @Group-annotated @Benchmark methods. Multiple execution
+     * groups may participate in the run. The total thread count in the run is rounded to the
+     * execution group size, which will only allow the full execution groups.
      *
      * Note that two state scopes: Scope.Benchmark and Scope.Thread are not covering all
      * the use cases here -- you either share everything in the state, or share nothing.
      * To break this, we have the middle ground Scope.Group, which marks the state to be
-     * shared within the execution group, but not among the groups.
+     * shared within the execution group, but not among the execution groups.
      *
-     * Putting this all together, if we want to run this with 8 threads, the example below
-     * means:
-     *  a) make two execution groups, each having 4 threads (by default)
-     *  b) each execution group has one benchmark instance to share (= share the $counter)
-     *  c) each execution group has 3 thread executing inc().
-     *  d) each execution group has 1 thread executing get().
+     * Putting this all together, the example below means:
+     *  a) define the execution group "g", with 3 threads executing inc(), and 1 thread
+     *     executing get(), 4 threads per group in total;
+     *  b) if we run this test case with 4 threads, then we will have a single execution
+     *     group. Generally, running with 4*N threads will create N execution groups, etc.;
+     *  c) each execution group has one @State instance to share: that is, execution groups
+     *     share the counter within the group, but not across the groups.
      */
 
     private AtomicInteger counter;
