@@ -105,22 +105,27 @@ public class ClassUtils {
             maxLen = Math.max(maxLen, s.length());
         }
 
+        boolean first = true;
+
         String[] prefix = new String[0];
         for (String s : src) {
             String[] names = s.split("\\.");
-            if (prefix.length == 0) {
+
+            if (first) {
                 prefix = names;
+                first = false;
                 continue;
             }
 
-            int prefixRun = 0;
-            for (int c = 0; c < Math.min(prefix.length, names.length); c++, prefixRun++) {
+            int c = 0;
+            while (c < Math.min(prefix.length, names.length)) {
                 if (!names[c].equals(prefix[c])) {
                     break;
                 }
+                c++;
             }
 
-            prefix = Arrays.copyOf(prefix, prefixRun);
+            prefix = Arrays.copyOf(prefix, c);
         }
 
         for (int c = 0; c < prefix.length; c++) {

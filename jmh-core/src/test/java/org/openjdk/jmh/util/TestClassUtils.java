@@ -58,4 +58,15 @@ public class TestClassUtils {
         Assert.assertEquals("o.o.b.ForkJoinTest.test1:label1", map.get("org.openjdk.benches.ForkJoinTest.test1:label1"));
     }
 
+    @Test
+    public void testDifferentPackages() {
+        List<String> src = Arrays.asList("com.some.even.longer.word.SomeEvenMoreWeirdBenchmark", "my.sample.pkg.MySampleBenchmark", "test.jmh.TestJmhBenchmark");
+        Map<String,String> map = ClassUtils.denseClassNames(src);
+
+        Assert.assertEquals("com.some.even.longer.word.SomeEvenMoreWeirdBenchmark", map.get("com.some.even.longer.word.SomeEvenMoreWeirdBenchmark"));
+        Assert.assertEquals("my.sample.pkg.MySampleBenchmark", map.get("my.sample.pkg.MySampleBenchmark"));
+        Assert.assertEquals("test.jmh.TestJmhBenchmark", map.get("test.jmh.TestJmhBenchmark"));
+    }
+
+
 }
