@@ -724,32 +724,30 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                 String lib = elems[elems.length - 1];
                 lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
 
-                if (process.equalsIgnoreCase("java")) {
-                    try {
-                        Double time = Double.valueOf(strTime);
-                        if (startTime == null) {
-                            startTime = time;
-                        } else {
-                            if (time - startTime < skipSec) {
-                                continue;
-                            }
+                try {
+                    Double time = Double.valueOf(strTime);
+                    if (startTime == null) {
+                        startTime = time;
+                    } else {
+                        if (time - startTime < skipSec) {
+                            continue;
                         }
-                    } catch (NumberFormatException e) {
-                        // misformatted line, no timestamp
-                        continue;
                     }
+                } catch (NumberFormatException e) {
+                    // misformatted line, no timestamp
+                    continue;
+                }
 
-                    Multiset<Long> evs = events.get(evName);
-                    try {
-                        Long addr = Long.valueOf(strAddr, 16);
-                        evs.add(addr);
-                        methods.put(addr, dedup.dedup(symbol));
-                        libs.put(addr, dedup.dedup(lib));
-                    } catch (NumberFormatException e) {
-                        // kernel addresses like "ffffffff810c1b00" overflow signed long,
-                        // record them as dummy address
-                        evs.add(0L);
-                    }
+                Multiset<Long> evs = events.get(evName);
+                try {
+                    Long addr = Long.valueOf(strAddr, 16);
+                    evs.add(addr);
+                    methods.put(addr, dedup.dedup(symbol));
+                    libs.put(addr, dedup.dedup(lib));
+                } catch (NumberFormatException e) {
+                    // kernel addresses like "ffffffff810c1b00" overflow signed long,
+                    // record them as dummy address
+                    evs.add(0L);
                 }
             }
 
