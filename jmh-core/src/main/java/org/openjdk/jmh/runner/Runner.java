@@ -657,8 +657,12 @@ public class Runner extends BaseRunner {
             }
 
         } catch (IOException ex) {
+            out.println("<failed to invoke the VM, caught IOException: " + ex.getMessage() + ">");
+            out.println("");
             throw new BenchmarkException(ex);
         } catch (InterruptedException ex) {
+            out.println("<host VM has been interrupted waiting for forked VM: " + ex.getMessage() + ">");
+            out.println("");
             throw new BenchmarkException(ex);
         } finally {
             FileUtils.safelyClose(fosErr);
