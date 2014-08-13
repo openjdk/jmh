@@ -34,9 +34,7 @@ import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.results.format.ResultFormat;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
-import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
@@ -234,10 +232,13 @@ public class Runner extends BaseRunner {
         out.flush();
         out.close();
 
-        ResultFormatType resultFormatType = options.getResultFormat().orElse(Defaults.RESULT_FORMAT);
-        String resultFormatFile = options.getResult().orElse(Defaults.RESULT_FILE);
-        ResultFormat resultFormat = ResultFormatFactory.getInstance(resultFormatType, resultFormatFile);
-        resultFormat.writeOut(results);
+        // If user requested the result file in one way or the other, write it out.
+        if (options.getResult().hasValue() || options.getResultFormat().hasValue()) {
+            ResultFormatFactory.getInstance(
+                        options.getResultFormat().orElse(Defaults.RESULT_FORMAT),
+                        options.getResult().orElse(Defaults.RESULT_FILE)
+            ).writeOut(results);
+        }
 
         return results;
     }

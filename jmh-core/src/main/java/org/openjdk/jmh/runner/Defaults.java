@@ -110,7 +110,7 @@ public class Defaults {
     /**
      * The default {@link org.openjdk.jmh.results.format.ResultFormatType} to use.
      */
-    public static final ResultFormatType RESULT_FORMAT = ResultFormatType.NONE;
+    public static final ResultFormatType RESULT_FORMAT = ResultFormatType.CSV;
 
     /**
      * Default location of result file.
