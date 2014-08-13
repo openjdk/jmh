@@ -162,7 +162,7 @@ public class CommandLineOptions implements Options {
         OptionSpec<Integer> optThreadGroups = parser.accepts("tg", "Override thread group distribution for asymmetric benchmarks.")
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(Integer.class).describedAs("int+");
 
-        OptionSpec<String> optJvm = parser.accepts("jvm", "Custom JVM to use when forking.")
+        OptionSpec<String> optJvm = parser.accepts("jvm", "Custom JVM to use when forking (path to JVM executable).")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Custom JVM args to use when forking.")

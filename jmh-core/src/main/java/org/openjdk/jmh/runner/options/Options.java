@@ -202,8 +202,8 @@ public interface Options extends Serializable {
     Optional<Integer> getWarmupForkCount();
 
     /**
-     * JVM to use for forks
-     * @return JVM binary location
+     * JVM executable to use for forks
+     * @return path to JVM executable
      */
     Optional<String> getJvm();
 
