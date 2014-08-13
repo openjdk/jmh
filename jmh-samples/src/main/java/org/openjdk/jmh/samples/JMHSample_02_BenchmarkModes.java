@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.runner.Runner;
@@ -55,7 +55,10 @@ public class JMHSample_02_BenchmarkModes {
      */
 
     /*
-     * This benchmark type measures the raw throughput.
+     * This benchmark type measures the raw throughput by continuously calling
+     * the benchmark method in the time-bound iteration, and counting how many
+     * times we executed the method.
+     *
      * We are using the special annotation to select the units to measure in,
      * although you can use the default.
      */
@@ -68,7 +71,9 @@ public class JMHSample_02_BenchmarkModes {
     }
 
     /*
-     * This benchmark type measures the average execution time.
+     * This benchmark type measures the average execution time, and it does it
+     * in the way similar to Mode.Throughput.
+     *
      * Some might say it is the reciprocal throughput, and it really is.
      * There are workloads where measuring times is more convenient though.
      */
@@ -81,11 +86,12 @@ public class JMHSample_02_BenchmarkModes {
     }
 
     /*
-     * This benchmark type samples the execution time.
-     * With this benchmark, we are gathering the execution timings on their own,
-     * which allows us to infer the distributions, percentiles, etc.
+     * This benchmark type samples the execution time. With this mode, we are
+     * still running the method in a time-bound iteration, but instead of measuring
+     * the total time, we periodically sample the time spent in *some* of the
+     * benchmark method calls.
      *
-     * At this point, JMH only calculates percentile estimates.
+     * This allows us to infer the distributions, percentiles, etc.
      *
      * JMH also tries to auto-adjust sampling frequency: if the method
      * is long enough, you will end up capturing all the samples.
@@ -98,7 +104,11 @@ public class JMHSample_02_BenchmarkModes {
     }
 
     /*
-     * This benchmark type measures the single method invocation time.
+     * This benchmark type measures the single method invocation time. As the name
+     * suggests, we do only the single benchmark method invocation. The iteration
+     * time is meaningless in this mode: as soon as benchmark method stops, the
+     * iteration is over.
+     *
      * This mode is useful to do cold startup tests, when you specifically
      * do not want to call the benchmark method continuously.
      */
