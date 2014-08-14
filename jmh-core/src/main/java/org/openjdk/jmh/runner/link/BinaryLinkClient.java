@@ -72,9 +72,14 @@ public final class BinaryLinkClient {
     }
 
     public void close() throws IOException {
+        // BinaryLinkClient (BLC) should not acquire the BLC lock while dealing with
+        // ForwardingPrintStream (FPS): if there is a pending operation in FPS,
+        // and it writes something out, it will acquire the BLC lock after acquiring
+        // FPS lock => deadlock. Let FPS figure this one out on its own.
+        FileUtils.safelyClose(streamErr);
+        FileUtils.safelyClose(streamOut);
+
         synchronized (lock) {
-            FileUtils.safelyClose(streamErr);
-            FileUtils.safelyClose(streamOut);
             oos.writeObject(new FinishingFrame());
             FileUtils.safelyClose(ois);
             FileUtils.safelyClose(oos);
