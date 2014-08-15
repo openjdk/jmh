@@ -102,20 +102,20 @@ public class Runner extends BaseRunner {
         if (options == null) {
             throw new IllegalArgumentException("Options not allowed to be null.");
         }
-        PrintStream out;
-        // setup OutputFormat singleton
+
+        // Intercept the System.out when redirection is requested.
+        // FIXME: We need to properly give up on stream after we are done with it
+        // FIXME: We need to safeguard from accidentally closing the underlying "out"
         if (options.getOutput().hasValue()) {
             try {
-                out = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(options.getOutput().get()))));
+                PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(options.getOutput().get()))));
                 System.setOut(out); // override to print everything to file
             } catch (FileNotFoundException ex) {
                 throw new IllegalStateException(ex);
             }
-        } else {
-            out = System.out;
         }
 
-        return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.VERBOSITY));
+        return OutputFormatFactory.createFormatInstance(System.out, options.verbosity().orElse(Defaults.VERBOSITY));
     }
 
     /**
