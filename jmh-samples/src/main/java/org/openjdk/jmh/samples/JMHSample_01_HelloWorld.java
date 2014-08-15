@@ -35,14 +35,16 @@ public class JMHSample_01_HelloWorld {
     /*
      * This is our first benchmark method.
      *
-     * The contract for the benchmark methods is very simple:
-     * annotate it with @Benchmark, and you are set to go.
-     * JMH will run the test by continuously calling this method, and measuring
-     * the performance metrics for its execution.
+     * JMH works as follows: users annotated the methods with @Benchmark, and
+     * then JMH produces the generated code to run this particular benchmark
+     * as reliable as possible. In general, one might think about @Benchmark
+     * methods as the benchmark "payload", the things we want to measure.
+     * The surrounding infrastructure is provided by the harness itself.
      *
-     * The method names are non-essential, it matters they are marked with
-     * @Benchmark. You can have multiple benchmark methods
-     * within the same class.
+     * Read the Javadoc for @Benchmark annotation for complete semantics and
+     * restrictions. At this point, we only not that the methods names are
+     * non-essential, and it only matters the methods are marked with
+     * @Benchmark. You can have multiple benchmark methods within the same class.
      *
      * Note: if the benchmark method never finishes, then JMH run never
      * finishes as well. If you throw the exception from the method body,
