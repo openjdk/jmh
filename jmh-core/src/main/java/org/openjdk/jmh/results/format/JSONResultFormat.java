@@ -199,6 +199,7 @@ class JSONResultFormat implements ResultFormat {
     }
 
     private String tidy(String s) {
+        s = s.replaceAll("\r", "");
         s = s.replaceAll("\n", " ");
         s = s.replaceAll(",", ",\n");
         s = s.replaceAll("\\{", "{\n");
