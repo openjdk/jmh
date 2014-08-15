@@ -29,11 +29,14 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.ServiceLoader;
 
 public class ProfilerFactory {
 
     public static List<Class<? extends Profiler>> getAvailableProfilers() {
         List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
+
+        // All built-in profilers:
         profs.add(ClassloaderProfiler.class);
         profs.add(CompilerProfiler.class);
         profs.add(GCProfiler.class);
@@ -45,6 +48,16 @@ public class ProfilerFactory {
         profs.add(StackProfiler.class);
         profs.add(LinuxPerfProfiler.class);
         profs.add(LinuxPerfAsmProfiler.class);
+
+        // Try to discover more profilers through the SPI
+        profs.addAll(getDiscoveredProfilers());
+        return profs;
+    }
+
+    public static List<Class<? extends Profiler>> getDiscoveredProfilers() {
+        List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
+        for (Profiler s : ServiceLoader.loadInstalled(Profiler.class))
+            profs.add(s.getClass());
         return profs;
     }
 

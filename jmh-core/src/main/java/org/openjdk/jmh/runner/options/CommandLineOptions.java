@@ -442,18 +442,28 @@ public class CommandLineOptions implements Options {
     public void listProfilers() {
         StringBuilder supported = new StringBuilder();
         StringBuilder unsupported = new StringBuilder();
+
+        List<Class<? extends Profiler>> discoveredProfilers = ProfilerFactory.getDiscoveredProfilers();
+
         for (Class<? extends Profiler> s : ProfilerFactory.getAvailableProfilers()) {
             List<String> initMessages = new ArrayList<String>();
             if (ProfilerFactory.checkSupport(s, initMessages)) {
-                supported.append(String.format("%20s: %s\n", ProfilerFactory.getLabel(s), ProfilerFactory.getDescription(s)));
+                supported.append(String.format("%20s: %s %s\n",
+                        ProfilerFactory.getLabel(s),
+                        ProfilerFactory.getDescription(s),
+                        discoveredProfilers.contains(s) ? "(discovered)" : ""));
             } else {
-                unsupported.append(String.format("%20s: %s\n", ProfilerFactory.getLabel(s), ProfilerFactory.getDescription(s)));
+                unsupported.append(String.format("%20s: %s %s\n",
+                        ProfilerFactory.getLabel(s),
+                        ProfilerFactory.getDescription(s),
+                        discoveredProfilers.contains(s) ? "(discovered)" : ""));
                 for (String im : initMessages) {
                     unsupported.append(String.format("%20s  %s\n", "", im));
                 }
                 unsupported.append("\n");
             }
         }
+
         if (!supported.toString().isEmpty()) {
             System.out.println("Supported profilers:\n" + supported.toString());
         }
