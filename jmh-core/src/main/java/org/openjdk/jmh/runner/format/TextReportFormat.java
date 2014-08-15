@@ -163,7 +163,6 @@ class TextReportFormat extends AbstractOutputFormat {
         PrintWriter pw = new PrintWriter(out);
         ResultFormatFactory.getInstance(ResultFormatType.TEXT, pw).writeOut(runResults);
         pw.flush();
-        pw.close();
     }
 
 }
