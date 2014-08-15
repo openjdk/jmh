@@ -34,12 +34,6 @@ import java.lang.annotation.Target;
  * <p>GroupThreads defines how many threads are participating in running
  * a particular {@link Benchmark} method in the group.</p>
  *
- * <p><b>Interaction with "total threads" settings:</b> JMH will always have the full
- * execution groups, which forces the framework to round up the total number of threads
- * to accommodate the execution group size. For example, running {@link Group}
- * with two {@link Benchmark} methods, each having {@link GroupThreads}(4), will run
- * 8*N threads (where N is integer), regardless of the requested total number of threads.</p>
- *
  * @see Group
  */
 @Inherited

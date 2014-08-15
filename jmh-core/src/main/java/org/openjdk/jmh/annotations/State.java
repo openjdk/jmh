@@ -38,9 +38,10 @@ import java.lang.annotation.Target;
  * worker threads.</p>
  *
  * <p>State objects are usually injected into {@link Benchmark} methods as arguments,
- * and JMH takes care of their instantiation and sharing. State objects* may also be
+ * and JMH takes care of their instantiation and sharing. State objects may also be
  * injected into {@link Setup} and {@link TearDown} methods of other {@link State}
- * objects to get staged initialization.</p>
+ * objects to get the staged initialization. In that case, the dependency graph
+ * between the {@link State}-s should be directed acyclic graph.</p>
  *
  * <p>State objects may be inherited: you can place {@link State} on a super class and
  * use subclasses as states.</p>

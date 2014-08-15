@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * and should only reside in in {@link State} classes. JMH will inject
  * the value into the annotated field before any {@link Setup} method
  * is called. It is <b>not</b> guaranteed the field value would be accessible
- * in any instance initializer and/or constructor of {@link State}.</p>
+ * in any instance initializer or any constructor of {@link State}.</p>
  *
  * <p>Parameters are acceptable on any primitive type, primitive wrapper type,
  * a String, or an Enum. The annotation value is given in String, and will be
@@ -59,8 +59,8 @@ public @interface Param {
     static final String BLANK_ARGS = "blank_blank_blank_2014";
 
     /**
-     * Default values sequence for the parameter. The parameter values
-     * would be taken in the order given by user.
+     * Default values sequence for the parameter. By default, the parameter
+     * values will be traversed during the run in the given order.
      *
      * @return values sequence to follow.
      */

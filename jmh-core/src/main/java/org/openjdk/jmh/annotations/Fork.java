@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Fork annotation allows to set the default forking parameters for the benchmark.
+ * <b>Fork annotation allows to set the default forking parameters for the benchmark.</b>
  *
  * <p>This annotation may be put at {@link Benchmark} method to have effect on that
  * method only, or at the enclosing class instance to have the effect over all

@@ -32,9 +32,14 @@ import java.lang.annotation.Target;
 /**
  * <p>TearDown marks the fixture method to be run after the benchmark.</p>
  *
- * <p>In order to figure out which thread should call the fixture, and what
- * state this method can initialize, {@link TearDown} methods can only be declared in
- * {@link State} classes. Use {@link Level} to decide when to run the fixture.</p>
+ * <p>Since fixture methods manage the {@link State} lifecycles, {@link TearDown}
+ * can only be declared in {@link State} classes. The {@link TearDown} method will
+ * be executed by a thread which has the access to {@link State}, and it is not
+ * defined which thread exactly. Note that means {@link Setup} may be executed
+ * by a different thread, if {@link State} is shared between the threads.</p>
+ *
+ * <p>Uses may optionally provide the {@link Level} at which the fixture method
+ * should run.</p>
  *
  * @see State
  */

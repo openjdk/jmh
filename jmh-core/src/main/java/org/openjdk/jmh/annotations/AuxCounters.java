@@ -36,6 +36,11 @@ import java.lang.annotation.Target;
  * returning {int, long} values, and treat their values as the operation counts
  * in current iteration.</p>
  *
+ * <p>This allows to override the default operations counter with the user-provided one.
+ * Instead of relying on JMH itself counting the number of {@link Benchmark} calls,
+ * users can tell JMH how many calls actually happened. Note that it might require
+ * modifying the counter at each {@link Benchmark} invocation.</p>
+ *
  * <p><b>THIS IS AN EXPERIMENTAL API, which means, among other things:</b></p>
  *
  * <ul>
