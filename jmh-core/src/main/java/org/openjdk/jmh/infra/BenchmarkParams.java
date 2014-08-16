@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
  */
 @State(Scope.Thread)
 public class BenchmarkParams extends BenchmarkParamsL4 {
+    private static final long serialVersionUID = -1068219503090299117L;
 
     /**
      * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
@@ -84,6 +85,8 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
 }
 
 abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
+    private static final long serialVersionUID = -2409216922027695385L;
+
     private int markerEnd;
     public BenchmarkParamsL4(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
@@ -105,6 +108,8 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
 }
 
 abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
+    private static final long serialVersionUID = -53511295235994554L;
+
     private boolean q001, q002, q003, q004, q005, q006, q007, q008;
     private boolean q011, q012, q013, q014, q015, q016, q017, q018;
     private boolean q021, q022, q023, q024, q025, q026, q027, q028;
@@ -165,6 +170,8 @@ abstract class BenchmarkParamsL0 {
 }
 
 abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializable, Comparable<BenchmarkParams> {
+    private static final long serialVersionUID = -1068219503090299117L;
+
     protected final String benchmark;
     protected final String generatedTarget;
     protected final boolean synchIterations;

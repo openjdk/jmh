@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
+    private static final long serialVersionUID = 1323519395777393861L;
 
     private final Map<K, Collection<V>> map;
 

@@ -28,6 +28,7 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.inference.TestUtils;
 
 public abstract class AbstractStatistics implements Statistics {
+    private static final long serialVersionUID = 1536835581997509117L;
 
     /**
      * Returns the interval c1, c2 of which there's an 1-alpha

@@ -29,6 +29,8 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import java.io.Serializable;
 
 class Action implements Serializable {
+    private static final long serialVersionUID = -7315320958163363586L;
+
     private final BenchmarkParams params;
     private final ActionMode mode;
 

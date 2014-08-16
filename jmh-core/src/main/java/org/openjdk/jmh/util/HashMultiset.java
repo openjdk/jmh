@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HashMultiset<T> implements Multiset<T>, Serializable {
+    private static final long serialVersionUID = 8149201968248505516L;
 
     private final Map<T, Long> map;
     private long size;

@@ -29,6 +29,8 @@ import org.openjdk.jmh.runner.BenchmarkException;
 import java.io.Serializable;
 
 class ExceptionFrame implements Serializable {
+    private static final long serialVersionUID = 5595622047639653401L;
+
     private final BenchmarkException error;
 
     public ExceptionFrame(BenchmarkException error) {

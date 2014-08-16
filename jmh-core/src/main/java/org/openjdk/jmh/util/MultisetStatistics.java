@@ -25,6 +25,7 @@
 package org.openjdk.jmh.util;
 
 public class MultisetStatistics extends AbstractStatistics {
+    private static final long serialVersionUID = -4401871054963903938L;
 
     private final Multiset<Double> values;
 

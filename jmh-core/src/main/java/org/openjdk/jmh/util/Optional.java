@@ -31,6 +31,7 @@ import java.io.Serializable;
  * @param <T> stored value.
  */
 public class Optional<T> implements Serializable {
+    private static final long serialVersionUID = 5691070564925468961L;
 
     private final T val;
 

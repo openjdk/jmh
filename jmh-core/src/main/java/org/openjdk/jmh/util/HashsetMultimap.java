@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class HashsetMultimap<K, V> implements Multimap<K, V>, Serializable {
+    private static final long serialVersionUID = -4236100656731956836L;
 
     private final Map<K, Collection<V>> map;
 

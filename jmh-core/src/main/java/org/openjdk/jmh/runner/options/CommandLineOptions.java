@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
  * Class that handles all the command line options.
  */
 public class CommandLineOptions implements Options {
+    private static final long serialVersionUID = 5565183446360224399L;
 
     private final Optional<Integer> iterations;
     private final Optional<TimeValue> runTime;

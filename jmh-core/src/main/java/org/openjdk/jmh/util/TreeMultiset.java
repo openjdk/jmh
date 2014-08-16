@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class TreeMultiset<T extends Comparable<T>> implements Multiset<T>, Serializable {
+    private static final long serialVersionUID = 3571810468402616517L;
 
     private final Map<T, Long> map;
     private long size;

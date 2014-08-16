@@ -170,6 +170,8 @@ public class StackProfiler implements InternalProfiler {
     }
 
     private static class StackRecord implements Serializable {
+        private static final long serialVersionUID = -1829626661894754733L;
+
         public final String[] lines;
 
         private StackRecord(String[] lines) {
@@ -194,6 +196,8 @@ public class StackProfiler implements InternalProfiler {
     }
 
     public static class StackResult extends Result<StackResult> {
+        private static final long serialVersionUID = 2609170863630346073L;
+
         private final Map<Thread.State, Multiset<StackRecord>> stacks;
 
         public StackResult(Map<Thread.State, Multiset<StackRecord>> stacks) {

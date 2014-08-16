@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * Result class that stores once operation execution time.
  */
 public class SingleShotResult extends Result {
+    private static final long serialVersionUID = -1251578870918524737L;
 
     public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
         this(role, label,

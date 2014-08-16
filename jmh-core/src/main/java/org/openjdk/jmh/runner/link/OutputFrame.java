@@ -27,6 +27,8 @@ package org.openjdk.jmh.runner.link;
 import java.io.Serializable;
 
 class OutputFrame implements Serializable {
+    private static final long serialVersionUID = 8570795333046092668L;
+
     private final Type type;
     private final byte[] data;
 

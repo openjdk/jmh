@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
+    private static final long serialVersionUID = 2484428623123444998L;
 
     private final Map<K, Collection<V>> map;
 

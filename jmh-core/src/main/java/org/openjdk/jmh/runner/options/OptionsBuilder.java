@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class OptionsBuilder implements Options, ChainedOptionsBuilder {
+    private static final long serialVersionUID = -4088596253924343849L;
 
     @Override
     public Options build() {

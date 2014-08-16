@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * Result class that samples operation time.
  */
 public class SampleTimeResult extends Result {
+    private static final long serialVersionUID = -295298353763294757L;
 
     private final SampleBuffer buffer;
     private final TimeUnit outputTimeUnit;

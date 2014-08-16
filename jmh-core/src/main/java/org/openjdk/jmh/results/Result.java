@@ -35,6 +35,7 @@ import java.io.StringWriter;
  * Base class for all types of results that can be returned by a benchmark.
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
+    private static final long serialVersionUID = -7332879501317733312L;
 
     protected final ResultRole role;
     protected final String label;

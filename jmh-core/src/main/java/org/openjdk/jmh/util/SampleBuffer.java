@@ -30,6 +30,7 @@ import java.io.Serializable;
  * Sampling buffer accepts samples.
  */
 public class SampleBuffer implements Serializable {
+    private static final long serialVersionUID = 6124923853916845327L;
 
     private static final int PRECISION_BITS = 10;
 

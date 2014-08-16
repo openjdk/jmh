@@ -31,6 +31,8 @@ import org.openjdk.jmh.util.Multimap;
 import java.io.Serializable;
 
 class ResultsFrame implements Serializable {
+    private static final long serialVersionUID = -5627086531281515824L;
+
     private final Multimap<BenchmarkParams, BenchmarkResult> res;
 
     public ResultsFrame(Multimap<BenchmarkParams, BenchmarkResult> res) {

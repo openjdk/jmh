@@ -48,6 +48,8 @@ import java.io.Serializable;
  */
 @State(Scope.Thread)
 public class IterationParams extends IterationParamsL4 {
+    private static final long serialVersionUID = -8111111319033802892L;
+
     static {
         Utils.check(IterationParams.class, "type", "count", "timeValue", "batchSize");
     }
@@ -62,6 +64,8 @@ public class IterationParams extends IterationParamsL4 {
 }
 
 abstract class IterationParamsL4 extends IterationParamsL3 {
+    private static final long serialVersionUID = 9079354621906758255L;
+
     private int markerEnd;
     public IterationParamsL4(IterationType type, int count, TimeValue time, int batchSize) {
         super(type, count, time, batchSize);
@@ -73,6 +77,8 @@ abstract class IterationParamsL4 extends IterationParamsL3 {
 }
 
 abstract class IterationParamsL3 extends IterationParamsL2 {
+    private static final long serialVersionUID = 3907464940104879178L;
+
     private boolean q001, q002, q003, q004, q005, q006, q007, q008;
     private boolean q011, q012, q013, q014, q015, q016, q017, q018;
     private boolean q021, q022, q023, q024, q025, q026, q027, q028;
@@ -123,6 +129,8 @@ abstract class IterationParamsL0 {
 }
 
 abstract class IterationParamsL2 extends IterationParamsL1 implements Serializable {
+    private static final long serialVersionUID = -6138850517953881052L;
+
     /**
      * iteration type
      */

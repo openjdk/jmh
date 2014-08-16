@@ -28,6 +28,7 @@ package org.openjdk.jmh.runner;
  * Internal exception in JMH. Always wraps the real cause.
  */
 public class BenchmarkException extends RuntimeException {
+    private static final long serialVersionUID = 4064666042830679837L;
 
     public BenchmarkException(Throwable ex) {
         super(ex);

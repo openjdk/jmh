@@ -40,6 +40,7 @@ import java.util.TreeMap;
  * Class contains all info returned by benchmark iteration or/and collected during benchmark iteration.
  */
 public class IterationResult implements Serializable {
+    private static final long serialVersionUID = 960397066774710819L;
 
     private final BenchmarkParams benchmarkParams;
     private final IterationParams params;

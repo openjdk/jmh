@@ -30,6 +30,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class WorkloadParams implements Comparable<WorkloadParams>, Serializable {
+    private static final long serialVersionUID = 780563934988950196L;
 
     private final SortedMap<String, Value> params;
 
@@ -104,6 +105,8 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
     }
 
     private static class Value implements Comparable<Value>, Serializable {
+        private static final long serialVersionUID = 8846779314306880977L;
+
         private String value;
         private int order;
 

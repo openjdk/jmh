@@ -31,6 +31,8 @@ import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.Statistics;
 
 public class ProfilerResult extends Result<ProfilerResult> {
+    private static final long serialVersionUID = 3407232747805728586L;
+
     public ProfilerResult(String label, double n, String unit, AggregationPolicy policy) {
         this(label, of(n), unit, policy);
     }

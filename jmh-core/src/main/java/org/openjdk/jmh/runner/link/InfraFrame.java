@@ -27,6 +27,7 @@ package org.openjdk.jmh.runner.link;
 import java.io.Serializable;
 
 class InfraFrame implements Serializable {
+    private static final long serialVersionUID = 6341776120773421805L;
 
     private final Type type;
 

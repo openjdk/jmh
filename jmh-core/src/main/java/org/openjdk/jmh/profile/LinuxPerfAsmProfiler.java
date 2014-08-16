@@ -760,6 +760,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     }
 
     static class PerfResult extends Result<PerfResult> {
+        private static final long serialVersionUID = 6871141606856800453L;
+
         private final String output;
 
         public PerfResult(String output) {

@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * Result class that counts the number of operations performed during a specified unit of time.
  */
 public class ThroughputResult extends Result {
+    private static final long serialVersionUID = 7269598073169413322L;
 
     public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
         this(role, label,
