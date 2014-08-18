@@ -129,7 +129,7 @@ class TextResultFormat implements ResultFormat {
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "---" : v));
+                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v));
                 }
 
                 Result pRes = res.getPrimaryResult();
@@ -149,7 +149,7 @@ class TextResultFormat implements ResultFormat {
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "---" : v));
+                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v));
                 }
 
                 out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
