@@ -31,7 +31,6 @@ import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.HashMultiset;
-import org.openjdk.jmh.util.ListStatistics;
 import org.openjdk.jmh.util.Multiset;
 import org.openjdk.jmh.util.Multisets;
 
@@ -201,7 +200,7 @@ public class StackProfiler implements InternalProfiler {
         private final Map<Thread.State, Multiset<StackRecord>> stacks;
 
         public StackResult(Map<Thread.State, Multiset<StackRecord>> stacks) {
-            super(ResultRole.SECONDARY, "@stack", new ListStatistics(), "none", AggregationPolicy.AVG);
+            super(ResultRole.OMITTED, "@stack", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.stacks = stacks;
         }
 

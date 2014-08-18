@@ -25,8 +25,21 @@
 package org.openjdk.jmh.results;
 
 public enum ResultRole {
+
+    /**
+     * Participates in primary metric calculation.
+     */
     PRIMARY,
-    SECONDARY
+
+    /**
+     * Participates in secondary metric calculations.
+     */
+    SECONDARY,
+
+    /**
+     * Does not participate in any metric, garbage result.
+     */
+    OMITTED,
     ;
 
     public boolean isPrimary() {
