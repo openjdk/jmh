@@ -765,7 +765,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
         private final String output;
 
         public PerfResult(String output) {
-            super(ResultRole.SECONDARY, "@asm", of(Double.NaN), "N/A", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, "@asm", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.output = output;
         }
 
