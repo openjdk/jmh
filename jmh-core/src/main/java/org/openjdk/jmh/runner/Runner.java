@@ -568,11 +568,11 @@ public class Runner extends BaseRunner {
                     }
                     out.println("");
 
-                    if (!printOut) {
-                        out.println("# Profilers consume stdout from target VM, use -v " + VerboseMode.EXTRA + " to copy to console");
-                    }
-                    if (!printErr) {
-                        out.println("# Profilers consume stderr from target VM, use -v " + VerboseMode.EXTRA + " to copy to console");
+                    List<String> consumed = new ArrayList<String>();
+                    if (!printOut) consumed.add("stdout");
+                    if (!printErr) consumed.add("stderr");
+                    if (!consumed.isEmpty()) {
+                        out.println("# Profilers consume " + Utils.join(consumed, " and ") + " from target VM, use -v " + VerboseMode.EXTRA + " to copy to console");
                     }
                 }
 
