@@ -221,4 +221,15 @@ public class FileUtils {
         }
     }
 
+    public static void touch(String f) throws IOException {
+        File file = new File(f);
+        try {
+            if (file.createNewFile() || file.canWrite()) {
+                return;
+            }
+        } catch (IOException e) {
+            // fall-through
+        }
+        throw new IOException("The file is not writable: " + f);
+    }
 }

@@ -170,6 +170,18 @@ public class Runner extends BaseRunner {
             }
         }
 
+        // If user requested the result file in one way or the other, touch the result file,
+        // and prepare to write it out after the run.
+        String resultFile = null;
+        if (options.getResult().hasValue() || options.getResultFormat().hasValue()) {
+            resultFile = options.getResult().orElse(Defaults.RESULT_FILE);
+            try {
+                FileUtils.touch(resultFile);
+            } catch (IOException e) {
+                throw new RunnerException("Can not touch the result file: " + resultFile);
+            }
+        }
+
         SortedSet<BenchmarkListEntry> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
 
         if (benchmarks.isEmpty()) {
@@ -232,11 +244,11 @@ public class Runner extends BaseRunner {
         out.flush();
         out.close();
 
-        // If user requested the result file in one way or the other, write it out.
-        if (options.getResult().hasValue() || options.getResultFormat().hasValue()) {
+        // If user requested the result file, write it out.
+        if (resultFile != null) {
             ResultFormatFactory.getInstance(
                         options.getResultFormat().orElse(Defaults.RESULT_FORMAT),
-                        options.getResult().orElse(Defaults.RESULT_FILE)
+                        resultFile
             ).writeOut(results);
         }
 
