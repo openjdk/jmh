@@ -253,15 +253,15 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
          */
 
         Assembly assembly = readAssembly(new File(hsLog));
-        if (!assembly.isEmpty()) {
-            pw.printf("PrintAssembly processed: %d total lines%n", assembly.size());
+        if (assembly.size() > 0) {
+            pw.printf("PrintAssembly processed: %d total address lines.%n", assembly.size());
         } else if (SKIP_ASSEMBLY) {
             pw.println();
             pw.println("PrintAssembly skipped, Java methods are not resolved.");
             pw.println();
         } else {
             pw.println();
-            pw.println("No assembly, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
+            pw.println("ERROR: No address lines detected in assembly capture, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
             pw.println();
         }
 
@@ -292,7 +292,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             pw.println();
         } else {
             pw.println();
-            pw.println("No perf data, make sure \"perf stat echo 1\" is indeed working;\n " +
+            pw.println("ERROR: No perf data, make sure \"perf stat echo 1\" is indeed working;\n " +
                     "or the collection delay is not running past the benchmark time.");
             pw.println();
         }
@@ -857,12 +857,9 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             this(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
         }
 
-        public boolean isEmpty() {
-            return lines.isEmpty();
-        }
-
         public int size() {
-            return lines.size();
+            // We only care about the address lines.
+            return addressMap.size();
         }
 
         public List<ASMLine> getLines(long begin, long end, int window) {
