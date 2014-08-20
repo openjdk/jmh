@@ -110,7 +110,7 @@ class JSONResultFormat implements ResultFormat {
                 sb.append("\"scoreConfidence\" : ").append(emit(result.getScoreConfidence())).append(",");
                 sb.append(emitPercentiles(result.getStatistics()));
                 sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
-                sb.append("\"rawData\" :");
+                sb.append("\"rawData\" : ");
 
                 Collection<String> l2 = new ArrayList<String>();
                 for (BenchmarkResult benchmarkResult : runResult.getBenchmarkResults()) {
