@@ -46,6 +46,7 @@ import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.InputStreamDrainer;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
+import org.openjdk.jmh.util.UnCloseablePrintStream;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedOutputStream;
@@ -105,17 +106,20 @@ public class Runner extends BaseRunner {
 
         // Intercept the System.out when redirection is requested.
         // FIXME: We need to properly give up on stream after we are done with it
-        // FIXME: We need to safeguard from accidentally closing the underlying "out"
+        PrintStream out;
         if (options.getOutput().hasValue()) {
             try {
-                PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(options.getOutput().get()))));
+                out = new PrintStream(options.getOutput().get());
                 System.setOut(out); // override to print everything to file
             } catch (FileNotFoundException ex) {
                 throw new IllegalStateException(ex);
             }
+        } else {
+            // Protect the System.out from accidental closing
+            out = new UnCloseablePrintStream(System.out);
         }
 
-        return OutputFormatFactory.createFormatInstance(System.out, options.verbosity().orElse(Defaults.VERBOSITY));
+        return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.VERBOSITY));
     }
 
     /**
