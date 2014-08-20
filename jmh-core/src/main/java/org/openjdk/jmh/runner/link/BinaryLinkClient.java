@@ -54,6 +54,7 @@ public final class BinaryLinkClient {
     private final ObjectInputStream ois;
     private final ForwardingPrintStream streamErr;
     private final ForwardingPrintStream streamOut;
+    private final OutputFormat outputFormat;
 
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.lock = new Object();
@@ -62,6 +63,17 @@ public final class BinaryLinkClient {
         this.ois = new ObjectInputStream(clientSocket.getInputStream());
         this.streamErr = new ForwardingPrintStream(OutputFrame.Type.ERR);
         this.streamOut = new ForwardingPrintStream(OutputFrame.Type.OUT);
+        this.outputFormat = (OutputFormat) Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class[]{OutputFormat.class},
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        pushFrame(new OutputFormatFrame(ClassConventions.getMethodName(method), args));
+                        return null; // expect null
+                    }
+                }
+        );
     }
 
     private void pushFrame(Serializable frame) throws IOException {
@@ -129,18 +141,8 @@ public final class BinaryLinkClient {
         return streamErr;
     }
 
-    public OutputFormat getOutputFormatHook() {
-        return (OutputFormat) Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                new Class[]{OutputFormat.class},
-                new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        pushFrame(new OutputFormatFrame(ClassConventions.getMethodName(method), args));
-                        return null; // expect null
-                    }
-                }
-        );
+    public OutputFormat getOutputFormat() {
+        return outputFormat;
     }
 
     class ForwardingPrintStream extends PrintStream {

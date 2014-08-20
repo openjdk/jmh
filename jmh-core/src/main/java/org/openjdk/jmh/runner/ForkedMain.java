@@ -85,7 +85,7 @@ class ForkedMain {
                             String msg = "<failure: VM prematurely exited before JMH had finished with it, " +
                                     "explicit System.exit was called?>";
                             if (link != null) {
-                                link.getOutStream().println(msg);
+                                link.getOutputFormat().println(msg);
                                 try {
                                     link.pushException(new BenchmarkException(new IllegalStateException(msg)));
                                 } catch (IOException e) {

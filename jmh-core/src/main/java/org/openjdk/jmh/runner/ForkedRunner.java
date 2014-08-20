@@ -40,7 +40,7 @@ class ForkedRunner extends BaseRunner {
     private final BinaryLinkClient link;
 
     public ForkedRunner(Options options, BinaryLinkClient link) {
-        super(options, link.getOutputFormatHook());
+        super(options, link.getOutputFormat());
         this.link = link;
     }
 

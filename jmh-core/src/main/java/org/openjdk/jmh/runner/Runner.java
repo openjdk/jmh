@@ -49,7 +49,6 @@ import org.openjdk.jmh.util.TreeMultimap;
 import org.openjdk.jmh.util.UnCloseablePrintStream;
 import org.openjdk.jmh.util.Utils;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -104,13 +103,10 @@ public class Runner extends BaseRunner {
             throw new IllegalArgumentException("Options not allowed to be null.");
         }
 
-        // Intercept the System.out when redirection is requested.
-        // FIXME: We need to properly give up on stream after we are done with it
         PrintStream out;
         if (options.getOutput().hasValue()) {
             try {
                 out = new PrintStream(options.getOutput().get());
-                System.setOut(out); // override to print everything to file
             } catch (FileNotFoundException ex) {
                 throw new IllegalStateException(ex);
             }
