@@ -71,6 +71,10 @@ import java.util.concurrent.TimeUnit;
  * Runner executes JMH benchmarks.
  *
  * <p>This is the entry point for JMH Java API.</p>
+ *
+ * <p>{@link Runner} is not usually reusable. After you execute any method on the {@link Runner}, you should digest
+ * the results, give up on current {@link Runner}, and instantiate another one. This class may be turned into
+ * static class in future releases.</p>
  */
 public class Runner extends BaseRunner {
     private final BenchmarkList list;
