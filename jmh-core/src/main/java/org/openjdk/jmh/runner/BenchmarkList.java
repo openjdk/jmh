@@ -134,7 +134,7 @@ public class BenchmarkList extends AbstractResourceReader {
 
                                 // excludes override
                                 for (Pattern excludePattern : excludePatterns) {
-                                    if (excludePattern.matcher(line).find()) {
+                                    if (excludePattern.matcher(br.getUsername()).find()) {
                                         out.verbosePrintln("Excluding " + br.getUsername() + ", matches " + excludePattern);
 
                                         exclude = true;
