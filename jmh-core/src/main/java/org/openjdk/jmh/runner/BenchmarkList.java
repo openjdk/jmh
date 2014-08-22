@@ -85,7 +85,7 @@ public class BenchmarkList extends AbstractResourceReader {
     }
 
     /**
-     * Gets all the micro benchmarks that matches the given regexp, sorted
+     * Gets all the micro benchmarks that matches the given regexp, sorted.
      *
      * @param out Output the messages here
      * @param regexps  List of regexps to match against
@@ -109,7 +109,7 @@ public class BenchmarkList extends AbstractResourceReader {
             excludePatterns.add(Pattern.compile(regexp));
         }
 
-        // find all benchmarks matching pattern
+        // find all benchmarks containing pattern
         SortedSet<BenchmarkListEntry> result = new TreeSet<BenchmarkListEntry>();
         try {
             for (Reader r : getReaders()) {
@@ -129,12 +129,12 @@ public class BenchmarkList extends AbstractResourceReader {
                         BenchmarkListEntry br = new BenchmarkListEntry(line);
 
                         for (Pattern pattern : includePatterns) {
-                            if (pattern.matcher(br.getUsername()).matches()) {
+                            if (pattern.matcher(br.getUsername()).find()) {
                                 boolean exclude = false;
 
                                 // excludes override
                                 for (Pattern excludePattern : excludePatterns) {
-                                    if (excludePattern.matcher(line).matches()) {
+                                    if (excludePattern.matcher(line).find()) {
                                         out.verbosePrintln("Excluding " + br.getUsername() + ", matches " + excludePattern);
 
                                         exclude = true;

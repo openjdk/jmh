@@ -25,13 +25,13 @@
 package org.openjdk.jmh.runner;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +41,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests for BenchmarkList
  */
-@Ignore
 public class TestBenchmarkList {
 
     private static BenchmarkList list;
@@ -73,11 +72,37 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindSingle() throws Exception {
-        // check find without excldues
+    public void testListFindSingleByPattern() throws Exception {
+        // check find without excludes
         excludes.clear();
         Set<BenchmarkListEntry> micros = list.find(out, ".*Hash.*", excludes);
         assertEquals(7, micros.size());
+    }
+
+    @Test
+    public void testListFindSingleBySubstring() throws Exception {
+        // check find without excludes
+        excludes.clear();
+        Set<BenchmarkListEntry> micros = list.find(out, "Hash", excludes);
+        assertEquals(7, micros.size());
+    }
+
+    @Test
+    public void testListFindSingleByTypical() throws Exception {
+        // check find without excludes
+        excludes.clear();
+        // this would be a typical partial pattern with . abuse case
+        Set<BenchmarkListEntry> micros = list.find(out, "jbb05.GeneratedSPECjbb2005HashMap", excludes);
+        assertEquals(5, micros.size());
+    }
+
+    @Test
+    public void testListFindAnchored() throws Exception {
+        // check find without excludes
+        excludes.clear();
+        // matches only: org.openjdk.jmh.runner.TestMicro.dummy
+        Set<BenchmarkListEntry> micros = list.find(out, "^org\\.openjdk.*\\.dummy$", excludes);
+        assertEquals(1, micros.size());
     }
 
     @Test
@@ -90,6 +115,41 @@ public class TestBenchmarkList {
     }
 
     @Test
+    public void testListFindAllWithSubstringExclude() throws Exception {
+        // check find with excludes
+        excludes.clear();
+        excludes.add("oracle");
+        Set<BenchmarkListEntry> micros = list.find(out, "", excludes);
+        assertEquals(10, micros.size());
+    }
+
+    @Test
+    public void testListFindAllWithEmpty() throws Exception {
+        // will get modified
+        List<String> emptyIncludes = new ArrayList<String>();
+        excludes.clear();
+        Set<BenchmarkListEntry> micros = list.find(out, emptyIncludes, excludes);
+        assertEquals(20, micros.size());
+    }
+
+    @Test
+    public void testListFindIncludeList() throws Exception {
+        // check find with excludes
+        excludes.clear();
+        List<String> includes = Arrays.asList("^oracle", ".*openjmh.*");
+        Set<BenchmarkListEntry> micros = list.find(out, includes, excludes);
+        assertEquals(10, micros.size());
+    }
+
+    @Test
+    public void testListFindWithIncludesAndExcludes() throws Exception {
+        excludes.clear();
+        excludes.add(".*Int.*");
+        Set<BenchmarkListEntry> micros = list.find(out, ".*Concurrent.*", excludes);
+        assertEquals(2, micros.size());
+    }
+
+    @Test
     public void testListIsSorted() throws Exception {
         // micros should be sorted
         excludes.clear();
@@ -97,13 +157,5 @@ public class TestBenchmarkList {
         Set<BenchmarkListEntry> micros = list.find(out, ".*Hash.*", excludes);
         BenchmarkListEntry first = micros.iterator().next();
         assertTrue("oracle.micro.benchmarks.api.java.util.concurrent.GeneratedMaps.testConcurrentHashMap".equals(first.getUsername()));
-    }
-
-    @Test
-    public void testListGetWithIncludesAndExcludes() throws Exception {
-        excludes.clear();
-        excludes.add(".*Int.*");
-        Set<BenchmarkListEntry> micros = list.find(out, ".*Concurrent.*", excludes);
-        assertEquals(2, micros.size());
     }
 }
