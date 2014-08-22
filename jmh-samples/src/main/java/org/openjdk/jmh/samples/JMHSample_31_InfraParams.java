@@ -114,7 +114,7 @@ public class JMHSample_31_InfraParams {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_31.*" -wi 5 -i 5 -t 4 -f 5
+     *    $ java -jar target/benchmarks.jar JMHSample_31 -wi 5 -i 5 -t 4 -f 5
      *    (we requested 5 warmup iterations, 5 iterations, 2 threads, and 5 forks)
      *
      * b) Via the Java API:
@@ -124,7 +124,7 @@ public class JMHSample_31_InfraParams {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_31_InfraParams.class.getSimpleName() + ".*")
+                .include(JMHSample_31_InfraParams.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .threads(4)

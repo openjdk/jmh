@@ -122,7 +122,7 @@ public class JMHSample_21_ConsumeCPU {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_21.*" -w 1 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_21 -w 1 -i 5 -f 1
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -131,7 +131,7 @@ public class JMHSample_21_ConsumeCPU {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_21_ConsumeCPU.class.getSimpleName() + ".*")
+                .include(JMHSample_21_ConsumeCPU.class.getSimpleName())
                 .warmupIterations(1)
                 .measurementIterations(5)
                 .forks(1)

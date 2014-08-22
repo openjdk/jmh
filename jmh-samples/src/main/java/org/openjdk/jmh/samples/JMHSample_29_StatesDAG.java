@@ -146,7 +146,7 @@ public class JMHSample_29_StatesDAG {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_29.*"
+     *    $ java -jar target/benchmarks.jar JMHSample_29
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -155,7 +155,7 @@ public class JMHSample_29_StatesDAG {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_29_StatesDAG.class.getSimpleName() + ".*")
+                .include(JMHSample_29_StatesDAG.class.getSimpleName())
                 .build();
 
         new Runner(opt).run();

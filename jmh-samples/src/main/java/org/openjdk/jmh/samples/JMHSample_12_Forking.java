@@ -166,7 +166,7 @@ public class JMHSample_12_Forking {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_12.*" -wi 5 -i 5
+     *    $ java -jar target/benchmarks.jar JMHSample_12 -wi 5 -i 5
      *    (we requested 5 warmup/measurement iterations)
      *
      * b) Via the Java API:
@@ -176,7 +176,7 @@ public class JMHSample_12_Forking {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_12_Forking.class.getSimpleName() + ".*")
+                .include(JMHSample_12_Forking.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .build();

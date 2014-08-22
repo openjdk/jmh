@@ -74,7 +74,7 @@ public class JMHSample_01_HelloWorld {
      *
      * a) Via command-line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_01.*"
+     *    $ java -jar target/benchmarks.jar JMHSample_01
      *
      * JMH generates self-contained JARs, bundling JMH together with it.
      * The runtime options for the JMH are available with "-h":
@@ -87,7 +87,7 @@ public class JMHSample_01_HelloWorld {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_01_HelloWorld.class.getSimpleName() + ".*")
+                .include(JMHSample_01_HelloWorld.class.getSimpleName())
                 .forks(1)
                 .build();
 

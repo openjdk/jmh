@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -114,7 +114,7 @@ public class JMHSample_26_BatchSize {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_26.*" -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_26 -f 1
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -123,7 +123,7 @@ public class JMHSample_26_BatchSize {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_26_BatchSize.class.getSimpleName() + ".*")
+                .include(JMHSample_26_BatchSize.class.getSimpleName())
                 .forks(1)
                 .build();
 

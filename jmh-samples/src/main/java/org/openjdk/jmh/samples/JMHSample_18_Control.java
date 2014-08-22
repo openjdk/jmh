@@ -78,7 +78,7 @@ public class JMHSample_18_Control {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_18.*" -wi 1 -i 5 -t 2 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_18 -wi 1 -i 5 -t 2 -f 1
      *    (we requested 1 warmup iterations, 5 iterations, 2 threads, and single fork)
      *
      * b) Via the Java API:
@@ -88,7 +88,7 @@ public class JMHSample_18_Control {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_18_Control.class.getSimpleName() + ".*")
+                .include(JMHSample_18_Control.class.getSimpleName())
                 .warmupIterations(1)
                 .measurementIterations(5)
                 .threads(2)

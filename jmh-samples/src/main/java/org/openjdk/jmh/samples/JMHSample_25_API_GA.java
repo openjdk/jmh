@@ -87,7 +87,7 @@ public class JMHSample_25_API_GA {
         // measurement runs. That is, all measurement runs will inherit these,
         // see how it's done below.
         Options baseOpts = new OptionsBuilder()
-                .include(".*" + JMHSample_25_API_GA.class.getName() + ".*")
+                .include(JMHSample_25_API_GA.class.getName())
                 .warmupTime(TimeValue.milliseconds(200))
                 .measurementTime(TimeValue.milliseconds(200))
                 .warmupIterations(5)

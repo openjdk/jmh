@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -106,7 +106,7 @@ public class JMHSample_24_Inheritance {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_24.*"
+     *    $ java -jar target/benchmarks.jar JMHSample_24
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -115,7 +115,7 @@ public class JMHSample_24_Inheritance {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_24_Inheritance.class.getSimpleName() + ".*")
+                .include(JMHSample_24_Inheritance.class.getSimpleName())
                 .build();
 
         new Runner(opt).run();

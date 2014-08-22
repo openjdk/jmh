@@ -76,7 +76,7 @@ public class JMHSample_27_Params {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_27.*"
+     *    $ java -jar target/benchmarks.jar JMHSample_27
      *
      *    You can juggle parameters through the command line, e.g. with "-p arg=41,42"
      *
@@ -87,7 +87,7 @@ public class JMHSample_27_Params {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_27_Params.class.getSimpleName() + ".*")
+                .include(JMHSample_27_Params.class.getSimpleName())
 //                .param("arg", "41", "42") // Use this to selectively constrain/override parameters
                 .build();
 

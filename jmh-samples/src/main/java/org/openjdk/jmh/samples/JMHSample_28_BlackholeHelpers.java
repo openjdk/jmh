@@ -126,7 +126,7 @@ public class JMHSample_28_BlackholeHelpers {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_28.*"
+     *    $ java -jar target/benchmarks.jar JMHSample_28
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -135,7 +135,7 @@ public class JMHSample_28_BlackholeHelpers {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_28_BlackholeHelpers.class.getSimpleName() + ".*")
+                .include(JMHSample_28_BlackholeHelpers.class.getSimpleName())
                 .build();
 
         new Runner(opt).run();

@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -138,7 +138,7 @@ public class JMHSample_11_Loops {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_11.*" -wi 5 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_11 -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:
@@ -148,7 +148,7 @@ public class JMHSample_11_Loops {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_11_Loops.class.getSimpleName() + ".*")
+                .include(JMHSample_11_Loops.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)

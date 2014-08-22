@@ -108,7 +108,7 @@ public class JMHSample_05_StateFixtures {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -ea -jar target/benchmarks.jar ".*JMHSample_05.*" -wi 5 -i 5 -f 1
+     *    $ java -ea -jar target/benchmarks.jar JMHSample_05 -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:
@@ -118,7 +118,7 @@ public class JMHSample_05_StateFixtures {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_05_StateFixtures.class.getSimpleName() + ".*")
+                .include(JMHSample_05_StateFixtures.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)

@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -110,7 +110,7 @@ public class JMHSample_09_Blackholes {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_09.*" -wi 5 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_09 -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:
@@ -120,7 +120,7 @@ public class JMHSample_09_Blackholes {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_09_Blackholes.class.getSimpleName() + ".*")
+                .include(JMHSample_09_Blackholes.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)

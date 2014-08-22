@@ -158,7 +158,7 @@ public class JMHSample_02_BenchmarkModes {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_02.*" -wi 5 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_02 -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:
@@ -168,7 +168,7 @@ public class JMHSample_02_BenchmarkModes {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_02_BenchmarkModes.class.getSimpleName() + ".*")
+                .include(JMHSample_02_BenchmarkModes.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)

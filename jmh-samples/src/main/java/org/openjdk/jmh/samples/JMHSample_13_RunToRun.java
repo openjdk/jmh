@@ -102,7 +102,7 @@ public class JMHSample_13_RunToRun {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_13.*" -wi 0 -i 3
+     *    $ java -jar target/benchmarks.jar JMHSample_13 -wi 0 -i 3
      *    (we requested no warmup, 3 measurement iterations)
      *
      * b) Via the Java API:
@@ -112,7 +112,7 @@ public class JMHSample_13_RunToRun {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_13_RunToRun.class.getSimpleName() + ".*")
+                .include(JMHSample_13_RunToRun.class.getSimpleName())
                 .warmupIterations(0)
                 .measurementIterations(5)
                 .build();

@@ -101,7 +101,7 @@ public class JMHSample_15_Asymmetric {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_15.*" -wi 5 -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_15 -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      * b) Via the Java API:
@@ -111,7 +111,7 @@ public class JMHSample_15_Asymmetric {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_15_Asymmetric.class.getSimpleName() + ".*")
+                .include(JMHSample_15_Asymmetric.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)

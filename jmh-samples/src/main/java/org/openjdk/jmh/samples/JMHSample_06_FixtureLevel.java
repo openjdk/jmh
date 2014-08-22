@@ -80,7 +80,7 @@ public class JMHSample_06_FixtureLevel {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -ea -jar target/benchmarks.jar ".*JMHSample_06.*" -wi 5 -i 5 -f 1
+     *    $ java -ea -jar target/benchmarks.jar JMHSample_06 -wi 5 -i 5 -f 1
      *    (we requested 5 warmup/measurement iterations, single fork)
      *
      *    You can optionally supply -foe to fail the complete run.
@@ -92,7 +92,7 @@ public class JMHSample_06_FixtureLevel {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_06_FixtureLevel.class.getSimpleName() + ".*")
+                .include(JMHSample_06_FixtureLevel.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)

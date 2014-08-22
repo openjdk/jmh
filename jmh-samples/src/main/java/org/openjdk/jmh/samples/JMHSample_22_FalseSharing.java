@@ -24,9 +24,9 @@
  */
 package org.openjdk.jmh.samples;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -225,7 +225,7 @@ public class JMHSample_22_FalseSharing {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_22.*" -t $CPU
+     *    $ java -jar target/benchmarks.jar JMHSample_22 -t $CPU
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -234,7 +234,7 @@ public class JMHSample_22_FalseSharing {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_22_FalseSharing.class.getSimpleName() + ".*")
+                .include(JMHSample_22_FalseSharing.class.getSimpleName())
                 .threads(Runtime.getRuntime().availableProcessors())
                 .build();
 

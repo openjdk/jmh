@@ -24,8 +24,8 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
@@ -84,7 +84,7 @@ public class JMHSample_10_ConstantFold {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar ".*JMHSample_10.*" -i 5 -f 1
+     *    $ java -jar target/benchmarks.jar JMHSample_10 -i 5 -f 1
      *    (we requested 5 iterations, single fork)
      *
      * b) Via the Java API:
@@ -94,7 +94,7 @@ public class JMHSample_10_ConstantFold {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + JMHSample_10_ConstantFold.class.getSimpleName() + ".*")
+                .include(JMHSample_10_ConstantFold.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .forks(1)
