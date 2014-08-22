@@ -30,7 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -69,32 +69,21 @@ public class BenchmarkList extends AbstractResourceReader {
      * @return A list of all benchmarks, excluding matched
      */
     public Set<BenchmarkListEntry> getAll(OutputFormat out, List<String> excludes) {
-        return find(out, ".*", excludes);
+        return find(out, Arrays.asList(".*"), excludes);
     }
 
     /**
      * Gets all the micro benchmarks that matches the given regexp, sorted.
      *
      * @param out Output the messages here
-     * @param regexp   Regexp to match against
-     * @param excludes List of regexps to match excludes against
-     * @return Names of all micro benchmarks in the list that matches the include and NOT matching excludes
-     */
-    public Set<BenchmarkListEntry> find(OutputFormat out, String regexp, List<String> excludes) {
-        return find(out, Collections.singletonList(regexp), excludes);
-    }
-
-    /**
-     * Gets all the micro benchmarks that matches the given regexp, sorted.
-     *
-     * @param out Output the messages here
-     * @param regexps  List of regexps to match against
+     * @param includes  List of regexps to match against
      * @param excludes List of regexps to match excludes against
      * @return Names of all micro benchmarks in the list that matches includes and NOT matching excludes
      */
-    public SortedSet<BenchmarkListEntry> find(OutputFormat out, List<String> regexps, List<String> excludes) {
+    public SortedSet<BenchmarkListEntry> find(OutputFormat out, List<String> includes, List<String> excludes) {
 
         // assume we match all benchmarks when include is empty
+        List<String> regexps = new ArrayList<String>(includes);
         if (regexps.isEmpty()) {
             regexps.add(".*");
         }
