@@ -125,7 +125,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
                 return statistics.getMeanErrorAt(0.999);
             case SUM:
             case MAX:
-                return 0.0;
+                return Double.NaN;
             default:
                 throw new IllegalStateException("Unknown aggregation policy: " + policy);
         }
@@ -176,7 +176,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      */
     @Override
     public String toString() {
-        if (getStatistics().getN() > 2) {
+        if (!Double.isNaN(getScoreError())) {
             return String.format("%.3f \u00B1(99.9%%) %.3f %s", getScore(), getScoreError(), getScoreUnit());
         } else {
             return String.format("%.3f %s", getScore(), getScoreUnit());
