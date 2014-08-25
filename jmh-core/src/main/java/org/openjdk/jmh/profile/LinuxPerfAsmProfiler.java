@@ -143,6 +143,11 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
      */
     private static final String SAVE_LOG_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveLogToFile");
 
+    /**
+     * Skip tracing the classloading events.
+     */
+    private static final Boolean SKIP_TRACE_CL = Boolean.getBoolean("jmh.perfasm.skipTraceClassload");
+
     private String hsLog;
     private String perfBinData;
     private String perfParsedData;
@@ -161,15 +166,18 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     @Override
     public Collection<String> addJVMOptions(BenchmarkParams params) {
         if (!SKIP_ASSEMBLY) {
-            return Arrays.asList(
+            Collection<String> opts = new ArrayList<String>();
+            opts.addAll(Arrays.asList(
                     "-XX:+UnlockDiagnosticVMOptions",
-                    "-XX:+TraceClassLoading",
                     "-XX:+LogCompilation",
                     "-XX:LogFile=" + hsLog,
                     "-XX:+PrintAssembly",
                     "-XX:+PrintCompilation",
-                    "-XX:+PrintInlining"
-            );
+                    "-XX:+PrintInlining"));
+            if (!SKIP_TRACE_CL) {
+                opts.add("-XX:+TraceClassLoading");
+            }
+            return opts;
         } else {
             return Collections.emptyList();
         }
