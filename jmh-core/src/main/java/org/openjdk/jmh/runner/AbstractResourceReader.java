@@ -70,10 +70,10 @@ class AbstractResourceReader {
                                 : resource
                 );
             } catch (IOException e) {
-                throw new RuntimeException("IOException while obtaining resource: " + resource, e);
+                throw new RuntimeException("ERROR: While obtaining resource: " + resource, e);
             }
 
-            if (urls != null) {
+            if (urls != null && urls.hasMoreElements()) {
                 List<Reader> readers = new ArrayList<Reader>();
                 URL url = null;
                 try {
@@ -90,11 +90,11 @@ class AbstractResourceReader {
                             // ignore
                         }
                     }
-                    throw new RuntimeException("IOException while opening resource: " + url, e);
+                    throw new RuntimeException("ERROR: While opening resource: " + url, e);
                 }
                 return readers;
             } else {
-                throw new RuntimeException("Unable to find the resource");
+                throw new RuntimeException("ERROR: Unable to find the resource: " + resource);
             }
         }
 
