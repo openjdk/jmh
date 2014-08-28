@@ -187,7 +187,7 @@ abstract class BaseRunner {
 
         long secs = TimeUnit.NANOSECONDS.toSeconds(nanos);
 
-        return String.format("%s%02d:%02d:%02d", (days > 0) ? days + "days, " : "", hrs, mins, secs);
+        return String.format("%s%02d:%02d:%02d", (days > 0) ? days + " days, " : "", hrs, mins, secs);
     }
 
     BenchmarkResult runBenchmark(BenchmarkParams benchParams) {
