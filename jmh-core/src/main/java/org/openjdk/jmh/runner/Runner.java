@@ -77,6 +77,9 @@ import java.util.concurrent.TimeUnit;
  * static class in future releases.</p>
  */
 public class Runner extends BaseRunner {
+
+    private static final int TAIL_LINES_ON_ERROR = 20;
+
     private final BenchmarkList list;
     private int cpuCount;
 
@@ -656,13 +659,13 @@ public class Runner extends BaseRunner {
 
             if (ecode != 0) {
                 out.println("<forked VM failed with exit code " + ecode + ">");
-                out.println("<stdout last='10 lines'>");
-                for (String l : FileUtils.tail(stdOut, 10)) {
+                out.println("<stdout last='" + TAIL_LINES_ON_ERROR + " lines'>");
+                for (String l : FileUtils.tail(stdOut, TAIL_LINES_ON_ERROR)) {
                     out.println(l);
                 }
                 out.println("</stdout>");
-                out.println("<stderr last='10 lines'>");
-                for (String l : FileUtils.tail(stdErr, 10)) {
+                out.println("<stderr last='" + TAIL_LINES_ON_ERROR + " lines'>");
+                for (String l : FileUtils.tail(stdErr, TAIL_LINES_ON_ERROR)) {
                     out.println(l);
                 }
                 out.println("</stderr>");
