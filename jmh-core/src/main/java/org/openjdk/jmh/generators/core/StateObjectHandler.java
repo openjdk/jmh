@@ -40,7 +40,6 @@ import org.openjdk.jmh.util.Multimap;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -758,7 +757,7 @@ class StateObjectHandler {
                 pw.println("import " + so.userType + ";");
 
                 pw.println("public class " + so.type + "_B1 extends " + so.userType + " {");
-                Paddings.padding(pw, "b1");
+                Paddings.padding(pw);
                 addSuperCall(pw, so, "_B1");
                 pw.println("}");
 
@@ -813,7 +812,7 @@ class StateObjectHandler {
                 pw.println("package " + so.packageName + ";");
 
                 pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
-                Paddings.padding(pw, "b3");
+                Paddings.padding(pw);
                 addSuperCall(pw, so, "_B3");
                 pw.println("}");
                 pw.println("");

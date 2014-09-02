@@ -26,40 +26,32 @@ package org.openjdk.jmh.generators.core;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Paddings {
 
-    private static final Map<String, List<String>> PADDING_CACHE = new HashMap<String, List<String>>();
+    private static final List<String> PADDING_CACHE;
 
-    public static void padding(List<String> lines, String suffix) {
-        List<String> ps = PADDING_CACHE.get(suffix);
-        if (ps != null) {
-            lines.addAll(ps);
-            return;
-        }
-
-        List<String> tl = new ArrayList<String>();
+    static {
+        PADDING_CACHE = new ArrayList<String>();
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
             sb.append("    ");
-            sb.append("boolean ").append(suffix).append(String.format("_%03d", p * 16 + 0));
+            sb.append(String.format("boolean p%03d", p * 16 + 0));
             for (int q = 1; q < 16; q++) {
-                sb.append(", ").append(suffix).append(String.format("_%03d", p * 16 + q));
+                sb.append(String.format(", p%03d", p * 16 + q));
             }
             sb.append(";");
-            tl.add(sb.toString());
+            PADDING_CACHE.add(sb.toString());
         }
-        PADDING_CACHE.put(suffix, tl);
-        lines.addAll(tl);
     }
 
-    public static void padding(PrintWriter writer, String suffix) {
-        List<String> ss = new ArrayList<String>();
-        padding(ss, suffix);
-        for (String s : ss) {
+    public static void padding(List<String> lines) {
+        lines.addAll(PADDING_CACHE);
+    }
+
+    public static void padding(PrintWriter writer) {
+        for (String s : PADDING_CACHE) {
             writer.println(s);
         }
     }
