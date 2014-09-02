@@ -864,7 +864,7 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
-            writer.println(ident(2) + "int batchSize = control.iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation(), batchSize" + prefix(states.getArgList(method)) + ");");
 
@@ -971,12 +971,12 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
-            writer.println(ident(2) + "int batchSize = control.iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
 
-            writer.println(ident(4) + "control.preTearDown();");
+            writer.println(ident(3) + "control.preTearDown();");
 
             iterationEpilog(writer, 3, method, states);
 
