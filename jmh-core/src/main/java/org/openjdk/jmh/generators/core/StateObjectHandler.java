@@ -749,7 +749,7 @@ class StateObjectHandler {
             if (!visited.add(so.userType)) continue;
 
             result.add("static class " + so.type + "_B1 extends " + so.userType + " {");
-            padding(result, "b1");
+            Paddings.padding(result, "b1");
             addSuperCall(result, so, "_B1");
             result.add("}");
             result.add("");
@@ -787,7 +787,7 @@ class StateObjectHandler {
             result.add("}");
             result.add("");
             result.add("static class " + so.type + "_B3 extends " + so.type + "_B2 {");
-            padding(result, "b3");
+            Paddings.padding(result, "b3");
             addSuperCall(result, so, "_B3");
             result.add("}");
             result.add("");
@@ -797,18 +797,6 @@ class StateObjectHandler {
             result.add("");
         }
         return result;
-    }
-
-    public static void padding(List<String> lines, String suffix) {
-        for (int p = 0; p < 16; p++) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("    boolean ").append(suffix).append(String.format("_%03d", p * 16));
-            for (int q = 1; q < 16; q++) {
-                sb.append(", ").append(suffix).append(String.format("_%03d", p*16 + q));
-            }
-            sb.append(";");
-            lines.add(sb.toString());
-        }
     }
 
     public Collection<String> getFields() {

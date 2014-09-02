@@ -498,7 +498,9 @@ public class BenchmarkGenerator {
         writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
         writer.println("public final class " + info.generatedClassName + " {");
         writer.println();
-        generatePadding(writer);
+
+        // generate padding
+        Paddings.padding(writer, "p");
 
         writer.println(ident(1) + "int startRndMask;");
 
@@ -542,19 +544,6 @@ public class BenchmarkGenerator {
         writer.println();
 
         writer.close();
-    }
-
-    private void generatePadding(PrintWriter writer) {
-        for (int p = 0; p < 16; p++) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(ident(1));
-            sb.append(String.format("boolean p%03d", p*16));
-            for (int q = 1; q < 16; q++) {
-                sb.append(String.format(", p%03d", p*16 + q));
-            }
-            sb.append(";");
-            writer.println(sb.toString());
-        }
     }
 
     private void generateImport(PrintWriter writer) {
