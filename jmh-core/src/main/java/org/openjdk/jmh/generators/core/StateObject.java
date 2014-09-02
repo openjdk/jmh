@@ -42,6 +42,7 @@ class StateObject {
         }
     };
 
+    public final String packageName;
     public final String userType;
     public final String type;
     public final Scope scope;
@@ -50,9 +51,10 @@ class StateObject {
     public final Map<String, FieldInfo> params;
     public final SortedSet<HelperMethodInvocation> helpers;
 
-    public StateObject(Identifiers identifiers, String userType, Scope scope) {
-        this.userType = userType;
-        this.type = identifiers.getJMHtype(userType);
+    public StateObject(Identifiers identifiers, ClassInfo info, Scope scope) {
+        this.packageName = info.getPackageName() + ".generated";
+        this.userType = info.getQualifiedName();
+        this.type = identifiers.getJMHtype(info);
         this.scope = scope;
 
         String id = identifiers.collapseTypeName(userType) + identifiers.identifier(scope);

@@ -38,6 +38,9 @@ import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 class StateObjectHandler {
 
@@ -91,7 +95,7 @@ class StateObjectHandler {
             for (ParameterInfo ppi : method.getParameters()) {
                 ClassInfo pci = ppi.getType();
 
-                StateObject pso = new StateObject(identifiers, pci.getQualifiedName(), getState(pci, ppi).value());
+                StateObject pso = new StateObject(identifiers, pci, getState(pci, ppi).value());
                 stateObjects.add(pso);
                 args.put(method.getName(), pso);
                 bindState(method, pso, pci);
@@ -113,7 +117,7 @@ class StateObjectHandler {
                 for (ParameterInfo pi : mi.getParameters()) {
                     ClassInfo ci = pi.getType();
 
-                    StateObject so = new StateObject(identifiers, ci.getQualifiedName(), getState(ci, pi).value());
+                    StateObject so = new StateObject(identifiers, ci, getState(ci, pi).value());
 
                     if (!seen.add(so)) {
                         throw new GenerationException("@" + State.class.getSimpleName() + " dependency cycle is detected.", pi);
@@ -133,7 +137,7 @@ class StateObjectHandler {
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        StateObject so = new StateObject(identifiers, ci.getQualifiedName(), (ann != null) ? ann.value() : scope);
+        StateObject so = new StateObject(identifiers, ci, (ann != null) ? ann.value() : scope);
         stateObjects.add(so);
         implicits.put(label, so);
         bindState(null, so, ci);
@@ -730,73 +734,106 @@ class StateObjectHandler {
         return new LinkedHashSet<StateObject>(linearOrder);
     }
 
-    public void addSuperCall(List<String> result, StateObject so, String suffix) {
+    public void addSuperCall(PrintWriter writer, StateObject so, String suffix) throws IOException {
         // These classes have copying constructor:
         if (so.userType.equals(BenchmarkParams.class.getCanonicalName()) ||
             so.userType.equals(IterationParams.class.getCanonicalName()) ||
             so.userType.equals(ThreadParams.class.getCanonicalName())) {
-            result.add("    public " + so.type + suffix + "(" + so.userType + " other) {");
-            result.add("        super(other);");
-            result.add("    }");
+            writer.println("    public " + so.type + suffix + "(" + so.userType + " other) {");
+            writer.println("        super(other);");
+            writer.println("    }");
         }
     }
 
-    public List<String> getStateOverrides() {
-        Set<String> visited = new HashSet<String>();
+    public void writeStateOverrides(BenchmarkGeneratorSession sess, GeneratorDestination dst) throws IOException {
 
-        List<String> result = new ArrayList<String>();
         for (StateObject so : cons(stateObjects)) {
-            if (!visited.add(so.userType)) continue;
+            if (!sess.generatedStateOverrides.add(so.userType)) continue;
 
-            result.add("static class " + so.type + "_B1 extends " + so.userType + " {");
-            Paddings.padding(result, "b1");
-            addSuperCall(result, so, "_B1");
-            result.add("}");
-            result.add("");
-            result.add("static class " + so.type + "_B2 extends " + so.type + "_B1 {");
+            {
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B1"));
 
+                pw.println("package " + so.packageName + ";");
 
-            for (Level level : Level.values()) {
-                result.add("    public volatile int setup" + level + "Mutex;");
-                result.add("    public volatile int tear" + level + "Mutex;");
-                result.add("    public final static AtomicIntegerFieldUpdater setup" + level + "MutexUpdater = " +
-                        "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"setup" + level + "Mutex\");");
-                result.add("    public final static AtomicIntegerFieldUpdater tear" + level + "MutexUpdater = " +
-                        "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"tear" + level + "Mutex\");");
-                result.add("");
+                pw.println("import " + so.userType + ";");
+
+                pw.println("public class " + so.type + "_B1 extends " + so.userType + " {");
+                Paddings.padding(pw, "b1");
+                addSuperCall(pw, so, "_B1");
+                pw.println("}");
+
+                pw.close();
             }
 
-            switch (so.scope) {
-                case Benchmark:
-                case Group:
-                    for (Level level : Level.values()) {
-                        result.add("    public volatile boolean ready" + level + ";");
-                    }
-                    break;
-                case Thread:
-                    for (Level level : Level.values()) {
-                        result.add("    public boolean ready" + level + ";");
-                    }
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown state scope: " + so.scope);
+            {
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B2"));
+
+                pw.println("package " + so.packageName + ";");
+
+                pw.println("import " + AtomicIntegerFieldUpdater.class.getCanonicalName() + ";");
+
+                pw.println("public class " + so.type + "_B2 extends " + so.type + "_B1 {");
+
+                for (Level level : Level.values()) {
+                    pw.println("    public volatile int setup" + level + "Mutex;");
+                    pw.println("    public volatile int tear" + level + "Mutex;");
+                    pw.println("    public final static AtomicIntegerFieldUpdater setup" + level + "MutexUpdater = " +
+                            "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"setup" + level + "Mutex\");");
+                    pw.println("    public final static AtomicIntegerFieldUpdater tear" + level + "MutexUpdater = " +
+                            "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"tear" + level + "Mutex\");");
+                    pw.println("");
+                }
+
+                switch (so.scope) {
+                    case Benchmark:
+                    case Group:
+                        for (Level level : Level.values()) {
+                            pw.println("    public volatile boolean ready" + level + ";");
+                        }
+                        break;
+                    case Thread:
+                        for (Level level : Level.values()) {
+                            pw.println("    public boolean ready" + level + ";");
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException("Unknown state scope: " + so.scope);
+                }
+
+                addSuperCall(pw, so, "_B2");
+
+                pw.println("}");
+
+                pw.close();
             }
 
-            addSuperCall(result, so, "_B2");
+            {
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B3"));
 
-            result.add("}");
-            result.add("");
-            result.add("static class " + so.type + "_B3 extends " + so.type + "_B2 {");
-            Paddings.padding(result, "b3");
-            addSuperCall(result, so, "_B3");
-            result.add("}");
-            result.add("");
-            result.add("static final class " + so.type + " extends " + so.type + "_B3 {");
-            addSuperCall(result, so, "");
-            result.add("}");
-            result.add("");
+                pw.println("package " + so.packageName + ";");
+
+                pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
+                Paddings.padding(pw, "b3");
+                addSuperCall(pw, so, "_B3");
+                pw.println("}");
+                pw.println("");
+
+                pw.close();
+            }
+
+            {
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type));
+
+                pw.println("package " + so.packageName + ";");
+
+                pw.println("public class " + so.type + " extends " + so.type + "_B3 {");
+                addSuperCall(pw, so, "");
+                pw.println("}");
+                pw.println("");
+
+                pw.close();
+            }
         }
-        return result;
     }
 
     public Collection<String> getFields() {
@@ -825,4 +862,9 @@ class StateObjectHandler {
         return auxAccessors.get(method.getName() + name);
     }
 
+    public void addImports(PrintWriter writer) {
+        for (StateObject so : cons(stateObjects)) {
+            writer.println("import " + so.packageName + "." + so.type + ";");
+        }
+    }
 }

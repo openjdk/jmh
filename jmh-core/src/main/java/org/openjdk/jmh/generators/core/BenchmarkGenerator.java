@@ -86,11 +86,13 @@ public class BenchmarkGenerator {
     private final Set<BenchmarkInfo> benchmarkInfos;
     private final CompilerControlPlugin compilerControl;
     private final Set<String> processedBenchmarks;
+    private final BenchmarkGeneratorSession session;
 
     public BenchmarkGenerator() {
         benchmarkInfos = new HashSet<BenchmarkInfo>();
         processedBenchmarks = new HashSet<String>();
         compilerControl = new CompilerControlPlugin();
+        session = new BenchmarkGeneratorSession();
     }
 
     /**
@@ -485,25 +487,6 @@ public class BenchmarkGenerator {
      * Create and generate Java code for a class and it's methods
      */
     private void generateClass(GeneratorSource source, GeneratorDestination destination, ClassInfo classInfo, BenchmarkInfo info) throws IOException {
-        // Create file and open an outputstream
-        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
-
-        // Write package and imports
-        writer.println("package " + info.generatedPackageName + ';');
-        writer.println();
-
-        generateImport(writer);
-
-        // Write class header
-        writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
-        writer.println("public final class " + info.generatedClassName + " {");
-        writer.println();
-
-        // generate padding
-        Paddings.padding(writer, "p");
-
-        writer.println(ident(1) + "int startRndMask;");
-
         StateObjectHandler states = new StateObjectHandler(compilerControl);
 
         // benchmark instance is implicit
@@ -514,6 +497,26 @@ public class BenchmarkGenerator {
 
         // bind all methods
         states.bindMethodGroup(info.methodGroup);
+
+        // Create file and open an outputstream
+        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
+
+        // Write package and imports
+        writer.println("package " + info.generatedPackageName + ';');
+        writer.println();
+
+        generateImport(writer);
+        states.addImports(writer);
+
+        // Write class header
+        writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
+        writer.println("public final class " + info.generatedClassName + " {");
+        writer.println();
+
+        // generate padding
+        Paddings.padding(writer, "p");
+
+        writer.println(ident(1) + "int startRndMask;");
 
         // write all methods
         for (Mode benchmarkKind : Mode.values()) {
@@ -534,10 +537,7 @@ public class BenchmarkGenerator {
         writer.println();
 
         // Write out the required objects
-        for (String s : states.getStateOverrides()) {
-            writer.println(ident(1) + s);
-        }
-        writer.println();
+        states.writeStateOverrides(session, destination);
 
         // Finish class
         writer.println("}");

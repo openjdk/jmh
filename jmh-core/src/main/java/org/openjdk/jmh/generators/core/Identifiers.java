@@ -39,21 +39,18 @@ class Identifiers {
     private final Set<String> claimedJmhTypes = new HashSet<String>();
     private final Map<String, String> jmhTypes = new HashMap<String, String>();
 
-    public String getJMHtype(String type) {
-        String jmhType = jmhTypes.get(type);
+    public String getJMHtype(ClassInfo type) {
+        String id = BenchmarkGeneratorUtils.getGeneratedName(type);
+        String jmhType = jmhTypes.get(id);
         if (jmhType == null) {
             int v = 0;
             do {
-                jmhType = getBaseType(type) + (v == 0 ? "" : "_"+ v) + "_jmh";
+                jmhType = id + (v == 0 ? "" : "_" + v) + "_jmh";
                 v++;
             } while (!claimedJmhTypes.add(jmhType));
-            jmhTypes.put(type, jmhType);
+            jmhTypes.put(id, jmhType);
         }
         return jmhType;
-    }
-
-    private String getBaseType(String type) {
-        return type.substring(type.lastIndexOf(".") + 1);
     }
 
     public String collapseTypeName(String e) {
