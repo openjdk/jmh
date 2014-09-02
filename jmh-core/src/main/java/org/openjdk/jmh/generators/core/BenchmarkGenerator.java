@@ -548,9 +548,9 @@ public class BenchmarkGenerator {
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
             sb.append(ident(1));
-            sb.append("private boolean p").append(p);
+            sb.append(String.format("boolean p%03d", p*16));
             for (int q = 1; q < 16; q++) {
-                sb.append(", p").append(p).append("_").append(q);
+                sb.append(String.format(", p%03d", p*16 + q));
             }
             sb.append(";");
             writer.println(sb.toString());
