@@ -1059,12 +1059,19 @@ public class BenchmarkGenerator {
         }
     }
 
-    static String ident(int prefix) {
-        char[] chars = new char[prefix * 4];
-        for (int i = 0; i < prefix * 4; i++) {
-            chars[i] = ' ';
+    static String[] INDENTS = new String[0];
+
+    static String ident(int tabs) {
+        final int TAB_SIZE = 4;
+        if (tabs >= INDENTS.length) {
+            INDENTS = new String[tabs + 1];
+            for (int p = 0; p <= tabs; p++) {
+                char[] chars = new char[p * TAB_SIZE];
+                Arrays.fill(chars, ' ');
+                INDENTS[p] = new String(chars);
+            }
         }
-        return new String(chars);
+        return INDENTS[tabs];
     }
 
 }
