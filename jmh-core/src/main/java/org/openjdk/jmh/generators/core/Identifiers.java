@@ -42,9 +42,9 @@ class Identifiers {
     public String getJMHtype(String type) {
         String jmhType = jmhTypes.get(type);
         if (jmhType == null) {
-            int v = 1;
+            int v = 0;
             do {
-                jmhType = getBaseType(type) + "_" + v + "_jmh";
+                jmhType = getBaseType(type) + (v == 0 ? "" : "_"+ v) + "_jmh";
                 v++;
             } while (!claimedJmhTypes.add(jmhType));
             jmhTypes.put(type, jmhType);
