@@ -64,7 +64,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
  * Benchmark generator.
@@ -548,10 +546,10 @@ public class BenchmarkGenerator {
 
     private void generateImport(PrintWriter writer) {
         Class<?>[] imports = new Class<?>[]{
-                List.class, AtomicInteger.class, AtomicIntegerFieldUpdater.class,
-                Collection.class, Collections.class, ArrayList.class, Arrays.class,
+                List.class, AtomicInteger.class,
+                Collection.class, ArrayList.class,
                 TimeUnit.class, Generated.class, CompilerControl.class,
-                InfraControl.class, ThreadParams.class, Blackhole.class,
+                InfraControl.class, ThreadParams.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
