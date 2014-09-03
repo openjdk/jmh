@@ -81,6 +81,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BenchmarkGenerator {
 
+    private static final String JMH_STUB_SUFFIX = "_jmhStub";
+
     private final Set<BenchmarkInfo> benchmarkInfos;
     private final CompilerControlPlugin compilerControl;
     private final Set<String> processedBenchmarks;
@@ -119,6 +121,20 @@ public class BenchmarkGenerator {
                     destination.printError(ge.getMessage(), ge.getElement());
                 }
             }
+
+            /*
+             * JMH stubs should not be inlined to start the inlining budget from the hottest loop.
+             * We would like to accurately track the things we do not want to inline, but
+             * unfortunately the Hotspot's CompilerOracle is not scaling well with the number of compiler
+             * commands. Therefore, in order to cut down the number of compiler commands, we opt to
+             * blankly forbid the inlining all methods that look like JMH stubs.
+             *
+             * See: https://bugs.openjdk.java.net/browse/JDK-8057169
+             */
+            for (Mode mode : Mode.values()) {
+                compilerControl.alwaysDontInline("*", "*_" + mode.shortLabel() + JMH_STUB_SUFFIX);
+            }
+
             compilerControl.process(source, destination);
         } catch (Throwable t) {
             destination.printError("Annotation generator had thrown the exception.", t);
@@ -621,11 +637,11 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop" +
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
 
             // pretend we did the batched run; there is no reason to have an additional loop,
-            // when _jmhLoop* already is optimized.
+            // when JMH stub already is optimized.
             writer.println(ident(3) + "res.operations /= control.iterationParams.getBatchSize();");
 
             // control objects get a special treatment
@@ -671,10 +687,9 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
 
             compilerControl.defaultForceInline(method);
-            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
             writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
@@ -731,10 +746,10 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, res" + prefix(states.getArgList(method)) + ");");
 
             // pretend we did the batched run; there is no reason to have an additional loop,
-            // when _jmhLoop* already is optimized.
+            // when JMH stub is already optimized.
             writer.println(ident(3) + "res.operations /= control.iterationParams.getBatchSize();");
 
             // control objects get a special treatment
@@ -779,9 +794,8 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
-            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
             writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
                     "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
@@ -853,7 +867,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation(), batchSize" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation(), batchSize" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -894,9 +908,8 @@ public class BenchmarkGenerator {
 
         // measurement loop bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhLoop";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
-            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
             writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, SampleBuffer buffer, int targetSamples, long opsPerInv, int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
@@ -959,7 +972,7 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
 
             invocationEpilog(writer, 3, method, states, false);
 
@@ -982,9 +995,8 @@ public class BenchmarkGenerator {
 
         // measurement stub bodies
         for (MethodInfo method : methodGroup.methods()) {
-            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + "_jmhStub";
+            String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
-            compilerControl.alwaysDontInline(classInfo.getQualifiedName(), methodName);
 
             writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
                     "(InfraControl control, int batchSize, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
