@@ -54,7 +54,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,6 +83,8 @@ import java.util.concurrent.TimeUnit;
 public class Runner extends BaseRunner {
 
     private static final int TAIL_LINES_ON_ERROR = 20;
+    private static final String JMH_LOCK_FILE = System.getProperty("java.io.tmpdir") + "/jmh.lock";
+    private static final Boolean JMH_LOCK_IGNORE = Boolean.getBoolean("jmh.ignoreLock");
 
     private final BenchmarkList list;
     private int cpuCount;
@@ -166,6 +172,48 @@ public class Runner extends BaseRunner {
      * @throws org.openjdk.jmh.runner.RunnerException if something goes wrong
      */
     public Collection<RunResult> run() throws RunnerException {
+        FileChannel channel = null;
+        FileLock lock = null;
+        try {
+            channel = new RandomAccessFile(JMH_LOCK_FILE, "rw").getChannel();
+
+            try {
+                lock = channel.tryLock();
+            } catch (OverlappingFileLockException e) {
+                // fall-through
+            }
+
+            if (lock == null) {
+                String msg = "Unable to acquire the JMH lock (" + JMH_LOCK_FILE + "): already taken by another JMH instance";
+                if (JMH_LOCK_IGNORE) {
+                    out.println("# WARNING: " + msg + ", ignored by user's request.");
+                } else {
+                    throw new RunnerException("ERROR: " + msg + ", exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
+                }
+            }
+
+            return internalRun();
+        } catch (IOException e) {
+            String msg = "Exception while trying to acquire the JMH lock (" + JMH_LOCK_FILE + "): " + e.getMessage();
+            if (JMH_LOCK_IGNORE) {
+                out.println("# WARNING: " + msg + ", ignored by user's request.");
+                return internalRun();
+            } else {
+                throw new RunnerException("ERROR: " + msg  + ", exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
+            }
+        } finally {
+            try {
+                if (lock != null) {
+                    lock.release();
+                }
+            } catch (IOException e) {
+                // do nothing
+            }
+            FileUtils.safelyClose(channel);
+        }
+    }
+
+    private Collection<RunResult> internalRun() throws RunnerException {
         for (Class<? extends Profiler> p : options.getProfilers()) {
             List<String> initMessages = new ArrayList<String>();
             if (!ProfilerFactory.checkSupport(p, initMessages)) {

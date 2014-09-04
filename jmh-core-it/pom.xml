@@ -72,6 +72,8 @@ questions.
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.14.1</version>
                 <configuration>
+                    <!-- Integration tests are not measuring performance, OK to run them concurrently -->
+                    <argLine>-Djmh.ignoreLock=true</argLine>
                     <forkCount>1C</forkCount>
                     <reuseForks>true</reuseForks>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
