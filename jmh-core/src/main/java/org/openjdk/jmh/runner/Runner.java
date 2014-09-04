@@ -82,7 +82,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Runner extends BaseRunner {
 
-    private static final int TAIL_LINES_ON_ERROR = 20;
+    private static final int TAIL_LINES_ON_ERROR = Integer.getInteger("jmh.tailLines", 20);
     private static final String JMH_LOCK_FILE = System.getProperty("java.io.tmpdir") + "/jmh.lock";
     private static final Boolean JMH_LOCK_IGNORE = Boolean.getBoolean("jmh.ignoreLock");
 
