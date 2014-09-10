@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -137,12 +139,20 @@ public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler
 
                 Matcher m = Pattern.compile("(.*)#(.*)").matcher(line);
                 if (m.matches()) {
-                    String pair = m.group(1).replace(",", "").trim();
+                    String pair = m.group(1).trim();
                     if (pair.contains(" cycles")) {
-                        cycles = Long.valueOf(pair.split("[ ]+")[0]);
+                        try {
+                            cycles = NumberFormat.getInstance().parse(pair.split("[ ]+")[0]).longValue();
+                        } catch (ParseException e) {
+                            // do nothing, processing code will handle
+                        }
                     }
                     if (line.contains(" instructions")) {
-                        insns = Long.valueOf(pair.split("[ ]+")[0]);
+                        try {
+                            insns = NumberFormat.getInstance().parse(pair.split("[ ]+")[0]).longValue();
+                        } catch (ParseException e) {
+                            // do nothing, processing code will handle
+                        }
                     }
                 }
             }
