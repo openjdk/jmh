@@ -129,7 +129,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
     }
 
 
-    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("harness.executor", ExecutorType.FIXED_TPE.name()));
+    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("jmh.executor", ExecutorType.FIXED_TPE.name()));
 
     private enum ExecutorType {
 
@@ -189,7 +189,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         CUSTOM {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
-                String className = System.getProperty("harness.executor.class");
+                String className = System.getProperty("jmh.executor.class");
                 return (ExecutorService) Class.forName(className).getConstructor(int.class, String.class)
                         .newInstance(maxThreads, prefix);
             }

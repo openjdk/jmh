@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Fixtures {
 
-    private static final int REPS = Integer.getInteger("it.reps", 1);
+    private static final int REPS = Integer.getInteger("jmh.it.reps", 1);
 
     public static int repetitionCount() {
         return REPS;
