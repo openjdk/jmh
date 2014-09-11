@@ -34,12 +34,14 @@ import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.IterationType;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TextReportFormat implementation of OutputFormat.
@@ -52,26 +54,34 @@ class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void startBenchmark(BenchmarkParams params) {
-        if (params.getWarmup().getCount() > 0) {
-            out.println("# Warmup: " + params.getWarmup().getCount() + " iterations, " +
-                    params.getWarmup().getTime() + " each" +
-                    (params.getWarmup().getBatchSize() <= 1 ? "" : ", " + params.getWarmup().getBatchSize() + " calls per op"));
+        IterationParams warmup = params.getWarmup();
+        if (warmup.getCount() > 0) {
+            out.println("# Warmup: " + warmup.getCount() + " iterations, " +
+                    warmup.getTime() + " each" +
+                    (warmup.getBatchSize() <= 1 ? "" : ", " + warmup.getBatchSize() + " calls per op"));
         } else {
             out.println("# Warmup: <none>");
         }
 
-        if (params.getMeasurement().getCount() > 0) {
-            out.println("# Measurement: " + params.getMeasurement().getCount() + " iterations, " +
-                    params.getMeasurement().getTime() + " each" +
-                    (params.getMeasurement().getBatchSize() <= 1 ? "" : ", " + params.getMeasurement().getBatchSize() + " calls per op"));
+        IterationParams measurement = params.getMeasurement();
+        if (measurement.getCount() > 0) {
+            out.println("# Measurement: " + measurement.getCount() + " iterations, " +
+                    measurement.getTime() + " each" +
+                    (measurement.getBatchSize() <= 1 ? "" : ", " + measurement.getBatchSize() + " calls per op"));
         } else {
             out.println("# Measurement: <none>");
         }
+
+        TimeValue timeout = params.getTimeout();
+        boolean timeoutWarning = (timeout.convertTo(TimeUnit.NANOSECONDS) <= measurement.getTime().convertTo(TimeUnit.NANOSECONDS)) ||
+                (timeout.convertTo(TimeUnit.NANOSECONDS) <= warmup.getTime().convertTo(TimeUnit.NANOSECONDS));
+        out.println("# Timeout: " + timeout + " per iteration" + (timeoutWarning ? ", ***WARNING: The timeout might be too low!***" : ""));
 
         out.println("# Threads: " + params.getThreads() + " " + getThreadsString(params.getThreads()) +
                 (params.shouldSynchIterations() ?
                         ", will synchronize iterations" :
                         (params.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***"));
+
         out.println("# Benchmark mode: " + params.getMode().longLabel());
         out.println("# Benchmark: " + params.getBenchmark());
         if (!params.getParamsKeys().isEmpty()) {

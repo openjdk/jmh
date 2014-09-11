@@ -141,4 +141,9 @@ public class Defaults {
      * Default operations per invocation.
      */
     public static final Integer OPS_PER_INVOCATION = 1;
+
+    /**
+     * Default timeout.
+     */
+    public static final TimeValue TIMEOUT = TimeValue.minutes(10);
 }

@@ -616,4 +616,25 @@ public class TestParentOptions {
         }
     }
 
+    @Test
+    public void testTimeout_Empty() throws Exception {
+        Options parent = new OptionsBuilder().build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertFalse(builder.getTimeout().hasValue());
+    }
+
+    @Test
+    public void testTimeout_Parent() throws Exception {
+        Options parent = new OptionsBuilder().timeout(TimeValue.hours(42)).build();
+        Options builder = new OptionsBuilder().parent(parent).build();
+        Assert.assertEquals(TimeValue.hours(42), builder.getTimeout().get());
+    }
+
+    @Test
+    public void testTimeout_Merged() throws Exception {
+        Options parent = new OptionsBuilder().timeout(TimeValue.hours(42)).build();
+        Options builder = new OptionsBuilder().parent(parent).timeout(TimeValue.days(42)).build();
+        Assert.assertEquals(TimeValue.days(42), builder.getTimeout().get());
+    }
+
 }

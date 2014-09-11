@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.WorkloadParams;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
@@ -74,13 +75,14 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             String jvm, Collection<String> jvmArgs) {
+                             String jvm, Collection<String> jvmArgs,
+                             TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvm, jvmArgs);
+                jvm, jvmArgs, timeout);
     }
 }
 
@@ -93,13 +95,15 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             String jvm, Collection<String> jvmArgs) {
+                             String jvm, Collection<String> jvmArgs,
+                             TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvm, jvmArgs);
+                jvm, jvmArgs,
+                timeout);
     }
 
     public BenchmarkParamsL4(BenchmarkParams other) {
@@ -132,13 +136,15 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             String jvm, Collection<String> jvmArgs) {
+                             String jvm, Collection<String> jvmArgs,
+                             TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvm, jvmArgs);
+                jvm, jvmArgs,
+                timeout);
     }
 
     public BenchmarkParamsL3(BenchmarkParams other) {
@@ -187,13 +193,15 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     protected final int opsPerInvocation;
     protected final String jvm;
     protected final Collection<String> jvmArgs;
+    protected final TimeValue timeout;
 
     public BenchmarkParamsL2(String benchmark, String generatedTarget, boolean synchIterations,
                              int threads, int[] threadGroups, int forks, int warmupForks,
                              IterationParams warmup, IterationParams measurement,
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
-                             String jvm, Collection<String> jvmArgs) {
+                             String jvm, Collection<String> jvmArgs,
+                             TimeValue timeout) {
         this.benchmark = benchmark;
         this.generatedTarget = generatedTarget;
         this.synchIterations = synchIterations;
@@ -209,6 +217,7 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.opsPerInvocation = opsPerInvocation;
         this.jvm = jvm;
         this.jvmArgs = jvmArgs;
+        this.timeout = timeout;
     }
 
     public BenchmarkParamsL2(BenchmarkParams other) {
@@ -227,6 +236,14 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.opsPerInvocation = other.opsPerInvocation;
         this.jvm = other.jvm;
         this.jvmArgs = other.jvmArgs;
+        this.timeout = other.timeout;
+    }
+
+    /**
+     * @return how long to wait for iteration to complete
+     */
+    public TimeValue getTimeout() {
+        return timeout;
     }
 
     /**

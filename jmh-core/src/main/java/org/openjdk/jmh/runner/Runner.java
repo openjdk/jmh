@@ -457,10 +457,13 @@ public class Runner extends BaseRunner {
         jvmArgs.addAll(options.getJvmArgsAppend().orElse(
                 benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
 
+        TimeValue timeout = options.getTimeout().orElse(
+                Defaults.TIMEOUT);
+
         return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
                 threads, threadGroups, forks, warmupForks,
                 warmup, measurement, benchmark.getMode(), benchmark.getWorkloadParams(), timeUnit, opsPerInvocation,
-                jvm, jvmArgs);
+                jvm, jvmArgs, timeout);
     }
 
     private List<WorkloadParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {

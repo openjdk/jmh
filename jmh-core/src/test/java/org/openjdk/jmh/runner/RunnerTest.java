@@ -61,7 +61,8 @@ public class RunnerTest {
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                Utils.getCurrentJvm(), Collections.<String>emptyList());
+                Utils.getCurrentJvm(), Collections.<String>emptyList(),
+                TimeValue.days(1));
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
@@ -89,7 +90,8 @@ public class RunnerTest {
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                Utils.getCurrentJvm(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints));
+                Utils.getCurrentJvm(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints),
+                TimeValue.days(1));
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file
@@ -122,7 +124,8 @@ public class RunnerTest {
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(),
-                Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2));
+                Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
+                TimeValue.days(1));
         String[] command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
 
         // expecting 1 compile command file

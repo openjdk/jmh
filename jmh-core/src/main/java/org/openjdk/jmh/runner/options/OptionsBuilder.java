@@ -648,4 +648,26 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
         params.putAll(name, Arrays.asList(values));
         return this;
     }
+
+    // ---------------------------------------------------------------------------
+
+    private Optional<TimeValue> timeout = Optional.none();
+
+    @Override
+    public ChainedOptionsBuilder timeout(TimeValue value) {
+        this.timeout = Optional.of(value);
+        return this;
+    }
+
+    @Override
+    public Optional<TimeValue> getTimeout() {
+        if (otherOptions != null) {
+            return timeout.orAnother(otherOptions.getTimeout());
+        } else {
+            return timeout;
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+
 }

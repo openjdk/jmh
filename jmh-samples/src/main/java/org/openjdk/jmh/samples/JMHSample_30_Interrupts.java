@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -35,11 +36,14 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Group)
 public class JMHSample_30_Interrupts {
 
@@ -57,6 +61,8 @@ public class JMHSample_30_Interrupts {
      * to interrupts well, and therefore we can rely on JMH to terminate the
      * measurement for us. JMH will notify users about the interrupt actions
      * nevertheless, so users can see if those interrupts affected the measurement.
+     * JMH will start issuing interrupts after the default or user-specified timeout
+     * had been reached.
      *
      * This is a variant of org.openjdk.jmh.samples.JMHSample_18_Control, but without
      * the explicit control objects. This example is suitable for the methods which
@@ -89,8 +95,8 @@ public class JMHSample_30_Interrupts {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_30 -wi 5 -i 5 -t 2 -f 5
-     *    (we requested 5 warmup iterations, 5 iterations, 2 threads, and 5 forks)
+     *    $ java -jar target/benchmarks.jar JMHSample_30 -wi 5 -i 5 -t 2 -f 5 -to 5
+     *    (we requested 5 warmup iterations, 5 iterations, 2 threads, 5 forks, and 5 sec timeout)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -104,6 +110,7 @@ public class JMHSample_30_Interrupts {
                 .measurementIterations(5)
                 .threads(2)
                 .forks(5)
+                .timeout(TimeValue.seconds(5))
                 .build();
 
         new Runner(opt).run();

@@ -533,4 +533,16 @@ public class TestOptions {
         }
     }
 
+    @Test
+    public void testTimeout() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-to", "34ms");
+        Options builder = new OptionsBuilder().timeout(TimeValue.milliseconds(34)).build();
+        Assert.assertEquals(builder.getTimeout(), cmdLine.getTimeout());
+    }
+
+    @Test
+    public void testTimeout_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getTimeout(), EMPTY_CMDLINE.getTimeout());
+    }
+
 }

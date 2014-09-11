@@ -53,6 +53,7 @@ public class CommandLineOptions implements Options {
     private static final long serialVersionUID = 5565183446360224399L;
 
     private final Optional<Integer> iterations;
+    private final Optional<TimeValue> timeout;
     private final Optional<TimeValue> runTime;
     private final Optional<Integer> batchSize;
     private final Optional<Integer> warmupIterations;
@@ -116,6 +117,9 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(Integer.class).describedAs("int");
 
         OptionSpec<String> optWarmupTime = parser.accepts("w", "Time to spend at each warmup iteration.")
+                .withRequiredArg().ofType(String.class).describedAs("time");
+
+        OptionSpec<String> optTimeoutTime = parser.accepts("to", "Timeout for benchmark iteration.")
                 .withRequiredArg().ofType(String.class).describedAs("time");
 
         OptionSpec<String> optThreads = parser.accepts("t", "Number of worker threads to run with.")
@@ -294,6 +298,17 @@ public class CommandLineOptions implements Options {
                 }
             } else {
                 warmupTime = Optional.none();
+            }
+
+            if (set.has(optTimeoutTime)) {
+                String value = optTimeoutTime.value(set);
+                try {
+                    timeout = Optional.of(TimeValue.fromString(value));
+                } catch (IllegalArgumentException iae) {
+                    throw new CommandLineOptionException(iae.getMessage(), iae);
+                }
+            } else {
+                timeout = Optional.none();
             }
 
             if (set.has(optThreads)) {
@@ -665,4 +680,8 @@ public class CommandLineOptions implements Options {
         return new HashSet<Mode>(benchMode);
     }
 
+    @Override
+    public Optional<TimeValue> getTimeout() {
+        return timeout;
+    }
 }

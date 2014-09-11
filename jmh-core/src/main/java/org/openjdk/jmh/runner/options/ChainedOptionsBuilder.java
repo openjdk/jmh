@@ -298,4 +298,11 @@ public interface ChainedOptionsBuilder {
      */
     ChainedOptionsBuilder param(String name, String... values);
 
+    /**
+     * How long to wait for iteration execution?
+     * @param value time
+     * @return builder
+     */
+    ChainedOptionsBuilder timeout(TimeValue value);
+
 }

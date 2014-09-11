@@ -81,7 +81,8 @@ public class ResultFormatTest {
                     ps,
                     TimeUnit.SECONDS, 1,
                     Utils.getCurrentJvm(),
-                    Collections.<String>emptyList());
+                    Collections.<String>emptyList(),
+                    TimeValue.days(1));
 
             Collection<BenchmarkResult> benchmarkResults = new ArrayList<BenchmarkResult>();
             for (int f = 0; f < r.nextInt(10); f++) {

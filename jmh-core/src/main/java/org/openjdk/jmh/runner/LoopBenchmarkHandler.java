@@ -81,6 +81,8 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
             runners[i] = new BenchmarkTask(control, threadParamses[i]);
         }
 
+        long waitDeadline = System.nanoTime() + benchmarkParams.getTimeout().convertTo(TimeUnit.NANOSECONDS);
+
         // profilers start way before the workload starts to capture
         // the edge behaviors.
         startProfilers(benchmarkParams, params);
@@ -125,21 +127,6 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
             }
         }
 
-        // Adjust waiting intervals:
-        //  - We don't know the running time for SingleShot benchmarks,
-        //    we wait for at least 10 minutes for benchmark to stop; this
-        //    can be adjusted with usual warmup/measurement duration settings;
-        //  - For other benchmarks, we wait for twice the run time,
-        //    but at least 5 seconds to cover for low run times.
-        long timeToWait;
-        switch (benchmarkParams.getMode()) {
-            case SingleShotTime:
-                timeToWait = Math.max(TimeUnit.SECONDS.toNanos(600), runtime.convertTo(TimeUnit.NANOSECONDS));
-                break;
-            default:
-                timeToWait = Math.max(runtime.convertTo(TimeUnit.NANOSECONDS) * 2, TimeUnit.SECONDS.toNanos(5));
-        }
-
         // Wait for the result, continuously polling the worker threads.
         // The abrupt exception in any worker will float up here.
         int expected = numThreads;
@@ -147,7 +134,8 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
             for (BenchmarkTask task : results.keySet()) {
                 Future<Collection<? extends Result>> fr = results.get(task);
                 try {
-                    fr.get(timeToWait, TimeUnit.NANOSECONDS);
+                    long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
+                    fr.get(waitFor, TimeUnit.NANOSECONDS);
                     expected--;
                 } catch (InterruptedException ex) {
                     throw new BenchmarkException(ex);

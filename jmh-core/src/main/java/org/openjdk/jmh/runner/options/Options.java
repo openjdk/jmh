@@ -238,4 +238,10 @@ public interface Options extends Serializable {
      */
     Optional<Collection<String>> getParameter(String name);
 
+    /**
+     * Timeout: how long to wait for an iteration to complete.
+     * @return duration
+     */
+    Optional<TimeValue> getTimeout();
+
 }

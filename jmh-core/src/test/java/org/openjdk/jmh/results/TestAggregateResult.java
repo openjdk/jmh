@@ -30,7 +30,6 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.runner.IterationType;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
 
@@ -54,7 +53,8 @@ public class TestAggregateResult {
                         new IterationParams(IterationType.WARMUP, 1, TimeValue.seconds(1), 1),
                         new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                         Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                        Utils.getCurrentJvm(), Collections.<String>emptyList()),
+                        Utils.getCurrentJvm(), Collections.<String>emptyList(),
+                        TimeValue.days(1)),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.days(1), 1)
         );
         for (double d : values) {
