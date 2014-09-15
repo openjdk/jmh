@@ -31,6 +31,7 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
@@ -45,17 +46,13 @@ public class JMHSample_24_Inheritance {
     /*
      * In very special circumstances, you might want to provide the benchmark
      * body in the (abstract) superclass, and specialize it with the concrete
-     * pieces in the subclasses. Unfortunately, the annotation processors
-     * limit our ways in figuring out whether there are subclasses to the class
-     * annotated with @GMB.
+     * pieces in the subclasses.
      *
-     * JMH has the provisional hack over annotation processors, which still
-     * enables us to do this. The rule of thumb is: if some class has @GMB
-     * method, then all the subclasses are also having the "synthetic"
-     * @GMB method. The caveat is, because we only know the type hierarchy
-     * during the compilation, it is only possible during the same compilation
-     * session. That is, mixing in the subclass extending your benchmark class
-     * *after* the JMH compilation would have no effect.
+     * The rule of thumb is: if some class has @GMB method, then all the subclasses
+     * are also having the "synthetic" @GMB method. The caveat is, because we only
+     * know the type hierarchy during the compilation, it is only possible during
+     * the same compilation session. That is, mixing in the subclass extending your
+     * benchmark class *after* the JMH compilation would have no effect.
      *
      * Note how annotations now have two possible places. The closest annotation
      * in the hierarchy wins.
@@ -66,7 +63,12 @@ public class JMHSample_24_Inheritance {
     @State(Scope.Thread)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public static abstract class AbstractBenchmark {
-        public int x = 42;
+        int x;
+
+        @Setup
+        public void setup() {
+            x = 42;
+        }
 
         @Benchmark
         @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
@@ -95,14 +97,15 @@ public class JMHSample_24_Inheritance {
     public static class BenchmarkCos extends AbstractBenchmark {
         @Override
         protected double doWork() {
-            return Math.sin(x);
+            return Math.cos(x);
         }
     }
 
     /*
      * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can run this test:
+     * You can run this test, and observe the three distinct benchmarks running the squares
+     * of Math.log, Math.sin, and Math.cos, accordingly.
      *
      * a) Via the command line:
      *    $ mvn clean install
