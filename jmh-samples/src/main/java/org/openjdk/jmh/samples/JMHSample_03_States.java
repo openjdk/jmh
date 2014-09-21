@@ -52,12 +52,12 @@ public class JMHSample_03_States {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-        double x = Math.PI;
+        volatile double x = Math.PI;
     }
 
     @State(Scope.Thread)
     public static class ThreadState {
-        double x = Math.PI;
+        volatile double x = Math.PI;
     }
 
     /*
