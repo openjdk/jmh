@@ -31,8 +31,10 @@ import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.Deduplicator;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.InputStreamDrainer;
+import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.Multiset;
 import org.openjdk.jmh.util.Multisets;
 import org.openjdk.jmh.util.TreeMultiset;
@@ -602,7 +604,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                 if (addr - lastAddr > MERGE_MARGIN) {
                     List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, PRINT_MARGIN);
                     if (!regionLines.isEmpty()) {
-                        regions.add(new GeneratedRegion(asms.getMethod(lastBegin), lastBegin, lastAddr, regionLines, eventfulAddrs));
+                        regions.add(new GeneratedRegion(asms, lastBegin, lastAddr, regionLines, eventfulAddrs));
                     } else {
                         regions.add(new NativeRegion(events, lastBegin, lastAddr, eventfulAddrs));
                     }
@@ -618,27 +620,15 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
         return regions;
     }
 
-    Assembly readAssembly(File stdOut) {
+    Collection<Collection<String>> splitAssembly(File stdOut) {
         try {
-            Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
-
-            List<ASMLine> lines = new ArrayList<ASMLine>();
-            SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
-            SortedMap<Long, String> methodMap = new TreeMap<Long, String>();
-
-            Map<Long, String> writerToMethod = new HashMap<Long, String>();
+            Multimap<Long, String> writerToLines = new HashMultimap<Long, String>();
             Long writerId = -1L;
 
+            Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
             String line;
             BufferedReader br = new BufferedReader(new FileReader(stdOut));
             while ((line = br.readLine()) != null) {
-                String trim = line.trim();
-
-                if (trim.isEmpty()) continue;
-                String[] elements = trim.split(" ");
-
-                ASMLine asmLine = new ASMLine(line);
-
                 // Parse the writer threads IDs:
                 //    <writer thread='140703710570240'/>
                 if (line.contains("<writer thread=")) {
@@ -650,17 +640,46 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                             // something is wrong, try to recover
                         }
                     }
-                } else if (line.contains("{method}")) {
+                    continue;
+                }
+                writerToLines.put(writerId, line);
+            }
+
+            Collection<Collection<String>> r = new ArrayList<Collection<String>>();
+            for (long id : writerToLines.keys()) {
+                r.add(writerToLines.get(id));
+            }
+            return r;
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    Assembly readAssembly(File stdOut) {
+        List<ASMLine> lines = new ArrayList<ASMLine>();
+        SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
+        SortedMap<Long, String> methodMap = new TreeMap<Long, String>();
+
+        for (Collection<String> cs : splitAssembly(stdOut)) {
+            String method = null;
+            for (String line : cs) {
+                String trim = line.trim();
+
+                if (trim.isEmpty()) continue;
+                String[] elements = trim.split(" ");
+
+                ASMLine asmLine = new ASMLine(line);
+
+                if (line.contains("# {method}")) {
                     if (elements.length == 7) {
-                        String method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
+                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
                         method = method.replace("&apos;", "");
                         method = method.replace("&lt;", "<");
                         method = method.replace("&gt;", ">");
-                        writerToMethod.put(writerId, method);
                     } else {
                         // {method} line is corrupted, other writer had possibly interjected;
                         // honestly say we can't figure the method name out instead of lying.
-                        writerToMethod.put(writerId, "<name unparseable>");
+                        method = "<name unparseable>";
                     }
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be line with address.
@@ -669,11 +688,10 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                         int idx = lines.size();
                         addressMap.put(addr, idx);
 
-                        // Record the starting address for the method, if any,
-                        String method = writerToMethod.get(writerId);
+                        // Record the starting address for the method, if any.
                         if (method != null) {
                             methodMap.put(addr, method);
-                            writerToMethod.remove(writerId);
+                            method = null;
                         }
 
                         asmLine = new ASMLine(addr, line);
@@ -683,10 +701,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                 }
                 lines.add(asmLine);
             }
-            return new Assembly(lines, addressMap, methodMap);
-        } catch (IOException e) {
-            return new Assembly();
         }
+        return new Assembly(lines, addressMap, methodMap);
     }
 
     PerfEvents readEvents(double skipSec) {
@@ -971,9 +987,20 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     static class GeneratedRegion extends Region {
         final Collection<ASMLine> code;
 
-        GeneratedRegion(String method, long begin, long end, Collection<ASMLine> code, Set<Long> eventfulAddrs) {
-            super(method, begin, end, eventfulAddrs);
+        GeneratedRegion(Assembly asms, long begin, long end, Collection<ASMLine> code, Set<Long> eventfulAddrs) {
+            super(generateName(asms, eventfulAddrs), begin, end, eventfulAddrs);
             this.code = code;
+        }
+
+        static String generateName(Assembly asm, Set<Long> eventfulAddrs) {
+            Set<String> methods = new HashSet<String>();
+            for (Long ea : eventfulAddrs) {
+                String m = asm.getMethod(ea);
+                if (m != null) {
+                    methods.add(m);
+                }
+            }
+            return Utils.join(methods, "; ");
         }
 
         @Override
@@ -1010,7 +1037,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             for (Long ea : eventfulAddrs) {
                 methods.add(events.methods.get(ea));
             }
-            return Utils.join(methods, ",");
+            return Utils.join(methods, "; ");
         }
 
         static String resolveLib(PerfEvents events, Set<Long> eventfulAddrs) {
@@ -1018,7 +1045,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             for (Long ea : eventfulAddrs) {
                 libs.add(events.libs.get(ea));
             }
-            return Utils.join(libs, ",");
+            return Utils.join(libs, "; ");
         }
 
         @Override
