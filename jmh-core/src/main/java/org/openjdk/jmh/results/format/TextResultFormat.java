@@ -84,7 +84,7 @@ class TextResultFormat implements ResultFormat {
         int modeLen     = "Mode".length();
         int samplesLen  = "Samples".length();
         int scoreLen    = "Score".length();
-        int scoreErrLen = "Score Error".length();
+        int scoreErrLen = "Error".length();
         int unitLen     = "Units".length();
 
         for (RunResult res : runResults) {
@@ -107,7 +107,7 @@ class TextResultFormat implements ResultFormat {
         modeLen     += COLUMN_PAD;
         samplesLen  += COLUMN_PAD;
         scoreLen    += COLUMN_PAD;
-        scoreErrLen += COLUMN_PAD;
+        scoreErrLen += COLUMN_PAD - 1; // digest a single character for +- separator
         unitLen     += COLUMN_PAD;
 
         out.print(String.format("%-" + nameLen + "s", "Benchmark"));
@@ -118,7 +118,8 @@ class TextResultFormat implements ResultFormat {
         out.print(String.format("%" + modeLen + "s",     "Mode"));
         out.print(String.format("%" + samplesLen + "s",  "Samples"));
         out.print(String.format("%" + scoreLen + "s",    "Score"));
-        out.print(String.format("%" + scoreErrLen + "s", "Score error"));
+        out.print("  ");
+        out.print(String.format("%" + scoreErrLen + "s", "Error"));
         out.print(String.format("%" + unitLen + "s",     "Units"));
         out.println();
 
@@ -136,6 +137,7 @@ class TextResultFormat implements ResultFormat {
                 out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
                 out.print(String.format("%" + samplesLen + "d",     pRes.getSampleCount()));
                 out.print(String.format("%" + scoreLen + ".3f",     pRes.getScore()));
+                out.print(" \u00B1");
                 out.print(String.format("%" + scoreErrLen + ".3f",  pRes.getScoreError()));
                 out.print(String.format("%" + unitLen + "s",        pRes.getScoreUnit()));
                 out.println();
@@ -155,6 +157,7 @@ class TextResultFormat implements ResultFormat {
                 out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
                 out.print(String.format("%" + samplesLen + "d",     subRes.getSampleCount()));
                 out.print(String.format("%" + scoreLen + ".3f",     subRes.getScore()));
+                out.print(" \u00B1");
                 out.print(String.format("%" + scoreErrLen + ".3f",  subRes.getScoreError()));
                 out.print(String.format("%" + unitLen + "s",        subRes.getScoreUnit()));
                 out.println();
