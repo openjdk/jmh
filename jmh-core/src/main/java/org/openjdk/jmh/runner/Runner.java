@@ -229,7 +229,8 @@ public class Runner extends BaseRunner {
         // and prepare to write it out after the run.
         String resultFile = null;
         if (options.getResult().hasValue() || options.getResultFormat().hasValue()) {
-            resultFile = options.getResult().orElse(Defaults.RESULT_FILE);
+            resultFile = options.getResult().orElse(Defaults.RESULT_FILE_PREFIX + "."
+                    + options.getResultFormat().orElse(Defaults.RESULT_FORMAT)).toLowerCase();
             try {
                 FileUtils.touch(resultFile);
             } catch (IOException e) {
@@ -296,16 +297,19 @@ public class Runner extends BaseRunner {
 
         Collection<RunResult> results = runBenchmarks(benchmarks);
 
-        out.flush();
-        out.close();
-
         // If user requested the result file, write it out.
         if (resultFile != null) {
             ResultFormatFactory.getInstance(
                         options.getResultFormat().orElse(Defaults.RESULT_FORMAT),
                         resultFile
             ).writeOut(results);
+
+            out.println("");
+            out.println("Benchmark result is saved to " + resultFile);
         }
+
+        out.flush();
+        out.close();
 
         return results;
     }

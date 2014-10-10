@@ -113,9 +113,9 @@ public class Defaults {
     public static final ResultFormatType RESULT_FORMAT = ResultFormatType.CSV;
 
     /**
-     * Default location of result file.
+     * Default prefix of the result file.
      */
-    public static final String RESULT_FILE = "jmh.out";
+    public static final String RESULT_FILE_PREFIX = "jmh-result";
 
     /**
      * Default {@link org.openjdk.jmh.runner.options.WarmupMode}.
