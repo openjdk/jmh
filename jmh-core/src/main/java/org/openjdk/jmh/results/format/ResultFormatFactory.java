@@ -84,6 +84,8 @@ public class ResultFormatFactory {
                 return new XSVResultFormat(writer, ";");
             case JSON:
                 return new JSONResultFormat(writer);
+            case LATEX:
+                return new LaTeXResultFormat(writer);
             default:
                 throw new IllegalStateException("Unsupported result format: " + type);
         }

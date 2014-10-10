@@ -30,5 +30,6 @@ public enum ResultFormatType {
     CSV,
     SCSV,
     JSON,
+    LATEX,
 
 }
