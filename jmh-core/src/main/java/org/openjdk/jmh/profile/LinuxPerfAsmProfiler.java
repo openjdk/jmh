@@ -496,8 +496,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
         {
             int sum = 0;
-            for (String ev : events.totalCounts.keySet()) {
-                sum += events.totalCounts.get(ev);
+            for (Long v : events.totalCounts.values()) {
+                sum += v;
             }
 
             if (sum < 1000) {

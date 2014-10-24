@@ -35,6 +35,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 class JSONResultFormat implements ResultFormat {
 
@@ -100,8 +101,9 @@ class JSONResultFormat implements ResultFormat {
             }
 
             Collection<String> secondaries = new ArrayList<String>();
-            for (String secondaryName : runResult.getSecondaryResults().keySet()) {
-                Result result = runResult.getSecondaryResults().get(secondaryName);
+            for (Map.Entry<String, Result> e : runResult.getSecondaryResults().entrySet()) {
+                String secondaryName = e.getKey();
+                Result result = e.getValue();
 
                 StringBuilder sb = new StringBuilder();
                 sb.append("\"").append(secondaryName).append("\" : {");

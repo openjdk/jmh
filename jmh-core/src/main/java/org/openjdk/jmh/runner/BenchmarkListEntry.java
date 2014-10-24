@@ -378,13 +378,13 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         @Override
         public String valueOf(Map<String, String[]> src) {
             StringBuilder sb = new StringBuilder();
-            for (String s : src.keySet()) {
-                sb.append(s);
+            for (Map.Entry<String, String[]> e : src.entrySet()) {
+                sb.append(e.getKey());
                 sb.append("===SEP-K===");
-                if (src.get(s).length == 0) {
+                if (e.getValue().length == 0) {
                     sb.append("===EMPTY===");
                 } else {
-                    for (String v : src.get(s)) {
+                    for (String v : e.getValue()) {
                         sb.append(v);
                         sb.append("===SEP-V===");
                     }

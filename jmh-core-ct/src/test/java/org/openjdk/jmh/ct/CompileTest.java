@@ -101,8 +101,10 @@ public class CompileTest {
         }
 
         Collection<JavaSourceFromString> sources = new ArrayList<JavaSourceFromString>();
-        for (String name : destination.classBodies.keySet()) {
-            sources.add(new JavaSourceFromString(name, destination.classBodies.get(name).toString()));
+        for (Map.Entry<String, StringWriter> e : destination.classBodies.entrySet()) {
+            String name = e.getKey();
+            String body = e.getValue().toString();
+            sources.add(new JavaSourceFromString(name, body));
         }
 
         JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, null, null, sources);

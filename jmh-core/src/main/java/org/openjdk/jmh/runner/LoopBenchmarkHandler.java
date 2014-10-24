@@ -131,8 +131,9 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         // The abrupt exception in any worker will float up here.
         int expected = numThreads;
         while (expected > 0) {
-            for (BenchmarkTask task : results.keySet()) {
-                Future<Collection<? extends Result>> fr = results.get(task);
+            for (Map.Entry<BenchmarkTask, Future<Collection<? extends Result>>> re : results.entrySet()) {
+                BenchmarkTask task = re.getKey();
+                Future<Collection<? extends Result>> fr = re.getValue();
                 try {
                     long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
                     fr.get(waitFor, TimeUnit.NANOSECONDS);

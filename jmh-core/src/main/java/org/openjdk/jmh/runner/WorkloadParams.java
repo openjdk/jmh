@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -49,8 +50,8 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
             throw new IllegalStateException("Comparing actual params with different key sets.");
         }
 
-        for (String key : params.keySet()) {
-            int cr = params.get(key).compareTo(o.params.get(key));
+        for (Map.Entry<String, Value> e : params.entrySet()) {
+            int cr = e.getValue().compareTo(o.params.get(e.getKey()));
             if (cr != 0) {
                 return cr;
             }

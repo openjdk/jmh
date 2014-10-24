@@ -96,8 +96,7 @@ class TextResultFormat implements ResultFormat {
             scoreErrLen = Math.max(scoreErrLen, String.format("%.3f", primRes.getScoreError()).length());
             unitLen     = Math.max(unitLen,     primRes.getScoreUnit().length());
 
-            for (String label : res.getSecondaryResults().keySet()) {
-                Result subRes = res.getSecondaryResults().get(label);
+            for (Result subRes : res.getSecondaryResults().values()) {
                 samplesLen  = Math.max(samplesLen,  String.format("%d",   subRes.getSampleCount()).length());
                 scoreLen    = Math.max(scoreLen,    String.format("%.3f", subRes.getScore()).length());
                 scoreErrLen = Math.max(scoreErrLen, String.format("%.3f", subRes.getScoreError()).length());
@@ -143,8 +142,9 @@ class TextResultFormat implements ResultFormat {
                 out.println();
             }
 
-            for (String label : res.getSecondaryResults().keySet()) {
-                Result subRes = res.getSecondaryResults().get(label);
+            for (Map.Entry<String, Result> e : res.getSecondaryResults().entrySet()) {
+                String label = e.getKey();
+                Result subRes = e.getValue();
 
                 out.print(String.format("%-" + nameLen + "s",
                         benchPrefixes.get(res.getParams().getBenchmark() + ":" + label)));

@@ -473,8 +473,10 @@ public class Runner extends BaseRunner {
     private List<WorkloadParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
         Map<String, String[]> benchParams = br.getParams().orElse(Collections.<String, String[]>emptyMap());
         List<WorkloadParams> ps = new ArrayList<WorkloadParams>();
-        for (String k : benchParams.keySet()) {
-            Collection<String> values = options.getParameter(k).orElse(Arrays.asList(benchParams.get(k)));
+        for (Map.Entry<String, String[]> e : benchParams.entrySet()) {
+            String k = e.getKey();
+            String[] vals = e.getValue();
+            Collection<String> values = options.getParameter(k).orElse(Arrays.asList(vals));
             if (values.isEmpty()) {
                 throw new RunnerException("Benchmark \"" + br.getUsername() +
                         "\" defines the parameter \"" + k + "\", but no default values.\n" +

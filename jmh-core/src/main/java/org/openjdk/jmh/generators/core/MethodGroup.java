@@ -268,8 +268,9 @@ class MethodGroup implements Comparable<MethodGroup> {
     public Optional<Map<String, String[]>> getParams() {
         Map<String, String[]> map = new TreeMap<String, String[]>();
 
-        for (String key : params.keySet()) {
-            String[] values = params.get(key);
+        for (Map.Entry<String, String[]> e : params.entrySet()) {
+            String key = e.getKey();
+            String[] values = e.getValue();
             if (values.length == 1 && values[0].equalsIgnoreCase(Param.BLANK_ARGS)) {
                 map.put(key, new String[0]);
             } else {
