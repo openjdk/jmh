@@ -56,8 +56,9 @@ public class ProfilerFactory {
 
     public static List<Class<? extends Profiler>> getDiscoveredProfilers() {
         List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
-        for (Profiler s : ServiceLoader.loadInstalled(Profiler.class))
+        for (Profiler s : ServiceLoader.load(Profiler.class)) {
             profs.add(s.getClass());
+        }
         return profs;
     }
 
