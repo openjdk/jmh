@@ -150,6 +150,11 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
      */
     private static final Boolean SKIP_TRACE_CL = Boolean.getBoolean("jmh.perfasm.skipTraceClassload");
 
+    /**
+     * Override the default assembly syntax
+     */
+    private static final String ASSEMBLY_SYNTAX = System.getProperty("jmh.perfasm.assemblySyntax");
+
     private String hsLog;
     private String perfBinData;
     private String perfParsedData;
@@ -178,6 +183,9 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                     "-XX:+PrintInlining"));
             if (!SKIP_TRACE_CL) {
                 opts.add("-XX:+TraceClassLoading");
+            }
+            if (ASSEMBLY_SYNTAX != null) {
+                opts.add("-XX:PrintAssemblyOptions=" + ASSEMBLY_SYNTAX);
             }
             return opts;
         } else {
