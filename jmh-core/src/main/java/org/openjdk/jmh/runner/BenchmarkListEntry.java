@@ -59,6 +59,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     private final Optional<Map<String, String[]>> params;
     private final Optional<TimeUnit> tu;
     private final Optional<Integer> opsPerInvocation;
+    private final Optional<TimeValue> timeout;
 
     private WorkloadParams workloadParams;
 
@@ -67,7 +68,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                               Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
                               Optional<Integer> forks, Optional<Integer> warmupForks,
                               Optional<String> jvm, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
-                              Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv) {
+                              Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv,
+                              Optional<TimeValue> timeout) {
         this.userName = userName;
         this.generatedName = generatedName;
         this.mode = mode;
@@ -89,12 +91,13 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.workloadParams = new WorkloadParams();
         this.tu = tu;
         this.opsPerInvocation = opsPerInv;
+        this.timeout = timeout;
     }
 
     public BenchmarkListEntry(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 20) {
+        if (args.length != 21) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -119,6 +122,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.params = Optional.of(args[17], PARAM_COLLECTION_UNMARSHALLER);
         this.tu = Optional.of(args[18], TIMEUNIT_UNMARSHALLER);
         this.opsPerInvocation = Optional.of(args[19], INTEGER_UNMARSHALLER);
+        this.timeout = Optional.of(args[20], TIME_VALUE_UNMARSHALLER);
     }
 
     public BenchmarkListEntry(String userName, String generatedName, Mode mode) {
@@ -126,7 +130,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<Integer>none(),
                 Optional.<String>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
-                Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none(), Optional.<Integer>none());
+                Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none(), Optional.<Integer>none(),
+                Optional.<TimeValue>none());
     }
 
     public String toLine() {
@@ -139,7 +144,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 jvmArgsPrepend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 jvmArgsAppend.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
                 params.toString(PARAM_COLLECTION_MARSHALLER) + BR_SEPARATOR + tu.toString(TIMEUNIT_MARSHALLER) + BR_SEPARATOR +
-                opsPerInvocation;
+                opsPerInvocation + BR_SEPARATOR +
+                timeout;
     }
 
     public BenchmarkListEntry cloneWith(Mode mode) {
@@ -148,7 +154,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks,
                 jvm, jvmArgs, jvmArgsPrepend, jvmArgsAppend,
-                params, tu, opsPerInvocation);
+                params, tu, opsPerInvocation,
+                timeout);
     }
 
     public BenchmarkListEntry cloneWith(WorkloadParams p) {
@@ -157,7 +164,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks,
                 jvm, jvmArgs, jvmArgsPrepend, jvmArgsAppend,
-                params, tu, opsPerInvocation);
+                params, tu, opsPerInvocation,
+                timeout);
         br.workloadParams = p;
         return br;
     }
@@ -295,6 +303,10 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     public Optional<Integer> getOperationsPerInvocation() {
         return opsPerInvocation;
+    }
+
+    public Optional<TimeValue> getTimeout() {
+        return timeout;
     }
 
     static final Optional.Unmarshaller<Integer> INTEGER_UNMARSHALLER = new Optional.Unmarshaller<Integer>() {

@@ -178,7 +178,8 @@ public class BenchmarkGenerator {
                             group.getJvmArgsAppend(),
                             group.getParams(),
                             group.getOutputTimeUnit(),
-                            group.getOperationsPerInvocation()
+                            group.getOperationsPerInvocation(),
+                            group.getTimeout()
                     );
                     writer.println(br.toLine());
                 }

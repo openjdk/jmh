@@ -462,7 +462,7 @@ public class Runner extends BaseRunner {
                 benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
 
         TimeValue timeout = options.getTimeout().orElse(
-                Defaults.TIMEOUT);
+                benchmark.getTimeout().orElse(Defaults.TIMEOUT));
 
         return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
                 threads, threadGroups, forks, warmupForks,

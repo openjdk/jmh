@@ -31,6 +31,7 @@ import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Optional;
@@ -244,6 +245,14 @@ class MethodGroup implements Comparable<MethodGroup> {
         Fork ann = getFinal(Fork.class);
         if (ann != null && !(ann.jvmArgsPrepend().length == 1 && ann.jvmArgsPrepend()[0].equals(Fork.BLANK_ARGS))) {
             return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsPrepend()));
+        }
+        return Optional.none();
+    }
+
+    public Optional<TimeValue> getTimeout() {
+        Timeout ann = getFinal(Timeout.class);
+        if (ann != null) {
+            return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
         }
         return Optional.none();
     }
