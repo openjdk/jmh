@@ -88,8 +88,9 @@ class ASMFieldInfo extends FieldVisitor implements FieldInfo {
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-        AnnotationInvocationHandler annHandler = new AnnotationInvocationHandler(super.visitAnnotation(desc, visible));
-        annotations.put(Type.getType(desc).getClassName(), annHandler);
+        String className = Type.getType(desc).getClassName();
+        AnnotationInvocationHandler annHandler = new AnnotationInvocationHandler(className, super.visitAnnotation(desc, visible));
+        annotations.put(className, annHandler);
         return annHandler;
     }
 

@@ -262,11 +262,8 @@ class MethodGroup implements Comparable<MethodGroup> {
         for (MethodInvocation mi : methods) {
             T ann = BenchmarkGeneratorUtils.getAnnSuper(mi.method, ci, annClass);
             if (ann != null) {
-                // FIXME: Temporalily disabled before we figure the proxy annotations equals/hashCode
-                if (false && finalAnn != null && !finalAnn.equals(ann)) {
-                    if (!finalAnn.equals(ann)) {
-                        throw new GenerationException("Colliding annotations: " + ann + " vs. " + finalAnn, mi.method);
-                    }
+                if (finalAnn != null && !finalAnn.equals(ann)) {
+                    throw new GenerationException("Colliding annotations: " + ann + " vs. " + finalAnn, mi.method);
                 }
                 finalAnn = ann;
             }

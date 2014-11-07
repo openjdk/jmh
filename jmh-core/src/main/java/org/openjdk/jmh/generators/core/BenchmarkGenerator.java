@@ -155,33 +155,37 @@ public class BenchmarkGenerator {
         try {
             PrintWriter writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
             for (BenchmarkInfo info : benchmarkInfos) {
-                MethodGroup group = info.methodGroup;
-                String method = group.getName();
-                for (Mode m : group.getModes()) {
-                    BenchmarkListEntry br = new BenchmarkListEntry(
-                            info.userName + "." + method,
-                            info.generatedName + "." + method,
-                            m,
-                            group.getThreads(),
-                            group.getTotalThreadCount(),
-                            group.getWarmupIterations(),
-                            group.getWarmupTime(),
-                            group.getWarmupBatchSize(),
-                            group.getMeasurementIterations(),
-                            group.getMeasurementTime(),
-                            group.getMeasurementBatchSize(),
-                            group.getForks(),
-                            group.getWarmupForks(),
-                            group.getJvm(),
-                            group.getJvmArgs(),
-                            group.getJvmArgsPrepend(),
-                            group.getJvmArgsAppend(),
-                            group.getParams(),
-                            group.getOutputTimeUnit(),
-                            group.getOperationsPerInvocation(),
-                            group.getTimeout()
-                    );
-                    writer.println(br.toLine());
+                try {
+                    MethodGroup group = info.methodGroup;
+                    String method = group.getName();
+                    for (Mode m : group.getModes()) {
+                        BenchmarkListEntry br = new BenchmarkListEntry(
+                                info.userName + "." + method,
+                                info.generatedName + "." + method,
+                                m,
+                                group.getThreads(),
+                                group.getTotalThreadCount(),
+                                group.getWarmupIterations(),
+                                group.getWarmupTime(),
+                                group.getWarmupBatchSize(),
+                                group.getMeasurementIterations(),
+                                group.getMeasurementTime(),
+                                group.getMeasurementBatchSize(),
+                                group.getForks(),
+                                group.getWarmupForks(),
+                                group.getJvm(),
+                                group.getJvmArgs(),
+                                group.getJvmArgsPrepend(),
+                                group.getJvmArgsAppend(),
+                                group.getParams(),
+                                group.getOutputTimeUnit(),
+                                group.getOperationsPerInvocation(),
+                                group.getTimeout()
+                        );
+                        writer.println(br.toLine());
+                    }
+                } catch (GenerationException ge) {
+                    destination.printError(ge.getMessage(), ge.getElement());
                 }
             }
 
