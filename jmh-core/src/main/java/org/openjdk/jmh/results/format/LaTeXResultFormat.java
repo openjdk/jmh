@@ -47,22 +47,42 @@ class LaTeXResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Collection<RunResult> results) {
-
         SortedSet<String> params = new TreeSet<String>();
         Set<String> benchNames = new HashSet<String>();
 
         Set<String> units = new HashSet<String>();
-        for (RunResult rs : results) {
-            params.addAll(rs.getParams().getParamsKeys());
-            benchNames.add(rs.getParams().getBenchmark());
-            units.add(rs.getPrimaryResult().getScoreUnit());
+        for (RunResult rr : results) {
+            params.addAll(rr.getParams().getParamsKeys());
+            units.add(rr.getPrimaryResult().getScoreUnit());
+            benchNames.add(rr.getParams().getBenchmark());
+            for (String label : rr.getSecondaryResults().keySet()) {
+                benchNames.add(rr.getParams().getBenchmark() + ":" + label);
+            }
         }
 
         boolean singleUnit = (units.size() == 1);
         String unit = singleUnit ? units.iterator().next() : null;
 
-        Map<String, String> benchPrefixes = ClassUtils.denseClassNames(benchNames);
+        Map<String, String> prefixes = ClassUtils.denseClassNames(benchNames);
 
+        printHeader(params, singleUnit, unit);
+
+        for (RunResult rr : results) {
+            BenchmarkParams benchmarkParams = rr.getParams();
+            Result res = rr.getPrimaryResult();
+
+            printLine(benchmarkParams.getBenchmark(), benchmarkParams, params, prefixes, singleUnit, res);
+
+            for (String label : rr.getSecondaryResults().keySet()) {
+                Result subRes = rr.getSecondaryResults().get(label);
+                printLine(benchmarkParams.getBenchmark() + ":" + label, benchmarkParams, params, prefixes, singleUnit, subRes);
+            }
+        }
+
+        printFooter();
+    }
+
+    private void printHeader(SortedSet<String> params, boolean singleUnit, String unit) {
         pw.write("\\begin{tabular}{r|");
         for (String p : params) {
             pw.write("l|");
@@ -75,28 +95,25 @@ class LaTeXResultFormat implements ResultFormat {
         }
         pw.write(" \\multicolumn{" + (singleUnit ? 2 : 3) + "}{c}{\\texttt{Score" + (singleUnit ? ", " + unit : "") + "}} \\\\\n");
         pw.write("\\hline\n");
+    }
 
-        for (RunResult runResult : results) {
-            BenchmarkParams benchmarkParams = runResult.getParams();
-            Result primaryResult = runResult.getPrimaryResult();
+    private void printFooter() {pw.write("\\end{tabular}");}
 
-            pw.printf("\\texttt{%s} & ", escape(benchPrefixes.get(benchmarkParams.getBenchmark())));
-            for (String p : params) {
-                pw.printf("\\texttt{%s}", escape(benchmarkParams.getParam(p)));
-                pw.write(" & ");
-            }
-            pw.printf("\\texttt{%5.3f} & ", primaryResult.getScore());
-            pw.printf("\\scriptsize $\\pm$ \\texttt{%5.3f}", primaryResult.getScoreError());
-            if (!singleUnit) {
-                pw.printf(" & \\texttt{%s}", primaryResult.getScoreUnit());
-            }
-            pw.write(" \\\\");
-
-            pw.write("\n");
+    private void printLine(String label, BenchmarkParams benchParams, SortedSet<String> params,
+                           Map<String, String> prefixes, boolean singleUnit, Result res) {
+        pw.printf("\\texttt{%s} & ", escape(prefixes.get(label)));
+        for (String p : params) {
+            pw.printf("\\texttt{%s}", escape(benchParams.getParam(p)));
+            pw.write(" & ");
         }
+        pw.printf("\\texttt{%5.3f} & ", res.getScore());
+        pw.printf("\\scriptsize $\\pm$ \\texttt{%5.3f}", res.getScoreError());
+        if (!singleUnit) {
+            pw.printf(" & \\texttt{%s}", res.getScoreUnit());
+        }
+        pw.write(" \\\\");
 
-        pw.write("\\end{tabular}");
-
+        pw.write("\n");
     }
 
     private static String escape(String s) {

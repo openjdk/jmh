@@ -190,4 +190,31 @@ public class ResultFormatTest {
         compare(actualFile, "output-golden.scsv");
     }
 
+
+    @Test
+    public void latexTest() throws IOException {
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
+
+        ResultFormatFactory.getInstance(
+                    ResultFormatType.LATEX,
+                    actualFile)
+                .writeOut(getStub());
+
+        compare(actualFile, "output-golden.latex");
+    }
+
+    @Test
+    public void latexTest_Stream() throws IOException {
+        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
+
+        PrintWriter pw = new PrintWriter(actualFile);
+        ResultFormatFactory.getInstance(
+                    ResultFormatType.LATEX,
+                    actualFile)
+                .writeOut(getStub());
+        pw.close();
+
+        compare(actualFile, "output-golden.latex");
+    }
+
 }
