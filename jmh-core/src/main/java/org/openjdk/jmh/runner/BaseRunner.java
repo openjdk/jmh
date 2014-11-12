@@ -77,8 +77,21 @@ abstract class BaseRunner {
             ActionMode mode = action.getMode();
 
             if (!forked) {
-                etaBeforeBenchmark();
+                String opts = Utils.join(params.getJvmArgs(), " ").trim();
+                String realOpts = Utils.join(ManagementFactory.getRuntimeMXBean().getInputArguments(), " ").trim();
+                if (opts.isEmpty()) {
+                    opts = "<none>";
+                }
+                if (realOpts.isEmpty()) {
+                    realOpts = "<none>";
+                }
+
+                out.println("# VM invoker: " + params.getJvm());
+                out.println("# VM options: " + realOpts + (opts.equals(realOpts) ? "" : " *** WARNING: some JVM options are ignored in non-forked runs ***"));
+
                 out.startBenchmark(params);
+                out.println("");
+                etaBeforeBenchmark();
                 out.println("# Fork: N/A, test runs in the existing VM");
             }
 
