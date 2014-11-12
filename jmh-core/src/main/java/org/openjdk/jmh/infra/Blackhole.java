@@ -73,7 +73,7 @@ abstract class BlackholeL2 extends BlackholeL1 {
     public volatile Object[] objs1;
     public volatile BlackholeL2 nullBait = null;
     public int tlr;
-    public int tlrMask;
+    public volatile int tlrMask;
 
     public BlackholeL2() {
         Random r = new Random(System.nanoTime());
@@ -208,6 +208,9 @@ public class Blackhole extends BlackholeL4 {
      * generating the slow path, and apply the previous logic to constant-fold
      * the condition to "false". We are warming up the slow-path in the beginning
      * to evade that effect.
+     * <p/>
+     * In all cases, consumes do the volatile reads to have a consistent memory
+     * semantics across all consume methods.
      */
 
     static {
@@ -271,11 +274,12 @@ public class Blackhole extends BlackholeL4 {
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
+        int tlrMask = this.tlrMask; // volatile read
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
             this.obj1 = obj;
-            this.tlrMask = (this.tlrMask << 1) + 1;
+            this.tlrMask = (tlrMask << 1) + 1;
         }
     }
 
@@ -285,6 +289,7 @@ public class Blackhole extends BlackholeL4 {
      * @param objs objects to consume.
      */
     public final void consume(Object[] objs) {
+        int tlrMask = this.tlrMask; // volatile read
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
