@@ -146,9 +146,10 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     private static final String SAVE_LOG_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveLogToFile");
 
     /**
-     * Skip tracing the classloading events.
+     * Print the collateral compilation information.
+     * Enabling this might corrupt the assembly output, see https://bugs.openjdk.java.net/browse/CODETOOLS-7901102
      */
-    private static final Boolean SKIP_TRACE_CL = Boolean.getBoolean("jmh.perfasm.skipTraceClassload");
+    private static final Boolean PRINT_COMPILATION_INFO = Boolean.getBoolean("jmh.perfasm.printCompilationInfo");
 
     /**
      * Override the default assembly syntax
@@ -178,10 +179,10 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                     "-XX:+UnlockDiagnosticVMOptions",
                     "-XX:+LogCompilation",
                     "-XX:LogFile=" + hsLog,
-                    "-XX:+PrintAssembly",
-                    "-XX:+PrintCompilation",
-                    "-XX:+PrintInlining"));
-            if (!SKIP_TRACE_CL) {
+                    "-XX:+PrintAssembly"));
+            if (PRINT_COMPILATION_INFO) {
+                opts.add("-XX:+PrintCompilation");
+                opts.add("-XX:+PrintInlining");
                 opts.add("-XX:+TraceClassLoading");
             }
             if (ASSEMBLY_SYNTAX != null) {
