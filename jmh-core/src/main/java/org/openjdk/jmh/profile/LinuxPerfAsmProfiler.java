@@ -240,7 +240,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
          */
 
         try {
-            Process p = Runtime.getRuntime().exec("perf script -i " + perfBinData);
+            Process p = Runtime.getRuntime().exec("perf script -f time,event,ip,dso,sym -i " + perfBinData);
 
             // drain streams, else we might lock up
             FileOutputStream fos = new FileOutputStream(perfParsedData);
@@ -734,11 +734,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             // lots of performance, so we need to get tricky, and merge the symbol names back
             // after splitting.
             //
-            // Sample input string:
-            //    java   598 11937.621044:  cycles:      7f7318c26a10 StringTable::intern(Symbol*, Thread*) (.../libjvm.so)
+            // We are forcing perf to print: time event ip dso sym
             //
-            // Old perfs skip the unresolved symbol names:
-            //    java  6118 171515.765683: instructions:          b4a84c58  (/tmp/perf-6108.map)
 
             String line;
             while ((line = reader.readLine()) != null) {
@@ -746,14 +743,13 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
                 String[] elems = line.trim().split("[ ]+");
 
-                if (elems.length < 6) continue;
+                if (elems.length < 5) continue;
 
-                String process = elems[0];
-                String strTime = elems[2].replace(":", "");
-                String evName = elems[3].replace(":", "");
-                String strAddr = elems[4];
-                String symbol = Utils.join(Arrays.copyOfRange(elems, 5, elems.length - 1), " ");
-                String lib = elems[elems.length - 1];
+                String strTime = elems[0].replace(":", "");
+                String evName = elems[1].replace(":", "");
+                String strAddr = elems[2];
+                String lib = elems[3];
+                String symbol = Utils.join(Arrays.copyOfRange(elems, 4, elems.length), " ");
                 lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
 
                 try {
@@ -771,6 +767,11 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                 }
 
                 Multiset<Long> evs = events.get(evName);
+                if (evs == null) {
+                    // we are not prepared to handle this event, skip
+                    continue;
+                }
+
                 try {
                     Long addr = Long.valueOf(strAddr, 16);
                     evs.add(addr);
