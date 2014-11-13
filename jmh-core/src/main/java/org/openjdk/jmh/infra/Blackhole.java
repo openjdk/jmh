@@ -61,14 +61,22 @@ abstract class BlackholeL1 extends BlackholeL0 {
 }
 
 abstract class BlackholeL2 extends BlackholeL1 {
-    public volatile byte b1, b2;
-    public volatile boolean bool1, bool2;
-    public volatile char c1, c2;
-    public volatile short s1, s2;
-    public volatile int i1, i2;
-    public volatile long l1, l2;
-    public volatile float f1, f2;
-    public volatile double d1, d2;
+    public volatile byte b1;
+    public volatile boolean bool1;
+    public volatile char c1;
+    public volatile short s1;
+    public volatile int i1;
+    public volatile long l1;
+    public volatile float f1;
+    public volatile double d1;
+    public byte b2;
+    public boolean bool2;
+    public char c2;
+    public short s2;
+    public int i2;
+    public long l2;
+    public float f2;
+    public double d2;
     public volatile Object obj1;
     public volatile Object[] objs1;
     public volatile BlackholeL2 nullBait = null;
@@ -304,6 +312,8 @@ public class Blackhole extends BlackholeL4 {
      * @param b object to consume.
      */
     public final void consume(byte b) {
+        byte b1 = this.b1; // volatile read
+        byte b2 = this.b2;
         if (b == b1 & b == b2) {
             // SHOULD NEVER HAPPEN
             nullBait.b1 = b; // implicit null pointer exception
@@ -316,6 +326,8 @@ public class Blackhole extends BlackholeL4 {
      * @param bool object to consume.
      */
     public final void consume(boolean bool) {
+        boolean bool1 = this.bool1; // volatile read
+        boolean bool2 = this.bool2;
         if (bool == bool1 & bool == bool2) {
             // SHOULD NEVER HAPPEN
             nullBait.bool1 = bool; // implicit null pointer exception
@@ -328,6 +340,8 @@ public class Blackhole extends BlackholeL4 {
      * @param c object to consume.
      */
     public final void consume(char c) {
+        char c1 = this.c1; // volatile read
+        char c2 = this.c2;
         if (c == c1 & c == c2) {
             // SHOULD NEVER HAPPEN
             nullBait.c1 = c; // implicit null pointer exception
@@ -340,6 +354,8 @@ public class Blackhole extends BlackholeL4 {
      * @param s object to consume.
      */
     public final void consume(short s) {
+        short s1 = this.s1; // volatile read
+        short s2 = this.s2;
         if (s == s1 & s == s2) {
             // SHOULD NEVER HAPPEN
             nullBait.s1 = s; // implicit null pointer exception
@@ -352,6 +368,8 @@ public class Blackhole extends BlackholeL4 {
      * @param i object to consume.
      */
     public final void consume(int i) {
+        int i1 = this.i1; // volatile read
+        int i2 = this.i2;
         if (i == i1 & i == i2) {
             // SHOULD NEVER HAPPEN
             nullBait.i1 = i; // implicit null pointer exception
@@ -364,6 +382,8 @@ public class Blackhole extends BlackholeL4 {
      * @param l object to consume.
      */
     public final void consume(long l) {
+        long l1 = this.l1; // volatile read
+        long l2 = this.l2;
         if (l == l1 & l == l2) {
             // SHOULD NEVER HAPPEN
             nullBait.l1 = l; // implicit null pointer exception
@@ -376,6 +396,8 @@ public class Blackhole extends BlackholeL4 {
      * @param f object to consume.
      */
     public final void consume(float f) {
+        float f1 = this.f1; // volatile read
+        float f2 = this.f2;
         if (f == f1 & f == f2) {
             // SHOULD NEVER HAPPEN
             nullBait.f1 = f; // implicit null pointer exception
@@ -388,6 +410,8 @@ public class Blackhole extends BlackholeL4 {
      * @param d object to consume.
      */
     public final void consume(double d) {
+        double d1 = this.d1; // volatile read
+        double d2 = this.d2;
         if (d == d1 & d == d2) {
             // SHOULD NEVER HAPPEN
             nullBait.d1 = d; // implicit null pointer exception
