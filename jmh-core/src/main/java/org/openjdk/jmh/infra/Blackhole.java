@@ -161,51 +161,52 @@ public class Blackhole extends BlackholeL4 {
 
     /**
      * IMPLEMENTATION NOTES:
-     * <p/>
+     *
      * The major things to dodge with Blackholes are:
-     *   a) dead-code elimination: the arguments should be used on every call,
+     *   a) Dead-code elimination: the arguments should be used on every call,
      *      so that compilers are unable to fold them into constants or
      *      otherwise optimize them away along with the computations resulted
      *      in them.
-     *   b) false sharing: reading/writing the state may disturb the cache
+     *   b) False sharing: reading/writing the state may disturb the cache
      *      lines. We need to isolate the critical fields to achieve tolerable
      *      performance.
-     *   c) write wall: we need to ease off on writes as much as possible,
+     *   c) Write wall: we need to ease off on writes as much as possible,
      *      since it disturbs the caches, pollutes the write buffers, etc.
      *      This may very well result in hitting the memory wall prematurely.
      *      Reading memory is fine as long as it is cacheable.
-     * <p/>
+     *
      * To achieve these goals, we are piggybacking on several things in the
      * compilers:
-     * <p/>
-     * 1. Superclass fields are not reordered with the subclass' fields.
-     * No practical VM that we are aware of is doing this. It is unpractical,
-     * because if the superclass fields are at the different offsets in two
-     * subclasses, the VMs would then need to do the polymorphic access for
-     * the superclass fields.
-     * <p/>
-     * This allows us to "squash" the protected fields in the inheritance
-     * hierarchy so that the padding in super- and sub-class are laid out
-     * right before and right after the protected fields.
-     * <p/>
-     * We also pad with booleans so that dense layout in superclass does not
-     * have the gap where runtime can fit the subclass field.
-     * <p/>
-     * 2. Compilers are unable to predict the value of the volatile read.
-     * While the compilers can speculatively optimize until the relevant
-     * volatile write happens, it is unlikely to be practical to be able to stop
-     * all the threads the instant that write had happened.
-     * <p/>
-     * This allows us to compare the incoming values against the relevant
-     * volatile fields. The values in those volatile fields are never changing,
-     * but due to (2), we should re-read the values again and again.
-     * <p/>
+     *
+     *  1. Superclass fields are not reordered with the subclass' fields.
+     *     No practical VM that we are aware of is doing this. It is unpractical,
+     *     because if the superclass fields are at the different offsets in two
+     *     subclasses, the VMs would then need to do the polymorphic access for
+     *     the superclass fields.
+     *
+     *  2. Compilers are unable to predict the value of the volatile read.
+     *     While the compilers can speculatively optimize until the relevant
+     *     volatile write happens, it is unlikely to be practical to be able to stop
+     *     all the threads the instant that write had happened.
+     *
+     *  3. Compilers are not doing aggressive inter-procedural optimizations,
+     *     and/or break them when the target method is forced to be non-inlineable.
+     *
+     * Observation (1) allows us to "squash" the protected fields in the inheritance
+     * hierarchy so that the padding in super- and sub-class are laid out right before
+     * and right after the protected fields. We also pad with booleans so that dense
+     * layout in superclass does not have the gap where runtime can fit the subclass field.
+     *
+     * Observation (2) allows us to compare the incoming primitive values against
+     * the relevant volatile-guarded fields. The values in those guarded fields are
+     * never changing, but due to (2), we should re-read the values again and again.
+     *
      * Primitives are a bit hard, because we can't predict what values we
      * will be fed. But we can compare the incoming value with *two* distinct
      * known values, and both checks will never be true at the same time.
      * Note the bitwise AND in all the predicates: both to spare additional
      * branch, and also to provide more uniformity in the performance.
-     * <p/>
+     *
      * Objects should normally abide the Java's referential semantics, i.e. the
      * incoming objects will never be equal to the distinct object we have, and
      * volatile read will break the speculation about what we compare with.
@@ -216,7 +217,13 @@ public class Blackhole extends BlackholeL4 {
      * generating the slow path, and apply the previous logic to constant-fold
      * the condition to "false". We are warming up the slow-path in the beginning
      * to evade that effect.
-     * <p/>
+     *
+     * Observation (3) provides us with an opportunity to create a safety net in case
+     * either (1) or (2) fails. This is why Blackhole methods are prohibited from
+     * being inlined. This is treated specially in JMH runner code. Conversely,
+     * both (1) and (2) are covering in case (3) fails. This provides a defense
+     * in depth for Blackhole.
+     *
      * In all cases, consumes do the volatile reads to have a consistent memory
      * semantics across all consume methods.
      */
