@@ -240,7 +240,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
          */
 
         try {
-            Process p = Runtime.getRuntime().exec("perf script -f time,event,ip,dso,sym -i " + perfBinData);
+            Process p = Runtime.getRuntime().exec("perf script -f time,event,ip,sym,dso -i " + perfBinData);
 
             // drain streams, else we might lock up
             FileOutputStream fos = new FileOutputStream(perfParsedData);
@@ -734,7 +734,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             // lots of performance, so we need to get tricky, and merge the symbol names back
             // after splitting.
             //
-            // We are forcing perf to print: time event ip dso sym
+            // We are forcing perf to print: time event ip sym dso
             //
 
             String line;
@@ -743,13 +743,13 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
                 String[] elems = line.trim().split("[ ]+");
 
-                if (elems.length < 5) continue;
+                if (elems.length < 4) continue;
 
                 String strTime = elems[0].replace(":", "");
                 String evName = elems[1].replace(":", "");
                 String strAddr = elems[2];
-                String lib = elems[3];
-                String symbol = Utils.join(Arrays.copyOfRange(elems, 4, elems.length), " ");
+                String symbol = Utils.join(Arrays.copyOfRange(elems, 3, elems.length - 1), " ");
+                String lib = elems[elems.length - 1];
                 lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
 
                 try {
