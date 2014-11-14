@@ -680,16 +680,20 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                 ASMLine asmLine = new ASMLine(line);
 
                 if (line.contains("# {method}")) {
-                    if (elements.length == 7) {
+                    if (elements.length == 6) {
+                        // old JDKs may print the line with 6 fields: # {method} <name> <signature> in <class>
+                        method = (elements[5].replace("/", ".") + "::" + elements[2]).replace("'", "");
+                    } else if (elements.length == 7) {
+                        // newer JDKs always print 7 fields: # {method} <address> <name> <signature> in <class>
                         method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
-                        method = method.replace("&apos;", "");
-                        method = method.replace("&lt;", "<");
-                        method = method.replace("&gt;", ">");
                     } else {
                         // {method} line is corrupted, other writer had possibly interjected;
                         // honestly say we can't figure the method name out instead of lying.
                         method = "<name unparseable>";
                     }
+                    method = method.replace("&apos;", "");
+                    method = method.replace("&lt;", "<");
+                    method = method.replace("&gt;", ">");
                 } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be line with address.
                     try {
