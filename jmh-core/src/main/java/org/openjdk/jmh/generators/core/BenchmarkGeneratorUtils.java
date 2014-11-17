@@ -130,6 +130,14 @@ class BenchmarkGeneratorUtils {
         return ls;
     }
 
+    public static Collection<MethodInfo> getAllMethods(ClassInfo ci) {
+        List<MethodInfo> ls = new ArrayList<MethodInfo>();
+        do {
+            ls.addAll(ci.getMethods());
+        } while ((ci = ci.getSuperClass()) != null);
+        return ls;
+    }
+
     public static Collection<MethodInfo> getMethods(ClassInfo ci) {
         List<MethodInfo> ls = new ArrayList<MethodInfo>();
         do {
@@ -267,14 +275,25 @@ class BenchmarkGeneratorUtils {
     /**
      * Compute the parameter space given by {@code @Param} annotations and add all them to the group.
      *
-     * @param parameterInfoType type of the state {@code @State} in which to find {@code @Param}s
+     * @param host type of the state {@code @State} in which to find {@code @Param}s
      * @param group method group
      */
-    static void addParameterValuesToGroup(ClassInfo parameterInfoType, MethodGroup group) {
-        for (FieldInfo fi : getAllFields(parameterInfoType)) {
+    static void addParameterValuesToGroup(ClassInfo host, MethodGroup group) {
+        // Add all inherited @Param fields
+        for (FieldInfo fi : getAllFields(host)) {
             if (fi.getAnnotation(Param.class) != null) {
                 String[] values = toParameterValues(fi);
                 group.addParamValues(fi.getName(), values);
+            }
+        }
+
+        // Add all @Param fields reachable through the dependencies.
+        // This recursive approach always converges because @State dependency graph is DAG.
+        for (MethodInfo mi : getAllMethods(host)) {
+            if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
+                for (ParameterInfo pi : mi.getParameters()) {
+                    addParameterValuesToGroup(pi.getType(), group);
+                }
             }
         }
     }
