@@ -695,11 +695,11 @@ public class Runner extends BaseRunner {
             InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), fosOut);
 
             if (printErr) {
-                errDrainer.addOutputStream(System.err);
+                errDrainer.addOutputStream(new OutputFormatAdapter(out));
             }
 
             if (printOut) {
-                outDrainer.addOutputStream(System.out);
+                outDrainer.addOutputStream(new OutputFormatAdapter(out));
             }
 
             errDrainer.start();
@@ -728,8 +728,17 @@ public class Runner extends BaseRunner {
                 out.println("</stderr>");
 
                 out.println("");
+            }
 
-                throw new BenchmarkException(new IllegalStateException("Forked VM failed with exit code " + ecode));
+            BenchmarkException exception = reader.getException();
+            if (exception == null) {
+                if (ecode == 0) {
+                    return reader.getResults();
+                } else {
+                    throw new BenchmarkException(new IllegalStateException("Forked VM failed with exit code " + ecode));
+                }
+            } else {
+                throw exception;
             }
 
         } catch (IOException ex) {
@@ -745,12 +754,6 @@ public class Runner extends BaseRunner {
             FileUtils.safelyClose(fosOut);
         }
 
-        BenchmarkException exception = reader.getException();
-        if (exception == null) {
-            return reader.getResults();
-        } else {
-            throw exception;
-        }
     }
 
     /**

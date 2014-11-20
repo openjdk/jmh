@@ -55,6 +55,7 @@ public final class BinaryLinkClient {
     private final ForwardingPrintStream streamErr;
     private final ForwardingPrintStream streamOut;
     private final OutputFormat outputFormat;
+    private volatile boolean failed;
 
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.lock = new Object();
@@ -77,9 +78,30 @@ public final class BinaryLinkClient {
     }
 
     private void pushFrame(Serializable frame) throws IOException {
+        if (failed) {
+            throw new IOException("Link had failed already");
+        }
+
         synchronized (lock) {
-            oos.writeObject(frame);
-            oos.flush();
+            try {
+                oos.writeObject(frame);
+                oos.flush();
+            } catch (IOException e) {
+                failed = true;
+                throw e;
+            }
+        }
+    }
+
+    private Object readFrame() throws IOException, ClassNotFoundException {
+        try {
+            return ois.readObject();
+        } catch (ClassNotFoundException ex) {
+            failed = true;
+            throw ex;
+        } catch (IOException ex) {
+            failed = true;
+            throw ex;
         }
     }
 
@@ -103,7 +125,7 @@ public final class BinaryLinkClient {
         synchronized (lock) {
             pushFrame(new InfraFrame(InfraFrame.Type.OPTIONS_REQUEST));
 
-            Object reply = ois.readObject();
+            Object reply = readFrame();
             if (reply instanceof OptionsFrame) {
                 return (((OptionsFrame) reply).getOpts());
             } else {
@@ -116,7 +138,7 @@ public final class BinaryLinkClient {
         synchronized (lock) {
             pushFrame(new InfraFrame(InfraFrame.Type.ACTION_PLAN_REQUEST));
 
-            Object reply = ois.readObject();
+            Object reply = readFrame();
             if (reply instanceof ActionPlanFrame) {
                 return ((ActionPlanFrame) reply).getActionPlan();
             } else {

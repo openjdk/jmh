@@ -35,17 +35,17 @@ import java.io.IOException;
 class ForkedMain {
 
     private static volatile boolean gracefullyFinished;
+    private static volatile Exception exception;
 
     /**
      * Application main entry point
      *
      * @param argv Command line arguments
      */
-    public static void main(String[] argv) {
-        if (argv.length == 0) {
-            throw new IllegalArgumentException("Empty arguments for forked VM");
+    public static void main(String[] argv) throws Exception {
+        if (argv.length != 2) {
+            throw new IllegalArgumentException("Expected two arguments for forked VM");
         } else {
-            BinaryLinkClient link = null;
             try {
                 // This assumes the exact order of arguments:
                 //   1) host name to back-connect
@@ -54,7 +54,7 @@ class ForkedMain {
                 int hostPort = Integer.valueOf(argv[1]);
 
                 // establish the link to host VM and pull the options
-                link = new BinaryLinkClient(hostName, hostPort);
+                BinaryLinkClient link = new BinaryLinkClient(hostName, hostPort);
                 addShutdownHook(link);
 
                 Options options = link.requestOptions();
@@ -68,10 +68,9 @@ class ForkedMain {
                 runner.run();
 
                 gracefullyFinished = true;
-            } catch (IOException ex) {
-                throw new IllegalArgumentException(ex.getMessage());
-            } catch (ClassNotFoundException ex) {
-                throw new IllegalArgumentException(ex.getMessage());
+            } catch (Exception ex) {
+                exception = ex;
+                System.exit(1);
             }
         }
     }
@@ -82,19 +81,26 @@ class ForkedMain {
                     @Override
                     public void run() {
                         if (!gracefullyFinished) {
-                            String msg = "<failure: VM prematurely exited before JMH had finished with it, " +
-                                    "explicit System.exit was called?>";
+                            Exception ex = exception;
+                            if (ex == null) {
+                                ex = new IllegalStateException(
+                                        "<failure: VM prematurely exited before JMH had finished with it, " +
+                                        "explicit System.exit was called?>");
+                            }
+
+                            String msg = ex.getMessage();
+
                             if (link != null) {
-                                link.getOutputFormat().println(msg);
                                 try {
-                                    link.pushException(new BenchmarkException(new IllegalStateException(msg)));
-                                } catch (IOException e) {
+                                    link.getOutputFormat().println(msg);
+                                    link.pushException(new BenchmarkException(ex));
+                                } catch (Exception e) {
                                     // last resort
-                                    System.err.println(msg);
+                                    ex.printStackTrace(System.err);
                                 }
                             } else {
                                 // last resort
-                                System.err.println(msg);
+                                ex.printStackTrace(System.err);
                             }
                         }
 
