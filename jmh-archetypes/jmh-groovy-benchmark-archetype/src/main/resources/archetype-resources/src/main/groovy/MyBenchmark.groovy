@@ -29,13 +29,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package $
+package ${groupId}
 
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.State
-
-{groupId}
 
 @State(Scope.Benchmark)
 class MyBenchmark {

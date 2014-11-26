@@ -31,6 +31,8 @@
 
 package ${groupId}
 
+import org.openjdk.jmh.annotations.Benchmark
+
 class MyBenchmark {
 
   @Benchmark
