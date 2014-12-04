@@ -25,13 +25,13 @@
 package org.openjdk.jmh.it.synciter;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
@@ -47,7 +47,12 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class SyncIterNotOnlyMeasurementTest {
 
-    private boolean inMeasurementLoopOnly = true;
+    private boolean inMeasurementLoopOnly;
+
+    @Setup(Level.Trial)
+    public void setup() {
+        inMeasurementLoopOnly = true;
+    }
 
     @TearDown(Level.Trial)
     public void check() {
@@ -73,16 +78,31 @@ public class SyncIterNotOnlyMeasurementTest {
     }
 
     @Test
-    @Ignore // this test is probabilistic
     public void invokeAPI() throws RunnerException {
-        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
-            Options opt = new OptionsBuilder()
-                    .include(Fixtures.getTestMask(this.getClass()))
-                    .shouldFailOnError(true)
-                    .syncIterations(true)
-                    .build();
-            new Runner(opt).run();
+        // This test is probabilistic, and it can fail sometimes, but not all the time.
+
+        Options opt = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .shouldFailOnError(true)
+                .syncIterations(true)
+                .build();
+
+        final int trials = 200;
+
+        RunnerException last = null;
+        for (int c = 0; c < trials; c++) {
+            try {
+                new Runner(opt).run();
+
+                // no assert, yay, we can break away now
+                return;
+            } catch (RunnerException e) {
+                last = e;
+            }
         }
+
+        // we consistently throw exceptions, re-throw the last one
+        throw last;
     }
 
 }

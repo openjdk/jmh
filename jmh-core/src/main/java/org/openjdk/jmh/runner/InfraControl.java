@@ -155,12 +155,8 @@ abstract class InfraControlL2 extends InfraControlL1 {
         shouldSynchIterations = benchmarkParams.shouldSynchIterations();
         threads = benchmarkParams.getThreads();
 
-        if (!shouldSynchIterations) {
-            warmupShouldWait = false;
-            warmdownShouldWait = false;
-            warmupDone.countDown();
-            warmdownDone.countDown();
-        }
+        warmupShouldWait = shouldSynchIterations;
+        warmdownShouldWait = shouldSynchIterations;
 
         this.preSetup = preSetup;
         this.preTearDown = preTearDown;
@@ -193,6 +189,26 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
         if (v > threads) {
             throw new IllegalStateException("More threads than expected");
+        }
+    }
+
+    public void awaitWarmupReady() {
+        if (warmupShouldWait) {
+            try {
+                warmupDone.await();
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+    }
+
+    public void awaitWarmdownReady() {
+        if (warmdownShouldWait) {
+            try {
+                warmdownDone.await();
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
     }
 
