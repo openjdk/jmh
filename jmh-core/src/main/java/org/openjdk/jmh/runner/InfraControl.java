@@ -49,6 +49,7 @@ public class InfraControl extends InfraControlL4 {
         Utils.check(InfraControl.class, "lastIteration");
         Utils.check(InfraControl.class, "warmupVisited", "warmdownVisited");
         Utils.check(InfraControl.class, "warmupShouldWait", "warmdownShouldWait");
+        Utils.check(InfraControl.class, "warmupDone", "warmdownDone");
         Utils.check(InfraControl.class, "benchmarkParams", "iterationParams");
         Utils.check(InfraControl.class, "shouldSynchIterations", "threads");
     }
@@ -136,6 +137,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
     public final AtomicInteger warmupVisited, warmdownVisited;
     public volatile boolean warmupShouldWait, warmdownShouldWait;
+    public final CountDownLatch warmupDone, warmdownDone;
 
     public final BenchmarkParams benchmarkParams;
     public final IterationParams iterationParams;
@@ -144,14 +146,22 @@ abstract class InfraControlL2 extends InfraControlL1 {
     private final int threads;
 
     public InfraControlL2(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-        this.warmupVisited = new AtomicInteger();
-        this.warmdownVisited = new AtomicInteger();
+        warmupVisited = new AtomicInteger();
+        warmdownVisited = new AtomicInteger();
+
+        warmupDone = new CountDownLatch(1);
+        warmdownDone = new CountDownLatch(1);
 
         shouldSynchIterations = benchmarkParams.shouldSynchIterations();
         threads = benchmarkParams.getThreads();
 
-        warmupShouldWait = shouldSynchIterations;
-        warmdownShouldWait = shouldSynchIterations;
+        if (!shouldSynchIterations) {
+            warmupShouldWait = false;
+            warmdownShouldWait = false;
+            warmupDone.countDown();
+            warmdownDone.countDown();
+        }
+
         this.preSetup = preSetup;
         this.preTearDown = preTearDown;
         this.lastIteration = lastIteration;
@@ -165,6 +175,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
         if (v == threads) {
             warmupShouldWait = false;
+            warmupDone.countDown();
         }
 
         if (v > threads) {
@@ -177,6 +188,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
         int v = warmdownVisited.incrementAndGet();
         if (v == threads) {
             warmdownShouldWait = false;
+            warmdownDone.countDown();
         }
 
         if (v > threads) {

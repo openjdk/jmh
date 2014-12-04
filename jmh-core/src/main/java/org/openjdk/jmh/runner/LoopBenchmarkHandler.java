@@ -94,12 +94,10 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         }
 
         // wait for all workers to transit to measurement
-        while (control.warmupShouldWait) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+        try {
+            control.warmupDone.await();
+        } catch (InterruptedException e) {
+            // ignore
         }
 
         // wait for the iteration time to expire
@@ -119,12 +117,10 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
         control.isDone = true;
 
         // wait for all workers to transit to teardown
-        while (control.warmdownShouldWait) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+        try {
+            control.warmdownDone.await();
+        } catch (InterruptedException e) {
+            // ignore
         }
 
         // Wait for the result, continuously polling the worker threads.
