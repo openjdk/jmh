@@ -146,8 +146,19 @@ public final class BinaryLinkServer {
         this.plan.set(actionPlan);
     }
 
-    private InetAddress getLoopback() {
-        // Try to use JDK 7+ method first, it is more reliable.
+    private InetAddress getListenAddress() {
+        // Try to use user-provided override first.
+        String addr = System.getProperty("jmh.link.address");
+        if (addr != null) {
+            try {
+                return InetAddress.getByName(addr);
+            } catch (UnknownHostException e) {
+                // override failed, notify user
+                throw new IllegalStateException("Can not initialize binary link.", e);
+            }
+        }
+
+        // Auto-detection should try to use JDK 7+ method first, it is more reliable.
         try {
             Method m = InetAddress.class.getMethod("getLoopbackAddress");
             return (InetAddress) m.invoke(null);
@@ -177,12 +188,18 @@ public final class BinaryLinkServer {
         }
     }
 
+    private int getListenPort() {
+        return Integer.getInteger("jmh.link.port", 0);
+    }
+
     private final class Acceptor extends Thread {
 
         private final ServerSocket server;
+        private final InetAddress listenAddress;
 
         public Acceptor() throws IOException {
-            server = new ServerSocket(0, 50, getLoopback());
+            listenAddress = getListenAddress();
+            server = new ServerSocket(getListenPort(), 50, listenAddress);
         }
 
         @Override
@@ -206,10 +223,11 @@ public final class BinaryLinkServer {
         }
 
         public String getHost() {
-            return getLoopback().getHostAddress();
+            return listenAddress.getHostAddress();
         }
 
         public int getPort() {
+            // Poll the actual listen port, in case it is ephemeral
             return server.getLocalPort();
         }
 
