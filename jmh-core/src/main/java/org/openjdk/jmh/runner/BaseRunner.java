@@ -35,6 +35,7 @@ import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
 import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.Version;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -86,6 +87,8 @@ abstract class BaseRunner {
                     realOpts = "<none>";
                 }
 
+                Version.printVersion(out);
+                out.println("# VM invoker: " + params.getJvm());
                 out.println("# VM invoker: " + params.getJvm());
                 out.println("# VM options: " + realOpts + (opts.equals(realOpts) ? "" : " *** WARNING: some JVM options are ignored in non-forked runs ***"));
 

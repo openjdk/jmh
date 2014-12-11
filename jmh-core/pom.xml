@@ -75,6 +75,8 @@ questions.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>EEE MMM dd HH:mm:ss zzz yyyy</maven.build.timestamp.format>
     </properties>
 
     <build>
@@ -135,6 +137,13 @@ questions.
                 <artifactId>wagon-ssh</artifactId>
             </extension>
         </extensions>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources/</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 
     <repositories>

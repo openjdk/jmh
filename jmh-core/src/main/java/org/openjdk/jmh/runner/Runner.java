@@ -48,6 +48,7 @@ import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
 import org.openjdk.jmh.util.UnCloseablePrintStream;
 import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.Version;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -593,6 +594,7 @@ public class Runner extends BaseRunner {
                 opts = "<none>";
             }
 
+            Version.printVersion(out);
             out.println("# VM invoker: " + params.getJvm());
             out.println("# VM options: " + opts);
             out.startBenchmark(params);
