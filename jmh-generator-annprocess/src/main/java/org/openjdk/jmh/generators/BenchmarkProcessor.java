@@ -39,10 +39,16 @@ import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class BenchmarkProcessor extends AbstractProcessor {
 
     private final BenchmarkGenerator generator = new BenchmarkGenerator();
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        // We may claim to support the latest version, since we are not using
+        // any version-specific extensions.
+        return SourceVersion.latest();
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
