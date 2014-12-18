@@ -117,10 +117,7 @@ public class ResultFormatTest {
     public void jsonTest() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.JSON,
-                    actualFile)
-                .writeOut(getStub());
+        ResultFormatFactory.getInstance(ResultFormatType.JSON, actualFile).writeOut(getStub());
 
         compare(actualFile, "output-golden.json");
     }
@@ -130,10 +127,7 @@ public class ResultFormatTest {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         PrintStream ps = new PrintStream(actualFile);
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.JSON,
-                    ps)
-                .writeOut(getStub());
+        ResultFormatFactory.getInstance(ResultFormatType.JSON, ps).writeOut(getStub());
         ps.close();
 
         compare(actualFile, "output-golden.json");
@@ -143,10 +137,7 @@ public class ResultFormatTest {
     public void csvTest() throws IOException {
         String actualFile = FileUtils.tempFile("jmh").getAbsolutePath();
 
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.CSV,
-                    actualFile)
-                .writeOut(getStub());
+        ResultFormatFactory.getInstance(ResultFormatType.CSV, actualFile).writeOut(getStub());
 
         compare(actualFile, "output-golden.csv");
     }
@@ -156,10 +147,7 @@ public class ResultFormatTest {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
         PrintStream ps = new PrintStream(actualFile);
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.CSV,
-                    ps)
-                .writeOut(getStub());
+        ResultFormatFactory.getInstance(ResultFormatType.CSV, ps).writeOut(getStub());
         ps.close();
 
         compare(actualFile, "output-golden.csv");
@@ -169,10 +157,7 @@ public class ResultFormatTest {
     public void scsvTest() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.SCSV,
-                    actualFile)
-                .writeOut(getStub());
+        ResultFormatFactory.getInstance(ResultFormatType.SCSV, actualFile).writeOut(getStub());
 
         compare(actualFile, "output-golden.scsv");
     }
@@ -181,12 +166,9 @@ public class ResultFormatTest {
     public void scsvTest_Stream() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        PrintWriter pw = new PrintWriter(actualFile);
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.SCSV,
-                    actualFile)
-                .writeOut(getStub());
-        pw.close();
+        PrintStream ps = new PrintStream(actualFile);
+        ResultFormatFactory.getInstance(ResultFormatType.SCSV, ps).writeOut(getStub());
+        ps.close();
 
         compare(actualFile, "output-golden.scsv");
     }
@@ -196,10 +178,7 @@ public class ResultFormatTest {
     public void latexTest() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.LATEX,
-                    actualFile)
-                .writeOut(getStub());
+        ResultFormatFactory.getInstance(ResultFormatType.LATEX, actualFile).writeOut(getStub());
 
         compare(actualFile, "output-golden.latex");
     }
@@ -208,12 +187,9 @@ public class ResultFormatTest {
     public void latexTest_Stream() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        PrintWriter pw = new PrintWriter(actualFile);
-        ResultFormatFactory.getInstance(
-                    ResultFormatType.LATEX,
-                    actualFile)
-                .writeOut(getStub());
-        pw.close();
+        PrintStream ps = new PrintStream(actualFile);
+        ResultFormatFactory.getInstance(ResultFormatType.LATEX, ps).writeOut(getStub());
+        ps.close();
 
         compare(actualFile, "output-golden.latex");
     }
