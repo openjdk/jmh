@@ -35,6 +35,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintWriter;
@@ -49,11 +50,19 @@ public class MainValidation {
         pw.println("-------------------------------------------------------------------------");
         pw.println();
 
-        timingMeasurements(pw);
-        basic(pw);
+        Options opts = new OptionsBuilder()
+                .warmupIterations(5)
+                .warmupTime(TimeValue.milliseconds(100))
+                .measurementIterations(5)
+                .measurementTime(TimeValue.milliseconds(100))
+                .forks(3)
+                .build();
+
+        timingMeasurements(pw, opts);
+        basic(pw, opts);
     }
 
-    private static void basic(PrintWriter pw) throws RunnerException {
+    private static void basic(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("Basic benchmark tests:");
         pw.println("  These tests show the basic overheads of calling the benchmark method.");
         pw.println("  Additionally, the overheads of calling empty Fixture methods are measured.");
@@ -61,7 +70,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(EmptyBench.class.getCanonicalName() + ".*")
+                    .parent(parent)
+                    .include(EmptyBench.class.getCanonicalName())
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -75,7 +85,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(LevelTrialBench.class.getCanonicalName() + ".*benchmark_setup")
+                    .parent(parent)
+                    .include(LevelTrialBench.class.getCanonicalName() + ".benchmark_setup$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -89,7 +100,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(LevelTrialBench.class.getCanonicalName() + ".*benchmark_teardown")
+                    .parent(parent)
+                    .include(LevelTrialBench.class.getCanonicalName() + ".benchmark_teardown$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -103,7 +115,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(LevelIterationBench.class.getCanonicalName() + ".*benchmark_setup")
+                    .parent(parent)
+                    .include(LevelIterationBench.class.getCanonicalName() + ".benchmark_setup$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -117,7 +130,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(LevelIterationBench.class.getCanonicalName() + ".*benchmark_teardown")
+                    .parent(parent)
+                    .include(LevelIterationBench.class.getCanonicalName() + ".benchmark_teardown$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -131,7 +145,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(LevelInvocationBench.class.getCanonicalName() + ".*benchmark_setup")
+                    .parent(parent)
+                    .include(LevelInvocationBench.class.getCanonicalName() + ".benchmark_setup$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -145,7 +160,8 @@ public class MainValidation {
 
         {
             Options opts = new OptionsBuilder()
-                    .include(LevelInvocationBench.class.getCanonicalName() + ".*benchmark_teardown")
+                    .parent(parent)
+                    .include(LevelInvocationBench.class.getCanonicalName() + ".benchmark_teardown$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -160,7 +176,7 @@ public class MainValidation {
         pw.println();
     }
 
-    private static void timingMeasurements(PrintWriter pw) throws RunnerException {
+    private static void timingMeasurements(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("Timing measurements test");
         pw.println("  This test shows the minimal individual timing possible to measure.");
         pw.println("  This normally affects only SampleTime and SingleShot benchmark modes.");
@@ -171,7 +187,8 @@ public class MainValidation {
         long latency;
         {
             Options opts = new OptionsBuilder()
-                    .include(NanoTimerBench.class.getCanonicalName() + ".*latency")
+                    .parent(parent)
+                    .include(NanoTimerBench.class.getCanonicalName() + ".latency$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
@@ -188,7 +205,8 @@ public class MainValidation {
         long granularity;
         {
             Options opts = new OptionsBuilder()
-                    .include(NanoTimerBench.class.getCanonicalName() + ".*granularity")
+                    .parent(parent)
+                    .include(NanoTimerBench.class.getCanonicalName() + ".granularity$")
                     .verbosity(VerboseMode.SILENT)
                     .build();
 
