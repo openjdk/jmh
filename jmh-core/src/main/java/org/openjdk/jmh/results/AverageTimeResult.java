@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Result class that stores average operation time.
  */
-public class AverageTimeResult extends Result {
+public class AverageTimeResult extends Result<AverageTimeResult> {
     private static final long serialVersionUID = 6937689337229703312L;
 
     public AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {

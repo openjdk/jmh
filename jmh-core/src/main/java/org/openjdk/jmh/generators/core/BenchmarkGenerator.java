@@ -608,7 +608,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateThroughput(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public Collection<ThroughputResult> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -674,7 +674,7 @@ public class BenchmarkGenerator {
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "Collection<ThroughputResult> results = new ArrayList<ThroughputResult>();");
             writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
@@ -717,7 +717,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateAverageTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public Collection<AverageTimeResult> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -781,7 +781,7 @@ public class BenchmarkGenerator {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "Collection<AverageTimeResult> results = new ArrayList<AverageTimeResult>();");
             writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
@@ -836,7 +836,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateSampleTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public Collection<SampleTimeResult> " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -898,7 +898,7 @@ public class BenchmarkGenerator {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "Collection<SampleTimeResult> results = new ArrayList<SampleTimeResult>();");
             writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
@@ -957,7 +957,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateSingleShotTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<? extends Result> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
+        writer.println(ident(1) + "public Collection<SingleShotResult> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -985,7 +985,7 @@ public class BenchmarkGenerator {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<Result> results = new ArrayList<Result>();");
+            writer.println(ident(3) + "Collection<SingleShotResult> results = new ArrayList<SingleShotResult>();");
             writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");

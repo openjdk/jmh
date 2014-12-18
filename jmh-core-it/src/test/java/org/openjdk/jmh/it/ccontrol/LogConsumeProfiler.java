@@ -119,7 +119,7 @@ public class LogConsumeProfiler implements ExternalProfiler {
 
         public static class LogAggregator implements Aggregator<LogConsumeResult> {
             @Override
-            public Result aggregate(Collection<LogConsumeResult> results) {
+            public LogConsumeResult aggregate(Collection<LogConsumeResult> results) {
                 String label = null;
                 Collection<String> allLines = new ArrayList<String>();
                 for (LogConsumeResult r : results) {

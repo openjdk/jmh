@@ -318,7 +318,7 @@ public class StackProfiler implements InternalProfiler {
 
     public static class StackResultAggregator implements Aggregator<StackResult> {
         @Override
-        public Result aggregate(Collection<StackResult> results) {
+        public StackResult aggregate(Collection<StackResult> results) {
             Map<Thread.State, Multiset<StackRecord>> sum = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
             for (StackResult r : results) {
                 for (Map.Entry<Thread.State, Multiset<StackRecord>> entry : r.stacks.entrySet()) {

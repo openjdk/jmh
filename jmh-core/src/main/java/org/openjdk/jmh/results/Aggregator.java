@@ -41,5 +41,5 @@ public interface Aggregator<R extends Result> {
      * @param results results to aggregate
      * @return aggregated result; may throw exceptions on validation errors
      */
-    Result aggregate(Collection<R> results);
+    R aggregate(Collection<R> results);
 }

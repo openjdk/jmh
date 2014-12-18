@@ -26,14 +26,13 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.results.AggregatorUtils;
 import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.util.ListStatistics;
 
 import java.util.Collection;
 
 public class ProfilerResultAggregator implements Aggregator<ProfilerResult> {
     @Override
-    public Result aggregate(Collection<ProfilerResult> results) {
+    public ProfilerResult aggregate(Collection<ProfilerResult> results) {
         ListStatistics stats = new ListStatistics();
         for (ProfilerResult r : results) {
             stats.addValue(r.getScore());

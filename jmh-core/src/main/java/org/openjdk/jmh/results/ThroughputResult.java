@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Result class that counts the number of operations performed during a specified unit of time.
  */
-public class ThroughputResult extends Result {
+public class ThroughputResult extends Result<ThroughputResult> {
     private static final long serialVersionUID = 7269598073169413322L;
 
     public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
@@ -49,12 +49,12 @@ public class ThroughputResult extends Result {
     }
 
     @Override
-    protected Aggregator getThreadAggregator() {
+    protected Aggregator<ThroughputResult> getThreadAggregator() {
         return new ThroughputAggregator(AggregationPolicy.SUM);
     }
 
     @Override
-    protected Aggregator getIterationAggregator() {
+    protected Aggregator<ThroughputResult> getIterationAggregator() {
         return new ThroughputAggregator(AggregationPolicy.AVG);
     }
 
@@ -66,7 +66,7 @@ public class ThroughputResult extends Result {
         }
 
         @Override
-        public Result aggregate(Collection<ThroughputResult> results) {
+        public ThroughputResult aggregate(Collection<ThroughputResult> results) {
             ListStatistics stat = new ListStatistics();
             for (ThroughputResult r : results) {
                 stat.addValue(r.getScore());

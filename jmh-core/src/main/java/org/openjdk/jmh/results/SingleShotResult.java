@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Result class that stores once operation execution time.
  */
-public class SingleShotResult extends Result {
+public class SingleShotResult extends Result<SingleShotResult> {
     private static final long serialVersionUID = -1251578870918524737L;
 
     public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
@@ -53,12 +53,12 @@ public class SingleShotResult extends Result {
     }
 
     @Override
-    protected Aggregator getThreadAggregator() {
+    protected Aggregator<SingleShotResult> getThreadAggregator() {
         return new AveragingAggregator();
     }
 
     @Override
-    protected Aggregator getIterationAggregator() {
+    protected Aggregator<SingleShotResult> getIterationAggregator() {
         return new AveragingAggregator();
     }
 
@@ -67,7 +67,7 @@ public class SingleShotResult extends Result {
      */
     static class AveragingAggregator implements Aggregator<SingleShotResult> {
         @Override
-        public Result aggregate(Collection<SingleShotResult> results) {
+        public SingleShotResult aggregate(Collection<SingleShotResult> results) {
             ListStatistics stat = new ListStatistics();
             for (SingleShotResult r : results) {
                 stat.addValue(r.getScore());

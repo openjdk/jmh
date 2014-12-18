@@ -830,7 +830,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
     static class PerfResultAggregator implements Aggregator<PerfResult> {
         @Override
-        public Result aggregate(Collection<PerfResult> results) {
+        public PerfResult aggregate(Collection<PerfResult> results) {
             String output = "";
             for (PerfResult r : results) {
                 output += r.output;

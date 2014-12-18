@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Result class that samples operation time.
  */
-public class SampleTimeResult extends Result {
+public class SampleTimeResult extends Result<SampleTimeResult> {
     private static final long serialVersionUID = -295298353763294757L;
 
     private final SampleBuffer buffer;
@@ -89,12 +89,12 @@ public class SampleTimeResult extends Result {
     }
 
     @Override
-    protected Aggregator getThreadAggregator() {
+    protected Aggregator<SampleTimeResult> getThreadAggregator() {
         return new JoiningAggregator();
     }
 
     @Override
-    protected Aggregator getIterationAggregator() {
+    protected Aggregator<SampleTimeResult> getIterationAggregator() {
         return new JoiningAggregator();
     }
 
@@ -105,7 +105,7 @@ public class SampleTimeResult extends Result {
     static class JoiningAggregator implements Aggregator<SampleTimeResult> {
 
         @Override
-        public Result aggregate(Collection<SampleTimeResult> results) {
+        public SampleTimeResult aggregate(Collection<SampleTimeResult> results) {
             SampleBuffer buffer = new SampleBuffer();
             TimeUnit tu = null;
             for (SampleTimeResult r : results) {

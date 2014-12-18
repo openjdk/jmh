@@ -214,7 +214,7 @@ public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler
     static class PerfResultAggregator implements Aggregator<PerfResult> {
 
         @Override
-        public Result aggregate(Collection<PerfResult> results) {
+        public PerfResult aggregate(Collection<PerfResult> results) {
             long cycles = 0;
             long instructions = 0;
             String output = "";
