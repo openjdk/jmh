@@ -29,7 +29,7 @@ import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.ClassUtils;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -39,10 +39,10 @@ import java.util.TreeSet;
 
 class LaTeXResultFormat implements ResultFormat {
 
-    private final PrintWriter pw;
+    private final PrintStream out;
 
-    public LaTeXResultFormat(PrintWriter pw) {
-        this.pw = pw;
+    public LaTeXResultFormat(PrintStream out) {
+        this.out = out;
     }
 
     @Override
@@ -83,37 +83,37 @@ class LaTeXResultFormat implements ResultFormat {
     }
 
     private void printHeader(SortedSet<String> params, boolean singleUnit, String unit) {
-        pw.write("\\begin{tabular}{r|");
+        out.print("\\begin{tabular}{r|");
         for (String p : params) {
-            pw.write("l|");
+            out.print("l|");
         }
-        pw.write("rl" + (singleUnit ? "" : "l") + "}\n");
-        pw.write(" \\multicolumn{1}{c|}{\\texttt{Benchmark}} & ");
+        out.print("rl" + (singleUnit ? "" : "l") + "}\n");
+        out.print(" \\multicolumn{1}{c|}{\\texttt{Benchmark}} & ");
         for (String p : params) {
-            pw.printf("\\texttt{%s}", p);
-            pw.write(" & ");
+            out.printf("\\texttt{%s}", p);
+            out.print(" & ");
         }
-        pw.write(" \\multicolumn{" + (singleUnit ? 2 : 3) + "}{c}{\\texttt{Score" + (singleUnit ? ", " + unit : "") + "}} \\\\\n");
-        pw.write("\\hline\n");
+        out.print(" \\multicolumn{" + (singleUnit ? 2 : 3) + "}{c}{\\texttt{Score" + (singleUnit ? ", " + unit : "") + "}} \\\\\n");
+        out.print("\\hline\n");
     }
 
-    private void printFooter() {pw.write("\\end{tabular}");}
+    private void printFooter() {out.print("\\end{tabular}");}
 
     private void printLine(String label, BenchmarkParams benchParams, SortedSet<String> params,
                            Map<String, String> prefixes, boolean singleUnit, Result res) {
-        pw.printf("\\texttt{%s} & ", escape(prefixes.get(label)));
+        out.printf("\\texttt{%s} & ", escape(prefixes.get(label)));
         for (String p : params) {
-            pw.printf("\\texttt{%s}", escape(benchParams.getParam(p)));
-            pw.write(" & ");
+            out.printf("\\texttt{%s}", escape(benchParams.getParam(p)));
+            out.print(" & ");
         }
-        pw.printf("\\texttt{%5.3f} & ", res.getScore());
-        pw.printf("\\scriptsize $\\pm$ \\texttt{%5.3f}", res.getScoreError());
+        out.printf("\\texttt{%5.3f} & ", res.getScore());
+        out.printf("\\scriptsize $\\pm$ \\texttt{%5.3f}", res.getScoreError());
         if (!singleUnit) {
-            pw.printf(" & \\texttt{%s}", res.getScoreUnit());
+            out.printf(" & \\texttt{%s}", res.getScoreUnit());
         }
-        pw.write(" \\\\");
+        out.print(" \\\\");
 
-        pw.write("\n");
+        out.print("\n");
     }
 
     private static String escape(String s) {

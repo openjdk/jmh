@@ -44,6 +44,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,12 +129,12 @@ public class ResultFormatTest {
     public void jsonTest_Stream() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        PrintWriter pw = new PrintWriter(actualFile);
+        PrintStream ps = new PrintStream(actualFile);
         ResultFormatFactory.getInstance(
                     ResultFormatType.JSON,
-                    pw)
+                    ps)
                 .writeOut(getStub());
-        pw.close();
+        ps.close();
 
         compare(actualFile, "output-golden.json");
     }
@@ -154,12 +155,12 @@ public class ResultFormatTest {
     public void csvTest_Stream() throws IOException {
         String actualFile = FileUtils.tempFile("test").getAbsolutePath();
 
-        PrintWriter pw = new PrintWriter(actualFile);
+        PrintStream ps = new PrintStream(actualFile);
         ResultFormatFactory.getInstance(
                     ResultFormatType.CSV,
-                    pw)
+                    ps)
                 .writeOut(getStub());
-        pw.close();
+        ps.close();
 
         compare(actualFile, "output-golden.csv");
     }

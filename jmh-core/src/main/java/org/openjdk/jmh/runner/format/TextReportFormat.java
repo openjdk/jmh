@@ -38,7 +38,6 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -170,9 +169,7 @@ class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void endRun(Collection<RunResult> runResults) {
-        PrintWriter pw = new PrintWriter(out);
-        ResultFormatFactory.getInstance(ResultFormatType.TEXT, pw).writeOut(runResults);
-        pw.flush();
+        ResultFormatFactory.getInstance(ResultFormatType.TEXT, out).writeOut(runResults);
     }
 
 }

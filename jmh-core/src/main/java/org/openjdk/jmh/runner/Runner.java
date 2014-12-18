@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -126,7 +127,11 @@ public class Runner extends BaseRunner {
             }
         } else {
             // Protect the System.out from accidental closing
-            out = new UnCloseablePrintStream(System.out);
+            try {
+                out = new UnCloseablePrintStream(System.out, Utils.guessConsoleEncoding());
+            } catch (UnsupportedEncodingException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
 
         return OutputFormatFactory.createFormatInstance(out, options.verbosity().orElse(Defaults.VERBOSITY));

@@ -29,7 +29,7 @@ import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.ClassUtils;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,10 +38,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 class TextResultFormat implements ResultFormat {
-    private final PrintWriter out;
+    private final PrintStream out;
 
-    public TextResultFormat(PrintWriter writer) {
-        this.out = writer;
+    public TextResultFormat(PrintStream out) {
+        this.out = out;
     }
 
     @Override

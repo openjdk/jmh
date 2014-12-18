@@ -26,10 +26,14 @@ package org.openjdk.jmh.util;
 
 import sun.misc.Unsafe;
 
+import java.io.Console;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -162,6 +166,49 @@ public class Utils {
         service.shutdown();
 
         return max;
+    }
+
+    public static String guessConsoleEncoding() {
+        // We cannot use Console class directly, because we also need the access to the raw byte stream,
+        // e.g. for pushing in a raw output from a forked VM invocation. Therefore, we are left with
+        // reflectively poking out the Charset from Console, and use it for our own private output streams.
+
+        try {
+            Field f = Console.class.getDeclaredField("cs");
+            if (f != null) {
+                f.setAccessible(true);
+                Console console = System.console();
+                if (console != null) {
+                    Object res = f.get(console);
+                    if (res instanceof Charset) {
+                        return ((Charset) res).name();
+                    }
+                }
+            }
+        } catch (NoSuchFieldException e) {
+            // fall-through
+        } catch (IllegalAccessException e) {
+            // fall-through
+        }
+
+        try {
+            Method m = Console.class.getDeclaredMethod("encoding");
+            if (m != null) {
+                m.setAccessible(true);
+                Object res = m.invoke(null);
+                if (res instanceof String) {
+                    return (String) res;
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            // fall-through
+        } catch (InvocationTargetException e) {
+            // fall-through
+        } catch (IllegalAccessException e) {
+            // fall-through
+        }
+
+        return Charset.defaultCharset().name();
     }
 
     static class BurningTask implements Runnable {

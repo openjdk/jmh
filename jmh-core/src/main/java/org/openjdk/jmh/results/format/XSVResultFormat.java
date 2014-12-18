@@ -28,18 +28,18 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 class XSVResultFormat implements ResultFormat {
 
-    private final PrintWriter pw;
+    private final PrintStream out;
     private final String delimiter;
 
-    public XSVResultFormat(PrintWriter pw, String delimiter) {
-        this.pw = pw;
+    public XSVResultFormat(PrintStream out, String delimiter) {
+        this.out = out;
         this.delimiter = delimiter;
     }
 
@@ -66,58 +66,58 @@ class XSVResultFormat implements ResultFormat {
     }
 
     private void printHeader(SortedSet<String> params) {
-        pw.write("\"Benchmark\"");
-        pw.write(delimiter);
-        pw.write("\"Mode\"");
-        pw.write(delimiter);
-        pw.write("\"Threads\"");
-        pw.write(delimiter);
-        pw.write("\"Samples\"");
-        pw.write(delimiter);
-        pw.write("\"Score\"");
-        pw.write(delimiter);
-        pw.write("\"Score Error (99.9%)\"");
-        pw.write(delimiter);
-        pw.write("\"Unit\"");
+        out.print("\"Benchmark\"");
+        out.print(delimiter);
+        out.print("\"Mode\"");
+        out.print(delimiter);
+        out.print("\"Threads\"");
+        out.print(delimiter);
+        out.print("\"Samples\"");
+        out.print(delimiter);
+        out.print("\"Score\"");
+        out.print(delimiter);
+        out.print("\"Score Error (99.9%)\"");
+        out.print(delimiter);
+        out.print("\"Unit\"");
         for (String k : params) {
-            pw.write(delimiter);
-            pw.write("\"Param: " + k + "\"");
+            out.print(delimiter);
+            out.print("\"Param: " + k + "\"");
         }
-        pw.write("\r\n");
+        out.print("\r\n");
     }
 
     private void printLine(String label, BenchmarkParams benchmarkParams, SortedSet<String> params, Result result) {
-        pw.write("\"");
-        pw.write(label);
-        pw.write("\"");
-        pw.write(delimiter);
-        pw.write("\"");
-        pw.write(benchmarkParams.getMode().shortLabel());
-        pw.write("\"");
-        pw.write(delimiter);
-        pw.write(String.valueOf(benchmarkParams.getThreads()));
-        pw.write(delimiter);
-        pw.write(String.valueOf(result.getSampleCount()));
-        pw.write(delimiter);
-        pw.write(String.valueOf(result.getScore()));
-        pw.write(delimiter);
-        pw.write(String.valueOf(result.getScoreError()));
-        pw.write(delimiter);
-        pw.write("\"");
-        pw.write(result.getScoreUnit());
-        pw.write("\"");
+        out.print("\"");
+        out.print(label);
+        out.print("\"");
+        out.print(delimiter);
+        out.print("\"");
+        out.print(benchmarkParams.getMode().shortLabel());
+        out.print("\"");
+        out.print(delimiter);
+        out.print(String.valueOf(benchmarkParams.getThreads()));
+        out.print(delimiter);
+        out.print(String.valueOf(result.getSampleCount()));
+        out.print(delimiter);
+        out.print(String.valueOf(result.getScore()));
+        out.print(delimiter);
+        out.print(String.valueOf(result.getScoreError()));
+        out.print(delimiter);
+        out.print("\"");
+        out.print(result.getScoreUnit());
+        out.print("\"");
 
         for (String p : params) {
-            pw.write(delimiter);
-            pw.write("\"");
+            out.print(delimiter);
+            out.print("\"");
             String v = benchmarkParams.getParam(p);
             if (v != null) {
-                pw.write(v);
+                out.print(v);
             }
-            pw.write("\"");
+            out.print("\"");
         }
 
-        pw.write("\r\n");
+        out.print("\r\n");
     }
 
 }

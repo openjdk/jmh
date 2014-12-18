@@ -27,7 +27,7 @@ package org.openjdk.jmh.results.format;
 import org.openjdk.jmh.results.RunResult;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.Collection;
 
 public class ResultFormatFactory {
@@ -45,7 +45,7 @@ public class ResultFormatFactory {
             @Override
             public void writeOut(Collection<RunResult> results) {
                 try {
-                    PrintWriter pw = new PrintWriter(file);
+                    PrintStream pw = new PrintStream(file);
                     ResultFormat rf = getInstance(type, pw);
                     rf.writeOut(results);
                     pw.flush();
@@ -58,22 +58,22 @@ public class ResultFormatFactory {
     }
 
     /**
-     * Get the instance of ResultFormat of given type which write the result to writer.
-     * It is a user responsibility to initialize and finish the writer as appropriate.
+     * Get the instance of ResultFormat of given type which write the result to out.
+     * It is a user responsibility to initialize and finish the out as appropriate.
      *
      * @param type result format type
-     * @param writer target writer
+     * @param out target out
      * @return result format.
      */
-    public static ResultFormat getInstance(ResultFormatType type, PrintWriter writer) {
+    public static ResultFormat getInstance(ResultFormatType type, PrintStream out) {
         switch (type) {
             case TEXT:
-                return new TextResultFormat(writer);
+                return new TextResultFormat(out);
             case CSV:
                 /*
                  * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180
                  */
-                return new XSVResultFormat(writer, ",");
+                return new XSVResultFormat(out, ",");
             case SCSV:
                 /*
                  *    Since some implementations, notably Excel, think it is a good
@@ -81,11 +81,11 @@ public class ResultFormatFactory {
                  *    comma in some locales, this is the specialised
                  *     Semi-Colon Separated Values formatter.
                  */
-                return new XSVResultFormat(writer, ";");
+                return new XSVResultFormat(out, ";");
             case JSON:
-                return new JSONResultFormat(writer);
+                return new JSONResultFormat(out);
             case LATEX:
-                return new LaTeXResultFormat(writer);
+                return new LaTeXResultFormat(out);
             default:
                 throw new IllegalStateException("Unsupported result format: " + type);
         }

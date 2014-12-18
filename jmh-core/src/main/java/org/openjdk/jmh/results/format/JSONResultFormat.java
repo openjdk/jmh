@@ -31,6 +31,7 @@ import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.Statistics;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -39,9 +40,9 @@ import java.util.Map;
 
 class JSONResultFormat implements ResultFormat {
 
-    private final PrintWriter out;
+    private final PrintStream out;
 
-    public JSONResultFormat(PrintWriter out) {
+    public JSONResultFormat(PrintStream out) {
         this.out = out;
     }
 
