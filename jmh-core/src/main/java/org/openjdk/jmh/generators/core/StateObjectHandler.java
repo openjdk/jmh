@@ -776,9 +776,9 @@ class StateObjectHandler {
                 for (Level level : Level.values()) {
                     pw.println("    public volatile int setup" + level + "Mutex;");
                     pw.println("    public volatile int tear" + level + "Mutex;");
-                    pw.println("    public final static AtomicIntegerFieldUpdater setup" + level + "MutexUpdater = " +
+                    pw.println("    public final static AtomicIntegerFieldUpdater<" + so.type + "_B2> setup" + level + "MutexUpdater = " +
                             "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"setup" + level + "Mutex\");");
-                    pw.println("    public final static AtomicIntegerFieldUpdater tear" + level + "MutexUpdater = " +
+                    pw.println("    public final static AtomicIntegerFieldUpdater<" + so.type + "_B2> tear" + level + "MutexUpdater = " +
                             "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"tear" + level + "Mutex\");");
                     pw.println("");
                 }
