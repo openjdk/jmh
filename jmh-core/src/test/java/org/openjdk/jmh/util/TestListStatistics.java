@@ -231,4 +231,41 @@ public class TestListStatistics {
         Assert.assertEquals("compareTo at 0.9999", 0, s1.compareTo(s2, 0.9999));
     }
 
+    @Test
+    public strictfp void testEmpty() {
+        Statistics s = new ListStatistics();
+
+        Assert.assertEquals(0, s.getN());
+        Assert.assertEquals(Double.NaN, s.getSum());
+        Assert.assertEquals(Double.NaN, s.getMin());
+        Assert.assertEquals(Double.NaN, s.getMax());
+        Assert.assertEquals(Double.NaN, s.getMean());
+        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5));
+        Assert.assertEquals(Double.NaN, s.getVariance());
+        Assert.assertEquals(Double.NaN, s.getStandardDeviation());
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0]);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1]);
+        Assert.assertEquals(Double.NaN, s.getPercentile(0));
+        Assert.assertEquals(Double.NaN, s.getPercentile(100));
+    }
+
+    @Test
+    public strictfp void testSingle() {
+        ListStatistics s = new ListStatistics();
+        s.addValue(42.0D);
+
+        Assert.assertEquals(1, s.getN());
+        Assert.assertEquals(42.0D, s.getSum());
+        Assert.assertEquals(42.0D, s.getMin());
+        Assert.assertEquals(42.0D, s.getMax());
+        Assert.assertEquals(42.0D, s.getMean());
+        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5));
+        Assert.assertEquals(Double.NaN, s.getVariance());
+        Assert.assertEquals(Double.NaN, s.getStandardDeviation());
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0]);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1]);
+        Assert.assertEquals(42.0D, s.getPercentile(0));
+        Assert.assertEquals(42.0D, s.getPercentile(100));
+    }
+
 }

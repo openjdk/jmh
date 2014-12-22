@@ -67,7 +67,7 @@ public class ListStatistics extends AbstractStatistics {
 
     @Override
     public double getMax() {
-        if (getN() > 0) {
+        if (count > 0) {
             double m = Double.NEGATIVE_INFINITY;
             for (int i = 0; i < count; i++) {
                 m = Math.max(m, values[i]);
@@ -80,7 +80,7 @@ public class ListStatistics extends AbstractStatistics {
 
     @Override
     public double getMin() {
-        if (getN() > 0) {
+        if (count > 0) {
             double m = Double.POSITIVE_INFINITY;
             for (int i = 0; i < count; i++) {
                 m = Math.min(m, values[i]);
@@ -98,7 +98,7 @@ public class ListStatistics extends AbstractStatistics {
 
     @Override
     public double getSum() {
-        if (getN() > 0) {
+        if (count > 0) {
             double s = 0;
             for (int i = 0; i < count; i++) {
                 s += values[i];
@@ -128,13 +128,13 @@ public class ListStatistics extends AbstractStatistics {
 
     @Override
     public double getVariance() {
-        if (getN() > 0) {
+        if (count > 1) {
             double v = 0;
             double m = getMean();
             for (int i = 0; i < count; i++) {
                 v += Math.pow(values[i] - m, 2);
             }
-            return v / (getN() - 1);
+            return v / (count - 1);
         } else {
             return Double.NaN;
         }
