@@ -235,8 +235,10 @@ public class Runner extends BaseRunner {
         // and prepare to write it out after the run.
         String resultFile = null;
         if (options.getResult().hasValue() || options.getResultFormat().hasValue()) {
-            resultFile = options.getResult().orElse(Defaults.RESULT_FILE_PREFIX + "."
-                    + options.getResultFormat().orElse(Defaults.RESULT_FORMAT)).toLowerCase();
+            resultFile = options.getResult().orElse(
+                        Defaults.RESULT_FILE_PREFIX + "." +
+                                options.getResultFormat().orElse(Defaults.RESULT_FORMAT).toString().toLowerCase()
+                    );
             try {
                 FileUtils.touch(resultFile);
             } catch (IOException e) {
