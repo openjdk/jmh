@@ -75,8 +75,8 @@ questions.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <timestamp>${maven.build.timestamp}</timestamp>
-        <maven.build.timestamp.format>EEE MMM dd HH:mm:ss zzz yyyy</maven.build.timestamp.format>
+        <buildDate>${maven.build.timestamp}</buildDate>
+        <maven.build.timestamp.format>yyyy/MM/dd</maven.build.timestamp.format>
     </properties>
 
     <build>

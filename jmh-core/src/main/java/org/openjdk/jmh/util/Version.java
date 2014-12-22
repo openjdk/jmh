@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -39,33 +40,49 @@ public class Version {
     public static void printVersion(OutputFormat pw) {
         Properties p = new Properties();
         InputStream s = Version.class.getResourceAsStream("/jmh.properties");
-        String time = null;
-        if (s != null) {
-            try {
-                p.load(s);
-                time = (String) p.get("jmh.buildTime");
 
-                Date parse = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").parse(time);
-                long diff = (System.currentTimeMillis() - parse.getTime()) / TimeUnit.DAYS.toMillis(1);
-
-                pw.print("# JMH " + p.get("jmh.version") + " (released ");
-                if (diff > 0) {
-                    pw.print(String.format("%d days ago", diff));
-                    if (diff > 30) {
-                        pw.print(", please consider updating!");
-                    }
-                } else {
-                    pw.print("today");
-                }
-                pw.println(")");
-            } catch (IOException e) {
-                pw.println("# Can not figure out JMH version");
-            } catch (ParseException e) {
-                pw.println("# Can not figure out JMH version, unable to parse the build time: " + time);
-            }
-        } else {
-            pw.println("# Can not figure out JMH version, no jmh.properties");
+        if (s == null) {
+            pw.println("# Cannot figure out JMH version, no jmh.properties");
+            return;
         }
+
+        try {
+            p.load(s);
+        } catch (IOException e) {
+            pw.println("# Cannot figure out JMH version");
+            return;
+        }
+
+        String version = (String) p.get("jmh.version");
+        if (version == null) {
+            pw.println("# Cannot read jmh.version");
+            return;
+        }
+
+        pw.print("# JMH " + version + " ");
+
+        String time = (String) p.get("jmh.buildDate");
+        if (time == null) {
+            pw.println("(cannot read jmh.buildDate)");
+            return;
+        }
+
+        pw.print("(released ");
+        try {
+            Date parse = new SimpleDateFormat("yyyy/MM/dd", Locale.ROOT).parse(time);
+            long diff = (System.currentTimeMillis() - parse.getTime()) / TimeUnit.DAYS.toMillis(1);
+            if (diff > 0) {
+                pw.print(String.format("%d days ago", diff));
+                if (diff > 30) {
+                    pw.print(", please consider updating!");
+                }
+            } else {
+                pw.print("today");
+            }
+        } catch (ParseException e) {
+            pw.print(time);
+        }
+        pw.println(")");
     }
 
 }
