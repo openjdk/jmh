@@ -51,6 +51,8 @@ public class Version {
         } catch (IOException e) {
             pw.println("# Cannot figure out JMH version");
             return;
+        } finally {
+            FileUtils.safelyClose(s);
         }
 
         String version = (String) p.get("jmh.version");
