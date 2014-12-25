@@ -29,12 +29,12 @@ import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.util.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.NumberFormat;
@@ -120,9 +120,10 @@ public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
+        FileReader fr = null;
         try {
-            FileInputStream fis = new FileInputStream(stdErr);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            fr = new FileReader(stdErr);
+            BufferedReader reader = new BufferedReader(fr);
 
             long cycles = 0;
             long insns = 0;
@@ -173,6 +174,8 @@ public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler
             );
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        } finally {
+            FileUtils.safelyClose(fr);
         }
     }
 

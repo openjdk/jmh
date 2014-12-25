@@ -175,14 +175,12 @@ public class Utils {
 
         try {
             Field f = Console.class.getDeclaredField("cs");
-            if (f != null) {
-                f.setAccessible(true);
-                Console console = System.console();
-                if (console != null) {
-                    Object res = f.get(console);
-                    if (res instanceof Charset) {
-                        return ((Charset) res).name();
-                    }
+            f.setAccessible(true);
+            Console console = System.console();
+            if (console != null) {
+                Object res = f.get(console);
+                if (res instanceof Charset) {
+                    return ((Charset) res).name();
                 }
             }
         } catch (NoSuchFieldException e) {
@@ -193,12 +191,10 @@ public class Utils {
 
         try {
             Method m = Console.class.getDeclaredMethod("encoding");
-            if (m != null) {
-                m.setAccessible(true);
-                Object res = m.invoke(null);
-                if (res instanceof String) {
-                    return (String) res;
-                }
+            m.setAccessible(true);
+            Object res = m.invoke(null);
+            if (res instanceof String) {
+                return (String) res;
             }
         } catch (NoSuchMethodException e) {
             // fall-through

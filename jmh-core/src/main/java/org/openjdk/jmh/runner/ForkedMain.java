@@ -35,7 +35,7 @@ import java.io.IOException;
 class ForkedMain {
 
     private static volatile boolean gracefullyFinished;
-    private static volatile Exception exception;
+    private static volatile Throwable exception;
 
     /**
      * Application main entry point
@@ -68,7 +68,7 @@ class ForkedMain {
                 runner.run();
 
                 gracefullyFinished = true;
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 exception = ex;
                 System.exit(1);
             }
@@ -81,7 +81,7 @@ class ForkedMain {
                     @Override
                     public void run() {
                         if (!gracefullyFinished) {
-                            Exception ex = exception;
+                            Throwable ex = exception;
                             if (ex == null) {
                                 ex = new IllegalStateException(
                                         "<failure: VM prematurely exited before JMH had finished with it, " +

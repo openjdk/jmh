@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -226,6 +227,16 @@ public class FileUtils {
         if (channel != null) {
             try {
                 channel.close();
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+    }
+
+    public static void safelyClose(Reader reader) {
+        if (reader != null) {
+            try {
+                reader.close();
             } catch (IOException e) {
                 // do nothing
             }

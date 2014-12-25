@@ -630,13 +630,16 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     }
 
     Collection<Collection<String>> splitAssembly(File stdOut) {
+        FileReader in = null;
         try {
             Multimap<Long, String> writerToLines = new HashMultimap<Long, String>();
             Long writerId = -1L;
 
             Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
             String line;
-            BufferedReader br = new BufferedReader(new FileReader(stdOut));
+
+            in = new FileReader(stdOut);
+            BufferedReader br = new BufferedReader(in);
             while ((line = br.readLine()) != null) {
                 // Parse the writer threads IDs:
                 //    <writer thread='140703710570240'/>
@@ -661,6 +664,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             return r;
         } catch (IOException e) {
             return Collections.emptyList();
+        } finally {
+            FileUtils.safelyClose(in);
         }
     }
 
@@ -719,11 +724,12 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     }
 
     PerfEvents readEvents(double skipSec) {
+        FileReader fr = null;
         try {
             Deduplicator<String> dedup = new Deduplicator<String>();
 
-            FileInputStream fis = new FileInputStream(perfParsedData);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            fr = new FileReader(perfParsedData);
+            BufferedReader reader = new BufferedReader(fr);
 
             Map<Long, String> methods = new HashMap<Long, String>();
             Map<Long, String> libs = new HashMap<Long, String>();
@@ -794,6 +800,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
             return new PerfEvents(events, methods, libs);
         } catch (IOException e) {
             return new PerfEvents();
+        } finally {
+            FileUtils.safelyClose(fr);
         }
     }
 

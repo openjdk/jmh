@@ -96,7 +96,7 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
     static ThreadParams[] distributeThreads(int threads, int[] groups) {
         ThreadParams[] result = new ThreadParams[threads];
         int totalGroupThreads = Utils.sum(groups);
-        int totalGroups = (int) Math.ceil(threads / totalGroupThreads);
+        int totalGroups = (int) Math.ceil(1D * threads / totalGroupThreads);
         int totalSubgroups = groups.length;
 
         int currentGroupThread = 0;

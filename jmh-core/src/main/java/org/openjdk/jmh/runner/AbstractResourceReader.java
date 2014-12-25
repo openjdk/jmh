@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +72,7 @@ class AbstractResourceReader {
                 throw new RuntimeException("ERROR: While obtaining resource: " + resource, e);
             }
 
-            if (urls != null && urls.hasMoreElements()) {
+            if (urls.hasMoreElements()) {
                 List<Reader> readers = new ArrayList<Reader>();
                 URL url = null;
                 try {

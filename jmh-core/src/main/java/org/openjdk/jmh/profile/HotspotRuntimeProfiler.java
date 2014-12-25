@@ -91,11 +91,11 @@ public class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
                         "counts", AggregationPolicy.MAX),
 
                 new ProfilerResult("@rt.safepointSyncTime",
-                        TimeUnit.NANOSECONDS.toMillis(current.get("sun.rt.safepointSyncTime")),
+                        current.get("sun.rt.safepointSyncTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
                 new ProfilerResult("@rt.safepointTime",
-                        TimeUnit.NANOSECONDS.toMillis(current.get("sun.rt.safepointTime")),
+                        current.get("sun.rt.safepointTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX)
         );
     }

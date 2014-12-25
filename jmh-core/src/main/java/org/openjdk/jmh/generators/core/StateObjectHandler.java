@@ -690,17 +690,7 @@ class StateObjectHandler {
     public List<String> getStateGetters(MethodInfo method) {
         List<String> result = new ArrayList<String>();
         for (StateObject so : stateOrder(method, true)) {
-            switch (so.scope) {
-                case Benchmark:
-                case Thread:
-                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadParams" + soDependency_Args(so) + ");");
-                    break;
-                case Group:
-                    result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadParams" + soDependency_Args(so) + ");");
-                    break;
-                default:
-                    throw new IllegalStateException("Unhandled scope: " + so.scope);
-            }
+            result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadParams" + soDependency_Args(so) + ");");
         }
         return result;
     }
