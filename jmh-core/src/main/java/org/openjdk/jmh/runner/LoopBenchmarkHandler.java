@@ -117,30 +117,36 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
 
         // Wait for the result, continuously polling the worker threads.
         // The abrupt exception in any worker will float up here.
-        int expected = numThreads;
-        while (expected > 0) {
-            for (Map.Entry<BenchmarkTask, Future<Collection<? extends Result>>> re : results.entrySet()) {
-                BenchmarkTask task = re.getKey();
-                Future<Collection<? extends Result>> fr = re.getValue();
-                try {
-                    long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
-                    fr.get(waitFor, TimeUnit.NANOSECONDS);
-                    expected--;
-                } catch (InterruptedException ex) {
-                    throw new BenchmarkException(ex);
-                } catch (ExecutionException ex) {
-                    // unwrap: ExecutionException -> Throwable-wrapper -> InvocationTargetException
-                    Throwable cause = ex.getCause().getCause().getCause();
-                    throw new BenchmarkException(cause);
-                } catch (TimeoutException e) {
-                    // try to kick the thread, if it was already started
-                    Thread runner = task.runner;
-                    if (runner != null) {
-                        out.print("(*interrupt*) ");
-                        runner.interrupt();
+        try {
+            int expected = numThreads;
+            while (expected > 0) {
+                for (Map.Entry<BenchmarkTask, Future<Collection<? extends Result>>> re : results.entrySet()) {
+                    BenchmarkTask task = re.getKey();
+                    Future<Collection<? extends Result>> fr = re.getValue();
+                    try {
+                        long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
+                        fr.get(waitFor, TimeUnit.NANOSECONDS);
+                        expected--;
+                    } catch (InterruptedException ex) {
+                        throw new BenchmarkException(ex);
+                    } catch (ExecutionException ex) {
+                        // unwrap: ExecutionException -> Throwable-wrapper -> InvocationTargetException
+                        Throwable cause = ex.getCause().getCause().getCause();
+                        throw new BenchmarkException(cause);
+                    } catch (TimeoutException e) {
+                        // try to kick the thread, if it was already started
+                        Thread runner = task.runner;
+                        if (runner != null) {
+                            out.print("(*interrupt*) ");
+                            runner.interrupt();
+                        }
                     }
                 }
             }
+        } finally {
+            // profilers stop when after all threads are confirmed to be
+            // finished to capture the edge behaviors; or, on a failure path
+            stopProfilers(benchmarkParams, params, iterationResults);
         }
 
         // Get the results.
@@ -155,10 +161,6 @@ class LoopBenchmarkHandler extends BaseBenchmarkHandler {
                 throw new IllegalStateException("Impossible to be here");
             }
         }
-
-        // profilers stop when after all threads are confirmed to be
-        // finished to capture the edge behaviors
-        stopProfilers(benchmarkParams, params, iterationResults);
 
         return iterationResults;
     }
