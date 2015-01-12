@@ -32,7 +32,6 @@ import org.openjdk.jmh.util.ClassUtils;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -107,18 +106,14 @@ class LaTeXResultFormat implements ResultFormat {
             out.printf("\\texttt{%s}", escape(benchParams.getParam(p)));
             out.print(" & ");
         }
-        out.printf("\\texttt{%s} & ", emit(res.getScore()));
-        out.printf("\\scriptsize $\\pm$ \\texttt{%s}", emit(res.getScoreError()));
+        out.printf("\\texttt{%5.3f} & ", res.getScore());
+        out.printf("\\scriptsize $\\pm$ \\texttt{%5.3f}", res.getScoreError());
         if (!singleUnit) {
             out.printf(" & \\texttt{%s}", res.getScoreUnit());
         }
         out.print(" \\\\");
 
         out.print("\n");
-    }
-
-    private static String emit(double d) {
-        return String.format(Locale.ROOT, "%5.3f", d);
     }
 
     private static String escape(String s) {

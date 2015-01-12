@@ -70,9 +70,6 @@ public class ResultFormatFactory {
             case TEXT:
                 return new TextResultFormat(out);
             case CSV:
-                /*
-                 * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180
-                 */
                 return new XSVResultFormat(out, ",");
             case SCSV:
                 /*

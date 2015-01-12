@@ -45,10 +45,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Random;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -113,85 +113,117 @@ public class ResultFormatTest {
         }
     }
 
+    public void test(ResultFormatType type, Locale locale, String suffix) throws IOException {
+        Locale prevLocale = Locale.getDefault();
+        Locale.setDefault(locale);
+
+        String actualFileName = "test." + type.toString().toLowerCase() + suffix;
+        String goldenFileName = "output-golden." + type.toString().toLowerCase() + suffix;
+
+        try {
+            String actualFile = FileUtils.tempFile(actualFileName).getAbsolutePath();
+            ResultFormatFactory.getInstance(type, actualFile).writeOut(getStub());
+            compare(actualFile, goldenFileName);
+
+            PrintStream ps = new PrintStream(actualFile);
+            ResultFormatFactory.getInstance(type, ps).writeOut(getStub());
+            ps.close();
+
+            compare(actualFile, goldenFileName);
+        } finally {
+            Locale.setDefault(prevLocale);
+        }
+    }
+
+    /*
+     * JSON has a strict format for numbers, the results should be Locale-agnostic.
+     */
+
     @Test
-    public void jsonTest() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
-
-        ResultFormatFactory.getInstance(ResultFormatType.JSON, actualFile).writeOut(getStub());
-
-        compare(actualFile, "output-golden.json");
+    public void jsonTest_ROOT() throws IOException {
+        test(ResultFormatType.JSON, Locale.ROOT, "");
     }
 
     @Test
-    public void jsonTest_Stream() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
-
-        PrintStream ps = new PrintStream(actualFile);
-        ResultFormatFactory.getInstance(ResultFormatType.JSON, ps).writeOut(getStub());
-        ps.close();
-
-        compare(actualFile, "output-golden.json");
+    public void jsonTest_US() throws IOException {
+        test(ResultFormatType.JSON, Locale.US, "");
     }
 
     @Test
-    public void csvTest() throws IOException {
-        String actualFile = FileUtils.tempFile("jmh").getAbsolutePath();
+    public void jsonTest_RU() throws IOException {
+        test(ResultFormatType.JSON, Locale.forLanguageTag("RU"), "");
+    }
 
-        ResultFormatFactory.getInstance(ResultFormatType.CSV, actualFile).writeOut(getStub());
+    /*
+     * CSV and SCSV data should conform to the Locale.
+     */
 
-        compare(actualFile, "output-golden.csv");
+    @Test
+    public void csvTest_ROOT() throws IOException {
+        test(ResultFormatType.CSV, Locale.ROOT, ".root");
     }
 
     @Test
-    public void csvTest_Stream() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
-
-        PrintStream ps = new PrintStream(actualFile);
-        ResultFormatFactory.getInstance(ResultFormatType.CSV, ps).writeOut(getStub());
-        ps.close();
-
-        compare(actualFile, "output-golden.csv");
+    public void csvTest_US() throws IOException {
+        test(ResultFormatType.CSV, Locale.US, ".us");
     }
 
     @Test
-    public void scsvTest() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
-
-        ResultFormatFactory.getInstance(ResultFormatType.SCSV, actualFile).writeOut(getStub());
-
-        compare(actualFile, "output-golden.scsv");
+    public void csvTest_RU() throws IOException {
+        test(ResultFormatType.CSV, Locale.forLanguageTag("RU"), ".ru");
     }
 
     @Test
-    public void scsvTest_Stream() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
-
-        PrintStream ps = new PrintStream(actualFile);
-        ResultFormatFactory.getInstance(ResultFormatType.SCSV, ps).writeOut(getStub());
-        ps.close();
-
-        compare(actualFile, "output-golden.scsv");
-    }
-
-
-    @Test
-    public void latexTest() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
-
-        ResultFormatFactory.getInstance(ResultFormatType.LATEX, actualFile).writeOut(getStub());
-
-        compare(actualFile, "output-golden.latex");
+    public void scsvTest_ROOT() throws IOException {
+        test(ResultFormatType.SCSV, Locale.ROOT, ".root");
     }
 
     @Test
-    public void latexTest_Stream() throws IOException {
-        String actualFile = FileUtils.tempFile("test").getAbsolutePath();
+    public void scsvTest_US() throws IOException {
+        test(ResultFormatType.SCSV, Locale.US, ".us");
+    }
 
-        PrintStream ps = new PrintStream(actualFile);
-        ResultFormatFactory.getInstance(ResultFormatType.LATEX, ps).writeOut(getStub());
-        ps.close();
+    @Test
+    public void scsvTest_RU() throws IOException {
+        test(ResultFormatType.SCSV, Locale.forLanguageTag("RU"), ".ru");
+    }
 
-        compare(actualFile, "output-golden.latex");
+    /*
+     * LaTeX output should conform to the Locale.
+     */
+
+    @Test
+    public void latexTest_ROOT() throws IOException {
+        test(ResultFormatType.LATEX, Locale.ROOT, ".root");
+    }
+
+    @Test
+    public void latexTest_US() throws IOException {
+        test(ResultFormatType.LATEX, Locale.US, ".us");
+    }
+
+    @Test
+    public void latexTest_RU() throws IOException {
+        test(ResultFormatType.LATEX, Locale.forLanguageTag("RU"), ".ru");
+    }
+
+    /*
+     * Text output should conform to the Locale.
+     */
+
+    @Test
+    public void textTest_ROOT() throws IOException {
+        test(ResultFormatType.TEXT, Locale.ROOT, ".root");
+    }
+
+    @Test
+    public void textTest_US() throws IOException {
+        test(ResultFormatType.TEXT, Locale.US, ".us");
+    }
+
+    @Test
+    public void textTest_RU() throws IOException {
+        test(ResultFormatType.TEXT, Locale.forLanguageTag("RU"), ".ru");
     }
 
 }

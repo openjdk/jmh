@@ -33,6 +33,9 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/*
+ * CSV formatter follows the provisions of http://tools.ietf.org/html/rfc4180
+ */
 class XSVResultFormat implements ResultFormat {
 
     private final PrintStream out;
@@ -76,7 +79,7 @@ class XSVResultFormat implements ResultFormat {
         out.print(delimiter);
         out.print("\"Score\"");
         out.print(delimiter);
-        out.print("\"Score Error (99.9%)\"");
+        out.printf("\"Score Error (%.1f%%)\"", 99.9);
         out.print(delimiter);
         out.print("\"Unit\"");
         for (String k : params) {
@@ -95,13 +98,13 @@ class XSVResultFormat implements ResultFormat {
         out.print(benchmarkParams.getMode().shortLabel());
         out.print("\"");
         out.print(delimiter);
-        out.print(String.valueOf(benchmarkParams.getThreads()));
+        out.print(emit(benchmarkParams.getThreads()));
         out.print(delimiter);
-        out.print(String.valueOf(result.getSampleCount()));
+        out.print(emit(result.getSampleCount()));
         out.print(delimiter);
-        out.print(String.valueOf(result.getScore()));
+        out.print(emit(result.getScore()));
         out.print(delimiter);
-        out.print(String.valueOf(result.getScoreError()));
+        out.print(emit(result.getScoreError()));
         out.print(delimiter);
         out.print("\"");
         out.print(result.getScoreUnit());
@@ -109,15 +112,29 @@ class XSVResultFormat implements ResultFormat {
 
         for (String p : params) {
             out.print(delimiter);
-            out.print("\"");
             String v = benchmarkParams.getParam(p);
             if (v != null) {
-                out.print(v);
+                out.print(emit(v));
             }
-            out.print("\"");
         }
 
         out.print("\r\n");
+    }
+
+    private String emit(String v) {
+        if (v.contains(delimiter) || v.contains(" ") || v.contains("\n") || v.contains("\r") || v.contains("\"")) {
+            return "\"" + v.replaceAll("\"", "\"\"") + "\"";
+        } else {
+            return v;
+        }
+    }
+
+    private String emit(int i) {
+        return emit(String.format("%d", i));
+    }
+
+    private String emit(double d) {
+        return emit(String.format("%f", d));
     }
 
 }
