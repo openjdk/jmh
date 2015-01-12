@@ -25,6 +25,7 @@
 package org.openjdk.jmh.generators.core;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 
 /**
@@ -43,6 +44,16 @@ public interface GeneratorDestination {
      * @throws java.io.IOException if something wacked happens
      */
     Writer newResource(String resourcePath) throws IOException;
+
+    /**
+     * Returns the Reader for the given resource.
+     * Callers are responsible for closing Readers.
+     *
+     * @param resourcePath resource path
+     * @return reader usable to read the resource
+     * @throws java.io.IOException if something wacked happens
+     */
+    Reader getResource(String resourcePath) throws IOException;
 
     /**
      * Returns the Writer for the given class.
@@ -79,5 +90,31 @@ public interface GeneratorDestination {
      * @param throwable exception causing the error
      */
     void printError(String message, Throwable throwable);
+
+    /**
+     * Print the warning.
+     * Calling this method should not terminate anything.
+     *
+     * @param message warning.
+     */
+    void printWarning(String message);
+
+    /**
+     * Print the warning.
+     * Calling this method should not terminate anything.
+     *
+     * @param message warning.
+     * @param element metadata element, to which this error is tailored
+     */
+    void printWarning(String message, MetadataInfo element);
+
+    /**
+     * Print the warning.
+     * Calling this method should not terminate anything.
+     *
+     * @param message warning.
+     * @param throwable exception causing the error
+     */
+    void printWarning(String message, Throwable throwable);
 
 }

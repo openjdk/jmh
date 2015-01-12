@@ -233,12 +233,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     @Override
     public String toString() {
-        return "BenchmarkListEntry{" +
-                "userName='" + userName + '\'' +
-                ", generatedName='" + generatedName + '\'' +
-                ", mode=" + mode +
-                ", workloadParams=" + workloadParams +
-                '}';
+        return "{\'" + userName + "\', " + mode + ", " + workloadParams + "}";
     }
 
     public Optional<TimeValue> getWarmupTime() {

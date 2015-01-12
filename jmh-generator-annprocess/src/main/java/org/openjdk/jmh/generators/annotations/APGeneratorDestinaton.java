@@ -33,6 +33,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 
 public class APGeneratorDestinaton implements GeneratorDestination {
@@ -48,6 +49,11 @@ public class APGeneratorDestinaton implements GeneratorDestination {
     @Override
     public Writer newResource(String resourcePath) throws IOException {
         return processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openWriter();
+    }
+
+    @Override
+    public Reader getResource(String resourcePath) throws IOException {
+        return processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openReader(true);
     }
 
     @Override
@@ -68,6 +74,21 @@ public class APGeneratorDestinaton implements GeneratorDestination {
     @Override
     public void printError(String message, Throwable throwable) {
         printError(message + " " + Utils.throwableToString(throwable));
+    }
+
+    @Override
+    public void printWarning(String message) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, message);
+    }
+
+    @Override
+    public void printWarning(String message, MetadataInfo element) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, message, ((APMetadataInfo)element).getElement());
+    }
+
+    @Override
+    public void printWarning(String message, Throwable throwable) {
+        printWarning(message + " " + Utils.throwableToString(throwable));
     }
 
 }

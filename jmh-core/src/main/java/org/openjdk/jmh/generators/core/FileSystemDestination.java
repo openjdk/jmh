@@ -25,8 +25,10 @@
 package org.openjdk.jmh.generators.core;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,11 +39,13 @@ public class FileSystemDestination implements GeneratorDestination {
     private final File resourceDir;
     private final File sourceDir;
     private final List<SourceError> sourceErrors;
+    private final List<SourceWarning> sourceWarnings;
 
     public FileSystemDestination(File resourceDir, File sourceDir) {
         this.resourceDir = resourceDir;
         this.sourceDir = sourceDir;
         this.sourceErrors = new ArrayList<SourceError>();
+        this.sourceWarnings = new ArrayList<SourceWarning>();
     }
 
     @Override
@@ -52,6 +56,16 @@ public class FileSystemDestination implements GeneratorDestination {
             throw new IOException("Unable to create " + p.getAbsolutePath());
         }
         return new FileWriter(new File(pathName));
+    }
+
+    @Override
+    public Reader getResource(String resourcePath) throws IOException {
+        String pathName = resourceDir.getAbsolutePath() + "/" + resourcePath;
+        File p = new File(pathName.substring(0, pathName.lastIndexOf("/")));
+        if (!p.isFile() && !p.exists()) {
+            throw new IOException("Unable to open " + pathName);
+        }
+        return new FileReader(new File(pathName));
     }
 
     @Override
@@ -85,6 +99,29 @@ public class FileSystemDestination implements GeneratorDestination {
 
     public Collection<SourceError> getErrors() {
         return sourceErrors;
+    }
+
+    @Override
+    public void printWarning(String message) {
+        sourceWarnings.add(new SourceWarning(message));
+    }
+
+    @Override
+    public void printWarning(String message, MetadataInfo element) {
+        sourceWarnings.add(new SourceElementWarning(message, element));
+    }
+
+    @Override
+    public void printWarning(String message, Throwable throwable) {
+        sourceWarnings.add(new SourceThrowableWarning(message, throwable));
+    }
+
+    public boolean hasWarnings() {
+        return !sourceWarnings.isEmpty();
+    }
+
+    public Collection<SourceWarning> getWarnings() {
+        return sourceWarnings;
     }
 
 }

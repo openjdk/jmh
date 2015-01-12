@@ -52,6 +52,7 @@ import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkListEntry;
 import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.runner.InfraControl;
+import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
@@ -59,6 +60,7 @@ import org.openjdk.jmh.util.SampleBuffer;
 import javax.annotation.Generated;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -151,9 +153,23 @@ public class BenchmarkGenerator {
     public void complete(GeneratorSource source, GeneratorDestination destination) {
         compilerControl.finish(source, destination);
 
-        // Processing completed, final round. Print all added methods to file
+        // Processing completed, final round.
         try {
-            PrintWriter writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
+            // Collect all benchmark entries here
+            Set<BenchmarkListEntry> entries = new HashSet<BenchmarkListEntry>();
+
+            // Try to read the benchmark entries from previous generator sessions.
+            try {
+                Reader reader = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1));
+                Collection<String> existingLines = FileUtils.readAllLines(reader);
+                for (String line : existingLines) {
+                    entries.add(new BenchmarkListEntry(line));
+                }
+            } catch (IOException e) {
+                // Expected in most cases, move on.
+            }
+
+            // Generate new benchmark entries, potentially overwriting the previous lines
             for (BenchmarkInfo info : benchmarkInfos) {
                 try {
                     MethodGroup group = info.methodGroup;
@@ -182,14 +198,26 @@ public class BenchmarkGenerator {
                                 group.getOperationsPerInvocation(),
                                 group.getTimeout()
                         );
-                        writer.println(br.toLine());
+
+                        if (entries.contains(br)) {
+                            destination.printWarning("Benchmark entry " + br + " already exists, overwriting");
+                            entries.remove(br);
+                        }
+
+                        entries.add(br);
                     }
                 } catch (GenerationException ge) {
                     destination.printError(ge.getMessage(), ge.getElement());
                 }
             }
 
+            // Write out the complete benchmark list
+            PrintWriter writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
+            for (BenchmarkListEntry entry : entries) {
+                writer.println(entry.toLine());
+            }
             writer.close();
+
         } catch (IOException ex) {
             destination.printError("Error writing benchmark list", ex);
         }

@@ -93,6 +93,11 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
         return params != null ? params.hashCode() : 0;
     }
 
+    @Override
+    public String toString() {
+        return params.toString();
+    }
+
     public WorkloadParams copy() {
         return new WorkloadParams(params);
     }

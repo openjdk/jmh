@@ -27,8 +27,6 @@ package org.openjdk.jmh.ct;
 import junit.framework.Assert;
 import org.openjdk.jmh.generators.asm.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
-import org.openjdk.jmh.generators.core.GeneratorDestination;
-import org.openjdk.jmh.generators.core.MetadataInfo;
 import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
 
 import javax.tools.Diagnostic;
@@ -41,15 +39,10 @@ import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CompileTest {
@@ -57,14 +50,14 @@ public class CompileTest {
     private static final String GENERATOR_TYPE = System.getProperty("jmh.ct.generator", "notset");
 
     public static void assertFail(Class<?> klass) {
-        TestGeneratorDestination destination = doTest(klass);
+        InMemoryGeneratorDestination destination = doTest(klass);
         if (!destination.hasErrors()) {
             Assert.fail("Should have failed.");
         }
     }
 
     public static void assertFail(Class<?> klass, String error) {
-        TestGeneratorDestination destination = doTest(klass);
+        InMemoryGeneratorDestination destination = doTest(klass);
         if (!destination.hasErrors()) {
             Assert.fail("Should have failed.");
         }
@@ -78,7 +71,7 @@ public class CompileTest {
     }
 
     public static void assertOK(Class<?> klass) {
-        TestGeneratorDestination destination = doTest(klass);
+        InMemoryGeneratorDestination destination = doTest(klass);
 
         if (destination.hasErrors()) {
             StringBuilder sb = new StringBuilder();
@@ -101,14 +94,11 @@ public class CompileTest {
         }
 
         Collection<JavaSourceFromString> sources = new ArrayList<JavaSourceFromString>();
-        for (Map.Entry<String, StringWriter> e : destination.classBodies.entrySet()) {
-            String name = e.getKey();
-            String body = e.getValue().toString();
-            sources.add(new JavaSourceFromString(name, body));
+        for (Map.Entry<String, String> e : destination.getClasses().entrySet()) {
+            sources.add(new JavaSourceFromString(e.getKey(), e.getValue()));
         }
 
         JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, null, null, sources);
-
         boolean success = task.call();
 
         if (!success) {
@@ -136,7 +126,7 @@ public class CompileTest {
         }
     }
 
-    private static TestGeneratorDestination doTest(Class<?> klass) {
+    private static InMemoryGeneratorDestination doTest(Class<?> klass) {
         if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
             return doTestReflection(klass);
         }
@@ -146,9 +136,9 @@ public class CompileTest {
         throw new IllegalStateException("Unhandled compile test generator: " + GENERATOR_TYPE);
     }
 
-    private static TestGeneratorDestination doTestReflection(Class<?> klass) {
+    private static InMemoryGeneratorDestination doTestReflection(Class<?> klass) {
         RFGeneratorSource source = new RFGeneratorSource();
-        TestGeneratorDestination destination = new TestGeneratorDestination();
+        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
         source.processClasses(klass);
 
         BenchmarkGenerator gen = new BenchmarkGenerator();
@@ -157,9 +147,9 @@ public class CompileTest {
         return destination;
     }
 
-    private static TestGeneratorDestination doTestAsm(Class<?> klass) {
+    private static InMemoryGeneratorDestination doTestAsm(Class<?> klass) {
         ASMGeneratorSource source = new ASMGeneratorSource();
-        TestGeneratorDestination destination = new TestGeneratorDestination();
+        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
 
         String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".class";
         try {
@@ -172,53 +162,6 @@ public class CompileTest {
         gen.generate(source, destination);
         gen.complete(source, destination);
         return destination;
-    }
-
-    public static class TestGeneratorDestination implements GeneratorDestination {
-
-        List<String> errors = new ArrayList<String>();
-
-        private Map<String, StringWriter> classBodies = new HashMap<String, StringWriter>();
-
-        @Override
-        public Writer newResource(String resourcePath) throws IOException {
-            return new PrintWriter(System.out, true);
-        }
-
-        @Override
-        public Writer newClass(String className) throws IOException {
-            StringWriter sw = classBodies.get(className);
-            if (sw != null) {
-                throw new IllegalStateException("Already writing the class");
-            } else {
-                sw = new StringWriter();
-                classBodies.put(className, sw);
-            }
-            return new PrintWriter(sw, true);
-        }
-
-        @Override
-        public void printError(String message) {
-            errors.add(message);
-        }
-
-        @Override
-        public void printError(String message, MetadataInfo element) {
-            errors.add(message);
-        }
-
-        @Override
-        public void printError(String message, Throwable throwable) {
-            errors.add(message + ":\n" + throwable.toString());
-        }
-
-        public boolean hasErrors() {
-            return !errors.isEmpty();
-        }
-
-        public List<String> getErrors() {
-            return errors;
-        }
     }
 
 

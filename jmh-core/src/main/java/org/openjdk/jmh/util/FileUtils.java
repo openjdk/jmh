@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -138,23 +139,25 @@ public class FileUtils {
         }
     }
 
-    public static Collection<String> readAllLines(File file) throws IOException {
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+    public static Collection<String> readAllLines(Reader src) throws IOException {
+            BufferedReader reader = new BufferedReader(src);
             List<String> lines = new ArrayList<String>();
             String line;
             while ((line = reader.readLine()) != null) {
                 lines.add(line);
             }
             return lines;
-        } finally {
-            FileUtils.safelyClose(fis);
-        }
-
     }
 
+    public static Collection<String> readAllLines(File file) throws IOException {
+        FileReader fr = null;
+        try {
+            fr = new FileReader(file);
+            return readAllLines(fr);
+        } finally {
+            FileUtils.safelyClose(fr);
+        }
+    }
 
     public static Collection<File> getClasses(File root) {
         Collection<File> result = new ArrayList<File>();
