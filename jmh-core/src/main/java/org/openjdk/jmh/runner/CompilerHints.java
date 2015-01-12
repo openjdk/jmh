@@ -69,7 +69,7 @@ public class CompilerHints extends AbstractResourceReader {
                 hints.add("quiet");
                 hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.*");
                 hints.addAll(defaultHints);
-                hintsFile = FileUtils.createTempFileWithLines("jmh", "compilecommand", hints);
+                hintsFile = FileUtils.createTempFileWithLines("compilecommand", hints);
             } catch (IOException e) {
                 throw new IllegalStateException("Error creating compiler hints file", e);
             }
@@ -231,7 +231,7 @@ public class CompilerHints extends AbstractResourceReader {
             for(String file : compileCommandFiles) {
                 hints.addAll(fromFile(file).get());
             }
-            return FileUtils.createTempFileWithLines("jmh", "compilecommand", hints);
+            return FileUtils.createTempFileWithLines("compilecommand", hints);
         } catch (IOException e) {
             throw new IllegalStateException("Error merging compiler hints files", e);
         }

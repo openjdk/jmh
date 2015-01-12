@@ -82,7 +82,7 @@ public class RunnerTest {
     @Test
     public void testOptsWithCompileCommandFileResultInMergedCompileCommandFile() throws IOException {
         // add a hints file
-        String tempHints = FileUtils.createTempFileWithLines("test", "fileWithLines",
+        String tempHints = FileUtils.createTempFileWithLines("fileWithLines",
                 Arrays.asList("inline,we/like/to/move/it.*"));
         Set<String> extraHints = CompilerHints.fromFile(tempHints).get();
         Runner blade = new Runner(new OptionsBuilder().build());
@@ -112,10 +112,10 @@ public class RunnerTest {
     @Test
     public void testOptsWith2CompileCommandFilesResultInMergedCompileCommandFile() throws IOException {
         // add hints files
-        String tempHints1 = FileUtils.createTempFileWithLines("test", "fileWithLines",
+        String tempHints1 = FileUtils.createTempFileWithLines("fileWithLines",
                 Arrays.asList("inline,we/like/to/move/it/move/it.*"));
         Set<String> extraHints1 = CompilerHints.fromFile(tempHints1).get();
-        String tempHints2 = FileUtils.createTempFileWithLines("test", "fileWithLines",
+        String tempHints2 = FileUtils.createTempFileWithLines("fileWithLines",
                 Arrays.asList("inline,we/like/to/move/it.*"));
         Set<String> extraHints2 = CompilerHints.fromFile(tempHints2).get();
         Runner blade = new Runner(new OptionsBuilder().build());

@@ -102,14 +102,13 @@ public class FileUtils {
     /**
      * Create a temporary file (see {@link File#createTempFile(String, String)}) and fill it with the given lines.
      *
-     * @param prefix file prefix as for {@link File#createTempFile(String, String)}
      * @param suffix file suffix {@link File#createTempFile(String, String)}
      * @param lines to be written
      *
      * @return the temporary file absolute path
      * @throws IOException on file creation error
      */
-    public static String createTempFileWithLines(String prefix, String suffix, Iterable<String> lines)
+    public static String createTempFileWithLines(String suffix, Iterable<String> lines)
             throws IOException {
         File file = FileUtils.tempFile(suffix);
         PrintWriter pw = new PrintWriter(file);
