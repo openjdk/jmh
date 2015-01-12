@@ -151,7 +151,7 @@ public class ResultFormatTest {
 
     @Test
     public void jsonTest_RU() throws IOException {
-        test(ResultFormatType.JSON, Locale.forLanguageTag("RU"), "");
+        test(ResultFormatType.JSON, new Locale("RU"), "");
     }
 
     /*
@@ -170,7 +170,7 @@ public class ResultFormatTest {
 
     @Test
     public void csvTest_RU() throws IOException {
-        test(ResultFormatType.CSV, Locale.forLanguageTag("RU"), ".ru");
+        test(ResultFormatType.CSV, new Locale("RU"), ".ru");
     }
 
     @Test
@@ -185,7 +185,7 @@ public class ResultFormatTest {
 
     @Test
     public void scsvTest_RU() throws IOException {
-        test(ResultFormatType.SCSV, Locale.forLanguageTag("RU"), ".ru");
+        test(ResultFormatType.SCSV, new Locale("RU"), ".ru");
     }
 
     /*
@@ -204,7 +204,7 @@ public class ResultFormatTest {
 
     @Test
     public void latexTest_RU() throws IOException {
-        test(ResultFormatType.LATEX, Locale.forLanguageTag("RU"), ".ru");
+        test(ResultFormatType.LATEX, new Locale("RU"), ".ru");
     }
 
     /*
@@ -223,7 +223,7 @@ public class ResultFormatTest {
 
     @Test
     public void textTest_RU() throws IOException {
-        test(ResultFormatType.TEXT, Locale.forLanguageTag("RU"), ".ru");
+        test(ResultFormatType.TEXT, new Locale("RU"), ".ru");
     }
 
 }
