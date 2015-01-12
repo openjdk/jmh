@@ -167,6 +167,8 @@ public class BenchmarkGenerator {
                 }
             } catch (IOException e) {
                 // Expected in most cases, move on.
+            } catch (UnsupportedOperationException e) {
+                destination.printWarning("Unable to read the existing benchmark list, because of UnsupportedOperationException. Run on JDK 7 or higher.");
             }
 
             // Generate new benchmark entries, potentially overwriting the previous lines
