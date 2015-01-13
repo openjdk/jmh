@@ -165,7 +165,6 @@ public class BenchmarkGenerator {
                 for (String line : existingLines) {
                     BenchmarkListEntry br = new BenchmarkListEntry(line);
                     entries.add(br);
-                    destination.printWarning("Old benchmark: " + br);
                 }
             } catch (IOException e) {
                 // Expected in most cases, move on.
@@ -206,8 +205,6 @@ public class BenchmarkGenerator {
                         if (entries.contains(br)) {
                             destination.printWarning("Benchmark entry " + br + " already exists, overwriting");
                             entries.remove(br);
-                        } else {
-                            destination.printWarning("New benchmark: " + br);
                         }
 
                         entries.add(br);
