@@ -163,7 +163,9 @@ public class BenchmarkGenerator {
                 Reader reader = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1));
                 Collection<String> existingLines = FileUtils.readAllLines(reader);
                 for (String line : existingLines) {
-                    entries.add(new BenchmarkListEntry(line));
+                    BenchmarkListEntry br = new BenchmarkListEntry(line);
+                    entries.add(br);
+                    destination.printWarning("Old benchmark: " + br);
                 }
             } catch (IOException e) {
                 // Expected in most cases, move on.
@@ -204,6 +206,8 @@ public class BenchmarkGenerator {
                         if (entries.contains(br)) {
                             destination.printWarning("Benchmark entry " + br + " already exists, overwriting");
                             entries.remove(br);
+                        } else {
+                            destination.printWarning("New benchmark: " + br);
                         }
 
                         entries.add(br);

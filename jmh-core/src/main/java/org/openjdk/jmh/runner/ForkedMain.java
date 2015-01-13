@@ -24,10 +24,12 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Main program entry point for forked JVM instance
@@ -68,10 +70,46 @@ class ForkedMain {
                 runner.run();
 
                 gracefullyFinished = true;
+
+                // arm the shutdown timer
+                new ShutdownTimeoutThread(link).start();
             } catch (Throwable ex) {
                 exception = ex;
                 System.exit(1);
             }
+        }
+    }
+
+    private static class ShutdownTimeoutThread extends Thread {
+        private static final int TIMEOUT = Integer.getInteger("jmh.shutdownTimeout", 30);
+        private static final int TIMEOUT_STEP = Integer.getInteger("jmh.shutdownTimeout.step", 5);
+        private final BinaryLinkClient link;
+
+        public ShutdownTimeoutThread(final BinaryLinkClient link) {
+            this.link = link;
+            setName("JMH-Shutdown-Timeout");
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
+            long start = System.nanoTime();
+
+            long waitMore;
+            do {
+                try {
+                    TimeUnit.SECONDS.sleep(TIMEOUT_STEP);
+                } catch (InterruptedException e) {
+                    return;
+                }
+
+                waitMore = TimeUnit.SECONDS.toNanos(TIMEOUT) - (System.nanoTime() - start);
+                link.getOutputFormat().println("<JMH had finished, but forked VM did not exit, are there stray running threads? Waiting " +
+                        TimeUnit.NANOSECONDS.toSeconds(waitMore) + " seconds more...>");
+            } while (waitMore > 0);
+
+            link.getOutputFormat().println("<shutdown timeout of " + TIMEOUT + " seconds expired, forcing forked VM to exit>");
+            System.exit(0);
         }
     }
 
