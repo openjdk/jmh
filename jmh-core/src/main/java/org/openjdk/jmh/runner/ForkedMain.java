@@ -24,20 +24,26 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Main program entry point for forked JVM instance
  */
 class ForkedMain {
 
+    private static final AtomicBoolean hangupFuse = new AtomicBoolean();
+    private static final AtomicReference<BinaryLinkClient> linkRef = new AtomicReference<BinaryLinkClient>();
+
     private static volatile boolean gracefullyFinished;
     private static volatile Throwable exception;
+    private static volatile PrintStream nakedErr;
 
     /**
      * Application main entry point
@@ -48,6 +54,9 @@ class ForkedMain {
         if (argv.length != 2) {
             throw new IllegalArgumentException("Expected two arguments for forked VM");
         } else {
+            // arm the hangup thread
+            Runtime.getRuntime().addShutdownHook(new HangupThread());
+
             try {
                 // This assumes the exact order of arguments:
                 //   1) host name to back-connect
@@ -57,11 +66,12 @@ class ForkedMain {
 
                 // establish the link to host VM and pull the options
                 BinaryLinkClient link = new BinaryLinkClient(hostName, hostPort);
-                addShutdownHook(link);
+                linkRef.set(link);
 
                 Options options = link.requestOptions();
 
                 // dump outputs into binary link
+                nakedErr = System.err;
                 System.setErr(link.getErrStream());
                 System.setOut(link.getOutStream());
 
@@ -70,23 +80,92 @@ class ForkedMain {
                 runner.run();
 
                 gracefullyFinished = true;
-
-                // arm the shutdown timer
-                new ShutdownTimeoutThread(link).start();
             } catch (Throwable ex) {
                 exception = ex;
+                gracefullyFinished = false;
+            } finally {
+                // arm the shutdown timer
+                new ShutdownTimeoutThread().start();
+            }
+
+            if (!gracefullyFinished) {
                 System.exit(1);
             }
         }
     }
 
+    /**
+     * Report our latest status to the host VM, and say goodbye.
+     */
+    static void hangup() {
+        // hangup fires only once
+        if (!hangupFuse.compareAndSet(false, true)) return;
+
+        if (!gracefullyFinished) {
+            Throwable ex = exception;
+            if (ex == null) {
+                ex = new IllegalStateException(
+                        "<failure: VM prematurely exited before JMH had finished with it, " +
+                                "explicit System.exit was called?>");
+            }
+
+            String msg = ex.getMessage();
+
+            BinaryLinkClient link = linkRef.get();
+            if (link != null) {
+                try {
+                    link.getOutputFormat().println(msg);
+                    link.pushException(new BenchmarkException(ex));
+                } catch (Exception e) {
+                    // last resort
+                    ex.printStackTrace(nakedErr);
+                }
+            } else {
+                // last resort
+                ex.printStackTrace(nakedErr);
+            }
+        }
+
+        BinaryLinkClient link = linkRef.getAndSet(null);
+        if (link != null) {
+            try {
+                link.close();
+            } catch (IOException e) {
+                // swallow
+            }
+        }
+    }
+
+    /**
+     * Hangup thread will detach us from the host VM properly, in three cases:
+     *   - normal shutdown
+     *   - shutdown with benchmark exception
+     *   - any System.exit call
+     *
+     * The need to intercept System.exit calls is the reason to register ourselves
+     * as the shutdown hook. Additionally, this thread runs only when all non-daemon
+     * threads are stopped, and therefore the stray user threads would be reported
+     * by shutdown timeout thread over still alive binary link.
+     */
+    private static class HangupThread extends Thread {
+        @Override
+        public void run() {
+            hangup();
+        }
+    }
+
+    /**
+     * Shutdown timeout thread will forcefully exit the VM in two cases:
+     *   - stray non-daemon thread prevents the VM from exiting
+     *   - all user threads have finished, but we are stuck in some shutdown hook or finalizer
+     *
+     * In all other "normal" cases, VM will exit before the timeout expires.
+     */
     private static class ShutdownTimeoutThread extends Thread {
         private static final int TIMEOUT = Integer.getInteger("jmh.shutdownTimeout", 30);
         private static final int TIMEOUT_STEP = Integer.getInteger("jmh.shutdownTimeout.step", 5);
-        private final BinaryLinkClient link;
 
-        public ShutdownTimeoutThread(final BinaryLinkClient link) {
-            this.link = link;
+        public ShutdownTimeoutThread() {
             setName("JMH-Shutdown-Timeout");
             setDaemon(true);
         }
@@ -104,55 +183,32 @@ class ForkedMain {
                 }
 
                 waitMore = TimeUnit.SECONDS.toNanos(TIMEOUT) - (System.nanoTime() - start);
-                link.getOutputFormat().println("<JMH had finished, but forked VM did not exit, are there stray running threads? Waiting " +
-                        TimeUnit.NANOSECONDS.toSeconds(waitMore) + " seconds more...>");
+
+                String msg = "<JMH had finished, but forked VM did not exit, are there stray running threads? Waiting " +
+                        TimeUnit.NANOSECONDS.toSeconds(waitMore) + " seconds more...>";
+
+                BinaryLinkClient link = linkRef.get();
+                if (link != null) {
+                    link.getOutputFormat().println(msg);
+                } else {
+                    // last resort
+                    nakedErr.println(msg);
+                }
             } while (waitMore > 0);
 
-            link.getOutputFormat().println("<shutdown timeout of " + TIMEOUT + " seconds expired, forcing forked VM to exit>");
-            System.exit(0);
+            String msg = "<shutdown timeout of " + TIMEOUT + " seconds expired, forcing forked VM to exit>";
+            BinaryLinkClient link = linkRef.get();
+            if (link != null) {
+                link.getOutputFormat().println(msg);
+            } else {
+                // last resort
+                nakedErr.println(msg);
+            }
+
+            // aggressively try to hangup, and HALT
+            hangup();
+            Runtime.getRuntime().halt(0);
         }
-    }
-
-    private static void addShutdownHook(final BinaryLinkClient link) {
-        Runtime.getRuntime().addShutdownHook(
-                new Thread() {
-                    @Override
-                    public void run() {
-                        if (!gracefullyFinished) {
-                            Throwable ex = exception;
-                            if (ex == null) {
-                                ex = new IllegalStateException(
-                                        "<failure: VM prematurely exited before JMH had finished with it, " +
-                                        "explicit System.exit was called?>");
-                            }
-
-                            String msg = ex.getMessage();
-
-                            if (link != null) {
-                                try {
-                                    link.getOutputFormat().println(msg);
-                                    link.pushException(new BenchmarkException(ex));
-                                } catch (Exception e) {
-                                    // last resort
-                                    ex.printStackTrace(System.err);
-                                }
-                            } else {
-                                // last resort
-                                ex.printStackTrace(System.err);
-                            }
-                        }
-
-                        if (link != null) {
-                            try {
-                                link.close();
-                            } catch (IOException e) {
-                                // swallow
-                            }
-                        }
-                    }
-                }
-        );
-
     }
 
 }
