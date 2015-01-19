@@ -42,11 +42,9 @@ import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -116,6 +114,18 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
     private static final Boolean SKIP_ASSEMBLY = Boolean.getBoolean("jmh.perfasm.skipAsm");
 
     /**
+     * Skip printing out interpreter stubs. This may improve the parser performance at the expense
+     * of missing the resolution and disassembly of interpreter regions.
+     */
+    private static final Boolean SKIP_INTERPRETER = Boolean.getBoolean("jmh.perfasm.skipInterpreter");
+
+    /**
+     * Skip printing out VM stubs. This may improve the parser performance at the expense
+     * of missing the resolution and disassembly of VM stub regions.
+     */
+    private static final Boolean SKIP_VM_STUBS = Boolean.getBoolean("jmh.perfasm.skipVMStubs");
+
+    /**
      * Save perf output to file?
      */
     private static final Boolean SAVE_PERF_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerf");
@@ -180,6 +190,17 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                     "-XX:+LogCompilation",
                     "-XX:LogFile=" + hsLog,
                     "-XX:+PrintAssembly"));
+
+            if (!SKIP_INTERPRETER) {
+                opts.add("-XX:+PrintInterpreter");
+            }
+            if (!SKIP_VM_STUBS) {
+                opts.add("-XX:+PrintNMethods");
+                opts.add("-XX:+PrintNativeNMethods");
+                opts.add("-XX:+PrintSignatureHandlers");
+                opts.add("-XX:+PrintAdapterHandlers");
+                opts.add("-XX:+PrintStubCode");
+            }
             if (PRINT_COMPILATION_INFO) {
                 opts.add("-XX:+PrintCompilation");
                 opts.add("-XX:+PrintInlining");
@@ -676,6 +697,7 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
         for (Collection<String> cs : splitAssembly(stdOut)) {
             String method = null;
+            String prevLine = "";
             for (String line : cs) {
                 String trim = line.trim();
 
@@ -684,22 +706,8 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
 
                 ASMLine asmLine = new ASMLine(line);
 
-                if (line.contains("# {method}")) {
-                    if (elements.length == 6) {
-                        // old JDKs may print the line with 6 fields: # {method} <name> <signature> in <class>
-                        method = (elements[5].replace("/", ".") + "::" + elements[2]).replace("'", "");
-                    } else if (elements.length == 7) {
-                        // newer JDKs always print 7 fields: # {method} <address> <name> <signature> in <class>
-                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
-                    } else {
-                        // {method} line is corrupted, other writer had possibly interjected;
-                        // honestly say we can't figure the method name out instead of lying.
-                        method = "<name unparseable>";
-                    }
-                    method = method.replace("&apos;", "");
-                    method = method.replace("&lt;", "<");
-                    method = method.replace("&gt;", ">");
-                } else if (elements.length >= 1 && elements[0].startsWith("0x")) {
+                // Handle the most frequent case first.
+                if (elements.length >= 1 && elements[0].startsWith("0x")) {
                     // Seems to be line with address.
                     try {
                         Long addr = Long.valueOf(elements[0].replace("0x", "").replace(":", ""), 16);
@@ -716,8 +724,31 @@ public class LinuxPerfAsmProfiler extends LinuxPerfUtil implements ExternalProfi
                     } catch (NumberFormatException e) {
                         // Nope, not the address line.
                     }
+                } else if (line.contains("# {method}")) {
+                    // Handle the compiled code line.
+                    if (elements.length == 6) {
+                        // old JDKs may print the line with 6 fields: # {method} <name> <signature> in <class>
+                        method = (elements[5].replace("/", ".") + "::" + elements[2]).replace("'", "");
+                    } else if (elements.length == 7) {
+                        // newer JDKs always print 7 fields: # {method} <address> <name> <signature> in <class>
+                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
+                    } else {
+                        // {method} line is corrupted, other writer had possibly interjected;
+                        // honestly say we can't figure the method name out instead of lying.
+                        method = "<name unparseable>";
+                    }
+                    method = method.replace("&apos;", "");
+                    method = method.replace("&lt;", "<");
+                    method = method.replace("&gt;", ">");
+                } else if (prevLine.contains("--------")) {
+                    if (line.trim().endsWith("bytes")) {
+                        // Handle the VM stub/interpreter line.
+                        method = "<stub: " + line.substring(0, line.indexOf("[")).trim() + ">";
+                    }
                 }
                 lines.add(asmLine);
+
+                prevLine = line;
             }
         }
         return new Assembly(lines, addressMap, methodMap);
