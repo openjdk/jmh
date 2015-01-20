@@ -1003,14 +1003,10 @@ public class BenchmarkGenerator {
 
             iterationProlog(writer, 3, method, states);
 
-            invocationProlog(writer, 3, method, states, false);
-
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
-
-            invocationEpilog(writer, 3, method, states, false);
 
             writer.println(ident(3) + "control.preTearDown();");
 
