@@ -414,14 +414,20 @@ class StateObjectHandler {
         List<StateObject> statesForward = new ArrayList<StateObject>();
         for (StateObject so : stateOrder(method, true)) {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
-                if (hmi.helperLevel == helperLevel) statesForward.add(so);
+                if (hmi.helperLevel == helperLevel) {
+                    statesForward.add(so);
+                    break;
+                }
             }
         }
 
         List<StateObject> statesReverse = new ArrayList<StateObject>();
         for (StateObject so : stateOrder(method, false)) {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
-                if (hmi.helperLevel == helperLevel) statesReverse.add(so);
+                if (hmi.helperLevel == helperLevel) {
+                    statesReverse.add(so);
+                    break;
+                }
             }
         }
 
