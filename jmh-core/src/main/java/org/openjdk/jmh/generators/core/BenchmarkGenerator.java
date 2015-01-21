@@ -1053,23 +1053,20 @@ public class BenchmarkGenerator {
     }
 
     private void invocationProlog(PrintWriter writer, int prefix, MethodInfo method, StateObjectHandler states, boolean pauseMeasurement) {
-        if (!states.getInvocationSetups(method).isEmpty()) {
+        if (states.hasInvocationStubs(method)) {
             for (String s : states.getInvocationSetups(method))
                 writer.println(ident(prefix) + s);
             if (pauseMeasurement)
                 writer.println(ident(prefix) + "long rt = System.nanoTime();");
-            writer.println();
         }
     }
 
     private void invocationEpilog(PrintWriter writer, int prefix, MethodInfo method, StateObjectHandler states, boolean pauseMeasurement) {
-        if (!states.getInvocationTearDowns(method).isEmpty()) {
-            writer.println();
+        if (states.hasInvocationStubs(method)) {
             if (pauseMeasurement)
                 writer.println(ident(prefix) + "realTime += (System.nanoTime() - rt);");
             for (String s : states.getInvocationTearDowns(method))
                 writer.println(ident(prefix) + s);
-            writer.println();
         }
     }
 

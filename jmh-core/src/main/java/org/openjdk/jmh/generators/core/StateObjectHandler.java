@@ -438,15 +438,12 @@ class StateObjectHandler {
             if (so.scope != Scope.Thread) continue;
 
             if (type == HelperType.SETUP) {
-                result.add("if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
                         Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add("    " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
                     }
                 }
-                result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = true;");
-                result.add("}");
             }
         }
 
@@ -454,15 +451,12 @@ class StateObjectHandler {
             if (so.scope != Scope.Thread) continue;
 
             if (type == HelperType.TEARDOWN) {
-                result.add("if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
                         Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add("    " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
                     }
                 }
-                result.add("    " + so.localIdentifier + ".ready" + helperLevel + " = false;");
-                result.add("}");
             }
         }
 
@@ -514,6 +508,10 @@ class StateObjectHandler {
         }
 
         return result;
+    }
+
+    public boolean hasInvocationStubs(MethodInfo method) {
+        return !getInvocationSetups(method).isEmpty() || !getInvocationTearDowns(method).isEmpty();
     }
 
     public Collection<String> getInvocationSetups(MethodInfo method) {
@@ -586,20 +584,27 @@ class StateObjectHandler {
             result.add("");
             result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
 
-            // These classes are copying the external environment.
+            // These special classes are copying the external environment.
             if (so.userType.equals(BenchmarkParams.class.getCanonicalName())) {
-                result.add("    if (true) {");
-                result.add("        " + so.type + " val = new " + so.type + "(control.benchmarkParams);");
+                result.add("    " + so.fieldIdentifier + " = new " + so.type + "(control.benchmarkParams);");
+                result.add("    return " + so.fieldIdentifier + ";");
+                result.add("}");
+                continue;
             } else if (so.userType.equals(IterationParams.class.getCanonicalName())) {
-                result.add("    if (true) {");
-                result.add("        " + so.type + " val = new " + so.type + "(control.iterationParams);");
+                result.add("    " + so.fieldIdentifier + " = new " + so.type + "(control.iterationParams);");
+                result.add("    return " + so.fieldIdentifier + ";");
+                result.add("}");
+                continue;
             } else if (so.userType.equals(ThreadParams.class.getCanonicalName())) {
-                result.add("    if (true) {");
-                result.add("        " + so.type + " val = new " + so.type + "(threadParams);");
-            } else {
-                result.add("    if (" + so.fieldIdentifier + " == null) {");
-                result.add("        " + so.type + " val = new " + so.type + "();");
+                result.add("    " + so.fieldIdentifier + " = new " + so.type + "(threadParams);");
+                result.add("    return " + so.fieldIdentifier + ";");
+                result.add("}");
+                continue;
             }
+
+            result.add("    " + so.type + " val = " + so.fieldIdentifier + ";");
+            result.add("    if (val == null) {");
+            result.add("        val = new " + so.type + "();");
 
             if (!so.getParamsLabels().isEmpty()) {
                 result.add("            Field f;");
@@ -615,10 +620,9 @@ class StateObjectHandler {
                 Collection<StateObject> args = stateHelperArgs.get(hmi.method.getQualifiedName());
                 result.add("        val." + hmi.method.getName() + "(" + getArgList(args) + ");");
             }
-            result.add("        " + "val.ready" + Level.Trial + " = true;");
             result.add("        " + so.fieldIdentifier + " = val;");
             result.add("    }");
-            result.add("    return " + so.fieldIdentifier + ";");
+            result.add("    return val;");
             result.add("}");
         }
 
@@ -787,9 +791,7 @@ class StateObjectHandler {
                         }
                         break;
                     case Thread:
-                        for (Level level : Level.values()) {
-                            pw.println("    public boolean ready" + level + ";");
-                        }
+                        // these flags are redundant for single thread
                         break;
                     default:
                         throw new IllegalStateException("Unknown state scope: " + so.scope);
