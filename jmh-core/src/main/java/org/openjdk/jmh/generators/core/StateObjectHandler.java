@@ -550,29 +550,34 @@ class StateObjectHandler {
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
             result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add("    " + so.type + " val = " + so.fieldIdentifier + ";");
+            result.add("    if (val != null) {");
+            result.add("        return val;");
+            result.add("    }");
             result.add("    synchronized(this.getClass()) {");
-            result.add("        if (" + so.fieldIdentifier + " == null) {");
-            result.add("            " + so.fieldIdentifier + " = new " + so.type + "();");
+            result.add("        val = " + so.fieldIdentifier + ";");
+            result.add("        if (val != null) {");
+            result.add("            return val;");
             result.add("        }");
-            result.add("        if (!" + so.fieldIdentifier + ".ready" + Level.Trial + ") {");
+            result.add("        val = new " + so.type + "();");
             if (!so.getParamsLabels().isEmpty()) {
-                result.add("            Field f;");
+                result.add("        Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
-                result.add("            f.setAccessible(true);");
-                result.add("            f.set(" + so.fieldIdentifier + ", " + so.getParamAccessor(paramName) + ");");
+                result.add("        f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                result.add("        f.setAccessible(true);");
+                result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
                 Collection<StateObject> args = stateHelperArgs.get(hmi.method.getQualifiedName());
-                result.add("            " + so.fieldIdentifier + "." + hmi.method.getName() + "(" + getArgList(args) + ");");
+                result.add("        val." + hmi.method.getName() + "(" + getArgList(args) + ");");
             }
-            result.add("            " + so.fieldIdentifier + ".ready" + Level.Trial + " = true;");
-            result.add("        }");
+            result.add("        val.ready" + Level.Trial + " = true;");
+            result.add("        " + so.fieldIdentifier + " = val;");
             result.add("    }");
-            result.add("    return " + so.fieldIdentifier + ";");
+            result.add("    return val;");
             result.add("}");
         }
 
@@ -633,32 +638,34 @@ class StateObjectHandler {
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
             result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add("    " + so.type + " val = " + so.fieldIdentifier + "_map.get(threadParams.getGroupIndex());");
+            result.add("    if (val != null) {");
+            result.add("        return val;");
+            result.add("    }");
             result.add("    synchronized(this.getClass()) {");
-            result.add("        " + so.type + " local = " + so.fieldIdentifier + "_map.get(threadParams.getGroupIndex());");
-            result.add("        if (local == null) {");
-            result.add("            " + so.type + " val = new " + so.type + "();");
-            result.add("            " + so.fieldIdentifier + "_map.put(threadParams.getGroupIndex(), val);");
-            result.add("            local = val;");
+            result.add("        val = " + so.fieldIdentifier + "_map.get(threadParams.getGroupIndex());");
+            result.add("        if (val != null) {");
+            result.add("            return val;");
             result.add("        }");
-            result.add("        if (!local.ready" + Level.Trial + ") {");
+            result.add("        val = new " + so.type + "();");
             if (!so.getParamsLabels().isEmpty()) {
-                result.add("            Field f;");
+                result.add("        Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("            f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
-                result.add("            f.setAccessible(true);");
-                result.add("            f.set(local, " + so.getParamAccessor(paramName) + ");");
+                result.add("        f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                result.add("        f.setAccessible(true);");
+                result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
             }
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
                 Collection<StateObject> args = stateHelperArgs.get(hmi.method.getQualifiedName());
-                result.add("            local." + hmi.method.getName() + "(" + getArgList(args) + ");");
+                result.add("        val." + hmi.method.getName() + "(" + getArgList(args) + ");");
             }
-            result.add("            " + "local.ready" + Level.Trial + " = true;");
-            result.add("        }");
-            result.add("        return local;");
+            result.add("        " + "val.ready" + Level.Trial + " = true;");
+            result.add("        " + so.fieldIdentifier + "_map.put(threadParams.getGroupIndex(), val);");
             result.add("    }");
+            result.add("    return val;");
             result.add("}");
         }
         return result;
