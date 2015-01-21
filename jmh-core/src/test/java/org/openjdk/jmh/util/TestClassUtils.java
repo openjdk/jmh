@@ -38,8 +38,8 @@ public class TestClassUtils {
         List<String> src = Arrays.asList("org.openjdk.benches.ForkJoinTest.test1", "org.openjdk.benches.ForkJoinTest.test2", "org.openjdk.benches.AnotherTest.test0");
         Map<String,String> map = ClassUtils.denseClassNames(src);
 
-        Assert.assertEquals("o.o.b.ForkJoinTest.test1", map.get("org.openjdk.benches.ForkJoinTest.test1"));
-        Assert.assertEquals("o.o.b.ForkJoinTest.test2", map.get("org.openjdk.benches.ForkJoinTest.test2"));
+        Assert.assertEquals("ForkJoinTest.test1", map.get("org.openjdk.benches.ForkJoinTest.test1"));
+        Assert.assertEquals("ForkJoinTest.test2", map.get("org.openjdk.benches.ForkJoinTest.test2"));
     }
 
     @Test
@@ -47,7 +47,7 @@ public class TestClassUtils {
         List<String> src = Arrays.asList("org.openjdk.benches.ForkJoinTest.test1");
         Map<String,String> map = ClassUtils.denseClassNames(src);
 
-        Assert.assertEquals("o.o.b.ForkJoinTest.test1", map.get("org.openjdk.benches.ForkJoinTest.test1"));
+        Assert.assertEquals("ForkJoinTest.test1", map.get("org.openjdk.benches.ForkJoinTest.test1"));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class TestClassUtils {
         List<String> src = Arrays.asList("org.openjdk.benches.ForkJoinTest.test1:label1");
         Map<String,String> map = ClassUtils.denseClassNames(src);
 
-        Assert.assertEquals("o.o.b.ForkJoinTest.test1:label1", map.get("org.openjdk.benches.ForkJoinTest.test1:label1"));
+        Assert.assertEquals("ForkJoinTest.test1:label1", map.get("org.openjdk.benches.ForkJoinTest.test1:label1"));
     }
 
     @Test
@@ -66,6 +66,15 @@ public class TestClassUtils {
         Assert.assertEquals("com.some.even.longer.word.SomeEvenMoreWeirdBenchmark", map.get("com.some.even.longer.word.SomeEvenMoreWeirdBenchmark"));
         Assert.assertEquals("my.sample.pkg.MySampleBenchmark", map.get("my.sample.pkg.MySampleBenchmark"));
         Assert.assertEquals("test.jmh.TestJmhBenchmark", map.get("test.jmh.TestJmhBenchmark"));
+    }
+
+    @Test
+    public void testSemiDifferentPackages() {
+        List<String> src = Arrays.asList("com.some.Benchmark", "com.some2.Benchmark2");
+        Map<String,String> map = ClassUtils.denseClassNames(src);
+
+        Assert.assertEquals("c.some.Benchmark", map.get("com.some.Benchmark"));
+        Assert.assertEquals("c.some2.Benchmark2", map.get("com.some2.Benchmark2"));
     }
 
 

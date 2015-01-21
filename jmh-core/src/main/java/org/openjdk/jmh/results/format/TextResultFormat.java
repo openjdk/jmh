@@ -63,7 +63,6 @@ class TextResultFormat implements ResultFormat {
         for (String prefix : benchPrefixes.values()) {
             nameLen = Math.max(nameLen, prefix.length());
         }
-        nameLen += COLUMN_PAD;
 
         // determine param lengths
         Map<String, Integer> paramLengths = new HashMap<String, Integer>();
@@ -82,7 +81,7 @@ class TextResultFormat implements ResultFormat {
 
         // determine column lengths for other columns
         int modeLen     = "Mode".length();
-        int samplesLen  = "Samples".length();
+        int samplesLen  = "Cnt".length();
         int scoreLen    = "Score".length();
         int scoreErrLen = "Error".length();
         int unitLen     = "Units".length();
@@ -115,7 +114,7 @@ class TextResultFormat implements ResultFormat {
         }
 
         out.print(String.format("%" + modeLen + "s",     "Mode"));
-        out.print(String.format("%" + samplesLen + "s",  "Samples"));
+        out.print(String.format("%" + samplesLen + "s",  "Cnt"));
         out.print(String.format("%" + scoreLen + "s",    "Score"));
         out.print("  ");
         out.print(String.format("%" + scoreErrLen + "s", "Error"));

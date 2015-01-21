@@ -107,33 +107,46 @@ public class ClassUtils {
 
         boolean first = true;
 
+        boolean prefixCut = false;
+
         String[] prefix = new String[0];
         for (String s : src) {
             String[] names = s.split("\\.");
 
             if (first) {
-                prefix = names;
+                prefix = new String[names.length];
+
+                int c;
+                for (c = 0; c < names.length; c++) {
+                    if (names[c].toLowerCase().equals(names[c])) {
+                        prefix[c] = names[c];
+                    } else {
+                        break;
+                    }
+                }
+                prefix = Arrays.copyOf(prefix, c);
                 first = false;
                 continue;
             }
 
             int c = 0;
             while (c < Math.min(prefix.length, names.length)) {
-                if (!names[c].equals(prefix[c])) {
+                String n = names[c];
+                String p = prefix[c];
+                if (!n.equals(p) || !n.toLowerCase().equals(n)) {
                     break;
                 }
                 c++;
             }
 
+            if (prefix.length != c) {
+                prefixCut = true;
+            }
             prefix = Arrays.copyOf(prefix, c);
         }
 
         for (int c = 0; c < prefix.length; c++) {
-            if (prefix[c].toLowerCase().equals(prefix[c])) {
-                prefix[c] = String.valueOf(prefix[c].charAt(0));
-            } else {
-                break;
-            }
+            prefix[c] = prefixCut ? String.valueOf(prefix[c].charAt(0)) : "";
         }
 
         Map<String, String> result = new HashMap<String, String>();
@@ -145,7 +158,9 @@ public class ClassUtils {
 
             String dense = "";
             for (String n : names) {
-                dense += n + ".";
+                if (!n.isEmpty()) {
+                    dense += n + ".";
+                }
             }
 
             if (dense.endsWith(".")) {
