@@ -31,7 +31,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.5</version>
     </parent>
 
     <name>JMH Generators: Annotation Processors</name>
