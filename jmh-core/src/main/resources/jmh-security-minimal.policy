@@ -1,0 +1,11 @@
+grant {
+    permission java.lang.RuntimePermission "accessDeclaredMembers";
+    permission java.lang.RuntimePermission "modifyThread";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.misc";
+    permission java.lang.RuntimePermission "setSecurityManager";
+    permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+    permission java.util.PropertyPermission "*", "read, write";
+    permission java.lang.management.ManagementPermission "monitor";
+    permission java.io.FilePermission "/-", "read,write,execute";
+    permission java.net.SocketPermission "*", "connect,resolve,accept,listen";
+};
