@@ -81,6 +81,9 @@ public class CompileTest {
         InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
         boolean success = doTest(klass, destination);
         if (!success) {
+            for (String e : destination.getErrors()) {
+                System.err.println(e);
+            }
             Assert.fail("Should have passed.");
         }
     }
@@ -141,10 +144,10 @@ public class CompileTest {
 
         if (!success) {
             for (JavaSourceFromString src : sources) {
-                System.out.println(src.getCharContent(false));
+                destination.printError(src.getCharContent(false).toString());
             }
             for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
-                System.out.println(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
+                destination.printError(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
             }
         }
 
@@ -180,7 +183,7 @@ public class CompileTest {
 
             if (!success) {
                 for (JavaSourceFromString src : sources) {
-                    System.out.println(src.getCharContent(false));
+                    destination.printError(src.getCharContent(false).toString());
                 }
                 for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
                     destination.printError(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
