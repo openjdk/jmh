@@ -33,6 +33,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
+import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -79,12 +80,27 @@ public class APGeneratorSource implements GeneratorSource {
             lastSize = discoveredClasses.size();
             List<TypeElement> newClasses = new ArrayList<TypeElement>();
             for (Element e : discoveredClasses) {
-                TypeElement walk = (TypeElement) e;
-                do {
-                    for (TypeElement nested : ElementFilter.typesIn(walk.getEnclosedElements())) {
-                        newClasses.add(nested);
+                try {
+                    TypeElement walk = (TypeElement) e;
+                    do {
+                        for (TypeElement nested : ElementFilter.typesIn(walk.getEnclosedElements())) {
+                            newClasses.add(nested);
+                        }
                     }
-                } while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
+                    while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
+                } catch (Exception t) {
+                    // Working around the javac bug:
+                    //   https://bugs.openjdk.java.net/browse/JDK-8071778
+                    //
+                    // JMH ignores these exceptions since they probably consider the classes that do not
+                    // have any JMH-related annotations. We can do nothing better than to notify the user,
+                    // and bail from traversing a current class.
+                    if (t.getClass().getName().endsWith("CompletionFailure")) {
+                        processingEnv.getMessager().printMessage(Diagnostic.Kind.MANDATORY_WARNING, "While traversing " + e + ", caught " + t);
+                    } else {
+                        throw new RuntimeException(t);
+                    }
+                }
             }
             discoveredClasses.addAll(newClasses);
         }
