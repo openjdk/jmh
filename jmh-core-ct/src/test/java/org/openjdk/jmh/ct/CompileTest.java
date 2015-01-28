@@ -27,7 +27,10 @@ package org.openjdk.jmh.ct;
 import junit.framework.Assert;
 import org.openjdk.jmh.generators.asm.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
+import org.openjdk.jmh.generators.core.GeneratorSource;
 import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
+import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.Utils;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -39,6 +42,8 @@ import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,15 +55,17 @@ public class CompileTest {
     private static final String GENERATOR_TYPE = System.getProperty("jmh.ct.generator", "notset");
 
     public static void assertFail(Class<?> klass) {
-        InMemoryGeneratorDestination destination = doTest(klass);
-        if (!destination.hasErrors()) {
+        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
+        boolean success = doTest(klass, destination);
+        if (success) {
             Assert.fail("Should have failed.");
         }
     }
 
     public static void assertFail(Class<?> klass, String error) {
-        InMemoryGeneratorDestination destination = doTest(klass);
-        if (!destination.hasErrors()) {
+        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
+        boolean success = doTest(klass, destination);
+        if (success) {
             Assert.fail("Should have failed.");
         }
 
@@ -71,7 +78,38 @@ public class CompileTest {
     }
 
     public static void assertOK(Class<?> klass) {
-        InMemoryGeneratorDestination destination = doTest(klass);
+        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
+        boolean success = doTest(klass, destination);
+        if (!success) {
+            Assert.fail("Should have passed.");
+        }
+    }
+
+    private static boolean doTest(Class<?> klass, InMemoryGeneratorDestination destination) {
+        if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
+            RFGeneratorSource source = new RFGeneratorSource();
+            source.processClasses(klass);
+            return doTestOther(source, destination);
+        } else if (GENERATOR_TYPE.equalsIgnoreCase("asm")) {
+            ASMGeneratorSource source = new ASMGeneratorSource();
+            String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".class";
+            try {
+                source.processClass(klass.getResourceAsStream(name));
+            } catch (IOException e) {
+                throw new IllegalStateException(name, e);
+            }
+            return doTestOther(source, destination);
+        } else if (GENERATOR_TYPE.equalsIgnoreCase("annprocess")) {
+            return doTestAnnprocess(klass, destination);
+        } else
+            throw new IllegalStateException("Unhandled compile test generator: " + GENERATOR_TYPE);
+    }
+
+
+    public static boolean doTestOther(GeneratorSource source, InMemoryGeneratorDestination destination) {
+        BenchmarkGenerator gen = new BenchmarkGenerator();
+        gen.generate(source, destination);
+        gen.complete(source, destination);
 
         if (destination.hasErrors()) {
             StringBuilder sb = new StringBuilder();
@@ -79,7 +117,7 @@ public class CompileTest {
             for (String e : destination.getErrors()) {
                 sb.append(e).append("\n");
             }
-            Assert.fail(sb.toString());
+            return false;
         }
 
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
@@ -98,7 +136,7 @@ public class CompileTest {
             sources.add(new JavaSourceFromString(e.getKey(), e.getValue()));
         }
 
-        JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, null, null, sources);
+        JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, Collections.singleton("-proc:none"), null, sources);
         boolean success = task.call();
 
         if (!success) {
@@ -108,7 +146,49 @@ public class CompileTest {
             for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
                 System.out.println(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
             }
-            Assert.fail("Unable to compile the generated code");
+        }
+
+        return success;
+    }
+
+    private static boolean doTestAnnprocess(Class<?> klass, InMemoryGeneratorDestination destination) {
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+
+        JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
+        StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);
+
+        try {
+            fm.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(System.getProperty("java.io.tmpdir"))));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".java";
+        String shortName = klass.getName();
+
+        InputStream stream = klass.getResourceAsStream(name);
+        Assert.assertNotNull(name + " is not found", stream);
+
+        try {
+            Collection<String> lines = FileUtils.readAllLines(new InputStreamReader(stream));
+            String file = Utils.join(lines, "\n");
+
+            Collection<JavaSourceFromString> sources = Collections.singleton(new JavaSourceFromString(shortName, file));
+            JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, null, null, sources);
+
+            boolean success = task.call();
+
+            if (!success) {
+                for (JavaSourceFromString src : sources) {
+                    System.out.println(src.getCharContent(false));
+                }
+                for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
+                    destination.printError(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
+                }
+            }
+            return success;
+        } catch (IOException e) {
+            return false;
         }
     }
 
@@ -125,44 +205,5 @@ public class CompileTest {
             return code;
         }
     }
-
-    private static InMemoryGeneratorDestination doTest(Class<?> klass) {
-        if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
-            return doTestReflection(klass);
-        }
-        if (GENERATOR_TYPE.equalsIgnoreCase("asm")) {
-            return doTestAsm(klass);
-        }
-        throw new IllegalStateException("Unhandled compile test generator: " + GENERATOR_TYPE);
-    }
-
-    private static InMemoryGeneratorDestination doTestReflection(Class<?> klass) {
-        RFGeneratorSource source = new RFGeneratorSource();
-        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
-        source.processClasses(klass);
-
-        BenchmarkGenerator gen = new BenchmarkGenerator();
-        gen.generate(source, destination);
-        gen.complete(source, destination);
-        return destination;
-    }
-
-    private static InMemoryGeneratorDestination doTestAsm(Class<?> klass) {
-        ASMGeneratorSource source = new ASMGeneratorSource();
-        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
-
-        String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".class";
-        try {
-            source.processClass(klass.getResourceAsStream(name));
-        } catch (IOException e) {
-            throw new IllegalStateException(name, e);
-        }
-
-        BenchmarkGenerator gen = new BenchmarkGenerator();
-        gen.generate(source, destination);
-        gen.complete(source, destination);
-        return destination;
-    }
-
 
 }
