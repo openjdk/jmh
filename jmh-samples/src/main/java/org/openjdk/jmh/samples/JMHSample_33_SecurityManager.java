@@ -69,10 +69,10 @@ public class JMHSample_33_SecurityManager {
      * the SecurityManager is not installed.
      *
      * If you need a restricted security policy for the tests, you are advised to
-     * get /jmh-minimal-security.policy, that contains the minimal permissions
+     * get /jmh-security-minimal.policy, that contains the minimal permissions
      * required for JMH benchmark to run, merge the new permissions there, produce new
      * policy file in a temporary location, and load that policy file instead.
-     * There is also /jmh-minimal-runner-security.policy, that contains the minimal
+     * There is also /jmh-security-minimal-runner.policy, that contains the minimal
      * permissions for the JMH harness to run, if you want to use JVM args to arm
      * the SecurityManager.
      */

@@ -55,7 +55,7 @@ public class BenchmarkMinSecurityManagerTest {
     @Setup
     public void setup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         Fixtures.work();
-        URI policyFile = BenchmarkMinSecurityManagerTest.class.getResource("/jmh-minimal-security.policy").toURI();
+        URI policyFile = BenchmarkMinSecurityManagerTest.class.getResource("/jmh-security-minimal.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
         System.setSecurityManager(new SecurityManager());
     }

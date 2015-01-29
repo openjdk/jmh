@@ -60,7 +60,7 @@ public class BenchmarkMinRunnerSecurityManagerTest {
 
     @Test
     public void invokeAPI() throws RunnerException, URISyntaxException, NoSuchAlgorithmException {
-        URI policyFile = BenchmarkMinRunnerSecurityManagerTest.class.getResource("/jmh-minimal-runner-security.policy").toURI();
+        URI policyFile = BenchmarkMinRunnerSecurityManagerTest.class.getResource("/jmh-security-minimal-runner.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
         System.setSecurityManager(new SecurityManager());
 
