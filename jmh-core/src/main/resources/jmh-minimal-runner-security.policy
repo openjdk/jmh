@@ -3,9 +3,11 @@ grant {
     permission java.lang.RuntimePermission "modifyThread";
     permission java.lang.RuntimePermission "accessClassInPackage.sun.misc";
     permission java.lang.RuntimePermission "setSecurityManager";
+    permission java.lang.RuntimePermission "shutdownHooks";
+    permission java.lang.RuntimePermission "setIO";
     permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
-    permission java.util.PropertyPermission "*", "read, write";
+    permission java.util.PropertyPermission "*", "read";
     permission java.lang.management.ManagementPermission "monitor";
-    permission java.io.FilePermission "/-", "read,write,execute";
+    permission java.io.FilePermission "/-", "read,write,execute,delete";
     permission java.net.SocketPermission "*", "connect,resolve,accept,listen";
 };

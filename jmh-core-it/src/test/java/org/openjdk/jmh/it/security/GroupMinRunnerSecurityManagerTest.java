@@ -33,9 +33,7 @@ import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
@@ -43,7 +41,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -52,20 +49,7 @@ import java.security.URIParameter;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Group)
-public class GroupSecurityManagerTest {
-
-    @Setup
-    public void setup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
-        Fixtures.work();
-        URI policyFile = GroupSecurityManagerTest.class.getResource("/jmh-security.policy").toURI();
-        Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
-        System.setSecurityManager(new SecurityManager());
-    }
-
-    @TearDown
-    public void tearDown() {
-        System.setSecurityManager(null);
-    }
+public class GroupMinRunnerSecurityManagerTest {
 
     @Benchmark
     @BenchmarkMode(Mode.All)
@@ -79,12 +63,20 @@ public class GroupSecurityManagerTest {
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
-        Options opts = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .shouldFailOnError(true)
-                .build();
-        new Runner(opts).run();
+    public void invokeAPI() throws RunnerException, URISyntaxException, NoSuchAlgorithmException {
+        URI policyFile = GroupMinRunnerSecurityManagerTest.class.getResource("/jmh-minimal-runner-security.policy").toURI();
+        Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
+        System.setSecurityManager(new SecurityManager());
+
+        try {
+            Options opts = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opts).run();
+        } finally {
+            System.setSecurityManager(null);
+        }
     }
 
 }

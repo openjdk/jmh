@@ -54,6 +54,7 @@ public class ThreadSecurityManagerTest {
 
     @Setup
     public void setup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+        Fixtures.work();
         URI policyFile = ThreadSecurityManagerTest.class.getResource("/jmh-security.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
         System.setSecurityManager(new SecurityManager());

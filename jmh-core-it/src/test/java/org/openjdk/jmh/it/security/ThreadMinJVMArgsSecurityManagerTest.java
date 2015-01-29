@@ -28,14 +28,10 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
@@ -43,46 +39,31 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Policy;
-import java.security.URIParameter;
 import java.util.concurrent.TimeUnit;
 
-@State(Scope.Group)
-public class GroupSecurityManagerTest {
-
-    @Setup
-    public void setup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
-        Fixtures.work();
-        URI policyFile = GroupSecurityManagerTest.class.getResource("/jmh-security.policy").toURI();
-        Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
-        System.setSecurityManager(new SecurityManager());
-    }
-
-    @TearDown
-    public void tearDown() {
-        System.setSecurityManager(null);
-    }
+@State(Scope.Thread)
+public class ThreadMinJVMArgsSecurityManagerTest {
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(1)
-    @Group("group1")
-    @GroupThreads(2)
-    public void test1() {
+    public void test() {
         Fixtures.work();
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
+    public void invokeAPI() throws RunnerException, URISyntaxException, NoSuchAlgorithmException {
+        URI policyFile = ThreadMinJVMArgsSecurityManagerTest.class.getResource("/jmh-minimal-runner-security.policy").toURI();
+
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
+                .jvmArgsAppend("-Djava.security.manager", "-Djava.security.policy=" + policyFile.toString())
                 .build();
         new Runner(opts).run();
     }

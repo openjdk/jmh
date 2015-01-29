@@ -56,7 +56,8 @@ public class GroupMinSecurityManagerTest {
 
     @Setup
     public void setup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
-        URI policyFile = GroupMinSecurityManagerTest.class.getResource("/jmh-security-minimal.policy").toURI();
+        Fixtures.work();
+        URI policyFile = GroupMinSecurityManagerTest.class.getResource("/jmh-minimal-security.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
         System.setSecurityManager(new SecurityManager());
     }

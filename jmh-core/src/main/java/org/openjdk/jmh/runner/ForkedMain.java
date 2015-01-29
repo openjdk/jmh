@@ -57,6 +57,9 @@ class ForkedMain {
             // arm the hangup thread
             Runtime.getRuntime().addShutdownHook(new HangupThread());
 
+            // init the shutdown thread
+            ShutdownTimeoutThread shutdownThread = new ShutdownTimeoutThread();
+
             try {
                 // This assumes the exact order of arguments:
                 //   1) host name to back-connect
@@ -85,7 +88,7 @@ class ForkedMain {
                 gracefullyFinished = false;
             } finally {
                 // arm the shutdown timer
-                new ShutdownTimeoutThread().start();
+                shutdownThread.start();
             }
 
             if (!gracefullyFinished) {

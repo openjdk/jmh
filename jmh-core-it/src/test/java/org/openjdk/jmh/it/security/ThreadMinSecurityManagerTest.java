@@ -54,7 +54,8 @@ public class ThreadMinSecurityManagerTest {
 
     @Setup
     public void setup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
-        URI policyFile = ThreadMinSecurityManagerTest.class.getResource("/jmh-security-minimal.policy").toURI();
+        Fixtures.work();
+        URI policyFile = ThreadMinSecurityManagerTest.class.getResource("/jmh-minimal-security.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
         System.setSecurityManager(new SecurityManager());
     }
