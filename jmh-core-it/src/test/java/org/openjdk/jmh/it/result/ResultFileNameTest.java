@@ -83,7 +83,9 @@ public class ResultFileNameTest {
                 .build();
         new Runner(opts).run();
 
-        Assert.assertTrue(new File(name).exists());
+        File file = new File(name);
+        Assert.assertTrue(file.exists());
+        file.delete();
     }
 
 }
