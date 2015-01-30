@@ -117,4 +117,11 @@ public interface GeneratorDestination {
      */
     void printWarning(String message, Throwable throwable);
 
+    /**
+     * Print the informative message.
+     * Calling this method should not terminate anything.
+     *
+     * @param message message.
+     */
+    void printNote(String message);
 }

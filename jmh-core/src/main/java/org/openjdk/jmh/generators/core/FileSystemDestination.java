@@ -124,4 +124,8 @@ public class FileSystemDestination implements GeneratorDestination {
         return sourceWarnings;
     }
 
+    @Override
+    public void printNote(String message) {
+        // do nothing
+    }
 }

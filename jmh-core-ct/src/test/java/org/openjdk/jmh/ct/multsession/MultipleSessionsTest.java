@@ -48,6 +48,7 @@ public class MultipleSessionsTest {
 
             Assert.assertFalse("First stage error", dst.hasErrors());
             Assert.assertFalse("First stage warnings", dst.hasWarnings());
+            Assert.assertFalse("First stage infos", dst.hasNotes());
 
             String[] list = dst.getResources().get(BenchmarkList.BENCHMARK_LIST.substring(1)).split("\n");
             Assert.assertEquals("First stage should have only 1 benchmark", 1, list.length);
@@ -64,6 +65,7 @@ public class MultipleSessionsTest {
 
             Assert.assertFalse("Second stage error", dst.hasErrors());
             Assert.assertFalse("Second stage warnings", dst.hasWarnings());
+            Assert.assertFalse("Second stage notes", dst.hasNotes());
 
             String[] list = dst.getResources().get(BenchmarkList.BENCHMARK_LIST.substring(1)).split("\n");
             Assert.assertEquals("Second stage should have 2 benchmarks", 2, list.length);
@@ -85,6 +87,7 @@ public class MultipleSessionsTest {
 
             Assert.assertFalse("First stage error", dst.hasErrors());
             Assert.assertFalse("First stage warnings", dst.hasWarnings());
+            Assert.assertFalse("First stage notes", dst.hasNotes());
 
             String[] list = dst.getResources().get(BenchmarkList.BENCHMARK_LIST.substring(1)).split("\n");
             Assert.assertEquals("First stage should have only 1 benchmark", 1, list.length);
@@ -100,12 +103,13 @@ public class MultipleSessionsTest {
             gen.complete(src, dst);
 
             Assert.assertFalse("Second stage error", dst.hasErrors());
-            Assert.assertTrue("Second stage warnings", dst.hasWarnings());
-            boolean hasOurWarning = false;
-            for (String warning : dst.getWarnings()) {
-                hasOurWarning |= (warning.contains("Benchmark1") && warning.contains("overwriting"));
+            Assert.assertFalse("Second stage warnings", dst.hasWarnings());
+            Assert.assertTrue("Second stage notes", dst.hasNotes());
+            boolean hasOurInfo = false;
+            for (String warning : dst.getNotes()) {
+                hasOurInfo |= (warning.contains("Benchmark1") && warning.contains("overwriting"));
             }
-            Assert.assertTrue("Should have our warning: " + dst.getWarnings(), hasOurWarning);
+            Assert.assertTrue("Should have our note: " + dst.getNotes(), hasOurInfo);
 
             String[] list = dst.getResources().get(BenchmarkList.BENCHMARK_LIST.substring(1)).split("\n");
             Assert.assertEquals("Second stage should have 1 benchmark", 1, list.length);

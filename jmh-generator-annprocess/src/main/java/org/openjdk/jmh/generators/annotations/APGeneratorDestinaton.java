@@ -91,4 +91,8 @@ public class APGeneratorDestinaton implements GeneratorDestination {
         printWarning(message + " " + Utils.throwableToString(throwable));
     }
 
+    @Override
+    public void printNote(String message) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
+    }
 }

@@ -42,6 +42,7 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
 
     private List<String> errors = new ArrayList<String>();
     private List<String> warnings = new ArrayList<String>();
+    private List<String> infos = new ArrayList<String>();
 
     private Map<String, StringWriter> classBodies = new HashMap<String, StringWriter>();
     private Map<String, StringWriter> resourceBodies = new HashMap<String, StringWriter>();
@@ -130,4 +131,18 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
         }
         return result;
     }
+
+    @Override
+    public void printNote(String message) {
+        infos.add(message);
+    }
+
+    public boolean hasNotes() {
+        return !infos.isEmpty();
+    }
+
+    public List<String> getNotes() {
+        return infos;
+    }
+
 }

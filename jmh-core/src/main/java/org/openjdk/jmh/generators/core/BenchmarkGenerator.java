@@ -203,7 +203,7 @@ public class BenchmarkGenerator {
                         );
 
                         if (entries.contains(br)) {
-                            destination.printWarning("Benchmark entry " + br + " already exists, overwriting");
+                            destination.printNote("Benchmark entry " + br + " already exists, overwriting");
                             entries.remove(br);
                         }
 
