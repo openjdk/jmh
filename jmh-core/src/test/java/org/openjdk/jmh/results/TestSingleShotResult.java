@@ -40,7 +40,7 @@ public class TestSingleShotResult {
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
-        assertEquals("us", result.getScoreUnit());
+        assertEquals("us/op", result.getScoreUnit());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class TestSingleShotResult {
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(1.5, result.getScore());
-        assertEquals("us", result.getScoreUnit());
+        assertEquals("us/op", result.getScoreUnit());
     }
 
 }

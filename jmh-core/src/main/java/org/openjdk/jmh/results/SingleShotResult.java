@@ -40,7 +40,7 @@ public class SingleShotResult extends Result<SingleShotResult> {
     public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
         this(role, label,
                 of(1.0D * duration / TimeUnit.NANOSECONDS.convert(1, outputTimeUnit)),
-                TimeValue.tuToString(outputTimeUnit));
+                TimeValue.tuToString(outputTimeUnit) + "/op");
     }
 
     SingleShotResult(ResultRole mode, String label, Statistics s, String unit) {
