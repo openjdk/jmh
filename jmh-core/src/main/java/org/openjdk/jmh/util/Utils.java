@@ -34,6 +34,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -168,7 +170,7 @@ public class Utils {
         return max;
     }
 
-    public static String guessConsoleEncoding() {
+    public static Charset guessConsoleEncoding() {
         // We cannot use Console class directly, because we also need the access to the raw byte stream,
         // e.g. for pushing in a raw output from a forked VM invocation. Therefore, we are left with
         // reflectively poking out the Charset from Console, and use it for our own private output streams.
@@ -180,7 +182,7 @@ public class Utils {
             if (console != null) {
                 Object res = f.get(console);
                 if (res instanceof Charset) {
-                    return ((Charset) res).name();
+                    return (Charset) res;
                 }
             }
         } catch (NoSuchFieldException e) {
@@ -194,7 +196,7 @@ public class Utils {
             m.setAccessible(true);
             Object res = m.invoke(null);
             if (res instanceof String) {
-                return (String) res;
+                return Charset.forName((String) res);
             }
         } catch (NoSuchMethodException e) {
             // fall-through
@@ -202,9 +204,13 @@ public class Utils {
             // fall-through
         } catch (IllegalAccessException e) {
             // fall-through
+        } catch (IllegalCharsetNameException e) {
+            // fall-through
+        } catch (UnsupportedCharsetException e) {
+            // fall-through
         }
 
-        return Charset.defaultCharset().name();
+        return Charset.defaultCharset();
     }
 
     static class BurningTask implements Runnable {

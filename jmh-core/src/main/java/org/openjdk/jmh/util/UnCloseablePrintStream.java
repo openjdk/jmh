@@ -27,11 +27,12 @@ package org.openjdk.jmh.util;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 public class UnCloseablePrintStream extends PrintStream {
 
-    public UnCloseablePrintStream(OutputStream out, String charset) throws UnsupportedEncodingException {
-        super(out, false, charset);
+    public UnCloseablePrintStream(OutputStream out, Charset charset) throws UnsupportedEncodingException {
+        super(out, false, charset.name());
     }
 
     @Override
