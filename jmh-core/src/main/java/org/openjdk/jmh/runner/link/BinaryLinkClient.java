@@ -82,9 +82,14 @@ public final class BinaryLinkClient {
             throw new IOException("Link had failed already");
         }
 
+        // It is important to reset the OOS to avoid garbage buildup in internal identity
+        // tables, and as much as important to flush the stream to let the other party
+        // know we pushed something out.
+
         synchronized (lock) {
             try {
                 oos.writeObject(frame);
+                oos.reset();
                 oos.flush();
             } catch (IOException e) {
                 failed = true;
