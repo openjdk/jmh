@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,22 +22,10 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner.link;
+package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.results.IterationResult;
 
-import java.io.Serializable;
-
-class ResultsFrame implements Serializable {
-    private static final long serialVersionUID = -5627086531281515824L;
-
-    private final IterationResult res;
-
-    public ResultsFrame(IterationResult res) {
-        this.res = res;
-    }
-
-    public IterationResult getRes() {
-        return res;
-    }
+interface IterationResultAcceptor {
+    void accept(IterationResult iterationData);
 }

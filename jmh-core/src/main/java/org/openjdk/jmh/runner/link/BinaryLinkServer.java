@@ -24,20 +24,18 @@
  */
 package org.openjdk.jmh.runner.link;
 
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.VerboseMode;
-import org.openjdk.jmh.util.HashMultimap;
-import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -50,8 +48,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -71,7 +71,7 @@ public final class BinaryLinkServer {
     private final Set<String> forbidden;
     private final Acceptor acceptor;
     private final AtomicReference<Handler> handler;
-    private final AtomicReference<Multimap<BenchmarkParams, BenchmarkResult>> results;
+    private final AtomicReference<List<IterationResult>> results;
     private final AtomicReference<BenchmarkException> exception;
     private final AtomicReference<ActionPlan> plan;
 
@@ -99,7 +99,7 @@ public final class BinaryLinkServer {
         acceptor.start();
 
         handler = new AtomicReference<Handler>();
-        results = new AtomicReference<Multimap<BenchmarkParams, BenchmarkResult>>(new HashMultimap<BenchmarkParams, BenchmarkResult>());
+        results = new AtomicReference<List<IterationResult>>(new ArrayList<IterationResult>());
         exception = new AtomicReference<BenchmarkException>();
         plan = new AtomicReference<ActionPlan>();
     }
@@ -137,8 +137,8 @@ public final class BinaryLinkServer {
         return exception.getAndSet(null);
     }
 
-    public Multimap<BenchmarkParams, BenchmarkResult> getResults() {
-        Multimap<BenchmarkParams, BenchmarkResult> res = results.getAndSet(new HashMultimap<BenchmarkParams, BenchmarkResult>());
+    public List<IterationResult> getResults() {
+        List<IterationResult> res = results.getAndSet(new ArrayList<IterationResult>());
         if (res != null) {
             return res;
         } else {
@@ -284,19 +284,21 @@ public final class BinaryLinkServer {
                         handleInfra((InfraFrame) obj);
                     }
                     if (obj instanceof ResultsFrame) {
-                        handleResults((ResultsFrame)obj);
+                        handleResults((ResultsFrame) obj);
                     }
                     if (obj instanceof ExceptionFrame) {
-                        handleException((ExceptionFrame)obj);
+                        handleException((ExceptionFrame) obj);
                     }
                     if (obj instanceof OutputFrame) {
-                        handleOutput((OutputFrame)obj);
+                        handleOutput((OutputFrame) obj);
                     }
                     if (obj instanceof FinishingFrame) {
                         // close the streams
                         break;
                     }
                 }
+            } catch (EOFException e) {
+                // ignore
             } catch (Exception e) {
                 out.println("<binary link had failed, forked VM corrupted the stream? Use " + VerboseMode.EXTRA + " verbose to print exception>");
                 if (opts.verbosity().orElse(Defaults.VERBOSITY).equalsOrHigherThan(VerboseMode.EXTRA)) {
@@ -327,7 +329,7 @@ public final class BinaryLinkServer {
         }
 
         private void handleResults(ResultsFrame obj) {
-            results.get().merge(obj.getRes());
+            results.get().add(obj.getRes());
         }
 
         private void handleInfra(InfraFrame req) throws IOException {

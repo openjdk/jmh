@@ -69,71 +69,90 @@ abstract class BaseRunner {
         this.out = handler;
     }
 
-    protected Multimap<BenchmarkParams, BenchmarkResult> runBenchmarks(boolean forked, ActionPlan actionPlan) {
-        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
-
+    protected void runBenchmarksForked(ActionPlan actionPlan, IterationResultAcceptor acceptor) {
         for (Action action : actionPlan.getActions()) {
-
             BenchmarkParams params = action.getParams();
             ActionMode mode = action.getMode();
 
-            if (!forked) {
-                String opts = Utils.join(params.getJvmArgs(), " ").trim();
-                String realOpts = Utils.join(ManagementFactory.getRuntimeMXBean().getInputArguments(), " ").trim();
-                if (opts.isEmpty()) {
-                    opts = "<none>";
-                }
-                if (realOpts.isEmpty()) {
-                    realOpts = "<none>";
-                }
+            doSingle(params, mode, acceptor);
+        }
+    }
 
-                Version.printVersion(out);
-                out.println("# VM invoker: " + params.getJvm());
-                out.println("# VM invoker: " + params.getJvm());
-                out.println("# VM options: " + realOpts + (opts.equals(realOpts) ? "" : " *** WARNING: some JVM options are ignored in non-forked runs ***"));
+    protected Multimap<BenchmarkParams, BenchmarkResult> runBenchmarksEmbedded(ActionPlan actionPlan) {
+        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
 
-                out.startBenchmark(params);
-                out.println("");
-                etaBeforeBenchmark();
-                out.println("# Fork: N/A, test runs in the existing VM");
+        for (Action action : actionPlan.getActions()) {
+            BenchmarkParams params = action.getParams();
+            ActionMode mode = action.getMode();
+
+            String opts = Utils.join(params.getJvmArgs(), " ").trim();
+            String realOpts = Utils.join(ManagementFactory.getRuntimeMXBean().getInputArguments(), " ").trim();
+            if (opts.isEmpty()) {
+                opts = "<none>";
+            }
+            if (realOpts.isEmpty()) {
+                realOpts = "<none>";
             }
 
-            BenchmarkResult r = null;
-            try {
-                switch (mode) {
-                    case WARMUP: {
-                        runBenchmark(params);
-                        out.println("");
-                        break;
-                    }
-                    case WARMUP_MEASUREMENT:
-                    case MEASUREMENT: {
-                        r = runBenchmark(params);
-                        results.put(params, r);
-                        break;
-                    }
-                    default:
-                        throw new IllegalStateException("Unknown mode: " + mode);
+            Version.printVersion(out);
+            out.println("# VM invoker: " + params.getJvm());
+            out.println("# VM invoker: " + params.getJvm());
+            out.println("# VM options: " + realOpts + (opts.equals(realOpts) ? "" : " *** WARNING: some JVM options are ignored in non-forked runs ***"));
 
-                }
-            } catch (BenchmarkException be) {
-                out.println("<failure>");
-                out.println("");
-                out.println(Utils.throwableToString(be.getCause()));
-                out.println("");
+            out.startBenchmark(params);
+            out.println("");
+            etaBeforeBenchmark();
+            out.println("# Fork: N/A, test runs in the existing VM");
 
-                if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
-                    throw be;
+            final List<IterationResult> res = new ArrayList<IterationResult>();
+
+            IterationResultAcceptor acceptor = new IterationResultAcceptor() {
+                @Override
+                public void accept(IterationResult iterationData) {
+                    res.add(iterationData);
                 }
+            };
+
+            doSingle(params, mode, acceptor);
+
+            if (!res.isEmpty()) {
+                BenchmarkResult br = new BenchmarkResult(res);
+                results.put(params, br);
+                out.endBenchmark(br);
             }
 
-            if (!forked) {
-                etaAfterBenchmark(params);
-                out.endBenchmark(r);
+            etaAfterBenchmark(params);
+        }
+        return results;
+    }
+
+    private void doSingle(BenchmarkParams params, ActionMode mode, IterationResultAcceptor acceptor) {
+        try {
+            switch (mode) {
+                case WARMUP: {
+                    runBenchmark(params, null);
+                    out.println("");
+                    break;
+                }
+                case WARMUP_MEASUREMENT:
+                case MEASUREMENT: {
+                    runBenchmark(params, acceptor);
+                    break;
+                }
+                default:
+                    throw new IllegalStateException("Unknown mode: " + mode);
+
+            }
+        } catch (BenchmarkException be) {
+            out.println("<failure>");
+            out.println("");
+            out.println(Utils.throwableToString(be.getCause()));
+            out.println("");
+
+            if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {
+                throw be;
             }
         }
-
-        return results;
     }
 
     protected void etaAfterBenchmark(BenchmarkParams params) {
@@ -206,7 +225,7 @@ abstract class BaseRunner {
         return String.format("%s%02d:%02d:%02d", (days > 0) ? days + " days, " : "", hrs, mins, secs);
     }
 
-    BenchmarkResult runBenchmark(BenchmarkParams benchParams) {
+    void runBenchmark(BenchmarkParams benchParams, IterationResultAcceptor acceptor) {
         BenchmarkHandler handler = null;
         try {
             String target = benchParams.generatedBenchmark();
@@ -216,7 +235,7 @@ abstract class BaseRunner {
 
             handler = BenchmarkHandlers.getInstance(out, clazz, method, benchParams, options);
 
-            return runBenchmark(benchParams, handler);
+            runBenchmark(benchParams, handler, acceptor);
         } catch (BenchmarkException be) {
             throw be;
         } catch (Throwable ex) {
@@ -228,9 +247,7 @@ abstract class BaseRunner {
         }
     }
 
-    protected BenchmarkResult runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler) {
-        List<IterationResult> allResults = new ArrayList<IterationResult>();
-
+    protected void runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler, IterationResultAcceptor acceptor) {
         // warmup
         IterationParams wp = benchParams.getWarmup();
         for (int i = 1; i <= wp.getCount(); i++) {
@@ -259,14 +276,10 @@ abstract class BaseRunner {
             boolean isLastIteration = (i == mp.getCount());
             IterationResult iterData = handler.runIteration(benchParams, mp, isLastIteration);
             out.iterationResult(benchParams, mp, i, iterData);
-            allResults.add(iterData);
-        }
 
-        if (!allResults.isEmpty()) {
-            return new BenchmarkResult(allResults);
-        } else {
-            // should be ignored in the caller
-            return null;
+            if (acceptor != null) {
+                acceptor.accept(iterData);
+            }
         }
     }
 

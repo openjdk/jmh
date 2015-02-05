@@ -24,11 +24,9 @@
  */
 package org.openjdk.jmh.runner;
 
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.Multimap;
 
 import java.io.IOException;
 
@@ -48,14 +46,40 @@ class ForkedRunner extends BaseRunner {
         ActionPlan actionPlan = link.requestPlan();
 
         try {
-            Multimap<BenchmarkParams,BenchmarkResult> res = runBenchmarks(true, actionPlan);
-            link.pushResults(res);
+            IterationResultAcceptor acceptor = new IterationResultAcceptor() {
+                @Override
+                public void accept(IterationResult iterationData) {
+                    try {
+                        link.pushResults(iterationData);
+                    } catch (IOException e) {
+                        // link had probably failed
+                        throw new SavedIOException(e);
+                    }
+                }
+            };
+
+            runBenchmarksForked(actionPlan, acceptor);
         } catch (BenchmarkException be) {
             link.pushException(be);
+        } catch (SavedIOException ioe) {
+            throw ioe.getCause();
         }
 
         out.flush();
         out.close();
+    }
+
+    static class SavedIOException extends RuntimeException {
+        private final IOException e;
+
+        public SavedIOException(IOException e) {
+            super(e);
+            this.e = e;
+        }
+
+        public IOException getCause() {
+            return e;
+        }
     }
 
 }

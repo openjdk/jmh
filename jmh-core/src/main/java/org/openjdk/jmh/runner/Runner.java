@@ -32,6 +32,7 @@ import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
@@ -528,7 +529,7 @@ public class Runner extends BaseRunner {
                 Multimap<BenchmarkParams, BenchmarkResult> res;
                 switch (r.getType()) {
                     case EMBEDDED:
-                        res = runBenchmarks(false, r);
+                        res = runBenchmarksEmbedded(r);
                         break;
                     case FORKED:
                         res = runSeparate(r);
@@ -649,22 +650,24 @@ public class Runner extends BaseRunner {
                     }
                 }
 
-                Multimap<BenchmarkParams, BenchmarkResult> result = doFork(server, commandString, stdOut, stdErr, printOut, printErr);
+                List<IterationResult> result = doFork(server, commandString, stdOut, stdErr, printOut, printErr);
+                if (!result.isEmpty()) {
+                    BenchmarkResult br = new BenchmarkResult(result);
 
-                if (!profilers.isEmpty()) {
-                    out.print("# Processing profiler results: ");
-                    for (ExternalProfiler profiler : profilers) {
-                        out.print(profiler.label() + " ");
-                        for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
-                            for (BenchmarkResult r : result.values()) {
-                                r.addBenchmarkResult(profR);
+                    if (!profilers.isEmpty()) {
+                        out.print("# Processing profiler results: ");
+                        for (ExternalProfiler profiler : profilers) {
+                            out.print(profiler.label() + " ");
+                            for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
+                                br.addBenchmarkResult(profR);
                             }
                         }
+                        out.println("");
                     }
-                    out.println("");
+
+                    results.put(params, br);
                 }
 
-                results.merge(result);
                 etaAfterBenchmark(params);
                 out.println("");
             }
@@ -689,7 +692,7 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private Multimap<BenchmarkParams, BenchmarkResult> doFork(BinaryLinkServer reader, String[] commandString,
+    private List<IterationResult> doFork(BinaryLinkServer reader, String[] commandString,
                                                               File stdOut, File stdErr, boolean printOut, boolean printErr) {
         FileOutputStream fosErr = null;
         FileOutputStream fosOut = null;

@@ -24,14 +24,12 @@
  */
 package org.openjdk.jmh.runner.link;
 
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.Multimap;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -161,7 +159,7 @@ public final class BinaryLinkClient {
         }
     }
 
-    public void pushResults(Multimap<BenchmarkParams, BenchmarkResult> res) throws IOException {
+    public void pushResults(IterationResult res) throws IOException {
         pushFrame(new ResultsFrame(res));
     }
 
