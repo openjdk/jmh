@@ -33,6 +33,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.Multimap;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -47,6 +49,8 @@ import java.util.Arrays;
 
 public final class BinaryLinkClient {
 
+    private static final int BUFFER_SIZE = Integer.getInteger("jmh.link.bufferSize", 64*1024);
+
     private final Object lock;
 
     private final Socket clientSocket;
@@ -60,8 +64,13 @@ public final class BinaryLinkClient {
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.lock = new Object();
         this.clientSocket = new Socket(hostName, hostPort);
-        this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
-        this.ois = new ObjectInputStream(clientSocket.getInputStream());
+
+        // Initialize the OOS first, and flush, letting the other party read the stream header.
+        this.oos = new ObjectOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(), BUFFER_SIZE));
+        this.oos.flush();
+
+        this.ois = new ObjectInputStream(new BufferedInputStream(clientSocket.getInputStream(), BUFFER_SIZE));
+
         this.streamErr = new ForwardingPrintStream(OutputFrame.Type.ERR);
         this.streamOut = new ForwardingPrintStream(OutputFrame.Type.OUT);
         this.outputFormat = (OutputFormat) Proxy.newProxyInstance(

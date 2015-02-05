@@ -36,6 +36,8 @@ import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.Utils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -60,6 +62,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * client at any given point of time.
  */
 public final class BinaryLinkServer {
+
+    private static final int BUFFER_SIZE = Integer.getInteger("jmh.link.bufferSize", 64*1024);
 
     private final Options opts;
     private final OutputFormat out;
@@ -259,14 +263,17 @@ public final class BinaryLinkServer {
             this.socket = socket;
             this.is = socket.getInputStream();
             this.os = socket.getOutputStream();
+
+            // eager OOS initialization, let the other party read the stream header
+            oos = new ObjectOutputStream(new BufferedOutputStream(os, BUFFER_SIZE));
+            oos.flush();
         }
 
         @Override
         public void run() {
             try {
                 // late OIS initialization, otherwise we'll block reading the header
-                ois = new ObjectInputStream(is);
-                oos = new ObjectOutputStream(os);
+                ois = new ObjectInputStream(new BufferedInputStream(is, BUFFER_SIZE));
 
                 Object obj;
                 while ((obj = ois.readObject()) != null) {
