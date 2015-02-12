@@ -43,8 +43,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,6 +76,28 @@ public class StackProfiler implements InternalProfiler {
             "Attach Listener"
     };
 
+    /** Whether or not filter the packages. */
+    private static final Boolean EXCLUDE_PACKAGES = Boolean.getBoolean("jmh.stack.excludePackages");
+
+    /**
+     * Requested excluded packages from system properties. This is expected to be a comma (,) separated list
+     * of the fully qualified package names to be excluded. Every stack line that starts with the provided
+     * patterns will be excluded. If the default package exclusion is enabled, the list would be added.
+     */
+    private static final Set<String> EXCLUDE_PACKAGES_NAMES;
+
+    static {
+        if (EXCLUDE_PACKAGES) {
+            String userNames = System.getProperty("jmh.stack.excludePackageNames");
+            EXCLUDE_PACKAGES_NAMES = new HashSet<String>(
+                    (userNames != null) ?
+                        Arrays.asList(userNames.split(",")) :
+                        Arrays.asList("java.", "javax.", "sun.", "sunw.", "com.sun.", "org.openjdk.jmh."));
+        } else {
+            EXCLUDE_PACKAGES_NAMES = Collections.emptySet();
+        }
+    }
+
     private volatile SamplingTask samplingTask;
 
     @Override
@@ -85,7 +109,7 @@ public class StackProfiler implements InternalProfiler {
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         samplingTask.stop();
-        return Arrays.asList(new StackResult(samplingTask.stacks));
+        return Collections.singleton(new StackResult(samplingTask.stacks));
     }
 
     @Override
@@ -133,14 +157,28 @@ public class StackProfiler implements InternalProfiler {
                         }
                     }
 
+                    //   - Discard everything that matches excluded patterns from the top of the stack
+                    //   - Get the remaining number of stack lines and build the stack record
+
                     StackTraceElement[] stack = info.getStackTrace();
-                    String[] stackLines = new String[Math.min(stack.length, SAMPLE_STACK_LINES)];
-                    for (int i = 0; i < Math.min(stack.length, SAMPLE_STACK_LINES); i++) {
-                        stackLines[i] =
-                                stack[i].getClassName() +
-                                        '.' + stack[i].getMethodName()
-                                        + (SAMPLE_LINE ? ":" + stack[i].getLineNumber() : "");
+                    List<String> stackLines = new ArrayList<String>();
+
+                    for (StackTraceElement l : stack) {
+                        String className = l.getClassName();
+                        if (!isExcluded(className)) {
+                            stackLines.add(className + '.' + l.getMethodName()
+                                    + (SAMPLE_LINE ? ":" + l.getLineNumber() : ""));
+
+                            if (stackLines.size() >= SAMPLE_STACK_LINES) {
+                                break;
+                            }
+                        }
                     }
+
+                    if (stackLines.isEmpty()) {
+                        stackLines.add("<stack is empty, everything is filtered?>");
+                    }
+
                     Thread.State state = info.getThreadState();
                     stacks.get(state).add(new StackRecord(stackLines));
                 }
@@ -166,14 +204,22 @@ public class StackProfiler implements InternalProfiler {
             }
         }
 
+        private boolean isExcluded(String className) {
+            for (String p : EXCLUDE_PACKAGES_NAMES) {
+                if (className.startsWith(p)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private static class StackRecord implements Serializable {
         private static final long serialVersionUID = -1829626661894754733L;
 
-        public final String[] lines;
+        public final List<String> lines;
 
-        private StackRecord(String[] lines) {
+        private StackRecord(List<String> lines) {
             this.lines = lines;
         }
 
@@ -184,13 +230,12 @@ public class StackProfiler implements InternalProfiler {
 
             StackRecord that = (StackRecord) o;
 
-            if (!Arrays.equals(lines, that.lines)) return false;
-            return true;
+            return lines.equals(that.lines);
         }
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(lines);
+            return lines.hashCode();
         }
     }
 
@@ -260,20 +305,26 @@ public class StackProfiler implements InternalProfiler {
 
                     int totalDisplayed = 0;
                     for (StackRecord s : Multisets.countHighest(stateStacks, SAMPLE_TOP_STACKS)) {
-                        String[] lines = s.lines;
-                        if (lines.length > 0) {
+                        List<String> lines = s.lines;
+                        if (!lines.isEmpty()) {
                             totalDisplayed += stateStacks.count(s);
-                            builder.append(String.format("%5.1f%% %5.1f%% %s%n", stateStacks.count(s) * 100.0 / totalSize, stateStacks.count(s) * 100.0 / stateStacks.size(), lines[0]));
-                            if (lines.length > 1) {
-                                for (int i = 1; i < lines.length; i++) {
-                                    builder.append(String.format("%13s %s%n", "", lines[i]));
+                            builder.append(String.format("%5.1f%% %5.1f%% %s%n",
+                                stateStacks.count(s) * 100.0 / totalSize,
+                                stateStacks.count(s) * 100.0 / stateStacks.size(),
+                                lines.get(0)));
+                            if (lines.size() > 1) {
+                                for (int i = 1; i < lines.size(); i++) {
+                                    builder.append(String.format("%13s %s%n", "", lines.get(i)));
                                 }
                                 builder.append("\n");
                             }
                         }
                     }
                     if (isSignificant((stateStacks.size() - totalDisplayed), stateStacks.size())) {
-                        builder.append(String.format("%5.1f%% %5.1f%% %s%n", (stateStacks.size() - totalDisplayed) * 100.0 / totalSize, (stateStacks.size() - totalDisplayed) * 100.0 / stateStacks.size(), "<other>"));
+                        builder.append(String.format("%5.1f%% %5.1f%% %s%n",
+                            (stateStacks.size() - totalDisplayed) * 100.0 / totalSize,
+                            (stateStacks.size() - totalDisplayed) * 100.0 / stateStacks.size(),
+                            "<other>"));
                     }
 
                     builder.append("\n");
@@ -284,7 +335,7 @@ public class StackProfiler implements InternalProfiler {
 
         // returns true, if part is >0.1% of total
         private boolean isSignificant(long part, long total) {
-            // returns true if part*100.0/total is greater ot equals to 0.1
+            // returns true if part*100.0/total is greater or equals to 0.1
             return part * 1000 >= total;
         }
 
