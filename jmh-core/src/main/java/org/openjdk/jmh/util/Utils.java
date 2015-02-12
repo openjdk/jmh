@@ -26,10 +26,13 @@ package org.openjdk.jmh.util;
 
 import sun.misc.Unsafe;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,6 +42,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -262,4 +266,58 @@ public class Utils {
                 (isWindows() ? ".exe" : "");
     }
 
+    /**
+     * Gets PID of the current JVM.
+     *
+     * @return PID.
+     */
+    public static long getPid() {
+        final String DELIM = "@";
+
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+
+        if (name != null) {
+            int idx = name.indexOf(DELIM);
+
+            if (idx != -1) {
+                String str = name.substring(0, name.indexOf(DELIM));
+                try {
+                    return Long.valueOf(str);
+                } catch (NumberFormatException nfe) {
+                    throw new IllegalStateException("Process PID is not a number: " + str);
+                }
+            }
+        }
+        throw new IllegalStateException("Unsupported PID format: " + name);
+    }
+
+    public static Collection<String> tryWith(String... cmd) {
+        Collection<String> messages = new ArrayList<String>();
+        try {
+            Process p = Runtime.getRuntime().exec(cmd);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            // drain streams, else we might lock up
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
+
+            errDrainer.start();
+            outDrainer.start();
+
+            int err = p.waitFor();
+
+            errDrainer.join();
+            outDrainer.join();
+
+            if (err > 0) {
+                messages.add(baos.toString());
+            }
+        } catch (IOException ex) {
+            return Collections.singleton(ex.getMessage());
+        } catch (InterruptedException ex) {
+            throw new IllegalStateException(ex);
+        }
+        return messages;
+    }
 }

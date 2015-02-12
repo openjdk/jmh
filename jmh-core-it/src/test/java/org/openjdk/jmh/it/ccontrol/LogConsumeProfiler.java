@@ -58,7 +58,7 @@ public class LogConsumeProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, File stdOut, File stdErr) {
+    public Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, long pid, File stdOut, File stdErr) {
         try {
             return Arrays.asList(
                     new LogConsumeResult("out", FileUtils.readAllLines(stdOut)),

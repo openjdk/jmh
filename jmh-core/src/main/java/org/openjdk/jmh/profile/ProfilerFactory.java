@@ -48,6 +48,7 @@ public class ProfilerFactory {
         profs.add(StackProfiler.class);
         profs.add(LinuxPerfProfiler.class);
         profs.add(LinuxPerfAsmProfiler.class);
+        profs.add(WinPerfAsmProfiler.class);
 
         // Try to discover more profilers through the SPI
         profs.addAll(getDiscoveredProfilers());

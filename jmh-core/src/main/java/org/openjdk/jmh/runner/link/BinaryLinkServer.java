@@ -74,6 +74,7 @@ public final class BinaryLinkServer {
     private final AtomicReference<List<IterationResult>> results;
     private final AtomicReference<BenchmarkException> exception;
     private final AtomicReference<ActionPlan> plan;
+    private volatile long clientPid;
 
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
@@ -196,6 +197,10 @@ public final class BinaryLinkServer {
         return Integer.getInteger("jmh.link.port", 0);
     }
 
+    public long getClientPid() {
+        return clientPid;
+    }
+
     private final class Acceptor extends Thread {
 
         private final ServerSocket server;
@@ -283,6 +288,9 @@ public final class BinaryLinkServer {
                     if (obj instanceof InfraFrame) {
                         handleInfra((InfraFrame) obj);
                     }
+                    if (obj instanceof HandshakeInitFrame) {
+                        handleHandshake((HandshakeInitFrame) obj);
+                    }
                     if (obj instanceof ResultsFrame) {
                         handleResults((ResultsFrame) obj);
                     }
@@ -332,12 +340,14 @@ public final class BinaryLinkServer {
             results.get().add(obj.getRes());
         }
 
+        private void handleHandshake(HandshakeInitFrame obj) throws IOException {
+            clientPid = obj.getPid();
+            oos.writeObject(new HandshakeResponseFrame(opts));
+            oos.flush();
+        }
+
         private void handleInfra(InfraFrame req) throws IOException {
             switch (req.getType()) {
-                case OPTIONS_REQUEST:
-                    oos.writeObject(new OptionsFrame(opts));
-                    oos.flush();
-                    break;
                 case ACTION_PLAN_REQUEST:
                     oos.writeObject(new ActionPlanFrame(plan.get()));
                     oos.flush();

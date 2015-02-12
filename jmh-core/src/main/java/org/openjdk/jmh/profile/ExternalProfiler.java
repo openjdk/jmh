@@ -72,7 +72,7 @@ public interface ExternalProfiler extends Profiler {
      * @param stdErr file containing the standard error from the benchmark JVM
      * @return profiler results
      */
-    Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, File stdOut, File stdErr);
+    Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, long pid, File stdOut, File stdErr);
 
     /**
      * If target VM communicates with profiler with standard output, this method

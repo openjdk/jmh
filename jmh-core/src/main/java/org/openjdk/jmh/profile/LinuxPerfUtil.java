@@ -24,13 +24,9 @@
  */
 package org.openjdk.jmh.profile;
 
-import org.openjdk.jmh.util.InputStreamDrainer;
+import org.openjdk.jmh.util.Utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 public class LinuxPerfUtil {
 
@@ -39,41 +35,10 @@ public class LinuxPerfUtil {
     public static final Collection<String> FAIL_MSGS;
 
     static {
-        FAIL_MSGS = tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
+        FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
         IS_SUPPORTED = FAIL_MSGS.isEmpty();
 
-        Collection<String> delay = tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
+        Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
         IS_DELAYED = delay.isEmpty();
     }
-
-    private static Collection<String> tryWith(String... cmd) {
-        Collection<String> messages = new ArrayList<String>();
-        try {
-            Process p = Runtime.getRuntime().exec(cmd);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
-
-            errDrainer.start();
-            outDrainer.start();
-
-            int err = p.waitFor();
-
-            errDrainer.join();
-            outDrainer.join();
-
-            if (err > 0) {
-                messages.add(baos.toString());
-            }
-        } catch (IOException ex) {
-            return Collections.singleton(ex.getMessage());
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException(ex);
-        }
-        return messages;
-    }
-
 }

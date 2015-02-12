@@ -30,6 +30,7 @@ import org.openjdk.jmh.runner.BenchmarkException;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -133,13 +134,13 @@ public final class BinaryLinkClient {
         }
     }
 
-    public Options requestOptions() throws IOException, ClassNotFoundException {
+    public Options handshake() throws IOException, ClassNotFoundException {
         synchronized (lock) {
-            pushFrame(new InfraFrame(InfraFrame.Type.OPTIONS_REQUEST));
+            pushFrame(new HandshakeInitFrame(Utils.getPid()));
 
             Object reply = readFrame();
-            if (reply instanceof OptionsFrame) {
-                return (((OptionsFrame) reply).getOpts());
+            if (reply instanceof HandshakeResponseFrame) {
+                return (((HandshakeResponseFrame) reply).getOpts());
             } else {
                 throw new IllegalStateException("Got the erroneous reply: " + reply);
             }

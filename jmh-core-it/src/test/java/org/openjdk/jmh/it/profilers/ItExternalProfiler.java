@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.it.profilers;
 
+import junit.framework.Assert;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.results.Result;
@@ -51,7 +52,8 @@ public class ItExternalProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, File stdOut, File stdErr) {
+    public Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, long pid, File stdOut, File stdErr) {
+        Assert.assertFalse("Forked VM PID is not 0", pid == 0);
         return Collections.emptyList();
     }
 

@@ -81,7 +81,7 @@ public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams params, File stdOut, File stdErr) {
+    public Collection<? extends Result> afterTrial(BenchmarkParams params, long pid, File stdOut, File stdErr) {
         PerfResult result = process(stdOut, stdErr);
         return Collections.singleton(result);
     }

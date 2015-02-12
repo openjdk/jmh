@@ -652,13 +652,15 @@ public class Runner extends BaseRunner {
 
                 List<IterationResult> result = doFork(server, commandString, stdOut, stdErr, printOut, printErr);
                 if (!result.isEmpty()) {
+                    long pid = server.getClientPid();
+
                     BenchmarkResult br = new BenchmarkResult(result);
 
                     if (!profilers.isEmpty()) {
                         out.print("# Processing profiler results: ");
                         for (ExternalProfiler profiler : profilers) {
                             out.print(profiler.label() + " ");
-                            for (Result profR : profiler.afterTrial(params, stdOut, stdErr)) {
+                            for (Result profR : profiler.afterTrial(params, pid, stdOut, stdErr)) {
                                 br.addBenchmarkResult(profR);
                             }
                         }

@@ -71,7 +71,7 @@ class ForkedMain {
                 BinaryLinkClient link = new BinaryLinkClient(hostName, hostPort);
                 linkRef.set(link);
 
-                Options options = link.requestOptions();
+                Options options = link.handshake();
 
                 // dump outputs into binary link
                 nakedErr = System.err;

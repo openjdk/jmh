@@ -40,8 +40,6 @@ class InfraFrame implements Serializable {
     }
 
     public enum Type {
-        OPTIONS_REQUEST,
         ACTION_PLAN_REQUEST,
     }
-
 }
