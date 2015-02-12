@@ -55,12 +55,16 @@ public class JMHSample_10_ConstantFold {
      * can cleverly optimize it. In our case, that means we can move the computation
      * outside of the internal JMH loop.
      *
-     * This can be prevented by always reading the inputs from the state, computing
-     * the result based on that state, and the follow the rules to prevent DCE.
+     * This can be prevented by always reading the inputs from the non-final instance fields
+     * of @State objects, computing the result based on those values, and the follow the
+     * rules to prevent DCE.
      */
 
     // IDEs will say "Oh, you can convert this field to local variable". Don't. Trust. Them.
     private double x = Math.PI;
+
+    // IDEs will probably also say "Look, it could be final". Don't. Trust. Them. Either.
+    private final double wrongX = Math.PI;
 
     @Benchmark
     public double baseline() {
@@ -69,9 +73,15 @@ public class JMHSample_10_ConstantFold {
     }
 
     @Benchmark
-    public double measureWrong() {
+    public double measureWrong_1() {
         // This is wrong: the source is predictable, and computation is foldable.
         return Math.log(Math.PI);
+    }
+
+    @Benchmark
+    public double measureWrong_2() {
+        // This is wrong: the source is predictable, and computation is foldable.
+        return Math.log(wrongX);
     }
 
     @Benchmark
@@ -83,7 +93,7 @@ public class JMHSample_10_ConstantFold {
     /*
      * ============================== HOW TO RUN THIS TEST: ====================================
      *
-     * You can see the unrealistically fast calculation in with measureWrong(),
+     * You can see the unrealistically fast calculation in with measureWrong_*(),
      * while realistic measurement with measureRight().
      *
      * You can run this test:
