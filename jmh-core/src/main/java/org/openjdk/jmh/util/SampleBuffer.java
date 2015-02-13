@@ -33,18 +33,19 @@ public class SampleBuffer implements Serializable {
     private static final long serialVersionUID = 6124923853916845327L;
 
     private static final int PRECISION_BITS = 10;
+    private static final int BUCKETS = Long.SIZE - PRECISION_BITS;
 
     private final int[][] hdr;
 
     public SampleBuffer() {
-        hdr = new int[64][];
-        for (int p = 0; p < 64; p++) {
+        hdr = new int[BUCKETS][];
+        for (int p = 0; p < BUCKETS; p++) {
             hdr[p] = new int[1 << PRECISION_BITS];
         }
     }
 
     public void half() {
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < hdr.length; i++) {
             for (int j = 0; j < hdr[i].length; j++) {
                 int nV = hdr[i][j] / 2;
                 if (nV != 0) { // prevent halving to zero
@@ -55,8 +56,7 @@ public class SampleBuffer implements Serializable {
     }
 
     public void add(long sample) {
-        int msb = 64 - Long.numberOfLeadingZeros(sample);
-        int bucket = Math.max(0, msb - PRECISION_BITS);
+        int bucket = Math.max(0, BUCKETS - Long.numberOfLeadingZeros(sample));
         int subBucket = (int) (sample >> bucket);
         hdr[bucket][subBucket]++;
     }
