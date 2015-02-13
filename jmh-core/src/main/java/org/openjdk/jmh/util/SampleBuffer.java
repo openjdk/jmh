@@ -39,17 +39,17 @@ public class SampleBuffer implements Serializable {
 
     public SampleBuffer() {
         hdr = new int[BUCKETS][];
-        for (int p = 0; p < BUCKETS; p++) {
-            hdr[p] = new int[1 << PRECISION_BITS];
-        }
     }
 
     public void half() {
         for (int i = 0; i < hdr.length; i++) {
-            for (int j = 0; j < hdr[i].length; j++) {
-                int nV = hdr[i][j] / 2;
-                if (nV != 0) { // prevent halving to zero
-                    hdr[i][j] = nV;
+            int[] bucket = hdr[i];
+            if (bucket != null) {
+                for (int j = 0; j < bucket.length; j++) {
+                    int nV = bucket[j] / 2;
+                    if (nV != 0) { // prevent halving to zero
+                        bucket[j] = nV;
+                    }
                 }
             }
         }
@@ -58,15 +58,24 @@ public class SampleBuffer implements Serializable {
     public void add(long sample) {
         int bucket = Math.max(0, BUCKETS - Long.numberOfLeadingZeros(sample));
         int subBucket = (int) (sample >> bucket);
-        hdr[bucket][subBucket]++;
+
+        int[] b = hdr[bucket];
+        if (b == null) {
+            b = new int[1 << PRECISION_BITS];
+            hdr[bucket] = b;
+        }
+        b[subBucket]++;
     }
 
     public Statistics getStatistics(double multiplier) {
         MultisetStatistics stat = new MultisetStatistics();
         for (int i = 0; i < hdr.length; i++) {
-            for (int j = 0; j < hdr[i].length; j++) {
-                long ns = (long) j << i;
-                stat.addValue(multiplier * ns, hdr[i][j]);
+            int[] bucket = hdr[i];
+            if (bucket != null) {
+                for (int j = 0; j < bucket.length; j++) {
+                    long ns = (long) j << i;
+                    stat.addValue(multiplier * ns, bucket[j]);
+                }
             }
         }
         return stat;
@@ -74,8 +83,16 @@ public class SampleBuffer implements Serializable {
 
     public void addAll(SampleBuffer other) {
         for (int i = 0; i < other.hdr.length; i++) {
-            for (int j = 0; j < other.hdr[i].length; j++) {
-                hdr[i][j] += other.hdr[i][j];
+            int[] otherBucket = other.hdr[i];
+            if (otherBucket != null) {
+                int[] myBucket = hdr[i];
+                if (myBucket == null) {
+                    myBucket = new int[1 << PRECISION_BITS];
+                    hdr[i] = myBucket;
+                }
+                for (int j = 0; j < otherBucket.length; j++) {
+                    myBucket[j] += otherBucket[j];
+                }
             }
         }
     }
