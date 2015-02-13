@@ -75,14 +75,17 @@ public class Main {
                 } else {
                     runner.list();
                 }
+                System.exit(1);
             } catch (RunnerException e) {
                 System.err.print("ERROR: ");
                 e.printStackTrace(System.err);
+                System.exit(1);
             }
 
         } catch (CommandLineOptionException e) {
             System.err.println("Error parsing command line:");
             System.err.println(" " + e.getMessage());
+            System.exit(1);
         }
     }
 
