@@ -592,6 +592,9 @@ public class Runner extends BaseRunner {
                 printErr &= prof.allowPrintErr();
             }
 
+            List<ExternalProfiler> profilersRev = new ArrayList<ExternalProfiler>(profilers);
+            Collections.reverse(profilersRev);
+
             boolean forcePrint = options.verbosity().orElse(Defaults.VERBOSITY).equalsOrHigherThan(VerboseMode.EXTRA);
             printOut = forcePrint || printOut;
             printErr = forcePrint || printErr;
@@ -656,9 +659,9 @@ public class Runner extends BaseRunner {
 
                     BenchmarkResult br = new BenchmarkResult(result);
 
-                    if (!profilers.isEmpty()) {
+                    if (!profilersRev.isEmpty()) {
                         out.print("# Processing profiler results: ");
-                        for (ExternalProfiler profiler : profilers) {
+                        for (ExternalProfiler profiler : profilersRev) {
                             out.print(profiler.label() + " ");
                             for (Result profR : profiler.afterTrial(params, pid, stdOut, stdErr)) {
                                 br.addBenchmarkResult(profR);

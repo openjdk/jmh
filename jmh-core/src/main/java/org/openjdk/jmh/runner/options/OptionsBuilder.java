@@ -36,9 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class OptionsBuilder implements Options, ChainedOptionsBuilder {
@@ -181,7 +179,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private Set<Class<? extends Profiler>> profilers = new LinkedHashSet<Class<? extends Profiler>>();
+    private List<Class<? extends Profiler>> profilers = new ArrayList<Class<? extends Profiler>>();
 
     @Override
     public ChainedOptionsBuilder addProfiler(Class<? extends Profiler> prof) {
@@ -190,7 +188,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     }
 
     @Override
-    public Set<Class<? extends Profiler>> getProfilers() {
+    public List<Class<? extends Profiler>> getProfilers() {
         if (otherOptions != null) {
             profilers.addAll(otherOptions.getProfilers());
         }

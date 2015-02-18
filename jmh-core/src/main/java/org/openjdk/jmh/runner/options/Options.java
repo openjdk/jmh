@@ -74,9 +74,10 @@ public interface Options extends Serializable {
 
     /**
      * Profilers to use for the run.
+     * Profilers will start in the order specified by collection, and will stop in the reverse order.
      * @return profilers to use; empty collection if no profilers are required
      */
-    Collection<Class<? extends Profiler>> getProfilers();
+    List<Class<? extends Profiler>> getProfilers();
 
     /**
      * How verbose should we be?

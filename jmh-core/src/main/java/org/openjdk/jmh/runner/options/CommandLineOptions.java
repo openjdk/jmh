@@ -42,9 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,7 +65,7 @@ public class CommandLineOptions implements Options {
     private final Optional<Boolean> gcEachIteration;
     private final Optional<VerboseMode> verbose;
     private final Optional<Boolean> failOnError;
-    private final Set<Class<? extends Profiler>> profilers = new LinkedHashSet<Class<? extends Profiler>>();
+    private final List<Class<? extends Profiler>> profilers = new ArrayList<Class<? extends Profiler>>();
     private final Optional<TimeUnit> timeUnit;
     private final Optional<Integer> opsPerInvocation;
     private final List<String> regexps = new ArrayList<String>();
@@ -672,7 +670,7 @@ public class CommandLineOptions implements Options {
     }
 
     @Override
-    public Set<Class<? extends Profiler>> getProfilers() {
+    public List<Class<? extends Profiler>> getProfilers() {
         return profilers;
     }
 

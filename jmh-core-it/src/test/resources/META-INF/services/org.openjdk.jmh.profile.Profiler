@@ -1,2 +1,8 @@
 org.openjdk.jmh.it.profilers.ItInternalProfiler
 org.openjdk.jmh.it.profilers.ItExternalProfiler
+org.openjdk.jmh.it.profilers.order.InternalProfiler1
+org.openjdk.jmh.it.profilers.order.InternalProfiler2
+org.openjdk.jmh.it.profilers.order.InternalProfiler3
+org.openjdk.jmh.it.profilers.order.ExternalProfiler1
+org.openjdk.jmh.it.profilers.order.ExternalProfiler2
+org.openjdk.jmh.it.profilers.order.ExternalProfiler3

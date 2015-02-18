@@ -38,6 +38,7 @@ import org.openjdk.jmh.util.Utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,10 +60,14 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
 
     protected final OutputFormat out;
 
-    private final List<InternalProfiler> registeredProfilers;
+    private final List<InternalProfiler> profilers;
+    private final List<InternalProfiler> profilersRev;
 
     public BaseBenchmarkHandler(OutputFormat out, final Class<?> clazz, Options options, BenchmarkParams executionParams) {
-        this.registeredProfilers = createProfilers(options);
+        this.profilers = createProfilers(options);
+        this.profilersRev = new ArrayList<InternalProfiler>(profilers);
+        Collections.reverse(profilersRev);
+
         this.instances = new ThreadLocal<Object>() {
             @Override
             protected Object initialValue() {
@@ -204,22 +209,22 @@ abstract class BaseBenchmarkHandler implements BenchmarkHandler {
         }
     }
 
-    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iterationResults) {
-        // stop profilers
-        for (InternalProfiler prof : registeredProfilers) {
+    protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
+        // start profilers
+        for (InternalProfiler prof : profilers) {
             try {
-                iterationResults.addResults(prof.afterIteration(benchmarkParams, iterationParams));
+                prof.beforeIteration(benchmarkParams, iterationParams);
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }
         }
     }
 
-    protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        // start profilers
-        for (InternalProfiler prof : registeredProfilers) {
+    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iterationResults) {
+        // stop profilers
+        for (InternalProfiler prof : profilersRev) {
             try {
-                prof.beforeIteration(benchmarkParams, iterationParams);
+                iterationResults.addResults(prof.afterIteration(benchmarkParams, iterationParams));
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }
