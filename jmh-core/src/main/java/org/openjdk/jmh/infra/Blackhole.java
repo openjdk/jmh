@@ -261,7 +261,14 @@ public class Blackhole extends BlackholeL4 {
          */
 
         IllegalStateException iae = new IllegalStateException("Blackholes should not be instantiated directly.");
-        for (StackTraceElement el : iae.getStackTrace()) {
+        StackTraceElement[] stackTrace = iae.getStackTrace();
+
+        // Somebody disabled the stack traces? Oh well.
+        if (stackTrace.length == 0) {
+            return;
+        }
+
+        for (StackTraceElement el : stackTrace) {
             // Either we instantiate from the JMH generated code,
             // or our user is a tricky bastard, and gets what's coming to him.
             if (el.getMethodName().startsWith("_jmh_tryInit_") &&
