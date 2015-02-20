@@ -116,7 +116,7 @@ abstract class BaseRunner {
             doSingle(params, mode, acceptor);
 
             if (!res.isEmpty()) {
-                BenchmarkResult br = new BenchmarkResult(res);
+                BenchmarkResult br = new BenchmarkResult(params, res);
                 results.put(params, br);
                 out.endBenchmark(br);
             }

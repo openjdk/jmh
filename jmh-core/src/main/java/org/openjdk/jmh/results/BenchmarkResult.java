@@ -48,22 +48,10 @@ public class BenchmarkResult implements Serializable {
     private final Multimap<String, Result> benchmarkResults;
     private final BenchmarkParams params;
 
-    public BenchmarkResult(Collection<IterationResult> data) {
+    public BenchmarkResult(BenchmarkParams params, Collection<IterationResult> data) {
         this.benchmarkResults = new HashMultimap<String, Result>();
         this.iterationResults = data;
-
-        BenchmarkParams myParams = null;
-
-        for (IterationResult ir : data) {
-            BenchmarkParams params = ir.getBenchmarkParams();
-
-            if (myParams != null && !params.equals(myParams)) {
-                throw new IllegalStateException("Aggregating the iteration results from different benchmarks");
-            } else {
-                myParams = params;
-            }
-        }
-        this.params = myParams;
+        this.params = params;
     }
 
     public void addBenchmarkResult(Result r) {

@@ -95,9 +95,9 @@ public class ResultFormatTest {
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     iterResults.add(res);
                 }
-                benchmarkResults.add(new BenchmarkResult(iterResults));
+                benchmarkResults.add(new BenchmarkResult(params, iterResults));
             }
-            results.add(new RunResult(benchmarkResults));
+            results.add(new RunResult(params, benchmarkResults));
         }
         return results;
     }

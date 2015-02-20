@@ -102,10 +102,8 @@ public class IterationResult implements Serializable {
     }
 
     public Result getPrimaryResult() {
-        Result next = primaryResults.iterator().next();
-
         @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = next.getThreadAggregator();
+        Aggregator<Result> aggregator = primaryResults.get(0).getThreadAggregator();
         return aggregator.aggregate(primaryResults);
     }
 

@@ -556,7 +556,7 @@ public class Runner extends BaseRunner {
     private SortedSet<RunResult> mergeRunResults(Multimap<BenchmarkParams, BenchmarkResult> results) {
         SortedSet<RunResult> result = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
         for (BenchmarkParams key : results.keys()) {
-            result.add(new RunResult(results.get(key)));
+            result.add(new RunResult(key, results.get(key)));
         }
         return result;
     }
@@ -657,7 +657,7 @@ public class Runner extends BaseRunner {
                 if (!result.isEmpty()) {
                     long pid = server.getClientPid();
 
-                    BenchmarkResult br = new BenchmarkResult(result);
+                    BenchmarkResult br = new BenchmarkResult(params, result);
 
                     if (!profilersRev.isEmpty()) {
                         out.print("# Processing profiler results: ");
@@ -677,7 +677,7 @@ public class Runner extends BaseRunner {
                 out.println("");
             }
 
-            out.endBenchmark(new RunResult(results.get(params)).getAggregatedResult());
+            out.endBenchmark(new RunResult(params, results.get(params)).getAggregatedResult());
 
         } catch (IOException e) {
             results.clear();

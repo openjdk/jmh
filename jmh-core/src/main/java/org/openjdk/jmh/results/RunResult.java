@@ -43,22 +43,9 @@ public class RunResult implements Serializable {
     private final Collection<BenchmarkResult> benchmarkResults;
     private final BenchmarkParams params;
 
-    public RunResult(Collection<BenchmarkResult> data) {
+    public RunResult(BenchmarkParams params, Collection<BenchmarkResult> data) {
         this.benchmarkResults = data;
-
-        BenchmarkParams myParams = null;
-
-        for (BenchmarkResult br : data) {
-            BenchmarkParams params = br.getParams();
-
-            if (myParams != null && !params.equals(myParams)) {
-                throw new IllegalStateException("Aggregating the benchmark results from different benchmarks");
-            } else {
-                myParams = params;
-            }
-        }
-
-        this.params = myParams;
+        this.params = params;
     }
 
     public Collection<BenchmarkResult> getBenchmarkResults() {
@@ -90,7 +77,7 @@ public class RunResult implements Serializable {
                 results.add(ir);
             }
         }
-        BenchmarkResult result = new BenchmarkResult(results);
+        BenchmarkResult result = new BenchmarkResult(params, results);
         for (BenchmarkResult br : benchmarkResults) {
             for (String k : br.getBenchmarkResults().keys()) {
                 for (Result r : br.getBenchmarkResults().get(k)) {
