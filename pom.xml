@@ -30,7 +30,7 @@ questions.
     <groupId>org.openjdk.jmh</groupId>
     <artifactId>jmh-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.6.1</version>
     <name>Java Microbenchmark Harness Parent</name>
 
     <description>
