@@ -233,7 +233,7 @@ public class BenchmarkGenerator {
      */
     private Multimap<ClassInfo, MethodInfo> buildAnnotatedSet(GeneratorSource source) {
         // Transitively close the hierarchy:
-        //   If superclass has a @GMB method, then all subclasses also have it.
+        //   If superclass has a @Benchmark method, then all subclasses also have it.
         //   We skip the generated classes, which we had probably generated during the previous rounds
         //   of processing. Abstract classes are of no interest for us either.
 
@@ -1092,9 +1092,9 @@ public class BenchmarkGenerator {
 
     private String emitCall(MethodInfo method, StateObjectHandler states) {
         if ("void".equalsIgnoreCase(method.getReturnType())) {
-            return states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getGMBArgList(method) + ")";
+            return states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getBenchmarkArgList(method) + ")";
         } else {
-            return states.getImplicit("blackhole").localIdentifier + ".consume(" + states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getGMBArgList(method) + "))";
+            return states.getImplicit("blackhole").localIdentifier + ".consume(" + states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getBenchmarkArgList(method) + "))";
         }
     }
 

@@ -44,7 +44,7 @@ public class CompilerControlDontInlineTest {
     }
 
     @Test
-    public void testGMB() throws RunnerException {
+    public void testBenchmark() throws RunnerException {
         boolean exists = false;
         for (String s : CompilerHints.defaultList().get()) {
             if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("dummyTest")) {

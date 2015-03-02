@@ -64,7 +64,7 @@ public class APGeneratorSource implements GeneratorSource {
             }
         });
 
-        // Need to do a few rollovers to find all classes that have @GMB-annotated methods in their
+        // Need to do a few rollovers to find all classes that have @Benchmark-annotated methods in their
         // subclasses. This is mostly due to some of the nested classes not discoverable at once,
         // when we need to discover the enclosing class first. With the potentially non-zero nesting
         // depth, we need to do a few rounds. Hopefully we will just do a single stride in most

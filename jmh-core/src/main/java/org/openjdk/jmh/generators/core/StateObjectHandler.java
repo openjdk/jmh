@@ -360,7 +360,7 @@ class StateObjectHandler {
         }
     }
 
-    public String getGMBArgList(MethodInfo methodInfo) {
+    public String getBenchmarkArgList(MethodInfo methodInfo) {
         return getArgList(args.get(methodInfo.getName()));
     }
 

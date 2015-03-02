@@ -57,7 +57,7 @@ import java.util.concurrent.TimeUnit;
 public class JMHSample_28_BlackholeHelpers {
 
     /**
-     * Sometimes you need the black hole not in @GMB method, but in
+     * Sometimes you need the black hole not in @Benchmark method, but in
      * helper methods, because you want to pass it through to the concrete
      * implementation which is instantiated in helper methods. In this case,
      * you can request the black hole straight in the helper method signature.

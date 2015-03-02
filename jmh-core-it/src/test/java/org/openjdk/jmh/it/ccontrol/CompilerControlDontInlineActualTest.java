@@ -55,7 +55,7 @@ public class CompilerControlDontInlineActualTest {
     }
 
     @Test
-    public void testGMB() throws RunnerException {
+    public void testBenchmark() throws RunnerException {
         for (Mode mode : Mode.values()) {
             if (mode == Mode.All) continue;
 

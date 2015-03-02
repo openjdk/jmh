@@ -26,8 +26,8 @@ package org.openjdk.jmh.it.ccontrol;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
@@ -44,7 +44,7 @@ public class CompilerControlInlineTest {
     }
 
     @Test
-    public void testGMB() throws RunnerException {
+    public void testBenchmark() throws RunnerException {
         boolean exists = false;
         for (String s : CompilerHints.defaultList().get()) {
             if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("dummyTest")) {
