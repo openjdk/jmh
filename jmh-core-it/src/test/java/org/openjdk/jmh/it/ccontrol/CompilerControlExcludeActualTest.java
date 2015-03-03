@@ -64,7 +64,7 @@ public class CompilerControlExcludeActualTest {
                     .mode(mode)
                     .shouldFailOnError(true)
                     .addProfiler(LogConsumeProfiler.class)
-                    .measurementIterations(mode == Mode.SingleShotTime ? 100000 : 1)
+                    .measurementIterations(mode == Mode.SingleShotTime ? 10000 : 1)
                     .measurementTime(TimeValue.seconds(5))
                     .warmupIterations(0)
                     .forks(1)
