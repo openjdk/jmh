@@ -48,11 +48,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class CompileTest {
 
     private static final String GENERATOR_TYPE = System.getProperty("jmh.ct.generator", "notset");
+
+    private static final String SRC_PREFIX = "SRC: ";
 
     public static void assertFail(Class<?> klass) {
         InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
@@ -69,12 +72,16 @@ public class CompileTest {
             Assert.fail("Should have failed.");
         }
 
+        List<String> testErrors = new ArrayList<String>();
         boolean contains = false;
         for (String e : destination.getErrors()) {
+            if (!e.startsWith(SRC_PREFIX)) {
+                testErrors.add(e);
+                contains |= e.contains(error);
+            }
             System.err.println(e);
-            contains |= e.contains(error);
         }
-        Assert.assertTrue("Failure message should contain \"" + error + "\", but was \"" + destination.getErrors() + "\"", contains);
+        Assert.assertTrue("Failure message should contain \"" + error + "\", but was \"" + testErrors + "\"", contains);
     }
 
     public static void assertOK(Class<?> klass) {
@@ -144,7 +151,7 @@ public class CompileTest {
 
         if (!success) {
             for (JavaSourceFromString src : sources) {
-                destination.printError(src.getCharContent(false).toString());
+                destination.printError(SRC_PREFIX + src.getCharContent(false).toString());
             }
             for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
                 destination.printError(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
@@ -183,7 +190,7 @@ public class CompileTest {
 
             if (!success) {
                 for (JavaSourceFromString src : sources) {
-                    destination.printError(src.getCharContent(false).toString());
+                    destination.printError(SRC_PREFIX + src.getCharContent(false).toString());
                 }
                 for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
                     destination.printError(diagnostic.getKind() + " at line " + diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
