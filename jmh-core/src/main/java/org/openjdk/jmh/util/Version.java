@@ -75,7 +75,7 @@ public class Version {
             long diff = (System.currentTimeMillis() - parse.getTime()) / TimeUnit.DAYS.toMillis(1);
             if (diff > 0) {
                 pw.print(String.format("%d days ago", diff));
-                if (diff > 30) {
+                if (diff > 90) {
                     pw.print(", please consider updating!");
                 }
             } else {
