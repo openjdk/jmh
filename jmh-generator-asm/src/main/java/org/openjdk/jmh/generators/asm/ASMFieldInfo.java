@@ -74,6 +74,11 @@ class ASMFieldInfo extends FieldVisitor implements FieldInfo {
     }
 
     @Override
+    public boolean isFinal() {
+        return (access & Opcodes.ACC_FINAL) > 0;
+    }
+
+    @Override
     public <T extends Annotation> T getAnnotation(Class<T> annClass) {
         AnnotationInvocationHandler handler = annotations.get(annClass.getCanonicalName());
         if (handler == null) {

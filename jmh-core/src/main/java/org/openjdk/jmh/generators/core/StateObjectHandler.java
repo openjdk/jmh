@@ -221,6 +221,12 @@ class StateObjectHandler {
                     fi);
         }
 
+        if (fi.isFinal()) {
+            throw new GenerationException(
+                    "@" + Param.class.getSimpleName() + " annotation is not acceptable on final fields.",
+                    fi);
+        }
+
         if (BenchmarkGeneratorUtils.getAnnSyntax(fi.getDeclaringClass(), State.class) == null) {
             throw new GenerationException(
                     "@" + Param.class.getSimpleName() + " annotation should be placed in @" + State.class.getSimpleName() +

@@ -63,4 +63,8 @@ public interface FieldInfo extends MetadataInfo {
      */
     boolean isStatic();
 
+    /**
+     * @return true, if field is final
+     */
+    boolean isFinal();
 }

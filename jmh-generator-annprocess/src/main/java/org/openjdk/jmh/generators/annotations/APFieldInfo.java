@@ -66,6 +66,11 @@ class APFieldInfo extends APMetadataInfo implements FieldInfo {
     }
 
     @Override
+    public boolean isFinal() {
+        return ve.getModifiers().contains(Modifier.FINAL);
+    }
+
+    @Override
     public <T extends Annotation> T getAnnotation(Class<T> annClass) {
         return ve.getAnnotation(annClass);
     }

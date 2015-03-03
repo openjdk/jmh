@@ -22,56 +22,29 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.reflection;
+package org.openjdk.jmh.ct.params.invalid.finals;
 
-import org.openjdk.jmh.generators.core.ClassInfo;
-import org.openjdk.jmh.generators.core.FieldInfo;
+import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.ct.CompileTest;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+@State(Scope.Benchmark)
+public class LongTest {
 
-class RFFieldInfo implements FieldInfo {
-    private final ClassInfo declaringClass;
-    private final Field f;
+    @Param("0")
+    public final long param = 0;
 
-    public RFFieldInfo(ClassInfo declaringClass, Field f) {
-        this.declaringClass = declaringClass;
-        this.f = f;
+    @Benchmark
+    public void test() {
+
     }
 
-    @Override
-    public ClassInfo getDeclaringClass() {
-        return declaringClass;
+    @Test
+    public void compileTest() {
+        CompileTest.assertFail(this.getClass(), "final fields");
     }
 
-    @Override
-    public String getName() {
-        return f.getName();
-    }
-
-    @Override
-    public ClassInfo getType() {
-        return new RFClassInfo(f.getType());
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-        return f.getAnnotation(annClass);
-    }
-
-    @Override
-    public boolean isPublic() {
-        return Modifier.isPublic(f.getModifiers());
-    }
-
-    @Override
-    public boolean isStatic() {
-        return Modifier.isStatic(f.getModifiers());
-    }
-
-    @Override
-    public boolean isFinal() {
-        return Modifier.isFinal(f.getModifiers());
-    }
 }
