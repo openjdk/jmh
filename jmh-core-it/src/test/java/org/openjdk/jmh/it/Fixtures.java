@@ -35,7 +35,7 @@ public class Fixtures {
     }
 
     public static String getTestMask(Class<?> klass) {
-        return ".*" + klass.getCanonicalName().replaceAll("org\\.openjdk\\.jmh\\.it", "").replaceAll("\\.",".*\\\\.") + ".*";
+        return klass.getCanonicalName();
     }
 
     public static void work() {
