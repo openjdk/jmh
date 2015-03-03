@@ -215,12 +215,6 @@ class StateObjectHandler {
     }
 
     private void checkParam(FieldInfo fi) {
-        if (fi.isStatic()) {
-            throw new GenerationException(
-                    "@" + Param.class.getSimpleName() + " annotation is not acceptable on static fields.",
-                    fi);
-        }
-
         if (fi.isFinal()) {
             throw new GenerationException(
                     "@" + Param.class.getSimpleName() + " annotation is not acceptable on final fields.",

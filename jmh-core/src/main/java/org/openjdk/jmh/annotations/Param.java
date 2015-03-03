@@ -33,11 +33,11 @@ import java.lang.annotation.Target;
 /**
  * <p>Marks the configurable parameter in the benchmark.</p>
  *
- * <p>{@link Param} fields should be non-final instance fields,
+ * <p>{@link Param} fields should be non-final fields,
  * and should only reside in in {@link State} classes. JMH will inject
  * the value into the annotated field before any {@link Setup} method
  * is called. It is <b>not</b> guaranteed the field value would be accessible
- * in any instance initializer or any constructor of {@link State}.</p>
+ * in any initializer or any constructor of {@link State}.</p>
  *
  * <p>Parameters are acceptable on any primitive type, primitive wrapper type,
  * a String, or an Enum. The annotation value is given in String, and will be
