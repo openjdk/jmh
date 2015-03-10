@@ -32,6 +32,7 @@ import org.openjdk.jmh.util.TreeMultimap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,17 +43,19 @@ import java.util.TreeMap;
 public class IterationResult implements Serializable {
     private static final long serialVersionUID = 960397066774710819L;
 
+    private static final Multimap<String, Result> EMPTY_MAP = new TreeMultimap<String, Result>();
+    private static final List<Result> EMPTY_LIST = Collections.emptyList();
+
     private final BenchmarkParams benchmarkParams;
     private final IterationParams params;
-    private final List<Result> primaryResults;
-    private final Multimap<String, Result> secondaryResults;
-    private String scoreUnit;
+    private Collection<Result> primaryResults;
+    private Multimap<String, Result> secondaryResults;
 
     public IterationResult(BenchmarkParams benchmarkParams, IterationParams params) {
         this.benchmarkParams = benchmarkParams;
         this.params = params;
-        this.primaryResults = new ArrayList<Result>();
-        this.secondaryResults = new TreeMultimap<String, Result>();
+        this.primaryResults = EMPTY_LIST;
+        this.secondaryResults = EMPTY_MAP;
     }
 
     public void addResults(Collection<? extends Result> rs) {
@@ -63,17 +66,22 @@ public class IterationResult implements Serializable {
 
     public void addResult(Result result) {
         if (result.getRole().isPrimary()) {
-            if (scoreUnit == null) {
-                scoreUnit = result.getScoreUnit();
+            if (primaryResults == EMPTY_LIST) {
+                primaryResults = Collections.singleton(result);
+            } else if (primaryResults.size() == 1) {
+                List<Result> newResults = new ArrayList<Result>(2);
+                newResults.addAll(primaryResults);
+                newResults.add(result);
+                primaryResults = newResults;
             } else {
-                if (!scoreUnit.equals(result.getScoreUnit())) {
-                    throw new IllegalStateException("Adding the result with another score unit!");
-                }
+                primaryResults.add(result);
             }
-            primaryResults.add(result);
         }
 
         if (result.getRole().isSecondary()) {
+            if (secondaryResults == EMPTY_MAP) {
+                secondaryResults = new TreeMultimap<String, Result>();
+            }
             secondaryResults.put(result.getLabel(), result);
         }
     }
@@ -103,7 +111,7 @@ public class IterationResult implements Serializable {
 
     public Result getPrimaryResult() {
         @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = primaryResults.get(0).getThreadAggregator();
+        Aggregator<Result> aggregator = primaryResults.iterator().next().getThreadAggregator();
         return aggregator.aggregate(primaryResults);
     }
 
@@ -116,7 +124,7 @@ public class IterationResult implements Serializable {
     }
 
     public String getScoreUnit() {
-        return scoreUnit;
+        return getPrimaryResult().getScoreUnit();
     }
 
 }

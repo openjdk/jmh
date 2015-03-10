@@ -22,29 +22,49 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner.link;
+package org.openjdk.jmh.util;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+/**
+ * Calculate statistics with just a single value.
+ */
+public class SingletonStatistics extends AbstractStatistics {
 
-class ClassConventions {
+    private static final long serialVersionUID = -90642978235578197L;
 
-    private static final Map<Method, String> METHOD_NAMES = new HashMap<Method, String>();
+    private final double value;
 
-    public static String getMethodName(Method m) {
-        String result = METHOD_NAMES.get(m);
-        if (result == null) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(m.getName());
-            for (Class<?> paramType : m.getParameterTypes()) {
-                builder.append(paramType.getName());
-                builder.append(",");
-            }
-            result = builder.toString();
-            METHOD_NAMES.put(m, result);
-        }
-        return result;
+    public SingletonStatistics(double value) {
+        this.value = value;
+    }
+
+    @Override
+    public double getMax() {
+        return value;
+    }
+
+    @Override
+    public double getMin() {
+        return value;
+    }
+
+    @Override
+    public long getN() {
+        return 1;
+    }
+
+    @Override
+    public double getSum() {
+        return value;
+    }
+
+    @Override
+    public double getPercentile(double rank) {
+        return value;
+    }
+
+    @Override
+    public double getVariance() {
+        return Double.NaN;
     }
 
 }

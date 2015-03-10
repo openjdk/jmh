@@ -48,6 +48,7 @@ import java.util.Arrays;
 
 public final class BinaryLinkClient {
 
+    private static final int RESET_EACH = Integer.getInteger("jmh.link.resetEach", 100);
     private static final int BUFFER_SIZE = Integer.getInteger("jmh.link.bufferSize", 64*1024);
 
     private final Object lock;
@@ -59,6 +60,7 @@ public final class BinaryLinkClient {
     private final ForwardingPrintStream streamOut;
     private final OutputFormat outputFormat;
     private volatile boolean failed;
+    private int resetToGo;
 
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.lock = new Object();
@@ -91,13 +93,21 @@ public final class BinaryLinkClient {
         }
 
         // It is important to reset the OOS to avoid garbage buildup in internal identity
-        // tables, and as much as important to flush the stream to let the other party
-        // know we pushed something out.
+        // tables. However, we cannot do that after each frame since the huge referenced
+        // objects like benchmark and iteration parameters will be duplicated on the receiver
+        // side. This is why we reset only each RESET_EACH frames.
+        //
+        // It is as much as important to flush the stream to let the other party know we
+        // pushed something out.
 
         synchronized (lock) {
             try {
+                if (resetToGo-- < 0) {
+                    oos.reset();
+                    resetToGo = RESET_EACH;
+                }
+
                 oos.writeObject(frame);
-                oos.reset();
                 oos.flush();
             } catch (IOException e) {
                 failed = true;

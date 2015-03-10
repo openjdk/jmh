@@ -24,7 +24,8 @@
  */
 package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.util.ListStatistics;
+import org.openjdk.jmh.util.Deduplicator;
+import org.openjdk.jmh.util.SingletonStatistics;
 import org.openjdk.jmh.util.Statistics;
 
 import java.io.PrintWriter;
@@ -36,6 +37,7 @@ import java.io.StringWriter;
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
     private static final long serialVersionUID = -7332879501317733312L;
+    private static final Deduplicator<String> DEDUP = new Deduplicator<String>();
 
     protected final ResultRole role;
     protected final String label;
@@ -45,16 +47,14 @@ public abstract class Result<T extends Result<T>> implements Serializable {
 
     public Result(ResultRole role, String label, Statistics s, String unit, AggregationPolicy policy) {
         this.role = role;
-        this.label = label;
-        this.unit = unit;
+        this.label = DEDUP.dedup(label);
+        this.unit = DEDUP.dedup(unit);
         this.statistics = s;
         this.policy = policy;
     }
 
     protected static Statistics of(double v) {
-        ListStatistics s = new ListStatistics();
-        s.addValue(v);
-        return s;
+        return new SingletonStatistics(v);
     }
 
     /**
