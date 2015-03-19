@@ -328,9 +328,7 @@ public final class BinaryLinkServer {
         }
 
         private void handleResultMetadata(ResultMetadataFrame obj) {
-            if (!metadata.compareAndSet(null, obj.getMD())) {
-                throw new IllegalStateException("Metadata had been already received");
-            }
+            metadata.set(obj.getMD());
         }
 
         private void handleOutput(OutputFrame obj) {
