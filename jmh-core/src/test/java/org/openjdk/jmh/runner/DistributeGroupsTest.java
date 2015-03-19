@@ -32,7 +32,7 @@ public class DistributeGroupsTest {
 
     @Test
     public void test1() {
-        ThreadParams[] controls = BaseBenchmarkHandler.distributeThreads(1, new int[]{1});
+        ThreadParams[] controls = BenchmarkHandler.distributeThreads(1, new int[]{1});
 
         Assert.assertEquals(1, controls.length);
 
@@ -59,7 +59,7 @@ public class DistributeGroupsTest {
 
     @Test
     public void test2() {
-        ThreadParams[] controls = BaseBenchmarkHandler.distributeThreads(2, new int[]{1});
+        ThreadParams[] controls = BenchmarkHandler.distributeThreads(2, new int[]{1});
 
         Assert.assertEquals(2, controls.length);
 
@@ -97,7 +97,7 @@ public class DistributeGroupsTest {
     @Test
     public void test3() {
         // First "subgroup" is ignored
-        ThreadParams[] controls = BaseBenchmarkHandler.distributeThreads(2, new int[]{0, 1});
+        ThreadParams[] controls = BenchmarkHandler.distributeThreads(2, new int[]{0, 1});
 
         Assert.assertEquals(2, controls.length);
 
@@ -134,7 +134,7 @@ public class DistributeGroupsTest {
 
     @Test
     public void test4() {
-        ThreadParams[] controls = BaseBenchmarkHandler.distributeThreads(2, new int[]{1, 1});
+        ThreadParams[] controls = BenchmarkHandler.distributeThreads(2, new int[]{1, 1});
 
         Assert.assertEquals(2, controls.length);
 
@@ -172,7 +172,7 @@ public class DistributeGroupsTest {
 
     @Test
     public void test5() {
-        ThreadParams[] controls = BaseBenchmarkHandler.distributeThreads(3, new int[]{1, 2});
+        ThreadParams[] controls = BenchmarkHandler.distributeThreads(3, new int[]{1, 2});
 
         Assert.assertEquals(3, controls.length);
 
@@ -220,7 +220,7 @@ public class DistributeGroupsTest {
 
     @Test
     public void test6() {
-        ThreadParams[] controls = BaseBenchmarkHandler.distributeThreads(6, new int[]{1, 2});
+        ThreadParams[] controls = BenchmarkHandler.distributeThreads(6, new int[]{1, 2});
 
         Assert.assertEquals(6, controls.length);
 

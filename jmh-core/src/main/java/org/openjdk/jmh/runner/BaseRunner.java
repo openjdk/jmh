@@ -31,7 +31,6 @@ import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
 import org.openjdk.jmh.util.Utils;
@@ -39,7 +38,6 @@ import org.openjdk.jmh.util.Version;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -228,13 +226,7 @@ abstract class BaseRunner {
     void runBenchmark(BenchmarkParams benchParams, IterationResultAcceptor acceptor) {
         BenchmarkHandler handler = null;
         try {
-            String target = benchParams.generatedBenchmark();
-            int lastDot = target.lastIndexOf('.');
-            Class<?> clazz = ClassUtils.loadClass(target.substring(0, lastDot));
-            Method method = BenchmarkHandlers.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
-
-            handler = BenchmarkHandlers.getInstance(out, clazz, method, benchParams, options);
-
+            handler = new BenchmarkHandler(out, options, benchParams);
             runBenchmark(benchParams, handler, acceptor);
         } catch (BenchmarkException be) {
             throw be;
