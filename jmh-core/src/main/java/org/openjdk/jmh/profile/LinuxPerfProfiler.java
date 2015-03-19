@@ -31,6 +31,7 @@ import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,7 +49,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler {
+public class LinuxPerfProfiler implements ExternalProfiler {
+
+    private static final boolean IS_SUPPORTED;
+    private static final boolean IS_DELAYED;
+    private static final Collection<String> FAIL_MSGS;
+
+    static {
+        FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
+        IS_SUPPORTED = FAIL_MSGS.isEmpty();
+
+        Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
+        IS_DELAYED = delay.isEmpty();
+    }
 
     /** Delay collection for given time; -1 to detect automatically */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perf.delayMs", -1);

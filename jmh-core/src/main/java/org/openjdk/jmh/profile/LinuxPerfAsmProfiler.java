@@ -55,12 +55,24 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
      */
     private static final String[] EVENTS = System.getProperty("jmh.perfasm.events", "cycles,instructions").split(",");
 
+    private static final boolean IS_SUPPORTED;
+    private static final boolean IS_DELAYED;
+    private static final Collection<String> FAIL_MSGS;
+
+    static {
+        FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
+        IS_SUPPORTED = FAIL_MSGS.isEmpty();
+
+        Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
+        IS_DELAYED = delay.isEmpty();
+    }
+
     @Override
     public boolean checkSupport(List<String> msgs) {
-        if (LinuxPerfUtil.IS_SUPPORTED) {
+        if (IS_SUPPORTED) {
             return true;
         } else {
-            msgs.addAll(LinuxPerfUtil.FAIL_MSGS);
+            msgs.addAll(FAIL_MSGS);
             return false;
         }
     }

@@ -47,6 +47,7 @@ public class ProfilerFactory {
         profs.add(HotspotThreadProfiler.class);
         profs.add(StackProfiler.class);
         profs.add(LinuxPerfProfiler.class);
+        profs.add(LinuxPerfNormProfiler.class);
         profs.add(LinuxPerfAsmProfiler.class);
         profs.add(WinPerfAsmProfiler.class);
 
