@@ -641,7 +641,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateThroughput(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public BenchmarkTaskResult " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -726,7 +726,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
             writer.println(ident(3) + "res.measuredOps /= batchSize;");
 
-            writer.println(ident(3) + "HandlerResult results = new HandlerResult(res.allOps, res.measuredOps);");
+            writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
             writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
@@ -769,7 +769,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateAverageTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public BenchmarkTaskResult " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -852,7 +852,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
             writer.println(ident(3) + "res.measuredOps /= batchSize;");
 
-            writer.println(ident(3) + "HandlerResult results = new HandlerResult(res.allOps, res.measuredOps);");
+            writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
             writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
@@ -907,7 +907,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateSampleTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public BenchmarkTaskResult " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -988,7 +988,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.allOps /= batchSize;");
             writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
 
-            writer.println(ident(3) + "HandlerResult results = new HandlerResult(res.allOps, res.measuredOps);");
+            writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
             writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
@@ -1051,7 +1051,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateSingleShotTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
+        writer.println(ident(1) + "public BenchmarkTaskResult " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -1085,7 +1085,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "long totalOps = opsPerInv;");
 
-            writer.println(ident(3) + "HandlerResult results = new HandlerResult(totalOps, totalOps);");
+            writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(totalOps, totalOps);");
             writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
