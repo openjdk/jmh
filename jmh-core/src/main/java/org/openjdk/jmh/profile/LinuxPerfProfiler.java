@@ -27,6 +27,7 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.FileUtils;
@@ -81,7 +82,7 @@ public class LinuxPerfProfiler extends LinuxPerfUtil implements ExternalProfiler
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams params, long pid, File stdOut, File stdErr) {
+    public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         PerfResult result = process(stdOut, stdErr);
         return Collections.singleton(result);
     }

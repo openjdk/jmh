@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner.link;
 
+import org.openjdk.jmh.results.BenchmarkResultMetaData;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
@@ -176,6 +177,10 @@ public final class BinaryLinkClient {
 
     public void pushException(BenchmarkException error) throws IOException {
         pushFrame(new ExceptionFrame(error));
+    }
+
+    public void pushResultMetadata(BenchmarkResultMetaData res) throws IOException {
+        pushFrame(new ResultMetadataFrame(res));
     }
 
     public PrintStream getOutStream() {

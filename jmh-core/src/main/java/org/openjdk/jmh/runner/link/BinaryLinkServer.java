@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner.link;
 
+import org.openjdk.jmh.results.BenchmarkResultMetaData;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.ActionPlan;
 import org.openjdk.jmh.runner.BenchmarkException;
@@ -72,6 +73,7 @@ public final class BinaryLinkServer {
     private final Acceptor acceptor;
     private final AtomicReference<Handler> handler;
     private final AtomicReference<List<IterationResult>> results;
+    private final AtomicReference<BenchmarkResultMetaData> metadata;
     private final AtomicReference<BenchmarkException> exception;
     private final AtomicReference<ActionPlan> plan;
     private volatile long clientPid;
@@ -100,6 +102,7 @@ public final class BinaryLinkServer {
         acceptor.start();
 
         handler = new AtomicReference<Handler>();
+        metadata = new AtomicReference<BenchmarkResultMetaData>();
         results = new AtomicReference<List<IterationResult>>(new ArrayList<IterationResult>());
         exception = new AtomicReference<BenchmarkException>();
         plan = new AtomicReference<ActionPlan>();
@@ -145,6 +148,10 @@ public final class BinaryLinkServer {
         } else {
             throw new IllegalStateException("Acquiring the null result");
         }
+    }
+
+    public BenchmarkResultMetaData getMetadata() {
+        return metadata.getAndSet(null);
     }
 
     public void setPlan(ActionPlan actionPlan) {
@@ -300,6 +307,9 @@ public final class BinaryLinkServer {
                     if (obj instanceof OutputFrame) {
                         handleOutput((OutputFrame) obj);
                     }
+                    if (obj instanceof ResultMetadataFrame) {
+                        handleResultMetadata((ResultMetadataFrame) obj);
+                    }
                     if (obj instanceof FinishingFrame) {
                         // close the streams
                         break;
@@ -314,6 +324,12 @@ public final class BinaryLinkServer {
                 }
             } finally {
                 close();
+            }
+        }
+
+        private void handleResultMetadata(ResultMetadataFrame obj) {
+            if (!metadata.compareAndSet(null, obj.getMD())) {
+                throw new IllegalStateException("Metadata had been already received");
             }
         }
 

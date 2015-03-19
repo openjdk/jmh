@@ -54,4 +54,12 @@ public class BenchmarkTaskResult {
     public Collection<Result> getResults() {
         return results;
     }
+
+    public long getAllOps() {
+        return allOperations;
+    }
+
+    public long getMeasuredOps() {
+        return measuredOperations;
+    }
 }

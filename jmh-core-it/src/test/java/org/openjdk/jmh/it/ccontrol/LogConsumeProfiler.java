@@ -28,6 +28,7 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.FileUtils;
@@ -58,7 +59,7 @@ public class LogConsumeProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, long pid, File stdOut, File stdErr) {
+    public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         try {
             return Arrays.asList(
                     new LogConsumeResult("out", FileUtils.readAllLines(stdOut)),

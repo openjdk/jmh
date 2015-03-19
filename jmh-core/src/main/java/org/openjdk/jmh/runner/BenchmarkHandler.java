@@ -31,7 +31,7 @@ import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.BenchmarkTaskResult;
-import org.openjdk.jmh.results.IterationResult;
+import org.openjdk.jmh.results.HandlerResult;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
@@ -282,7 +282,7 @@ class BenchmarkHandler {
         }
     }
 
-    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iterationResults) {
+    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, HandlerResult iterationResults) {
         // stop profilers
         for (InternalProfiler prof : profilersRev) {
             try {
@@ -324,7 +324,7 @@ class BenchmarkHandler {
      * @param last    Should this iteration considered to be the last
      * @return IterationResult
      */
-    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
+    public HandlerResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
         int numThreads = benchmarkParams.getThreads();
         TimeValue runtime = params.getTime();
 
@@ -332,7 +332,7 @@ class BenchmarkHandler {
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
         // result object to accumulate the results in
-        IterationResult iterationResults = new IterationResult(benchmarkParams, params);
+        HandlerResult iterationResults = new HandlerResult(benchmarkParams, params);
 
         InfraControl control = new InfraControl(benchmarkParams, params, preSetupBarrier, preTearDownBarrier, last);
 
@@ -417,7 +417,10 @@ class BenchmarkHandler {
         // all the results ready without the exceptions.
         for (Future<BenchmarkTaskResult> fr : results.values()) {
             try {
-                iterationResults.addResults(fr.get().getResults());
+                BenchmarkTaskResult btr = fr.get();
+                iterationResults.addAllOps(btr.getAllOps());
+                iterationResults.addMeasuredOps(btr.getMeasuredOps());
+                iterationResults.addResults(btr.getResults());
             } catch (InterruptedException ex) {
                 throw new IllegalStateException("Impossible to be here");
             } catch (ExecutionException ex) {

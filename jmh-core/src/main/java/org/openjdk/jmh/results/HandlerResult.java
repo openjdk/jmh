@@ -22,13 +22,48 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.results.BenchmarkResultMetaData;
-import org.openjdk.jmh.results.IterationResult;
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 
-interface IterationResultAcceptor {
-    void accept(IterationResult iterationData);
+import java.util.Collection;
 
-    void acceptMeta(BenchmarkResultMetaData md);
+public class HandlerResult {
+
+    private final IterationResult res;
+    private volatile long allOps;
+    private volatile long measuredOps;
+
+    public HandlerResult(BenchmarkParams benchmarkParams, IterationParams params) {
+        this.res = new IterationResult(benchmarkParams, params);
+    }
+
+    public void add(Result r) {
+        res.addResult(r);
+    }
+
+    public IterationResult getResult() {
+        return res;
+    }
+
+    public void addResults(Collection<? extends Result> rs) {
+        res.addResults(rs);
+    }
+
+    public void addMeasuredOps(long v) {
+        measuredOps += v;
+    }
+
+    public void addAllOps(long v) {
+        allOps += v;
+    }
+
+    public long getMeasuredOps() {
+        return measuredOps;
+    }
+
+    public long getAllOps() {
+        return allOps;
+    }
 }

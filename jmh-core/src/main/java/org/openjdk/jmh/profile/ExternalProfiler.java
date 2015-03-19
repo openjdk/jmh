@@ -25,6 +25,7 @@
 package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 
 import java.io.File;
@@ -67,12 +68,12 @@ public interface ExternalProfiler extends Profiler {
      * Run this code after the trial is done. This method will execute
      * after benchmark JVM had stopped.
      *
-     * @param benchmarkParams benchmark parameters used for current launch
+     * @param br benchmark result that was the result of the trial
      * @param stdOut file containing the standard output from the benchmark JVM
      * @param stdErr file containing the standard error from the benchmark JVM
      * @return profiler results
      */
-    Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, long pid, File stdOut, File stdErr);
+    Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr);
 
     /**
      * If target VM communicates with profiler with standard output, this method

@@ -47,11 +47,24 @@ public class BenchmarkResult implements Serializable {
     private final Collection<IterationResult> iterationResults;
     private final Multimap<String, Result> benchmarkResults;
     private final BenchmarkParams params;
+    private final BenchmarkResultMetaData metadata;
 
     public BenchmarkResult(BenchmarkParams params, Collection<IterationResult> data) {
+        this(params, data, null);
+    }
+
+    public BenchmarkResult(BenchmarkParams params, Collection<IterationResult> data, BenchmarkResultMetaData md) {
+        this.metadata = md;
         this.benchmarkResults = new HashMultimap<String, Result>();
         this.iterationResults = data;
         this.params = params;
+    }
+
+    /**
+     * @return returns the benchmark metadata, "null" otherwise
+     */
+    public BenchmarkResultMetaData getMetadata() {
+        return metadata;
     }
 
     public void addBenchmarkResult(Result r) {

@@ -25,8 +25,11 @@
 package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
+import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.BenchmarkResultMetaData;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.FileUtils;
@@ -227,8 +230,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams params, long pid, File stdOut, File stdErr) {
-        PerfResult result = processAssembly(params, stdOut, stdErr);
+    public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
+        PerfResult result = processAssembly(br, stdOut, stdErr);
 
         return Collections.singleton(result);
     }
@@ -263,7 +266,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
      */
     protected abstract String perfBinaryExtension();
 
-    private PerfResult processAssembly(BenchmarkParams params, File stdOut, File stdErr) {
+    private PerfResult processAssembly(BenchmarkResult br, File stdOut, File stdErr) {
         /**
          * 1. Parse binary events.
          */
@@ -296,9 +299,16 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         long delayNs;
         if (DELAY_MSEC == -1) { // not set
-            delayNs = params.getWarmup().getCount() *
-                params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS)
-                + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
+            BenchmarkResultMetaData md = br.getMetadata();
+            if (md != null) {
+                // try to ask harness itself:
+                delayNs = TimeUnit.MILLISECONDS.toNanos(md.getMeasurementTime() - md.getStartTime());
+            } else {
+                // metadata is not available, let's make a guess:
+                IterationParams wp = br.getParams().getWarmup();
+                delayNs = wp.getCount() * wp.getTime().convertTo(TimeUnit.NANOSECONDS)
+                        + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
+            }
         } else {
             delayNs = TimeUnit.MILLISECONDS.toNanos(DELAY_MSEC);
         }
@@ -526,7 +536,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          */
         if (SAVE_PERF_OUTPUT) {
             String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
-                SAVE_PERF_OUTPUT_TO + "/" + params.id() + ".perf" :
+                SAVE_PERF_OUTPUT_TO + "/" + br.getParams().id() + ".perf" :
                 SAVE_PERF_OUTPUT_TO_FILE;
             try {
                 FileUtils.copy(perfParsedData, target);
@@ -541,7 +551,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          */
         if (SAVE_PERF_BIN_OUTPUT) {
             String target = (SAVE_PERF_BIN_OUTPUT_TO_FILE == null) ?
-                SAVE_PERF_BIN_OUTPUT_TO + "/" + params.id() + perfBinaryExtension() :
+                SAVE_PERF_BIN_OUTPUT_TO + "/" + br.getParams().id() + perfBinaryExtension() :
                 SAVE_PERF_BIN_OUTPUT_TO_FILE;
             try {
                 FileUtils.copy(perfBinData, target);
@@ -556,7 +566,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          */
         if (SAVE_LOG_OUTPUT) {
             String target = (SAVE_LOG_OUTPUT_TO_FILE == null) ?
-                SAVE_LOG_OUTPUT_TO + "/" + params.id() + ".log" :
+                SAVE_LOG_OUTPUT_TO + "/" + br.getParams().id() + ".log" :
                 SAVE_LOG_OUTPUT_TO_FILE;
             FileOutputStream asm;
             try {

@@ -32,6 +32,7 @@ import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.BenchmarkResultMetaData;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
@@ -657,13 +658,14 @@ public class Runner extends BaseRunner {
                 if (!result.isEmpty()) {
                     long pid = server.getClientPid();
 
-                    BenchmarkResult br = new BenchmarkResult(params, result);
+                    BenchmarkResultMetaData md = server.getMetadata();
+                    BenchmarkResult br = new BenchmarkResult(params, result, md);
 
                     if (!profilersRev.isEmpty()) {
                         out.print("# Processing profiler results: ");
                         for (ExternalProfiler profiler : profilersRev) {
                             out.print(profiler.label() + " ");
-                            for (Result profR : profiler.afterTrial(params, pid, stdOut, stdErr)) {
+                            for (Result profR : profiler.afterTrial(br, pid, stdOut, stdErr)) {
                                 br.addBenchmarkResult(profR);
                             }
                         }

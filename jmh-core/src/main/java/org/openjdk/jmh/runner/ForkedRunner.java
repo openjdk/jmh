@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
+import org.openjdk.jmh.results.BenchmarkResultMetaData;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.link.BinaryLinkClient;
 import org.openjdk.jmh.runner.options.Options;
@@ -51,6 +52,16 @@ class ForkedRunner extends BaseRunner {
                 public void accept(IterationResult iterationData) {
                     try {
                         link.pushResults(iterationData);
+                    } catch (IOException e) {
+                        // link had probably failed
+                        throw new SavedIOException(e);
+                    }
+                }
+
+                @Override
+                public void acceptMeta(BenchmarkResultMetaData md) {
+                    try {
+                        link.pushResultMetadata(md);
                     } catch (IOException e) {
                         // link had probably failed
                         throw new SavedIOException(e);

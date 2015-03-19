@@ -22,13 +22,43 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.results.BenchmarkResultMetaData;
-import org.openjdk.jmh.results.IterationResult;
+import java.io.Serializable;
 
-interface IterationResultAcceptor {
-    void accept(IterationResult iterationData);
+public class BenchmarkResultMetaData implements Serializable {
 
-    void acceptMeta(BenchmarkResultMetaData md);
+    private final long startTime;
+    private final long measurementTime;
+    private final long stopTime;
+    private final long warmupOps;
+    private final long measurementOps;
+
+    public BenchmarkResultMetaData(long startTime, long measurementTime, long stopTime, long warmupOps, long measurementOps) {
+        this.startTime = startTime;
+        this.measurementTime = measurementTime;
+        this.stopTime = stopTime;
+        this.warmupOps = warmupOps;
+        this.measurementOps = measurementOps;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public long getMeasurementTime() {
+        return measurementTime;
+    }
+
+    public long getStopTime() {
+        return stopTime;
+    }
+
+    public long getMeasurementOps() {
+        return measurementOps;
+    }
+
+    public long getWarmupOps() {
+        return warmupOps;
+    }
 }

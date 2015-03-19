@@ -26,6 +26,7 @@ package org.openjdk.jmh.it.profilers.order;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.profile.ExternalProfiler;
+import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 
 import java.io.File;
@@ -75,7 +76,7 @@ public abstract class AbstractExternalProfiler implements ExternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterTrial(BenchmarkParams benchmarkParams, long pid, File stdOut, File stdErr) {
+    public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         stop = System.nanoTime();
         try {
             TimeUnit.MILLISECONDS.sleep(100);
