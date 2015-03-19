@@ -154,9 +154,17 @@ class TextReportFormat extends AbstractOutputFormat {
     public void endBenchmark(BenchmarkResult result) {
         out.println();
         if (result != null) {
-            out.println(result.getPrimaryResult().extendedInfo(null));
+            {
+                String s = result.getPrimaryResult().extendedInfo(null);
+                if (!s.trim().isEmpty()) {
+                    out.println(s);
+                }
+            }
             for (Result r : result.getSecondaryResults().values()) {
-                out.println(r.extendedInfo(r.getLabel()));
+                String s = r.extendedInfo(r.getLabel());
+                if (!s.trim().isEmpty()) {
+                    out.println(s);
+                }
             }
             out.println();
         }

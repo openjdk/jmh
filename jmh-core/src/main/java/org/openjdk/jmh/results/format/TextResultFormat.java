@@ -133,10 +133,22 @@ class TextResultFormat implements ResultFormat {
 
                 Result pRes = res.getPrimaryResult();
                 out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
-                out.print(String.format("%" + samplesLen + "d",     pRes.getSampleCount()));
+
+                if (pRes.getSampleCount() > 1) {
+                    out.print(String.format("%" + samplesLen + "d", pRes.getSampleCount()));
+                } else {
+                    out.printf("%" + (samplesLen) + "s", "");
+                }
+
                 out.print(String.format("%" + scoreLen + ".3f",     pRes.getScore()));
-                out.print(" \u00B1");
-                out.print(String.format("%" + scoreErrLen + ".3f",  pRes.getScoreError()));
+
+                if (!Double.isNaN(pRes.getScoreError())) {
+                    out.print(" \u00B1");
+                    out.print(String.format("%" + scoreErrLen + ".3f",  pRes.getScoreError()));
+                } else {
+                    out.printf("%" + (scoreErrLen + 2) + "s", "");
+                }
+
                 out.print(String.format("%" + unitLen + "s",        pRes.getScoreUnit()));
                 out.println();
             }
@@ -154,10 +166,22 @@ class TextResultFormat implements ResultFormat {
                 }
 
                 out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
-                out.print(String.format("%" + samplesLen + "d",     subRes.getSampleCount()));
+
+                if (subRes.getSampleCount() > 1) {
+                    out.print(String.format("%" + samplesLen + "d", subRes.getSampleCount()));
+                } else {
+                    out.printf("%" + (samplesLen) + "s", "");
+                }
+
                 out.print(String.format("%" + scoreLen + ".3f",     subRes.getScore()));
-                out.print(" \u00B1");
-                out.print(String.format("%" + scoreErrLen + ".3f",  subRes.getScoreError()));
+
+                if (!Double.isNaN(subRes.getScoreError())) {
+                    out.print(" \u00B1");
+                    out.print(String.format("%" + scoreErrLen + ".3f",  subRes.getScoreError()));
+                } else {
+                    out.printf("%" + (scoreErrLen + 2) + "s", "");
+                }
+
                 out.print(String.format("%" + unitLen + "s",        subRes.getScoreUnit()));
                 out.println();
             }
