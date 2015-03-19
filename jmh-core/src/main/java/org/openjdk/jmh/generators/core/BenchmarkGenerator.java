@@ -42,6 +42,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.results.AverageTimeResult;
+import org.openjdk.jmh.results.BenchmarkTaskResult;
 import org.openjdk.jmh.results.RawResults;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
@@ -602,6 +603,7 @@ public class BenchmarkGenerator {
                 Collection.class, ArrayList.class,
                 TimeUnit.class, Generated.class, CompilerControl.class,
                 InfraControl.class, ThreadParams.class,
+                BenchmarkTaskResult.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
@@ -639,7 +641,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateThroughput(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<ThroughputResult> " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -650,6 +652,7 @@ public class BenchmarkGenerator {
             subGroup++;
 
             writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
+            writer.println(ident(3) + "RawResults res = new RawResults();");
 
             iterationProlog(writer, 3, method, states);
 
@@ -663,6 +666,7 @@ public class BenchmarkGenerator {
             writer.println(ident(4) + emitCall(method, states) + ';');
             invocationEpilog(writer, 4, method, states, false);
 
+            writer.println(ident(4) + "res.allOps++;");
             writer.println(ident(3) + "}");
             writer.println();
 
@@ -672,13 +676,8 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX +
                     "(control, res" + prefix(states.getArgList(method)) + ");");
-
-            // pretend we did the batched run; there is no reason to have an additional loop,
-            // when JMH stub already is optimized.
-            writer.println(ident(3) + "res.operations /= control.iterationParams.getBatchSize();");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -696,6 +695,7 @@ public class BenchmarkGenerator {
             writer.println(ident(5) + emitCall(method, states) + ';');
             invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
             writer.println(ident(4) + "control.preTearDown();");
             writer.println(ident(3) + "} catch (InterruptedException ie) {");
@@ -705,10 +705,31 @@ public class BenchmarkGenerator {
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<ThroughputResult> results = new ArrayList<ThroughputResult>();");
-            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
+            writer.println(ident(3) + "res.allOps += res.measuredOps;");
+
+            /*
+               Adjust the operation counts:
+                  1) res.measuredOps counted the individual @Benchmark invocations. Therefore, we need
+                     to adjust for opsPerInv (pretending each @Benchmark invocation counts as $opsPerInv ops);
+                     and we need to adjust down for $batchSize (pretending we had the batched run, and $batchSize
+                     @Benchmark invocations counted as single op);
+                  2) res.allOps counted the individual @Benchmark invocations as well; the same reasoning applies.
+
+               It's prudent to make the multiplication first to get more accuracy.
+             */
+
+            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
+
+            writer.println(ident(3) + "res.allOps *= opsPerInv;");
+            writer.println(ident(3) + "res.allOps /= batchSize;");
+            writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
+            writer.println(ident(3) + "res.measuredOps /= batchSize;");
+
+            writer.println(ident(3) + "HandlerResult results = new HandlerResult(res.allOps, res.measuredOps);");
+            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.benchmarkParams.getTimeUnit()));");
@@ -741,14 +762,14 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "} while(!control.isDone);");
             writer.println(ident(2) + "result.stopTime = System.nanoTime();");
             writer.println(ident(2) + "result.realTime = realTime;");
-            writer.println(ident(2) + "result.operations = operations;");
+            writer.println(ident(2) + "result.measuredOps = operations;");
             writer.println(ident(1) + "}");
             writer.println();
         }
     }
 
     private void generateAverageTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<AverageTimeResult> " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -759,6 +780,7 @@ public class BenchmarkGenerator {
             subGroup++;
 
             writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
+            writer.println(ident(3) + "RawResults res = new RawResults();");
 
             iterationProlog(writer, 3, method, states);
 
@@ -772,6 +794,7 @@ public class BenchmarkGenerator {
             writer.println(ident(4) + emitCall(method, states) + ';');
             invocationEpilog(writer, 4, method, states, false);
 
+            writer.println(ident(4) + "res.allOps++;");
             writer.println(ident(3) + "}");
             writer.println();
 
@@ -781,12 +804,7 @@ public class BenchmarkGenerator {
             }
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, res" + prefix(states.getArgList(method)) + ");");
-
-            // pretend we did the batched run; there is no reason to have an additional loop,
-            // when JMH stub is already optimized.
-            writer.println(ident(3) + "res.operations /= control.iterationParams.getBatchSize();");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -804,6 +822,7 @@ public class BenchmarkGenerator {
             writer.println(ident(5) + emitCall(method, states) + ';');
             invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
             writer.println(ident(4) + "control.preTearDown();");
             writer.println(ident(3) + "} catch (InterruptedException ie) {");
@@ -812,10 +831,31 @@ public class BenchmarkGenerator {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<AverageTimeResult> results = new ArrayList<AverageTimeResult>();");
-            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
+            writer.println(ident(3) + "res.allOps += res.measuredOps;");
+
+            /*
+               Adjust the operation counts:
+                  1) res.measuredOps counted the individual @Benchmark invocations. Therefore, we need
+                     to adjust for opsPerInv (pretending each @Benchmark invocation counts as $opsPerInv ops);
+                     and we need to adjust down for $batchSize (pretending we had the batched run, and $batchSize
+                     @Benchmark invocations counted as single op)
+                  2) res.measuredOps counted the individual @Benchmark invocations as well; the same reasoning applies.
+
+               It's prudent to make the multiplication first to get more accuracy.
+             */
+
+            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
+
+            writer.println(ident(3) + "res.allOps *= opsPerInv;");
+            writer.println(ident(3) + "res.allOps /= batchSize;");
+            writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
+            writer.println(ident(3) + "res.measuredOps /= batchSize;");
+
+            writer.println(ident(3) + "HandlerResult results = new HandlerResult(res.allOps, res.measuredOps);");
+            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getOperations(), res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.benchmarkParams.getTimeUnit()));");
@@ -848,7 +888,7 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "} while(!control.isDone);");
             writer.println(ident(2) + "result.stopTime = System.nanoTime();");
             writer.println(ident(2) + "result.realTime = realTime;");
-            writer.println(ident(2) + "result.operations = operations;");
+            writer.println(ident(2) + "result.measuredOps = operations;");
             writer.println(ident(1) + "}");
             writer.println();
         }
@@ -867,7 +907,7 @@ public class BenchmarkGenerator {
     }
 
     private void generateSampleTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<SampleTimeResult> " + methodGroup.getName() + "_" + benchmarkKind +
+        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind +
                 "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
@@ -878,6 +918,7 @@ public class BenchmarkGenerator {
             subGroup++;
 
             writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
+            writer.println(ident(3) + "RawResults res = new RawResults();");
 
             iterationProlog(writer, 3, method, states);
 
@@ -891,6 +932,7 @@ public class BenchmarkGenerator {
             writer.println(ident(4) + emitCall(method, states) + ';');
             invocationEpilog(writer, 4, method, states, false);
 
+            writer.println(ident(4) + "res.allOps++;");
             writer.println(ident(3) + "}");
             writer.println();
 
@@ -902,8 +944,9 @@ public class BenchmarkGenerator {
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
             writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, buffer, targetSamples, control.benchmarkParams.getOpsPerInvocation(), batchSize" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, res, buffer, targetSamples, opsPerInv, batchSize" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
             for (StateObject so : states.getControls()) {
@@ -921,6 +964,7 @@ public class BenchmarkGenerator {
             writer.println(ident(5) + emitCall(method, states) + ';');
             invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
             writer.println(ident(4) + "control.preTearDown();");
             writer.println(ident(3) + "} catch (InterruptedException ie) {");
@@ -929,7 +973,22 @@ public class BenchmarkGenerator {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<SampleTimeResult> results = new ArrayList<SampleTimeResult>();");
+            /*
+               Adjust the operation counts:
+                  1) res.measuredOps counted the batched @Benchmark invocations. Therefore, we need only
+                     to adjust for opsPerInv (pretending each @Benchmark invocation counts as $opsPerInv ops);
+                  2) res.allOps counted the individual @Benchmark invocations; to it needs the adjustment for $batchSize.
+
+               It's prudent to make the multiplication first to get more accuracy.
+             */
+
+            writer.println(ident(3) + "res.allOps += res.measuredOps * batchSize;");
+
+            writer.println(ident(3) + "res.allOps *= opsPerInv;");
+            writer.println(ident(3) + "res.allOps /= batchSize;");
+            writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
+
+            writer.println(ident(3) + "HandlerResult results = new HandlerResult(res.allOps, res.measuredOps);");
             writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
@@ -947,8 +1006,9 @@ public class BenchmarkGenerator {
             String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
 
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, SampleBuffer buffer, int targetSamples, long opsPerInv, int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result, SampleBuffer buffer, int targetSamples, long opsPerInv, int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long realTime = 0;");
+            writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
             writer.println(ident(2) + "int rndMask = startRndMask;");
             writer.println(ident(2) + "long time = 0;");
@@ -979,16 +1039,19 @@ public class BenchmarkGenerator {
 
             invocationEpilog(writer, 3, method, states, true);
 
+            writer.println(ident(3) + "operations++;");
             writer.println(ident(2) + "} while(!control.isDone);");
             writer.println(ident(2) + "startRndMask = Math.max(startRndMask, rndMask);");
 
+            writer.println(ident(2) + "result.realTime = realTime;");
+            writer.println(ident(2) + "result.measuredOps = operations;");
             writer.println(ident(1) + "}");
             writer.println();
         }
     }
 
     private void generateSingleShotTime(ClassInfo classInfo, PrintWriter writer, Mode benchmarkKind, MethodGroup methodGroup, StateObjectHandler states) {
-        writer.println(ident(1) + "public Collection<SingleShotResult> " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
+        writer.println(ident(1) + "public HandlerResult " + methodGroup.getName() + "_" + benchmarkKind + "(InfraControl control, ThreadParams threadParams) throws Throwable {");
 
         methodProlog(writer, methodGroup);
 
@@ -1004,7 +1067,7 @@ public class BenchmarkGenerator {
             iterationProlog(writer, 3, method, states);
 
             // measurement loop call
-            writer.println(ident(3) + "RawResults res = new RawResults(control.benchmarkParams.getOpsPerInvocation());");
+            writer.println(ident(3) + "RawResults res = new RawResults();");
             writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
 
@@ -1012,7 +1075,17 @@ public class BenchmarkGenerator {
 
             iterationEpilog(writer, 3, method, states);
 
-            writer.println(ident(3) + "Collection<SingleShotResult> results = new ArrayList<SingleShotResult>();");
+            /*
+             * Adjust total ops:
+             *   Single shot always does single op.  Therefore, we need to adjust for $opsPerInv (pretending each @Benchmark
+             *   invocation counts as $opsPerInv ops). We *don't need* to adjust down for $batchSize, because we always have
+             *   one "op".
+             */
+
+            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
+            writer.println(ident(3) + "long totalOps = opsPerInv;");
+
+            writer.println(ident(3) + "HandlerResult results = new HandlerResult(totalOps, totalOps);");
             writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");

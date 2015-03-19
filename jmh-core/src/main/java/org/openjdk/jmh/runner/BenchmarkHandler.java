@@ -30,8 +30,8 @@ import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
+import org.openjdk.jmh.results.BenchmarkTaskResult;
 import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
@@ -41,7 +41,6 @@ import org.openjdk.jmh.util.Utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +176,7 @@ class BenchmarkHandler {
      * @return
      */
     private static boolean isValidBenchmarkSignature(Method m) {
-        if (m.getReturnType() != Collection.class) {
+        if (m.getReturnType() != BenchmarkTaskResult.class) {
             return false;
         }
         final Class<?>[] parameterTypes = m.getParameterTypes();
@@ -352,7 +351,7 @@ class BenchmarkHandler {
         startProfilers(benchmarkParams, params);
 
         // submit tasks to threadpool
-        Map<BenchmarkTask, Future<Collection<? extends Result>>> results = new HashMap<BenchmarkTask, Future<Collection<? extends Result>>>();
+        Map<BenchmarkTask, Future<BenchmarkTaskResult>> results = new HashMap<BenchmarkTask, Future<BenchmarkTaskResult>>();
         for (BenchmarkTask runner : runners) {
             results.put(runner, executor.submit(runner));
         }
@@ -384,9 +383,9 @@ class BenchmarkHandler {
         try {
             int expected = numThreads;
             while (expected > 0) {
-                for (Map.Entry<BenchmarkTask, Future<Collection<? extends Result>>> re : results.entrySet()) {
+                for (Map.Entry<BenchmarkTask, Future<BenchmarkTaskResult>> re : results.entrySet()) {
                     BenchmarkTask task = re.getKey();
-                    Future<Collection<? extends Result>> fr = re.getValue();
+                    Future<BenchmarkTaskResult> fr = re.getValue();
                     try {
                         long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
                         fr.get(waitFor, TimeUnit.NANOSECONDS);
@@ -416,9 +415,9 @@ class BenchmarkHandler {
         // Get the results.
         // Should previous loop allow us to get to this point, we can fully expect
         // all the results ready without the exceptions.
-        for (Future<Collection<? extends Result>> fr : results.values()) {
+        for (Future<BenchmarkTaskResult> fr : results.values()) {
             try {
-                iterationResults.addResults(fr.get());
+                iterationResults.addResults(fr.get().getResults());
             } catch (InterruptedException ex) {
                 throw new IllegalStateException("Impossible to be here");
             } catch (ExecutionException ex) {
@@ -432,7 +431,7 @@ class BenchmarkHandler {
     /**
      * Worker body.
      */
-    class BenchmarkTask implements Callable<Collection<? extends Result>> {
+    class BenchmarkTask implements Callable<BenchmarkTaskResult> {
 
         private volatile Thread runner;
         private final InfraControl control;
@@ -444,13 +443,13 @@ class BenchmarkHandler {
         }
 
         @Override
-        public Collection<? extends Result> call() throws Exception {
+        public BenchmarkTaskResult call() throws Exception {
             try {
                 // bind the executor thread
                 runner = Thread.currentThread();
 
                 // go for the run
-                return (Collection<? extends Result>) method.invoke(instances.get(), control, threadParams);
+                return (BenchmarkTaskResult) method.invoke(instances.get(), control, threadParams);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore

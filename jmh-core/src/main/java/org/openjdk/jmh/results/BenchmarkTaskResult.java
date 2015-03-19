@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,16 +24,34 @@
  */
 package org.openjdk.jmh.results;
 
-public class RawResults {
+import java.util.ArrayList;
+import java.util.Collection;
 
-    public long allOps;
-    public long measuredOps;
-    public long realTime;
-    public long startTime;
-    public long stopTime;
+public class BenchmarkTaskResult {
 
-    public long getTime() {
-        return (realTime > 0) ? realTime : (stopTime - startTime);
+    /**
+     * Total benchmark ops done.
+     */
+    private final long allOperations;
+
+    /**
+     * Measured benchmark ops done: total without sync iterations.
+     */
+    private final long measuredOperations;
+
+    private final Collection<Result> results;
+
+    public BenchmarkTaskResult(long allOperations, long measuredOperations) {
+        this.allOperations = allOperations;
+        this.measuredOperations = measuredOperations;
+        this.results = new ArrayList<Result>();
     }
 
+    public void add(Result result) {
+        results.add(result);
+    }
+
+    public Collection<Result> getResults() {
+        return results;
+    }
 }
