@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>1.7-SNAPSHOT</version>
+        <version>1.7</version>
     </parent>
 
     <name>JMH Core Compilation Tests</name>
