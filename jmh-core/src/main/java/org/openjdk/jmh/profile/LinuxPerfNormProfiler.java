@@ -150,9 +150,6 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     }
 
     private Collection<? extends Result> process(BenchmarkResult br, File stdOut, File stdErr) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-
         Multiset<String> events = new HashMultiset<String>();
 
         FileReader fr = null;
@@ -214,14 +211,12 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
             }
 
-            if (!IS_INCREMENTABLE) {
-                pw.println();
-                pw.println("WARNING: Your system uses old \"perf\", which can not print data incrementally (-I).\n" +
+            if (!IS_INCREMENTABLE || true) {
+                System.out.println();
+                System.out.println();
+                System.out.println("WARNING: Your system uses old \"perf\", which cannot print data incrementally (-I).\n" +
                         "Therefore, perf performance data includes benchmark warmup.");
             }
-
-            pw.flush();
-            pw.close();
 
             long totalOpts;
 
