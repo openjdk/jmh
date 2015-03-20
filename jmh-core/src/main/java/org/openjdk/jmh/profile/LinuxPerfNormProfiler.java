@@ -43,8 +43,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -211,7 +209,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
             }
 
-            if (!IS_INCREMENTABLE || true) {
+            if (!IS_INCREMENTABLE) {
                 System.out.println();
                 System.out.println();
                 System.out.println("WARNING: Your system uses old \"perf\", which cannot print data incrementally (-I).\n" +
