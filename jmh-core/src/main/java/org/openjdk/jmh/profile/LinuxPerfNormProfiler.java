@@ -229,6 +229,18 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 for (String key : events.keys()) {
                     results.add(new PerfResult(key, events.count(key) * 1.0 / totalOpts));
                 }
+
+                // Also figure out CPI, if enough counters available:
+                {
+                    long cycles = events.count("cycles");
+                    long instructions = events.count("instructions");
+                    if (cycles != 0 && instructions != 0) {
+                        results.add(new PerfResult("CPI", 1.0 * cycles / instructions));
+                    } else {
+                        results.add(new PerfResult("CPI", Double.NaN));
+                    }
+                }
+
                 return results;
             } else {
                 return Collections.singleton(new PerfResult("N/A", Double.NaN));
