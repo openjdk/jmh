@@ -93,6 +93,33 @@ public class Utils {
         return join(Arrays.asList(src), delim);
     }
 
+    public static Collection<String> splitQuotedEscape(String src) {
+        List<String> results = new ArrayList<String>();
+
+        StringBuilder sb = new StringBuilder();
+        boolean escaped = false;
+        for (char ch : src.toCharArray()) {
+            if (ch == ' ' && !escaped) {
+                String s = sb.toString();
+                if (!s.isEmpty()) {
+                    results.add(s);
+                    sb = new StringBuilder();
+                }
+            } else if (ch == '\"') {
+                escaped ^= true;
+            } else {
+                sb.append(ch);
+            }
+        }
+
+        String s = sb.toString();
+        if (!s.isEmpty()) {
+            results.add(s);
+        }
+
+        return results;
+    }
+
     public static int sum(int[] arr) {
         int sum = 0;
         for (int i : arr) {

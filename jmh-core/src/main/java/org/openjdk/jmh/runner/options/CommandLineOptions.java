@@ -36,6 +36,7 @@ import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.Optional;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -417,23 +418,9 @@ public class CommandLineOptions implements Options {
 
             jvm = Optional.eitherOf(optJvm.value(set));
 
-            if (set.hasArgument(optJvmArgs)) {
-                jvmArgs = Optional.<Collection<String>>of(Arrays.asList(optJvmArgs.value(set).trim().split("[ ]+")));
-            } else {
-                jvmArgs = Optional.none();
-            }
-
-            if (set.hasArgument(optJvmArgsAppend)) {
-                jvmArgsAppend = Optional.<Collection<String>>of(Arrays.asList(optJvmArgsAppend.value(set).trim().split("[ ]+")));
-            } else {
-                jvmArgsAppend = Optional.none();
-            }
-
-            if (set.hasArgument(optJvmArgsPrepend)) {
-                jvmArgsPrepend = Optional.<Collection<String>>of(Arrays.asList(optJvmArgsPrepend.value(set).trim().split("[ ]+")));
-            } else {
-                jvmArgsPrepend = Optional.none();
-            }
+            jvmArgs = treatQuoted(set, optJvmArgs);
+            jvmArgsAppend = treatQuoted(set, optJvmArgsAppend);
+            jvmArgsPrepend = treatQuoted(set, optJvmArgsPrepend);
 
             if (set.hasArgument(optParams)) {
                 for (String p : optParams.values(set)) {
@@ -448,6 +435,23 @@ public class CommandLineOptions implements Options {
         } catch (OptionException e) {
             throw new CommandLineOptionException(e.getMessage(), e);
         }
+    }
+
+    public Optional<Collection<String>> treatQuoted(OptionSet set, OptionSpec<String> spec) {
+        if (set.hasArgument(spec)) {
+            try {
+                List<String> vals = spec.values(set);
+                if (vals.size() != 1) {
+                    return Optional.<Collection<String>>of(vals);
+                } else {
+                    // Windows launcher somehow ends up here, fall-through to single value treatment
+                }
+            } catch (OptionException e) {
+                // only a single value, fall through
+            }
+            return Optional.of(Utils.splitQuotedEscape(spec.value(set)));
+        }
+        return Optional.none();
     }
 
     public void showHelp() throws IOException {

@@ -27,11 +27,23 @@ package org.openjdk.jmh.util;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 public class TestUtil {
 
     @Test
     public void testPID() {
         Assert.assertFalse(Utils.getPid() == 0);
+    }
+
+    @Test
+    public void testSplit() {
+        Assert.assertEquals(Arrays.asList("moo"), Utils.splitQuotedEscape("moo"));
+        Assert.assertEquals(Arrays.asList("moo", "bar"), Utils.splitQuotedEscape("moo bar"));
+        Assert.assertEquals(Arrays.asList("moo", "bar"), Utils.splitQuotedEscape("moo  bar"));
+        Assert.assertEquals(Arrays.asList("moo", "bar", "baz"), Utils.splitQuotedEscape("moo  bar baz"));
+        Assert.assertEquals(Arrays.asList("moo", "bar baz"), Utils.splitQuotedEscape("moo  \"bar baz\""));
+        Assert.assertEquals(Arrays.asList("moo", "-Dopt=bar baz"), Utils.splitQuotedEscape("moo  -Dopt=\"bar baz\""));
     }
 
 }
