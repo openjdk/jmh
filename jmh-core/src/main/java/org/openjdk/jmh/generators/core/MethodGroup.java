@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -87,7 +88,11 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public void addMethod(MethodInfo method, int threads) {
-        methods.add(new MethodInvocation(method, threads));
+        if (!methods.add(new MethodInvocation(method, threads))) {
+            throw new GenerationException(
+                    "Duplicate @" + Benchmark.class.getSimpleName() + " method. JMH needs an uniquely named method, regardless of the arguments list.",
+                    method);
+        }
     }
 
     public Collection<MethodInfo> methods() {

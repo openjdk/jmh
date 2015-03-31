@@ -22,36 +22,28 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.generators.core;
+package org.openjdk.jmh.ct.benchmark.args;
 
-class MethodInvocation implements Comparable<MethodInvocation> {
-    public final MethodInfo method;
-    public final int threads;
+import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.ct.CompileTest;
+import org.openjdk.jmh.infra.Blackhole;
 
-    public MethodInvocation(MethodInfo method, int threads) {
-        this.method = method;
-        this.threads = threads;
+public class ArgumentListAmbiguityTest {
+
+    @Benchmark
+    public void test() {
+
     }
 
-    @Override
-    public int compareTo(MethodInvocation o) {
-        return method.getName().compareTo(o.method.getName());
+    @Benchmark
+    public void test(Blackhole bh) {
+
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        MethodInvocation that = (MethodInvocation) o;
-
-        if (!method.getName().equals(that.method.getName())) return false;
-
-        return true;
+    @Test
+    public void compileTest() {
+        CompileTest.assertFail(this.getClass(), "uniquely named method");
     }
 
-    @Override
-    public int hashCode() {
-        return method.getName().hashCode();
-    }
 }
