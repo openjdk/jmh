@@ -199,6 +199,27 @@ class BenchmarkGeneratorUtils {
         }
     }
 
+    public static <T extends Annotation> Collection<T> getAnnSuperAll(MethodInfo mi, ClassInfo startCi, Class<T> annClass) {
+        Collection<T> results = new ArrayList<T>();
+        {
+            T ann = mi.getAnnotation(annClass);
+            if (ann != null) {
+                results.add(ann);
+            }
+        }
+
+        ClassInfo ci = startCi;
+        do {
+            T ann = ci.getAnnotation(annClass);
+            if (ann != null) {
+                results.add(ann);
+            }
+            ci = ci.getSuperClass();
+        } while (ci != null);
+
+        return results;
+    }
+
     public static String getGeneratedName(ClassInfo ci) {
         String name = "";
         do {

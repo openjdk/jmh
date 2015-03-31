@@ -79,7 +79,8 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("middle"));
         Assert.assertNull(System.getProperty("appended"));
         Assert.assertNotNull(System.getProperty("prepended"));
-        Assert.assertNull(System.getProperty("appendedUp"));
+        Assert.assertNotNull(System.getProperty("appendedUp"));
+        Assert.assertNull(System.getProperty("prependedUp"));
     }
 
     @Benchmark
@@ -92,7 +93,7 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNotNull(System.getProperty("appended"));
         Assert.assertNull(System.getProperty("prepended"));
         Assert.assertNull(System.getProperty("appendedUp"));
-        Assert.assertNull(System.getProperty("prependedUp"));
+        Assert.assertNotNull(System.getProperty("prependedUp"));
     }
 
     @Benchmark
@@ -104,8 +105,8 @@ public class ForkedJvmAppendPrependArgs2_Test {
         Assert.assertNull(System.getProperty("middle"));
         Assert.assertNull(System.getProperty("appended"));
         Assert.assertNull(System.getProperty("prepended"));
-        Assert.assertNull(System.getProperty("appendedUp"));
-        Assert.assertNull(System.getProperty("prependedUp"));
+        Assert.assertNotNull(System.getProperty("appendedUp"));
+        Assert.assertNotNull(System.getProperty("prependedUp"));
     }
 
     @Test

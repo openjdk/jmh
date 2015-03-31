@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,12 +27,11 @@ package org.openjdk.jmh.it.fork;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -40,51 +39,16 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.All)
-@Fork(jvmArgs = "-DtestUpper")
-public class ForkedJvmArgs2_Test {
+@Fork(5)
+public class ForkMergeTest {
 
     @Benchmark
     @Warmup(iterations = 0)
     @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest1")
-    public void test1() {
+    @Fork(jvmArgsAppend = {"-Dbar"})
+    public void test() {
         Fixtures.work();
-        Assert.assertNotNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNull(System.getProperty("testUpper"));
-    }
-
-    @Benchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork(jvmArgs = "-Dtest2")
-    public void test2() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNotNull(System.getProperty("test2"));
-        Assert.assertNull(System.getProperty("testUpper"));
-    }
-
-    @Benchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Fork
-    public void testUpper() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNotNull(System.getProperty("testUpper"));
-    }
-
-    @Benchmark
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public void testNone() {
-        Fixtures.work();
-        Assert.assertNull(System.getProperty("test1"));
-        Assert.assertNull(System.getProperty("test2"));
-        Assert.assertNotNull(System.getProperty("testUpper"));
+        Assert.assertNotNull(System.getProperty("bar"));
     }
 
     @Test
@@ -92,9 +56,9 @@ public class ForkedJvmArgs2_Test {
         Options opt = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
-                .forks(1)
                 .build();
-        new Runner(opt).run();
+        RunResult result = new Runner(opt).runSingle();
+        Assert.assertEquals(5, result.getAggregatedResult().getPrimaryResult().getSampleCount());
     }
 
 }

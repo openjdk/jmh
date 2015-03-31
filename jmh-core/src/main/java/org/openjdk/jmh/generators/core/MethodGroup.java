@@ -99,8 +99,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public Optional<Integer> getTotalThreadCount() {
-        Threads ann = getFinal(Threads.class);
-        if (ann != null) {
+        for (Threads ann : getAll(Threads.class)) {
             return Optional.of(ann.value());
         }
         return Optional.none();
@@ -144,131 +143,147 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public Optional<Integer> getOperationsPerInvocation() {
-        OperationsPerInvocation ann = getFinal(OperationsPerInvocation.class);
-        return (ann != null) ? Optional.of(ann.value()) : Optional.<Integer>none();
-    }
-
-    public Optional<TimeUnit> getOutputTimeUnit() {
-        OutputTimeUnit ann = getFinal(OutputTimeUnit.class);
-        return (ann != null) ? Optional.of(ann.value()) : Optional.<TimeUnit>none();
-    }
-
-    public Optional<Integer> getWarmupIterations() {
-        Warmup ann = getFinal(Warmup.class);
-        if (ann != null && ann.iterations() != Warmup.BLANK_ITERATIONS) {
-            return Optional.of(ann.iterations());
-        }
-        return Optional.none();
-    }
-
-    public Optional<TimeValue> getWarmupTime() {
-        Warmup ann = getFinal(Warmup.class);
-        if (ann != null && ann.time() != Warmup.BLANK_TIME) {
-            return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
-        }
-        return Optional.none();
-    }
-
-    public Optional<Integer> getWarmupBatchSize() {
-        Warmup ann = getFinal(Warmup.class);
-        if (ann != null && ann.batchSize() != Warmup.BLANK_BATCHSIZE) {
-            return Optional.of(ann.batchSize());
-        }
-        return Optional.none();
-    }
-
-    public Optional<Integer> getMeasurementIterations() {
-        Measurement ann = getFinal(Measurement.class);
-        if (ann != null && ann.iterations() != Measurement.BLANK_ITERATIONS) {
-            return Optional.of(ann.iterations());
-        }
-        return Optional.none();
-    }
-
-    public Optional<TimeValue> getMeasurementTime() {
-        Measurement ann = getFinal(Measurement.class);
-        if (ann != null && ann.time() != Measurement.BLANK_TIME) {
-            return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
-        }
-        return Optional.none();
-    }
-
-    public Optional<Integer> getMeasurementBatchSize() {
-        Measurement ann = getFinal(Measurement.class);
-        if (ann != null && ann.batchSize() != Measurement.BLANK_BATCHSIZE) {
-            return Optional.of(ann.batchSize());
-        }
-        return Optional.none();
-    }
-
-    public Optional<Integer> getForks() {
-        Fork ann = getFinal(Fork.class);
-        if (ann != null && ann.value() != Fork.BLANK_FORKS) {
+        for (OperationsPerInvocation ann : getAll(OperationsPerInvocation.class)) {
             return Optional.of(ann.value());
         }
         return Optional.none();
     }
 
+    public Optional<TimeUnit> getOutputTimeUnit() {
+        for (OutputTimeUnit ann : getAll(OutputTimeUnit.class)) {
+            return Optional.of(ann.value());
+        }
+        return Optional.none();
+    }
+
+    public Optional<Integer> getWarmupIterations() {
+        for (Warmup ann : getAll(Warmup.class)) {
+            if (ann.iterations() != Warmup.BLANK_ITERATIONS) {
+                return Optional.of(ann.iterations());
+            }
+        }
+        return Optional.none();
+    }
+
+    public Optional<TimeValue> getWarmupTime() {
+        for (Warmup ann : getAll(Warmup.class)) {
+            if (ann.time() != Warmup.BLANK_TIME) {
+                return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
+            }
+        }
+        return Optional.none();
+    }
+
+    public Optional<Integer> getWarmupBatchSize() {
+        for (Warmup ann : getAll(Warmup.class)) {
+            if (ann.batchSize() != Warmup.BLANK_BATCHSIZE) {
+                return Optional.of(ann.batchSize());
+            }
+        }
+        return Optional.none();
+    }
+
+    public Optional<Integer> getMeasurementIterations() {
+        for (Measurement ann : getAll(Measurement.class)) {
+            if (ann.iterations() != Measurement.BLANK_ITERATIONS) {
+                return Optional.of(ann.iterations());
+            }
+        }
+        return Optional.none();
+    }
+
+    public Optional<TimeValue> getMeasurementTime() {
+        for (Measurement ann : getAll(Measurement.class)) {
+            if (ann.time() != Measurement.BLANK_TIME) {
+                return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
+            }
+        }
+        return Optional.none();
+    }
+
+    public Optional<Integer> getMeasurementBatchSize() {
+        for (Measurement ann : getAll(Measurement.class)) {
+            if (ann.batchSize() != Measurement.BLANK_BATCHSIZE) {
+                return Optional.of(ann.batchSize());
+            }
+        }
+        return Optional.none();
+    }
+
+    public Optional<Integer> getForks() {
+        for (Fork ann : getAll(Fork.class)) {
+            if (ann.value() != Fork.BLANK_FORKS) {
+                return Optional.of(ann.value());
+            }
+        }
+        return Optional.none();
+    }
+
     public Optional<Integer> getWarmupForks() {
-        Fork ann = getFinal(Fork.class);
-        if (ann != null && ann.warmups() != Fork.BLANK_FORKS) {
-            return Optional.of(ann.warmups());
+        for (Fork ann : getAll(Fork.class)) {
+            if (ann.warmups() != Fork.BLANK_FORKS) {
+                return Optional.of(ann.warmups());
+            }
         }
         return Optional.none();
     }
 
     public Optional<String> getJvm() {
-        Fork ann = getFinal(Fork.class);
-        if (ann != null && !(ann.jvm().equals(Fork.BLANK_ARGS))) {
-            return Optional.of(ann.jvm());
+        for (Fork ann : getAll(Fork.class)) {
+            if (!ann.jvm().equals(Fork.BLANK_ARGS)) {
+                return Optional.of(ann.jvm());
+            }
         }
         return Optional.none();
     }
 
     public Optional<Collection<String>> getJvmArgs() {
-        Fork ann = getFinal(Fork.class);
-        if (ann != null && !(ann.jvmArgs().length == 1 && ann.jvmArgs()[0].equals(Fork.BLANK_ARGS))) {
-            return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgs()));
+        for (Fork ann : getAll(Fork.class)) {
+            String[] args = ann.jvmArgs();
+            if (!(args.length == 1 && args[0].equals(Fork.BLANK_ARGS))) {
+                return Optional.<Collection<String>>of(Arrays.asList(args));
+            }
         }
         return Optional.none();
     }
 
     public Optional<Collection<String>> getJvmArgsAppend() {
-        Fork ann = getFinal(Fork.class);
-        if (ann != null && !(ann.jvmArgsAppend().length == 1 && ann.jvmArgsAppend()[0].equals(Fork.BLANK_ARGS))) {
-            return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsAppend()));
+        for (Fork ann : getAll(Fork.class)) {
+            String[] args = ann.jvmArgsAppend();
+            if (!(args.length == 1 && args[0].equals(Fork.BLANK_ARGS))) {
+                return Optional.<Collection<String>>of(Arrays.asList(args));
+            }
         }
         return Optional.none();
     }
 
     public Optional<Collection<String>> getJvmArgsPrepend() {
-        Fork ann = getFinal(Fork.class);
-        if (ann != null && !(ann.jvmArgsPrepend().length == 1 && ann.jvmArgsPrepend()[0].equals(Fork.BLANK_ARGS))) {
-            return Optional.<Collection<String>>of(Arrays.asList(ann.jvmArgsPrepend()));
+        for (Fork ann : getAll(Fork.class)) {
+            String[] args = ann.jvmArgsPrepend();
+            if (!(args.length == 1 && args[0].equals(Fork.BLANK_ARGS))) {
+                return Optional.<Collection<String>>of(Arrays.asList(args));
+            }
         }
         return Optional.none();
     }
 
     public Optional<TimeValue> getTimeout() {
-        Timeout ann = getFinal(Timeout.class);
-        if (ann != null) {
+        for (Timeout ann : getAll(Timeout.class)) {
             return Optional.of(new TimeValue(ann.time(), ann.timeUnit()));
         }
         return Optional.none();
     }
 
-    private <T extends Annotation> T getFinal(Class<T> annClass) {
-        T finalAnn = null;
+    private <T extends Annotation> Collection<T> getAll(Class<T> annClass) {
+        Collection<T> results = new ArrayList<T>();
         for (MethodInvocation mi : methods) {
-            T ann = BenchmarkGeneratorUtils.getAnnSuper(mi.method, ci, annClass);
-            if (ann != null) {
-                if (finalAnn != null && !finalAnn.equals(ann)) {
-                    throw new GenerationException("Colliding annotations: " + ann + " vs. " + finalAnn, mi.method);
-                }
-                finalAnn = ann;
+            Collection<T> anns = BenchmarkGeneratorUtils.getAnnSuperAll(mi.method, ci, annClass);
+            if (!(results.isEmpty() || anns.isEmpty() || results.equals(anns))) {
+                throw new GenerationException("Colliding annotations: " + anns + " vs. " + results, mi.method);
             }
+            results = anns;
         }
-        return finalAnn;
+        return results;
     }
 
     public Optional<Map<String, String[]>> getParams() {
