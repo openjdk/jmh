@@ -108,48 +108,48 @@ class TextResultFormat implements ResultFormat {
         scoreErrLen += COLUMN_PAD - 1; // digest a single character for +- separator
         unitLen     += COLUMN_PAD;
 
-        out.print(String.format("%-" + nameLen + "s", "Benchmark"));
+        out.printf("%-" + nameLen + "s", "Benchmark");
         for (String k : params) {
-            out.print(String.format("%" + paramLengths.get(k) + "s", "(" + k + ")"));
+            out.printf("%" + paramLengths.get(k) + "s", "(" + k + ")");
         }
 
-        out.print(String.format("%" + modeLen + "s",     "Mode"));
-        out.print(String.format("%" + samplesLen + "s",  "Cnt"));
-        out.print(String.format("%" + scoreLen + "s",    "Score"));
+        out.printf("%" + modeLen + "s",     "Mode");
+        out.printf("%" + samplesLen + "s",  "Cnt");
+        out.printf("%" + scoreLen + "s",    "Score");
         out.print("  ");
-        out.print(String.format("%" + scoreErrLen + "s", "Error"));
-        out.print(String.format("%" + unitLen + "s",     "Units"));
+        out.printf("%" + scoreErrLen + "s", "Error");
+        out.printf("%" + unitLen + "s",     "Units");
         out.println();
 
         for (RunResult res : runResults) {
             {
-                out.print(String.format("%-" + nameLen + "s",
-                        benchPrefixes.get(res.getParams().getBenchmark())));
+                out.printf("%-" + nameLen + "s", benchPrefixes.get(res.getParams().getBenchmark()));
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v));
+                    out.printf("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v);
                 }
 
                 Result pRes = res.getPrimaryResult();
-                out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
+                out.printf("%" + modeLen + "s", res.getParams().getMode().shortLabel());
 
                 if (pRes.getSampleCount() > 1) {
-                    out.print(String.format("%" + samplesLen + "d", pRes.getSampleCount()));
+                    out.printf("%" + samplesLen + "d", pRes.getSampleCount());
                 } else {
-                    out.printf("%" + (samplesLen) + "s", "");
+                    out.printf("%" + samplesLen + "s", "");
                 }
 
-                out.print(String.format("%" + scoreLen + ".3f",     pRes.getScore()));
+                out.printf("%" + scoreLen + ".3f", pRes.getScore());
 
                 if (!Double.isNaN(pRes.getScoreError())) {
                     out.print(" \u00B1");
-                    out.print(String.format("%" + scoreErrLen + ".3f",  pRes.getScoreError()));
+                    out.printf("%" + scoreErrLen + ".3f", pRes.getScoreError());
                 } else {
-                    out.printf("%" + (scoreErrLen + 2) + "s", "");
+                    out.print("  ");
+                    out.printf("%" + scoreErrLen + "s", "");
                 }
 
-                out.print(String.format("%" + unitLen + "s",        pRes.getScoreUnit()));
+                out.printf("%" + unitLen + "s", pRes.getScoreUnit());
                 out.println();
             }
 
@@ -157,32 +157,33 @@ class TextResultFormat implements ResultFormat {
                 String label = e.getKey();
                 Result subRes = e.getValue();
 
-                out.print(String.format("%-" + nameLen + "s",
-                        benchPrefixes.get(res.getParams().getBenchmark() + ":" + label)));
+                out.printf("%-" + nameLen + "s",
+                        benchPrefixes.get(res.getParams().getBenchmark() + ":" + label));
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.print(String.format("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v));
+                    out.printf("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v);
                 }
 
-                out.print(String.format("%" + modeLen + "s",        res.getParams().getMode().shortLabel()));
+                out.printf("%" + modeLen + "s", res.getParams().getMode().shortLabel());
 
                 if (subRes.getSampleCount() > 1) {
-                    out.print(String.format("%" + samplesLen + "d", subRes.getSampleCount()));
+                    out.printf("%" + samplesLen + "d", subRes.getSampleCount());
                 } else {
-                    out.printf("%" + (samplesLen) + "s", "");
+                    out.printf("%" + samplesLen + "s", "");
                 }
 
-                out.print(String.format("%" + scoreLen + ".3f",     subRes.getScore()));
+                out.printf("%" + scoreLen + ".3f", subRes.getScore());
 
                 if (!Double.isNaN(subRes.getScoreError())) {
                     out.print(" \u00B1");
-                    out.print(String.format("%" + scoreErrLen + ".3f",  subRes.getScoreError()));
+                    out.printf("%" + scoreErrLen + ".3f", subRes.getScoreError());
                 } else {
-                    out.printf("%" + (scoreErrLen + 2) + "s", "");
+                    out.print("  ");
+                    out.printf("%" + scoreErrLen + "s", "");
                 }
 
-                out.print(String.format("%" + unitLen + "s",        subRes.getScoreUnit()));
+                out.printf("%" + unitLen + "s", subRes.getScoreUnit());
                 out.println();
             }
         }
