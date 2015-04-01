@@ -57,6 +57,12 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     /** Delay collection for given time; -1 to detect automatically */
     private static final int DELAY_MSEC = Integer.getInteger("jmh.perfnorm.delayMs", -1);
 
+    /** Events to gather */
+    private static final String[] USER_EVENTS = System.getProperty("jmh.perfnorm.events", "").split(",");
+
+    /** Use "perf stat -d -d -d" instead of explicit counter list */
+    private static final Boolean USE_DEFAULT_STAT = Boolean.getBoolean("jmh.perfnorm.useDefaultStat");
+
     /** Ignore event increments larger that this */
     private static final long HIGH_PASS_FILTER = Long.getLong("jmh.perfnorm.filterHigh", 100000000000L);
 
@@ -67,22 +73,59 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     private static final boolean IS_INCREMENTABLE;
     private static final Collection<String> FAIL_MSGS;
 
+    /** This is a non-exhaustive list of events we care about. */
+    private static final String[] INTERESTING_EVENTS = new String[]{
+            "cycles", "instructions",
+            "branches", "branch-misses",
+            "bus-cycles", "ref-cycles",
+            "context-switches", "cpu-migrations",
+            "page-faults", "minor-faults", "major-faults", "alignment-faults", "emulation-faults",
+            "L1-dcache-loads",  "L1-dcache-load-misses",
+            "L1-dcache-stores", "L1-dcache-store-misses",
+            "L1-icache-loads", "L1-icache-load-misses",
+            "LLC-loads", "LLC-stores",
+            "dTLB-loads",  "dTLB-load-misses",
+            "dTLB-stores", "dTLB-store-misses",
+            "iTLB-loads",  "iTLB-load-misses",
+            "stalled-cycles-frontend", "stalled-cycles-backend",
+    };
+
+    private static final Collection<String> SUPPORTED_EVENTS = new ArrayList<String>();
+
     static {
         FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "echo", "1");
         IS_SUPPORTED = FAIL_MSGS.isEmpty();
 
         Collection<String> incremental = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-I", String.valueOf(INCREMENT_INTERVAL), "echo", "1");
         IS_INCREMENTABLE = incremental.isEmpty();
-    }
 
+        for (String ev : USER_EVENTS) {
+            if (ev.trim().isEmpty()) continue;
+            SUPPORTED_EVENTS.add(ev);
+        }
+
+        if (SUPPORTED_EVENTS.isEmpty()) {
+            for (String ev : INTERESTING_EVENTS) {
+                Collection<String> res = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-e", "cycles,instructions," + ev, "echo", "1");
+                if (res.isEmpty()) {
+                    SUPPORTED_EVENTS.add(ev);
+                }
+            }
+        }
+    }
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        if (IS_INCREMENTABLE) {
-            return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d", "-x,", "-I", String.valueOf(INCREMENT_INTERVAL));
+        List<String> cmd = new ArrayList<String>();
+        if (USE_DEFAULT_STAT) {
+            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-d", "-d", "-d"));
         } else {
-            return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d", "-x,");
+            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-e", Utils.join(SUPPORTED_EVENTS, ",")));
         }
+        if (IS_INCREMENTABLE) {
+            cmd.addAll(Arrays.asList("-I", String.valueOf(INCREMENT_INTERVAL)));
+        }
+        return cmd;
     }
 
     @Override
