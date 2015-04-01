@@ -28,6 +28,7 @@ import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.util.ScoreFormatter;
 import org.openjdk.jmh.util.Statistics;
 
 public class ProfilerResult extends Result<ProfilerResult> {
@@ -54,10 +55,10 @@ public class ProfilerResult extends Result<ProfilerResult> {
     public String extendedInfo(String label) {
         switch (policy) {
             case AVG:
-                return String.format("Result %30s: %.3f ±(99.9%%) %.3f %s", "\"" + label + "\"", getScore(), getScoreError(), getScoreUnit());
+                return String.format("Result %30s: %s ±(99.9%%) %s %s", "\"" + label + "\"", ScoreFormatter.format(getScore()), ScoreFormatter.format(getScoreError()), getScoreUnit());
             case MAX:
             case SUM:
-                return String.format("Result %30s: %.3f %s [%s]", "\"" + label + "\"", getScore(), getScoreUnit(), policy);
+                return String.format("Result %30s: %s %s [%s]", "\"" + label + "\"", ScoreFormatter.format(getScore()), getScoreUnit(), policy);
             default:
                 throw new IllegalStateException("Unknown policy: " + policy);
         }

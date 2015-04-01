@@ -31,6 +31,7 @@ import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.ScoreFormatter;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.BufferedReader;
@@ -219,7 +220,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
         @Override
         public String toString() {
-            return String.format("%.3f cycles per instruction", 1.0 * cycles / instructions);
+            return String.format("%s cycles per instruction", ScoreFormatter.format(1.0 * cycles / instructions));
         }
 
         @Override

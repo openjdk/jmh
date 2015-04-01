@@ -36,6 +36,7 @@ import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.ListStatistics;
 import org.openjdk.jmh.util.Multiset;
+import org.openjdk.jmh.util.ScoreFormatter;
 import org.openjdk.jmh.util.Statistics;
 import org.openjdk.jmh.util.Utils;
 
@@ -322,7 +323,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         @Override
         public String toString() {
-            return String.format(" %.3f %s/op", getScore(), key);
+            return String.format(" %s %s/op", ScoreFormatter.format(getScore()), key);
         }
 
         @Override

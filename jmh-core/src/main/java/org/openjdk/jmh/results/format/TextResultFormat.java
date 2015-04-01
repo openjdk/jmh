@@ -28,6 +28,7 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.ClassUtils;
+import org.openjdk.jmh.util.ScoreFormatter;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -91,14 +92,14 @@ class TextResultFormat implements ResultFormat {
 
             modeLen     = Math.max(modeLen,     res.getParams().getMode().shortLabel().length());
             samplesLen  = Math.max(samplesLen,  String.format("%d",   primRes.getSampleCount()).length());
-            scoreLen    = Math.max(scoreLen,    String.format("%.3f", primRes.getScore()).length());
-            scoreErrLen = Math.max(scoreErrLen, String.format("%.3f", primRes.getScoreError()).length());
+            scoreLen    = Math.max(scoreLen,    ScoreFormatter.format(primRes.getScore()).length());
+            scoreErrLen = Math.max(scoreErrLen, ScoreFormatter.format(primRes.getScoreError()).length());
             unitLen     = Math.max(unitLen,     primRes.getScoreUnit().length());
 
             for (Result subRes : res.getSecondaryResults().values()) {
                 samplesLen  = Math.max(samplesLen,  String.format("%d",   subRes.getSampleCount()).length());
-                scoreLen    = Math.max(scoreLen,    String.format("%.3f", subRes.getScore()).length());
-                scoreErrLen = Math.max(scoreErrLen, String.format("%.3f", subRes.getScoreError()).length());
+                scoreLen    = Math.max(scoreLen,    ScoreFormatter.format(subRes.getScore()).length());
+                scoreErrLen = Math.max(scoreErrLen, ScoreFormatter.format(subRes.getScoreError()).length());
                 unitLen     = Math.max(unitLen,     subRes.getScoreUnit().length());
             }
         }
@@ -139,11 +140,11 @@ class TextResultFormat implements ResultFormat {
                     out.printf("%" + samplesLen + "s", "");
                 }
 
-                out.printf("%" + scoreLen + ".3f", pRes.getScore());
+                out.print(ScoreFormatter.format(scoreLen, pRes.getScore()));
 
-                if (!Double.isNaN(pRes.getScoreError())) {
+                if (!Double.isNaN(pRes.getScoreError()) && !ScoreFormatter.isApproximate(pRes.getScore())) {
                     out.print(" \u00B1");
-                    out.printf("%" + scoreErrLen + ".3f", pRes.getScoreError());
+                    out.print(ScoreFormatter.formatError(scoreErrLen, pRes.getScoreError()));
                 } else {
                     out.print("  ");
                     out.printf("%" + scoreErrLen + "s", "");
@@ -173,11 +174,11 @@ class TextResultFormat implements ResultFormat {
                     out.printf("%" + samplesLen + "s", "");
                 }
 
-                out.printf("%" + scoreLen + ".3f", subRes.getScore());
+                out.print(ScoreFormatter.format(scoreLen, subRes.getScore()));
 
-                if (!Double.isNaN(subRes.getScoreError())) {
+                if (!Double.isNaN(subRes.getScoreError()) && !ScoreFormatter.isApproximate(subRes.getScore())) {
                     out.print(" \u00B1");
-                    out.printf("%" + scoreErrLen + ".3f", subRes.getScoreError());
+                    out.print(ScoreFormatter.formatError(scoreErrLen, subRes.getScoreError()));
                 } else {
                     out.print("  ");
                     out.printf("%" + scoreErrLen + "s", "");

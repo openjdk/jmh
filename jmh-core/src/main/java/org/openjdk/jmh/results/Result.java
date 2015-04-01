@@ -25,6 +25,7 @@
 package org.openjdk.jmh.results;
 
 import org.openjdk.jmh.util.Deduplicator;
+import org.openjdk.jmh.util.ScoreFormatter;
 import org.openjdk.jmh.util.SingletonStatistics;
 import org.openjdk.jmh.util.Statistics;
 
@@ -176,10 +177,15 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      */
     @Override
     public String toString() {
-        if (!Double.isNaN(getScoreError())) {
-            return String.format("%.3f \u00B1(99.9%%) %.3f %s", getScore(), getScoreError(), getScoreUnit());
+        if (!Double.isNaN(getScoreError()) && !ScoreFormatter.isApproximate(getScore())) {
+            return String.format("%s \u00B1(99.9%%) %sf %s",
+                    ScoreFormatter.format(getScore()),
+                    ScoreFormatter.formatError(getScoreError()),
+                    getScoreUnit());
         } else {
-            return String.format("%.3f %s", getScore(), getScoreUnit());
+            return String.format("%s %s",
+                    ScoreFormatter.format(getScore()),
+                    getScoreUnit());
         }
     }
 
@@ -197,18 +203,24 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         PrintWriter pw = new PrintWriter(sw);
 
         Statistics stats = getStatistics();
-        if (stats.getN() > 2) {
+        if (stats.getN() > 2 && !ScoreFormatter.isApproximate(getScore())) {
             double[] interval = getScoreConfidence();
-            pw.println(String.format("Result%s: %.3f \u00B1(99.9%%) %.3f %s [%s]",
+            pw.println(String.format("Result%s: %s \u00B1(99.9%%) %s %s [%s]",
                     (label == null) ? "" : " \"" + label + "\"",
-                    getScore(), (interval[1] - interval[0]) / 2,
+                    ScoreFormatter.format(getScore()),
+                    ScoreFormatter.formatError((interval[1] - interval[0]) / 2),
                     getScoreUnit(), policy));
-            pw.println(String.format("  Statistics: (min, avg, max) = (%.3f, %.3f, %.3f), stdev = %.3f%n" +
-                    "  Confidence interval (99.9%%): [%.3f, %.3f]",
-                    stats.getMin(), stats.getMean(), stats.getMax(), stats.getStandardDeviation(),
-                    interval[0], interval[1]));
+            pw.println(String.format("  Statistics: (min, avg, max) = (%s, %s, %s), stdev = %s%n" +
+                    "  Confidence interval (99.9%%): [%s, %s]",
+                    ScoreFormatter.format(stats.getMin()),
+                    ScoreFormatter.format(stats.getMean()),
+                    ScoreFormatter.format(stats.getMax()),
+                    ScoreFormatter.formatError(stats.getStandardDeviation()),
+                    ScoreFormatter.format(interval[0]),
+                    ScoreFormatter.format(interval[1]))
+            );
         } else {
-            pw.println(String.format("Run result: %.2f %s (<= 2 samples)", stats.getMean(), getScoreUnit()));
+            pw.println(String.format("Run result: %s %s", ScoreFormatter.format(stats.getMean()), getScoreUnit()));
         }
         pw.close();
         return sw.toString();
@@ -223,23 +235,25 @@ public abstract class Result<T extends Result<T>> implements Serializable {
             sb.append("  Samples, N = ").append(stats.getN()).append("\n");
 
             double[] interval = stats.getConfidenceIntervalAt(0.999);
-            sb.append(String.format("        mean = %10.3f \u00B1(99.9%%) %.3f",
-                    stats.getMean(),
-                    (interval[1] - interval[0]) / 2
+            sb.append(String.format("        mean = %s \u00B1(99.9%%) %s",
+                    ScoreFormatter.format(10, stats.getMean()),
+                    ScoreFormatter.formatError((interval[1] - interval[0]) / 2)
             ));
             sb.append(" ").append(getScoreUnit()).append("\n");
 
-            sb.append(String.format("         min = %10.3f %s\n", stats.getMin(), getScoreUnit()));
+            sb.append(String.format("         min = %s %s\n", ScoreFormatter.format(stats.getMin()), getScoreUnit()));
 
             for (double p : new double[]{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
-                sb.append(String.format("  %9s = %10.3f %s\n",
+                sb.append(String.format("  %9s = %s %s\n",
                         "p(" + String.format("%7.4f", p * 100) + ")",
-                        stats.getPercentile(p * 100),
+                        ScoreFormatter.format(10, stats.getPercentile(p * 100)),
                         getScoreUnit()
-                ));
+                        ));
             }
 
-            sb.append(String.format("         max = %10.3f %s\n", stats.getMax(), getScoreUnit()));
+            sb.append(String.format("         max = %s %s\n",
+                    ScoreFormatter.format(10, stats.getMax()),
+                    getScoreUnit()));
         }
 
         return sb.toString();
