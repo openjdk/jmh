@@ -34,7 +34,6 @@ import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class GCProfiler implements InternalProfiler {
     private long beforeGCCount;
@@ -77,10 +76,10 @@ public class GCProfiler implements InternalProfiler {
         }
 
         return Arrays.asList(
-                new ProfilerResult("@gc.count.profiled", gcCount - beforeGCCount, "counts", AggregationPolicy.SUM),
-                new ProfilerResult("@gc.count.total", gcCount, "counts", AggregationPolicy.MAX),
-                new ProfilerResult("@gc.time.profiled", gcTime - beforeGCTime, "ms", AggregationPolicy.SUM),
-                new ProfilerResult("@gc.time.total", gcTime, "ms", AggregationPolicy.MAX)
+                new ProfilerResult(Defaults.PREFIX + "gc.count.profiled", gcCount - beforeGCCount, "counts", AggregationPolicy.SUM),
+                new ProfilerResult(Defaults.PREFIX + "gc.count.total", gcCount, "counts", AggregationPolicy.MAX),
+                new ProfilerResult(Defaults.PREFIX + "gc.time.profiled", gcTime - beforeGCTime, "ms", AggregationPolicy.SUM),
+                new ProfilerResult(Defaults.PREFIX + "gc.time.total", gcTime, "ms", AggregationPolicy.MAX)
         );
     }
 

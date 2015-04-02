@@ -770,7 +770,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         private final String output;
 
         public PerfResult(String output) {
-            super(ResultRole.SECONDARY, "@asm", of(Double.NaN), "---", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, Defaults.PREFIX + "asm", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.output = output;
         }
 

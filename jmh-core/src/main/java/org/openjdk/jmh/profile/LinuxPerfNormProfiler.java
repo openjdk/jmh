@@ -307,7 +307,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         }
 
         public PerfResult(String key, Statistics stat) {
-            super(ResultRole.SECONDARY, "@" + key, stat, "#/op", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, Defaults.PREFIX + key, stat, "#/op", AggregationPolicy.AVG);
             this.key = key;
         }
 

@@ -202,7 +202,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         private final long instructions;
 
         public PerfResult(String output, long cycles, long instructions) {
-            super(ResultRole.SECONDARY, "@cpi", of(1.0 * cycles / instructions), "CPI", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, Defaults.PREFIX + "cpi", of(1.0 * cycles / instructions), "CPI", AggregationPolicy.AVG);
             this.output = output;
             this.cycles = cycles;
             this.instructions = instructions;

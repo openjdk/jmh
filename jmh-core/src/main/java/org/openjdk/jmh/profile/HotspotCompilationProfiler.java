@@ -58,51 +58,51 @@ public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
-                new ProfilerResult("@compiler.totalTime",
+                new ProfilerResult(Defaults.PREFIX + "compiler.totalTime",
                         current.get("java.ci.totalTime") * 1D / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.totalCompiles",
+                new ProfilerResult(Defaults.PREFIX + "compiler.totalCompiles",
                         current.get("sun.ci.totalCompiles"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.totalBailouts",
+                new ProfilerResult(Defaults.PREFIX + "compiler.totalBailouts",
                         current.get("sun.ci.totalBailouts"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.totalInvalidates",
+                new ProfilerResult(Defaults.PREFIX + "compiler.totalInvalidates",
                         current.get("sun.ci.totalInvalidates"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.nmethodCodeSize",
+                new ProfilerResult(Defaults.PREFIX + "compiler.nmethodCodeSize",
                         current.get("sun.ci.nmethodCodeSize") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.nmethodSize",
+                new ProfilerResult(Defaults.PREFIX + "compiler.nmethodSize",
                         current.get("sun.ci.nmethodSize") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.osrCompiles",
+                new ProfilerResult(Defaults.PREFIX + "compiler.osrCompiles",
                         current.get("sun.ci.osrCompiles"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.osrBytes",
+                new ProfilerResult(Defaults.PREFIX + "compiler.osrBytes",
                         current.get("sun.ci.osrBytes") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.osrTime",
+                new ProfilerResult(Defaults.PREFIX + "compiler.osrTime",
                         current.get("sun.ci.osrTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.standardCompiles",
+                new ProfilerResult(Defaults.PREFIX + "compiler.standardCompiles",
                         current.get("sun.ci.standardCompiles"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.standardBytes",
+                new ProfilerResult(Defaults.PREFIX + "compiler.standardBytes",
                         current.get("sun.ci.standardBytes") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult("@compiler.standardTime",
+                new ProfilerResult(Defaults.PREFIX + "compiler.standardTime",
                         current.get("sun.ci.standardTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX)
         );

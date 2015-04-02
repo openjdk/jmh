@@ -81,8 +81,8 @@ public class CompilerProfiler implements InternalProfiler {
         }
 
         return Arrays.asList(
-                new ProfilerResult("@compiler.time.profiled", compTime, "ms", AggregationPolicy.SUM),
-                new ProfilerResult("@compiler.time.total", comp.getTotalCompilationTime(), "ms", AggregationPolicy.MAX)
+                new ProfilerResult(Defaults.PREFIX + "compiler.time.profiled", compTime, "ms", AggregationPolicy.SUM),
+                new ProfilerResult(Defaults.PREFIX + "compiler.time.total", comp.getTotalCompilationTime(), "ms", AggregationPolicy.MAX)
         );
     }
 

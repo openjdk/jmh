@@ -58,43 +58,43 @@ public class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
-                new ProfilerResult("@rt.sync.fatMonitors",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.fatMonitors",
                         current.get("sun.rt._sync_MonExtant"),
                         "monitors", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.sync.monitorInflations",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.monitorInflations",
                         current.get("sun.rt._sync_Inflations"),
                         "monitors", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.sync.monitorDeflations",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.monitorDeflations",
                         current.get("sun.rt._sync_Deflations"),
                         "monitors", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.sync.contendedLockAttempts",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.contendedLockAttempts",
                         current.get("sun.rt._sync_ContendedLockAttempts"),
                         "locks", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.sync.parks",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.parks",
                         current.get("sun.rt._sync_Parks"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.sync.notifications",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.notifications",
                         current.get("sun.rt._sync_Notifications"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.sync.futileWakeups",
+                new ProfilerResult(Defaults.PREFIX + "rt.sync.futileWakeups",
                         current.get("sun.rt._sync_FutileWakeups"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.safepoints",
+                new ProfilerResult(Defaults.PREFIX + "rt.safepoints",
                         current.get("sun.rt.safepoints"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.safepointSyncTime",
+                new ProfilerResult(Defaults.PREFIX + "rt.safepointSyncTime",
                         current.get("sun.rt.safepointSyncTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult("@rt.safepointTime",
+                new ProfilerResult(Defaults.PREFIX + "rt.safepointTime",
                         current.get("sun.rt.safepointTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX)
         );

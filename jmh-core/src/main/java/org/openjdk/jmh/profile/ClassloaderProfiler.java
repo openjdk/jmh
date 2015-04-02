@@ -95,10 +95,10 @@ public class ClassloaderProfiler implements InternalProfiler {
         }
 
         return Arrays.asList(
-                new ProfilerResult("@classload.loaded.profiled", loaded, "classes", AggregationPolicy.SUM),
-                new ProfilerResult("@classload.unloaded.profiled", unloaded, "classes", AggregationPolicy.SUM),
-                new ProfilerResult("@classload.loaded.total", loadedClassCount, "classes", AggregationPolicy.MAX),
-                new ProfilerResult("@classload.unloaded.total", unloadedClassCount, "classes", AggregationPolicy.MAX)
+                new ProfilerResult(Defaults.PREFIX + "classload.loaded.profiled", loaded, "classes", AggregationPolicy.SUM),
+                new ProfilerResult(Defaults.PREFIX + "classload.unloaded.profiled", unloaded, "classes", AggregationPolicy.SUM),
+                new ProfilerResult(Defaults.PREFIX + "classload.loaded.total", loadedClassCount, "classes", AggregationPolicy.MAX),
+                new ProfilerResult(Defaults.PREFIX + "classload.unloaded.total", unloadedClassCount, "classes", AggregationPolicy.MAX)
         );
     }
 
