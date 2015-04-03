@@ -178,7 +178,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
     @Override
     public String toString() {
         if (!Double.isNaN(getScoreError()) && !ScoreFormatter.isApproximate(getScore())) {
-            return String.format("%s \u00B1(99.9%%) %sf %s",
+            return String.format("%s \u00B1(99.9%%) %s %s",
                     ScoreFormatter.format(getScore()),
                     ScoreFormatter.formatError(getScoreError()),
                     getScoreUnit());

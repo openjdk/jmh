@@ -36,7 +36,8 @@ public class ScoreFormatter {
 
     public static String format(double score) {
         if (isApproximate(score)) {
-            return "\u2248 10" + superscript("" + (int)Math.round(Math.log10(score)));
+            int power = (int) Math.round(Math.log10(score));
+            return "\u2248 " + ((power != 0) ? "10" + superscript("" + power) : "0");
         } else {
             return String.format("%." + PRECISION + "f", score);
         }
@@ -44,7 +45,8 @@ public class ScoreFormatter {
 
     public static String format(int width, double score) {
         if (isApproximate(score)) {
-            return String.format("%" + width + "s", "\u2248 10" + superscript("" + (int)Math.round(Math.log10(score))));
+            int power = (int) Math.round(Math.log10(score));
+            return String.format("%" + width + "s", "\u2248 " + ((power != 0) ? "10" + superscript("" + power) : "0"));
         } else {
             return String.format("%" + width + "." + PRECISION + "f", score);
         }
