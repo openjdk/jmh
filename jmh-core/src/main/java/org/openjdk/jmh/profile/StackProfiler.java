@@ -28,6 +28,7 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
 import org.openjdk.jmh.results.Aggregator;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.util.HashMultiset;
@@ -107,7 +108,7 @@ public class StackProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         samplingTask.stop();
         return Collections.singleton(new StackResult(samplingTask.stacks));
     }

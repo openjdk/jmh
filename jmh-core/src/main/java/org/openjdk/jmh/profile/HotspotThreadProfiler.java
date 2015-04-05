@@ -27,6 +27,7 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import sun.management.HotspotThreadMBean;
 import sun.management.counter.Counter;
@@ -54,7 +55,7 @@ public class HotspotThreadProfiler extends AbstractHotspotProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
                 new ProfilerResult(Defaults.PREFIX + "threads.alive",

@@ -89,7 +89,7 @@ public class ResultFormatTest {
             for (int f = 0; f < r.nextInt(10); f++) {
                 Collection<IterationResult> iterResults = new ArrayList<IterationResult>();
                 for (int c = 0; c < r.nextInt(10); c++) {
-                    IterationResult res = new IterationResult(params, params.getMeasurement());
+                    IterationResult res = new IterationResult(params, params.getMeasurement(), null);
                     res.addResult(new ThroughputResult(ResultRole.PRIMARY, "test", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary1", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));

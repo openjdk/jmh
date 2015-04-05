@@ -29,7 +29,6 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.BenchmarkResultMetaData;
-import org.openjdk.jmh.results.HandlerResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
@@ -263,10 +262,10 @@ abstract class BaseRunner {
 
             out.iteration(benchParams, wp, i);
             boolean isLastIteration = (benchParams.getMeasurement().getCount() == 0);
-            HandlerResult hr = handler.runIteration(benchParams, wp, isLastIteration);
-            out.iterationResult(benchParams, wp, i, hr.getResult());
+            IterationResult ir = handler.runIteration(benchParams, wp, isLastIteration);
+            out.iterationResult(benchParams, wp, i, ir);
 
-            allWarmup += hr.getAllOps();
+            allWarmup += ir.getMetadata().getAllOps();
         }
 
         long measurementTime = System.currentTimeMillis();
@@ -283,13 +282,13 @@ abstract class BaseRunner {
             out.iteration(benchParams, mp, i);
 
             boolean isLastIteration = (i == mp.getCount());
-            HandlerResult hr = handler.runIteration(benchParams, mp, isLastIteration);
-            out.iterationResult(benchParams, mp, i, hr.getResult());
+            IterationResult ir = handler.runIteration(benchParams, mp, isLastIteration);
+            out.iterationResult(benchParams, mp, i, ir);
 
-            allMeasurement += hr.getAllOps();
+            allMeasurement += ir.getMetadata().getAllOps();
 
             if (acceptor != null) {
-                acceptor.accept(hr.getResult());
+                acceptor.accept(ir);
             }
         }
 

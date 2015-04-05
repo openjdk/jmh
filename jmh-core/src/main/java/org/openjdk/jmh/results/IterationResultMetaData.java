@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,42 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.it.profilers;
+package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.profile.InternalProfiler;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
+import java.io.Serializable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+public class IterationResultMetaData implements Serializable {
 
-public class ItInternalProfiler implements InternalProfiler {
+    private final long allOps;
+    private final long measuredOps;
 
-    @Override
-    public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        // intentionally blank
+    public IterationResultMetaData(long allOps, long measuredOps) {
+        this.allOps = allOps;
+        this.measuredOps = measuredOps;
     }
 
-    @Override
-    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
-        return Collections.emptyList();
+    public long getMeasuredOps() {
+        return measuredOps;
     }
 
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "itinternal";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Integration Test Internal Profiler";
+    public long getAllOps() {
+        return allOps;
     }
 }

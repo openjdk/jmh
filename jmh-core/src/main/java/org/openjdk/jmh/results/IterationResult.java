@@ -48,14 +48,20 @@ public class IterationResult implements Serializable {
 
     private final BenchmarkParams benchmarkParams;
     private final IterationParams params;
+    private final IterationResultMetaData metadata;
     private Collection<Result> primaryResults;
     private Multimap<String, Result> secondaryResults;
 
-    public IterationResult(BenchmarkParams benchmarkParams, IterationParams params) {
+    public IterationResult(BenchmarkParams benchmarkParams, IterationParams params, IterationResultMetaData md) {
         this.benchmarkParams = benchmarkParams;
         this.params = params;
+        this.metadata = md;
         this.primaryResults = EMPTY_LIST;
         this.secondaryResults = EMPTY_MAP;
+    }
+
+    public IterationResultMetaData getMetadata() {
+        return metadata;
     }
 
     public void addResults(Collection<? extends Result> rs) {

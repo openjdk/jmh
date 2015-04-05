@@ -27,6 +27,7 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 
 import java.lang.management.ClassLoadingMXBean;
@@ -71,7 +72,7 @@ public class ClassloaderProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         long loaded;
         long unloaded;
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();

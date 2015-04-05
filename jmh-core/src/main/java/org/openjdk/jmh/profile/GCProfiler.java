@@ -27,6 +27,7 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
+import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 
 import java.lang.management.GarbageCollectorMXBean;
@@ -67,7 +68,7 @@ public class GCProfiler implements InternalProfiler {
     }
 
     @Override
-    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
+    public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         long gcTime = 0;
         long gcCount = 0;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {

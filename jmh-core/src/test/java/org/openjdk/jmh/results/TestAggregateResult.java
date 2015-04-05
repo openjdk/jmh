@@ -55,7 +55,8 @@ public class TestAggregateResult {
                         Mode.Throughput, null, TimeUnit.SECONDS, 1,
                         Utils.getCurrentJvm(), Collections.<String>emptyList(),
                         TimeValue.days(1)),
-                new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.days(1), 1)
+                new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.days(1), 1),
+                null
         );
         for (double d : values) {
             result.addResult(new ThroughputResult(ResultRole.PRIMARY, "test1", (long) d, 10 * 1000 * 1000, TimeUnit.MILLISECONDS));

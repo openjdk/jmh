@@ -35,7 +35,7 @@ public class ResultAggregationTest {
 
     @Test
     public void testThroughput() {
-        IterationResult ir = new IterationResult(null, null);
+        IterationResult ir = new IterationResult(null, null, null);
         ir.addResult(new ThroughputResult(ResultRole.PRIMARY, "", 10000, 1, TimeUnit.NANOSECONDS));
         ir.addResult(new ThroughputResult(ResultRole.PRIMARY, "", 10000, 1, TimeUnit.NANOSECONDS));
         ir.addResult(new ThroughputResult(ResultRole.SECONDARY, "sec", 5000, 1, TimeUnit.NANOSECONDS));
@@ -69,7 +69,7 @@ public class ResultAggregationTest {
 
     @Test
     public void testAverageTime() {
-        IterationResult ir = new IterationResult(null, null);
+        IterationResult ir = new IterationResult(null, null, null);
         ir.addResult(new AverageTimeResult(ResultRole.PRIMARY, "", 1, 10000, TimeUnit.NANOSECONDS));
         ir.addResult(new AverageTimeResult(ResultRole.PRIMARY, "", 1, 10000, TimeUnit.NANOSECONDS));
         ir.addResult(new AverageTimeResult(ResultRole.SECONDARY, "sec", 1, 5000, TimeUnit.NANOSECONDS));
@@ -112,7 +112,7 @@ public class ResultAggregationTest {
         SampleBuffer sb3000 = new SampleBuffer();
         sb3000.add(3000);
 
-        IterationResult ir = new IterationResult(null, null);
+        IterationResult ir = new IterationResult(null, null, null);
         ir.addResult(new SampleTimeResult(ResultRole.PRIMARY, "", sb10000, TimeUnit.NANOSECONDS));
         ir.addResult(new SampleTimeResult(ResultRole.PRIMARY, "", sb10000, TimeUnit.NANOSECONDS));
         ir.addResult(new SampleTimeResult(ResultRole.SECONDARY, "sec", sb5000, TimeUnit.NANOSECONDS));
@@ -146,7 +146,7 @@ public class ResultAggregationTest {
 
     @Test
     public void testSingleShot() {
-        IterationResult ir = new IterationResult(null, null);
+        IterationResult ir = new IterationResult(null, null, null);
         ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10000, TimeUnit.NANOSECONDS));
         ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10000, TimeUnit.NANOSECONDS));
         ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5000, TimeUnit.NANOSECONDS));

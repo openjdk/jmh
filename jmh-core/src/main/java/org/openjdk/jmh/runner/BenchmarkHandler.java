@@ -31,7 +31,9 @@ import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.BenchmarkTaskResult;
-import org.openjdk.jmh.results.HandlerResult;
+import org.openjdk.jmh.results.IterationResult;
+import org.openjdk.jmh.results.IterationResultMetaData;
+import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
@@ -282,11 +284,11 @@ class BenchmarkHandler {
         }
     }
 
-    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, HandlerResult iterationResults) {
+    protected void stopProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iterationResults) {
         // stop profilers
         for (InternalProfiler prof : profilersRev) {
             try {
-                iterationResults.addResults(prof.afterIteration(benchmarkParams, iterationParams));
+                iterationResults.addResults(prof.afterIteration(benchmarkParams, iterationParams, iterationResults));
             } catch (Throwable ex) {
                 throw new BenchmarkException(ex);
             }
@@ -324,7 +326,7 @@ class BenchmarkHandler {
      * @param last    Should this iteration considered to be the last
      * @return IterationResult
      */
-    public HandlerResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
+    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
         int numThreads = benchmarkParams.getThreads();
         TimeValue runtime = params.getTime();
 
@@ -332,7 +334,7 @@ class BenchmarkHandler {
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
         // result object to accumulate the results in
-        HandlerResult iterationResults = new HandlerResult(benchmarkParams, params);
+        List<Result> iterationResults = new ArrayList<Result>();
 
         InfraControl control = new InfraControl(benchmarkParams, params, preSetupBarrier, preTearDownBarrier, last);
 
@@ -380,6 +382,10 @@ class BenchmarkHandler {
 
         // Wait for the result, continuously polling the worker threads.
         // The abrupt exception in any worker will float up here.
+        long allOps = 0;
+        long measuredOps = 0;
+        IterationResult result;
+
         try {
             int expected = numThreads;
             while (expected > 0) {
@@ -388,7 +394,11 @@ class BenchmarkHandler {
                     Future<BenchmarkTaskResult> fr = re.getValue();
                     try {
                         long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
-                        fr.get(waitFor, TimeUnit.NANOSECONDS);
+
+                        BenchmarkTaskResult btr = fr.get(waitFor, TimeUnit.NANOSECONDS);
+                        iterationResults.addAll(btr.getResults());
+                        allOps += btr.getAllOps();
+                        measuredOps += btr.getMeasuredOps();
                         expected--;
                     } catch (InterruptedException ex) {
                         throw new BenchmarkException(ex);
@@ -407,28 +417,15 @@ class BenchmarkHandler {
                 }
             }
         } finally {
+            result = new IterationResult(benchmarkParams, params, new IterationResultMetaData(allOps, measuredOps));
+            result.addResults(iterationResults);
+
             // profilers stop when after all threads are confirmed to be
             // finished to capture the edge behaviors; or, on a failure path
-            stopProfilers(benchmarkParams, params, iterationResults);
+            stopProfilers(benchmarkParams, params, result);
         }
 
-        // Get the results.
-        // Should previous loop allow us to get to this point, we can fully expect
-        // all the results ready without the exceptions.
-        for (Future<BenchmarkTaskResult> fr : results.values()) {
-            try {
-                BenchmarkTaskResult btr = fr.get();
-                iterationResults.addAllOps(btr.getAllOps());
-                iterationResults.addMeasuredOps(btr.getMeasuredOps());
-                iterationResults.addResults(btr.getResults());
-            } catch (InterruptedException ex) {
-                throw new IllegalStateException("Impossible to be here");
-            } catch (ExecutionException ex) {
-                throw new IllegalStateException("Impossible to be here");
-            }
-        }
-
-        return iterationResults;
+        return result;
     }
 
     /**
