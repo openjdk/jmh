@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.profile;
 
-import com.sun.management.GarbageCollectionNotificationInfo;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.AggregationPolicy;
@@ -41,6 +40,9 @@ import javax.management.openmbean.CompositeData;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,31 +56,58 @@ public class GCProfiler implements InternalProfiler {
     private long beforeGCCount;
     private long beforeGCTime;
     private final NotificationListener listener;
-    private Set<String> observedSpaces = new HashSet<String>();
-    private Multiset<String> churn = new HashMultiset<String>();
+    private final Set<String> observedSpaces;
+    private volatile Multiset<String> churn;
 
     public GCProfiler() {
-        listener = new NotificationListener() {
-            @Override
-            public void handleNotification(Notification n, Object o) {
-                if (n.getType().equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
-                    GarbageCollectionNotificationInfo info = GarbageCollectionNotificationInfo.from((CompositeData) n.getUserData());
+        observedSpaces = new HashSet<String>();
+        churn = new HashMultiset<String>();
 
-                    Map<String, MemoryUsage> mapBefore = info.getGcInfo().getMemoryUsageBeforeGc();
-                    Map<String, MemoryUsage> mapAfter = info.getGcInfo().getMemoryUsageAfterGc();
-                    for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
-                        String name = entry.getKey();
-                        MemoryUsage after = entry.getValue();
-                        MemoryUsage before = mapBefore.get(name);
-                        long c = before.getUsed() - after.getUsed();
-                        if (c > 0) {
-                            churn.add(name, c);
-                            observedSpaces.add(name);
+        NotificationListener listener = null;
+        try {
+            final Class<?> infoKlass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
+            final Field notifNameField = infoKlass.getField("GARBAGE_COLLECTION_NOTIFICATION");
+            final Method infoMethod = infoKlass.getMethod("from", CompositeData.class);
+            final Method getGcInfo = infoKlass.getMethod("getGcInfo");
+            final Method getMemoryUsageBeforeGc = getGcInfo.getReturnType().getMethod("getMemoryUsageBeforeGc");
+            final Method getMemoryUsageAfterGc = getGcInfo.getReturnType().getMethod("getMemoryUsageAfterGc");
+
+            listener = new NotificationListener() {
+                @Override
+                public void handleNotification(Notification n, Object o) {
+                    try {
+                        if (n.getType().equals(notifNameField.get(null))) {
+                            Object info = infoMethod.invoke(null, n.getUserData());
+                            Object gcInfo = getGcInfo.invoke(info);
+                            Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
+                            Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
+                            for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
+                                String name = entry.getKey();
+                                MemoryUsage after = entry.getValue();
+                                MemoryUsage before = mapBefore.get(name);
+                                long c = before.getUsed() - after.getUsed();
+                                if (c > 0) {
+                                    churn.add(name, c);
+                                    observedSpaces.add(name);
+                                }
+                            }
                         }
+                    } catch (IllegalAccessException e) {
+                        // Do nothing, counters would not get populated
+                    } catch (InvocationTargetException e) {
+                        // Do nothing, counters would not get populated
                     }
                 }
-            }
-        };
+            };
+        } catch (ClassNotFoundException e) {
+            // Nothing to do here, listener is not functional
+        } catch (NoSuchFieldException e) {
+            // Nothing to do here, listener is not functional
+        } catch (NoSuchMethodException e) {
+            // Nothing to do here, listener is not functional
+        }
+
+        this.listener = listener;
     }
 
     @Override
@@ -158,6 +187,7 @@ public class GCProfiler implements InternalProfiler {
     private boolean hooksInstalled;
 
     public synchronized void installHooks() {
+        if (listener == null) return;
         if (hooksInstalled) return;
         hooksInstalled = true;
         churn = new HashMultiset<String>();
@@ -167,6 +197,7 @@ public class GCProfiler implements InternalProfiler {
     }
 
     public synchronized void uninstallHooks() {
+        if (listener == null) return;
         if (!hooksInstalled) return;
         hooksInstalled = false;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
