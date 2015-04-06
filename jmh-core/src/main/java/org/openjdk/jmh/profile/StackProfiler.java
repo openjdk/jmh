@@ -266,7 +266,7 @@ public class StackProfiler implements InternalProfiler {
         }
 
         @Override
-        public String extendedInfo(String label) {
+        public String extendedInfo() {
             return getStack(stacks);
         }
 

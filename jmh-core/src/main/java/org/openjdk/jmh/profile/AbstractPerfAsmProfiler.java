@@ -790,7 +790,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         @Override
-        public String extendedInfo(String label) {
+        public String extendedInfo() {
             return output;
         }
     }

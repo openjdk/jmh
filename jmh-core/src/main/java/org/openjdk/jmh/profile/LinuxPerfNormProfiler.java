@@ -327,7 +327,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         }
 
         @Override
-        public String extendedInfo(String label) {
+        public String extendedInfo() {
             return "";
         }
     }

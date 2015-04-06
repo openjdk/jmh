@@ -84,8 +84,8 @@ public class SampleTimeResult extends Result<SampleTimeResult> {
     }
 
     @Override
-    public String extendedInfo(String label) {
-        return simpleExtendedInfo(label) + percentileExtendedInfo(label);
+    public String extendedInfo() {
+        return simpleExtendedInfo() + percentileExtendedInfo();
     }
 
     @Override

@@ -191,27 +191,25 @@ public abstract class Result<T extends Result<T>> implements Serializable {
 
     /**
      * Print extended result information
-     * @param label result label
      * @return String with extended info
      */
-    public String extendedInfo(String label) {
-        return simpleExtendedInfo(label);
+    public String extendedInfo() {
+        return simpleExtendedInfo();
     }
 
-    protected String simpleExtendedInfo(String label) {
+    protected String simpleExtendedInfo() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
         Statistics stats = getStatistics();
         if (stats.getN() > 2 && !ScoreFormatter.isApproximate(getScore())) {
             double[] interval = getScoreConfidence();
-            pw.println(String.format("Result%s: %s \u00B1(99.9%%) %s %s [%s]",
-                    (label == null) ? "" : " \"" + label + "\"",
+            pw.println(String.format("  %s \u00B1(99.9%%) %s %s [%s]",
                     ScoreFormatter.format(getScore()),
                     ScoreFormatter.formatError((interval[1] - interval[0]) / 2),
                     getScoreUnit(), policy));
-            pw.println(String.format("  Statistics: (min, avg, max) = (%s, %s, %s), stdev = %s%n" +
-                    "  Confidence interval (99.9%%): [%s, %s]",
+            pw.println(String.format("  (min, avg, max) = (%s, %s, %s), stdev = %s%n" +
+                    "  CI (99.9%%): [%s, %s] (assumes normal distribution)",
                     ScoreFormatter.format(stats.getMin()),
                     ScoreFormatter.format(stats.getMean()),
                     ScoreFormatter.format(stats.getMax()),
@@ -220,13 +218,13 @@ public abstract class Result<T extends Result<T>> implements Serializable {
                     ScoreFormatter.format(interval[1]))
             );
         } else {
-            pw.println(String.format("Run result: %s %s", ScoreFormatter.format(stats.getMean()), getScoreUnit()));
+            pw.println(String.format("  %s %s", ScoreFormatter.format(stats.getMean()), getScoreUnit()));
         }
         pw.close();
         return sw.toString();
     }
 
-    protected String percentileExtendedInfo(String label) {
+    protected String percentileExtendedInfo() {
         Statistics stats = getStatistics();
 
         StringBuilder sb = new StringBuilder();
@@ -241,7 +239,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
             ));
             sb.append(" ").append(getScoreUnit()).append("\n");
 
-            sb.append(String.format("         min = %s %s\n", ScoreFormatter.format(stats.getMin()), getScoreUnit()));
+            sb.append(String.format("         min = %s %s\n", ScoreFormatter.format(10, stats.getMin()), getScoreUnit()));
 
             for (double p : new double[]{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
                 sb.append(String.format("  %9s = %s %s\n",

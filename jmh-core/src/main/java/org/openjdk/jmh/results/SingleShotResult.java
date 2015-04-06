@@ -48,8 +48,8 @@ public class SingleShotResult extends Result<SingleShotResult> {
     }
 
     @Override
-    public String extendedInfo(String label) {
-        return simpleExtendedInfo(label) + percentileExtendedInfo(label);
+    public String extendedInfo() {
+        return simpleExtendedInfo() + percentileExtendedInfo();
     }
 
     @Override

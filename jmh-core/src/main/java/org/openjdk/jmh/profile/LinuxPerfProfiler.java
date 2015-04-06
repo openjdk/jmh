@@ -224,7 +224,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         }
 
         @Override
-        public String extendedInfo(String label) {
+        public String extendedInfo() {
             return "Perf stats:\n--------------------------------------------------\n" + output;
         }
     }
