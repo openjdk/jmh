@@ -80,19 +80,24 @@ public class BenchmarkResult implements Serializable {
     }
 
     public Result getPrimaryResult() {
-        @SuppressWarnings("unchecked")
-        Aggregator<Result> aggregator = iterationResults.iterator().next().getPrimaryResult().getIterationAggregator();
-
+        Aggregator<Result> aggregator = null;
         Collection<Result> aggrs = new ArrayList<Result>();
         for (IterationResult r : iterationResults) {
-            aggrs.add(r.getPrimaryResult());
+            Result e = r.getPrimaryResult();
+            aggrs.add(e);
+            aggregator = e.getIterationAggregator();
         }
         for (Result r : benchmarkResults.values()) {
             if (r.getRole().isPrimary()) {
                 aggrs.add(r);
             }
         }
-        return aggregator.aggregate(aggrs);
+
+        if (aggregator != null) {
+            return aggregator.aggregate(aggrs);
+        } else {
+            throw new IllegalStateException("No aggregator for primary result");
+        }
     }
 
     public Map<String, Result> getSecondaryResults() {
@@ -103,27 +108,31 @@ public class BenchmarkResult implements Serializable {
 
         Map<String, Result> answers = new TreeMap<String, Result>();
         for (String label : labels) {
-            @SuppressWarnings("unchecked")
-            Aggregator<Result> aggregator = iterationResults.iterator().next().getSecondaryResults().get(label).getIterationAggregator();
-
+            Aggregator<Result> aggregator = null;
             Collection<Result> results = new ArrayList<Result>();
             for (IterationResult r : iterationResults) {
-                results.add(r.getSecondaryResults().get(label));
+                Result e = r.getSecondaryResults().get(label);
+                if (e != null) {
+                    results.add(e);
+                    aggregator = e.getIterationAggregator();
+                }
             }
-            answers.put(label, aggregator.aggregate(results));
+
+            if (aggregator != null) {
+                answers.put(label, aggregator.aggregate(results));
+            }
         }
 
         for (String label : benchmarkResults.keys()) {
-            @SuppressWarnings("unchecked")
-            Aggregator<Result> aggregator = benchmarkResults.get(label).iterator().next().getIterationAggregator();
-
+            Aggregator<Result> aggregator = null;
             Collection<Result> results = new ArrayList<Result>();
             for (Result r : benchmarkResults.get(label)) {
                 if (r.getRole().isSecondary()) {
                     results.add(r);
+                    aggregator = r.getIterationAggregator();
                 }
             }
-            if (!results.isEmpty()) {
+            if (aggregator != null) {
                 answers.put(label, aggregator.aggregate(results));
             }
         }
