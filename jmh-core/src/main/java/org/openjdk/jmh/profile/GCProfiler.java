@@ -45,8 +45,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class GCProfiler implements InternalProfiler {
@@ -55,9 +58,11 @@ public class GCProfiler implements InternalProfiler {
     private long beforeGCTime;
     private final NotificationListener listener;
     private volatile Multiset<String> churn;
+    private Set<String> observedSpaces;
 
     public GCProfiler() {
         churn = new HashMultiset<String>();
+        observedSpaces = Collections.synchronizedSet(new HashSet<String>());
 
         NotificationListener listener = null;
         try {
@@ -84,6 +89,7 @@ public class GCProfiler implements InternalProfiler {
                                 long c = before.getUsed() - after.getUsed();
                                 if (c > 0) {
                                     churn.add(name, c);
+                                    observedSpaces.add(name);
                                 }
                             }
                         }
@@ -161,7 +167,7 @@ public class GCProfiler implements InternalProfiler {
                 "ms",
                 AggregationPolicy.SUM));
 
-        for (String space : churn.keys()) {
+        for (String space : observedSpaces) {
             double churnRate = 1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime);
 
             results.add(new ProfilerResult(
