@@ -755,6 +755,9 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         // Handle the VM stub/interpreter line.
                         method = "<stub: " + line.substring(0, line.indexOf("[")).trim() + ">";
                     }
+                } else if (line.contains("StubRoutines::")) {
+                    // Handle the VM stub/interpreter line (another format)
+                    method = elements[0];
                 }
                 lines.add(asmLine);
 
@@ -902,6 +905,9 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         public String getMethod(long addr) {
+            if (methodMap.containsKey(addr)) {
+                return methodMap.get(addr);
+            }
             SortedMap<Long, String> head = methodMap.headMap(addr);
             if (head.isEmpty()) {
                 return "<unresolved>";
