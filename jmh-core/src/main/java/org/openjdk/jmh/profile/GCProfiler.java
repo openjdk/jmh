@@ -169,14 +169,15 @@ public class GCProfiler implements InternalProfiler {
 
         for (String space : observedSpaces) {
             double churnRate = 1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime);
+            String spaceName = space.replaceAll(" ", "_");
 
             results.add(new ProfilerResult(
-                    Defaults.PREFIX + "gc.churn.{" + space + "}",
+                    Defaults.PREFIX + "gc.churn." + spaceName + "",
                     churnRate / 1024 / 1024,
                     "MB/sec",
                     AggregationPolicy.AVG));
 
-            results.add(new ProfilerResult(Defaults.PREFIX + "gc.churn.{" + space + "}.norm",
+            results.add(new ProfilerResult(Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
                     churnRate / iResult.getMetadata().getAllOps(),
                     "B/op",
                     AggregationPolicy.AVG));
