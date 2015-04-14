@@ -119,7 +119,10 @@ class JSONResultFormat implements ResultFormat {
                 for (BenchmarkResult benchmarkResult : runResult.getBenchmarkResults()) {
                     Collection<String> scores = new ArrayList<String>();
                     for (IterationResult r : benchmarkResult.getIterationResults()) {
-                        scores.add(emit(r.getSecondaryResults().get(secondaryName).getScore()));
+                        Result rr = r.getSecondaryResults().get(secondaryName);
+                        if (rr != null) {
+                            scores.add(emit(rr.getScore()));
+                        }
                     }
                     l2.add(printMultiple(scores, "[", "]"));
                 }

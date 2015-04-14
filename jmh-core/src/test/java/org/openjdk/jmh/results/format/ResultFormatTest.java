@@ -63,6 +63,7 @@ public class ResultFormatTest {
         Collection<RunResult> results = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
 
         Random r = new Random(12345);
+        Random ar = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
             WorkloadParams ps = new WorkloadParams();
             for (int p = 0; p < 5; p++) {
@@ -93,6 +94,9 @@ public class ResultFormatTest {
                     res.addResult(new ThroughputResult(ResultRole.PRIMARY, "test", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary1", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
                     res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary2", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
+                    if (ar.nextBoolean()) {
+                        res.addResult(new ThroughputResult(ResultRole.SECONDARY, "secondary3", ar.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));
+                    }
                     iterResults.add(res);
                 }
                 benchmarkResults.add(new BenchmarkResult(params, iterResults));
@@ -105,12 +109,10 @@ public class ResultFormatTest {
     private void compare(String actualFile, String goldenFile) throws IOException {
         BufferedReader actualReader = new BufferedReader(new FileReader(actualFile));
         BufferedReader goldenReader = new BufferedReader(new InputStreamReader(ResultFormatTest.class.getResourceAsStream("/org/openjdk/jmh/results/format/" + goldenFile)));
-        while (true) {
-            String goldenLine = goldenReader.readLine();
-            String actualLine = actualReader.readLine();
-            Assert.assertEquals("Mismatch", goldenLine, actualLine);
-            if (goldenLine == null && actualLine == null) break;
-        }
+
+        String actualLines = Utils.join(FileUtils.readAllLines(actualReader), "\n");
+        String goldenLines = Utils.join(FileUtils.readAllLines(goldenReader), "\n");
+        Assert.assertEquals("Mismatch", goldenLines, actualLines);
     }
 
     public void test(ResultFormatType type, Locale locale, String suffix) throws IOException {
