@@ -45,7 +45,7 @@ public class ResultFormatFactory {
             @Override
             public void writeOut(Collection<RunResult> results) {
                 try {
-                    PrintStream pw = new PrintStream(file);
+                    PrintStream pw = new PrintStream(file, "UTF-8");
                     ResultFormat rf = getInstance(type, pw);
                     rf.writeOut(results);
                     pw.flush();
