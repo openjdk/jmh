@@ -52,6 +52,15 @@ public class ScoreFormatter {
         }
     }
 
+    public static String formatLatex(double score) {
+        if (isApproximate(score)) {
+            int power = (int) Math.round(Math.log10(score));
+            return "$\\approx " + ((power != 0) ? "10^{" + power + "}" : "0") + "$";
+        } else {
+            return String.format("%." + PRECISION + "f", score);
+        }
+    }
+
     public static String formatError(double error) {
         return String.format("%." + PRECISION + "f", Math.max(error, ULP));
     }

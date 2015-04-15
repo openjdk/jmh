@@ -28,6 +28,7 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.ClassUtils;
+import org.openjdk.jmh.util.ScoreFormatter;
 
 import java.io.PrintStream;
 import java.util.Collection;
@@ -52,11 +53,14 @@ class LaTeXResultFormat implements ResultFormat {
 
         Set<String> units = new HashSet<String>();
         for (RunResult rr : results) {
+            String benchmark = rr.getParams().getBenchmark();
+            benchNames.add(benchmark);
             params.addAll(rr.getParams().getParamsKeys());
             units.add(rr.getPrimaryResult().getScoreUnit());
-            benchNames.add(rr.getParams().getBenchmark());
-            for (String label : rr.getSecondaryResults().keySet()) {
-                benchNames.add(rr.getParams().getBenchmark() + ":" + label);
+            Map<String, Result> secondaries = rr.getSecondaryResults();
+            for (String label : secondaries.keySet()) {
+                benchNames.add(benchmark + ":" + label);
+                units.add(secondaries.get(label).getScoreUnit());
             }
         }
 
@@ -68,14 +72,16 @@ class LaTeXResultFormat implements ResultFormat {
         printHeader(params, singleUnit, unit);
 
         for (RunResult rr : results) {
-            BenchmarkParams benchmarkParams = rr.getParams();
+            BenchmarkParams bp = rr.getParams();
+            String benchmark = bp.getBenchmark();
             Result res = rr.getPrimaryResult();
 
-            printLine(benchmarkParams.getBenchmark(), benchmarkParams, params, prefixes, singleUnit, res);
+            printLine(benchmark, bp, params, prefixes, singleUnit, res);
 
-            for (String label : rr.getSecondaryResults().keySet()) {
-                Result subRes = rr.getSecondaryResults().get(label);
-                printLine(benchmarkParams.getBenchmark() + ":" + label, benchmarkParams, params, prefixes, singleUnit, subRes);
+            Map<String, Result> secondaries = rr.getSecondaryResults();
+            for (String label : secondaries.keySet()) {
+                Result subRes = secondaries.get(label);
+                printLine(benchmark + ":" + label, bp, params, prefixes, singleUnit, subRes);
             }
         }
 
@@ -90,30 +96,33 @@ class LaTeXResultFormat implements ResultFormat {
         out.print("rl" + (singleUnit ? "" : "l") + "}\n");
         out.print(" \\multicolumn{1}{c|}{\\texttt{Benchmark}} & ");
         for (String p : params) {
-            out.printf("\\texttt{%s}", p);
-            out.print(" & ");
+            out.printf("\\texttt{%s} & ", p);
         }
-        out.print(" \\multicolumn{" + (singleUnit ? 2 : 3) + "}{c}{\\texttt{Score" + (singleUnit ? ", " + unit : "") + "}} \\\\\n");
+        out.print("\\multicolumn{" + (singleUnit ? 2 : 3) + "}{c}{\\texttt{Score" + (singleUnit ? ", " + unit : "") + "}} \\\\\n");
         out.print("\\hline\n");
     }
 
-    private void printFooter() {out.print("\\end{tabular}");}
+    private void printFooter() {
+        out.print("\\end{tabular}");
+    }
 
     private void printLine(String label, BenchmarkParams benchParams, SortedSet<String> params,
                            Map<String, String> prefixes, boolean singleUnit, Result res) {
         out.printf("\\texttt{%s} & ", escape(prefixes.get(label)));
         for (String p : params) {
-            out.printf("\\texttt{%s}", escape(benchParams.getParam(p)));
-            out.print(" & ");
+            out.printf("\\texttt{%s} & ", escape(benchParams.getParam(p)));
         }
-        out.printf("\\texttt{%5.3f} & ", res.getScore());
-        out.printf("\\scriptsize $\\pm$ \\texttt{%5.3f}", res.getScoreError());
-        if (!singleUnit) {
-            out.printf(" & \\texttt{%s}", res.getScoreUnit());
-        }
-        out.print(" \\\\");
+        out.printf("\\texttt{%s} & ", ScoreFormatter.formatLatex(res.getScore()));
 
-        out.print("\n");
+        if (!Double.isNaN(res.getScoreError()) && !ScoreFormatter.isApproximate(res.getScore())) {
+            out.printf("\\scriptsize $\\pm$ \\texttt{%s} ", ScoreFormatter.formatError(res.getScoreError()));
+        }
+
+        if (!singleUnit) {
+            out.print("& ");
+            out.printf("\\texttt{%s}", res.getScoreUnit());
+        }
+        out.print(" \\\\\n");
     }
 
     private static String escape(String s) {
