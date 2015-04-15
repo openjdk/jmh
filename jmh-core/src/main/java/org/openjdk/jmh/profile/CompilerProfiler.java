@@ -34,11 +34,12 @@ import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class CompilerProfiler implements InternalProfiler {
 
-    private long startCompTime = -1;
+    private long startCompTime;
 
     @Override
     public String getDescription() {
@@ -67,24 +68,22 @@ public class CompilerProfiler implements InternalProfiler {
         try {
             startCompTime = comp.getTotalCompilationTime();
         } catch (UnsupportedOperationException e) {
-            startCompTime = -1;
+            // do nothing
         }
     }
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
-        long compTime = -startCompTime;
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
-            compTime += comp.getTotalCompilationTime();
+            long curTime = comp.getTotalCompilationTime();
+            return Arrays.asList(
+                new ProfilerResult(Defaults.PREFIX + "compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
+                new ProfilerResult(Defaults.PREFIX + "compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
+            );
         } catch (UnsupportedOperationException e) {
-            compTime = -1;
+            return Collections.emptyList();
         }
-
-        return Arrays.asList(
-                new ProfilerResult(Defaults.PREFIX + "compiler.time.profiled", compTime, "ms", AggregationPolicy.SUM),
-                new ProfilerResult(Defaults.PREFIX + "compiler.time.total", comp.getTotalCompilationTime(), "ms", AggregationPolicy.MAX)
-        );
     }
 
 }

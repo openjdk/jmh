@@ -32,14 +32,14 @@ import org.openjdk.jmh.results.Result;
 
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class ClassloaderProfiler implements InternalProfiler {
 
-    private long loadedClasses = -1;
-    private long unloadedClasses = -1;
+    private long loadedClasses;
+    private long unloadedClasses;
 
     @Override
     public String getDescription() {
@@ -60,47 +60,43 @@ public class ClassloaderProfiler implements InternalProfiler {
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
         try {
-            loadedClasses = cl.getLoadedClassCount();
+            loadedClasses = cl.getTotalLoadedClassCount();
         } catch (UnsupportedOperationException e) {
-            loadedClasses = -1;
+            // do nothing
         }
         try {
             unloadedClasses = cl.getUnloadedClassCount();
         } catch (UnsupportedOperationException e) {
-            unloadedClasses = -1;
+            // do nothing
         }
     }
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
-        long loaded;
-        long unloaded;
+        List<Result> results = new ArrayList<Result>();
+
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
 
-        int loadedClassCount;
         try {
-            loadedClassCount = cl.getLoadedClassCount();
-            loaded = loadedClassCount - loadedClasses;
+            long loadedClassCount = cl.getTotalLoadedClassCount();
+            long loaded = loadedClassCount - loadedClasses;
+            results.add(new ProfilerResult(Defaults.PREFIX + "classload.loaded.profiled", loaded, "classes", AggregationPolicy.SUM));
+            results.add(new ProfilerResult(Defaults.PREFIX + "classload.loaded.total", loadedClassCount, "classes", AggregationPolicy.MAX));
         } catch (UnsupportedOperationException e) {
-            loaded = -1;
-            loadedClassCount = -1;
+            // do nothing
         }
 
-        long unloadedClassCount;
         try {
-            unloadedClassCount = cl.getUnloadedClassCount();
-            unloaded = unloadedClassCount - unloadedClasses;
+            long unloadedClassCount = cl.getUnloadedClassCount();
+            long unloaded = unloadedClassCount - unloadedClasses;
+            results.add(new ProfilerResult(Defaults.PREFIX + "classload.unloaded.profiled", unloaded, "classes", AggregationPolicy.SUM));
+            results.add(new ProfilerResult(Defaults.PREFIX + "classload.unloaded.total", unloadedClassCount, "classes", AggregationPolicy.MAX));
+
         } catch (UnsupportedOperationException e) {
-            unloaded = -1;
-            unloadedClassCount = -1;
+            // do nothing
         }
 
-        return Arrays.asList(
-                new ProfilerResult(Defaults.PREFIX + "classload.loaded.profiled", loaded, "classes", AggregationPolicy.SUM),
-                new ProfilerResult(Defaults.PREFIX + "classload.unloaded.profiled", unloaded, "classes", AggregationPolicy.SUM),
-                new ProfilerResult(Defaults.PREFIX + "classload.loaded.total", loadedClassCount, "classes", AggregationPolicy.MAX),
-                new ProfilerResult(Defaults.PREFIX + "classload.unloaded.total", unloadedClassCount, "classes", AggregationPolicy.MAX)
-        );
+        return results;
     }
 
 }
