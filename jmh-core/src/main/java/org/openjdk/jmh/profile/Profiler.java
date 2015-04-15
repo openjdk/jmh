@@ -38,7 +38,7 @@ public interface Profiler {
     /**
      * Check the support for a given profiler.
      * @param msgs where to put the diagnostic messages
-     * @return true, if suppported
+     * @return true, if supported
      */
     boolean checkSupport(List<String> msgs);
 

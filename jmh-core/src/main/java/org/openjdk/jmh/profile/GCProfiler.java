@@ -40,12 +40,14 @@ import javax.management.openmbean.CompositeData;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +58,7 @@ public class GCProfiler implements InternalProfiler {
     private long beforeTime;
     private long beforeGCCount;
     private long beforeGCTime;
+    private HotspotAllocationSnapshot beforeAllocated;
     private final NotificationListener listener;
     private volatile Multiset<String> churn;
     private Set<String> observedSpaces;
@@ -87,6 +90,7 @@ public class GCProfiler implements InternalProfiler {
                                 MemoryUsage after = entry.getValue();
                                 MemoryUsage before = mapBefore.get(name);
                                 long c = before.getUsed() - after.getUsed();
+                                // Reporting code uses observedSpaces, so it reports 0 even if we omit adding
                                 if (c > 0) {
                                     churn.add(name, c);
                                     observedSpaces.add(name);
@@ -138,6 +142,7 @@ public class GCProfiler implements InternalProfiler {
         }
         this.beforeGCCount = gcCount;
         this.beforeGCTime = gcTime;
+        this.beforeAllocated = HotspotAllocationSnapshot.create();
         this.beforeTime = System.nanoTime();
     }
 
@@ -145,6 +150,8 @@ public class GCProfiler implements InternalProfiler {
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iResult) {
         uninstallHooks();
         long afterTime = System.nanoTime();
+
+        HotspotAllocationSnapshot newSnapshot = HotspotAllocationSnapshot.create();
 
         long gcTime = 0;
         long gcCount = 0;
@@ -154,6 +161,27 @@ public class GCProfiler implements InternalProfiler {
         }
 
         List<ProfilerResult> results = new ArrayList<ProfilerResult>();
+
+        if (beforeAllocated == HotspotAllocationSnapshot.EMPTY) {
+            // When allocation profiling fails, make sure it is distinguishable in report
+            results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate",
+                    Double.NaN,
+                    "MB/sec", AggregationPolicy.AVG));
+        } else {
+            long allocated = newSnapshot.subtract(beforeAllocated);
+            // When no allocations measured, we still need to report results to avoid measurement bias.
+            results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate",
+                            (afterTime != beforeTime) ?
+                                    1.0 * allocated / 1024 / 1024 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) :
+                                    Double.NaN,
+                            "MB/sec", AggregationPolicy.AVG));
+            long allOps = iResult.getMetadata().getAllOps();
+            results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate.norm",
+                            (allOps != 0) ?
+                                    1.0 * allocated / allOps :
+                                    Double.NaN,
+                            "B/op", AggregationPolicy.AVG));
+        }
 
         results.add(new ProfilerResult(
                 Defaults.PREFIX + "gc.count",
@@ -168,17 +196,22 @@ public class GCProfiler implements InternalProfiler {
                 AggregationPolicy.SUM));
 
         for (String space : observedSpaces) {
-            double churnRate = 1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime);
+            double churnRate = (afterTime != beforeTime) ?
+                    1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) / 1024 / 1024 :
+                    Double.NaN;
+
+            double churnNorm = 1.0 * churn.count(space) / iResult.getMetadata().getAllOps();
+
             String spaceName = space.replaceAll(" ", "_");
 
             results.add(new ProfilerResult(
                     Defaults.PREFIX + "gc.churn." + spaceName + "",
-                    churnRate / 1024 / 1024,
+                    churnRate,
                     "MB/sec",
                     AggregationPolicy.AVG));
 
             results.add(new ProfilerResult(Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
-                    churnRate / iResult.getMetadata().getAllOps(),
+                    churnNorm,
                     "B/op",
                     AggregationPolicy.AVG));
         }
@@ -208,6 +241,99 @@ public class GCProfiler implements InternalProfiler {
             } catch (ListenerNotFoundException e) {
                 // Do nothing
             }
+        }
+    }
+
+    static class HotspotAllocationSnapshot {
+        public final static HotspotAllocationSnapshot EMPTY = new HotspotAllocationSnapshot(new long[0], new long[0]);
+
+        // Volatiles are here for lazy initialization.
+        // Initialization in <clinit> was banned as having a "severe startup overhead"
+        private static volatile Method GET_THREAD_ALLOCATED_BYTES;
+        private static volatile boolean allocationNotAvailable;
+
+        private final long[] threadIds;
+        private final long[] allocatedBytes;
+
+        private HotspotAllocationSnapshot(long[] threadIds, long[] allocatedBytes) {
+            this.threadIds = threadIds;
+            this.allocatedBytes = allocatedBytes;
+        }
+
+        /**
+         * Takes a snapshot of thread allocation counters.
+         * The method might allocate, however it is assumed that allocations made by "current thread" will
+         * be excluded from the result while performing {@link HotspotAllocationSnapshot#subtract(HotspotAllocationSnapshot)}
+         *
+         * @return snapshot of thread allocation counters
+         */
+        public static HotspotAllocationSnapshot create() {
+            Method getBytes = getAllocatedBytesGetter();
+            if (getBytes == null) {
+                return HotspotAllocationSnapshot.EMPTY;
+            }
+            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+            try {
+                long[] threadIds = threadMXBean.getAllThreadIds();
+                long[] allocatedBytes = (long[]) getBytes.invoke(threadMXBean, (Object) threadIds);
+                return new HotspotAllocationSnapshot(threadIds, allocatedBytes);
+            } catch (IllegalAccessException e) {
+                // intentionally left blank
+            } catch (InvocationTargetException e) {
+                // intentionally left blank
+            }
+            // In exceptional cases, assume information is not available
+            return HotspotAllocationSnapshot.EMPTY;
+        }
+
+        /**
+         * Estimates allocated bytes based on two snapshots.
+         * The problem is threads can come and go while performing the benchmark,
+         * thus we would miss allocations made in a thread that was created and died between the snapshots.
+         * <p/>
+         * <p>Current thread is intentionally excluded since it believed to execute jmh infrastructure code only.
+         *
+         * @return estimated number of allocated bytes between profiler calls
+         */
+        public long subtract(HotspotAllocationSnapshot other) {
+            HashMap<Long, Integer> prevIndex = new HashMap<Long, Integer>();
+            for (int i = 0; i < other.threadIds.length; i++) {
+                long id = other.threadIds[i];
+                prevIndex.put(id, i);
+            }
+            long currentThreadId = Thread.currentThread().getId();
+            long allocated = 0;
+            for (int i = 0; i < threadIds.length; i++) {
+                long id = threadIds[i];
+                if (id == currentThreadId) {
+                    continue;
+                }
+                allocated += allocatedBytes[i];
+                Integer prev = prevIndex.get(id);
+                if (prev != null) {
+                    allocated -= other.allocatedBytes[prev];
+                }
+            }
+            return allocated;
+        }
+
+        private static Method getAllocatedBytesGetter() {
+            Method getBytes = GET_THREAD_ALLOCATED_BYTES;
+            if (getBytes != null || allocationNotAvailable) {
+                return getBytes;
+            }
+            // We do not care to execute reflection code multiple times if it fails
+            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+            try {
+                getBytes = threadMXBean.getClass().getMethod("getThreadAllocatedBytes", long[].class);
+                getBytes.setAccessible(true);
+            } catch (Throwable e) { // To avoid jmh failure in case of incompatible JDK and/or inaccessible method
+                getBytes = null;
+                allocationNotAvailable = true;
+                System.out.println("Allocation profiling is not available: " + e.getMessage());
+            }
+            GET_THREAD_ALLOCATED_BYTES = getBytes;
+            return getBytes;
         }
     }
 
