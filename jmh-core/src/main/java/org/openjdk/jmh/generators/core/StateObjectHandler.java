@@ -465,21 +465,24 @@ class StateObjectHandler {
             if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
 
             if (type == HelperType.SETUP) {
-                result.add("while(!" + so.type + ".setup" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
-                result.add("    if (Thread.interrupted()) throw new InterruptedException();");
-                result.add("}");
-                result.add("try {");
-                result.add("    if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                result.add("if (" + so.type + ".setup" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
+                result.add("    try {");
+                result.add("        if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
                         Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add("        " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
                     }
                 }
-                result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = true;");
+                result.add("            " + so.localIdentifier + ".ready" + helperLevel + " = true;");
+                result.add("        }");
+                result.add("    } finally {");
+                result.add("        " + so.type + ".setup" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("    }");
-                result.add("} finally {");
-                result.add("    " + so.type + ".setup" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
+                result.add("} else {");
+                result.add("    while (" + so.type + ".setup" + helperLevel + "MutexUpdater.get(" + so.localIdentifier + ") == 1) {");
+                result.add("        if (Thread.interrupted()) throw new InterruptedException();");
+                result.add("    }");
                 result.add("}");
             }
         }
@@ -488,21 +491,24 @@ class StateObjectHandler {
             if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
 
             if (type == HelperType.TEARDOWN) {
-                result.add("while(!" + so.type + ".tear" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
-                result.add("    if (Thread.interrupted()) throw new InterruptedException();");
-                result.add("}");
-                result.add("try {");
-                result.add("    if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
+                result.add("if (" + so.type + ".tear" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
+                result.add("    try {");
+                result.add("        if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
                         Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add("        " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
                     }
                 }
-                result.add("        " + so.localIdentifier + ".ready" + helperLevel + " = false;");
+                result.add("            " + so.localIdentifier + ".ready" + helperLevel + " = false;");
+                result.add("        }");
+                result.add("    } finally {");
+                result.add("        " + so.type + ".tear" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("    }");
-                result.add("} finally {");
-                result.add("    " + so.type + ".tear" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
+                result.add("} else {");
+                result.add("    while (" + so.type + ".tear" + helperLevel + "MutexUpdater.get(" + so.localIdentifier + ") == 1) {");
+                result.add("        if (Thread.interrupted()) throw new InterruptedException();");
+                result.add("    }");
                 result.add("}");
             }
         }
