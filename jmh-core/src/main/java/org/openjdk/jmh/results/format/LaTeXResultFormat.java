@@ -120,13 +120,14 @@ class LaTeXResultFormat implements ResultFormat {
 
         if (!singleUnit) {
             out.print("& ");
-            out.printf("\\texttt{%s}", res.getScoreUnit());
+            out.printf("\\texttt{%s}", escape(res.getScoreUnit()));
         }
         out.print(" \\\\\n");
     }
 
     private static String escape(String s) {
-        return s.replaceAll("_", "\\\\_");
+        return s.replaceAll("_", "\\\\_")
+                .replaceAll("#", "\\\\#");
     }
 
 }
