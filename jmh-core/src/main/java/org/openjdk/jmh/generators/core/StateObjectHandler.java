@@ -506,7 +506,21 @@ class StateObjectHandler {
                 result.add("        " + so.type + ".tear" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("    }");
                 result.add("} else {");
+
+                // We don't need to actively busy-wait for Trial, it is way past the measurement window,
+                // and we would not need measurement threads anymore after this is over. Therefore, it
+                // is OK to exponentially back off.
+                if (helperLevel == Level.Trial) {
+                    result.add("    long " + so.localIdentifier + "_backoff = 1;");
+                }
+
                 result.add("    while (" + so.type + ".tear" + helperLevel + "MutexUpdater.get(" + so.localIdentifier + ") == 1) {");
+
+                if (helperLevel == Level.Trial) {
+                    result.add("        TimeUnit.MILLISECONDS.sleep(" + so.localIdentifier + "_backoff);");
+                    result.add("        " + so.localIdentifier + "_backoff = Math.max(1024, " + so.localIdentifier + "_backoff * 2);");
+                }
+
                 result.add("        if (Thread.interrupted()) throw new InterruptedException();");
                 result.add("    }");
                 result.add("}");
