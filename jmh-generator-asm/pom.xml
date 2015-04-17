@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>1.9-SNAPSHOT</version>
+        <version>1.9</version>
     </parent>
 
     <name>JMH Generators: ASM</name>
