@@ -24,23 +24,22 @@
  */
 package org.openjdk.jmh.util;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Deduplicator<T> {
 
     final Map<T, T> map;
 
     public Deduplicator() {
-        map = new HashMap<T, T>();
+        map = new ConcurrentHashMap<T, T>();
     }
 
     public T dedup(T t) {
-        T et = map.get(t);
+        T et = map.putIfAbsent(t, t);
         if (et != null) {
             return et;
         } else {
-            map.put(t, t);
             return t;
         }
     }
