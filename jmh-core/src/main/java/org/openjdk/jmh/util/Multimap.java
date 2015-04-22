@@ -26,6 +26,7 @@ package org.openjdk.jmh.util;
 
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Basic Multimap.
@@ -56,6 +57,13 @@ public interface Multimap<K, V> {
      * @return collection of values
      */
     Collection<V> get(K key);
+
+    /**
+     * Get all associations of the multimap.
+     * The method is intended for read-only view.
+     * @return entry set of the multimap
+     */
+    Collection<Map.Entry<K, Collection<V>>> entrySet();
 
     /**
      * Checks if multimap is empty

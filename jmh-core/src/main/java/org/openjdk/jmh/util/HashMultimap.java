@@ -25,102 +25,13 @@
 package org.openjdk.jmh.util;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
-public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
+public class HashMultimap<K, V> extends DelegatingMultimap<K, V> implements Serializable {
     private static final long serialVersionUID = 2484428623123444998L;
 
-    private final Map<K, Collection<V>> map;
-
     public HashMultimap() {
-        map = new HashMap<K, Collection<V>>();
-    }
-
-    @Override
-    public void put(K key, V value) {
-        Collection<V> vs = map.get(key);
-        if (vs == null) {
-            vs = new ArrayList<V>();
-            map.put(key, vs);
-        }
-        vs.add(value);
-    }
-
-    @Override
-    public void putAll(K key, Collection<V> vvs) {
-        Collection<V> vs = map.get(key);
-        if (vs == null) {
-            vs = new ArrayList<V>();
-            map.put(key, vs);
-        }
-        vs.addAll(vvs);
-    }
-
-    @Override
-    public Collection<V> get(K key) {
-        Collection<V> vs = map.get(key);
-        return (vs == null) ? Collections.<V>emptyList() : Collections.unmodifiableCollection(vs);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public void clear() {
-        map.clear();
-    }
-
-    @Override
-    public Collection<K> keys() {
-        return map.keySet();
-    }
-
-    @Override
-    public Collection<V> values() {
-        Collection<V> result = new ArrayList<V>();
-        for (Collection<V> vs : map.values()) {
-            result.addAll(vs);
-        }
-        return result;
-    }
-
-    @Override
-    public void remove(K key) {
-        map.remove(key);
-    }
-
-    @Override
-    public void merge(Multimap<K, V> other) {
-        for (K k : other.keys()) {
-            putAll(k, other.get(k));
-        }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        HashMultimap that = (HashMultimap) o;
-
-        if (!map.equals(that.map)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return map.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return map.toString();
+        super(new HashMap<K, Collection<V>>());
     }
 }

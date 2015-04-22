@@ -25,6 +25,7 @@
 package org.openjdk.jmh.util;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Basic Multiset.
@@ -54,6 +55,13 @@ public interface Multiset<T> {
      * @return number of matching elements in the set; zero, if no elements
      */
     long count(T element);
+
+    /**
+     * Get all associations of the multiset.
+     * Each entry provides a key and a count of that element.
+     * @return entry set of the multiset
+     */
+    Collection<Map.Entry<T, Long>> entrySet();
 
     /**
      * Answers if Multiset is empty
