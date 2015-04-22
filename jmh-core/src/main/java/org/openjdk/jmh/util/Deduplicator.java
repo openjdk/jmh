@@ -24,12 +24,12 @@
  */
 package org.openjdk.jmh.util;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class Deduplicator<T> {
 
-    final Map<T, T> map;
+    final ConcurrentMap<T, T> map;
 
     public Deduplicator() {
         map = new ConcurrentHashMap<T, T>();
