@@ -24,32 +24,28 @@
  */
 package org.openjdk.jmh.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class Multisets {
 
-    public static <T> Collection<T> countHighest(Multiset<T> set, int top) {
-        // crude and inefficient
-        PriorityQueue<Pair<T, Long>> q = new PriorityQueue<Pair<T, Long>>(10, new Comparator<Pair<T, Long>>() {
+    public static <T> List<T> countHighest(Multiset<T> set, int top) {
+        Queue<Map.Entry<T, Long>> q = new BoundedPriorityQueue<Map.Entry<T, Long>>(top, new Comparator<Map.Entry<T, Long>>() {
             @Override
-            public int compare(Pair<T, Long> o1, Pair<T, Long> o2) {
-                return o2.k2.compareTo(o1.k2);
+            public int compare(Map.Entry<T, Long> o1, Map.Entry<T, Long> o2) {
+                return o2.getValue().compareTo(o1.getValue());
             }
         });
 
-        for (T key : set.keys()) {
-            q.add(new Pair<T, Long>(key, set.count(key)));
+        q.addAll(set.entrySet());
+
+        List<T> result = new ArrayList<T>(q.size());
+
+        for (Map.Entry<T, Long> pair : q) {
+            result.add(pair.getKey());
         }
 
-        List<T> result = new ArrayList<T>();
-        for (int t = 0; (t < top && !q.isEmpty()); t++) {
-            result.add(q.poll().k1);
-        }
+        // BoundedPriorityQueue returns "smallest to largest", so we reverse the result
+        Collections.reverse(result);
 
         return result;
     }
@@ -65,16 +61,6 @@ public class Multisets {
             }
         });
         return sorted;
-    }
-
-    private static class Pair<K1, K2> {
-        public final K1 k1;
-        public final K2 k2;
-
-        private Pair(K1 k1, K2 k2) {
-            this.k1 = k1;
-            this.k2 = k2;
-        }
     }
 
 }
