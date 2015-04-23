@@ -25,23 +25,14 @@
 package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.util.Deduplicator;
-import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.Multiset;
-import org.openjdk.jmh.util.TreeMultiset;
-import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.*;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigInteger;
+import java.util.*;
 
 public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
@@ -185,19 +176,26 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
                     continue;
                 }
 
+                // Try to parse the positive address lightly first.
+                // If that fails, try to parse the negative address.
+                // If that fails as well, then address is unresolvable.
+                Long addr;
                 try {
-                    Long addr = Long.valueOf(strAddr, 16);
-                    evs.add(addr);
-                    methods.put(addr, dedup.dedup(symbol));
-                    libs.put(addr, dedup.dedup(lib));
+                    addr = Long.valueOf(strAddr, 16);
                 } catch (NumberFormatException e) {
-                    // kernel addresses like "ffffffff810c1b00" overflow signed long,
-                    // record them as dummy address
-                    evs.add(0L);
+                    try {
+                        addr = new BigInteger(strAddr, 16).longValue();
+                    } catch (NumberFormatException e1) {
+                        addr = 0L;
+                    }
                 }
+
+                evs.add(addr);
+                methods.put(addr, dedup.dedup(symbol));
+                libs.put(addr, dedup.dedup(lib));
             }
 
-            methods.put(0L, "<kernel>");
+            methods.put(0L, "<unknown>");
 
             return new PerfEvents(tracedEvents, events, methods, libs);
         } catch (IOException e) {

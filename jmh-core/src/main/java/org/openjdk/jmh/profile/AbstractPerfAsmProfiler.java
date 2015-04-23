@@ -26,41 +26,11 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.BenchmarkResult;
-import org.openjdk.jmh.results.BenchmarkResultMetaData;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.HashMultimap;
-import org.openjdk.jmh.util.HashMultiset;
-import org.openjdk.jmh.util.Multimap;
-import org.openjdk.jmh.util.Multiset;
-import org.openjdk.jmh.util.Multisets;
-import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.results.*;
+import org.openjdk.jmh.util.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -633,7 +603,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         Long lastAddr = null;
         for (Long addr : addrs) {
             if (addr == 0) {
-                regions.add(new KernelRegion());
+                regions.add(new UnknownRegion());
                 continue;
             }
 
@@ -1053,19 +1023,19 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    static class KernelRegion extends Region {
-        KernelRegion() {
-            super("<kernel>", 0L, 0L, Collections.singleton(0L));
+    static class UnknownRegion extends Region {
+        UnknownRegion() {
+            super("<unknown>", 0L, 0L, Collections.singleton(0L));
         }
 
         @Override
         public void printCode(PrintWriter pw, PerfEvents events) {
-            pw.println(" <no assembly is recorded, kernel region>");
+            pw.println(" <no assembly is recorded, unknown region>");
         }
 
         @Override
         public String getType() {
-            return "<kernel>";
+            return "<unknown>";
         }
     }
 }
