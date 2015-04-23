@@ -51,4 +51,8 @@ public class ProfilerResult extends Result<ProfilerResult> {
         return new ProfilerResultAggregator();
     }
 
+    @Override
+    protected ProfilerResult getZeroResult() {
+        return new ProfilerResult(label, 0, unit, policy);
+    }
 }

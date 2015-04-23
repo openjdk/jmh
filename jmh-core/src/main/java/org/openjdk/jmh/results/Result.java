@@ -171,6 +171,15 @@ public abstract class Result<T extends Result<T>> implements Serializable {
     protected abstract Aggregator<T> getIterationAggregator();
 
     /**
+     * Returns "0" result. This is used for un-biased aggregation of secondary results.
+     * For instance, profilers might omit results in some iterations, thus we should pretend there were 0 results.
+     * @return result that represents "empty" result, null if no sensible "empty" result can be created
+     */
+    protected T getZeroResult() {
+        return null;
+    }
+
+    /**
      * Result as represented by a String.
      *
      * @return String with the result and unit

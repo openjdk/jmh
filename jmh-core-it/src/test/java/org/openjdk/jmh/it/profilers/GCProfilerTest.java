@@ -25,20 +25,13 @@
 package org.openjdk.jmh.it.profilers;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -47,13 +40,21 @@ import java.util.concurrent.TimeUnit;
  * Tests allocation profiler.
  */
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Fork(1) // 0 to enable debugging
 public class GCProfilerTest {
 
     @Benchmark
-    @Warmup(iterations = 2)
-    @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 20, time = 10, timeUnit = TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
-    @Fork(1)
+    public Object allocateObjectNoWarmup() {
+        return new Object();
+    }
+
+    @Benchmark
+    @Warmup(iterations = 2)
+    @Measurement(iterations = 2, time = 2, timeUnit = TimeUnit.SECONDS)
+    @BenchmarkMode(Mode.AverageTime)
     public Object allocateObject() {
         return new Object();
     }
@@ -62,16 +63,14 @@ public class GCProfilerTest {
     @Warmup(iterations = 2)
     @Measurement(iterations = 5)
     @BenchmarkMode(Mode.SingleShotTime)
-    @Fork(1)
     public Object allocateObjectSingleShot() {
         return new Object();
     }
 
     @Benchmark
     @Warmup(iterations = 2)
-    @Measurement(iterations = 1)
+    @Measurement(iterations = 1, time = 2, timeUnit = TimeUnit.SECONDS)
     @BenchmarkMode(Mode.SampleTime)
-    @Fork(1)
     public Object allocateObjectSampleTime() {
         return new Object();
     }
@@ -87,7 +86,6 @@ public class GCProfilerTest {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .addProfiler(GCProfiler.class)
-                .measurementTime(TimeValue.seconds(2))
                 .build();
         new Runner(opts).run();
     }

@@ -31,9 +31,7 @@ import org.openjdk.jmh.util.Multimap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -101,26 +99,43 @@ public class BenchmarkResult implements Serializable {
     }
 
     public Map<String, Result> getSecondaryResults() {
-        Set<String> labels = new HashSet<String>();
-        for (IterationResult r : iterationResults) {
-            labels.addAll(r.getSecondaryResults().keySet());
+        // label -> collection of results
+        Multimap<String, Result> allSecondary = new HashMultimap<String, Result>();
+
+        // Build multiset of all results to capture if some labels are missing in some of the iterations
+        for (IterationResult ir : iterationResults) {
+            Map<String, Result> secondaryResults = ir.getSecondaryResults();
+            for (Map.Entry<String, Result> entry : secondaryResults.entrySet()) {
+                allSecondary.put(entry.getKey(), entry.getValue());
+            }
         }
 
         Map<String, Result> answers = new TreeMap<String, Result>();
-        for (String label : labels) {
-            Aggregator<Result> aggregator = null;
-            Collection<Result> results = new ArrayList<Result>();
-            for (IterationResult r : iterationResults) {
-                Result e = r.getSecondaryResults().get(label);
-                if (e != null) {
-                    results.add(e);
-                    aggregator = e.getIterationAggregator();
+
+        int totalIterations = iterationResults.size();
+        // Create "0" entries in case certain labels did not appear in some of the iterations
+        for (String label : allSecondary.keys()) {
+            Collection<Result> results = allSecondary.get(label);
+            Result firstResult = results.iterator().next();
+            Result emptyResult = firstResult.getZeroResult();
+            if (emptyResult != null) {
+                for (int i = results.size(); i < totalIterations; i++) {
+                    allSecondary.put(label, emptyResult);
                 }
             }
-
-            if (aggregator != null) {
-                answers.put(label, aggregator.aggregate(results));
+            @SuppressWarnings("unchecked")
+            Aggregator<Result> aggregator = firstResult.getIterationAggregator();
+            if (aggregator == null) {
+                if (results.size() == 1) {
+                    answers.put(label, firstResult);
+                    continue;
+                }
+                throw new IllegalStateException("No aggregator for " + firstResult);
             }
+
+            // Note: should not use "results" here since the contents was just updated by "put" above
+            Result aggregate = aggregator.aggregate(allSecondary.get(label));
+            answers.put(label, aggregate);
         }
 
         for (String label : benchmarkResults.keys()) {

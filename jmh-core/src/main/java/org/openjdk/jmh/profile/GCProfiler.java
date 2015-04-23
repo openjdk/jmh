@@ -44,14 +44,7 @@ import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class GCProfiler implements InternalProfiler {
@@ -61,11 +54,9 @@ public class GCProfiler implements InternalProfiler {
     private HotspotAllocationSnapshot beforeAllocated;
     private final NotificationListener listener;
     private volatile Multiset<String> churn;
-    private Set<String> observedSpaces;
 
     public GCProfiler() {
         churn = new HashMultiset<String>();
-        observedSpaces = Collections.synchronizedSet(new HashSet<String>());
 
         NotificationListener listener = null;
         try {
@@ -90,10 +81,8 @@ public class GCProfiler implements InternalProfiler {
                                 MemoryUsage after = entry.getValue();
                                 MemoryUsage before = mapBefore.get(name);
                                 long c = before.getUsed() - after.getUsed();
-                                // Reporting code uses observedSpaces, so it reports 0 even if we omit adding
                                 if (c > 0) {
                                     churn.add(name, c);
-                                    observedSpaces.add(name);
                                 }
                             }
                         }
@@ -169,18 +158,20 @@ public class GCProfiler implements InternalProfiler {
                     "MB/sec", AggregationPolicy.AVG));
         } else {
             long allocated = newSnapshot.subtract(beforeAllocated);
-            // When no allocations measured, we still need to report results to avoid measurement bias.
+            // When no allocations measured, we still need to report results to avoid user confusion
             results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate",
                             (afterTime != beforeTime) ?
                                     1.0 * allocated / 1024 / 1024 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) :
                                     Double.NaN,
                             "MB/sec", AggregationPolicy.AVG));
-            long allOps = iResult.getMetadata().getAllOps();
-            results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate.norm",
-                            (allOps != 0) ?
-                                    1.0 * allocated / allOps :
-                                    Double.NaN,
-                            "B/op", AggregationPolicy.AVG));
+            if (allocated != 0) {
+                long allOps = iResult.getMetadata().getAllOps();
+                results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate.norm",
+                                (allOps != 0) ?
+                                        1.0 * allocated / allOps :
+                                        Double.NaN,
+                                "B/op", AggregationPolicy.AVG));
+            }
         }
 
         results.add(new ProfilerResult(
@@ -189,13 +180,15 @@ public class GCProfiler implements InternalProfiler {
                 "counts",
                 AggregationPolicy.SUM));
 
-        results.add(new ProfilerResult(
-                Defaults.PREFIX + "gc.time",
-                gcTime - beforeGCTime,
-                "ms",
-                AggregationPolicy.SUM));
+        if (gcCount != beforeGCCount || gcTime != beforeGCTime) {
+            results.add(new ProfilerResult(
+                    Defaults.PREFIX + "gc.time",
+                    gcTime - beforeGCTime,
+                    "ms",
+                    AggregationPolicy.SUM));
+        }
 
-        for (String space : observedSpaces) {
+        for (String space : churn.keys()) {
             double churnRate = (afterTime != beforeTime) ?
                     1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) / 1024 / 1024 :
                     Double.NaN;
