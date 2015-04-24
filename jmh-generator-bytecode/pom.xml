@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>1.9.1</version>
+        <version>1.10-SNAPSHOT</version>
     </parent>
 
     <name>JMH Generators: Bytecode</name>
