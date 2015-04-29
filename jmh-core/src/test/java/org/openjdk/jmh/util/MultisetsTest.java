@@ -47,6 +47,23 @@ public class MultisetsTest {
     }
 
     @Test
+    public void testCountHighest_2() {
+        // Regression test for CODETOOLS-7901411
+
+        Multiset<String> set = new HashMultiset<String>();
+        set.add("Meh", 85);
+        set.add("Blah", 17);
+        set.add("Choo", 1);
+
+        List<String> top = Multisets.countHighest(set, 3);
+
+        Assert.assertEquals(3, top.size());
+        Assert.assertEquals("Meh", top.get(0));
+        Assert.assertEquals("Blah", top.get(1));
+        Assert.assertEquals("Choo", top.get(2));
+    }
+
+    @Test
     public void testSortedDesc() {
         Multiset<Integer> set = new HashMultiset<Integer>();
         set.add(10);

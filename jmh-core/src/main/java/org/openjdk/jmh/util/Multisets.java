@@ -40,7 +40,8 @@ public class Multisets {
 
         List<T> result = new ArrayList<T>(q.size());
 
-        for (Map.Entry<T, Long> pair : q) {
+        Map.Entry<T, Long> pair;
+        while ((pair = q.poll()) != null) {
             result.add(pair.getKey());
         }
 
