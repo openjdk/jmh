@@ -32,12 +32,7 @@ import org.openjdk.jmh.results.Result;
 import sun.management.counter.Counter;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 abstract class AbstractHotspotProfiler implements InternalProfiler {
 
@@ -69,7 +64,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
         HotspotInternalResult res = counters();
         Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
-            results.add(new ProfilerResult(Defaults.PREFIX + "unknown." + e.getKey(), e.getValue(), "unit?", AggregationPolicy.AVG));
+            results.add(new ProfilerResult(Defaults.PREFIX + label() + "." + e.getKey(), e.getValue(), "?", AggregationPolicy.AVG));
         }
         return results;
     }
