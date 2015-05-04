@@ -24,19 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Reader;
+import java.io.*;
 import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,32 +56,21 @@ public class FileUtils {
     public static File extractFromResource(String name) throws IOException {
         InputStream fis = null;
         OutputStream fos = null;
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
         try {
-            fis = FileUtils.class.getResourceAsStream(name);
-            bis = new BufferedInputStream(fis);
-
             File temp = FileUtils.tempFile("extracted");
-
+            fis = FileUtils.class.getResourceAsStream(name);
             fos = new FileOutputStream(temp);
-            bos = new BufferedOutputStream(fos);
-            byte[] b = new byte[1024];
 
-            int available = bis.available();
-            while (available > 0) {
-                int length = Math.min(b.length, available);
-
-                int read = bis.read(b, 0, length);
-                bos.write(b, 0, read);
-
-                available = bis.available();
+            byte[] buf = new byte[8192];
+            int read;
+            while ((read = fis.read(buf)) != -1) {
+                fos.write(buf, 0, read);
             }
+
+            fos.close();
 
             return temp;
         } finally {
-            FileUtils.safelyClose(bis);
-            FileUtils.safelyClose(bos);
             FileUtils.safelyClose(fis);
             FileUtils.safelyClose(fos);
         }
@@ -187,17 +164,23 @@ public class FileUtils {
     }
 
     public static void copy(String src, String dst) throws IOException {
-        FileInputStream fis = new FileInputStream(src);
-        FileOutputStream fos = new FileOutputStream(dst);
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        try {
+            fis = new FileInputStream(src);
+            fos = new FileOutputStream(dst);
 
-        byte[] buf = new byte[8192];
-        int read;
-        while ((read = fis.read(buf)) != -1) {
-            fos.write(buf, 0, read);
+            byte[] buf = new byte[8192];
+            int read;
+            while ((read = fis.read(buf)) != -1) {
+                fos.write(buf, 0, read);
+            }
+
+            fos.close();
+        } finally {
+            FileUtils.safelyClose(fis);
+            FileUtils.safelyClose(fos);
         }
-
-        FileUtils.safelyClose(fos);
-        FileUtils.safelyClose(fis);
     }
 
     public static void safelyClose(OutputStream out) {
