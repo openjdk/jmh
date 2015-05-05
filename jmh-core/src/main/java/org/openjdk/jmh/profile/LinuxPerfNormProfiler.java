@@ -26,19 +26,8 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.BenchmarkResult;
-import org.openjdk.jmh.results.BenchmarkResultMetaData;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.HashMultiset;
-import org.openjdk.jmh.util.ListStatistics;
-import org.openjdk.jmh.util.Multiset;
-import org.openjdk.jmh.util.ScoreFormatter;
-import org.openjdk.jmh.util.Statistics;
-import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.results.*;
+import org.openjdk.jmh.util.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,11 +35,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class LinuxPerfNormProfiler implements ExternalProfiler {
@@ -210,6 +195,11 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 if (IS_INCREMENTABLE) {
                     int idx1 = line.indexOf(",");
                     int idx2 = line.lastIndexOf(",");
+
+                    // Malformed line, ignore
+                    if (idx1 == -1) continue nextline;
+                    if (idx2 == -1) continue nextline;
+
                     String time  = line.substring(0, idx1).trim();
                     String count = line.substring(idx1, idx2 + 1).trim();
                     String event = line.substring(idx2 + 1).trim();
@@ -239,6 +229,10 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                     }
                 } else {
                     int idx = line.lastIndexOf(",");
+
+                    // Malformed line, ignore
+                    if (idx == -1) continue nextline;
+
                     String count = line.substring(0, idx).trim();
                     String event = line.substring(idx + 1).trim();
 
