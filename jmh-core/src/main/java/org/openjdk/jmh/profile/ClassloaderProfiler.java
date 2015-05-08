@@ -35,11 +35,14 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ClassloaderProfiler implements InternalProfiler {
 
     private long loadedClasses;
     private long unloadedClasses;
+    private long beforeTime;
+    private long afterTime;
 
     @Override
     public String getDescription() {
@@ -59,6 +62,9 @@ public class ClassloaderProfiler implements InternalProfiler {
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
+
+        this.beforeTime = System.nanoTime();
+
         try {
             loadedClasses = cl.getTotalLoadedClassCount();
         } catch (UnsupportedOperationException e) {
@@ -73,15 +79,20 @@ public class ClassloaderProfiler implements InternalProfiler {
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
+        afterTime = System.nanoTime();
+
         List<Result> results = new ArrayList<Result>();
 
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
 
+        long allOps = result.getMetadata().getAllOps();
+        double time = 1.0 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime);
+
         try {
             long loadedClassCount = cl.getTotalLoadedClassCount();
             long loaded = loadedClassCount - loadedClasses;
-            results.add(new ProfilerResult(Defaults.PREFIX + "classload.loaded.profiled", loaded, "classes", AggregationPolicy.SUM));
-            results.add(new ProfilerResult(Defaults.PREFIX + "classload.loaded.total", loadedClassCount, "classes", AggregationPolicy.MAX));
+            results.add(new ProfilerResult(Defaults.PREFIX + "class.load", loaded / time, "classes/sec", AggregationPolicy.SUM));
+            results.add(new ProfilerResult(Defaults.PREFIX + "class.load.norm", 1.0 * loaded / allOps, "classes/op", AggregationPolicy.AVG));
         } catch (UnsupportedOperationException e) {
             // do nothing
         }
@@ -89,8 +100,8 @@ public class ClassloaderProfiler implements InternalProfiler {
         try {
             long unloadedClassCount = cl.getUnloadedClassCount();
             long unloaded = unloadedClassCount - unloadedClasses;
-            results.add(new ProfilerResult(Defaults.PREFIX + "classload.unloaded.profiled", unloaded, "classes", AggregationPolicy.SUM));
-            results.add(new ProfilerResult(Defaults.PREFIX + "classload.unloaded.total", unloadedClassCount, "classes", AggregationPolicy.MAX));
+            results.add(new ProfilerResult(Defaults.PREFIX + "class.unload", unloaded / time, "classes/sec", AggregationPolicy.SUM));
+            results.add(new ProfilerResult(Defaults.PREFIX + "class.unload.norm", 1.0 * unloaded / allOps, "classes/op", AggregationPolicy.AVG));
 
         } catch (UnsupportedOperationException e) {
             // do nothing
