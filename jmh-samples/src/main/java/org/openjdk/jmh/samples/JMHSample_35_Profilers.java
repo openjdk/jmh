@@ -344,10 +344,10 @@ public class JMHSample_35_Profilers {
          *
          * a) Via the command line:
          *    $ mvn clean install
-         *    $ java -jar target/benchmarks.jar JMHSample_35.*Classy -prof perf     -f 1 (Linux)
-         *    $ java -jar target/benchmarks.jar JMHSample_35.*Classy -prof perfnorm -f 3 (Linux)
-         *    $ java -jar target/benchmarks.jar JMHSample_35.*Classy -prof perfasm  -f 1 (Linux)
-         *    $ java -jar target/benchmarks.jar JMHSample_35.*Classy -prof xperfasm -f 1 (Windows)
+         *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perf     -f 1 (Linux)
+         *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perfnorm -f 3 (Linux)
+         *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perfasm  -f 1 (Linux)
+         *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof xperfasm -f 1 (Windows)
          *
          * b) Via the Java API:
          *    (see the JMH homepage for possible caveats when running from IDE:
@@ -487,7 +487,7 @@ public class JMHSample_35_Profilers {
             The last, but not the least player on our field is -prof perfasm. It is important to follow up on
             generated code when dealing with fine-grained benchmarks. We could employ PrintAssembly to dump the
             generated code, but it will dump *all* the generated code, and figuring out what is related to our
-            benchmark is a dauting task. But we have "perf" that can tell what program addresses are really hot!
+            benchmark is a daunting task. But we have "perf" that can tell what program addresses are really hot!
             This enables us to contrast the assembly output.
 
             -prof perfasm would indeed contrast out the hottest loop in the generated code! It will also point
