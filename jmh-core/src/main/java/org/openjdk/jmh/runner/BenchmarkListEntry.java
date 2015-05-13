@@ -374,7 +374,13 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                 if (kv[1].equalsIgnoreCase("===EMPTY===")) {
                     map.put(kv[0], new String[0]);
                 } else {
-                    map.put(kv[0], kv[1].split("===SEP-V==="));
+                    String[] vals = kv[1].split("===SEP-V===");
+                    for (int c = 0; c < vals.length; c++) {
+                        if (vals[c].equals("===EMPTY-VAL===")) {
+                            vals[c] = "";
+                        }
+                    }
+                    map.put(kv[0], vals);
                 }
             }
             return map;
@@ -392,7 +398,11 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
                     sb.append("===EMPTY===");
                 } else {
                     for (String v : e.getValue()) {
-                        sb.append(v);
+                        if (v.isEmpty()) {
+                            sb.append("===EMPTY-VAL===");
+                        } else {
+                            sb.append(v);
+                        }
                         sb.append("===SEP-V===");
                     }
                 }

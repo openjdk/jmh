@@ -534,6 +534,22 @@ public class TestOptions {
     }
 
     @Test
+    public void testParam_EmptyString() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-p", "x=");
+        Options builder = new OptionsBuilder().param("x", "").build();
+
+        Collection<String> bp = builder.getParameter("x").get();
+        Collection<String> cp = cmdLine.getParameter("x").get();
+
+        for (String b : bp) {
+            Assert.assertTrue("CP does not contain: " + b, cp.contains(b));
+        }
+        for (String c : cp) {
+            Assert.assertTrue("BP does not contain: " + c, bp.contains(c));
+        }
+    }
+
+    @Test
     public void testTimeout() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-to", "34ms");
         Options builder = new OptionsBuilder().timeout(TimeValue.milliseconds(34)).build();

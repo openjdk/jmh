@@ -39,11 +39,7 @@ import org.openjdk.jmh.util.Optional;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -424,7 +420,7 @@ public class CommandLineOptions implements Options {
 
             if (set.hasArgument(optParams)) {
                 for (String p : optParams.values(set)) {
-                    String[] keys = p.split("=");
+                    String[] keys = p.split("=", 2);
                     if (keys.length != 2) {
                         throw new CommandLineOptionException("Unable to parse parameter string \"" + p + "\"");
                     }
