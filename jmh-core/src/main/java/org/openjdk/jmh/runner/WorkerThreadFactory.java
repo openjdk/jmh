@@ -30,16 +30,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 class WorkerThreadFactory implements ThreadFactory {
 
-    private final AtomicInteger counter = new AtomicInteger();
+    private final AtomicInteger counter;
     private final String prefix;
+    private final ThreadFactory factory;
 
     public WorkerThreadFactory(String prefix) {
+        this.counter = new AtomicInteger();
         this.prefix = prefix;
+        this.factory = Executors.defaultThreadFactory();
     }
 
     @Override
     public Thread newThread(Runnable r) {
-        Thread thread = Executors.defaultThreadFactory().newThread(r);
+        Thread thread = factory.newThread(r);
         thread.setName(prefix + "-jmh-worker-" + counter.incrementAndGet());
         thread.setDaemon(true);
         return thread;
