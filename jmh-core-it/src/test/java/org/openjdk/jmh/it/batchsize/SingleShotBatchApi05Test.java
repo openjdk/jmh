@@ -26,14 +26,7 @@ package org.openjdk.jmh.it.batchsize;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -50,7 +43,7 @@ public class SingleShotBatchApi05Test {
 
     private static final int WARMUP_ITERATIONS = 2;
     private static final int MEASUREMENT_ITERATIONS = 1;
-    private static final int WARMUP_BATCH = 0;
+    private static final int WARMUP_BATCH = 1;
     private static final int MEASUREMENT_BATCH = 5;
 
     private final AtomicInteger iterationCount = new AtomicInteger();

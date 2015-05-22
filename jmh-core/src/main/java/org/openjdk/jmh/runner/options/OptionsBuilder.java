@@ -25,18 +25,16 @@
 package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.Optional;
+import org.openjdk.jmh.util.Utils;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class OptionsBuilder implements Options, ChainedOptionsBuilder {
@@ -55,6 +53,21 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     public ChainedOptionsBuilder parent(Options other) {
         this.otherOptions = other;
         return this;
+    }
+
+    private static void checkGreaterOrEqual(int value, int minValue, String s) {
+        if (value >= minValue) {
+            return;
+        }
+        String message = s + " (" + value + ") should be ";
+        if (minValue == 0) {
+            message += "non-negative";
+        } else if (minValue == 1) {
+            message += "positive";
+        } else {
+            message += "greater or equal than " + minValue;
+        }
+        throw new IllegalArgumentException(message);
     }
 
     // ---------------------------------------------------------------------------
@@ -239,6 +252,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder threads(int count) {
+        if (count != Threads.MAX) {
+            checkGreaterOrEqual(count, 1, "Threads");
+        }
         this.threads = Optional.of(count);
         return this;
     }
@@ -258,7 +274,13 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder threadGroups(int... groups) {
-        this.threadGroups = Optional.of(groups);
+        if (groups != null) {
+            for (int i = 0; i < groups.length; i++) {
+                checkGreaterOrEqual(groups[i], 0, "Group #" + i + " thread count");
+            }
+            checkGreaterOrEqual(Utils.sum(groups), 1, "Group thread count");
+        }
+        this.threadGroups = Optional.of((groups == null || groups.length != 0) ? groups : null);
         return this;
     }
 
@@ -296,6 +318,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder warmupIterations(int value) {
+        checkGreaterOrEqual(value, 0, "Warmup iterations");
         this.warmupIterations = Optional.of(value);
         return this;
     }
@@ -315,6 +338,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder warmupBatchSize(int value) {
+        checkGreaterOrEqual(value, 1, "Warmup batch size");
         this.warmupBatchSize = Optional.of(value);
         return this;
     }
@@ -392,6 +416,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder measurementIterations(int count) {
+        checkGreaterOrEqual(count, 1, "Measurement iterations");
         this.iterations = Optional.of(count);
         return this;
     }
@@ -430,6 +455,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder measurementBatchSize(int value) {
+        checkGreaterOrEqual(value, 1, "Measurement batch size");
         this.measurementBatchSize = Optional.of(value);
         return this;
     }
@@ -488,6 +514,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder operationsPerInvocation(int opsPerInv) {
+        checkGreaterOrEqual(opsPerInv, 1, "Operations per invocation");
         this.opsPerInvocation = Optional.of(opsPerInv);
         return this;
     }
@@ -507,6 +534,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder forks(int value) {
+        checkGreaterOrEqual(value, 0, "Forks");
         this.forks = Optional.of(value);
         return this;
     }
@@ -526,6 +554,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder warmupForks(int value) {
+        checkGreaterOrEqual(value, 0, "Warmup forks");
         this.warmupForks = Optional.of(value);
         return this;
     }

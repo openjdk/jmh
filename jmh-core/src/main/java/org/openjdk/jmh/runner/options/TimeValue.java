@@ -151,6 +151,16 @@ public class TimeValue implements Serializable {
         }
     }
 
+    /**
+     * Parses time value from a string representation.
+     * This method is called by joptsimple to resolve string values.
+     * @param timeString string representation of a time value
+     * @return TimeValue value
+     */
+    public static TimeValue valueOf(String timeString) {
+        return fromString(timeString);
+    }
+
     public static TimeValue fromString(String timeString) {
         if (timeString == null) {
             throw new IllegalArgumentException("String is null");

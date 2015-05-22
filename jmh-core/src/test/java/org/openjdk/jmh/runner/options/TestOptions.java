@@ -145,13 +145,6 @@ public class TestOptions {
     }
 
     @Test
-    public void testGC_Set() throws Exception {
-        CommandLineOptions cmdLine = new CommandLineOptions("-gc");
-        Options builder = new OptionsBuilder().shouldDoGC(true).build();
-        Assert.assertEquals(builder.getOutput(), cmdLine.getOutput());
-    }
-
-    @Test
     public void testGC_True() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-gc", "true");
         Options builder = new OptionsBuilder().shouldDoGC(true).build();
@@ -216,13 +209,6 @@ public class TestOptions {
     }
 
     @Test
-    public void testSFOE_Set() throws Exception {
-        CommandLineOptions cmdLine = new CommandLineOptions("-foe");
-        Options builder = new OptionsBuilder().shouldFailOnError(true).build();
-        Assert.assertEquals(builder.shouldFailOnError(), cmdLine.shouldFailOnError());
-    }
-
-    @Test
     public void testSFOE_True() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-foe", "true");
         Options builder = new OptionsBuilder().shouldFailOnError(true).build();
@@ -256,6 +242,55 @@ public class TestOptions {
     }
 
     @Test
+    public void testThreads_Zero() throws Exception {
+        try {
+            new CommandLineOptions("-t", "0");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '0' of option ['t']. The given value 0 should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreads_Zero_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().threads(0);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Threads (0) should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreads_MinusOne() throws Exception {
+        try {
+            new CommandLineOptions("-t", "-1");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '-1' of option ['t']. The given value -1 should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreads_Minus42() throws Exception {
+        try {
+            new CommandLineOptions("-t", "-42");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '-42' of option ['t']. The given value -42 should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreads_Minus42_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().threads(-42);
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Threads (-42) should be positive", e.getMessage());
+        }
+    }
+
+    @Test
     public void testThreads_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getThreads(), EMPTY_CMDLINE.getThreads());
     }
@@ -273,10 +308,50 @@ public class TestOptions {
     }
 
     @Test
-    public void testSynchIterations_Set() throws Exception {
-        CommandLineOptions cmdLine = new CommandLineOptions("-si");
-        Options builder = new OptionsBuilder().syncIterations(true).build();
-        Assert.assertEquals(builder.shouldSyncIterations(), cmdLine.shouldSyncIterations());
+    public void testThreadGroups_WithZero() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-tg", "3,4,0");
+        Options builder = new OptionsBuilder().threadGroups(3, 4, 0).build();
+        Assert.assertEquals(builder.getThreads(), cmdLine.getThreads());
+    }
+
+    @Test
+    public void testThreadGroups_AllZero() throws Exception {
+        try {
+            new CommandLineOptions("-tg", "0,0,0");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Group thread count should be positive, but it is 0", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreadGroups_AllZero_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().threadGroups(0, 0, 0);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Group thread count (0) should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreadGroups_WithNegative() throws Exception {
+        try {
+            new CommandLineOptions("-tg", "-1,-2");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '-1' of option ['tg']. The given value -1 should be non-negative", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testThreadGroups_WithNegative_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().threadGroups(-1,-2);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Group #0 thread count (-1) should be non-negative", e.getMessage());
+        }
     }
 
     @Test
@@ -311,6 +386,33 @@ public class TestOptions {
     }
 
     @Test
+    public void testWarmupIterations_Zero() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-wi", "0");
+        Options builder = new OptionsBuilder().warmupIterations(0).build();
+        Assert.assertEquals(builder.getWarmupIterations(), cmdLine.getWarmupIterations());
+    }
+
+    @Test
+    public void testWarmupIterations_MinusOne() throws Exception {
+        try {
+            new CommandLineOptions("-wi", "-1");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '-1' of option ['wi']. The given value -1 should be non-negative", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testWarmupIterations_MinusOne_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().warmupIterations(-1);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Warmup iterations (-1) should be non-negative", e.getMessage());
+        }
+    }
+
+    @Test
     public void testWarmupTime() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-w", "34ms");
         Options builder = new OptionsBuilder().warmupTime(TimeValue.milliseconds(34)).build();
@@ -332,6 +434,26 @@ public class TestOptions {
     @Test
     public void testRuntimeIterations_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getMeasurementIterations(), EMPTY_CMDLINE.getMeasurementIterations());
+    }
+
+    @Test
+    public void testRuntimeIterations_Zero() throws Exception {
+        try {
+            new CommandLineOptions("-i", "0");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '0' of option ['i']. The given value 0 should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRuntimeIterations_Zero_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().measurementIterations(0);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Measurement iterations (0) should be positive", e.getMessage());
+        }
     }
 
     @Test
@@ -391,15 +513,28 @@ public class TestOptions {
     }
 
     @Test
-    public void testOPI_Default() throws Exception {
-        Assert.assertEquals(EMPTY_BUILDER.getOperationsPerInvocation(), EMPTY_CMDLINE.getOperationsPerInvocation());
+    public void testOPI_Zero() throws Exception {
+        try {
+            new CommandLineOptions("-opi", "0");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '0' of option ['opi']. The given value 0 should be positive", e.getMessage());
+        }
     }
 
     @Test
-    public void testFork() throws Exception {
-        CommandLineOptions cmdLine = new CommandLineOptions("-f");
-        Options builder = new OptionsBuilder().forks(1).build();
-        Assert.assertEquals(builder.getForkCount(), cmdLine.getForkCount());
+    public void testOPI_Zero_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().operationsPerInvocation(0);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Operations per invocation (0) should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testOPI_Default() throws Exception {
+        Assert.assertEquals(EMPTY_BUILDER.getOperationsPerInvocation(), EMPTY_CMDLINE.getOperationsPerInvocation());
     }
 
     @Test
@@ -422,6 +557,26 @@ public class TestOptions {
     }
 
     @Test
+    public void testFork_MinusOne() throws Exception {
+        try {
+            new CommandLineOptions("-f", "-1");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '-1' of option ['f']. The given value -1 should be non-negative", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testFork__MinusOne_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().forks(-1);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Forks (-1) should be non-negative", e.getMessage());
+        }
+    }
+
+    @Test
     public void testWarmupFork_0() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-wf", "0");
         Options builder = new OptionsBuilder().warmupForks(0).build();
@@ -438,6 +593,26 @@ public class TestOptions {
     @Test
     public void testWarmupFork_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupForkCount(), EMPTY_CMDLINE.getWarmupForkCount());
+    }
+
+    @Test
+    public void testWarmupFork_MinusOne() throws Exception {
+        try {
+            new CommandLineOptions("-wf", "-1");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '-1' of option ['wf']. The given value -1 should be non-negative", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testWarmupFork_MinusOne_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().warmupForks(-1);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Warmup forks (-1) should be non-negative", e.getMessage());
+        }
     }
 
     @Test
@@ -501,6 +676,26 @@ public class TestOptions {
     }
 
     @Test
+    public void testBatchSize_Zero() throws Exception {
+        try {
+            new CommandLineOptions("-bs", "0");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '0' of option ['bs']. The given value 0 should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testBatchSize_Zero_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().measurementBatchSize(0);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Measurement batch size (0) should be positive", e.getMessage());
+        }
+    }
+
+    @Test
     public void testWarmupBatchSize() throws Exception {
         CommandLineOptions cmdLine = new CommandLineOptions("-wbs", "43");
         Options builder = new OptionsBuilder().warmupBatchSize(43).build();
@@ -510,6 +705,26 @@ public class TestOptions {
     @Test
     public void testWarmupBatchSize_Default() throws Exception {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupBatchSize(), EMPTY_CMDLINE.getWarmupBatchSize());
+    }
+
+    @Test
+    public void testWarmupBatchSize_Zero() throws Exception {
+        try {
+            new CommandLineOptions("-wbs", "0");
+            Assert.fail();
+        } catch (CommandLineOptionException e) {
+            Assert.assertEquals("Cannot parse argument '0' of option ['wbs']. The given value 0 should be positive", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testWarmupBatchSize_Zero_OptionsBuilder() throws Exception {
+        try {
+            new OptionsBuilder().warmupBatchSize(0);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals("Warmup batch size (0) should be positive", e.getMessage());
+        }
     }
 
     @Test

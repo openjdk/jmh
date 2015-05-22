@@ -24,12 +24,8 @@
  */
 package org.openjdk.jmh.runner.options;
 
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
+import joptsimple.*;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
@@ -96,43 +92,43 @@ public class CommandLineOptions implements Options {
         parser.formatHelpWith(new OptionFormatter());
 
         OptionSpec<Integer> optMeasureCount = parser.accepts("i", "Number of measurement iterations to do.")
-                .withRequiredArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
         OptionSpec<Integer> optMeasureBatchSize = parser.accepts("bs", "Batch size: number of benchmark method calls per operation. " +
                 "(some benchmark modes can ignore this setting)")
-                .withRequiredArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
-        OptionSpec<String> optMeasureTime = parser.accepts("r", "Time to spend at each measurement iteration.")
-                .withRequiredArg().ofType(String.class).describedAs("time");
+        OptionSpec<TimeValue> optMeasureTime = parser.accepts("r", "Time to spend at each measurement iteration.")
+                .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         OptionSpec<Integer> optWarmupCount = parser.accepts("wi", "Number of warmup iterations to do.")
-                .withRequiredArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
         OptionSpec<Integer> optWarmupBatchSize = parser.accepts("wbs", "Warmup batch size: number of benchmark method calls per operation. " +
                 "(some benchmark modes can ignore this setting)")
-                .withRequiredArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
-        OptionSpec<String> optWarmupTime = parser.accepts("w", "Time to spend at each warmup iteration.")
-                .withRequiredArg().ofType(String.class).describedAs("time");
+        OptionSpec<TimeValue> optWarmupTime = parser.accepts("w", "Time to spend at each warmup iteration.")
+                .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
-        OptionSpec<String> optTimeoutTime = parser.accepts("to", "Timeout for benchmark iteration.")
-                .withRequiredArg().ofType(String.class).describedAs("time");
+        OptionSpec<TimeValue> optTimeoutTime = parser.accepts("to", "Timeout for benchmark iteration.")
+                .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
-        OptionSpec<String> optThreads = parser.accepts("t", "Number of worker threads to run with.")
-                .withRequiredArg().ofType(String.class).describedAs("int");
+        OptionSpec<Integer> optThreads = parser.accepts("t", "Number of worker threads to run with. 'max' means Runtime.getRuntime().availableProcessors().")
+                .withRequiredArg().withValuesConvertedBy(ThreadsValueConverter.INSTANCE).describedAs("int");
 
         OptionSpec<String> optBenchmarkMode = parser.accepts("bm", "Benchmark mode. Available modes are: " + Mode.getKnown())
                 .withRequiredArg().ofType(String.class).withValuesSeparatedBy(',').describedAs("mode");
 
         OptionSpec<Boolean> optSyncIters = parser.accepts("si", "Synchronize iterations?")
-                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optGC = parser.accepts("gc", "Should JMH force GC between iterations?")
-                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optFOE = parser.accepts("foe", "Should JMH fail immediately if any benchmark had" +
                 " experienced the unrecoverable error?")
-                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<String> optVerboseMode = parser.accepts("v", "Verbosity mode. Available modes are: " + Arrays.toString(VerboseMode.values()))
                 .withRequiredArg().ofType(String.class).describedAs("mode");
@@ -144,11 +140,11 @@ public class CommandLineOptions implements Options {
                 " Use 0 to disable forking altogether (WARNING: disabling forking may have detrimental" +
                 " impact on benchmark and infrastructure reliability, you might want to use different" +
                 " warmup mode instead).")
-                .withOptionalArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
         OptionSpec<Integer> optWarmupForks = parser.accepts("wf", "How many warmup forks to make " +
                 "for a single benchmark. 0 to disable warmup forks.")
-                .withRequiredArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
         OptionSpec<String> optOutput = parser.accepts("o", "Redirect human-readable output to file.")
                 .withRequiredArg().ofType(String.class).describedAs("filename");
@@ -161,7 +157,8 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("profiler+");
 
         OptionSpec<Integer> optThreadGroups = parser.accepts("tg", "Override thread group distribution for asymmetric benchmarks.")
-                .withRequiredArg().withValuesSeparatedBy(',').ofType(Integer.class).describedAs("int+");
+                .withRequiredArg().withValuesSeparatedBy(',').ofType(Integer.class)
+                .withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int+");
 
         OptionSpec<String> optJvm = parser.accepts("jvm", "Custom JVM to use when forking (path to JVM executable).")
                 .withRequiredArg().ofType(String.class).describedAs("string");
@@ -179,7 +176,7 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(String.class).describedAs("TU");
 
         OptionSpec<Integer> optOPI = parser.accepts("opi", "Operations per invocation.")
-                .withRequiredArg().ofType(Integer.class).describedAs("int");
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
         OptionSpec<String> optResultFormat = parser.accepts("rf", "Result format type. See the list of available result formats first.")
                 .withRequiredArg().ofType(String.class).describedAs("type");
@@ -239,7 +236,7 @@ public class CommandLineOptions implements Options {
                 timeUnit = Optional.none();
             }
 
-            opsPerInvocation = Optional.eitherOf(optOPI.value(set));
+            opsPerInvocation = toOptional(optOPI, set);
 
             if (set.has(optWarmupMode)) {
                 try {
@@ -266,61 +263,21 @@ public class CommandLineOptions implements Options {
             listResultFormats = set.has("lrf");
             listProfilers = set.has("lprof");
 
-            iterations = Optional.eitherOf(optMeasureCount.value(set));
-
-            batchSize = Optional.eitherOf(optMeasureBatchSize.value(set));
-
-            if (set.has(optMeasureTime)) {
-                String value = optMeasureTime.value(set);
-                try {
-                    runTime = Optional.of(TimeValue.fromString(value));
-                } catch (IllegalArgumentException iae) {
-                    throw new CommandLineOptionException(iae.getMessage(), iae);
-                }
-            } else {
-                runTime = Optional.none();
-            }
-
-            warmupIterations = Optional.eitherOf(optWarmupCount.value(set));
-
-            warmupBatchSize = Optional.eitherOf(optWarmupBatchSize.value(set));
-
-            if (set.has(optWarmupTime)) {
-                String value = optWarmupTime.value(set);
-                try {
-                    warmupTime = Optional.of(TimeValue.fromString(value));
-                } catch (IllegalArgumentException iae) {
-                    throw new CommandLineOptionException(iae.getMessage(), iae);
-                }
-            } else {
-                warmupTime = Optional.none();
-            }
-
-            if (set.has(optTimeoutTime)) {
-                String value = optTimeoutTime.value(set);
-                try {
-                    timeout = Optional.of(TimeValue.fromString(value));
-                } catch (IllegalArgumentException iae) {
-                    throw new CommandLineOptionException(iae.getMessage(), iae);
-                }
-            } else {
-                timeout = Optional.none();
-            }
-
-            if (set.has(optThreads)) {
-                String v = optThreads.value(set);
-                if (v.equalsIgnoreCase("max")) {
-                    threads = Optional.of(Threads.MAX);
-                } else {
-                    try {
-                        threads = Optional.of(Integer.valueOf(v));
-                    } catch (IllegalArgumentException iae) {
-                        throw new CommandLineOptionException(iae.getMessage(), iae);
-                    }
-                }
-            } else {
-                threads = Optional.none();
-            }
+            iterations = toOptional(optMeasureCount, set);
+            batchSize = toOptional(optMeasureBatchSize, set);
+            runTime = toOptional(optMeasureTime, set);
+            warmupIterations = toOptional(optWarmupCount, set);
+            warmupBatchSize = toOptional(optWarmupBatchSize, set);
+            warmupTime = toOptional(optWarmupTime, set);
+            timeout = toOptional(optTimeoutTime, set);
+            threads = toOptional(optThreads, set);
+            synchIterations = toOptional(optSyncIters, set);
+            gcEachIteration = toOptional(optGC, set);
+            failOnError = toOptional(optFOE, set);
+            fork = toOptional(optForks, set);
+            warmupFork = toOptional(optWarmupForks, set);
+            output = toOptional(optOutput, set);
+            result = toOptional(optOutputResults, set);
 
             if (set.has(optBenchmarkMode)) {
                 try {
@@ -332,36 +289,6 @@ public class CommandLineOptions implements Options {
                 } catch (IllegalArgumentException iae) {
                     throw new CommandLineOptionException(iae.getMessage(), iae);
                 }
-            }
-
-            if (set.has(optSyncIters)) {
-                if (set.hasArgument(optSyncIters)) {
-                    synchIterations = Optional.of(optSyncIters.value(set));
-                } else {
-                    synchIterations = Optional.of(true);
-                }
-            } else {
-                synchIterations = Optional.none();
-            }
-
-            if (set.has(optGC)) {
-                if (set.hasArgument(optGC)) {
-                    gcEachIteration = Optional.of(optGC.value(set));
-                } else {
-                    gcEachIteration = Optional.of(true);
-                }
-            } else {
-                gcEachIteration = Optional.none();
-            }
-
-            if (set.has(optFOE)) {
-                if (set.hasArgument(optFOE)) {
-                    failOnError = Optional.of(optFOE.value(set));
-                } else {
-                    failOnError = Optional.of(true);
-                }
-            } else {
-                failOnError = Optional.none();
             }
 
             if (set.has(optVerboseMode)) {
@@ -380,20 +307,6 @@ public class CommandLineOptions implements Options {
 
             regexps.addAll(set.valuesOf(optArgs));
 
-            if (set.has(optForks)) {
-                if (set.hasArgument(optForks)) {
-                    fork = Optional.of(optForks.value(set));
-                } else {
-                    fork = Optional.of(1);
-                }
-            } else {
-                fork = Optional.none();
-            }
-
-            warmupFork = Optional.eitherOf(optWarmupForks.value(set));
-            output = Optional.eitherOf(optOutput.value(set));
-            result = Optional.eitherOf(optOutputResults.value(set));
-
             if (set.has(optProfilers)) {
                 try {
                     for (String m : optProfilers.values(set)) {
@@ -410,9 +323,16 @@ public class CommandLineOptions implements Options {
 
             if (set.has(optThreadGroups)) {
                 threadGroups.addAll(set.valuesOf(optThreadGroups));
+                int total = 0;
+                for (int group : threadGroups) {
+                    total += group;
+                }
+                if (total <= 0) {
+                    throw new CommandLineOptionException("Group thread count should be positive, but it is " + total);
+                }
             }
 
-            jvm = Optional.eitherOf(optJvm.value(set));
+            jvm = toOptional(optJvm, set);
 
             jvmArgs = treatQuoted(set, optJvmArgs);
             jvmArgsAppend = treatQuoted(set, optJvmArgsAppend);
@@ -429,8 +349,20 @@ public class CommandLineOptions implements Options {
             }
 
         } catch (OptionException e) {
-            throw new CommandLineOptionException(e.getMessage(), e);
+            String message = e.getMessage();
+            Throwable cause = e.getCause();
+            if (cause instanceof ValueConversionException) {
+                message += ". " + cause.getMessage();
+            }
+            throw new CommandLineOptionException(message, e);
         }
+    }
+
+    private static <T> Optional<T> toOptional(OptionSpec<T> option, OptionSet set) {
+        if (set.has(option)) {
+            return Optional.eitherOf(option.value(set));
+        }
+        return Optional.none();
     }
 
     public Optional<Collection<String>> treatQuoted(OptionSet set, OptionSpec<String> spec) {
