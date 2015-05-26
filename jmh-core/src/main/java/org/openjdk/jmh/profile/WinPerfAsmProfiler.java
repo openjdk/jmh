@@ -90,7 +90,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     /**
      * Path to a directory with jvm.dll symbols (optional).
      */
-    private static final String SYMBOL_DIR = System.getProperty("jmh.perfasm.symbol.dir");
+    private static final String SYMBOL_DIR = System.getProperty("jmh.perfasm.symbol.dir", "");
 
     /**
      * Path to binary.
@@ -176,7 +176,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         // 2. Convert binary data to text form.
         try {
             ProcessBuilder pb = new ProcessBuilder(PATH, "-i", perfBinData, "-symbols", "-a", "dumper");
-            pb.environment().put("_NT_SYMBOL_PATH=" + SYMBOL_DIR, "");
+            pb.environment().put("_NT_SYMBOL_PATH", SYMBOL_DIR);
 
             Process p = pb.start();
 
