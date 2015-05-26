@@ -26,12 +26,7 @@ package org.openjdk.jmh.util;
 
 import sun.misc.Unsafe;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Console;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -39,11 +34,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -337,7 +328,7 @@ public class Utils {
             errDrainer.join();
             outDrainer.join();
 
-            if (err > 0) {
+            if (err != 0) {
                 messages.add(baos.toString());
             }
         } catch (IOException ex) {
