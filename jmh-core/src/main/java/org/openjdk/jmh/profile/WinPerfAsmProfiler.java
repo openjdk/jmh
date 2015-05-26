@@ -27,25 +27,10 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.util.Deduplicator;
-import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.Multiset;
-import org.openjdk.jmh.util.TreeMultiset;
-import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 /**
  * Windows performance profiler based on "xperf" utility.
@@ -190,8 +175,10 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
         // 2. Convert binary data to text form.
         try {
-            Process p = Runtime.getRuntime().exec(new String[] { PATH, "-i", perfBinData, "-symbols", "-a", "dumper" },
-                new String[] { "_NT_SYMBOL_PATH=" + SYMBOL_DIR });
+            ProcessBuilder pb = new ProcessBuilder(PATH, "-i", perfBinData, "-symbols", "-a", "dumper");
+            pb.environment().put("_NT_SYMBOL_PATH=" + SYMBOL_DIR, "");
+
+            Process p = pb.start();
 
             FileOutputStream fos = new FileOutputStream(perfParsedData);
 

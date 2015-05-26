@@ -312,7 +312,7 @@ public class Utils {
     public static Collection<String> tryWith(String... cmd) {
         Collection<String> messages = new ArrayList<String>();
         try {
-            Process p = Runtime.getRuntime().exec(cmd);
+            Process p = new ProcessBuilder(cmd).start();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 

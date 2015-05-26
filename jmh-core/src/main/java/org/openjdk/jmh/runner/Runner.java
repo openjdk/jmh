@@ -31,11 +31,7 @@ import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
-import org.openjdk.jmh.results.BenchmarkResult;
-import org.openjdk.jmh.results.BenchmarkResultMetaData;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
@@ -43,36 +39,14 @@ import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
-import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.HashMultimap;
-import org.openjdk.jmh.util.InputStreamDrainer;
-import org.openjdk.jmh.util.Multimap;
-import org.openjdk.jmh.util.TreeMultimap;
-import org.openjdk.jmh.util.UnCloseablePrintStream;
-import org.openjdk.jmh.util.Utils;
-import org.openjdk.jmh.util.Version;
+import org.openjdk.jmh.util.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -600,7 +574,7 @@ public class Runner extends BaseRunner {
             printOut = forcePrint || printOut;
             printErr = forcePrint || printErr;
 
-            String[] commandString = getSeparateExecutionCommand(params, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
+            List<String> commandString = getSeparateExecutionCommand(params, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
             String opts = Utils.join(params.getJvmArgs(), " ");
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
@@ -615,7 +589,7 @@ public class Runner extends BaseRunner {
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();
             if (warmupForkCount > 0) {
-                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + Arrays.toString(commandString));
+                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + commandString);
                 for (int i = 0; i < warmupForkCount; i++) {
                     etaBeforeBenchmark();
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
@@ -630,7 +604,7 @@ public class Runner extends BaseRunner {
                 }
             }
 
-            out.verbosePrintln("Forking " + forkCount + " times using command: " + Arrays.toString(commandString));
+            out.verbosePrintln("Forking " + forkCount + " times using command: " + commandString);
             for (int i = 0; i < forkCount; i++) {
                 etaBeforeBenchmark();
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
@@ -699,12 +673,13 @@ public class Runner extends BaseRunner {
         return results;
     }
 
-    private List<IterationResult> doFork(BinaryLinkServer reader, String[] commandString,
+    private List<IterationResult> doFork(BinaryLinkServer reader, List<String> commandString,
                                                               File stdOut, File stdErr, boolean printOut, boolean printErr) {
         FileOutputStream fosErr = null;
         FileOutputStream fosOut = null;
         try {
-            Process p = Runtime.getRuntime().exec(commandString);
+            ProcessBuilder pb = new ProcessBuilder(commandString);
+            Process p = pb.start();
 
             fosErr = new FileOutputStream(stdErr);
             fosOut = new FileOutputStream(stdOut);
@@ -785,7 +760,7 @@ public class Runner extends BaseRunner {
      * @param javaOptions add these options to JVM command string
      * @return the final command to execute
      */
-    String[] getSeparateExecutionCommand(BenchmarkParams benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
+    List<String> getSeparateExecutionCommand(BenchmarkParams benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
 
         List<String> command = new ArrayList<String>();
 
@@ -819,7 +794,7 @@ public class Runner extends BaseRunner {
         command.add(host);
         command.add(String.valueOf(port));
 
-        return command.toArray(new String[command.size()]);
+        return command;
     }
 
 }

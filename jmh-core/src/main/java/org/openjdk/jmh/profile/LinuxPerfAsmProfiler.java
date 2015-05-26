@@ -91,7 +91,8 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void parseEvents() {
         try {
-            Process p = Runtime.getRuntime().exec("perf script -f time,event,ip,sym,dso -i " + perfBinData);
+            ProcessBuilder pb = new ProcessBuilder("perf", "script", "-f", "time,event,ip,sym,dso", "-i", perfBinData);
+            Process p = pb.start();
 
             // drain streams, else we might lock up
             FileOutputStream fos = new FileOutputStream(perfParsedData);
