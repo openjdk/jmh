@@ -133,6 +133,10 @@ class XSVResultFormat implements ResultFormat {
         return emit(String.format("%d", i));
     }
 
+    private String emit(long l) {
+        return emit(String.format("%d", l));
+    }
+
     private String emit(double d) {
         return emit(String.format("%f", d));
     }
