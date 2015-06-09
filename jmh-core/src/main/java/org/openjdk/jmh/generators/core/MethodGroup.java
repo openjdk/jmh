@@ -24,35 +24,18 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OperationsPerInvocation;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.annotations.Timeout;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Optional;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 class MethodGroup implements Comparable<MethodGroup> {
     private final ClassInfo ci;
     private final String name;
-    private final Set<MethodInvocation> methods;
+    private final Map<MethodInvocation, MethodInvocation> methods;
     private final EnumSet<Mode> modes;
     private final Map<String, String[]> params;
     private boolean strictFP;
@@ -60,7 +43,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     public MethodGroup(ClassInfo ci, String name) {
         this.ci = ci;
         this.name = name;
-        this.methods = new TreeSet<MethodInvocation>();
+        this.methods = new TreeMap<MethodInvocation, MethodInvocation>();
         this.modes = EnumSet.noneOf(Mode.class);
         this.params = new TreeMap<String, String[]>();
     }
@@ -88,16 +71,21 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public void addMethod(MethodInfo method, int threads) {
-        if (!methods.add(new MethodInvocation(method, threads))) {
+        MethodInvocation mi = new MethodInvocation(method, threads);
+        MethodInvocation exist = methods.get(mi);
+        if (exist == null) {
+            methods.put(mi, mi);
+        } else {
             throw new GenerationException(
-                    "Duplicate @" + Benchmark.class.getSimpleName() + " method. JMH needs an uniquely named method, regardless of the arguments list.",
+                    "@" + Benchmark.class.getSimpleName() + " method is duplicate with " +
+                           exist.method.getQualifiedName() + ". JMH needs an uniquely named method, regardless of the arguments list. ",
                     method);
         }
     }
 
     public Collection<MethodInfo> methods() {
         Collection<MethodInfo> result = new ArrayList<MethodInfo>();
-        for (MethodInvocation m : methods) {
+        for (MethodInvocation m : methods.keySet()) {
             result.add(m.method);
         }
         return result;
@@ -141,7 +129,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     public int[] getThreads() {
         int[] threads = new int[methods.size()];
         int c = 0;
-        for (MethodInvocation mi : methods) {
+        for (MethodInvocation mi : methods.keySet()) {
             threads[c++] = mi.threads;
         }
         return threads;
@@ -281,7 +269,7 @@ class MethodGroup implements Comparable<MethodGroup> {
 
     private <T extends Annotation> Collection<T> getAll(Class<T> annClass) {
         Collection<T> results = new ArrayList<T>();
-        for (MethodInvocation mi : methods) {
+        for (MethodInvocation mi : methods.keySet()) {
             Collection<T> anns = BenchmarkGeneratorUtils.getAnnSuperAll(mi.method, ci, annClass);
             if (!(results.isEmpty() || anns.isEmpty() || results.equals(anns))) {
                 throw new GenerationException("Colliding annotations: " + anns + " vs. " + results, mi.method);
