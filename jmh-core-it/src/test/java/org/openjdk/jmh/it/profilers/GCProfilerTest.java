@@ -28,12 +28,12 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.GCProfiler;
+import org.openjdk.jmh.profile.ProfilerException;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -77,10 +77,10 @@ public class GCProfilerTest {
 
     @Test
     public void testAllocationProfiler() throws RunnerException {
-        GCProfiler profiler = new GCProfiler();
-        ArrayList<String> errors = new ArrayList<String>();
-        if (!profiler.checkSupport(errors)) {
-            System.out.println("Allocation profiler is not available: " + errors.toString());
+        try {
+            new GCProfiler();
+        } catch (ProfilerException e) {
+            // not supported
             return;
         }
         Options opts = new OptionsBuilder()

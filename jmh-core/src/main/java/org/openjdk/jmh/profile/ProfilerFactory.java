@@ -24,39 +24,163 @@
  */
 package org.openjdk.jmh.profile;
 
-import org.openjdk.jmh.runner.options.VerboseMode;
+import org.openjdk.jmh.runner.options.ProfilerConfig;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 public class ProfilerFactory {
 
-    public static List<Class<? extends Profiler>> getAvailableProfilers() {
-        List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
-
-        // All built-in profilers:
-        profs.add(ClassloaderProfiler.class);
-        profs.add(CompilerProfiler.class);
-        profs.add(GCProfiler.class);
-        profs.add(HotspotClassloadingProfiler.class);
-        profs.add(HotspotCompilationProfiler.class);
-        profs.add(HotspotMemoryProfiler.class);
-        profs.add(HotspotRuntimeProfiler.class);
-        profs.add(HotspotThreadProfiler.class);
-        profs.add(StackProfiler.class);
-        profs.add(LinuxPerfProfiler.class);
-        profs.add(LinuxPerfNormProfiler.class);
-        profs.add(LinuxPerfAsmProfiler.class);
-        profs.add(WinPerfAsmProfiler.class);
-
-        // Try to discover more profilers through the SPI
-        profs.addAll(getDiscoveredProfilers());
-        return profs;
+    public static Profiler getProfilerOrException(ProfilerConfig cfg) throws ProfilerException {
+        try {
+            return getProfiler(cfg);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof ProfilerException) {
+                throw (ProfilerException) e.getCause();
+            }
+            throw new ProfilerException(e);
+        } catch (ProfilerException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ProfilerException(e);
+        }
     }
 
-    public static List<Class<? extends Profiler>> getDiscoveredProfilers() {
+    private static Profiler getProfilerOrNull(ProfilerConfig cfg) {
+        try {
+            return getProfiler(cfg);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Profiler getProfiler(ProfilerConfig cfg) throws Exception {
+        String desc = cfg.getKlass();
+
+        // Try built-in profilers first
+        Class<? extends Profiler> builtIn = BUILT_IN.get(desc);
+        if (builtIn != null) {
+            return instantiate(cfg, builtIn);
+        }
+
+        // Try discovered profilers then
+        Collection<Class<? extends Profiler>> profilers = getDiscoveredProfilers();
+        for (Class<? extends Profiler> p : profilers) {
+            if (p.getCanonicalName().equals(desc)) {
+                return instantiate(cfg, p);
+            }
+        }
+
+        // Try the direct hit
+        Class<? extends Profiler> klass = (Class<? extends Profiler>) Class.forName(desc);
+        return instantiate(cfg, klass);
+    }
+
+    private static Profiler instantiate(ProfilerConfig cfg, Class<? extends Profiler> p) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        Profiler prof;
+        try {
+            Constructor<? extends Profiler> constructor = p.getConstructor(String.class);
+            prof = constructor.newInstance(cfg.getOpts());
+        } catch (NoSuchMethodException e) {
+            prof = p.newInstance();
+        }
+        return prof;
+    }
+
+    public static List<ExternalProfiler> getSupportedExternal(Collection<ProfilerConfig> cfg) {
+        List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
+        for (ProfilerConfig p : cfg) {
+            Profiler prof = ProfilerFactory.getProfilerOrNull(p);
+            if (prof instanceof ExternalProfiler) {
+                profilers.add((ExternalProfiler) prof);
+            }
+        }
+        return profilers;
+    }
+
+    public static List<InternalProfiler> getSupportedInternal(Collection<ProfilerConfig> cfg) {
+        List<InternalProfiler> profilers = new ArrayList<InternalProfiler>();
+        for (ProfilerConfig p : cfg) {
+            Profiler prof = ProfilerFactory.getProfilerOrNull(p);
+            if (prof instanceof InternalProfiler) {
+                profilers.add((InternalProfiler) prof);
+            }
+        }
+        return profilers;
+    }
+
+    public static void listProfilers(PrintStream out) {
+        StringBuilder supported = new StringBuilder();
+        StringBuilder unsupported = new StringBuilder();
+
+        for (String s : BUILT_IN.keySet()) {
+            try {
+                Profiler prof = getProfilerOrException(new ProfilerConfig(s, ""));
+                String descr = (prof != null) ? prof.getDescription() : "(unable to instantiate the profiler)";
+
+                if (prof != null) {
+                    supported.append(String.format("%20s: %s %s\n", s, descr, ""));
+                } else {
+                    unsupported.append(String.format("%20s: %s %s\n", s, descr, ""));
+                    unsupported.append("\n");
+                }
+            } catch (ProfilerException e) {
+                unsupported.append(String.format("%20s: %s %s\n", s, "<none>", ""));
+                unsupported.append(e.getMessage());
+                unsupported.append("\n");
+            }
+        }
+
+        for (Class<? extends Profiler> s : ProfilerFactory.getDiscoveredProfilers()) {
+            try {
+                Profiler prof = getProfilerOrException(new ProfilerConfig(s.getCanonicalName(), ""));
+                String descr = (prof != null) ? prof.getDescription() : "(unable to instantiate the profiler)";
+
+                if (prof != null) {
+                    supported.append(String.format("%20s: %s %s\n", "<none>", descr, "(discovered)"));
+                } else {
+                    unsupported.append(String.format("%20s: %s %s\n", "<none>", descr, "(discovered)"));
+                    unsupported.append("\n");
+                }
+            } catch (ProfilerException e) {
+                unsupported.append(String.format("%20s: %s %s\n", s, "<none>", ""));
+                unsupported.append(e.getMessage());
+                unsupported.append("\n");
+            }
+        }
+
+        if (!supported.toString().isEmpty()) {
+            out.println("Supported profilers:\n" + supported.toString());
+        }
+
+        if (!unsupported.toString().isEmpty()) {
+            out.println("Unsupported profilers:\n" + unsupported.toString());
+        }
+    }
+
+
+    private static final Map<String, Class<? extends Profiler>> BUILT_IN;
+
+    static {
+        BUILT_IN = new TreeMap<String, Class<? extends Profiler>>();
+        BUILT_IN.put("cl",       ClassloaderProfiler.class);
+        BUILT_IN.put("comp",     CompilerProfiler.class);
+        BUILT_IN.put("gc",       GCProfiler.class);
+        BUILT_IN.put("hs_cl",    HotspotClassloadingProfiler.class);
+        BUILT_IN.put("hs_comp",  HotspotCompilationProfiler.class);
+        BUILT_IN.put("hs_gc",    HotspotMemoryProfiler.class);
+        BUILT_IN.put("hs_rt",    HotspotRuntimeProfiler.class);
+        BUILT_IN.put("hs_thr",   HotspotThreadProfiler.class);
+        BUILT_IN.put("stack",    StackProfiler.class);
+        BUILT_IN.put("perf",     LinuxPerfProfiler.class);
+        BUILT_IN.put("perfnorm", LinuxPerfNormProfiler.class);
+        BUILT_IN.put("perfasm",  LinuxPerfAsmProfiler.class);
+        BUILT_IN.put("xperfasm", WinPerfAsmProfiler.class);
+    }
+
+    private static List<Class<? extends Profiler>> getDiscoveredProfilers() {
         List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
         for (Profiler s : ServiceLoader.load(Profiler.class)) {
             profs.add(s.getClass());
@@ -64,83 +188,4 @@ public class ProfilerFactory {
         return profs;
     }
 
-    public static boolean checkSupport(Class<? extends Profiler> klass, List<String> msgs) {
-        try {
-            Profiler prof = klass.newInstance();
-            return prof.checkSupport(msgs);
-        } catch (InstantiationException e) {
-            msgs.add("Unable to instantiate " + klass);
-            return false;
-        } catch (IllegalAccessException e) {
-            msgs.add("Unable to instantiate " + klass);
-            return false;
-        }
-    }
-
-    public static String getDescription(Class<? extends Profiler> klass) {
-        try {
-            Profiler prof = klass.newInstance();
-            return prof.getDescription();
-        } catch (InstantiationException e) {
-            return "(unable to instantiate the profiler)";
-        } catch (IllegalAccessException e) {
-            return "(unable to instantiate the profiler)";
-        }
-    }
-
-    public static Class<? extends Profiler> getProfilerByName(String name) {
-        try {
-            Class<?> klass = Class.forName(name);
-            if (Profiler.class.isAssignableFrom(klass)) {
-                return (Class<? extends Profiler>) klass;
-            }
-        } catch (ClassNotFoundException e) {
-            // omit
-        }
-
-        Collection<Class<? extends Profiler>> profilers = getAvailableProfilers();
-        for (Class<? extends Profiler> p : profilers) {
-            try {
-                Profiler prof = p.newInstance();
-                if (prof.label().equalsIgnoreCase(name)) {
-                    return p;
-                }
-            } catch (InstantiationException e) {
-                // omit
-            } catch (IllegalAccessException e) {
-                // omit
-            }
-        }
-
-        return null;
-    }
-
-    public static Profiler prepareProfiler(Class<? extends Profiler> klass, VerboseMode verboseMode) {
-        try {
-            return klass.newInstance();
-        } catch (InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public static String getLabel(Class<? extends Profiler> klass) {
-        try {
-            Profiler prof = klass.newInstance();
-            return prof.label();
-        } catch (InstantiationException e) {
-            return "(unable to instantiate the profiler)";
-        } catch (IllegalAccessException e) {
-            return "(unable to instantiate the profiler)";
-        }
-    }
-
-    public static boolean isInternal(Class<? extends Profiler> klass) {
-        return InternalProfiler.class.isAssignableFrom(klass);
-    }
-
-    public static boolean isExternal(Class<? extends Profiler> klass) {
-        return ExternalProfiler.class.isAssignableFrom(klass);
-    }
 }

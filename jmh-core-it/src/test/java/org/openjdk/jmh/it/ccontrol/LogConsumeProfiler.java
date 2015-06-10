@@ -26,11 +26,7 @@ package org.openjdk.jmh.it.ccontrol;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.profile.ExternalProfiler;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.BenchmarkResult;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.File;
@@ -39,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class LogConsumeProfiler implements ExternalProfiler {
 
@@ -79,16 +74,6 @@ public class LogConsumeProfiler implements ExternalProfiler {
     @Override
     public boolean allowPrintErr() {
         return false;
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "logaggr";
     }
 
     @Override

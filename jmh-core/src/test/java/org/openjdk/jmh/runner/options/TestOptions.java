@@ -29,8 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.profile.ClassloaderProfiler;
-import org.openjdk.jmh.profile.CompilerProfiler;
 import org.openjdk.jmh.results.format.ResultFormatType;
 
 import java.io.ByteArrayOutputStream;
@@ -165,9 +163,8 @@ public class TestOptions {
 
     @Test
     public void testProfilers() throws Exception {
-        // TODO: Should be able to accept multiple values without concat?
-        CommandLineOptions cmdLine = new CommandLineOptions("-prof", "cl,comp");
-        Options builder = new OptionsBuilder().addProfiler(ClassloaderProfiler.class).addProfiler(CompilerProfiler.class).build();
+        CommandLineOptions cmdLine = new CommandLineOptions("-prof", "cl", "-prof", "comp");
+        Options builder = new OptionsBuilder().addProfiler("cl").addProfiler("comp").build();
         Assert.assertEquals(builder.getProfilers(), cmdLine.getProfilers());
     }
 

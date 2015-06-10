@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.util.*;
 
@@ -36,51 +38,31 @@ import java.util.*;
 
 public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
-    /**
-     * Sampling frequency
-     */
-    private static final long SAMPLE_FREQUENCY = Long.getLong("jmh.perfasm.frequency", 1000);
+    private final long sampleFrequency;
 
-    /**
-     * Events to gather
-     */
-    private static final String[] EVENTS = System.getProperty("jmh.perfasm.events", "cycles,instructions").split(",");
+    private OptionSpec<Long> optFrequency;
 
-    private static final boolean IS_SUPPORTED;
-    private static final boolean IS_DELAYED;
-    private static final Collection<String> FAIL_MSGS;
+    public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
+        super(initLine, "cycles", "instructions");
 
-    static {
-        FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
-        IS_SUPPORTED = FAIL_MSGS.isEmpty();
+        Collection<String> failMsg = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
+        if (!failMsg.isEmpty()) {
+            throw new ProfilerException(failMsg.toString());
+        }
 
-        Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
-        IS_DELAYED = delay.isEmpty();
+        sampleFrequency = set.valueOf(optFrequency);
     }
 
     @Override
-    public boolean checkSupport(List<String> msgs) {
-        if (IS_SUPPORTED) {
-            return true;
-        } else {
-            msgs.addAll(FAIL_MSGS);
-            return false;
-        }
-    }
-
-
-    public LinuxPerfAsmProfiler() throws IOException {
-        super(EVENTS);
+    protected void addMyOptions(OptionParser parser) {
+        optFrequency = parser.accepts("frequency",
+                "Sampling frequency. This is synonymous to perf -F #")
+                .withRequiredArg().ofType(Long.class).describedAs("freq").defaultsTo(1000L);
     }
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList("perf", "record", "-F" + SAMPLE_FREQUENCY, "-e" + Utils.join(EVENTS, ","), "-o" + perfBinData);
-    }
-
-    @Override
-    public String label() {
-        return "perfasm";
+        return Arrays.asList("perf", "record", "-F" + sampleFrequency, "-e" + Utils.join(events, ","), "-o" + perfBinData);
     }
 
     @Override
@@ -128,7 +110,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             Map<Long, String> methods = new HashMap<Long, String>();
             Map<Long, String> libs = new HashMap<Long, String>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<String, Multiset<Long>>();
-            for (String evName : EVENTS) {
+            for (String evName : this.events) {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
@@ -198,9 +180,9 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
             methods.put(0L, "<unknown>");
 
-            return new PerfEvents(tracedEvents, events, methods, libs);
+            return new PerfEvents(this.events, events, methods, libs);
         } catch (IOException e) {
-            return new PerfEvents(tracedEvents);
+            return new PerfEvents(events);
         } finally {
             FileUtils.safelyClose(fr);
         }

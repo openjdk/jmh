@@ -40,14 +40,12 @@ import java.util.concurrent.TimeUnit;
 
 public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
 
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotCompilationMBean>getInstance("HotspotCompilationMBean").getInternalCompilerCounters();
+    public HotspotCompilationProfiler() throws ProfilerException {
     }
 
     @Override
-    public String label() {
-        return "hs_comp";
+    public List<Counter> getCounters() {
+        return AbstractHotspotProfiler.<HotspotCompilationMBean>getInstance("HotspotCompilationMBean").getInternalCompilerCounters();
     }
 
     @Override

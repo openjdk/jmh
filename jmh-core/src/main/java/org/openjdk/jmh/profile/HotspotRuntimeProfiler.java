@@ -40,14 +40,12 @@ import java.util.concurrent.TimeUnit;
 
 public class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
 
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotRuntimeMBean>getInstance("HotspotRuntimeMBean").getInternalRuntimeCounters();
+    public HotspotRuntimeProfiler() throws ProfilerException {
     }
 
     @Override
-    public String label() {
-        return "hs_rt";
+    public List<Counter> getCounters() {
+        return AbstractHotspotProfiler.<HotspotRuntimeMBean>getInstance("HotspotRuntimeMBean").getInternalRuntimeCounters();
     }
 
     @Override

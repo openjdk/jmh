@@ -35,7 +35,6 @@ import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class CompilerProfiler implements InternalProfiler {
 
@@ -46,19 +45,10 @@ public class CompilerProfiler implements InternalProfiler {
         return "JIT compiler profiling via standard MBeans";
     }
 
-    @Override
-    public String label() {
-        return "comp";
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
+    public CompilerProfiler() throws ProfilerException {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
-        if (comp.isCompilationTimeMonitoringSupported()) {
-            return true;
-        } else {
-            msgs.add("The MXBean is available, but compilation time monitoring is disabled.");
-            return false;
+        if (!comp.isCompilationTimeMonitoringSupported()) {
+            throw new ProfilerException("The MXBean is available, but compilation time monitoring is disabled.");
         }
     }
 

@@ -28,9 +28,4 @@ public class InternalProfiler3 extends AbstractInternalProfiler {
     public InternalProfiler3() {
         super("prof3");
     }
-
-    @Override
-    public String label() {
-        return "itinternal3";
-    }
 }

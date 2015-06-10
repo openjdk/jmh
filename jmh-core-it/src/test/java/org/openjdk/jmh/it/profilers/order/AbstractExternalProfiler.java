@@ -33,7 +33,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractExternalProfiler implements ExternalProfiler {
@@ -87,11 +86,6 @@ public abstract class AbstractExternalProfiler implements ExternalProfiler {
                 new ProfilerTimestamp(pfx + "start", start),
                 new ProfilerTimestamp(pfx + "stop", stop)
         );
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
     }
 
     @Override

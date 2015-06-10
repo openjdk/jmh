@@ -55,10 +55,10 @@ public class GCProfiler implements InternalProfiler {
     private final NotificationListener listener;
     private volatile Multiset<String> churn;
 
-    public GCProfiler() {
+    public GCProfiler() throws ProfilerException {
         churn = new HashMultiset<String>();
 
-        NotificationListener listener = null;
+        NotificationListener listener;
         try {
             final Class<?> infoKlass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
             final Field notifNameField = infoKlass.getField("GARBAGE_COLLECTION_NOTIFICATION");
@@ -94,11 +94,11 @@ public class GCProfiler implements InternalProfiler {
                 }
             };
         } catch (ClassNotFoundException e) {
-            // Nothing to do here, listener is not functional
+            throw new ProfilerException(e);
         } catch (NoSuchFieldException e) {
-            // Nothing to do here, listener is not functional
+            throw new ProfilerException(e);
         } catch (NoSuchMethodException e) {
-            // Nothing to do here, listener is not functional
+            throw new ProfilerException(e);
         }
 
         this.listener = listener;
@@ -107,16 +107,6 @@ public class GCProfiler implements InternalProfiler {
     @Override
     public String getDescription() {
         return "GC profiling via standard MBeans";
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "gc";
     }
 
     @Override
@@ -215,7 +205,6 @@ public class GCProfiler implements InternalProfiler {
     private boolean hooksInstalled;
 
     public synchronized void installHooks() {
-        if (listener == null) return;
         if (hooksInstalled) return;
         hooksInstalled = true;
         churn = new HashMultiset<String>();
@@ -225,7 +214,6 @@ public class GCProfiler implements InternalProfiler {
     }
 
     public synchronized void uninstallHooks() {
-        if (listener == null) return;
         if (!hooksInstalled) return;
         hooksInstalled = false;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {

@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.Result;
@@ -65,68 +67,45 @@ import java.util.*;
  */
 public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
-    /**
-     * Events to gather.
-     * There is only one predefined event type to gather.
-     */
-    private static final String[] EVENTS = new String[] { "SampledProfile" };
-
-    /**
-     * Error messages caught during support check.
-     */
-    protected static final Collection<String> FAIL_MSGS = new ArrayList<String>();
-
-    /**
-     * Path to "xperf" installation directory. Empty by default, so that xperf is expected to be in PATH.
-     */
-    private static final String XPERF_DIR = System.getProperty("jmh.perfasm.xperf.dir");
-
-    /**
-     * Providers.
-     */
-    private static final String XPERF_PROVIDERS = System.getProperty("jmh.perfasm.xperf.providers",
-        "loader+proc_thread+profile");
-
-    /**
-     * Path to a directory with jvm.dll symbols (optional).
-     */
-    private static final String SYMBOL_DIR = System.getProperty("jmh.perfasm.symbol.dir", "");
-
-    /**
-     * Path to binary.
-     */
-    private static final String PATH;
-
-    static {
-        PATH = XPERF_DIR != null && !XPERF_DIR.isEmpty() ? XPERF_DIR + File.separatorChar + "xperf" : "xperf";
-
-        Collection<String> errs = Utils.tryWith(PATH);
-
-        if (errs != null && !errs.isEmpty()) {
-            FAIL_MSGS.addAll(errs);
-        }
-    }
+    private final String xperfProviders;
+    private final String symbolDir;
+    private final String path;
 
     /** PID. */
     private volatile String pid;
+    private OptionSpec<String> optXperfDir;
+    private OptionSpec<String> optXperfProviders;
+    private OptionSpec<String> optSymbolDir;
 
     /**
      * Constructor.
-     *
-     * @throws IOException If failed.
      */
-    public WinPerfAsmProfiler() throws IOException {
-        super(EVENTS);
+    public WinPerfAsmProfiler(String initLine) throws ProfilerException {
+        super(initLine, "SampledProfile");
+
+        String xperfDir = set.valueOf(optXperfDir);
+        xperfProviders = set.valueOf(optXperfProviders);
+        symbolDir = set.valueOf(optSymbolDir);
+
+        path = xperfDir != null && !xperfDir.isEmpty() ? xperfDir + File.separatorChar + "xperf" : "xperf";
+
+        Collection<String> errs = Utils.tryWith(path);
+        if (!errs.isEmpty()) {
+            throw new ProfilerException(errs.toString());
+        }
     }
 
     @Override
-    public boolean checkSupport(List<String> msgs) {
-        if (FAIL_MSGS.isEmpty()) {
-            return true;
-        } else {
-            msgs.addAll(FAIL_MSGS);
-            return false;
-        }
+    protected void addMyOptions(OptionParser parser) {
+        optXperfDir = parser.accepts("xperf.dir",
+                "Path to \"xperf\" installation directory. Empty by default, so that xperf is expected to be in PATH.")
+                .withRequiredArg().ofType(String.class).describedAs("path");
+        optXperfProviders = parser.accepts("xperf.providers",
+                "xperf providers to use.")
+                .withRequiredArg().ofType(String.class).describedAs("string").defaultsTo("loader+proc_thread+profile");
+        optSymbolDir = parser.accepts("symbol.dir",
+                "Path to a directory with jvm.dll symbols (optional).")
+                .withRequiredArg().ofType(String.class).describedAs("string").defaultsTo("");
     }
 
     @Override
@@ -140,7 +119,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     public void beforeTrial(BenchmarkParams params) {
         // Start profiler before forked JVM is started.insta
-        Collection<String> errs = Utils.tryWith(PATH, "-on", XPERF_PROVIDERS);
+        Collection<String> errs = Utils.tryWith(path, "-on", xperfProviders);
 
         if (!errs.isEmpty())
             throw new IllegalStateException("Failed to start xperf: " + errs);
@@ -149,15 +128,10 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         if (pid == 0) {
-            throw new IllegalStateException(label() + " needs the forked VM PID, but it is not initialized.");
+            throw new IllegalStateException("perfasm needs the forked VM PID, but it is not initialized.");
         }
         this.pid = String.valueOf(pid);
         return super.afterTrial(br, pid, stdOut, stdErr);
-    }
-
-    @Override
-    public String label() {
-        return "xperfasm";
     }
 
     @Override
@@ -168,15 +142,15 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void parseEvents() {
         // 1. Stop profiling by calling xperf dumper.
-        Collection<String> errs = Utils.tryWith(PATH, "-d", perfBinData);
+        Collection<String> errs = Utils.tryWith(path, "-d", perfBinData);
 
         if (!errs.isEmpty())
             throw new IllegalStateException("Failed to stop xperf: " + errs);
 
         // 2. Convert binary data to text form.
         try {
-            ProcessBuilder pb = new ProcessBuilder(PATH, "-i", perfBinData, "-symbols", "-a", "dumper");
-            pb.environment().put("_NT_SYMBOL_PATH", SYMBOL_DIR);
+            ProcessBuilder pb = new ProcessBuilder(path, "-i", perfBinData, "-symbols", "-a", "dumper");
+            pb.environment().put("_NT_SYMBOL_PATH", symbolDir);
 
             Process p = pb.start();
 
@@ -211,7 +185,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
             Map<Long, String> methods = new HashMap<Long, String>();
             Map<Long, String> libs = new HashMap<Long, String>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<String, Multiset<Long>>();
-            for (String evName : EVENTS) {
+            for (String evName : this.events) {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
@@ -224,7 +198,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 String evName = elems[0].trim();
 
                 // We work with only one event type - "SampledProfile".
-                if (!EVENTS[0].equals(evName))
+                if (!this.events.get(0).equals(evName))
                     continue;
 
                 // Check PID.
@@ -276,9 +250,9 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
             methods.put(0L, "<kernel>");
 
-            return new PerfEvents(tracedEvents, events, methods, libs);
+            return new PerfEvents(this.events, events, methods, libs);
         } catch (IOException e) {
-            return new PerfEvents(tracedEvents);
+            return new PerfEvents(events);
         } finally {
             FileUtils.safelyClose(fr);
         }

@@ -101,6 +101,29 @@ public interface ChainedOptionsBuilder {
     ChainedOptionsBuilder addProfiler(Class<? extends Profiler> profiler);
 
     /**
+     * Add the profiler in the run
+     * @param profiler profiler class
+     * @param initLine profiler options initialization line
+     * @return builder
+     */
+    ChainedOptionsBuilder addProfiler(Class<? extends Profiler> profiler, String initLine);
+
+    /**
+     * Add the profiler in the run
+     * @param profiler profiler class name, or profiler alias
+     * @return builder
+     */
+    ChainedOptionsBuilder addProfiler(String profiler);
+
+    /**
+     * Add the profiler in the run
+     * @param profiler profiler class name, or profiler alias
+     * @param initLine profiler options initialization line
+     * @return builder
+     */
+    ChainedOptionsBuilder addProfiler(String profiler, String initLine);
+
+    /**
      * Control verbosity level.
      * @param mode flag
      * @return builder

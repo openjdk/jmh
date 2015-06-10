@@ -25,7 +25,6 @@
 package org.openjdk.jmh.runner.options;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.util.Optional;
 
@@ -77,7 +76,7 @@ public interface Options extends Serializable {
      * Profilers will start in the order specified by collection, and will stop in the reverse order.
      * @return profilers to use; empty collection if no profilers are required
      */
-    List<Class<? extends Profiler>> getProfilers();
+    List<ProfilerConfig> getProfilers();
 
     /**
      * How verbose should we be?

@@ -32,7 +32,6 @@ import org.openjdk.jmh.results.Result;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class ItInternalProfiler implements InternalProfiler {
 
@@ -44,16 +43,6 @@ public class ItInternalProfiler implements InternalProfiler {
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         return Collections.emptyList();
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "itinternal";
     }
 
     @Override

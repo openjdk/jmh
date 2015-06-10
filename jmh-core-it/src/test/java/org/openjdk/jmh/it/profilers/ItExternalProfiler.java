@@ -33,7 +33,6 @@ import org.openjdk.jmh.results.Result;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class ItExternalProfiler implements ExternalProfiler {
 
@@ -66,16 +65,6 @@ public class ItExternalProfiler implements ExternalProfiler {
     @Override
     public boolean allowPrintErr() {
         return true;
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "itexternal";
     }
 
     @Override

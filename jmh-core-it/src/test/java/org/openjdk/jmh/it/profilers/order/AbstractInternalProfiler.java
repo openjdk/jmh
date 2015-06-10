@@ -32,7 +32,6 @@ import org.openjdk.jmh.results.Result;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractInternalProfiler implements InternalProfiler {
@@ -66,11 +65,6 @@ public abstract class AbstractInternalProfiler implements InternalProfiler {
                 new ProfilerTimestamp(pfx + "start", start),
                 new ProfilerTimestamp(pfx + "stop", stop)
         );
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
     }
 
     @Override

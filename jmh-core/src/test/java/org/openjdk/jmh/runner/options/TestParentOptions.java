@@ -27,8 +27,6 @@ package org.openjdk.jmh.runner.options;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.profile.ClassloaderProfiler;
-import org.openjdk.jmh.profile.CompilerProfiler;
 import org.openjdk.jmh.results.format.ResultFormatType;
 
 import java.util.Arrays;
@@ -89,19 +87,19 @@ public class TestParentOptions {
 
     @Test
     public void testProfiler_Parent() throws Exception {
-        Options parent = new OptionsBuilder().addProfiler(ClassloaderProfiler.class).build();
+        Options parent = new OptionsBuilder().addProfiler("cl").build();
         Options builder = new OptionsBuilder().parent(parent).build();
         Assert.assertTrue(builder.getProfilers().size() == 1);
-        Assert.assertTrue(builder.getProfilers().contains(ClassloaderProfiler.class));
+        Assert.assertTrue(builder.getProfilers().contains(new ProfilerConfig("cl", "")));
     }
 
     @Test
     public void testProfiler_Merge() throws Exception {
-        Options parent = new OptionsBuilder().addProfiler(ClassloaderProfiler.class).build();
-        Options builder = new OptionsBuilder().parent(parent).addProfiler(CompilerProfiler.class).build();
+        Options parent = new OptionsBuilder().addProfiler("cl").build();
+        Options builder = new OptionsBuilder().parent(parent).addProfiler("comp").build();
         Assert.assertTrue(builder.getProfilers().size() == 2);
-        Assert.assertTrue(builder.getProfilers().contains(ClassloaderProfiler.class));
-        Assert.assertTrue(builder.getProfilers().contains(CompilerProfiler.class));
+        Assert.assertTrue(builder.getProfilers().contains(new ProfilerConfig("cl", "")));
+        Assert.assertTrue(builder.getProfilers().contains(new ProfilerConfig("comp", "")));
     }
 
     @Test

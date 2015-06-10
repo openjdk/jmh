@@ -192,16 +192,34 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private List<Class<? extends Profiler>> profilers = new ArrayList<Class<? extends Profiler>>();
+    private List<ProfilerConfig> profilers = new ArrayList<ProfilerConfig>();
 
     @Override
     public ChainedOptionsBuilder addProfiler(Class<? extends Profiler> prof) {
-        this.profilers.add(prof);
+        this.profilers.add(new ProfilerConfig(prof.getCanonicalName()));
         return this;
     }
 
     @Override
-    public List<Class<? extends Profiler>> getProfilers() {
+    public ChainedOptionsBuilder addProfiler(Class<? extends Profiler> prof, String initLine) {
+        this.profilers.add(new ProfilerConfig(prof.getCanonicalName(), initLine));
+        return this;
+    }
+
+    @Override
+    public ChainedOptionsBuilder addProfiler(String prof) {
+        this.profilers.add(new ProfilerConfig(prof, ""));
+        return this;
+    }
+
+    @Override
+    public ChainedOptionsBuilder addProfiler(String prof, String initLine) {
+        this.profilers.add(new ProfilerConfig(prof, initLine));
+        return this;
+    }
+
+    @Override
+    public List<ProfilerConfig> getProfilers() {
         if (otherOptions != null) {
             profilers.addAll(otherOptions.getProfilers());
         }

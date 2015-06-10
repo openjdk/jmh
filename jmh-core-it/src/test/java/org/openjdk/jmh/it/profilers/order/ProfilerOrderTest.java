@@ -70,7 +70,10 @@ public class ProfilerOrderTest {
     public void testInternal_CLI() throws RunnerException, CommandLineOptionException {
         CommandLineOptions opts = new CommandLineOptions(
                 Fixtures.getTestMask(this.getClass()),
-                "-prof", "itinternal1,itinternal2,itinternal3");
+                "-prof", InternalProfiler1.class.getCanonicalName(),
+                "-prof", InternalProfiler2.class.getCanonicalName(),
+                "-prof", InternalProfiler3.class.getCanonicalName()
+        );
         runWith(opts);
     }
 
@@ -90,7 +93,10 @@ public class ProfilerOrderTest {
     public void testExternal_CLI() throws RunnerException, CommandLineOptionException {
         CommandLineOptions opts = new CommandLineOptions(
                 Fixtures.getTestMask(this.getClass()),
-                "-prof", "itexternal1,itexternal2,itexternal3");
+                "-prof", ExternalProfiler1.class.getCanonicalName(),
+                "-prof", ExternalProfiler2.class.getCanonicalName(),
+                "-prof", ExternalProfiler3.class.getCanonicalName()
+                );
         runWith(opts);
     }
 

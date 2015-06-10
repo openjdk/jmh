@@ -28,9 +28,4 @@ public class ExternalProfiler2 extends AbstractExternalProfiler {
     public ExternalProfiler2() {
         super("prof2");
     }
-
-    @Override
-    public String label() {
-        return "itexternal2";
-    }
 }

@@ -24,61 +24,63 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.BenchmarkResult;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.ScoreFormatter;
 import org.openjdk.jmh.util.Utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LinuxPerfProfiler implements ExternalProfiler {
 
-    private static final boolean IS_SUPPORTED;
-    private static final boolean IS_DELAYED;
-    private static final Collection<String> FAIL_MSGS;
+    private final boolean isDelayed;
+    private final int delayMs;
 
-    static {
-        FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
-        IS_SUPPORTED = FAIL_MSGS.isEmpty();
+    public LinuxPerfProfiler(String initLine) throws ProfilerException {
+        OptionParser parser = new OptionParser();
+        parser.formatHelpWith(new ProfilerOptionFormatter("perf"));
+
+        OptionSpec<Integer> optDelay = parser.accepts("delay",
+                "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
+                .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
+
+        OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
+
+        delayMs = set.valueOf(optDelay);
+
+        Collection<String> msgs = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
+        if (!msgs.isEmpty()) {
+            throw new ProfilerException(msgs.toString());
+        }
 
         Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
-        IS_DELAYED = delay.isEmpty();
+        isDelayed = delay.isEmpty();
     }
-
-    /** Delay collection for given time; -1 to detect automatically */
-    private static final int DELAY_MSEC = Integer.getInteger("jmh.perf.delayMs", -1);
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         long delay;
-        if (DELAY_MSEC == -1) { // not set
+        if (delayMs == -1) { // not set
             delay = TimeUnit.NANOSECONDS.toMillis(params.getWarmup().getCount() *
                             params.getWarmup().getTime().convertTo(TimeUnit.NANOSECONDS))
                     + TimeUnit.SECONDS.toMillis(1); // loosely account for the JVM lag
         } else {
-            delay = DELAY_MSEC;
+            delay = delayMs;
         }
 
-        if (IS_DELAYED) {
+        if (isDelayed) {
             return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d", "-D", String.valueOf(delay));
         } else {
             return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d");
@@ -109,21 +111,6 @@ public class LinuxPerfProfiler implements ExternalProfiler {
     @Override
     public boolean allowPrintErr() {
         return false;
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msgs) {
-        if (IS_SUPPORTED) {
-            return true;
-        } else {
-            msgs.addAll(FAIL_MSGS);
-            return false;
-        }
-    }
-
-    @Override
-    public String label() {
-        return "perf";
     }
 
     @Override
@@ -173,7 +160,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                 }
             }
 
-            if (!IS_DELAYED) {
+            if (!isDelayed) {
                 pw.println();
                 pw.println("WARNING: Your system uses old \"perf\", which can not delay data collection.\n" +
                         "Therefore, perf performance data includes benchmark warmup.");

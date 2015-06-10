@@ -26,7 +26,6 @@ package org.openjdk.jmh.runner.options;
 
 import joptsimple.*;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.util.HashMultimap;
@@ -58,7 +57,7 @@ public class CommandLineOptions implements Options {
     private final Optional<Boolean> gcEachIteration;
     private final Optional<VerboseMode> verbose;
     private final Optional<Boolean> failOnError;
-    private final List<Class<? extends Profiler>> profilers = new ArrayList<Class<? extends Profiler>>();
+    private final List<ProfilerConfig> profilers = new ArrayList<ProfilerConfig>();
     private final Optional<TimeUnit> timeUnit;
     private final Optional<Integer> opsPerInvocation;
     private final List<String> regexps = new ArrayList<String>();
@@ -154,7 +153,7 @@ public class CommandLineOptions implements Options {
 
         OptionSpec<String> optProfilers = parser.accepts("prof", "Use profilers to collect additional data." +
                 " See the list of available profilers first.")
-                .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("profiler+");
+                .withRequiredArg().ofType(String.class).describedAs("profiler");
 
         OptionSpec<Integer> optThreadGroups = parser.accepts("tg", "Override thread group distribution for asymmetric benchmarks.")
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(Integer.class)
@@ -310,11 +309,10 @@ public class CommandLineOptions implements Options {
             if (set.has(optProfilers)) {
                 try {
                     for (String m : optProfilers.values(set)) {
-                        Class<? extends Profiler> pClass = ProfilerFactory.getProfilerByName(m);
-                        if (pClass == null) {
-                            throw new CommandLineOptionException("Unable to find profiler: " + m);
-                        }
-                        profilers.add(pClass);
+                        int idx = m.indexOf(":");
+                        String profName = (idx == -1) ?  m : m.substring(0, idx);
+                        String params   = (idx == -1) ? "" : m.substring(idx + 1);
+                        profilers.add(new ProfilerConfig(profName, params));
                     }
                 } catch (IllegalArgumentException iae) {
                     throw new CommandLineOptionException(iae.getMessage(), iae);
@@ -387,37 +385,7 @@ public class CommandLineOptions implements Options {
     }
 
     public void listProfilers() {
-        StringBuilder supported = new StringBuilder();
-        StringBuilder unsupported = new StringBuilder();
-
-        List<Class<? extends Profiler>> discoveredProfilers = ProfilerFactory.getDiscoveredProfilers();
-
-        for (Class<? extends Profiler> s : ProfilerFactory.getAvailableProfilers()) {
-            List<String> initMessages = new ArrayList<String>();
-            if (ProfilerFactory.checkSupport(s, initMessages)) {
-                supported.append(String.format("%20s: %s %s\n",
-                        ProfilerFactory.getLabel(s),
-                        ProfilerFactory.getDescription(s),
-                        discoveredProfilers.contains(s) ? "(discovered)" : ""));
-            } else {
-                unsupported.append(String.format("%20s: %s %s\n",
-                        ProfilerFactory.getLabel(s),
-                        ProfilerFactory.getDescription(s),
-                        discoveredProfilers.contains(s) ? "(discovered)" : ""));
-                for (String im : initMessages) {
-                    unsupported.append(String.format("%20s  %s\n", "", im));
-                }
-                unsupported.append("\n");
-            }
-        }
-
-        if (!supported.toString().isEmpty()) {
-            System.out.println("Supported profilers:\n" + supported.toString());
-        }
-
-        if (!unsupported.toString().isEmpty()) {
-            System.out.println("Unsupported profilers:\n" + unsupported.toString());
-        }
+        ProfilerFactory.listProfilers(System.out);
     }
 
     public void listResultFormats() {
@@ -602,7 +570,7 @@ public class CommandLineOptions implements Options {
     }
 
     @Override
-    public List<Class<? extends Profiler>> getProfilers() {
+    public List<ProfilerConfig> getProfilers() {
         return profilers;
     }
 

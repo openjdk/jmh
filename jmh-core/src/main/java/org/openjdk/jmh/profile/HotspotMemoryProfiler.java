@@ -31,14 +31,12 @@ import java.util.List;
 
 public class HotspotMemoryProfiler extends AbstractHotspotProfiler {
 
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotMemoryMBean>getInstance("HotspotMemoryMBean").getInternalMemoryCounters();
+    public HotspotMemoryProfiler() throws ProfilerException {
     }
 
     @Override
-    public String label() {
-        return "hs_gc";
+    public List<Counter> getCounters() {
+        return AbstractHotspotProfiler.<HotspotMemoryMBean>getInstance("HotspotMemoryMBean").getInternalMemoryCounters();
     }
 
     @Override

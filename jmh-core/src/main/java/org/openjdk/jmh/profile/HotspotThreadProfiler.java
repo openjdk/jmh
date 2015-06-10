@@ -39,14 +39,12 @@ import java.util.Map;
 
 public class HotspotThreadProfiler extends AbstractHotspotProfiler {
 
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotThreadMBean>getInstance("HotspotThreadMBean").getInternalThreadingCounters();
+    public HotspotThreadProfiler() throws ProfilerException {
     }
 
     @Override
-    public String label() {
-        return "hs_thr";
+    public List<Counter> getCounters() {
+        return AbstractHotspotProfiler.<HotspotThreadMBean>getInstance("HotspotThreadMBean").getInternalThreadingCounters();
     }
 
     @Override

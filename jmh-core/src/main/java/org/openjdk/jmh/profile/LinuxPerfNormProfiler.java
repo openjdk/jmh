@@ -24,6 +24,9 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
@@ -40,27 +43,8 @@ import java.util.concurrent.TimeUnit;
 
 public class LinuxPerfNormProfiler implements ExternalProfiler {
 
-    /** Delay collection for given time; -1 to detect automatically */
-    private static final int DELAY_MSEC = Integer.getInteger("jmh.perfnorm.delayMs", -1);
-
-    /** Events to gather */
-    private static final String[] USER_EVENTS = System.getProperty("jmh.perfnorm.events", "").split(",");
-
-    /** Use "perf stat -d -d -d" instead of explicit counter list */
-    private static final Boolean USE_DEFAULT_STAT = Boolean.getBoolean("jmh.perfnorm.useDefaultStat");
-
-    /** Ignore event increments larger that this */
-    private static final long HIGH_PASS_FILTER = Long.getLong("jmh.perfnorm.filterHigh", 100000000000L);
-
-    /** The interval between incremental updates from concurrently running perf */
-    private static final int INCREMENT_INTERVAL = Integer.getInteger("jmh.perfnorm.intervalMs", 100);
-
-    private static final boolean IS_SUPPORTED;
-    private static final boolean IS_INCREMENTABLE;
-    private static final Collection<String> FAIL_MSGS;
-
     /** This is a non-exhaustive list of events we care about. */
-    private static final String[] INTERESTING_EVENTS = new String[]{
+    private static final String[] interestingEvents = new String[]{
             "cycles", "instructions",
             "branches", "branch-misses",
             "bus-cycles", "ref-cycles",
@@ -76,25 +60,68 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
             "stalled-cycles-frontend", "stalled-cycles-backend",
     };
 
-    private static final Collection<String> SUPPORTED_EVENTS = new ArrayList<String>();
+    private final int delayMs;
+    private final boolean useDefaultStats;
+    private final long highPassFilter;
+    private final int incrementInterval;
+    private final boolean isIncrementable;
 
-    static {
-        FAIL_MSGS = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "echo", "1");
-        IS_SUPPORTED = FAIL_MSGS.isEmpty();
+    private final Collection<String> supportedEvents = new ArrayList<String>();
 
-        Collection<String> incremental = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-I", String.valueOf(INCREMENT_INTERVAL), "echo", "1");
-        IS_INCREMENTABLE = incremental.isEmpty();
+    public LinuxPerfNormProfiler(String initLine) throws ProfilerException {
+        OptionParser parser = new OptionParser();
+        parser.formatHelpWith(new ProfilerOptionFormatter("perfnorm"));
 
-        for (String ev : USER_EVENTS) {
-            if (ev.trim().isEmpty()) continue;
-            SUPPORTED_EVENTS.add(ev);
+        OptionSpec<String> optEvents = parser.accepts("events",
+                        "Events to gather.")
+                .withRequiredArg().ofType(String.class).withValuesSeparatedBy(",").describedAs("event+").defaultsTo(interestingEvents);
+
+        OptionSpec<Integer> optDelay = parser.accepts("delay",
+                        "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
+                .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
+
+        OptionSpec<Integer> optIncrementInterval = parser.accepts("interval",
+                        "The interval between incremental updates from a concurrently running perf. " +
+                        "Lower values may improve accuracy, while increasing the profiling overhead.")
+                .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(100);
+
+        OptionSpec<Long> optHighPassFilter = parser.accepts("highPassFilter",
+                        "Ignore event increments larger that this.")
+                .withRequiredArg().ofType(Long.class).describedAs("#").defaultsTo(100000000000L);
+
+        OptionSpec<Boolean> optDefaultStat = parser.accepts("useDefaultStat",
+                        "Use \"perf stat -d -d -d\" instead of explicit counter list.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
+
+        delayMs = set.valueOf(optDelay);
+        incrementInterval = set.valueOf(optIncrementInterval);
+        highPassFilter = set.valueOf(optHighPassFilter);
+        useDefaultStats = set.valueOf(optDefaultStat);
+
+        Collection<String> userEvents = set.valuesOf(optEvents);
+
+        Collection<String> msgs = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "echo", "1");
+        if (!msgs.isEmpty()) {
+            throw new ProfilerException(msgs.toString());
         }
 
-        if (SUPPORTED_EVENTS.isEmpty()) {
-            for (String ev : INTERESTING_EVENTS) {
+        Collection<String> incremental = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-I", String.valueOf(incrementInterval), "echo", "1");
+        isIncrementable = incremental.isEmpty();
+
+        if (userEvents != null) {
+            for (String ev : userEvents) {
+                if (ev.trim().isEmpty()) continue;
+                supportedEvents.add(ev);
+            }
+        }
+
+        if (supportedEvents.isEmpty()) {
+            for (String ev : interestingEvents) {
                 Collection<String> res = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-e", "cycles,instructions," + ev, "echo", "1");
                 if (res.isEmpty()) {
-                    SUPPORTED_EVENTS.add(ev);
+                    supportedEvents.add(ev);
                 }
             }
         }
@@ -103,13 +130,13 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         List<String> cmd = new ArrayList<String>();
-        if (USE_DEFAULT_STAT) {
+        if (useDefaultStats) {
             cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-d", "-d", "-d"));
         } else {
-            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-e", Utils.join(SUPPORTED_EVENTS, ",")));
+            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-e", Utils.join(supportedEvents, ",")));
         }
-        if (IS_INCREMENTABLE) {
-            cmd.addAll(Arrays.asList("-I", String.valueOf(INCREMENT_INTERVAL)));
+        if (isIncrementable) {
+            cmd.addAll(Arrays.asList("-I", String.valueOf(incrementInterval)));
         }
         return cmd;
     }
@@ -140,27 +167,12 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     }
 
     @Override
-    public boolean checkSupport(List<String> msgs) {
-        if (IS_SUPPORTED) {
-            return true;
-        } else {
-            msgs.addAll(FAIL_MSGS);
-            return false;
-        }
-    }
-
-    @Override
-    public String label() {
-        return "perfnorm";
-    }
-
-    @Override
     public String getDescription() {
         return "Linux perf statistics, normalized by operation count";
     }
 
     public long getDelay(BenchmarkResult br) {
-        if (DELAY_MSEC == -1) { // not set
+        if (delayMs == -1) { // not set
             BenchmarkResultMetaData md = br.getMetadata();
             if (md != null) {
                 // try to ask harness itself:
@@ -172,7 +184,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                         + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
             }
         } else {
-            return TimeUnit.MILLISECONDS.toNanos(DELAY_MSEC);
+            return TimeUnit.MILLISECONDS.toNanos(delayMs);
         }
     }
 
@@ -192,7 +204,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("#")) continue;
 
-                if (IS_INCREMENTABLE) {
+                if (isIncrementable) {
                     int idx1 = line.indexOf(",");
                     int idx2 = line.lastIndexOf(",");
 
@@ -217,7 +229,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
                     try {
                         long lValue = NumberFormat.getInstance().parse(count).longValue();
-                        if (lValue > HIGH_PASS_FILTER) {
+                        if (lValue > highPassFilter) {
                             // anomalous value, pretend we did not see it
                             continue nextline;
                         }
@@ -247,7 +259,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
             }
 
-            if (!IS_INCREMENTABLE) {
+            if (!isIncrementable) {
                 System.out.println();
                 System.out.println();
                 System.out.println("WARNING: Your system uses old \"perf\", which cannot print data incrementally (-I).\n" +
@@ -258,7 +270,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
             BenchmarkResultMetaData md = br.getMetadata();
             if (md != null) {
-                if (IS_INCREMENTABLE) {
+                if (isIncrementable) {
                     totalOpts = md.getMeasurementOps();
                 } else {
                     totalOpts = md.getWarmupOps() + md.getMeasurementOps();

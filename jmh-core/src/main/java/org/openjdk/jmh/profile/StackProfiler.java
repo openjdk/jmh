@@ -24,13 +24,13 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.results.*;
+import org.openjdk.jmh.runner.options.IntegerValueConverter;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.Multiset;
 import org.openjdk.jmh.util.Multisets;
@@ -38,16 +38,7 @@ import org.openjdk.jmh.util.Multisets;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,19 +46,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class StackProfiler implements InternalProfiler {
 
-    /** Number of stack lines to save */
-    private static final int SAMPLE_STACK_LINES = Integer.getInteger("jmh.stack.lines", 1);
-
-    /** Number of top stacks to show */
-    private static final int SAMPLE_TOP_STACKS =  Integer.getInteger("jmh.stack.top", 10);
-
-    /** Sampling period */
-    private static final int SAMPLE_PERIOD_MSEC = Integer.getInteger("jmh.stack.period", 10);
-
-    /** Record detailed line info */
-    private static final boolean SAMPLE_LINE =    Boolean.getBoolean("jmh.stack.detailLine");
-
-    /** Threads to ignore (known system and harness threads) */
+    /**
+     * Threads to ignore (known system and harness threads)
+     */
     private static final String[] IGNORED_THREADS = {
             "Finalizer",
             "Signal Dispatcher",
@@ -77,26 +58,55 @@ public class StackProfiler implements InternalProfiler {
             "Attach Listener"
     };
 
-    /** Whether or not filter the packages. */
-    private static final Boolean EXCLUDE_PACKAGES = Boolean.getBoolean("jmh.stack.excludePackages");
+    private final int stackLines;
+    private final int topStacks;
+    private final int periodMsec;
+    private final boolean sampleLine;
+    private final Set<String> excludePackageNames;
 
-    /**
-     * Requested excluded packages from system properties. This is expected to be a comma (,) separated list
-     * of the fully qualified package names to be excluded. Every stack line that starts with the provided
-     * patterns will be excluded. If the default package exclusion is enabled, the list would be added.
-     */
-    private static final Set<String> EXCLUDE_PACKAGES_NAMES;
+    public StackProfiler(String initLine) throws ProfilerException {
+        OptionParser parser = new OptionParser();
+        parser.formatHelpWith(new ProfilerOptionFormatter(StackProfiler.class.getCanonicalName()));
 
-    static {
-        if (EXCLUDE_PACKAGES) {
-            String userNames = System.getProperty("jmh.stack.excludePackageNames");
-            EXCLUDE_PACKAGES_NAMES = new HashSet<String>(
-                    (userNames != null) ?
-                        Arrays.asList(userNames.split(",")) :
-                        Arrays.asList("java.", "javax.", "sun.", "sunw.", "com.sun.", "org.openjdk.jmh."));
-        } else {
-            EXCLUDE_PACKAGES_NAMES = Collections.emptySet();
-        }
+        OptionSpec<Integer> optStackLines = parser.accepts("lines", "Number of stack lines to save in each stack trace. " +
+                "Larger values provide more insight into who is calling the top stack method, as the expense " +
+                "of more stack trace shapes to collect.")
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int").defaultsTo(1);
+
+        OptionSpec<Integer> optTopStacks = parser.accepts("top", "Number of top stacks to show in the profiling results. " +
+                "Larger values may catch some stack traces that linger in the distribution tail.")
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int").defaultsTo(10);
+
+        OptionSpec<Integer> optSamplePeriod = parser.accepts("period", "Sampling period, in milliseconds. " +
+                "Smaller values improve accuracy, at the expense of more profiling overhead.")
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int").defaultsTo(10);
+
+        OptionSpec<Boolean> optDetailLine = parser.accepts("detailLine", "Record detailed source line info. " +
+                "This adds the line numbers to the recorded stack traces.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSpec<Boolean> optExclude = parser.accepts("excludePackages", "Enable package filtering. " +
+                "Use excludePackages option to control what packages are filtered")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSpec<String> optExcludeClasses = parser.accepts("excludePackageNames", "Filter there packages. " +
+                "This is expected to be a comma-separated list\n" +
+                "of the fully qualified package names to be excluded. Every stack line that starts with the provided\n" +
+                "patterns will be excluded.")
+                .withRequiredArg().withValuesSeparatedBy(",").ofType(String.class).describedAs("package+")
+                .defaultsTo("java.", "javax.", "sun.", "sunw.", "com.sun.", "org.openjdk.jmh.");
+
+        OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
+
+        sampleLine = set.valueOf(optDetailLine);
+        periodMsec = set.valueOf(optSamplePeriod);
+        topStacks = set.valueOf(optTopStacks);
+        stackLines = set.valueOf(optStackLines);
+
+        boolean excludePackages = set.valueOf(optExclude);
+        excludePackageNames = excludePackages ?
+                new HashSet<String>(set.valuesOf(optExcludeClasses)) :
+                Collections.<String>emptySet();
     }
 
     private volatile SamplingTask samplingTask;
@@ -110,17 +120,7 @@ public class StackProfiler implements InternalProfiler {
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         samplingTask.stop();
-        return Collections.singleton(new StackResult(samplingTask.stacks));
-    }
-
-    @Override
-    public boolean checkSupport(List<String> msg) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "stack";
+        return Collections.singleton(new StackResult(samplingTask.stacks, topStacks));
     }
 
     @Override
@@ -128,7 +128,7 @@ public class StackProfiler implements InternalProfiler {
         return "Simple and naive Java stack profiler";
     }
 
-    public static class SamplingTask implements Runnable {
+    public class SamplingTask implements Runnable {
 
         private final Thread thread;
         private final Map<Thread.State, Multiset<StackRecord>> stacks;
@@ -162,30 +162,30 @@ public class StackProfiler implements InternalProfiler {
                     //   - Get the remaining number of stack lines and build the stack record
 
                     StackTraceElement[] stack = info.getStackTrace();
-                    List<String> stackLines = new ArrayList<String>();
+                    List<String> lines = new ArrayList<String>();
 
                     for (StackTraceElement l : stack) {
                         String className = l.getClassName();
                         if (!isExcluded(className)) {
-                            stackLines.add(className + '.' + l.getMethodName()
-                                    + (SAMPLE_LINE ? ":" + l.getLineNumber() : ""));
+                            lines.add(className + '.' + l.getMethodName()
+                                    + (sampleLine ? ":" + l.getLineNumber() : ""));
 
-                            if (stackLines.size() >= SAMPLE_STACK_LINES) {
+                            if (lines.size() >= stackLines) {
                                 break;
                             }
                         }
                     }
 
-                    if (stackLines.isEmpty()) {
-                        stackLines.add("<stack is empty, everything is filtered?>");
+                    if (lines.isEmpty()) {
+                        lines.add("<stack is empty, everything is filtered?>");
                     }
 
                     Thread.State state = info.getThreadState();
-                    stacks.get(state).add(new StackRecord(stackLines));
+                    stacks.get(state).add(new StackRecord(lines));
                 }
 
                 try {
-                    TimeUnit.MILLISECONDS.sleep(SAMPLE_PERIOD_MSEC);
+                    TimeUnit.MILLISECONDS.sleep(periodMsec);
                 } catch (InterruptedException e) {
                     return;
                 }
@@ -206,7 +206,7 @@ public class StackProfiler implements InternalProfiler {
         }
 
         private boolean isExcluded(String className) {
-            for (String p : EXCLUDE_PACKAGES_NAMES) {
+            for (String p : excludePackageNames) {
                 if (className.startsWith(p)) {
                     return true;
                 }
@@ -244,10 +244,12 @@ public class StackProfiler implements InternalProfiler {
         private static final long serialVersionUID = 2609170863630346073L;
 
         private final Map<Thread.State, Multiset<StackRecord>> stacks;
+        private final int topStacks;
 
-        public StackResult(Map<Thread.State, Multiset<StackRecord>> stacks) {
+        public StackResult(Map<Thread.State, Multiset<StackRecord>> stacks, int topStacks) {
             super(ResultRole.SECONDARY, Defaults.PREFIX + "stack", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.stacks = stacks;
+            this.topStacks = topStacks;
         }
 
         @Override
@@ -305,7 +307,7 @@ public class StackProfiler implements InternalProfiler {
                     builder.append(dottedLine("Thread state: " + state.toString()));
 
                     int totalDisplayed = 0;
-                    for (StackRecord s : Multisets.countHighest(stateStacks, SAMPLE_TOP_STACKS)) {
+                    for (StackRecord s : Multisets.countHighest(stateStacks, topStacks)) {
                         List<String> lines = s.lines;
                         if (!lines.isEmpty()) {
                             totalDisplayed += stateStacks.count(s);
@@ -371,6 +373,7 @@ public class StackProfiler implements InternalProfiler {
     public static class StackResultAggregator implements Aggregator<StackResult> {
         @Override
         public StackResult aggregate(Collection<StackResult> results) {
+            int topStacks = 0;
             Map<Thread.State, Multiset<StackRecord>> sum = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
             for (StackResult r : results) {
                 for (Map.Entry<Thread.State, Multiset<StackRecord>> entry : r.stacks.entrySet()) {
@@ -382,8 +385,9 @@ public class StackProfiler implements InternalProfiler {
                         sumSet.add(rec, entry.getValue().count(rec));
                     }
                 }
+                topStacks = r.topStacks;
             }
-            return new StackResult(sum);
+            return new StackResult(sum, topStacks);
         }
     }
 

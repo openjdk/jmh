@@ -24,14 +24,12 @@
  */
 package org.openjdk.jmh.it.profilers;
 
-import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.CommandLineOptionException;
@@ -39,7 +37,6 @@ import org.openjdk.jmh.runner.options.CommandLineOptions;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ProfilerTest {
@@ -72,16 +69,14 @@ public class ProfilerTest {
 
     @Test
     public void testInternal_CLI() throws RunnerException, CommandLineOptionException {
-        List<Class<? extends Profiler>> ps = new CommandLineOptions("-prof", "itinternal").getProfilers();
-        Assert.assertEquals(1, ps.size());
-        Assert.assertEquals(ItInternalProfiler.class.getName(), ps.get(0).getName());
+        Options opts = new CommandLineOptions("-prof", ItInternalProfiler.class.getCanonicalName(), Fixtures.getTestMask(this.getClass()));
+        new Runner(opts).run();
     }
 
     @Test
     public void testExternal_CLI() throws RunnerException, CommandLineOptionException {
-        List<Class<? extends Profiler>> ps = new CommandLineOptions("-prof", "itexternal").getProfilers();
-        Assert.assertEquals(1, ps.size());
-        Assert.assertEquals(ItExternalProfiler.class.getName(), ps.get(0).getName());
+        Options opts = new CommandLineOptions("-prof", ItExternalProfiler.class.getCanonicalName(), Fixtures.getTestMask(this.getClass()));
+        new Runner(opts).run();
     }
 
 }

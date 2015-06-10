@@ -44,18 +44,11 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
      */
     protected abstract Collection<Counter> getCounters();
 
-    /**
-     * Checks if this profiler is accessible
-     * @return true, if accessible; false otherwise
-     */
-    @Override
-    public boolean checkSupport(List<String> msgs) {
+    public AbstractHotspotProfiler() throws ProfilerException {
         try {
             Class.forName("sun.management.ManagementFactoryHelper");
-            return true;
         } catch (ClassNotFoundException e) {
-            msgs.add("Class not found: " + e.getMessage() + ", are you running HotSpot VM?");
-            return false;
+            throw new ProfilerException("Class not found: " + e.getMessage() + ", are you running HotSpot VM?");
         }
     }
 
@@ -64,7 +57,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
         HotspotInternalResult res = counters();
         Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
-            results.add(new ProfilerResult(Defaults.PREFIX + label() + "." + e.getKey(), e.getValue(), "?", AggregationPolicy.AVG));
+            results.add(new ProfilerResult(Defaults.PREFIX + "." + e.getKey(), e.getValue(), "?", AggregationPolicy.AVG));
         }
         return results;
     }

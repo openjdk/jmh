@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.profile;
 
-import java.util.List;
-
 /**
  * Root profiler interface.
  *
@@ -34,19 +32,6 @@ import java.util.List;
  * @see org.openjdk.jmh.profile.InternalProfiler
  */
 public interface Profiler {
-
-    /**
-     * Check the support for a given profiler.
-     * @param msgs where to put the diagnostic messages
-     * @return true, if supported
-     */
-    boolean checkSupport(List<String> msgs);
-
-    /**
-     * Unique label for the profiler.
-     * @return label
-     */
-    String label();
 
     /**
      * Human-readable one-line description of the profiler.

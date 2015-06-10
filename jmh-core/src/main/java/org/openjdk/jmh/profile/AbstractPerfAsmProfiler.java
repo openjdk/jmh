@@ -24,6 +24,9 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
@@ -35,134 +38,179 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-/**
- *
- */
 public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
-    /**
-     * Cutoff threshold for hot region: the regions with event count over threshold would be shown
-     */
-    private static final double THRESHOLD_RATE = Double.valueOf(System.getProperty("jmh.perfasm.hotThreshold", "0.10"));
+    protected final List<String> events;
 
-    /**
-     * Show this number of top hottest code regions
-     */
-    private static final int SHOW_TOP = Integer.getInteger("jmh.perfasm.top", 20);
+    private final double regionRateThreshold;
+    private final int regionShowTop;
+    private final int regionTooBigThreshold;
+    private final int printMargin;
+    private final int mergeMargin;
+    private final int delayMsec;
 
-    /**
-     * Cutoff threshold for large region: the region larger than this would be truncated
-     */
-    private static final int THRESHOLD_TOO_BIG = Integer.getInteger("jmh.perfasm.tooBigThreshold", 1000);
+    private final boolean skipAssembly;
+    private final boolean skipInterpreter;
+    private final boolean skipVMStubs;
 
-    /**
-     * Print margin: how many "context" lines without counters to show in each region
-     */
-    private static final int PRINT_MARGIN = Integer.getInteger("jmh.perfasm.printMargin", 10);
+    private final boolean savePerfOutput;
+    private final String savePerfOutputTo;
+    private final String savePerfOutputToFile;
 
-    /**
-     * Merge margin: the regions separated by less than the margin are considered the same
-     */
-    private static final int MERGE_MARGIN = Integer.getInteger("jmh.perfasm.mergeMargin", 32);
+    private final boolean savePerfBin;
+    private final String savePerfBinTo;
+    private final String savePerfBinFile;
 
-    /**
-     * Delay collection for given time; -1 to detect automatically
-     */
-    private static final int DELAY_MSEC = Integer.getInteger("jmh.perfasm.delayMs", -1);
+    private final boolean saveLog;
+    private final String saveLogTo;
+    private final String saveLogToFile;
 
-    /**
-     * Do -XX:+PrintAssembly instrumentation?
-     */
-    private static final Boolean SKIP_ASSEMBLY = Boolean.getBoolean("jmh.perfasm.skipAsm");
+    private final boolean printCompilationInfo;
+    private final boolean intelSyntax;
 
-    /**
-     * Skip printing out interpreter stubs. This may improve the parser performance at the expense
-     * of missing the resolution and disassembly of interpreter regions.
-     */
-    private static final Boolean SKIP_INTERPRETER = Boolean.getBoolean("jmh.perfasm.skipInterpreter");
+    protected final String hsLog;
+    protected final String perfBinData;
+    protected final String perfParsedData;
+    protected final OptionSet set;
 
-    /**
-     * Skip printing out VM stubs. This may improve the parser performance at the expense
-     * of missing the resolution and disassembly of VM stub regions.
-     */
-    private static final Boolean SKIP_VM_STUBS = Boolean.getBoolean("jmh.perfasm.skipVMStubs");
+    protected AbstractPerfAsmProfiler(String initLine, String... events) throws ProfilerException {
+        try {
+            hsLog = FileUtils.tempFile("hslog").getAbsolutePath();
+            perfBinData = FileUtils.tempFile("perfbin").getAbsolutePath();
+            perfParsedData = FileUtils.tempFile("perfparsed").getAbsolutePath();
+        } catch (IOException e) {
+            throw new ProfilerException(e);
+        }
 
-    /**
-     * Save perf output to file?
-     */
-    private static final Boolean SAVE_PERF_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerf");
+        OptionParser parser = new OptionParser();
+        parser.formatHelpWith(new ProfilerOptionFormatter("perfasm"));
 
-    /**
-     * Override the perf output location
-     */
-    private static final String SAVE_PERF_OUTPUT_TO = System.getProperty("jmh.perfasm.savePerfTo", ".");
+        OptionSpec<String> optEvents = parser.accepts("events",
+                        "Events to gather.")
+                .withRequiredArg().ofType(String.class).withValuesSeparatedBy(",").describedAs("event").defaultsTo(events);
 
-    /**
-     * Override the perf output filename
-     */
-    private static final String SAVE_PERF_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.savePerfToFile");
+        OptionSpec<Double> optThresholdRate = parser.accepts("hotThreshold",
+                        "Cutoff threshold for hot regions. The regions with event count over threshold would be expanded " +
+                        "with detailed disassembly.")
+                .withRequiredArg().ofType(Double.class).describedAs("rate").defaultsTo(0.10);
 
-    /**
-     * Save perf binary output to file?
-     */
-    private static final Boolean SAVE_PERF_BIN_OUTPUT = Boolean.getBoolean("jmh.perfasm.savePerfBin");
+        OptionSpec<Integer> optShowTop = parser.accepts("top",
+                        "Show this number of top hottest code regions.")
+                .withRequiredArg().ofType(Integer.class).describedAs("#").defaultsTo(20);
 
-    /**
-     * Override the perf binary output location
-     */
-    private static final String SAVE_PERF_BIN_OUTPUT_TO = System.getProperty("jmh.perfasm.savePerfBinTo", ".");
+        OptionSpec<Integer> optThreshold = parser.accepts("tooBigThreshold",
+                        "Cutoff threshold for large region. The region containing more than this number of lines " +
+                        "would be truncated.")
+                .withRequiredArg().ofType(Integer.class).describedAs("lines").defaultsTo(1000);
 
-    /**
-     * Override the perf binary output filename
-     */
-    private static final String SAVE_PERF_BIN_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.savePerfBinToFile");
+        OptionSpec<Integer> optPrintMargin = parser.accepts("printMargin",
+                        "Print margin. How many \"context\" lines without counters to show in each region.")
+                .withRequiredArg().ofType(Integer.class).describedAs("lines").defaultsTo(10);
 
-    /**
-     * Save annotated Hotspot log to file
-     */
-    private static final Boolean SAVE_LOG_OUTPUT = Boolean.getBoolean("jmh.perfasm.saveLog");
+        OptionSpec<Integer> optMergeMargin = parser.accepts("mergeMargin",
+                        "Merge margin. The regions separated by less than the margin are merged.")
+                .withRequiredArg().ofType(Integer.class).describedAs("lines").defaultsTo(32);
 
-    /**
-     * Override the annotated Hotspot log location
-     */
-    private static final String SAVE_LOG_OUTPUT_TO = System.getProperty("jmh.perfasm.saveLogTo", ".");
+        OptionSpec<Integer> optDelay = parser.accepts("delay",
+                        "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
+                .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
 
-    /**
-     * Override the annotated Hotspot log filename
-     */
-    private static final String SAVE_LOG_OUTPUT_TO_FILE = System.getProperty("jmh.perfasm.saveLogToFile");
+        OptionSpec<Boolean> optSkipAsm = parser.accepts("skipAsm",
+                        "Skip -XX:+PrintAssembly instrumentation.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
 
-    /**
-     * Print the collateral compilation information.
-     * Enabling this might corrupt the assembly output, see https://bugs.openjdk.java.net/browse/CODETOOLS-7901102
-     */
-    private static final Boolean PRINT_COMPILATION_INFO = Boolean.getBoolean("jmh.perfasm.printCompilationInfo");
+        OptionSpec<Boolean> optSkipInterpreter = parser.accepts("skipInterpreter",
+                        "Skip printing out interpreter stubs. This may improve the parser performance at the expense " +
+                        "of missing the resolution and disassembly of interpreter regions.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
 
-    /**
-     * Override the default assembly syntax
-     */
-    private static final String ASSEMBLY_SYNTAX = System.getProperty("jmh.perfasm.assemblySyntax");
+        OptionSpec<Boolean> optSkipVMStubs = parser.accepts("skipVMStubs",
+                        "Skip printing out VM stubs. This may improve the parser performance at the expense " +
+                        "of missing the resolution and disassembly of VM stub regions.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
 
-    protected final String[] tracedEvents;
+        OptionSpec<Boolean> optPerfOut = parser.accepts("savePerf",
+                        "Save parsed perf output to file. Use this for debugging.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
 
-    protected String hsLog;
-    protected String perfBinData;
-    protected String perfParsedData;
+        OptionSpec<String> optPerfOutTo = parser.accepts("savePerfTo",
+                        "Override the parsed perf output log location. This will use the unique file name per test. Use this for debugging.")
+                .withRequiredArg().ofType(String.class).describedAs("dir").defaultsTo(".");
 
-    protected AbstractPerfAsmProfiler(String[] events) throws IOException {
-        tracedEvents = events;
-        hsLog = FileUtils.tempFile("hslog").getAbsolutePath();
-        perfBinData = FileUtils.tempFile("perfbin").getAbsolutePath();
-        perfParsedData = FileUtils.tempFile("perfparsed").getAbsolutePath();
+        OptionSpec<String> optPerfOutToFile = parser.accepts("savePerfToFile",
+                        "Override the perf output log filename. Use this for debugging.")
+                .withRequiredArg().ofType(String.class).describedAs("file");
+
+        OptionSpec<Boolean> optPerfBin = parser.accepts("savePerfBin",
+                        "Save binary perf data to file. Use this for debugging.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSpec<String> optPerfBinTo = parser.accepts("savePerfBinTo",
+                        "Override the binary perf data location. This will use the unique file name per test. Use this for debugging.")
+                .withRequiredArg().ofType(String.class).describedAs("dir").defaultsTo(".");
+
+        OptionSpec<String> optPerfBinToFile = parser.accepts("savePerfBinToFile",
+                        "Override the perf binary data filename. Use this for debugging.")
+                .withRequiredArg().ofType(String.class).describedAs("file");
+
+        OptionSpec<Boolean> optSaveLog = parser.accepts("saveLog",
+                        "Save annotated Hotspot log to file.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSpec<String> optSaveLogTo = parser.accepts("saveLogTo",
+                        "Override the annotated Hotspot log location. This will use the unique file name per test.")
+                .withRequiredArg().ofType(String.class).describedAs("dir").defaultsTo(".");
+
+        OptionSpec<String> optSaveLogToFile = parser.accepts("saveLogToFile",
+                        "Override the annotated Hotspot log filename.")
+                .withRequiredArg().ofType(String.class).describedAs("file");
+
+        OptionSpec<Boolean> optPrintCompilationInfo = parser.accepts("printCompilationInfo",
+                        "Print the collateral compilation information. Enabling this might corrupt the " +
+                        "assembly output, see https://bugs.openjdk.java.net/browse/CODETOOLS-7901102.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSpec<Boolean> optIntelSyntax = parser.accepts("intelSyntax",
+                        "Should perfasm use intel syntax?")
+                .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(false);
+
+        addMyOptions(parser);
+
+        set = ProfilerUtils.parseInitLine(initLine, parser);
+
+        this.events = set.valuesOf(optEvents);
+        regionRateThreshold = set.valueOf(optThresholdRate);
+        regionShowTop = set.valueOf(optShowTop);
+        regionTooBigThreshold = set.valueOf(optThreshold);
+        printMargin = set.valueOf(optPrintMargin);
+        mergeMargin = set.valueOf(optMergeMargin);
+        delayMsec = set.valueOf(optDelay);
+
+        skipAssembly = set.valueOf(optSkipAsm);
+        skipInterpreter = set.valueOf(optSkipInterpreter);
+        skipVMStubs = set.valueOf(optSkipVMStubs);
+
+        savePerfOutput = set.valueOf(optPerfOut);
+        savePerfOutputTo = set.valueOf(optPerfOutTo);
+        savePerfOutputToFile = set.valueOf(optPerfOutToFile);
+
+        savePerfBin = set.valueOf(optPerfBin);
+        savePerfBinTo = set.valueOf(optPerfBinTo);
+        savePerfBinFile = set.valueOf(optPerfBinToFile);
+
+        saveLog = set.valueOf(optSaveLog);
+        saveLogTo = set.valueOf(optSaveLogTo);
+        saveLogToFile = set.valueOf(optSaveLogToFile);
+
+        intelSyntax = set.valueOf(optIntelSyntax);
+        printCompilationInfo = set.valueOf(optPrintCompilationInfo);
     }
 
-    @Override
-    public abstract boolean checkSupport(List<String> msgs);
+    protected abstract void addMyOptions(OptionParser parser);
 
     @Override
     public Collection<String> addJVMOptions(BenchmarkParams params) {
-        if (!SKIP_ASSEMBLY) {
+        if (!skipAssembly) {
             Collection<String> opts = new ArrayList<String>();
             opts.addAll(Arrays.asList(
                 "-XX:+UnlockDiagnosticVMOptions",
@@ -170,23 +218,23 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 "-XX:LogFile=" + hsLog,
                 "-XX:+PrintAssembly"));
 
-            if (!SKIP_INTERPRETER) {
+            if (!skipInterpreter) {
                 opts.add("-XX:+PrintInterpreter");
             }
-            if (!SKIP_VM_STUBS) {
+            if (!skipVMStubs) {
                 opts.add("-XX:+PrintNMethods");
                 opts.add("-XX:+PrintNativeNMethods");
                 opts.add("-XX:+PrintSignatureHandlers");
                 opts.add("-XX:+PrintAdapterHandlers");
                 opts.add("-XX:+PrintStubCode");
             }
-            if (PRINT_COMPILATION_INFO) {
+            if (printCompilationInfo) {
                 opts.add("-XX:+PrintCompilation");
                 opts.add("-XX:+PrintInlining");
                 opts.add("-XX:+TraceClassLoading");
             }
-            if (ASSEMBLY_SYNTAX != null) {
-                opts.add("-XX:PrintAssemblyOptions=" + ASSEMBLY_SYNTAX);
+            if (intelSyntax) {
+                opts.add("-XX:PrintAssemblyOptions=intel");
             }
             return opts;
         } else {
@@ -253,7 +301,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         Assembly assembly = readAssembly(new File(hsLog));
         if (assembly.size() > 0) {
             pw.printf("PrintAssembly processed: %d total address lines.%n", assembly.size());
-        } else if (SKIP_ASSEMBLY) {
+        } else if (skipAssembly) {
             pw.println();
             pw.println("PrintAssembly skipped, Java methods are not resolved.");
             pw.println();
@@ -268,7 +316,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          */
 
         long delayNs;
-        if (DELAY_MSEC == -1) { // not set
+        if (delayMsec == -1) { // not set
             BenchmarkResultMetaData md = br.getMetadata();
             if (md != null) {
                 // try to ask harness itself:
@@ -280,7 +328,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
             }
         } else {
-            delayNs = TimeUnit.MILLISECONDS.toNanos(DELAY_MSEC);
+            delayNs = TimeUnit.MILLISECONDS.toNanos(delayMsec);
         }
 
         double skipSec = 1.0 * delayNs / TimeUnit.SECONDS.toNanos(1);
@@ -290,7 +338,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         if (!events.isEmpty()) {
             pw.printf("Perf output processed (skipped %.3f seconds):%n", skipSec);
             int cnt = 1;
-            for (String event : tracedEvents) {
+            for (String event : this.events) {
                 pw.printf(" Column %d: %s (%d events)%n", cnt, event, events.get(event).size());
                 cnt++;
             }
@@ -313,7 +361,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * We would sort the regions by the hotness of the first (main) event type.
          */
 
-        final String mainEvent = tracedEvents[0];
+        final String mainEvent = this.events.get(0);
 
         Collections.sort(regions, new Comparator<Region>() {
             @Override
@@ -323,7 +371,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             }
         });
 
-        long threshold = (long) (THRESHOLD_RATE * events.getTotalEvents(mainEvent));
+        long threshold = (long) (regionRateThreshold * events.getTotalEvents(mainEvent));
 
         boolean headerPrinted = false;
 
@@ -331,7 +379,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         for (Region r : regions) {
             if (r.getEventCount(events, mainEvent) > threshold) {
                 if (!headerPrinted) {
-                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n", THRESHOLD_RATE * 100, mainEvent);
+                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n", regionRateThreshold * 100, mainEvent);
                     headerPrinted = true;
                 }
 
@@ -340,7 +388,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 r.printCode(pw, events);
 
                 printDottedLine(pw);
-                for (String event : tracedEvents) {
+                for (String event : this.events) {
                     printLine(pw, events, event, r.getEventCount(events, event));
                 }
                 pw.println("<total for region " + cnt + ">");
@@ -359,30 +407,30 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printDottedLine(pw, "Hottest Regions");
             int shown = 0;
             for (Region r : regions) {
-                if (shown++ < SHOW_TOP) {
-                    for (String event : tracedEvents) {
+                if (shown++ < regionShowTop) {
+                    for (String event : this.events) {
                         printLine(pw, events, event, r.getEventCount(events, event));
                     }
                     pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.getName());
                 } else {
-                    for (String event : tracedEvents) {
+                    for (String event : this.events) {
                         other.add(event, r.getEventCount(events, event));
                     }
                 }
-                for (String event : tracedEvents) {
+                for (String event : this.events) {
                     total.add(event, r.getEventCount(events, event));
                 }
             }
 
-            if (regions.size() - SHOW_TOP > 0) {
-                for (String event : tracedEvents) {
+            if (regions.size() - regionShowTop > 0) {
+                for (String event : this.events) {
                     printLine(pw, events, event, other.count(event));
                 }
-                pw.println("<...other " + (regions.size() - SHOW_TOP) + " warm regions...>");
+                pw.println("<...other " + (regions.size() - regionShowTop) + " warm regions...>");
             }
             printDottedLine(pw);
 
-            for (String event : tracedEvents) {
+            for (String event : this.events) {
                 printLine(pw, events, event, total.count(event));
             }
             pw.println("<totals>");
@@ -390,7 +438,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         final Map<String, Multiset<String>> methodsByType = new HashMap<String, Multiset<String>>();
-        for (String event : tracedEvents) {
+        for (String event : this.events) {
             methodsByType.put(event, new HashMultiset<String>());
         }
 
@@ -401,12 +449,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printDottedLine(pw, "Hottest Methods (after inlining)");
 
             Map<String, Multiset<String>> methods = new HashMap<String, Multiset<String>>();
-            for (String event : tracedEvents) {
+            for (String event : this.events) {
                 methods.put(event, new HashMultiset<String>());
             }
 
             for (Region r : regions) {
-                for (String event : tracedEvents) {
+                for (String event : this.events) {
                     long count = r.getEventCount(events, event);
                     methods.get(event).add(r.getName(), count);
                     methodsByType.get(event).add(r.getType(), count);
@@ -419,30 +467,30 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             int shownMethods = 0;
             List<String> top = Multisets.sortedDesc(methods.get(mainEvent));
             for (String m : top) {
-                if (shownMethods++ < SHOW_TOP) {
-                    for (String event : tracedEvents) {
+                if (shownMethods++ < regionShowTop) {
+                    for (String event : this.events) {
                         printLine(pw, events, event, methods.get(event).count(m));
                     }
                     pw.printf("%s%n", m);
                 } else {
-                    for (String event : tracedEvents) {
+                    for (String event : this.events) {
                         other.add(event, methods.get(event).count(m));
                     }
                 }
-                for (String event : tracedEvents) {
+                for (String event : this.events) {
                     total.add(event, methods.get(event).count(m));
                 }
             }
 
-            if (top.size() - SHOW_TOP > 0) {
-                for (String event : tracedEvents) {
+            if (top.size() - regionShowTop > 0) {
+                for (String event : this.events) {
                     printLine(pw, events, event, other.count(event));
                 }
-                pw.println("<...other " + (top.size() - SHOW_TOP) + " warm methods...>");
+                pw.println("<...other " + (top.size() - regionShowTop) + " warm methods...>");
             }
             printDottedLine(pw);
 
-            for (String event : tracedEvents) {
+            for (String event : this.events) {
                 printLine(pw, events, event, total.count(event));
             }
             pw.println("<totals>");
@@ -456,7 +504,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printDottedLine(pw, "Distribution by Area");
 
             for (String m : Multisets.sortedDesc(methodsByType.get(mainEvent))) {
-                for (String event : tracedEvents) {
+                for (String event : this.events) {
                     printLine(pw, events, event, methodsByType.get(event).count(m));
                 }
                 pw.printf("%s%n", m);
@@ -464,7 +512,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             printDottedLine(pw);
 
-            for (String event : tracedEvents) {
+            for (String event : this.events) {
                 printLine(pw, events, event, methodsByType.get(event).size());
             }
 
@@ -504,10 +552,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         /**
          * Print perf output, if needed:
          */
-        if (SAVE_PERF_OUTPUT) {
-            String target = (SAVE_PERF_OUTPUT_TO_FILE == null) ?
-                SAVE_PERF_OUTPUT_TO + "/" + br.getParams().id() + ".perf" :
-                SAVE_PERF_OUTPUT_TO_FILE;
+        if (savePerfOutput) {
+            String target = (savePerfOutputToFile == null) ?
+                savePerfOutputTo + "/" + br.getParams().id() + ".perf" :
+                savePerfOutputToFile;
             try {
                 FileUtils.copy(perfParsedData, target);
                 pw.println("Perf output saved to " + target);
@@ -519,10 +567,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         /**
          * Print binary perf output, if needed:
          */
-        if (SAVE_PERF_BIN_OUTPUT) {
-            String target = (SAVE_PERF_BIN_OUTPUT_TO_FILE == null) ?
-                SAVE_PERF_BIN_OUTPUT_TO + "/" + br.getParams().id() + perfBinaryExtension() :
-                SAVE_PERF_BIN_OUTPUT_TO_FILE;
+        if (savePerfBin) {
+            String target = (savePerfBinFile == null) ?
+                savePerfBinTo + "/" + br.getParams().id() + perfBinaryExtension() :
+                savePerfBinFile;
             try {
                 FileUtils.copy(perfBinData, target);
                 pw.println("Perf binary output saved to " + target);
@@ -534,16 +582,16 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         /**
          * Print annotated assembly, if needed:
          */
-        if (SAVE_LOG_OUTPUT) {
-            String target = (SAVE_LOG_OUTPUT_TO_FILE == null) ?
-                SAVE_LOG_OUTPUT_TO + "/" + br.getParams().id() + ".log" :
-                SAVE_LOG_OUTPUT_TO_FILE;
+        if (saveLog) {
+            String target = (saveLogToFile == null) ?
+                saveLogTo + "/" + br.getParams().id() + ".log" :
+                saveLogToFile;
             FileOutputStream asm;
             try {
                 asm = new FileOutputStream(target);
                 PrintWriter pwAsm = new PrintWriter(asm);
                 for (ASMLine line : assembly.lines) {
-                    for (String event : tracedEvents) {
+                    for (String event : this.events) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                         printLine(pwAsm, events, event, count);
                     }
@@ -611,10 +659,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 lastAddr = addr;
                 lastBegin = addr;
             } else {
-                if (addr - lastAddr > MERGE_MARGIN) {
-                    List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, PRINT_MARGIN);
+                if (addr - lastAddr > mergeMargin) {
+                    List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, printMargin);
                     if (!regionLines.isEmpty()) {
-                        regions.add(new GeneratedRegion(tracedEvents, asms, lastBegin, lastAddr, regionLines, eventfulAddrs));
+                        regions.add(new GeneratedRegion(this.events, asms, lastBegin, lastAddr, regionLines, eventfulAddrs, regionTooBigThreshold));
                     } else {
                         regions.add(new NativeRegion(events, lastBegin, lastAddr, eventfulAddrs));
                     }
@@ -785,7 +833,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final Map<Long, String> libs;
         final Map<String, Long> totalCounts;
 
-        PerfEvents(String[] tracedEvents, Map<String, Multiset<Long>> events, Map<Long, String> methods, Map<Long, String> libs) {
+        PerfEvents(Collection<String> tracedEvents, Map<String, Multiset<Long>> events, Map<Long, String> methods, Map<Long, String> libs) {
             this.events = events;
             this.methods = methods;
             this.libs = libs;
@@ -795,7 +843,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             }
         }
 
-        public PerfEvents(String[] tracedEvents) {
+        public PerfEvents(Collection<String> tracedEvents) {
             this(tracedEvents, Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap(), Collections.<Long, String>emptyMap());
         }
 
@@ -942,13 +990,15 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     static class GeneratedRegion extends Region {
-        final String[] tracedEvents;
+        final Collection<String> tracedEvents;
         final Collection<ASMLine> code;
+        final int threshold;
 
-        GeneratedRegion(String[] tracedEvents, Assembly asms, long begin, long end, Collection<ASMLine> code, Set<Long> eventfulAddrs) {
+        GeneratedRegion(Collection<String> tracedEvents, Assembly asms, long begin, long end, Collection<ASMLine> code, Set<Long> eventfulAddrs, int threshold) {
             super(generateName(asms, eventfulAddrs), begin, end, eventfulAddrs);
             this.tracedEvents = tracedEvents;
             this.code = code;
+            this.threshold = threshold;
         }
 
         static String generateName(Assembly asm, Set<Long> eventfulAddrs) {
@@ -964,8 +1014,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         @Override
         public void printCode(PrintWriter pw, PerfEvents events) {
-            if (code.size() > THRESHOLD_TOO_BIG) {
-                pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", code.size(), THRESHOLD_TOO_BIG);
+            if (code.size() > threshold) {
+                pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", code.size(), threshold);
             } else {
                 for (ASMLine line : code) {
                     for (String event : tracedEvents) {

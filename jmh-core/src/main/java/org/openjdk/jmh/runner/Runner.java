@@ -29,7 +29,7 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.profile.ExternalProfiler;
-import org.openjdk.jmh.profile.Profiler;
+import org.openjdk.jmh.profile.ProfilerException;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
@@ -37,6 +37,7 @@ import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.ProfilerConfig;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.util.*;
@@ -196,14 +197,16 @@ public class Runner extends BaseRunner {
     }
 
     private Collection<RunResult> internalRun() throws RunnerException {
-        for (Class<? extends Profiler> p : options.getProfilers()) {
-            List<String> initMessages = new ArrayList<String>();
-            if (!ProfilerFactory.checkSupport(p, initMessages)) {
-                StringBuilder sb = new StringBuilder();
-                for (String im : initMessages) {
-                    sb.append(String.format("%5s %s\n", "", im));
-                }
-                throw new RunnerException("The requested profiler (" + p.getName() + ") is not supported: \n" + sb.toString());
+        boolean someProfilersFail = false;
+        for (ProfilerConfig p : options.getProfilers()) {
+            try {
+                ProfilerFactory.getProfilerOrException(p);
+            } catch (ProfilerException e) {
+                out.println(e.getMessage());
+                someProfilersFail = true;
+            }
+            if (someProfilersFail) {
+                throw new RunnerException("Some profilers have failed to initialize");
             }
         }
 
@@ -551,16 +554,13 @@ public class Runner extends BaseRunner {
 
             BenchmarkParams params = actionPlan.getMeasurementActions().get(0).getParams();
 
+            List<ExternalProfiler> profilers = ProfilerFactory.getSupportedExternal(options.getProfilers());
+
             boolean printOut = true;
             boolean printErr = true;
-            List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
-
             List<String> javaInvokeOptions = new ArrayList<String>();
             List<String> javaOptions = new ArrayList<String>();
-            for (Class<? extends Profiler> p : options.getProfilers()) {
-                if (!ProfilerFactory.isExternal(p)) continue;
-                ExternalProfiler prof = (ExternalProfiler) ProfilerFactory.prepareProfiler(p, null);
-                profilers.add(prof);
+            for (ExternalProfiler prof : profilers) {
                 javaInvokeOptions.addAll(prof.addJVMInvokeOptions(params));
                 javaOptions.addAll(prof.addJVMOptions(params));
                 printOut &= prof.allowPrintOut();
@@ -615,7 +615,7 @@ public class Runner extends BaseRunner {
                 if (!profilers.isEmpty()) {
                     out.print("# Preparing profilers: ");
                     for (ExternalProfiler profiler : profilers) {
-                        out.print(profiler.label() + " ");
+                        out.print(profiler.getClass().getSimpleName() + " ");
                         profiler.beforeTrial(params);
                     }
                     out.println("");
@@ -638,7 +638,7 @@ public class Runner extends BaseRunner {
                     if (!profilersRev.isEmpty()) {
                         out.print("# Processing profiler results: ");
                         for (ExternalProfiler profiler : profilersRev) {
-                            out.print(profiler.label() + " ");
+                            out.print(profiler.getClass().getSimpleName() + " ");
                             for (Result profR : profiler.afterTrial(br, pid, stdOut, stdErr)) {
                                 br.addBenchmarkResult(profR);
                             }

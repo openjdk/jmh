@@ -50,16 +50,6 @@ public class ClassloaderProfiler implements InternalProfiler {
     }
 
     @Override
-    public boolean checkSupport(List<String> msgs) {
-        return true;
-    }
-
-    @Override
-    public String label() {
-        return "cl";
-    }
-
-    @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
 

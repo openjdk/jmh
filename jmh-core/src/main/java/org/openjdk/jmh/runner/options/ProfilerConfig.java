@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,25 +22,55 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.profile;
+package org.openjdk.jmh.runner.options;
 
-import sun.management.HotspotClassLoadingMBean;
-import sun.management.counter.Counter;
+import java.io.Serializable;
 
-import java.util.List;
+public class ProfilerConfig implements Serializable {
 
-public class HotspotClassloadingProfiler extends AbstractHotspotProfiler {
+    private final String klass;
+    private final String opts;
 
-    public HotspotClassloadingProfiler() throws ProfilerException {
+    public ProfilerConfig(String klass, String opts) {
+        this.klass = klass;
+        this.opts = opts;
+    }
+
+    public ProfilerConfig(String klass) {
+        this.klass = klass;
+        this.opts = "";
+    }
+
+    public String getKlass() {
+        return klass;
+    }
+
+    public String getOpts() {
+        return opts;
     }
 
     @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotClassLoadingMBean>getInstance("HotspotClassLoadingMBean").getInternalClassLoadingCounters();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ProfilerConfig that = (ProfilerConfig) o;
+
+        if (!klass.equals(that.klass)) return false;
+        if (!opts.equals(that.opts)) return false;
+
+        return true;
     }
 
     @Override
-    public String getDescription() {
-        return "HotSpot (tm) classloader profiling via implementation-specific MBeans";
+    public int hashCode() {
+        int result = klass.hashCode();
+        result = 31 * result + opts.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return klass + ":" + opts;
     }
 }

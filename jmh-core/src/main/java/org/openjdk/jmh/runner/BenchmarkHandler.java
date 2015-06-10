@@ -28,7 +28,6 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.profile.InternalProfiler;
-import org.openjdk.jmh.profile.Profiler;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.BenchmarkTaskResult;
 import org.openjdk.jmh.results.IterationResult;
@@ -42,19 +41,8 @@ import org.openjdk.jmh.util.Utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 
 
 /**
@@ -82,7 +70,7 @@ class BenchmarkHandler {
         final Class<?> clazz = ClassUtils.loadClass(target.substring(0, lastDot));
 
         this.method = BenchmarkHandler.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
-        this.profilers = createProfilers(options);
+        this.profilers = ProfilerFactory.getSupportedInternal(options.getProfilers());
         this.profilersRev = new ArrayList<InternalProfiler>(profilers);
         Collections.reverse(profilersRev);
 
@@ -104,16 +92,6 @@ class BenchmarkHandler {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    private static List<InternalProfiler> createProfilers(Options options) {
-        List<InternalProfiler> list = new ArrayList<InternalProfiler>();
-        // register the profilers
-        for (Class<? extends Profiler> prof : options.getProfilers()) {
-            if (!ProfilerFactory.isInternal(prof)) continue;
-            list.add((InternalProfiler) ProfilerFactory.prepareProfiler(prof, options.verbosity().orElse(Defaults.VERBOSITY)));
-        }
-        return list;
     }
 
     static ThreadParams[] distributeThreads(int threads, int[] groups) {
