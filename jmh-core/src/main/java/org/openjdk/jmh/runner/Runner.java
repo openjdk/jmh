@@ -206,7 +206,7 @@ public class Runner extends BaseRunner {
                 someProfilersFail = true;
             }
             if (someProfilersFail) {
-                throw new RunnerException("Some profilers have failed to initialize");
+                throw new ProfilersFailedException();
             }
         }
 

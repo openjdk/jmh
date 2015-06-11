@@ -24,10 +24,7 @@
  */
 package org.openjdk.jmh;
 
-import org.openjdk.jmh.runner.Defaults;
-import org.openjdk.jmh.runner.NoBenchmarksException;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.*;
 import org.openjdk.jmh.runner.options.CommandLineOptionException;
 import org.openjdk.jmh.runner.options.CommandLineOptions;
 import org.openjdk.jmh.runner.options.VerboseMode;
@@ -75,6 +72,10 @@ public class Main {
                 } else {
                     runner.list();
                 }
+                System.exit(1);
+            } catch (ProfilersFailedException e) {
+                // This is not exactly an error, set non-zero exit code
+                System.err.print(e.getMessage());
                 System.exit(1);
             } catch (RunnerException e) {
                 System.err.print("ERROR: ");
