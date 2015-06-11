@@ -75,7 +75,7 @@ public class Main {
                 System.exit(1);
             } catch (ProfilersFailedException e) {
                 // This is not exactly an error, set non-zero exit code
-                System.err.print(e.getMessage());
+                System.err.println(e.getMessage());
                 System.exit(1);
             } catch (RunnerException e) {
                 System.err.print("ERROR: ");

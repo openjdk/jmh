@@ -28,7 +28,7 @@ public class ProfilersFailedException extends RunnerException {
     private static final long serialVersionUID = 1446854343206595167L;
 
     public String getMessage() {
-        return "Profilers failed to initialize.";
+        return "Profilers failed to initialize, exiting.";
     }
 
 }
