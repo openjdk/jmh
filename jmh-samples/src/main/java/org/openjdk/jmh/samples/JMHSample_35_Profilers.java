@@ -60,7 +60,8 @@ public class JMHSample_35_Profilers {
      * a quick turnaround for the results.
      *
      * Use -lprof to list the profilers. There are quite a few profilers, and this sample
-     * would expand on a handful of most useful ones.
+     * would expand on a handful of most useful ones. Many profilers have their own options,
+     * usually accessible via -prof <profiler-name>:help.
      *
      * Since profilers are reporting on different things, it is hard to construct a single
      * benchmark sample that will show all profilers in action. Therefore, we have a couple

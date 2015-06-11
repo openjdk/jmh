@@ -27,6 +27,15 @@ package org.openjdk.jmh.profile;
 /**
  * Root profiler interface.
  *
+ * <p>Profiler classes are expected to provide either a non-arg constructor,
+ * or a constructor accepting single String argument, as the option line.
+ * The treatment of option line is unspecified, and can be handled in
+ * profiler-specific way. Profiler constructors can throw
+ * {@link org.openjdk.jmh.profile.ProfilerException} if profiler cannot
+ * operate, either because of misconfiguration, or help message requested.
+ * The message in {@link org.openjdk.jmh.profile.ProfilerException} should
+ * clearly articulate the reason.
+ *
  * <p>Profilers normally implement one of the subinterfaces.</p>
  * @see org.openjdk.jmh.profile.ExternalProfiler
  * @see org.openjdk.jmh.profile.InternalProfiler
