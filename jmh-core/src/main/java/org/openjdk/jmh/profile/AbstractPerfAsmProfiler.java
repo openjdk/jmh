@@ -72,6 +72,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     protected final String perfBinData;
     protected final String perfParsedData;
     protected final OptionSet set;
+    private final boolean drawIntraJumps;
+    private final boolean drawInterJumps;
 
     protected AbstractPerfAsmProfiler(String initLine, String... events) throws ProfilerException {
         try {
@@ -90,7 +92,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 .withRequiredArg().ofType(String.class).withValuesSeparatedBy(",").describedAs("event").defaultsTo(events);
 
         OptionSpec<Double> optThresholdRate = parser.accepts("hotThreshold",
-                        "Cutoff threshold for hot regions. The regions with event count over threshold would be expanded " +
+                "Cutoff threshold for hot regions. The regions with event count over threshold would be expanded " +
                         "with detailed disassembly.")
                 .withRequiredArg().ofType(Double.class).describedAs("rate").defaultsTo(0.10);
 
@@ -138,7 +140,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("dir").defaultsTo(".");
 
         OptionSpec<String> optPerfOutToFile = parser.accepts("savePerfToFile",
-                        "Override the perf output log filename. Use this for debugging.")
+                "Override the perf output log filename. Use this for debugging.")
                 .withRequiredArg().ofType(String.class).describedAs("file");
 
         OptionSpec<Boolean> optPerfBin = parser.accepts("savePerfBin",
@@ -150,7 +152,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("dir").defaultsTo(".");
 
         OptionSpec<String> optPerfBinToFile = parser.accepts("savePerfBinToFile",
-                        "Override the perf binary data filename. Use this for debugging.")
+                "Override the perf binary data filename. Use this for debugging.")
                 .withRequiredArg().ofType(String.class).describedAs("file");
 
         OptionSpec<Boolean> optSaveLog = parser.accepts("saveLog",
@@ -162,7 +164,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("dir").defaultsTo(".");
 
         OptionSpec<String> optSaveLogToFile = parser.accepts("saveLogToFile",
-                        "Override the annotated Hotspot log filename.")
+                "Override the annotated Hotspot log filename.")
                 .withRequiredArg().ofType(String.class).describedAs("file");
 
         OptionSpec<Boolean> optPrintCompilationInfo = parser.accepts("printCompilationInfo",
@@ -172,6 +174,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         OptionSpec<Boolean> optIntelSyntax = parser.accepts("intelSyntax",
                         "Should perfasm use intel syntax?")
+                .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(false);
+
+        OptionSpec<Boolean> optDrawIntraJumps = parser.accepts("drawIntraJumps",
+                        "Should perfasm draw jump arrows with the region?")
+                .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(true);
+
+        OptionSpec<Boolean> optDrawInterJumps = parser.accepts("drawInterJumps",
+                        "Should perfasm draw jump arrows out of the region?")
                 .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(false);
 
         addMyOptions(parser);
@@ -204,6 +214,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         intelSyntax = set.valueOf(optIntelSyntax);
         printCompilationInfo = set.valueOf(optPrintCompilationInfo);
+        drawIntraJumps = set.valueOf(optDrawInterJumps);
+        drawInterJumps = set.valueOf(optDrawIntraJumps);
     }
 
     protected abstract void addMyOptions(OptionParser parser);
@@ -661,8 +673,18 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             } else {
                 if (addr - lastAddr > mergeMargin) {
                     List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, printMargin);
+
+                    long minAddr = Long.MAX_VALUE;
+                    long maxAddr = Long.MIN_VALUE;
+                    for (ASMLine line : regionLines) {
+                        if (line.addr != null) {
+                            minAddr = Math.min(minAddr, line.addr);
+                            maxAddr = Math.max(maxAddr, line.addr);
+                        }
+                    }
+
                     if (!regionLines.isEmpty()) {
-                        regions.add(new GeneratedRegion(this.events, asms, lastBegin, lastAddr, regionLines, eventfulAddrs, regionTooBigThreshold));
+                        regions.add(new GeneratedRegion(this.events, asms, minAddr, maxAddr, regionLines, eventfulAddrs, regionTooBigThreshold, drawIntraJumps, drawInterJumps));
                     } else {
                         regions.add(new NativeRegion(events, lastBegin, lastAddr, eventfulAddrs));
                     }
@@ -722,6 +744,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         List<ASMLine> lines = new ArrayList<ASMLine>();
         SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
         SortedMap<Long, String> methodMap = new TreeMap<Long, String>();
+        Set<Interval> intervals = new HashSet<Interval>();
 
         for (Collection<String> cs : splitAssembly(stdOut)) {
             String method = null;
@@ -749,6 +772,19 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         }
 
                         asmLine = new ASMLine(addr, line);
+
+                        if (drawInterJumps || drawIntraJumps) {
+                            for (int c = 1; c < elements.length; c++) {
+                                if (elements[c].startsWith("0x")) {
+                                    try {
+                                        Long target = Long.valueOf(elements[c].replace("0x", "").replace(":", ""), 16);
+                                        intervals.add(new Interval(addr, target));
+                                    } catch (NumberFormatException e) {
+                                        // nope
+                                    }
+                                }
+                            }
+                        }
                     } catch (NumberFormatException e) {
                         // Nope, not the address line.
                     }
@@ -782,7 +818,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 prevLine = line;
             }
         }
-        return new Assembly(lines, addressMap, methodMap);
+        return new Assembly(lines, addressMap, methodMap, intervals);
     }
 
     static class PerfResult extends Result<PerfResult> {
@@ -826,6 +862,44 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             return new PerfResult(output);
         }
     }
+
+    static class Interval implements Comparable<Interval> {
+        private final long src;
+        private final long dst;
+
+        public Interval(long src, long dst) {
+            this.src = src;
+            this.dst = dst;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Interval interval = (Interval) o;
+
+            if (dst != interval.dst) return false;
+            if (src != interval.src) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (src ^ (src >>> 32));
+            result = 31 * result + (int) (dst ^ (dst >>> 32));
+            return result;
+        }
+
+        @Override
+        public int compareTo(Interval o) {
+            int c1 = Long.compare(src, o.src);
+            if (c1 != 0) return c1;
+            return Long.compare(dst, o.dst);
+        }
+    }
+
 
     protected static class PerfEvents {
         final Map<String, Multiset<Long>> events;
@@ -872,15 +946,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final List<ASMLine> lines;
         final SortedMap<Long, Integer> addressMap;
         final SortedMap<Long, String> methodMap;
+        final Set<Interval> intervals;
 
-        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap) {
+        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap, Set<Interval> intervals) {
             this.lines = lines;
             this.addressMap = addressMap;
             this.methodMap = methodMap;
-        }
-
-        public Assembly() {
-            this(new ArrayList<ASMLine>(), new TreeMap<Long, Integer>(), new TreeMap<Long, String>());
+            this.intervals = intervals;
         }
 
         public int size() {
@@ -991,14 +1063,22 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
     static class GeneratedRegion extends Region {
         final Collection<String> tracedEvents;
+        final Assembly asms;
         final Collection<ASMLine> code;
         final int threshold;
+        final boolean drawIntraJumps;
+        final boolean drawInterJumps;
 
-        GeneratedRegion(Collection<String> tracedEvents, Assembly asms, long begin, long end, Collection<ASMLine> code, Set<Long> eventfulAddrs, int threshold) {
+        GeneratedRegion(Collection<String> tracedEvents, Assembly asms, long begin, long end,
+                        Collection<ASMLine> code, Set<Long> eventfulAddrs,
+                        int threshold, boolean drawIntraJumps, boolean drawInterJumps) {
             super(generateName(asms, eventfulAddrs), begin, end, eventfulAddrs);
             this.tracedEvents = tracedEvents;
+            this.asms = asms;
             this.code = code;
             this.threshold = threshold;
+            this.drawIntraJumps = drawIntraJumps;
+            this.drawInterJumps = drawInterJumps;
         }
 
         static String generateName(Assembly asm, Set<Long> eventfulAddrs) {
@@ -1017,12 +1097,85 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             if (code.size() > threshold) {
                 pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", code.size(), threshold);
             } else {
+                Set<Interval> interIvs = new TreeSet<Interval>();
+                Set<Interval> intraIvs = new TreeSet<Interval>();
+
+                for (Interval it : asms.intervals) {
+                    boolean srcInline = (begin < it.src && it.src < end);
+                    boolean dstInline = (begin < it.dst && it.dst < end);
+                    if (srcInline && dstInline) {
+                        if (drawInterJumps) {
+                            interIvs.add(it);
+                        }
+                    } else if (srcInline || dstInline) {
+                        if (drawIntraJumps) {
+                            intraIvs.add(it);
+                        }
+                    }
+                }
+
+                long prevAddr = 0;
                 for (ASMLine line : code) {
                     for (String event : tracedEvents) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                         printLine(pw, events, event, count);
                     }
+
+                    long addr;
+                    long evAddr;
+
+                    if (line.addr == null) {
+                        addr = prevAddr;
+                        evAddr = -1;
+                    } else {
+                        addr = line.addr;
+                        evAddr = addr;
+                        prevAddr = addr;
+                    }
+
+                    for (Interval it : intraIvs) {
+                        printInterval(pw, it, addr, evAddr, false);
+                    }
+
+                    for (Interval it : interIvs) {
+                        printInterval(pw, it, addr, evAddr, true);
+                    }
+
                     pw.println(line.code);
+                }
+            }
+        }
+
+        private void printInterval(PrintWriter pw, Interval it, long addr, long evAddr, boolean inline) {
+            if (it.src < it.dst) {
+                // flows downwards
+                if (it.src == evAddr) {
+                    pw.print("\u256d");
+                } else if (it.dst == evAddr) {
+                    pw.print("\u2198");
+                } else if ((it.src <= addr) && (addr < it.dst)) {
+                    if (inline) {
+                        pw.print("\u2502");
+                    } else {
+                        pw.print("\u2575");
+                    }
+                } else {
+                    pw.print(" ");
+                }
+            } else {
+                // flows upwards
+                if (it.src == evAddr) {
+                    pw.print("\u2570");
+                } else if (it.dst == evAddr) {
+                    pw.print("\u2197");
+                } else if ((it.dst <= addr) && (addr < it.src)) {
+                    if (inline) {
+                        pw.print("\u2502");
+                    } else {
+                        pw.print("\u2575");
+                    }
+                } else {
+                    pw.print(" ");
                 }
             }
         }
