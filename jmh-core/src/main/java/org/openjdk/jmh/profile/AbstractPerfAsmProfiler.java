@@ -894,9 +894,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         @Override
         public int compareTo(Interval o) {
-            int c1 = Long.compare(src, o.src);
-            if (c1 != 0) return c1;
-            return Long.compare(dst, o.dst);
+            if (src < o.src) {
+                return -1;
+            } else if (src > o.src) {
+                return 1;
+            } else {
+                return (dst < o.dst) ? -1 : ((dst == o.dst) ? 0 : 1);
+            }
         }
     }
 
