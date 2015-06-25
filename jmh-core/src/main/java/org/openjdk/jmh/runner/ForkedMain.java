@@ -29,6 +29,7 @@ import org.openjdk.jmh.runner.options.Options;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -167,6 +168,7 @@ class ForkedMain {
     private static class ShutdownTimeoutThread extends Thread {
         private static final int TIMEOUT = Integer.getInteger("jmh.shutdownTimeout", 30);
         private static final int TIMEOUT_STEP = Integer.getInteger("jmh.shutdownTimeout.step", 5);
+        private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
         public ShutdownTimeoutThread() {
             setName("JMH-Shutdown-Timeout");
@@ -187,8 +189,7 @@ class ForkedMain {
 
                 waitMore = TimeUnit.SECONDS.toNanos(TIMEOUT) - (System.nanoTime() - start);
 
-                String msg = "<JMH had finished, but forked VM did not exit, are there stray running threads? Waiting " +
-                        TimeUnit.NANOSECONDS.toSeconds(waitMore) + " seconds more...>";
+                String msg = getMessage(waitMore);
 
                 BinaryLinkClient link = linkRef.get();
                 if (link != null) {
@@ -211,6 +212,39 @@ class ForkedMain {
             // aggressively try to hangup, and HALT
             hangup();
             Runtime.getRuntime().halt(0);
+        }
+
+        private String getMessage(long waitMore) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<JMH had finished, but forked VM did not exit, are there stray running threads? Waiting ")
+                    .append(TimeUnit.NANOSECONDS.toSeconds(waitMore)).append(" seconds more...>");
+            sb.append(LINE_SEPARATOR);
+            sb.append(LINE_SEPARATOR);
+
+            sb.append("Non-finished threads:");
+            sb.append(LINE_SEPARATOR);
+            sb.append(LINE_SEPARATOR);
+
+            for (Map.Entry<Thread, StackTraceElement[]> e : Thread.getAllStackTraces().entrySet()) {
+                Thread thread = e.getKey();
+                StackTraceElement[] els = e.getValue();
+
+                if (thread.isDaemon()) continue;
+                if (!thread.isAlive()) continue;
+
+                sb.append(thread);
+                sb.append(LINE_SEPARATOR);
+
+                for (StackTraceElement el : els) {
+                    sb.append("  at ");
+                    sb.append(el);
+                    sb.append(LINE_SEPARATOR);
+                }
+
+                sb.append(LINE_SEPARATOR);
+            }
+
+            return sb.toString();
         }
     }
 
