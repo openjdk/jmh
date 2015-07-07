@@ -102,12 +102,12 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         Collection<String> userEvents = set.valuesOf(optEvents);
 
-        Collection<String> msgs = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "echo", "1");
+        Collection<String> msgs = Utils.tryWith("perf", "stat", "--log-fd", "2", "--field-separator", ",", "echo", "1");
         if (!msgs.isEmpty()) {
             throw new ProfilerException(msgs.toString());
         }
 
-        Collection<String> incremental = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-I", String.valueOf(incrementInterval), "echo", "1");
+        Collection<String> incremental = Utils.tryWith("perf", "stat", "--log-fd", "2", "--field-separator", ",", "--interval-print", String.valueOf(incrementInterval), "echo", "1");
         isIncrementable = incremental.isEmpty();
 
         if (userEvents != null) {
@@ -119,7 +119,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         if (supportedEvents.isEmpty()) {
             for (String ev : interestingEvents) {
-                Collection<String> res = Utils.tryWith("perf", "stat", "--log-fd", "2", "-x,", "-e", "cycles,instructions," + ev, "echo", "1");
+                Collection<String> res = Utils.tryWith("perf", "stat", "--log-fd", "2", "--field-separator", ",", "--event", "cycles,instructions," + ev, "echo", "1");
                 if (res.isEmpty()) {
                     supportedEvents.add(ev);
                 }
@@ -131,9 +131,9 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         List<String> cmd = new ArrayList<String>();
         if (useDefaultStats) {
-            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-d", "-d", "-d"));
+            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "--field-separator", ",", "--detailed", "--detailed", "--detailed"));
         } else {
-            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "-x,", "-e", Utils.join(supportedEvents, ",")));
+            cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "--field-separator", ",", "--event", Utils.join(supportedEvents, ",")));
         }
         if (isIncrementable) {
             cmd.addAll(Arrays.asList("-I", String.valueOf(incrementInterval)));

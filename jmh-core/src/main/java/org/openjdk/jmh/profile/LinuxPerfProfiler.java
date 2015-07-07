@@ -65,7 +65,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
             throw new ProfilerException(msgs.toString());
         }
 
-        Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "-D", "1", "echo", "1");
+        Collection<String> delay = Utils.tryWith("perf", "stat", "--log-fd", "2", "--delay", "1", "echo", "1");
         isDelayed = delay.isEmpty();
     }
 
@@ -81,9 +81,9 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         }
 
         if (isDelayed) {
-            return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d", "-D", String.valueOf(delay));
+            return Arrays.asList("perf", "stat", "--log-fd", "2", "--detailed", "--detailed", "--detailed", "--delay", String.valueOf(delay));
         } else {
-            return Arrays.asList("perf", "stat", "--log-fd", "2", "-d", "-d", "-d");
+            return Arrays.asList("perf", "stat", "--log-fd", "2", "--detailed", "--detailed", "--detailed");
         }
     }
 

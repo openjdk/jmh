@@ -56,13 +56,13 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void addMyOptions(OptionParser parser) {
         optFrequency = parser.accepts("frequency",
-                "Sampling frequency. This is synonymous to perf -F #")
+                "Sampling frequency. This is synonymous to perf record --freq #")
                 .withRequiredArg().ofType(Long.class).describedAs("freq").defaultsTo(1000L);
     }
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList("perf", "record", "-F" + sampleFrequency, "-e" + Utils.join(events, ","), "-o" + perfBinData);
+        return Arrays.asList("perf", "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(events, ","), "--output", perfBinData);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void parseEvents() {
         try {
-            ProcessBuilder pb = new ProcessBuilder("perf", "script", "-f", "time,event,ip,sym,dso", "-i", perfBinData);
+            ProcessBuilder pb = new ProcessBuilder("perf", "script", "--fields", "time,event,ip,sym,dso", "--input", perfBinData);
             Process p = pb.start();
 
             // drain streams, else we might lock up
