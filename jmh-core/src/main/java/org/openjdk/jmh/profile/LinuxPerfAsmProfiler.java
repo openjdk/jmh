@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
@@ -50,7 +51,11 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(failMsg.toString());
         }
 
-        sampleFrequency = set.valueOf(optFrequency);
+        try {
+            sampleFrequency = set.valueOf(optFrequency);
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
     }
 
     @Override

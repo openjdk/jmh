@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
@@ -83,11 +84,14 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     public WinPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "SampledProfile");
 
-        String xperfDir = set.valueOf(optXperfDir);
-        xperfProviders = set.valueOf(optXperfProviders);
-        symbolDir = set.valueOf(optSymbolDir);
-
-        path = xperfDir != null && !xperfDir.isEmpty() ? xperfDir + File.separatorChar + "xperf" : "xperf";
+        try {
+            String xperfDir = set.valueOf(optXperfDir);
+            xperfProviders = set.valueOf(optXperfProviders);
+            symbolDir = set.valueOf(optSymbolDir);
+            path = xperfDir != null && !xperfDir.isEmpty() ? xperfDir + File.separatorChar + "xperf" : "xperf";
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
 
         Collection<String> errs = Utils.tryWith(path);
         if (!errs.isEmpty()) {

@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -58,7 +59,11 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
         OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
 
-        delayMs = set.valueOf(optDelay);
+        try {
+            delayMs = set.valueOf(optDelay);
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
 
         Collection<String> msgs = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
         if (!msgs.isEmpty()) {

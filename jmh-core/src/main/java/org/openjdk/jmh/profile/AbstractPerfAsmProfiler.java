@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -188,34 +189,38 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         set = ProfilerUtils.parseInitLine(initLine, parser);
 
-        this.events = set.valuesOf(optEvents);
-        regionRateThreshold = set.valueOf(optThresholdRate);
-        regionShowTop = set.valueOf(optShowTop);
-        regionTooBigThreshold = set.valueOf(optThreshold);
-        printMargin = set.valueOf(optPrintMargin);
-        mergeMargin = set.valueOf(optMergeMargin);
-        delayMsec = set.valueOf(optDelay);
+        try {
+            this.events = set.valuesOf(optEvents);
+            regionRateThreshold = set.valueOf(optThresholdRate);
+            regionShowTop = set.valueOf(optShowTop);
+            regionTooBigThreshold = set.valueOf(optThreshold);
+            printMargin = set.valueOf(optPrintMargin);
+            mergeMargin = set.valueOf(optMergeMargin);
+            delayMsec = set.valueOf(optDelay);
 
-        skipAssembly = set.valueOf(optSkipAsm);
-        skipInterpreter = set.valueOf(optSkipInterpreter);
-        skipVMStubs = set.valueOf(optSkipVMStubs);
+            skipAssembly = set.valueOf(optSkipAsm);
+            skipInterpreter = set.valueOf(optSkipInterpreter);
+            skipVMStubs = set.valueOf(optSkipVMStubs);
 
-        savePerfOutput = set.valueOf(optPerfOut);
-        savePerfOutputTo = set.valueOf(optPerfOutTo);
-        savePerfOutputToFile = set.valueOf(optPerfOutToFile);
+            savePerfOutput = set.valueOf(optPerfOut);
+            savePerfOutputTo = set.valueOf(optPerfOutTo);
+            savePerfOutputToFile = set.valueOf(optPerfOutToFile);
 
-        savePerfBin = set.valueOf(optPerfBin);
-        savePerfBinTo = set.valueOf(optPerfBinTo);
-        savePerfBinFile = set.valueOf(optPerfBinToFile);
+            savePerfBin = set.valueOf(optPerfBin);
+            savePerfBinTo = set.valueOf(optPerfBinTo);
+            savePerfBinFile = set.valueOf(optPerfBinToFile);
 
-        saveLog = set.valueOf(optSaveLog);
-        saveLogTo = set.valueOf(optSaveLogTo);
-        saveLogToFile = set.valueOf(optSaveLogToFile);
+            saveLog = set.valueOf(optSaveLog);
+            saveLogTo = set.valueOf(optSaveLogTo);
+            saveLogToFile = set.valueOf(optSaveLogToFile);
 
-        intelSyntax = set.valueOf(optIntelSyntax);
-        printCompilationInfo = set.valueOf(optPrintCompilationInfo);
-        drawIntraJumps = set.valueOf(optDrawInterJumps);
-        drawInterJumps = set.valueOf(optDrawIntraJumps);
+            intelSyntax = set.valueOf(optIntelSyntax);
+            printCompilationInfo = set.valueOf(optPrintCompilationInfo);
+            drawIntraJumps = set.valueOf(optDrawInterJumps);
+            drawInterJumps = set.valueOf(optDrawIntraJumps);
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
     }
 
     protected abstract void addMyOptions(OptionParser parser);

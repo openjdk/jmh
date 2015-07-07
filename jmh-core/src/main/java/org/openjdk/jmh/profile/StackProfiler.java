@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -98,15 +99,19 @@ public class StackProfiler implements InternalProfiler {
 
         OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
 
-        sampleLine = set.valueOf(optDetailLine);
-        periodMsec = set.valueOf(optSamplePeriod);
-        topStacks = set.valueOf(optTopStacks);
-        stackLines = set.valueOf(optStackLines);
+        try {
+            sampleLine = set.valueOf(optDetailLine);
+            periodMsec = set.valueOf(optSamplePeriod);
+            topStacks = set.valueOf(optTopStacks);
+            stackLines = set.valueOf(optStackLines);
 
-        boolean excludePackages = set.valueOf(optExclude);
-        excludePackageNames = excludePackages ?
-                new HashSet<String>(set.valuesOf(optExcludeClasses)) :
-                Collections.<String>emptySet();
+            boolean excludePackages = set.valueOf(optExclude);
+            excludePackageNames = excludePackages ?
+                    new HashSet<String>(set.valuesOf(optExcludeClasses)) :
+                    Collections.<String>emptySet();
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
     }
 
     private volatile SamplingTask samplingTask;

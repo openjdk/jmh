@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -95,12 +96,17 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
 
-        delayMs = set.valueOf(optDelay);
-        incrementInterval = set.valueOf(optIncrementInterval);
-        highPassFilter = set.valueOf(optHighPassFilter);
-        useDefaultStats = set.valueOf(optDefaultStat);
+        Collection<String> userEvents;
 
-        Collection<String> userEvents = set.valuesOf(optEvents);
+        try {
+            delayMs = set.valueOf(optDelay);
+            incrementInterval = set.valueOf(optIncrementInterval);
+            highPassFilter = set.valueOf(optHighPassFilter);
+            useDefaultStats = set.valueOf(optDefaultStat);
+            userEvents = set.valuesOf(optEvents);
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
 
         Collection<String> msgs = Utils.tryWith("perf", "stat", "--log-fd", "2", "--field-separator", ",", "echo", "1");
         if (!msgs.isEmpty()) {
