@@ -292,8 +292,6 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                     long instructions = events.count("instructions");
                     if (cycles != 0 && instructions != 0) {
                         results.add(new PerfResult("CPI", 1.0 * cycles / instructions));
-                    } else {
-                        results.add(new PerfResult("CPI", Double.NaN));
                     }
                 }
 
