@@ -574,9 +574,8 @@ public class Runner extends BaseRunner {
             printOut = forcePrint || printOut;
             printErr = forcePrint || printErr;
 
-            List<String> commandString = getSeparateExecutionCommand(params, javaInvokeOptions, javaOptions);
-            List<String> forkedString  = getForkedMainCommand(commandString, server.getHost(), server.getPort());
-            List<String> versionString = getVersionMainCommand(commandString);
+            List<String> forkedString  = getForkedMainCommand(params, javaInvokeOptions, javaOptions, server.getHost(), server.getPort());
+            List<String> versionString = getVersionMainCommand(params);
 
             String opts = Utils.join(params.getJvmArgs(), " ");
             if (opts.trim().isEmpty()) {
@@ -754,15 +753,11 @@ public class Runner extends BaseRunner {
     }
 
     /**
-     * Helper method for assembling the command to execute the forked JVM with
-     *
-     * @param benchmark benchmark to execute
-     * @param javaInvokeOptions prepend these commands before JVM invocation
-     * @param javaOptions add these options to JVM command string
-     * @return the final command to execute
+     * @param host host VM host
+     * @param port host VM port
+     * @return
      */
-    List<String> getSeparateExecutionCommand(BenchmarkParams benchmark, List<String> javaInvokeOptions, List<String> javaOptions) {
-
+    List<String> getForkedMainCommand(BenchmarkParams benchmark, List<String> javaInvokeOptions, List<String> javaOptions, String host, int port) {
         List<String> command = new ArrayList<String>();
 
         // prefix java invoke options, if any profiler wants it
@@ -788,18 +783,6 @@ public class Runner extends BaseRunner {
             command.add(System.getProperty("java.class.path"));
         }
 
-        return command;
-    }
-
-    /**
-     * @param baseLine base options
-     * @param host host VM host
-     * @param port host VM port
-     * @return
-     */
-    List<String> getForkedMainCommand(List<String> baseLine, String host, int port) {
-        List<String> command = new ArrayList<String>(baseLine);
-
         command.add(ForkedMain.class.getName());
 
         // Forked VM assumes the exact order of arguments:
@@ -812,12 +795,24 @@ public class Runner extends BaseRunner {
     }
 
     /**
-     * @param baseLine base options
      * @return
      */
-    List<String> getVersionMainCommand(List<String> baseLine) {
-        List<String> command = new ArrayList<String>(baseLine);
+    List<String> getVersionMainCommand(BenchmarkParams benchmark) {
+        List<String> command = new ArrayList<String>();
+
+        // use supplied jvm, if given
+        command.add(benchmark.getJvm());
+
+        // assemble final process command
+        command.add("-cp");
+        if (Utils.isWindows()) {
+            command.add('"' + System.getProperty("java.class.path") + '"');
+        } else {
+            command.add(System.getProperty("java.class.path"));
+        }
+
         command.add(VersionMain.class.getName());
+
         return command;
     }
 

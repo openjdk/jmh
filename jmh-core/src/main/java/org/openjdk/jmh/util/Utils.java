@@ -287,11 +287,10 @@ public class Utils {
     public static String getCurrentJvmVersion() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        pw.print(System.getProperty("java.vm.name"));
-        pw.print(" (");
-        pw.print(System.getProperty("java.vm.version"));
-        pw.print("), JDK ");
+        pw.print("JDK ");
         pw.print(System.getProperty("java.version"));
+        pw.print(", VM ");
+        pw.print(System.getProperty("java.vm.version"));
         return sw.toString();
     }
 
