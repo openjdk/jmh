@@ -63,7 +63,8 @@ public class RunnerTest {
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(), Collections.<String>emptyList(),
                 TimeValue.days(1));
-        List<String> command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
+        List<String> command = blade.getSeparateExecutionCommand(bp, Collections.<String>emptyList(), Collections.<String>emptyList());
+        command = blade.getForkedMainCommand(command, DUMMY_HOST, DUMMY_PORT);
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(command);
@@ -92,7 +93,8 @@ public class RunnerTest {
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints),
                 TimeValue.days(1));
-        List<String> command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
+        List<String> command = blade.getSeparateExecutionCommand(bp, Collections.<String>emptyList(), Collections.<String>emptyList());
+        command = blade.getForkedMainCommand(command, DUMMY_HOST, DUMMY_PORT);
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(command);
@@ -126,7 +128,8 @@ public class RunnerTest {
                 Utils.getCurrentJvm(),
                 Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
                 TimeValue.days(1));
-        List<String> command = blade.getSeparateExecutionCommand(bp, DUMMY_HOST, DUMMY_PORT, Collections.<String>emptyList(), Collections.<String>emptyList());
+        List<String> command = blade.getSeparateExecutionCommand(bp, Collections.<String>emptyList(), Collections.<String>emptyList());
+        command = blade.getForkedMainCommand(command, DUMMY_HOST, DUMMY_PORT);
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(command);

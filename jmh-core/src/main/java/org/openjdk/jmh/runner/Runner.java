@@ -574,13 +574,17 @@ public class Runner extends BaseRunner {
             printOut = forcePrint || printOut;
             printErr = forcePrint || printErr;
 
-            List<String> commandString = getSeparateExecutionCommand(params, server.getHost(), server.getPort(), javaInvokeOptions, javaOptions);
+            List<String> commandString = getSeparateExecutionCommand(params, javaInvokeOptions, javaOptions);
+            List<String> forkedString  = getForkedMainCommand(commandString, server.getHost(), server.getPort());
+            List<String> versionString = getVersionMainCommand(commandString);
+
             String opts = Utils.join(params.getJvmArgs(), " ");
             if (opts.trim().isEmpty()) {
                 opts = "<none>";
             }
 
             Version.printVersion(out);
+            out.print("# VM version: " + Utils.join(Utils.runWith(versionString), "\n"));
             out.println("# VM invoker: " + params.getJvm());
             out.println("# VM options: " + opts);
             out.startBenchmark(params);
@@ -589,7 +593,7 @@ public class Runner extends BaseRunner {
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();
             if (warmupForkCount > 0) {
-                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + commandString);
+                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + forkedString);
                 for (int i = 0; i < warmupForkCount; i++) {
                     etaBeforeBenchmark();
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
@@ -597,14 +601,14 @@ public class Runner extends BaseRunner {
                     File stdErr = FileUtils.tempFile("stderr");
                     File stdOut = FileUtils.tempFile("stdout");
 
-                    doFork(server, commandString, stdOut, stdErr, printOut, printErr);
+                    doFork(server, forkedString, stdOut, stdErr, printOut, printErr);
 
                     etaAfterBenchmark(params);
                     out.println("");
                 }
             }
 
-            out.verbosePrintln("Forking " + forkCount + " times using command: " + commandString);
+            out.verbosePrintln("Forking " + forkCount + " times using command: " + forkedString);
             for (int i = 0; i < forkCount; i++) {
                 etaBeforeBenchmark();
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
@@ -628,7 +632,7 @@ public class Runner extends BaseRunner {
                     }
                 }
 
-                List<IterationResult> result = doFork(server, commandString, stdOut, stdErr, printOut, printErr);
+                List<IterationResult> result = doFork(server, forkedString, stdOut, stdErr, printOut, printErr);
                 if (!result.isEmpty()) {
                     long pid = server.getClientPid();
 
@@ -747,20 +751,17 @@ public class Runner extends BaseRunner {
             FileUtils.safelyClose(fosErr);
             FileUtils.safelyClose(fosOut);
         }
-
     }
 
     /**
      * Helper method for assembling the command to execute the forked JVM with
      *
      * @param benchmark benchmark to execute
-     * @param host host VM host
-     * @param port host VM port
      * @param javaInvokeOptions prepend these commands before JVM invocation
      * @param javaOptions add these options to JVM command string
      * @return the final command to execute
      */
-    List<String> getSeparateExecutionCommand(BenchmarkParams benchmark, String host, int port, List<String> javaInvokeOptions, List<String> javaOptions) {
+    List<String> getSeparateExecutionCommand(BenchmarkParams benchmark, List<String> javaInvokeOptions, List<String> javaOptions) {
 
         List<String> command = new ArrayList<String>();
 
@@ -786,6 +787,19 @@ public class Runner extends BaseRunner {
         } else {
             command.add(System.getProperty("java.class.path"));
         }
+
+        return command;
+    }
+
+    /**
+     * @param baseLine base options
+     * @param host host VM host
+     * @param port host VM port
+     * @return
+     */
+    List<String> getForkedMainCommand(List<String> baseLine, String host, int port) {
+        List<String> command = new ArrayList<String>(baseLine);
+
         command.add(ForkedMain.class.getName());
 
         // Forked VM assumes the exact order of arguments:
@@ -794,6 +808,16 @@ public class Runner extends BaseRunner {
         command.add(host);
         command.add(String.valueOf(port));
 
+        return command;
+    }
+
+    /**
+     * @param baseLine base options
+     * @return
+     */
+    List<String> getVersionMainCommand(List<String> baseLine) {
+        List<String> command = new ArrayList<String>(baseLine);
+        command.add(VersionMain.class.getName());
         return command;
     }
 

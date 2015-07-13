@@ -94,8 +94,8 @@ abstract class BaseRunner {
             }
 
             Version.printVersion(out);
-            out.println("# VM invoker: " + params.getJvm());
-            out.println("# VM invoker: " + params.getJvm());
+            out.println("# VM version: " + Utils.getCurrentJvmVersion());
+            out.println("# VM invoker: " + Utils.getCurrentJvm());
             out.println("# VM options: " + realOpts + (opts.equals(realOpts) ? "" : " *** WARNING: some JVM options are ignored in non-forked runs ***"));
 
             out.startBenchmark(params);

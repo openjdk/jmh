@@ -284,6 +284,17 @@ public class Utils {
                 (isWindows() ? ".exe" : "");
     }
 
+    public static String getCurrentJvmVersion() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        pw.print(System.getProperty("java.vm.name"));
+        pw.print(" (");
+        pw.print(System.getProperty("java.vm.version"));
+        pw.print("), JDK ");
+        pw.print(System.getProperty("java.version"));
+        return sw.toString();
+    }
+
     /**
      * Gets PID of the current JVM.
      *
@@ -338,4 +349,33 @@ public class Utils {
         }
         return messages;
     }
+
+    public static Collection<String> runWith(List<String> cmd) {
+        Collection<String> messages = new ArrayList<String>();
+        try {
+            Process p = new ProcessBuilder(cmd).start();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            // drain streams, else we might lock up
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
+
+            errDrainer.start();
+            outDrainer.start();
+
+            int err = p.waitFor();
+
+            errDrainer.join();
+            outDrainer.join();
+
+            messages.add(baos.toString());
+        } catch (IOException ex) {
+            return Collections.singleton(ex.getMessage());
+        } catch (InterruptedException ex) {
+            throw new IllegalStateException(ex);
+        }
+        return messages;
+    }
+
 }
