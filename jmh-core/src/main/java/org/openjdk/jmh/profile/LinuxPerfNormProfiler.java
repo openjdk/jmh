@@ -211,16 +211,14 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 if (line.startsWith("#")) continue;
 
                 if (isIncrementable) {
-                    int idx1 = line.indexOf(",");
-                    int idx2 = line.lastIndexOf(",");
+                    String[] split = line.split(",");
 
                     // Malformed line, ignore
-                    if (idx1 == -1) continue nextline;
-                    if (idx2 == -1) continue nextline;
+                    if (split.length < 4) continue nextline;
 
-                    String time  = line.substring(0, idx1).trim();
-                    String count = line.substring(idx1, idx2 + 1).trim();
-                    String event = line.substring(idx2 + 1).trim();
+                    String time  = split[0].trim();
+                    String count = split[1].trim();
+                    String event = split[3].trim();
 
                     try {
                         double timeSec = NumberFormat.getInstance().parse(time).doubleValue();
