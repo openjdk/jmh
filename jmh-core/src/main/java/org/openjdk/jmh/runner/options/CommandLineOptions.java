@@ -75,6 +75,7 @@ public class CommandLineOptions implements Options {
     private final List<String> warmupMicros = new ArrayList<String>();
     private final Multimap<String, String> params = new HashMultimap<String, String>();
     private final boolean list;
+    private final boolean listWithParams;
     private final boolean listResultFormats;
     private final boolean help;
     private final boolean listProfilers;
@@ -197,6 +198,7 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("regexp+");
 
         parser.accepts("l", "List matching benchmarks and exit.");
+        parser.accepts("lp", "List matching benchmarks with parameters and exit.");
         parser.accepts("lrf", "List result formats.");
         parser.accepts("lprof", "List profilers.");
         parser.accepts("h", "Display help.");
@@ -259,6 +261,7 @@ public class CommandLineOptions implements Options {
 
             help = set.has("h");
             list = set.has("l");
+            listWithParams = set.has("lp");
             listResultFormats = set.has("lrf");
             listProfilers = set.has("lprof");
 
@@ -402,6 +405,10 @@ public class CommandLineOptions implements Options {
 
     public boolean shouldList() {
         return list;
+    }
+
+    public boolean shouldListWithParams() {
+        return listWithParams;
     }
 
     public boolean shouldListResultFormats() {

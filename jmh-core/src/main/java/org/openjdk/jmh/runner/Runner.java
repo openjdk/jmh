@@ -36,11 +36,9 @@ import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
 import org.openjdk.jmh.runner.link.BinaryLinkServer;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.ProfilerConfig;
-import org.openjdk.jmh.runner.options.TimeValue;
-import org.openjdk.jmh.runner.options.VerboseMode;
+import org.openjdk.jmh.runner.options.*;
 import org.openjdk.jmh.util.*;
+import org.openjdk.jmh.util.Optional;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -123,6 +121,26 @@ public class Runner extends BaseRunner {
         out.println("Benchmarks: ");
         for (BenchmarkListEntry benchmark : benchmarks) {
             out.println(benchmark.getUsername());
+        }
+    }
+
+    /**
+     * Print matching benchmarks with parameters into output.
+     * @param options
+     */
+    public void listWithParams(CommandLineOptions options) {
+        Set<BenchmarkListEntry> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());
+        out.println("Benchmarks: ");
+        for (BenchmarkListEntry benchmark : benchmarks) {
+            out.println(benchmark.getUsername());
+            Optional<Map<String, String[]>> params = benchmark.getParams();
+            if (params.hasValue()) {
+                for (Map.Entry<String, String[]> e : params.get().entrySet()) {
+                    String param = e.getKey();
+                    Collection<String> values = options.getParameter(param).orElse(Arrays.asList(e.getValue()));
+                    out.println("  param \"" + param + "\" = {" + Utils.join(values, ", ") + "}");
+                }
+            }
         }
     }
 

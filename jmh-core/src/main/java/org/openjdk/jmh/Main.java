@@ -52,6 +52,11 @@ public class Main {
                 return;
             }
 
+            if (cmdOptions.shouldListWithParams()) {
+                runner.listWithParams(cmdOptions);
+                return;
+            }
+
             if (cmdOptions.shouldListProfilers()) {
                 cmdOptions.listProfilers();
                 return;
