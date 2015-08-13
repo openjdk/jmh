@@ -75,7 +75,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         OptionSpec<String> optEvents = parser.accepts("events",
                         "Events to gather.")
-                .withRequiredArg().ofType(String.class).withValuesSeparatedBy(",").describedAs("event+").defaultsTo(interestingEvents);
+                .withRequiredArg().ofType(String.class).withValuesSeparatedBy(",").describedAs("event+");
 
         OptionSpec<Integer> optDelay = parser.accepts("delay",
                         "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
