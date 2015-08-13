@@ -204,6 +204,8 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
             long delayNs = getDelay(br);
 
+            NumberFormat nf = NumberFormat.getInstance();
+
             String line;
 
             nextline:
@@ -213,15 +215,27 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 if (isIncrementable) {
                     String[] split = line.split(",");
 
-                    // Malformed line, ignore
-                    if (split.length < 4) continue nextline;
+                    String time;
+                    String count;
+                    String event;
 
-                    String time  = split[0].trim();
-                    String count = split[1].trim();
-                    String event = split[3].trim();
+                    if (split.length == 3) {
+                        // perf 3.13: time,count,event
+                        time  = split[0].trim();
+                        count = split[1].trim();
+                        event = split[2].trim();
+                    } else if (split.length >= 4) {
+                        // perf >3.13: time,count,<other>,event,<others>
+                        time  = split[0].trim();
+                        count = split[1].trim();
+                        event = split[3].trim();
+                    } else {
+                        // Malformed line, ignore
+                        continue nextline;
+                    }
 
                     try {
-                        double timeSec = NumberFormat.getInstance().parse(time).doubleValue();
+                        double timeSec = nf.parse(time).doubleValue();
                         if (timeSec * TimeUnit.SECONDS.toNanos(1) < delayNs) {
                             // warmup, ignore
                             continue nextline;
@@ -232,7 +246,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                     }
 
                     try {
-                        long lValue = NumberFormat.getInstance().parse(count).longValue();
+                        long lValue = nf.parse(count).longValue();
                         if (lValue > highPassFilter) {
                             // anomalous value, pretend we did not see it
                             continue nextline;
@@ -253,7 +267,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                     String event = line.substring(idx + 1).trim();
 
                     try {
-                        long lValue = NumberFormat.getInstance().parse(count).longValue();
+                        long lValue = nf.parse(count).longValue();
                         events.add(event, lValue);
                     } catch (ParseException e) {
                         // do nothing, continue
