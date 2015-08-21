@@ -324,7 +324,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         } else {
             pw.println();
-            pw.println("ERROR: No address lines detected in assembly capture, make sure your JDK is PrintAssembly-enabled:\n    https://wikis.oracle.com/display/HotSpotInternals/PrintAssembly");
+            pw.println("ERROR: No address lines detected in assembly capture, make sure your JDK is PrintAssembly-enabled:\n    https://wiki.openjdk.java.net/display/HotSpot/PrintAssembly");
             pw.println();
         }
 
