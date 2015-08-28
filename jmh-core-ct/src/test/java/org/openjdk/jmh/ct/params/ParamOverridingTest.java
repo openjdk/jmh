@@ -38,14 +38,14 @@ public class ParamOverridingTest {
     private String param;
 
     @Benchmark
-    public void test() {}
+    public void test1() {}
 
-    static class OverridingTest extends ParamOverridingTest {
+    public static class OverridingTest extends ParamOverridingTest {
         @Param("newvalue")
         private String param;
 
         @Benchmark
-        public void test() {}
+        public void test2() {}
     }
 
     @Test
