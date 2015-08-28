@@ -45,7 +45,7 @@ class Identifiers {
         if (jmhType == null) {
             int v = 0;
             do {
-                jmhType = id + (v == 0 ? "" : "_" + v) + "_jmh";
+                jmhType = id + (v == 0 ? "" : "_" + v) + "_jmhType";
                 v++;
             } while (!claimedJmhTypes.add(jmhType));
             jmhTypes.put(id, jmhType);

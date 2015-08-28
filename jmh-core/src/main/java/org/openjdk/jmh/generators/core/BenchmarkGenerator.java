@@ -24,31 +24,12 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.CompilerControl;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OperationsPerInvocation;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.infra.ThreadParams;
-import org.openjdk.jmh.results.AverageTimeResult;
-import org.openjdk.jmh.results.BenchmarkTaskResult;
-import org.openjdk.jmh.results.RawResults;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
-import org.openjdk.jmh.results.SampleTimeResult;
-import org.openjdk.jmh.results.SingleShotResult;
-import org.openjdk.jmh.results.ThroughputResult;
+import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkListEntry;
 import org.openjdk.jmh.runner.Defaults;
@@ -64,14 +45,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -524,7 +498,7 @@ public class BenchmarkGenerator {
         for (MethodGroup group : result.values()) {
             String sourcePackage = clazz.getPackageName();
             String generatedPackageName = sourcePackage + ".generated";
-            String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz) + "_" + group.getName();
+            String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz) + "_" + group.getName() + "_jmhTest";
 
             BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName(), generatedPackageName, generatedClassName, group);
             validateBenchmarkInfo(info);
