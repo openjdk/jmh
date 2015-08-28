@@ -25,12 +25,12 @@
 package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.TreeMultimap;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 class StateObject {
@@ -48,7 +48,7 @@ class StateObject {
     public final Scope scope;
     public final String localIdentifier;
     public final String fieldIdentifier;
-    public final Map<String, FieldInfo> params;
+    public final Multimap<String, FieldInfo> params;
     public final SortedSet<HelperMethodInvocation> helpers;
 
     public StateObject(Identifiers identifiers, ClassInfo info, Scope scope) {
@@ -61,7 +61,7 @@ class StateObject {
         this.localIdentifier = "l_" + id;
         this.fieldIdentifier = "f_" + id;
 
-        this.params = new TreeMap<String, FieldInfo>();
+        this.params = new TreeMultimap<String, FieldInfo>();
         this.helpers = new TreeSet<HelperMethodInvocation>();
     }
 
@@ -97,19 +97,20 @@ class StateObject {
     }
 
     public Collection<String> getParamsLabels() {
-        return params.keySet();
+        return params.keys();
     }
 
     public void addParam(FieldInfo fieldInfo) {
         params.put(fieldInfo.getName(), fieldInfo);
     }
 
-    public FieldInfo getParam(String name) {
+    public Collection<FieldInfo> getParam(String name) {
         return params.get(name);
     }
 
-    public String getParamAccessor(String name) {
-        String type = params.get(name).getType().getQualifiedName();
+    public String getParamAccessor(FieldInfo paramField) {
+        String name = paramField.getName();
+        String type = paramField.getType().getQualifiedName();
 
         if (type.equalsIgnoreCase("java.lang.String")) {
             return "control.getParam(\"" + name + "\")";

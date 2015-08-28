@@ -103,7 +103,9 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public void addParamValues(String name, String[] value) {
-        params.put(name, value);
+        if (!params.containsKey(name)) {
+            params.put(name, value);
+        }
     }
 
     public void addStrictFP(boolean sfp) {

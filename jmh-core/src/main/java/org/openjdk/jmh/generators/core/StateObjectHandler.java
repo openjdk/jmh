@@ -24,13 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import org.openjdk.jmh.annotations.AuxCounters;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.Control;
 import org.openjdk.jmh.infra.IterationParams;
@@ -41,17 +35,7 @@ import org.openjdk.jmh.util.Multimap;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 class StateObjectHandler {
@@ -584,9 +568,11 @@ class StateObjectHandler {
                 result.add("        Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("        f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
-                result.add("        f.setAccessible(true);");
-                result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
+                for (FieldInfo paramField : so.getParam(paramName)) {
+                    result.add("        f = " + paramField.getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                    result.add("        f.setAccessible(true);");
+                    result.add("        f.set(val, " + so.getParamAccessor(paramField) + ");");
+                }
             }
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
@@ -635,9 +621,11 @@ class StateObjectHandler {
                 result.add("            Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("        f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
-                result.add("        f.setAccessible(true);");
-                result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
+                for (FieldInfo paramField : so.getParam(paramName)) {
+                    result.add("            f = " + paramField.getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                    result.add("            f.setAccessible(true);");
+                    result.add("            f.set(val, " + so.getParamAccessor(paramField) + ");");
+                }
             }
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
@@ -672,9 +660,11 @@ class StateObjectHandler {
                 result.add("        Field f;");
             }
             for (String paramName : so.getParamsLabels()) {
-                result.add("        f = " + so.getParam(paramName).getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
-                result.add("        f.setAccessible(true);");
-                result.add("        f.set(val, " + so.getParamAccessor(paramName) + ");");
+                for(FieldInfo paramField : so.getParam(paramName)) {
+                    result.add("        f = " + paramField.getDeclaringClass().getQualifiedName() + ".class.getDeclaredField(\"" + paramName + "\");");
+                    result.add("        f.setAccessible(true);");
+                    result.add("        f.set(val, " + so.getParamAccessor(paramField) + ");");
+                }
             }
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
