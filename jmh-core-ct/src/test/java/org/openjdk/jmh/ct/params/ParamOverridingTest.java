@@ -25,6 +25,7 @@
 package org.openjdk.jmh.ct.params;
 
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -36,9 +37,15 @@ public class ParamOverridingTest {
     @Param("value")
     private String param;
 
+    @Benchmark
+    public void test() {}
+
     static class OverridingTest extends ParamOverridingTest {
         @Param("newvalue")
         private String param;
+
+        @Benchmark
+        public void test() {}
     }
 
     @Test
