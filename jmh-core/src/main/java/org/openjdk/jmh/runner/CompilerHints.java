@@ -41,6 +41,9 @@ public class CompilerHints extends AbstractResourceReader {
     // Zing is only compatible from post 5.10.*.* releases
     static final String JVM_ZING = "Zing";
 
+    // Force blackhole inline, useful for testing.
+    public static final boolean INLINE_BLACKHOLE = Boolean.getBoolean("jmh.blackhole.forceInline");
+
     private static volatile CompilerHints defaultList;
     private static volatile String hintsFile;
 
@@ -62,7 +65,11 @@ public class CompilerHints extends AbstractResourceReader {
                 final Set<String> defaultHints = defaultList().get();
                 List<String> hints = new ArrayList<String>(defaultHints.size() + 2);
                 hints.add("quiet");
-                hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.*");
+                if (INLINE_BLACKHOLE) {
+                    hints.add("inline,org/openjdk/jmh/infra/Blackhole.*");
+                } else {
+                    hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.*");
+                }
                 hints.addAll(defaultHints);
                 hintsFile = FileUtils.createTempFileWithLines("compilecommand", hints);
             } catch (IOException e) {
