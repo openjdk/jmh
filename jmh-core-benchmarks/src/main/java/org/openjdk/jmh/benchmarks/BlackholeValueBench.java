@@ -24,13 +24,10 @@
  */
 package org.openjdk.jmh.benchmarks;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -44,17 +41,21 @@ public class BlackholeValueBench {
     // Normally, this is solved with more forks, whereas Blackhole
     // randomizes the value it matches against.
 
-    private boolean x1 = true;
-    private boolean x2 = false;
+    boolean[] array = new boolean[1000];
 
-    @Benchmark
-    public boolean test1() {
-        return x1;
+    @Setup
+    public void setup() {
+        Random random = new Random(0);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = random.nextBoolean();
+        }
     }
 
     @Benchmark
-    public boolean test2() {
-        return x2;
+    public void test(Blackhole bh) {
+        for (boolean b : array) {
+            bh.consume(b);
+        }
     }
 
 }

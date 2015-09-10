@@ -27,13 +27,12 @@ package org.openjdk.jmh.benchmarks;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-public class BlackholePipelineBench {
+public class BlackholePipelinePayloadBench {
 
     @Param("10")
     private int steps;
@@ -46,8 +45,8 @@ public class BlackholePipelineBench {
     private float[] floats;
     private long[] longs;
     private double[] doubles;
-    private Object[] objects;
-    private Object[][] arrays;
+    private Double[] objects;
+    private Double[][] arrays;
 
     @Setup
     public void prepare() {
@@ -59,91 +58,90 @@ public class BlackholePipelineBench {
         floats = new float[steps];
         longs = new long[steps];
         doubles = new double[steps];
-        objects = new Object[steps];
-        arrays = new Object[steps][];
+        objects = new Double[steps];
+        arrays = new Double[steps][];
 
-        Random r = new Random(0);
         for (int c = 0; c < steps; c++) {
-            booleans[c] = r.nextBoolean();
-            bytes[c] = (byte) r.nextInt();
-            shorts[c] = (short) r.nextInt();
-            chars[c] = (char) r.nextInt();
-            ints[c] = r.nextInt();
-            floats[c] = r.nextFloat();
-            longs[c] = r.nextLong();
-            doubles[c] = r.nextDouble();
-            objects[c] = new Object();
-            arrays[c] = new Object[10];
+            booleans[c] = ((c & 1) == 0);
+            bytes[c] = (byte) c;
+            shorts[c] = (short) c;
+            chars[c] = (char) c;
+            ints[c] = c;
+            floats[c] = c;
+            longs[c] = c;
+            doubles[c] = c;
+            objects[c] = (double) c;
+            arrays[c] = new Double[]{Double.valueOf(c)};
         }
     }
 
     @Benchmark
     public void test_boolean(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(booleans[c]);
+            bh.consume((Math.log(doubles[c]) > 1) ^ booleans[c]);
         }
     }
 
     @Benchmark
     public void test_byte(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(bytes[c]);
+            bh.consume((byte)Math.log(bytes[c]));
         }
     }
 
     @Benchmark
     public void test_short(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(shorts[c]);
+            bh.consume((short)Math.log(shorts[c]));
         }
     }
 
     @Benchmark
     public void test_char(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(chars[c]);
+            bh.consume((char)Math.log(chars[c]));
         }
     }
 
     @Benchmark
     public void test_int(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(ints[c]);
+            bh.consume((int)Math.log(ints[c]));
         }
     }
 
     @Benchmark
     public void test_float(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(floats[c]);
+            bh.consume((float)Math.log(floats[c]));
         }
     }
 
     @Benchmark
     public void test_long(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(longs[c]);
+            bh.consume((long)Math.log(longs[c]));
         }
     }
 
     @Benchmark
     public void test_double(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(doubles[c]);
+            bh.consume((double)Math.log(doubles[c]));
         }
     }
 
     @Benchmark
     public void test_Object(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(objects[c]);
+            bh.consume((Double) Math.log(objects[c]));
         }
     }
 
     @Benchmark
     public void test_Array(Blackhole bh) {
         for (int c = 0; c < steps; c++) {
-            bh.consume(arrays[c]);
+            bh.consume(new Double[] {Math.log(arrays[c][0])});
         }
     }
 

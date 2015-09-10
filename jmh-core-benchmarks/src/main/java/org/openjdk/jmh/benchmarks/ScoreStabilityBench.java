@@ -24,89 +24,30 @@
  */
 package org.openjdk.jmh.benchmarks;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Threads;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.SingleShotTime)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 50)
 @Measurement(iterations = 50)
-@Threads(4)
+@Threads(1)
+@State(Scope.Thread)
 public class ScoreStabilityBench {
 
-    @State(Scope.Thread)
-    public static class Sleep_X_State {
-        @Setup(Level.Iteration)
-        public void sleep() throws InterruptedException {
-            // don't
-        }
-    }
+    @Param("10")
+    private int delay;
 
-    @State(Scope.Thread)
-    public static class Sleep_X1_State {
-        @Setup(Level.Iteration)
-        public void sleep() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(1);
-        }
-    }
-
-    @State(Scope.Thread)
-    public static class Sleep_X10_State {
-        @Setup(Level.Iteration)
-        public void sleep() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(10);
-        }
-    }
-
-    @State(Scope.Thread)
-    public static class Sleep_X100_State {
-        @Setup(Level.Iteration)
-        public void sleep() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-    }
-
-    @State(Scope.Thread)
-    public static class Sleep_X500_State {
-        @Setup(Level.Iteration)
-        public void sleep() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(500);
-        }
+    @Setup(Level.Iteration)
+    public void sleep() throws InterruptedException {
+        TimeUnit.MILLISECONDS.sleep(delay);
     }
 
     @Benchmark
-    public void test_X(Sleep_X_State s) {
-        Blackhole.consumeCPU(10000);
-    }
-
-    @Benchmark
-    public void test_X1(Sleep_X1_State s) {
-        Blackhole.consumeCPU(10000);
-    }
-
-    @Benchmark
-    public void test_X10(Sleep_X10_State x) {
-        Blackhole.consumeCPU(10000);
-    }
-
-    @Benchmark
-    public void test_X100(Sleep_X100_State x) {
-        Blackhole.consumeCPU(10000);
-    }
-
-    @Benchmark
-    public void test_X500(Sleep_X500_State x) {
-        Blackhole.consumeCPU(10000);
+    public void test() {
+        Blackhole.consumeCPU(1000000);
     }
 
 }

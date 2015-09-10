@@ -29,6 +29,7 @@ import joptsimple.OptionDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class OptionFormatter implements HelpFormatter {
@@ -94,8 +95,13 @@ public class OptionFormatter implements HelpFormatter {
         }
 
         line.append(String.format("%-30s", o.toString()));
+        String desc = d.description();
+        List<?> defaults = d.defaultValues();
+        if (defaults != null && !defaults.isEmpty()) {
+            desc += " (default: " + defaults.toString() + ")";
+        }
         boolean first = true;
-        for (String l : rewrap(d.description())) {
+        for (String l : rewrap(desc)) {
             if (first) {
                 first = false;
             } else {

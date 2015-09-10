@@ -235,6 +235,30 @@ public class Utils {
         return Charset.defaultCharset();
     }
 
+    public static void reflow(PrintWriter pw, String src, int width, int indent) {
+        StringTokenizer tokenizer = new StringTokenizer(src);
+        int curWidth = indent;
+        indent(pw, indent);
+        while (tokenizer.hasMoreTokens()) {
+            String next = tokenizer.nextToken();
+            pw.print(next);
+            pw.print(" ");
+            curWidth += next.length() + 1;
+            if (curWidth > width) {
+                pw.println();
+                indent(pw, indent);
+                curWidth = 0;
+            }
+        }
+        pw.println();
+    }
+
+    private static void indent(PrintWriter pw, int indent) {
+        for (int i = 0; i < indent; i++) {
+            pw.print(" ");
+        }
+    }
+
     static class BurningTask implements Runnable {
         @Override
         public void run() {

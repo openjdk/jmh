@@ -24,14 +24,7 @@
  */
 package org.openjdk.jmh.benchmarks;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
@@ -71,102 +64,102 @@ public class BlackholeBench {
     }
 
     @Benchmark
-    public byte implicit_testByte() {
+    public byte implicit_byte() {
         return b;
     }
 
     @Benchmark
-    public boolean implicit_testBoolean() {
+    public boolean implicit_boolean() {
         return bool;
     }
 
     @Benchmark
-    public char implicit_testChar() {
+    public char implicit_char() {
         return c;
     }
 
     @Benchmark
-    public short implicit_testShort() {
+    public short implicit_short() {
         return s;
     }
 
     @Benchmark
-    public int implicit_testInt() {
+    public int implicit_int() {
         return i;
     }
 
     @Benchmark
-    public long implicit_testLong() {
+    public long implicit_long() {
         return l;
     }
 
     @Benchmark
-    public float implicit_testFloat() {
+    public float implicit_float() {
         return f;
     }
 
     @Benchmark
-    public double implicit_testDouble() {
+    public double implicit_double() {
         return d;
     }
 
     @Benchmark
-    public Object implicit_testObject() {
+    public Object implicit_Object() {
         return o;
     }
 
     @Benchmark
-    public Object[] implicit_testArray() {
+    public Object[] implicit_Array() {
         return os;
     }
 
     @Benchmark
-    public void explicit_testByte(Blackhole bh) {
+    public void explicit_byte(Blackhole bh) {
         bh.consume(b);
     }
 
     @Benchmark
-    public void explicit_testBoolean(Blackhole bh) {
+    public void explicit_boolean(Blackhole bh) {
         bh.consume(bool);
     }
 
     @Benchmark
-    public void explicit_testChar(Blackhole bh) {
+    public void explicit_char(Blackhole bh) {
         bh.consume(c);
     }
 
     @Benchmark
-    public void explicit_testShort(Blackhole bh) {
+    public void explicit_short(Blackhole bh) {
         bh.consume(s);
     }
 
     @Benchmark
-    public void explicit_testInt(Blackhole bh) {
+    public void explicit_int(Blackhole bh) {
         bh.consume(i);
     }
 
     @Benchmark
-    public void explicit_testLong(Blackhole bh) {
+    public void explicit_long(Blackhole bh) {
         bh.consume(l);
     }
 
     @Benchmark
-    public void explicit_testFloat(Blackhole bh) {
+    public void explicit_float(Blackhole bh) {
         bh.consume(f);
     }
 
     @Benchmark
-    public void explicit_testDouble(Blackhole bh) {
+    public void explicit_double(Blackhole bh) {
         bh.consume(d);
     }
 
     @Benchmark
-    public void explicit_testObject(Blackhole bh) {
+    public void explicit_Object(Blackhole bh) {
         bh.consume(o);
     }
 
     @Benchmark
-    public void explicit_testArray(Blackhole bh) {
+    public void explicit_Array(Blackhole bh) {
         bh.consume(os);
     }
 
