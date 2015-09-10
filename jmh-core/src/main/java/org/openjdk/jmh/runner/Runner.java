@@ -162,7 +162,11 @@ public class Runner extends BaseRunner {
                 throw new RunnerException("No results returned");
             }
         } else {
-            throw new RunnerException("More than single benchmark is matching the options");
+            if (benchmarks.size() > 1) {
+                throw new RunnerException("More than single benchmark are matching the options: " + benchmarks);
+            } else {
+                throw new NoBenchmarksException();
+            }
         }
     }
 
