@@ -46,13 +46,13 @@ public class ScoreStabilityTest implements ValidationTest {
         org.openjdk.jmh.util.Utils.reflow(pw,
                 "This test verifies the performance for a large busy benchmark is the same, regardless " +
                         "of the benchmark mode, and delay before the iteration. The performance should be " +
-                        "the same across all benchmark modes. If there is a significant difference on different " +
-                        "delay levels, this is usually indicative of power-saving features enabled, making bursty " +
-                        "benchmarks unreliable.",
+                        "the same across all delay values, and comparable across different benchmark modes. " +
+                        "If there is a significant difference on different delay levels, this is usually " +
+                        "indicative of power-saving features enabled, making bursty benchmarks unreliable.",
                 80, 2);
         pw.println();
 
-        pw.println("  Scores are milliseconds per benchmark operation.");
+        pw.println("  Scores are milliseconds per benchmark operation, or the reciprocal to it.");
         pw.println("  Delays are injected before each iteration, and are measured in milliseconds.");
         pw.println();
 
@@ -67,21 +67,24 @@ public class ScoreStabilityTest implements ValidationTest {
         for (Mode m : Mode.values()) {
             if (m == Mode.All) continue;
 
+            Result r = null;
+
             pw.printf("%20s", m + ": ");
             for (int delay : delays) {
                 Options opts = new OptionsBuilder()
                         .parent(parent)
+                        .mode(m)
                         .include(ScoreStabilityBench.class.getCanonicalName())
                         .verbosity(VerboseMode.SILENT)
                         .param("delay", String.valueOf(delay))
                         .build();
 
                 RunResult result = new Runner(opts).runSingle();
-                Result r = result.getPrimaryResult();
+                r = result.getPrimaryResult();
                 pw.printf("%16s", String.format("%.2f \u00b1 %.2f", r.getScore(), r.getScoreError()));
                 pw.flush();
             }
-            pw.println();
+            pw.println("   " + r.getScoreUnit());
         }
 
         pw.println();
