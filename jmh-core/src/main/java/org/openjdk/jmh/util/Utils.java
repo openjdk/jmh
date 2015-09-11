@@ -259,6 +259,26 @@ public class Utils {
         }
     }
 
+    public static Collection<String> rewrap(String lines) {
+        Collection<String> result = new ArrayList<String>();
+        String[] words = lines.split("[ \n]");
+        String line = "";
+        int cols = 0;
+        for (String w : words) {
+            cols += w.length();
+            line += w + " ";
+            if (cols > 40) {
+                result.add(line);
+                line = "";
+                cols = 0;
+            }
+        }
+        if (!line.trim().isEmpty()) {
+            result.add(line);
+        }
+        return result;
+    }
+
     static class BurningTask implements Runnable {
         @Override
         public void run() {

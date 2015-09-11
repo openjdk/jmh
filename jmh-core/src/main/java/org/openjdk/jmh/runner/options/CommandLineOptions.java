@@ -91,43 +91,55 @@ public class CommandLineOptions implements Options {
         parser = new OptionParser();
         parser.formatHelpWith(new OptionFormatter());
 
-        OptionSpec<Integer> optMeasureCount = parser.accepts("i", "Number of measurement iterations to do.")
+        OptionSpec<Integer> optMeasureCount = parser.accepts("i", "Number of measurement iterations to do. " +
+                "Measurement iterations are counted towards the benchmark score.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
-        OptionSpec<Integer> optMeasureBatchSize = parser.accepts("bs", "Batch size: number of benchmark method calls per operation. " +
-                "(some benchmark modes can ignore this setting)")
+        OptionSpec<Integer> optMeasureBatchSize = parser.accepts("bs", "Batch size: number of benchmark method " +
+                "calls per operation. Some benchmark modes may ignore this setting, please check this separately.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
-        OptionSpec<TimeValue> optMeasureTime = parser.accepts("r", "Time to spend at each measurement iteration.")
+        OptionSpec<TimeValue> optMeasureTime = parser.accepts("r", "Minimum time to spend at each measurement " +
+                "iteration. Benchmarks may generally run longer than iteration duration.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
-        OptionSpec<Integer> optWarmupCount = parser.accepts("wi", "Number of warmup iterations to do.")
+        OptionSpec<Integer> optWarmupCount = parser.accepts("wi", "Number of warmup iterations to do. Warmup " +
+                "iterations are not counted towards the benchmark score.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
-        OptionSpec<Integer> optWarmupBatchSize = parser.accepts("wbs", "Warmup batch size: number of benchmark method calls per operation. " +
-                "(some benchmark modes can ignore this setting)")
+        OptionSpec<Integer> optWarmupBatchSize = parser.accepts("wbs", "Warmup batch size: number of benchmark " +
+                "method calls per operation. Some benchmark modes may ignore this setting.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
-        OptionSpec<TimeValue> optWarmupTime = parser.accepts("w", "Time to spend at each warmup iteration.")
+        OptionSpec<TimeValue> optWarmupTime = parser.accepts("w", "Minimum time to spend at each warmup iteration. " +
+                "Benchmarks may generally run longer than iteration duration.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
-        OptionSpec<TimeValue> optTimeoutTime = parser.accepts("to", "Timeout for benchmark iteration.")
+        OptionSpec<TimeValue> optTimeoutTime = parser.accepts("to", "Timeout for benchmark iteration. After reaching " +
+                "this timeout, JMH will try to interrupt the running tasks. Non-cooperating benchmarks may ignore " +
+                "this timeout.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
-        OptionSpec<Integer> optThreads = parser.accepts("t", "Number of worker threads to run with. 'max' means Runtime.getRuntime().availableProcessors().")
+        OptionSpec<Integer> optThreads = parser.accepts("t", "Number of worker threads to run with. 'max' means the " +
+                "maximum number of hardware threads available on the machine, figured out by JMH itself.")
                 .withRequiredArg().withValuesConvertedBy(ThreadsValueConverter.INSTANCE).describedAs("int");
 
         OptionSpec<String> optBenchmarkMode = parser.accepts("bm", "Benchmark mode. Available modes are: " + Mode.getKnown())
                 .withRequiredArg().ofType(String.class).withValuesSeparatedBy(',').describedAs("mode");
 
-        OptionSpec<Boolean> optSyncIters = parser.accepts("si", "Synchronize iterations?")
+        OptionSpec<Boolean> optSyncIters = parser.accepts("si", "Should JMH synchronize iterations? This would " +
+                "significantly lower the noise in multithreaded tests, by making sure the measured part happens only " +
+                "when all workers are running.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<Boolean> optGC = parser.accepts("gc", "Should JMH force GC between iterations?")
+        OptionSpec<Boolean> optGC = parser.accepts("gc", "Should JMH force GC between iterations? Forcing the GC may " +
+                "help to lower the noise in GC-heavy benchmarks, at the expense of jeopardizing GC ergonomics " +
+                "decisions. Use with care.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<Boolean> optFOE = parser.accepts("foe", "Should JMH fail immediately if any benchmark had" +
-                " experienced the unrecoverable error?")
+        OptionSpec<Boolean> optFOE = parser.accepts("foe", "Should JMH fail immediately if any benchmark had " +
+                "experienced an unrecoverable error? This helps to make quick sanity tests for benchmark suites, as " +
+                "well as make the automated runs with checking error codes.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<String> optVerboseMode = parser.accepts("v", "Verbosity mode. Available modes are: " + Arrays.toString(VerboseMode.values()))
@@ -136,70 +148,84 @@ public class CommandLineOptions implements Options {
         OptionSpec<String> optArgs = parser.nonOptions("Benchmarks to run (regexp+).")
                 .describedAs("regexp+");
 
-        OptionSpec<Integer> optForks = parser.accepts("f", "How many times to forks a single benchmark." +
-                " Use 0 to disable forking altogether (WARNING: disabling forking may have detrimental" +
-                " impact on benchmark and infrastructure reliability, you might want to use different" +
-                " warmup mode instead).")
+        OptionSpec<Integer> optForks = parser.accepts("f", "How many times to fork a single benchmark. Use 0 to " +
+                "disable forking altogether. Warning: disabling forking may have detrimental impact on benchmark and " +
+                "infrastructure reliability, you might want to use different warmup mode instead.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
-        OptionSpec<Integer> optWarmupForks = parser.accepts("wf", "How many warmup forks to make " +
-                "for a single benchmark. 0 to disable warmup forks.")
+        OptionSpec<Integer> optWarmupForks = parser.accepts("wf", "How many warmup forks to make for a single benchmark. " +
+                "All iterations within the warmup fork are not counted towards the benchmark score. Use 0 to disable " +
+                "warmup forks.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
-        OptionSpec<String> optOutput = parser.accepts("o", "Redirect human-readable output to file.")
+        OptionSpec<String> optOutput = parser.accepts("o", "Redirect human-readable output to a given file.")
                 .withRequiredArg().ofType(String.class).describedAs("filename");
 
-        OptionSpec<String> optOutputResults = parser.accepts("rff", "Write results to given file.")
+        OptionSpec<String> optOutputResults = parser.accepts("rff", "Write machine-readable results to a given file. " +
+                "The file format is controlled by -rf option. Please see the list of result formats for available " +
+                "formats.")
                 .withRequiredArg().ofType(String.class).describedAs("filename");
 
-        OptionSpec<String> optProfilers = parser.accepts("prof", "Use profilers to collect additional data." +
-                " See the list of available profilers first.")
+        OptionSpec<String> optProfilers = parser.accepts("prof", "Use profilers to collect additional benchmark data. " +
+                "Some profilers are not available on all JVMs and/or all OSes. Please see the list of available " +
+                "profilers with -lprof.")
                 .withRequiredArg().ofType(String.class).describedAs("profiler");
 
-        OptionSpec<Integer> optThreadGroups = parser.accepts("tg", "Override thread group distribution for asymmetric benchmarks.")
+        OptionSpec<Integer> optThreadGroups = parser.accepts("tg", "Override thread group distribution for asymmetric " +
+                "benchmarks. This option expects a comma-separated list of thread counts within the group. See " +
+                "@Group/@GroupThreads Javadoc for more information.")
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(Integer.class)
                 .withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int+");
 
-        OptionSpec<String> optJvm = parser.accepts("jvm", "Custom JVM to use when forking (path to JVM executable).")
+        OptionSpec<String> optJvm = parser.accepts("jvm", "Use given JVM for runs. This option only affects forked runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
-        OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Custom JVM args to use when forking.")
+        OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. Most options are inherited " +
+                "from the host VM options, but in some cases you want to pass the options only to a forked VM. Either " +
+                "single space-separated option line, or multiple options are accepted. This option only affects forked " +
+                "runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
-        OptionSpec<String> optJvmArgsAppend = parser.accepts("jvmArgsAppend", "Custom JVM args to use when forking (append these)")
+        OptionSpec<String> optJvmArgsAppend = parser.accepts("jvmArgsAppend", "Same as jvmArgs, but append these " +
+                "options before the already given JVM args.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
-        OptionSpec<String> optJvmArgsPrepend = parser.accepts("jvmArgsPrepend", "Custom JVM args to use when forking (prepend these)")
+        OptionSpec<String> optJvmArgsPrepend = parser.accepts("jvmArgsPrepend", "Same as jvmArgs, but prepend these " +
+                "options before the already given JVM arg.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
-        OptionSpec<String> optTU = parser.accepts("tu", "Output time unit. Available time units are: [m, s, ms, us, ns].")
+        OptionSpec<String> optTU = parser.accepts("tu", "Override time unit in benchmark results. Available time units " +
+                "are: [m, s, ms, us, ns].")
                 .withRequiredArg().ofType(String.class).describedAs("TU");
 
-        OptionSpec<Integer> optOPI = parser.accepts("opi", "Operations per invocation.")
+        OptionSpec<Integer> optOPI = parser.accepts("opi", "Override operations per invocation, see " +
+                "@OperationsPerInvocation Javadoc for details.")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
-        OptionSpec<String> optResultFormat = parser.accepts("rf", "Result format type. See the list of available result formats first.")
+        OptionSpec<String> optResultFormat = parser.accepts("rf", "Format type for machine-readable results. These " +
+                "results are written to a separate file (see -rff). See the list of available result formats with -lrf.")
                 .withRequiredArg().ofType(String.class).describedAs("type");
 
-        OptionSpec<String> optWarmupMode = parser.accepts("wm", "Warmup mode for warming up selected benchmarks. Warmup modes are: " + Arrays.toString(WarmupMode.values()) + ".")
+        OptionSpec<String> optWarmupMode = parser.accepts("wm", "Warmup mode for warming up selected benchmarks. " +
+                "Warmup modes are: " + warmupModesDesc())
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
         OptionSpec<String> optExcludes = parser.accepts("e", "Benchmarks to exclude from the run.")
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("regexp+");
 
-        OptionSpec<String> optParams = parser.accepts("p", "Benchmark parameters. This option is expected to be used once" +
-                " per parameter. Parameter name and parameter values should be separated with equals sign." +
-                " Parameter values should be separated with commas.")
+        OptionSpec<String> optParams = parser.accepts("p", "Benchmark parameters. This option is expected to be used " +
+                "once per parameter. Parameter name and parameter values should be separated with equals sign. " +
+                "Parameter values should be separated with commas.")
                 .withRequiredArg().ofType(String.class).describedAs("param={v,}*");
 
-        OptionSpec<String> optWarmupBenchmarks = parser.accepts("wmb", "Warmup benchmarks to include in the run " +
-                "in addition to already selected. JMH will not measure these benchmarks, but only use them" +
-                " for the warmup.")
+        OptionSpec<String> optWarmupBenchmarks = parser.accepts("wmb", "Warmup benchmarks to include in the run in " +
+                "addition to already selected by the primary filters. Harness will not measure these benchmarks, but " +
+                "only use them for the warmup.")
                 .withRequiredArg().withValuesSeparatedBy(',').ofType(String.class).describedAs("regexp+");
 
-        parser.accepts("l", "List matching benchmarks and exit.");
-        parser.accepts("lp", "List matching benchmarks with parameters and exit.");
-        parser.accepts("lrf", "List result formats.");
+        parser.accepts("l", "List the benchmarks that match a filter, and exit.");
+        parser.accepts("lp", "List the benchmarks that match a filter, along with parameters, and exit.");
+        parser.accepts("lrf", "List machine-readable result formats.");
         parser.accepts("lprof", "List profilers.");
         parser.accepts("h", "Display help.");
 
@@ -357,6 +383,26 @@ public class CommandLineOptions implements Options {
             }
             throw new CommandLineOptionException(message, e);
         }
+    }
+
+    private String warmupModesDesc() {
+        StringBuilder sb = new StringBuilder();
+        for (WarmupMode mode : WarmupMode.values()) {
+            sb.append(mode);
+            sb.append(" = ");
+            switch (mode) {
+                case BULK:
+                    sb.append("Warmup all benchmarks first, then do all the measurements. ");
+                    break;
+                case INDI:
+                    sb.append("Warmup each benchmark individually, then measure it. ");
+                    break;
+                case BULK_INDI:
+                    sb.append("Warmup all benchmarks first, then re-warmup each benchmark individually, then measure it. ");
+                    break;
+            }
+        }
+        return sb.toString();
     }
 
     private static <T> Optional<T> toOptional(OptionSpec<T> option, OptionSet set) {

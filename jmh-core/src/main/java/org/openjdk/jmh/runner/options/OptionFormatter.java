@@ -26,13 +26,14 @@ package org.openjdk.jmh.runner.options;
 
 import joptsimple.HelpFormatter;
 import joptsimple.OptionDescriptor;
+import org.openjdk.jmh.util.Utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class OptionFormatter implements HelpFormatter {
+
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public String format(Map<String, ? extends OptionDescriptor> options) {
         StringBuilder sb = new StringBuilder();
@@ -48,24 +49,6 @@ public class OptionFormatter implements HelpFormatter {
         }
 
         return sb.toString();
-    }
-
-    private Collection<String> rewrap(String lines) {
-        Collection<String> result = new ArrayList<String>();
-        String[] words = lines.split("[ \n]");
-        String line = "";
-        int cols = 0;
-        for (String w : words) {
-            cols += w.length();
-            line += w + " ";
-            if (cols > 40) {
-                result.add(line);
-                line = "";
-                cols = 0;
-            }
-        }
-        result.add(line);
-        return result;
     }
 
     private String lineFor(OptionDescriptor d) {
@@ -94,24 +77,27 @@ public class OptionFormatter implements HelpFormatter {
             }
         }
 
-        line.append(String.format("%-30s", o.toString()));
+        final int optWidth = 30;
+
+        line.append(String.format("%-" + optWidth + "s", o.toString()));
+        boolean first = true;
         String desc = d.description();
         List<?> defaults = d.defaultValues();
         if (defaults != null && !defaults.isEmpty()) {
             desc += " (default: " + defaults.toString() + ")";
         }
-        boolean first = true;
-        for (String l : rewrap(desc)) {
+        for (String l : Utils.rewrap(desc)) {
             if (first) {
                 first = false;
             } else {
-                line.append("\n");
-                line.append(String.format("%-30s", ""));
+                line.append(LINE_SEPARATOR);
+                line.append(String.format("%-" + optWidth + "s", ""));
             }
             line.append(l);
         }
 
-        line.append(System.getProperty("line.separator"));
+        line.append(LINE_SEPARATOR);
+        line.append(LINE_SEPARATOR);
         return line.toString();
     }
 

@@ -26,9 +26,8 @@ package org.openjdk.jmh.profile;
 
 import joptsimple.HelpFormatter;
 import joptsimple.OptionDescriptor;
+import org.openjdk.jmh.util.Utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -53,26 +52,6 @@ class ProfilerOptionFormatter implements HelpFormatter {
         }
 
         return sb.toString();
-    }
-
-    private Collection<String> rewrap(String lines) {
-        Collection<String> result = new ArrayList<String>();
-        String[] words = lines.split("[ \n]");
-        String line = "";
-        int cols = 0;
-        for (String w : words) {
-            cols += w.length();
-            line += w + " ";
-            if (cols > 40) {
-                result.add(line);
-                line = "";
-                cols = 0;
-            }
-        }
-        if (!line.trim().isEmpty()) {
-            result.add(line);
-        }
-        return result;
     }
 
     private String lineFor(OptionDescriptor d) {
@@ -108,7 +87,7 @@ class ProfilerOptionFormatter implements HelpFormatter {
         if (defaults != null && !defaults.isEmpty()) {
             desc += " (default: " + defaults.toString() + ")";
         }
-        for (String l : rewrap(desc)) {
+        for (String l : Utils.rewrap(desc)) {
             if (first) {
                 first = false;
             } else {
