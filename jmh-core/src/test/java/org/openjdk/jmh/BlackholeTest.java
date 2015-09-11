@@ -32,15 +32,14 @@ public class BlackholeTest {
 
     @Test
     public void test() {
-        long tlr = 0;
-        long tlrMask = 0;
+        int tlr = 1;
+        int tlrMask = 2;
         for (int t = 0; t < 1000000000; t++) {
-            tlr = (tlr * 1664525 + 1013904223);
+            tlr = (tlr * 48271);
             if ((tlr & tlrMask) == 0) {
                 // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-                tlrMask = (tlrMask << 1) + 1;
-                tlr = 0;
-//                System.out.println(t);
+                tlrMask = (tlrMask << 1) + 2;
+                System.out.println(t);
             }
         }
     }

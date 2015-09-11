@@ -81,7 +81,7 @@ public class BlackholeConsecutiveTest implements ValidationTest {
 
         pw.printf("%12s", "");
         for (int steps : ss) {
-            pw.printf("%16s", steps);
+            pw.printf("%20s", steps);
         }
         pw.println();
 
@@ -97,7 +97,7 @@ public class BlackholeConsecutiveTest implements ValidationTest {
 
                 RunResult result = new Runner(opts).runSingle();
                 Result r = result.getPrimaryResult();
-                pw.printf("%16s", String.format("%.2f ± %.2f", r.getScore() / steps, r.getScoreError() / steps));
+                pw.printf("%20s", String.format("%.2f ± %.2f", r.getScore() / steps, r.getScoreError() / steps));
                 pw.flush();
             }
             pw.println();

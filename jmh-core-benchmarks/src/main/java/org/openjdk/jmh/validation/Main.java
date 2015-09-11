@@ -41,7 +41,7 @@ public class Main {
     public static void main(String[] args) throws RunnerException, CommandLineOptionException, IOException {
         PrintWriter pw = new PrintWriter(System.out, true);
 
-        pw.println("JMH COre Benchmark Tests");
+        pw.println("JMH Core Benchmark Tests");
         pw.println("----------------------------------------------------------------------------------------------------------");
         pw.println();
 
@@ -175,7 +175,7 @@ public class Main {
                 case blackhole_cpu:
                     new BlackholeConsumeCPUTest().runWith(pw, opts);
                     break;
-                case blackhole_simple:
+                case blackhole_single:
                     new BlackholeSingleTest().runWith(pw, opts);
                     break;
                 case blackhole_pipelined:
@@ -206,7 +206,7 @@ public class Main {
         thermal,
         helpers,
         blackhole_cpu,
-        blackhole_simple,
+        blackhole_single,
         blackhole_pipelined,
         blackhole_consec,
     }
