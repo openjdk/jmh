@@ -24,11 +24,7 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.util.Utils;
 
 import java.util.Random;
@@ -163,13 +159,16 @@ public class Blackhole extends BlackholeL4 {
      * IMPLEMENTATION NOTES:
      *
      * The major things to dodge with Blackholes are:
+     *
      *   a) Dead-code elimination: the arguments should be used on every call,
      *      so that compilers are unable to fold them into constants or
      *      otherwise optimize them away along with the computations resulted
      *      in them.
+     *
      *   b) False sharing: reading/writing the state may disturb the cache
      *      lines. We need to isolate the critical fields to achieve tolerable
      *      performance.
+     *
      *   c) Write wall: we need to ease off on writes as much as possible,
      *      since it disturbs the caches, pollutes the write buffers, etc.
      *      This may very well result in hitting the memory wall prematurely.
@@ -189,7 +188,11 @@ public class Blackhole extends BlackholeL4 {
      *     volatile write happens, it is unlikely to be practical to be able to stop
      *     all the threads the instant that write had happened.
      *
-     *  3. Compilers are not doing aggressive inter-procedural optimizations,
+     *  3. Compilers' code motion usually respects data dependencies, and they would
+     *     not normally schedule the consumer block before the code that generated
+     *     a value.
+     *
+     *  4. Compilers are not doing aggressive inter-procedural optimizations,
      *     and/or break them when the target method is forced to be non-inlineable.
      *
      * Observation (1) allows us to "squash" the protected fields in the inheritance
@@ -200,12 +203,16 @@ public class Blackhole extends BlackholeL4 {
      * Observation (2) allows us to compare the incoming primitive values against
      * the relevant volatile-guarded fields. The values in those guarded fields are
      * never changing, but due to (2), we should re-read the values again and again.
+     * Also, observation (3) requires us to to use the incoming value in the computation,
+     * thus anchoring the Blackhole code after the generating expression.
      *
      * Primitives are a bit hard, because we can't predict what values we
      * will be fed. But we can compare the incoming value with *two* distinct
      * known values, and both checks will never be true at the same time.
      * Note the bitwise AND in all the predicates: both to spare additional
-     * branch, and also to provide more uniformity in the performance.
+     * branch, and also to provide more uniformity in the performance. Where possible,
+     * we are using a specific code shape to force generating a single branch, e.g.
+     * making compiler to evaluate the predicate in full, not speculate on components.
      *
      * Objects should normally abide the Java's referential semantics, i.e. the
      * incoming objects will never be equal to the distinct object we have, and
@@ -218,14 +225,24 @@ public class Blackhole extends BlackholeL4 {
      * the condition to "false". We are warming up the slow-path in the beginning
      * to evade that effect.
      *
-     * Observation (3) provides us with an opportunity to create a safety net in case
-     * either (1) or (2) fails. This is why Blackhole methods are prohibited from
-     * being inlined. This is treated specially in JMH runner code. Conversely,
-     * both (1) and (2) are covering in case (3) fails. This provides a defense
-     * in depth for Blackhole.
+     * Observation (4) provides us with an opportunity to create a safety net in case
+     * either (1), (2) or (3) fails. This is why Blackhole methods are prohibited from
+     * being inlined. This is treated specially in JMH runner code (see CompilerHints).
+     * Conversely, both (1), (2), (3) are covering in case (4) fails. This provides
+     * a defense in depth for Blackhole implementation, where a point failure is a
+     * performance nuisance, but not a correctness catastrophe.
      *
      * In all cases, consumes do the volatile reads to have a consistent memory
      * semantics across all consume methods.
+     *
+     * An utmost caution should be exercised when changing the Blackhole code. Nominally,
+     * the JMH Core Benchmarks should be run on multiple platforms (and their generated code
+     * examined) to check the effects are still in place, and the overheads are not prohibitive.
+     * Or, in other words:
+     *
+     * IMPLEMENTING AN EFFICIENT / CORRECT BLACKHOLE IS NOT A SIMPLE TASK YOU CAN
+     * DO OVERNIGHT. IT REQUIRES A SIGNIFICANT JVM/COMPILER/PERFORMANCE EXPERTISE,
+     * AND LOTS OF TIME OVER THAT. ADJUST YOUR PLANS ACCORDINGLY.
      */
 
     static {
@@ -328,7 +345,7 @@ public class Blackhole extends BlackholeL4 {
     public final void consume(byte b) {
         byte b1 = this.b1; // volatile read
         byte b2 = this.b2;
-        if (b == b1 & b == b2) {
+        if ((b ^ b1) == (b ^ b2)) {
             // SHOULD NEVER HAPPEN
             nullBait.b1 = b; // implicit null pointer exception
         }
@@ -342,7 +359,7 @@ public class Blackhole extends BlackholeL4 {
     public final void consume(boolean bool) {
         boolean bool1 = this.bool1; // volatile read
         boolean bool2 = this.bool2;
-        if (bool == bool1 & bool == bool2) {
+        if ((bool ^ bool1) == (bool ^ bool2)) {
             // SHOULD NEVER HAPPEN
             nullBait.bool1 = bool; // implicit null pointer exception
         }
@@ -356,7 +373,7 @@ public class Blackhole extends BlackholeL4 {
     public final void consume(char c) {
         char c1 = this.c1; // volatile read
         char c2 = this.c2;
-        if (c == c1 & c == c2) {
+        if ((c ^ c1) == (c ^ c2)) {
             // SHOULD NEVER HAPPEN
             nullBait.c1 = c; // implicit null pointer exception
         }
@@ -370,7 +387,7 @@ public class Blackhole extends BlackholeL4 {
     public final void consume(short s) {
         short s1 = this.s1; // volatile read
         short s2 = this.s2;
-        if (s == s1 & s == s2) {
+        if ((s ^ s1) == (s ^ s2)) {
             // SHOULD NEVER HAPPEN
             nullBait.s1 = s; // implicit null pointer exception
         }
@@ -384,7 +401,7 @@ public class Blackhole extends BlackholeL4 {
     public final void consume(int i) {
         int i1 = this.i1; // volatile read
         int i2 = this.i2;
-        if (i == i1 & i == i2) {
+        if ((i ^ i1) == (i ^ i2)) {
             // SHOULD NEVER HAPPEN
             nullBait.i1 = i; // implicit null pointer exception
         }
@@ -398,7 +415,7 @@ public class Blackhole extends BlackholeL4 {
     public final void consume(long l) {
         long l1 = this.l1; // volatile read
         long l2 = this.l2;
-        if (l == l1 & l == l2) {
+        if ((l ^ l1) == (l ^ l2)) {
             // SHOULD NEVER HAPPEN
             nullBait.l1 = l; // implicit null pointer exception
         }
