@@ -329,13 +329,18 @@ public class Utils {
     }
 
     public static String getCurrentJvmVersion() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        pw.print("JDK ");
-        pw.print(System.getProperty("java.version"));
-        pw.print(", VM ");
-        pw.print(System.getProperty("java.vm.version"));
-        return sw.toString();
+        return "JDK "
+                + System.getProperty("java.version")
+                + ", VM "
+                + System.getProperty("java.vm.version");
+    }
+
+    public static String getCurrentOSVersion() {
+        return System.getProperty("os.name")
+                + ", "
+                + System.getProperty("os.arch")
+                + ", "
+                + System.getProperty("os.version");
     }
 
     /**

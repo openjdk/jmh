@@ -51,7 +51,7 @@ public class ThermalRundownTest implements ValidationTest {
         pw.println();
 
         org.openjdk.jmh.util.Utils.reflow(pw,
-                "This test tries to heat the machine up, forcing thermal throttling to kick in. If you see the diminishing " +
+                "This test tries to heat the machine up, trying to kick in the thermal throttling. If you see the diminishing " +
                         "performance over time, then your system throttles, and many benchmark experiments are unreliable. ",
                 80, 2);
         pw.println();

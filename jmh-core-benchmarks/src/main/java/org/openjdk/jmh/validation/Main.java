@@ -28,6 +28,8 @@ import joptsimple.*;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.*;
+import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.Version;
 import org.openjdk.jmh.validation.tests.*;
 
 import java.io.IOException;
@@ -41,22 +43,30 @@ public class Main {
     public static void main(String[] args) throws RunnerException, CommandLineOptionException, IOException {
         PrintWriter pw = new PrintWriter(System.out, true);
 
-        pw.println("JMH Core Benchmark Tests");
+        pw.println("JMH Core Benchmarks, Validation Tests");
         pw.println("----------------------------------------------------------------------------------------------------------");
         pw.println();
 
-        org.openjdk.jmh.util.Utils.reflow(pw,
+        pw.println("# " + Version.getVersion());
+        pw.println("# " + Utils.getCurrentJvmVersion());
+        pw.println("# " + Utils.getCurrentOSVersion());
+        pw.println();
+
+        Utils.reflow(pw,
                 "These tests assess the current benchmarking environment health, including hardware, OS, JVM, and JMH " +
                         "itself. While the failure on these tests does not immediately means the problem with environment, " +
                         "it is instructive to understand and follow up on oddities in these tests.",
                 80, 2);
         pw.println();
 
-        org.openjdk.jmh.util.Utils.reflow(pw,
+        Utils.reflow(pw,
                 "If you are sharing this report, please share it in full, including the JVM version, OS flavor and version, " +
                         "plus some data on used hardware.",
                 80, 2);
 
+        pw.println();
+
+        pw.println("  Use -h to get help on available options.");
         pw.println();
 
         OptionParser parser = new OptionParser();

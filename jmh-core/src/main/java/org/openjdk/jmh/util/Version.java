@@ -24,10 +24,10 @@
  */
 package org.openjdk.jmh.util;
 
-import org.openjdk.jmh.runner.format.OutputFormat;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,19 +37,28 @@ import java.util.concurrent.TimeUnit;
 
 public class Version {
 
-    public static void printVersion(OutputFormat pw) {
+    public static String getVersion() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+
+        printVersion(pw);
+        pw.close();
+        return sw.toString();
+    }
+
+    private static void printVersion(PrintWriter pw) {
         Properties p = new Properties();
         InputStream s = Version.class.getResourceAsStream("/jmh.properties");
 
         if (s == null) {
-            pw.println("# Cannot figure out JMH version, no jmh.properties");
+            pw.print("Cannot figure out JMH version, no jmh.properties");
             return;
         }
 
         try {
             p.load(s);
         } catch (IOException e) {
-            pw.println("# Cannot figure out JMH version");
+            pw.print("Cannot figure out JMH version");
             return;
         } finally {
             FileUtils.safelyClose(s);
@@ -57,15 +66,15 @@ public class Version {
 
         String version = (String) p.get("jmh.version");
         if (version == null) {
-            pw.println("# Cannot read jmh.version");
+            pw.print("Cannot read jmh.version");
             return;
         }
 
-        pw.print("# JMH " + version + " ");
+        pw.print("JMH " + version + " ");
 
         String time = (String) p.get("jmh.buildDate");
         if (time == null) {
-            pw.println("(cannot read jmh.buildDate)");
+            pw.print("(cannot read jmh.buildDate)");
             return;
         }
 
@@ -84,7 +93,7 @@ public class Version {
         } catch (ParseException e) {
             pw.print(time);
         }
-        pw.println(")");
+        pw.print(")");
     }
 
 }

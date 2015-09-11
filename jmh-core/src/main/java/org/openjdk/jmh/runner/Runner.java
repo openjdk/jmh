@@ -604,7 +604,7 @@ public class Runner extends BaseRunner {
                 opts = "<none>";
             }
 
-            Version.printVersion(out);
+            out.println("# " + Version.getVersion());
             out.print("# VM version: " + Utils.join(Utils.runWith(versionString), "\n"));
             out.println("# VM invoker: " + params.getJvm());
             out.println("# VM options: " + opts);
