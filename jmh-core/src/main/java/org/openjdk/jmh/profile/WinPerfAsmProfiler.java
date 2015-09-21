@@ -109,7 +109,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("string").defaultsTo("loader+proc_thread+profile");
         optSymbolDir = parser.accepts("symbol.dir",
                 "Path to a directory with jvm.dll symbols (optional).")
-                .withRequiredArg().ofType(String.class).describedAs("string").defaultsTo("");
+                .withRequiredArg().ofType(String.class).describedAs("string");
     }
 
     @Override
@@ -154,7 +154,9 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         // 2. Convert binary data to text form.
         try {
             ProcessBuilder pb = new ProcessBuilder(path, "-i", perfBinData, "-symbols", "-a", "dumper");
-            pb.environment().put("_NT_SYMBOL_PATH", symbolDir);
+            if (symbolDir != null) {
+                pb.environment().put("_NT_SYMBOL_PATH", symbolDir);
+            }
 
             Process p = pb.start();
 
