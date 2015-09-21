@@ -32,7 +32,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -193,45 +192,63 @@ public class Utils {
     }
 
     public static Charset guessConsoleEncoding() {
+        // The reason for this method to exist is simple: we need the proper platform encoding for output.
         // We cannot use Console class directly, because we also need the access to the raw byte stream,
         // e.g. for pushing in a raw output from a forked VM invocation. Therefore, we are left with
         // reflectively poking out the Charset from Console, and use it for our own private output streams.
 
+        // Try 1. Try to poke the System.console().
         try {
-            Field f = Console.class.getDeclaredField("cs");
-            f.setAccessible(true);
             Console console = System.console();
             if (console != null) {
+                Field f = Console.class.getDeclaredField("cs");
+                f.setAccessible(true);
                 Object res = f.get(console);
                 if (res instanceof Charset) {
                     return (Charset) res;
+                }
+                Method m = Console.class.getDeclaredMethod("encoding");
+                m.setAccessible(true);
+                res = m.invoke(null);
+                if (res instanceof String) {
+                    return Charset.forName((String) res);
                 }
             }
         } catch (NoSuchFieldException e) {
             // fall-through
         } catch (IllegalAccessException e) {
             // fall-through
-        }
-
-        try {
-            Method m = Console.class.getDeclaredMethod("encoding");
-            m.setAccessible(true);
-            Object res = m.invoke(null);
-            if (res instanceof String) {
-                return Charset.forName((String) res);
-            }
         } catch (NoSuchMethodException e) {
             // fall-through
         } catch (InvocationTargetException e) {
             // fall-through
-        } catch (IllegalAccessException e) {
+        }
+
+        // Try 2. Try to poke stdout.
+        // When System.console() is null, that is, an application is not attached to a console, the actual
+        // charset of standard output should be extracted from System.out, not from System.console().
+        try {
+            PrintStream out = System.out;
+            if (out != null) {
+                Field f = PrintStream.class.getDeclaredField("charOut");
+                f.setAccessible(true);
+                Object res = f.get(out);
+                if (res instanceof OutputStreamWriter) {
+                    String encoding = ((OutputStreamWriter) res).getEncoding();
+                    if (encoding != null) {
+                        return Charset.forName(encoding);
+                    }
+                }
+            }
+        } catch (NoSuchFieldException e) {
             // fall-through
-        } catch (IllegalCharsetNameException e) {
+        } catch (IllegalAccessException e) {
             // fall-through
         } catch (UnsupportedCharsetException e) {
             // fall-through
         }
 
+        // Try 3. Nothing left to do, except for returning a (possibly mismatched) default charset.
         return Charset.defaultCharset();
     }
 
