@@ -182,6 +182,9 @@ public class Main {
                 case helpers:
                     new HelperMethodsTest().runWith(pw, opts);
                     break;
+                case thread_scale:
+                    new ThreadScalingTest().runWith(pw, opts);
+                    break;
                 case blackhole_cpu:
                     new BlackholeConsumeCPUTest().runWith(pw, opts);
                     break;
@@ -212,8 +215,9 @@ public class Main {
 
     public static enum Test {
         timing,
-        stability,
         thermal,
+        stability,
+        thread_scale,
         helpers,
         blackhole_cpu,
         blackhole_single,
