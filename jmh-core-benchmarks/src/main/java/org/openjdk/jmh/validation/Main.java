@@ -161,6 +161,9 @@ public class Main {
                 case stability:
                     new ScoreStabilityTest().runWith(pw, opts);
                     break;
+                case compiler_hints:
+                    new CompilerHintsTest().runWith(pw, opts);
+                    break;
                 case thermal:
                     switch (mode) {
                         case flash:
@@ -215,6 +218,7 @@ public class Main {
 
     public static enum Test {
         timing,
+        compiler_hints,
         thermal,
         stability,
         thread_scale,
