@@ -30,12 +30,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -50,11 +45,12 @@ import java.util.concurrent.TimeUnit;
 public class JMHSample_09_Blackholes {
 
     /*
-     * Should you need returning multiple results, you have to consider two options.
+     * Should your benchmark require returning multiple results, you have to
+     * consider two options (detailed below).
      *
-     * NOTE: If you are only producing a single result, it is more readable to use
-     * the implicit return, as in org.openjdk.jmh.samples.JMHSample_08_DeadCode.
-     * Do not make your benchmark code less readable with explicit Blackholes!
+     * NOTE: If you are only producing a single result, it is more readable to
+     * use the implicit return, as in JMHSample_08_DeadCode. Do not make your benchmark
+     * code less readable with explicit Blackholes!
      */
 
     double x1 = Math.PI;

@@ -30,13 +30,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OperationsPerInvocation;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -51,13 +45,13 @@ public class JMHSample_11_Loops {
 
     /*
      * It would be tempting for users to do loops within the benchmarked method.
-     * (This is the bad thing Caliper taught everyone). This tests explains why
+     * (This is the bad thing Caliper taught everyone). These tests explain why
      * this is a bad idea.
      *
-     * Looping uses the idea of minimize the overhead for calling the test method,
-     * if we do the operations inside the loop inside the method call.
-     * Don't buy this argument; you will see there is more magic
-     * happening when we allow optimizers to merge the loop iterations.
+     * Looping is done in the hope of minimizing the overhead of calling the
+     * test method, by doing the operations inside the loop instead of inside
+     * the method call. Don't buy this argument; you will see there is more
+     * magic happening when we allow optimizers to merge the loop iterations.
      */
 
     /*

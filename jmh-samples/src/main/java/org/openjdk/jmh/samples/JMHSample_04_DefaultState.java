@@ -41,8 +41,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 /*
  * Fortunately, in many cases you just need a single state object.
  * In that case, we can mark the benchmark instance itself to be
- * the @State. Then, we can reference it's own fields as will any
- * Java program do.
+ * the @State. Then, we can reference its own fields as any
+ * Java program does.
  */
 
 @State(Scope.Thread)

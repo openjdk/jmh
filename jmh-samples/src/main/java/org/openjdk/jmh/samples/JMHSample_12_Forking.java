@@ -30,13 +30,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -50,17 +44,18 @@ import java.util.concurrent.TimeUnit;
 public class JMHSample_12_Forking {
 
     /*
-     * JVMs are notoriously good at profile-guided optimizations. This is bad for benchmarks,
-     * because different tests can mix their profiles together, and then render the "uniformly bad"
-     * code for every test. Forking each test can help to evade this issue.
+     * JVMs are notoriously good at profile-guided optimizations. This is bad
+     * for benchmarks, because different tests can mix their profiles together,
+     * and then render the "uniformly bad" code for every test. Forking (running
+     * in a separate process) each test can help to evade this issue.
      *
      * JMH will fork the tests by default.
      */
 
     /*
-     * Suppose we have this simple counter interface, and also have two implementations.
-     * Even though those are semantically the same, from the JVM standpoint, those are
-     * distinct classes.
+     * Suppose we have this simple counter interface, and two implementations.
+     * Even though those are semantically the same, from the JVM standpoint,
+     * those are distinct classes.
      */
 
     public interface Counter {

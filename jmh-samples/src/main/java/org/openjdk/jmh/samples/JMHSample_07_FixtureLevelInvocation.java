@@ -30,25 +30,13 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Fixtures have different Levels to control when they are about to run.
@@ -63,9 +51,9 @@ public class JMHSample_07_FixtureLevelInvocation {
      * Fixtures have different Levels to control when they are about to run.
      * Level.Invocation is useful sometimes to do some per-invocation work,
      * which should not count as payload. PLEASE NOTE the timestamping and
-     * synchronization for Level.Invocation helpers might significantly
-     * offset the measurement, use with care. See Level.Invocation javadoc
-     * for more discussion.
+     * synchronization for Level.Invocation helpers might significantly offset
+     * the measurement, use with care. See Level.Invocation javadoc for further
+     * discussion.
      *
      * Consider this sample:
      */

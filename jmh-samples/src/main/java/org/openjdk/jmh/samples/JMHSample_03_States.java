@@ -41,19 +41,18 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class JMHSample_03_States {
 
     /*
-     * Most of the time, you need to maintain some of the state while
-     * the benchmark is running. Since JMH is heavily used to build
-     * concurrent benchmarks, we opted to the explicit notion
-     * of state-bearing objects.
+     * Most of the time, you need to maintain some state while the benchmark is
+     * running. Since JMH is heavily used to build concurrent benchmarks, we
+     * opted for an explicit notion of state-bearing objects.
      *
-     * Below are two state objects. Their class names are not essential,
-     * it matters they are marked with @State. These objects will be
-     * instantiated on demand, and reused during the entire benchmark trial.
+     * Below are two state objects. Their class names are not essential, it
+     * matters they are marked with @State. These objects will be instantiated
+     * on demand, and reused during the entire benchmark trial.
      *
-     * The important property is that state is always instantiated by
-     * one of those benchmark threads which will then have the access
-     * to that state. That means you can initialize the fields as if you do
-     * that in worker threads (ThreadLocals are yours, etc).
+     * The important property is that state is always instantiated by one of
+     * those benchmark threads which will then have the access to that state.
+     * That means you can initialize the fields as if you do that in worker
+     * threads (ThreadLocals are yours, etc).
      */
 
     @State(Scope.Benchmark)
@@ -67,10 +66,10 @@ public class JMHSample_03_States {
     }
 
     /*
-     * Benchmark methods can reference the states, and JMH will inject
-     * the appropriate states while calling these methods. You can have
-     * no states at all, or have only one state, or have multiple states
-     * referenced. This makes building multi-threaded benchmark a breeze.
+     * Benchmark methods can reference the states, and JMH will inject the
+     * appropriate states while calling these methods. You can have no states at
+     * all, or have only one state, or have multiple states referenced. This
+     * makes building multi-threaded benchmark a breeze.
      *
      * For this exercise, we have two methods.
      */

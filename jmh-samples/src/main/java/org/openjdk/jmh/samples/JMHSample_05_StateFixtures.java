@@ -30,11 +30,7 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -46,21 +42,22 @@ public class JMHSample_05_StateFixtures {
     double x;
 
     /*
-     * Since @State objects are kept around during the lifetime of the benchmark,
-     * it helps to have the methods which do state housekeeping. These are usual
-     * fixture methods, you are probably familiar with them from JUnit and TestNG.
+     * Since @State objects are kept around during the lifetime of the
+     * benchmark, it helps to have the methods which do state housekeeping.
+     * These are usual fixture methods, you are probably familiar with them from
+     * JUnit and TestNG.
      *
-     * Fixture methods make sense only on @State objects, and JMH will fail to compile
-     * the test otherwise.
+     * Fixture methods make sense only on @State objects, and JMH will fail to
+     * compile the test otherwise.
      *
-     * As with the State, fixture methods are only called by those benchmark threads
-     * which are using the state. That means, you can operate the thread-local contexts,
-     * (don't) use synchronization as if you are executing in the context of benchmark
-     * thread.
+     * As with the State, fixture methods are only called by those benchmark
+     * threads which are using the state. That means you can operate in the
+     * thread-local context, and (not) use synchronization as if you are
+     * executing in the context of benchmark thread.
      *
-     * Note: fixture methods can also work with static fields, although the semantics
-     * of these operations fall back out of State scope, and obey usual Java rules (i.e.
-     * one static field per class).
+     * Note: fixture methods can also work with static fields, although the
+     * semantics of these operations fall back out of State scope, and obey
+     * usual Java rules (i.e. one static field per class).
      */
 
     /*
