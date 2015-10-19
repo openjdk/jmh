@@ -151,11 +151,11 @@ public class BenchmarkGenerator {
             for (BenchmarkInfo info : benchmarkInfos) {
                 try {
                     MethodGroup group = info.methodGroup;
-                    String method = group.getName();
                     for (Mode m : group.getModes()) {
                         BenchmarkListEntry br = new BenchmarkListEntry(
-                                info.userName + "." + method,
-                                info.generatedName + "." + method,
+                                info.userClassQName,
+                                info.generatedClassQName,
+                                group.getName(),
                                 m,
                                 group.getThreads(),
                                 group.getTotalThreadCount(),
@@ -524,7 +524,7 @@ public class BenchmarkGenerator {
         states.bindMethodGroup(info.methodGroup);
 
         // Create file and open an outputstream
-        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedName), false);
+        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedClassQName), false);
 
         // Write package and imports
         writer.println("package " + info.generatedPackageName + ';');

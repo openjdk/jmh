@@ -39,8 +39,9 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     private static final String BR_SEPARATOR = "===,===";
 
-    private final String userName;
-    private final String generatedName;
+    private final String userClassQName;
+    private final String generatedClassQName;
+    private final String method;
     private final Mode mode;
     private final int[] threadGroups;
     private final Optional<Integer> threads;
@@ -63,15 +64,16 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     private WorkloadParams workloadParams;
 
-    public BenchmarkListEntry(String userName, String generatedName, Mode mode, int[] threadGroups, Optional<Integer> threads,
+    public BenchmarkListEntry(String userClassQName, String generatedClassQName, String method, Mode mode, int[] threadGroups, Optional<Integer> threads,
                               Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
                               Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
                               Optional<Integer> forks, Optional<Integer> warmupForks,
                               Optional<String> jvm, Optional<Collection<String>> jvmArgs, Optional<Collection<String>> jvmArgsPrepend, Optional<Collection<String>> jvmArgsAppend,
                               Optional<Map<String, String[]>> params, Optional<TimeUnit> tu, Optional<Integer> opsPerInv,
                               Optional<TimeValue> timeout) {
-        this.userName = userName;
-        this.generatedName = generatedName;
+        this.userClassQName = userClassQName;
+        this.generatedClassQName = generatedClassQName;
+        this.method = method;
         this.mode = mode;
         this.threadGroups = threadGroups;
         this.threads = threads;
@@ -97,36 +99,39 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     public BenchmarkListEntry(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 21) {
+        if (args.length != 22) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
         this.workloadParams = new WorkloadParams();
-        this.userName = args[0].trim();
-        this.generatedName = args[1].trim();
-        this.mode = Mode.deepValueOf(args[2].trim());
-        this.threadGroups = Utils.unmarshalIntArray(args[3]);
-        this.threads = Optional.of(args[4], INTEGER_UNMARSHALLER);
-        this.warmupIterations = Optional.of(args[5], INTEGER_UNMARSHALLER);
-        this.warmupTime = Optional.of(args[6], TIME_VALUE_UNMARSHALLER);
-        this.warmupBatchSize = Optional.of(args[7], INTEGER_UNMARSHALLER);
-        this.measurementIterations = Optional.of(args[8], INTEGER_UNMARSHALLER);
-        this.measurementTime = Optional.of(args[9], TIME_VALUE_UNMARSHALLER);
-        this.measurementBatchSize = Optional.of(args[10], INTEGER_UNMARSHALLER);
-        this.forks = Optional.of(args[11], INTEGER_UNMARSHALLER);
-        this.warmupForks = Optional.of(args[12], INTEGER_UNMARSHALLER);
-        this.jvm = Optional.of(args[13], STRING_UNMARSHALLER);
-        this.jvmArgs = Optional.of(args[14], STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsPrepend = Optional.of(args[15], STRING_COLLECTION_UNMARSHALLER);
-        this.jvmArgsAppend = Optional.of(args[16], STRING_COLLECTION_UNMARSHALLER);
-        this.params = Optional.of(args[17], PARAM_COLLECTION_UNMARSHALLER);
-        this.tu = Optional.of(args[18], TIMEUNIT_UNMARSHALLER);
-        this.opsPerInvocation = Optional.of(args[19], INTEGER_UNMARSHALLER);
-        this.timeout = Optional.of(args[20], TIME_VALUE_UNMARSHALLER);
+
+        int idx = 0;
+        this.userClassQName = args[idx++].trim();
+        this.generatedClassQName = args[idx++].trim();
+        this.method = args[idx++].trim();
+        this.mode = Mode.deepValueOf(args[idx++].trim());
+        this.threadGroups = Utils.unmarshalIntArray(args[idx++]);
+        this.threads = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.warmupIterations = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.warmupTime = Optional.of(args[idx++], TIME_VALUE_UNMARSHALLER);
+        this.warmupBatchSize = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.measurementIterations = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.measurementTime = Optional.of(args[idx++], TIME_VALUE_UNMARSHALLER);
+        this.measurementBatchSize = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.forks = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.warmupForks = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.jvm = Optional.of(args[idx++], STRING_UNMARSHALLER);
+        this.jvmArgs = Optional.of(args[idx++], STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsPrepend = Optional.of(args[idx++], STRING_COLLECTION_UNMARSHALLER);
+        this.jvmArgsAppend = Optional.of(args[idx++], STRING_COLLECTION_UNMARSHALLER);
+        this.params = Optional.of(args[idx++], PARAM_COLLECTION_UNMARSHALLER);
+        this.tu = Optional.of(args[idx++], TIMEUNIT_UNMARSHALLER);
+        this.opsPerInvocation = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.timeout = Optional.of(args[idx++], TIME_VALUE_UNMARSHALLER);
     }
 
-    public BenchmarkListEntry(String userName, String generatedName, Mode mode) {
-        this(userName, generatedName, mode, new int[]{}, Optional.<Integer>none(),
+    public BenchmarkListEntry(String userClassQName, String generatedName, String method, Mode mode) {
+        this(userClassQName, generatedName, method, mode, new int[]{}, Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
                 Optional.<Integer>none(), Optional.<Integer>none(),
                 Optional.<String>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
@@ -135,7 +140,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     }
 
     public String toLine() {
-        return userName + BR_SEPARATOR + generatedName + BR_SEPARATOR + mode + BR_SEPARATOR + Utils.marshalIntArray(threadGroups) + BR_SEPARATOR +
+        return userClassQName + BR_SEPARATOR + generatedClassQName + BR_SEPARATOR + method + BR_SEPARATOR + mode + BR_SEPARATOR + Utils.marshalIntArray(threadGroups) + BR_SEPARATOR +
                 threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
                 measurementIterations + BR_SEPARATOR + measurementTime + BR_SEPARATOR + measurementBatchSize + BR_SEPARATOR +
                 forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
@@ -149,7 +154,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     }
 
     public BenchmarkListEntry cloneWith(Mode mode) {
-        return new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
+        return new BenchmarkListEntry(userClassQName, generatedClassQName, method, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks,
@@ -159,7 +164,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     }
 
     public BenchmarkListEntry cloneWith(WorkloadParams p) {
-        BenchmarkListEntry br = new BenchmarkListEntry(userName, generatedName, mode, threadGroups, threads,
+        BenchmarkListEntry br = new BenchmarkListEntry(userClassQName, generatedClassQName, method, mode, threadGroups, threads,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks,
@@ -181,7 +186,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
             return v;
         }
 
-        int v1 = userName.compareTo(o.userName);
+        int v1 = getUsername().compareTo(o.getUsername());
         if (v1 != 0) {
             return v1;
         }
@@ -202,25 +207,31 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
         if (mode != record.mode) return false;
         if (workloadParams != null ? !workloadParams.equals(record.workloadParams) : record.workloadParams != null) return false;
-        if (userName != null ? !userName.equals(record.userName) : record.userName != null) return false;
+        if (userClassQName != null ? !userClassQName.equals(record.userClassQName) : record.userClassQName != null) return false;
+        if (method != null ? !method.equals(record.method) : record.method != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = userName != null ? userName.hashCode() : 0;
+        int result = userClassQName != null ? userClassQName.hashCode() : 0;
+        result = 31 * result + (method != null ? method.hashCode() : 0);
         result = 31 * result + (mode != null ? mode.hashCode() : 0);
         result = 31 * result + (workloadParams != null ? workloadParams.hashCode() : 0);
         return result;
     }
 
     public String generatedTarget() {
-        return generatedName + "_" + mode;
+        return generatedClassQName + "." + method + "_" + mode;
     }
 
     public String getUsername() {
-        return userName;
+        return userClassQName + "." + method;
+    }
+
+    public String getUserClassQName() {
+        return userClassQName;
     }
 
     public Mode getMode() {
@@ -233,7 +244,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     @Override
     public String toString() {
-        return "{\'" + userName + "\', " + mode + ", " + workloadParams + "}";
+        return "{\'" + userClassQName + "." + method + "\', " + mode + ", " + workloadParams + "}";
     }
 
     public Optional<TimeValue> getWarmupTime() {
