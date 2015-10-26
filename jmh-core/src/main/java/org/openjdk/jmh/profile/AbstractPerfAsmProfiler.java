@@ -414,6 +414,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             }
         }
 
+        if (!headerPrinted) {
+            pw.printf("WARNING: No hottest code region above the threshold (%.2f%%) for disassembly.%n", regionRateThreshold * 100);
+            pw.println("Use \"hotThreshold\" profiler option to lower the filter threshold.");
+            pw.println();
+        }
+
         /**
          * 6. Print out the hottest regions
          */
