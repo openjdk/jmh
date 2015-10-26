@@ -133,13 +133,19 @@ public class BenchmarkGenerator {
             // Collect all benchmark entries here
             Set<BenchmarkListEntry> entries = new HashSet<BenchmarkListEntry>();
 
-            // Try to read the benchmark entries from previous generator sessions.
+            // Try to read the benchmark entries from the previous generator sessions.
+            // Incremental compilation may add or remove @Benchmark entries. New entries
+            // are discovered and added from the current compilation session. It is harder
+            // to detect removed @Benchmark entries. To do so, we are overwriting all benchmark
+            // records that belong to a current compilation unit.
+            Multimap<String, BenchmarkListEntry> entriesByQName = new HashMultimap<String, BenchmarkListEntry>();
             try {
                 Reader reader = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1));
                 Collection<String> existingLines = FileUtils.readAllLines(reader);
                 for (String line : existingLines) {
                     BenchmarkListEntry br = new BenchmarkListEntry(line);
                     entries.add(br);
+                    entriesByQName.put(br.getUserClassQName(), br);
                 }
             } catch (IOException e) {
                 // Expected in most cases, move on.
@@ -147,7 +153,7 @@ public class BenchmarkGenerator {
                 destination.printWarning("Unable to read the existing benchmark list, because of UnsupportedOperationException. Run on JDK 7 or higher.");
             }
 
-            // Generate new benchmark entries, potentially overwriting the previous lines
+            // Generate new benchmark entries
             for (BenchmarkInfo info : benchmarkInfos) {
                 try {
                     MethodGroup group = info.methodGroup;
@@ -177,9 +183,10 @@ public class BenchmarkGenerator {
                                 group.getTimeout()
                         );
 
-                        if (entries.contains(br)) {
-                            destination.printNote("Benchmark entry " + br + " already exists, overwriting");
-                            entries.remove(br);
+                        if (entriesByQName.keys().contains(info.userClassQName)) {
+                            destination.printNote("Benchmark entries for " + info.userClassQName + " already exist, overwriting");
+                            entries.removeAll(entriesByQName.get(info.userClassQName));
+                            entriesByQName.remove(info.userClassQName);
                         }
 
                         entries.add(br);
