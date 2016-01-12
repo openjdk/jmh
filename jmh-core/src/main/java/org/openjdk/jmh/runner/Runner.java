@@ -180,7 +180,13 @@ public class Runner extends BaseRunner {
         FileChannel channel = null;
         FileLock lock = null;
         try {
-            channel = new RandomAccessFile(JMH_LOCK_FILE, "rw").getChannel();
+            // Make sure the lock file is world-writeable, otherwise the lock file created by current
+            // user would not work for any other user, always failing the run.
+            File file = new File(JMH_LOCK_FILE);
+            file.createNewFile();
+            file.setWritable(true, false);
+
+            channel = new RandomAccessFile(file, "rw").getChannel();
 
             try {
                 lock = channel.tryLock();
