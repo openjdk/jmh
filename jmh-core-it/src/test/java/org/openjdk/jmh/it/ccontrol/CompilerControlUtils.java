@@ -25,6 +25,7 @@
 package org.openjdk.jmh.it.ccontrol;
 
 import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.runner.CompilerHints;
 
 import java.util.Collection;
 
@@ -40,6 +41,19 @@ public class CompilerControlUtils {
                 if (!line.contains(m)) continue line;
             }
             return true;
+        }
+        return false;
+    }
+
+    public static boolean hasHint(String hint, String... filters) {
+        nextHint:
+        for (String s : CompilerHints.defaultList().get()) {
+            for (String f : filters) {
+                if (!s.contains(f)) continue nextHint;
+            }
+            if (s.startsWith(hint)) {
+                return true;
+            }
         }
         return false;
     }

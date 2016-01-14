@@ -45,14 +45,14 @@ class CompilerControlPlugin {
         }
     });
 
-    private final Set<String> defaultDontInlineMethods = new TreeSet<String>();
+    private final Set<String> alwaysDontInlineMethods = new TreeSet<String>();
 
     public void defaultForceInline(MethodInfo methodInfo) {
         defaultForceInlineMethods.add(methodInfo);
     }
 
     public void alwaysDontInline(String className, String methodName) {
-        defaultDontInlineMethods.add(getName(className, methodName));
+        alwaysDontInlineMethods.add(getName(className, methodName));
     }
 
     public void process(GeneratorSource source, GeneratorDestination destination) {
@@ -68,11 +68,16 @@ class CompilerControlPlugin {
             }
 
             for (MethodInfo element : defaultForceInlineMethods) {
+                // Skip methods annotated explicitly
                 if (element.getAnnotation(CompilerControl.class) != null) continue;
+
+                // Skip methods in classes that are annotated explicitly
+                if (element.getDeclaringClass().getAnnotation(CompilerControl.class) != null) continue;
+
                 lines.add(CompilerControl.Mode.INLINE.command() + "," + getName(element));
             }
 
-            for (String element : defaultDontInlineMethods) {
+            for (String element : alwaysDontInlineMethods) {
                 lines.add(CompilerControl.Mode.DONT_INLINE.command() + "," + element);
             }
 

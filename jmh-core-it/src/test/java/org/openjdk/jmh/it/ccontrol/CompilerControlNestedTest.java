@@ -26,22 +26,22 @@ package org.openjdk.jmh.it.ccontrol;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.CompilerControl;
+import org.openjdk.jmh.annotations.CompilerControl.Mode;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
 
 public class CompilerControlNestedTest {
 
-    @CompilerControl(CompilerControl.Mode.INLINE)
+    @CompilerControl(Mode.INLINE)
     public static class SpecimenClass {
         void sampleMethod() {}
     }
 
 
     public static class SpecimenMethod {
-        @CompilerControl(CompilerControl.Mode.INLINE)
+        @CompilerControl(Mode.INLINE)
         void sampleMethod() {}
     }
 
@@ -52,24 +52,16 @@ public class CompilerControlNestedTest {
 
     @Test
     public void testClass() throws RunnerException {
-        boolean exists = false;
-        for (String s : CompilerHints.defaultList().get()) {
-            if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("$SpecimenClass.*")) {
-                exists |= s.startsWith("inline");
-            }
-        }
-        Assert.assertTrue(exists);
+        String className = this.getClass().getName().replace(".", "/");
+        Assert.assertTrue("Has hint on nested class",
+                CompilerControlUtils.hasHint(Mode.INLINE.command(), className, "$SpecimenClass.*"));
     }
 
     @Test
     public void testMethod() throws RunnerException {
-        boolean exists = false;
-        for (String s : CompilerHints.defaultList().get()) {
-            if (s.contains(this.getClass().getName().replace(".", "/")) && s.contains("$SpecimenMethod") && s.contains("sampleMethod")) {
-                exists |= s.startsWith("inline");
-            }
-        }
-        Assert.assertTrue(exists);
+        String className = this.getClass().getName().replace(".", "/");
+        Assert.assertTrue("Has hint on nested class",
+                CompilerControlUtils.hasHint(Mode.INLINE.command(), className, "$SpecimenMethod", "sampleMethod"));
     }
 
 }
