@@ -75,20 +75,53 @@ public interface Statistics extends Serializable, StatisticalSummary, Comparable
 
     int compareTo(Statistics other, double confidence);
 
-    double getStandardDeviation();
-
+    /**
+     * Returns the maximum for this statistics.
+     * @return maximum
+     */
     double getMax();
 
+    /**
+     * Returns the minimum for this statistics.
+     * @return minimum
+     */
     double getMin();
 
+    /**
+     * Returns the arithmetic mean for this statistics.
+     * @return arithmetic mean
+     */
     double getMean();
 
+    /**
+     * Returns the number of samples in this statistics.
+     * @return number of samples
+     */
     long getN();
 
+    /**
+     * Returns the sum of samples in this statistics.
+     * @return sum
+     */
     double getSum();
 
+    /**
+     * Returns the standard deviation for this statistics.
+     * @return standard deviation
+     */
+    double getStandardDeviation();
+
+    /**
+     * Returns the variance for this statistics.
+     * @return variance
+     */
     double getVariance();
 
+    /**
+     * Returns the percentile at given rank.
+     * @param rank the rank, [0..100]
+     * @return percentile
+     */
     double getPercentile(double rank);
 
     /**
