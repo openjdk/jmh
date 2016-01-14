@@ -90,4 +90,14 @@ public interface Statistics extends Serializable, StatisticalSummary, Comparable
     double getVariance();
 
     double getPercentile(double rank);
+
+    /**
+     * Returns the histogram for this statistics. The histogram bin count would
+     * be equal to number of levels, minus one; so that each i-th bin is the
+     * number of samples in [i-th, (i+1)-th) levels.
+     *
+     * @param levels levels
+     * @return histogram data
+     */
+    int[] getHistogram(double[] levels);
 }

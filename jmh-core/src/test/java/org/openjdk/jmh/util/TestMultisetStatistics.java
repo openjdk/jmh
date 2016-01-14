@@ -263,4 +263,126 @@ public class TestMultisetStatistics {
     }
 
 
+    @Test
+    public strictfp void testHistogram_MinMax() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(42.5, 1);
+
+        Util.assertHistogram(s,
+                new double[] {Double.MIN_VALUE, Double.MAX_VALUE},
+                new int[] {1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_42_43() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(42.5, 1);
+
+        Util.assertHistogram(s,
+                new double[] {42, 43},
+                new int[] {1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_0_42() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(42.5, 1);
+
+        Util.assertHistogram(s,
+                new double[] {0, 42},
+                new int[] {0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_43_100() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(42.5, 1);
+
+        Util.assertHistogram(s,
+                new double[] {43, 100},
+                new int[] {0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_leftBound() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(10, 1);
+
+        Util.assertHistogram(s,
+                new double[] {10, 100},
+                new int[] {1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_rightBound() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(10, 1);
+
+        Util.assertHistogram(s,
+                new double[] {0, 10},
+                new int[] {0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_emptyLevels_left() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(9, 1);
+
+        Util.assertHistogram(s,
+                new double[] {0, 2, 4, 8, 10},
+                new int[] {0, 0, 0, 1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_emptyLevels_right() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(1, 1);
+
+        Util.assertHistogram(s,
+                new double[] {0, 2, 4, 8, 10},
+                new int[] {1, 0, 0, 0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_emptyLevels_middle() {
+        MultisetStatistics s = new MultisetStatistics();
+        s.addValue(5, 1);
+
+        Util.assertHistogram(s,
+                new double[] {0, 2, 4, 8, 10},
+                new int[] {0, 0, 1, 0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_increasing() {
+        MultisetStatistics s = new MultisetStatistics();
+        for (int c = 0; c <= 10; c++) {
+            s.addValue(c * 10, c);
+        }
+
+        Util.assertHistogram(s,
+                new double[] {0, 200},
+                new int[] {55}
+        );
+
+        Util.assertHistogram(s,
+                new double[] {0, 50, 101},
+                new int[] {10, 45}
+        );
+
+        Util.assertHistogram(s,
+                new double[] {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100},
+                new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+        );
+    }
+
 }

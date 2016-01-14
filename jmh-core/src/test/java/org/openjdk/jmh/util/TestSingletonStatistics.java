@@ -42,7 +42,7 @@ public class TestSingletonStatistics {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        listStats.addValue(42.73638635);
+        listStats.addValue(VALUE);
     }
 
     /**
@@ -153,6 +153,96 @@ public class TestSingletonStatistics {
         Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1]);
         Assert.assertEquals(42.0D, s.getPercentile(0));
         Assert.assertEquals(42.0D, s.getPercentile(100));
+    }
+
+    @Test
+    public strictfp void testHistogram_MinMax() {
+        SingletonStatistics s = new SingletonStatistics(42.5);
+
+        Util.assertHistogram(s,
+                new double[] {Double.MIN_VALUE, Double.MAX_VALUE},
+                new int[] {1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_42_43() {
+        SingletonStatistics s = new SingletonStatistics(42.5);
+
+        Util.assertHistogram(s,
+                new double[] {42, 43},
+                new int[] {1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_0_42() {
+        SingletonStatistics s = new SingletonStatistics(42.5);
+
+        Util.assertHistogram(s,
+                new double[] {0, 42},
+                new int[] {0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_43_100() {
+        SingletonStatistics s = new SingletonStatistics(42.5);
+
+        Util.assertHistogram(s,
+                new double[] {43, 100},
+                new int[] {0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_leftBound() {
+        SingletonStatistics s = new SingletonStatistics(10);
+
+        Util.assertHistogram(s,
+                new double[] {10, 100},
+                new int[] {1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_rightBound() {
+        SingletonStatistics s = new SingletonStatistics(10);
+
+        Util.assertHistogram(s,
+                new double[] {0, 10},
+                new int[] {0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_emptyLevels_left() {
+        SingletonStatistics s = new SingletonStatistics(9);
+
+        Util.assertHistogram(s,
+                new double[] {0, 2, 4, 8, 10},
+                new int[] {0, 0, 0, 1}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_emptyLevels_right() {
+        SingletonStatistics s = new SingletonStatistics(1);
+
+        Util.assertHistogram(s,
+                new double[] {0, 2, 4, 8, 10},
+                new int[] {1, 0, 0, 0}
+        );
+    }
+
+    @Test
+    public strictfp void testHistogram_emptyLevels_middle() {
+        SingletonStatistics s = new SingletonStatistics(5);
+
+        Util.assertHistogram(s,
+                new double[] {0, 2, 4, 8, 10},
+                new int[] {0, 0, 1, 0}
+        );
     }
 
 }

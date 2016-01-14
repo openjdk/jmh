@@ -233,37 +233,82 @@ public abstract class Result<T extends Result<T>> implements Serializable {
         return sw.toString();
     }
 
-    protected String percentileExtendedInfo() {
+    protected String distributionExtendedInfo() {
         Statistics stats = getStatistics();
 
         StringBuilder sb = new StringBuilder();
 
         if (stats.getN() > 2) {
-            sb.append("  Samples, N = ").append(stats.getN()).append("\n");
+            sb.append("  N = ").append(stats.getN()).append("\n");
 
             double[] interval = stats.getConfidenceIntervalAt(0.999);
-            sb.append(String.format("        mean = %s \u00B1(99.9%%) %s",
+            sb.append(String.format("  mean = %s \u00B1(99.9%%) %s",
                     ScoreFormatter.format(10, stats.getMean()),
                     ScoreFormatter.formatError((interval[1] - interval[0]) / 2)
             ));
             sb.append(" ").append(getScoreUnit()).append("\n");
 
-            sb.append(String.format("         min = %s %s\n", ScoreFormatter.format(10, stats.getMin()), getScoreUnit()));
-
-            for (double p : new double[]{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999}) {
-                sb.append(String.format("  %9s = %s %s\n",
-                        "p(" + String.format("%7.4f", p * 100) + ")",
-                        ScoreFormatter.format(10, stats.getPercentile(p * 100)),
-                        getScoreUnit()
-                        ));
-            }
-
-            sb.append(String.format("         max = %s %s\n",
-                    ScoreFormatter.format(10, stats.getMax()),
-                    getScoreUnit()));
+            printHisto(stats, sb);
+            printPercentiles(stats, sb);
         }
 
         return sb.toString();
+    }
+
+    private void printPercentiles(Statistics stats, StringBuilder sb) {
+        sb.append("\n  Percentiles, ").append(getScoreUnit()).append(":\n");
+        for (double p : new double[]{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999, 0.999999, 1.0}) {
+            sb.append(String.format("    %11s = %s %s\n",
+                    "p(" + String.format("%.4f", p * 100) + ")",
+                    ScoreFormatter.format(10, stats.getPercentile(p * 100)),
+                    getScoreUnit()
+                    ));
+        }
+    }
+
+    static class LazyProps {
+        private static final int MIN_HISTOGRAM_BINS = Integer.getInteger("jmh.histogramBins", 10);
+    }
+
+    private void printHisto(Statistics stats, StringBuilder sb) {
+        sb.append("\n  Histogram, ").append(getScoreUnit()).append(":\n");
+
+        double min = stats.getMin();
+        double max = stats.getMax();
+
+        double binSize = Math.pow(10, Math.floor(Math.log10(max - min)));
+        min = Math.floor(min / binSize) * binSize;
+        max =  Math.ceil(max / binSize) * binSize;
+        double range = max - min;
+
+        double[] levels;
+        if (range > 0) {
+            while ((range / binSize) < LazyProps.MIN_HISTOGRAM_BINS) {
+                binSize /= 2;
+            }
+
+            int binCount = Math.max(2, (int) Math.ceil(range / binSize));
+
+            levels = new double[binCount];
+            for (int c = 0; c < binCount; c++) {
+                levels[c] = min + (c * binSize);
+            }
+        } else {
+            levels = new double[] {
+                    stats.getMin() - Math.ulp(stats.getMin()),
+                    stats.getMax() + Math.ulp(stats.getMax())
+            };
+        }
+
+        int width = ScoreFormatter.format(1, max).length();
+
+        int[] histo = stats.getHistogram(levels);
+        for (int c = 0; c < levels.length - 1; c++) {
+            sb.append(String.format("    [%" + width + "s, %" + width + "s) = %d %n",
+                    ScoreFormatter.formatExact(width, levels[c]),
+                    ScoreFormatter.formatExact(width, levels[c + 1]),
+                    histo[c]));
+        }
     }
 
 }

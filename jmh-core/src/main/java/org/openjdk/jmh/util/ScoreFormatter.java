@@ -52,6 +52,10 @@ public class ScoreFormatter {
         }
     }
 
+    public static String formatExact(int width, double score) {
+        return String.format("%" + width + "." + PRECISION + "f", score);
+    }
+
     public static String formatLatex(double score) {
         if (isApproximate(score)) {
             int power = (int) Math.round(Math.log10(score));

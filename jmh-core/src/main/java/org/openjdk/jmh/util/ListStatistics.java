@@ -127,6 +127,29 @@ public class ListStatistics extends AbstractStatistics {
     }
 
     @Override
+    public int[] getHistogram(double[] levels) {
+        if (levels.length < 2) {
+            throw new IllegalArgumentException("Expected more than two levels");
+        }
+
+        double[] vs = Arrays.copyOf(values, count);
+        Arrays.sort(vs);
+
+        int[] result = new int[levels.length - 1];
+
+        int c = 0;
+        values: for (double v : vs) {
+            while (levels[c] > v || v >= levels[c + 1]) {
+                c++;
+                if (c > levels.length - 2) break values;
+            }
+            result[c]++;
+        }
+
+        return result;
+    }
+
+    @Override
     public double getVariance() {
         if (count > 1) {
             double v = 0;

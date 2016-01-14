@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,58 +24,19 @@
  */
 package org.openjdk.jmh.util;
 
-/**
- * Calculate statistics with just a single value.
- */
-public class SingletonStatistics extends AbstractStatistics {
+import junit.framework.Assert;
 
-    private static final long serialVersionUID = -90642978235578197L;
+import java.util.Arrays;
 
-    private final double value;
+public class Util {
 
-    public SingletonStatistics(double value) {
-        this.value = value;
+    public static void assertHistogram(Statistics s, double[] vals, int[] expected) {
+        int[] actual = s.getHistogram(vals);
+        Assert.assertEquals(expected.length, actual.length);
+        Assert.assertTrue(
+                "Expected " + Arrays.toString(expected) +
+                        ", but got " + Arrays.toString(actual),
+                Arrays.equals(expected, actual));
     }
 
-    @Override
-    public double getMax() {
-        return value;
-    }
-
-    @Override
-    public double getMin() {
-        return value;
-    }
-
-    @Override
-    public long getN() {
-        return 1;
-    }
-
-    @Override
-    public double getSum() {
-        return value;
-    }
-
-    @Override
-    public double getPercentile(double rank) {
-        return value;
-    }
-
-    @Override
-    public double getVariance() {
-        return Double.NaN;
-    }
-
-    @Override
-    public int[] getHistogram(double[] levels) {
-        int[] result = new int[levels.length - 1];
-        for (int c = 0; c < levels.length - 1; c++) {
-            if (levels[c] <= value && value < levels[c + 1]) {
-                result[c] = 1;
-                break;
-            }
-        }
-        return result;
-    }
 }

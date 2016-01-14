@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class MultisetStatistics extends AbstractStatistics {
     private static final long serialVersionUID = -4401871054963903938L;
 
@@ -110,4 +114,26 @@ public class MultisetStatistics extends AbstractStatistics {
         }
     }
 
+    @Override
+    public int[] getHistogram(double[] levels) {
+        if (levels.length < 2) {
+            throw new IllegalArgumentException("Expected more than two levels");
+        }
+
+        List<Double> vs = new ArrayList<Double>(values.keys());
+        Collections.sort(vs);
+
+        int[] result = new int[levels.length - 1];
+
+        int c = 0;
+        values: for (double v : vs) {
+            while (levels[c] > v || v >= levels[c + 1]) {
+                c++;
+                if (c > levels.length - 2) break values;
+            }
+            result[c] += values.count(v);
+        }
+
+        return result;
+    }
 }

@@ -49,7 +49,7 @@ public class SingleShotResult extends Result<SingleShotResult> {
 
     @Override
     public String extendedInfo() {
-        return simpleExtendedInfo() + percentileExtendedInfo();
+        return distributionExtendedInfo();
     }
 
     @Override
