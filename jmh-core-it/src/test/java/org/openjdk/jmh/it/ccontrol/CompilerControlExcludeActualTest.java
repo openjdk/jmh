@@ -73,9 +73,15 @@ public class CompilerControlExcludeActualTest {
 
             if (CompilerControlUtils.check(runResult, "@", "callee")) { // Poor man's check -XX:+PrintInlining works
                 Assert.assertTrue("Failed with " + mode,
-                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "excluded by"));
+                         CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "excluded by") ||
+                         CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "not compilable") ||
+                         CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "disallowed by CompileCommand")
+                );
                 Assert.assertTrue("Failed with " + mode,
-                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "excluded by"));
+                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "excluded by") ||
+                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "not compilable") ||
+                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "disallowed by CompileCommand")
+                );
             }
         }
     }
