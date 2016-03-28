@@ -39,7 +39,6 @@ import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
 
-import javax.annotation.Generated;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -541,7 +540,6 @@ public class BenchmarkGenerator {
         states.addImports(writer);
 
         // Write class header
-        writer.println("@Generated(\"" + BenchmarkGenerator.class.getCanonicalName() + "\")");
         writer.println("public final class " + info.generatedClassName + " {");
         writer.println();
 
@@ -582,7 +580,7 @@ public class BenchmarkGenerator {
         Class<?>[] imports = new Class<?>[]{
                 List.class, AtomicInteger.class,
                 Collection.class, ArrayList.class,
-                TimeUnit.class, Generated.class, CompilerControl.class,
+                TimeUnit.class, CompilerControl.class,
                 InfraControl.class, ThreadParams.class,
                 BenchmarkTaskResult.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
