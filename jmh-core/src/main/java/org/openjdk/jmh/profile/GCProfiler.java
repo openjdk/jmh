@@ -37,10 +37,7 @@ import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import javax.management.openmbean.CompositeData;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryUsage;
-import java.lang.management.ThreadMXBean;
+import java.lang.management.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -52,56 +49,8 @@ public class GCProfiler implements InternalProfiler {
     private long beforeGCCount;
     private long beforeGCTime;
     private HotspotAllocationSnapshot beforeAllocated;
-    private final NotificationListener listener;
-    private volatile Multiset<String> churn;
 
     public GCProfiler() throws ProfilerException {
-        churn = new HashMultiset<String>();
-
-        NotificationListener listener;
-        try {
-            final Class<?> infoKlass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
-            final Field notifNameField = infoKlass.getField("GARBAGE_COLLECTION_NOTIFICATION");
-            final Method infoMethod = infoKlass.getMethod("from", CompositeData.class);
-            final Method getGcInfo = infoKlass.getMethod("getGcInfo");
-            final Method getMemoryUsageBeforeGc = getGcInfo.getReturnType().getMethod("getMemoryUsageBeforeGc");
-            final Method getMemoryUsageAfterGc = getGcInfo.getReturnType().getMethod("getMemoryUsageAfterGc");
-
-            listener = new NotificationListener() {
-                @Override
-                public void handleNotification(Notification n, Object o) {
-                    try {
-                        if (n.getType().equals(notifNameField.get(null))) {
-                            Object info = infoMethod.invoke(null, n.getUserData());
-                            Object gcInfo = getGcInfo.invoke(info);
-                            Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
-                            Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
-                            for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
-                                String name = entry.getKey();
-                                MemoryUsage after = entry.getValue();
-                                MemoryUsage before = mapBefore.get(name);
-                                long c = before.getUsed() - after.getUsed();
-                                if (c > 0) {
-                                    churn.add(name, c);
-                                }
-                            }
-                        }
-                    } catch (IllegalAccessException e) {
-                        // Do nothing, counters would not get populated
-                    } catch (InvocationTargetException e) {
-                        // Do nothing, counters would not get populated
-                    }
-                }
-            };
-        } catch (ClassNotFoundException e) {
-            throw new ProfilerException(e);
-        } catch (NoSuchFieldException e) {
-            throw new ProfilerException(e);
-        } catch (NoSuchMethodException e) {
-            throw new ProfilerException(e);
-        }
-
-        this.listener = listener;
     }
 
     @Override
@@ -111,7 +60,7 @@ public class GCProfiler implements InternalProfiler {
 
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        installHooks();
+        VMSupport.startChurnProfile();
 
         long gcTime = 0;
         long gcCount = 0;
@@ -121,16 +70,14 @@ public class GCProfiler implements InternalProfiler {
         }
         this.beforeGCCount = gcCount;
         this.beforeGCTime = gcTime;
-        this.beforeAllocated = HotspotAllocationSnapshot.create();
+        this.beforeAllocated = VMSupport.getSnapshot();
         this.beforeTime = System.nanoTime();
     }
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iResult) {
-        uninstallHooks();
+        VMSupport.finishChurnProfile();
         long afterTime = System.nanoTime();
-
-        HotspotAllocationSnapshot newSnapshot = HotspotAllocationSnapshot.create();
 
         long gcTime = 0;
         long gcCount = 0;
@@ -147,6 +94,7 @@ public class GCProfiler implements InternalProfiler {
                     Double.NaN,
                     "MB/sec", AggregationPolicy.AVG));
         } else {
+            HotspotAllocationSnapshot newSnapshot = VMSupport.getSnapshot();
             long allocated = newSnapshot.subtract(beforeAllocated);
             // When no allocations measured, we still need to report results to avoid user confusion
             results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate",
@@ -178,6 +126,7 @@ public class GCProfiler implements InternalProfiler {
                     AggregationPolicy.SUM));
         }
 
+        Multiset<String> churn = VMSupport.getChurn();
         for (String space : churn.keys()) {
             double churnRate = (afterTime != beforeTime) ?
                     1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) / 1024 / 1024 :
@@ -202,36 +151,8 @@ public class GCProfiler implements InternalProfiler {
         return results;
     }
 
-    private boolean hooksInstalled;
-
-    public synchronized void installHooks() {
-        if (hooksInstalled) return;
-        hooksInstalled = true;
-        churn = new HashMultiset<String>();
-        for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-            ((NotificationEmitter) bean).addNotificationListener(listener, null, null);
-        }
-    }
-
-    public synchronized void uninstallHooks() {
-        if (!hooksInstalled) return;
-        hooksInstalled = false;
-        for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-            try {
-                ((NotificationEmitter) bean).removeNotificationListener(listener);
-            } catch (ListenerNotFoundException e) {
-                // Do nothing
-            }
-        }
-    }
-
     static class HotspotAllocationSnapshot {
         public final static HotspotAllocationSnapshot EMPTY = new HotspotAllocationSnapshot(new long[0], new long[0]);
-
-        // Volatiles are here for lazy initialization.
-        // Initialization in <clinit> was banned as having a "severe startup overhead"
-        private static volatile Method GET_THREAD_ALLOCATED_BYTES;
-        private static volatile boolean allocationNotAvailable;
 
         private final long[] threadIds;
         private final long[] allocatedBytes;
@@ -239,32 +160,6 @@ public class GCProfiler implements InternalProfiler {
         private HotspotAllocationSnapshot(long[] threadIds, long[] allocatedBytes) {
             this.threadIds = threadIds;
             this.allocatedBytes = allocatedBytes;
-        }
-
-        /**
-         * Takes a snapshot of thread allocation counters.
-         * The method might allocate, however it is assumed that allocations made by "current thread" will
-         * be excluded from the result while performing {@link HotspotAllocationSnapshot#subtract(HotspotAllocationSnapshot)}
-         *
-         * @return snapshot of thread allocation counters
-         */
-        public static HotspotAllocationSnapshot create() {
-            Method getBytes = getAllocatedBytesGetter();
-            if (getBytes == null) {
-                return HotspotAllocationSnapshot.EMPTY;
-            }
-            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-            try {
-                long[] threadIds = threadMXBean.getAllThreadIds();
-                long[] allocatedBytes = (long[]) getBytes.invoke(threadMXBean, (Object) threadIds);
-                return new HotspotAllocationSnapshot(threadIds, allocatedBytes);
-            } catch (IllegalAccessException e) {
-                // intentionally left blank
-            } catch (InvocationTargetException e) {
-                // intentionally left blank
-            }
-            // In exceptional cases, assume information is not available
-            return HotspotAllocationSnapshot.EMPTY;
         }
 
         /**
@@ -297,24 +192,156 @@ public class GCProfiler implements InternalProfiler {
             }
             return allocated;
         }
+    }
 
-        private static Method getAllocatedBytesGetter() {
-            Method getBytes = GET_THREAD_ALLOCATED_BYTES;
-            if (getBytes != null || allocationNotAvailable) {
-                return getBytes;
-            }
-            // We do not care to execute reflection code multiple times if it fails
-            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+    /**
+     * This class encapsulates any platform-specific functionality. It is supposed to gracefully
+     * fail if some functionality is not available. This class resolves most special classes via
+     * Reflection to enable building against a standard JDK.
+     */
+    static class VMSupport {
+        private static final boolean ALLOC_AVAILABLE;
+        private static ThreadMXBean ALLOC_MX_BEAN;
+        private static Method ALLOC_MX_BEAN_GETTER;
+        private static final boolean CHURN_AVAILABLE;
+        private static NotificationListener listener;
+        private static Multiset<String> churn;
+
+        static {
+            ALLOC_AVAILABLE = tryInitAlloc();
+            CHURN_AVAILABLE = tryInitChurn();
+        }
+
+        private static boolean tryInitAlloc() {
             try {
-                getBytes = threadMXBean.getClass().getMethod("getThreadAllocatedBytes", long[].class);
-                getBytes.setAccessible(true);
-            } catch (Throwable e) { // To avoid jmh failure in case of incompatible JDK and/or inaccessible method
-                getBytes = null;
-                allocationNotAvailable = true;
+                Class<?> internalIntf = Class.forName("com.sun.management.ThreadMXBean");
+                ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+                if (!internalIntf.isAssignableFrom(bean.getClass())) {
+                    Class<?> pmo = Class.forName("java.lang.management.PlatformManagedObject");
+                    Method m = ManagementFactory.class.getMethod("getPlatformMXBean", Class.class, pmo);
+                    bean = (ThreadMXBean) m.invoke(null, internalIntf);
+                    if (!internalIntf.isAssignableFrom(bean.getClass())) {
+                        throw new UnsupportedOperationException("No way to access private ThreadMXBean");
+                    }
+                }
+
+                ALLOC_MX_BEAN = bean;
+                ALLOC_MX_BEAN_GETTER = internalIntf.getMethod("getThreadAllocatedBytes", long[].class);
+                getAllocatedBytes(bean.getAllThreadIds());
+
+                return true;
+            } catch (Throwable e) {
                 System.out.println("Allocation profiling is not available: " + e.getMessage());
             }
-            GET_THREAD_ALLOCATED_BYTES = getBytes;
-            return getBytes;
+            return false;
+        }
+
+        private static boolean tryInitChurn() {
+            try {
+                for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
+                    if (!(bean instanceof NotificationEmitter)) {
+                        throw new UnsupportedOperationException("GarbageCollectorMXBean cannot notify");
+                    }
+                }
+                newListener();
+                return true;
+            } catch (Throwable e) {
+                System.out.println("Churn profiling is not available: " + e.getMessage());
+            }
+
+            return false;
+        }
+
+        private static long[] getAllocatedBytes(long[] threadIds) {
+            try {
+                return (long[]) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, (Object) threadIds);
+            } catch (InvocationTargetException e) {
+                throw new IllegalStateException(e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        private static NotificationListener newListener() {
+            churn = new HashMultiset<String>();
+            try {
+                final Class<?> infoKlass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
+                final Field notifNameField = infoKlass.getField("GARBAGE_COLLECTION_NOTIFICATION");
+                final Method infoMethod = infoKlass.getMethod("from", CompositeData.class);
+                final Method getGcInfo = infoKlass.getMethod("getGcInfo");
+                final Method getMemoryUsageBeforeGc = getGcInfo.getReturnType().getMethod("getMemoryUsageBeforeGc");
+                final Method getMemoryUsageAfterGc = getGcInfo.getReturnType().getMethod("getMemoryUsageAfterGc");
+
+                return new NotificationListener() {
+                    @Override
+                    public void handleNotification(Notification n, Object o) {
+                        try {
+                            if (n.getType().equals(notifNameField.get(null))) {
+                                Object info = infoMethod.invoke(null, n.getUserData());
+                                Object gcInfo = getGcInfo.invoke(info);
+                                Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
+                                Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
+                                for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
+                                    String name = entry.getKey();
+                                    MemoryUsage after = entry.getValue();
+                                    MemoryUsage before = mapBefore.get(name);
+                                    long c = before.getUsed() - after.getUsed();
+                                    if (c > 0) {
+                                        churn.add(name, c);
+                                    }
+                                }
+                            }
+                        } catch (IllegalAccessException e) {
+                            // Do nothing, counters would not get populated
+                        } catch (InvocationTargetException e) {
+                            // Do nothing, counters would not get populated
+                        }
+                    }
+                };
+            } catch (Throwable e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        public static HotspotAllocationSnapshot getSnapshot() {
+            if (!ALLOC_AVAILABLE) return HotspotAllocationSnapshot.EMPTY;
+            long[] threadIds = ALLOC_MX_BEAN.getAllThreadIds();
+            long[] allocatedBytes = getAllocatedBytes(threadIds);
+            return new HotspotAllocationSnapshot(threadIds, allocatedBytes);
+        }
+
+        public static synchronized void startChurnProfile() {
+            if (!CHURN_AVAILABLE) return;
+            if (listener != null) {
+                throw new IllegalStateException("Churn profile already started");
+            }
+            listener = newListener();
+            try {
+                for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
+                    ((NotificationEmitter) bean).addNotificationListener(listener, null, null);
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException("Should not be here");
+            }
+        }
+
+        public static synchronized void finishChurnProfile() {
+            if (!CHURN_AVAILABLE) return;
+            if (listener == null) {
+                throw new IllegalStateException("Churn profile already stopped");
+            }
+            for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
+                try {
+                    ((NotificationEmitter) bean).removeNotificationListener(listener);
+                } catch (ListenerNotFoundException e) {
+                    // Do nothing
+                }
+            }
+            listener = null;
+        }
+
+        public static synchronized Multiset<String> getChurn() {
+            return (churn != null) ? churn : new HashMultiset<String>();
         }
     }
 
