@@ -220,7 +220,7 @@ public class GCProfiler implements InternalProfiler {
                     Class<?> pmo = Class.forName("java.lang.management.PlatformManagedObject");
                     Method m = ManagementFactory.class.getMethod("getPlatformMXBean", Class.class, pmo);
                     bean = (ThreadMXBean) m.invoke(null, internalIntf);
-                    if (!internalIntf.isAssignableFrom(bean.getClass())) {
+                    if (bean == null) {
                         throw new UnsupportedOperationException("No way to access private ThreadMXBean");
                     }
                 }
