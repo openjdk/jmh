@@ -84,11 +84,7 @@ abstract class BaseRunner {
             BenchmarkParams params = action.getParams();
             ActionMode mode = action.getMode();
 
-            String opts = Utils.join(params.getJvmArgs(), " ").trim();
             String realOpts = Utils.join(ManagementFactory.getRuntimeMXBean().getInputArguments(), " ").trim();
-            if (opts.isEmpty()) {
-                opts = "<none>";
-            }
             if (realOpts.isEmpty()) {
                 realOpts = "<none>";
             }
@@ -96,12 +92,14 @@ abstract class BaseRunner {
             out.println("# " + Version.getVersion());
             out.println("# VM version: " + Utils.getCurrentJvmVersion());
             out.println("# VM invoker: " + Utils.getCurrentJvm());
-            out.println("# VM options: " + realOpts + (opts.equals(realOpts) ? "" : " *** WARNING: some JVM options are ignored in non-forked runs ***"));
+            out.println("# VM options: " + realOpts);
 
             out.startBenchmark(params);
             out.println("");
             etaBeforeBenchmark();
-            out.println("# Fork: N/A, test runs in the existing VM");
+            out.println("# Fork: N/A, test runs in the host VM");
+            out.println("# *** WARNING: Non-forked runs may silently omit JVM options, mess up profilers, disable compiler hints, etc. ***");
+            out.println("# *** WARNING: Use non-forked runs only for debugging purposes, not for actual performance runs. ***");
 
             final List<IterationResult> res = new ArrayList<IterationResult>();
             final List<BenchmarkResultMetaData> mds = new ArrayList<BenchmarkResultMetaData>();
