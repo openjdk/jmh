@@ -70,8 +70,10 @@ class JSONResultFormat implements ResultFormat {
             pw.println("\"forks\" : " + params.getForks() + ",");
             pw.println("\"warmupIterations\" : " + params.getWarmup().getCount() + ",");
             pw.println("\"warmupTime\" : \"" + params.getWarmup().getTime() + "\",");
+            pw.println("\"warmupBatchSize\" : " + params.getWarmup().getBatchSize() + ",");
             pw.println("\"measurementIterations\" : " + params.getMeasurement().getCount() + ",");
             pw.println("\"measurementTime\" : \"" + params.getMeasurement().getTime() + "\",");
+            pw.println("\"measurementBatchSize\" : " + params.getMeasurement().getBatchSize() + ",");
 
             if (!params.getParamsKeys().isEmpty()) {
                 pw.println("\"params\" : {");
