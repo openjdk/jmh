@@ -25,7 +25,6 @@
 package org.openjdk.jmh.util;
 
 import java.io.*;
-import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -183,45 +182,25 @@ public class FileUtils {
         }
     }
 
-    public static void safelyClose(OutputStream out) {
-        if (out != null) {
+    public static <T extends Flushable & Closeable> void safelyClose(T obj) {
+        if (obj != null) {
             try {
-                out.flush();
+                obj.flush();
             } catch (IOException e) {
                 // ignore
             }
             try {
-                out.close();
-            } catch (IOException e) {
-                // ignore
-            }
-        }
-    }
-
-    public static void safelyClose(InputStream in) {
-        if (in != null) {
-            try {
-                in.close();
+                obj.close();
             } catch (IOException e) {
                 // ignore
             }
         }
     }
 
-    public static void safelyClose(Channel channel) {
-        if (channel != null) {
+    public static <T extends Closeable> void safelyClose(T obj) {
+        if (obj != null) {
             try {
-                channel.close();
-            } catch (IOException e) {
-                // do nothing
-            }
-        }
-    }
-
-    public static void safelyClose(Reader reader) {
-        if (reader != null) {
-            try {
-                reader.close();
+                obj.close();
             } catch (IOException e) {
                 // do nothing
             }

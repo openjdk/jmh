@@ -128,82 +128,96 @@ public class BenchmarkGenerator {
         compilerControl.finish(source, destination);
 
         // Processing completed, final round.
+        // Collect all benchmark entries here
+        Set<BenchmarkListEntry> entries = new HashSet<BenchmarkListEntry>();
+
+        // Try to read the benchmark entries from the previous generator sessions.
+        // Incremental compilation may add or remove @Benchmark entries. New entries
+        // are discovered and added from the current compilation session. It is harder
+        // to detect removed @Benchmark entries. To do so, we are overwriting all benchmark
+        // records that belong to a current compilation unit.
+        Multimap<String, BenchmarkListEntry> entriesByQName = new HashMultimap<String, BenchmarkListEntry>();
         try {
-            // Collect all benchmark entries here
-            Set<BenchmarkListEntry> entries = new HashSet<BenchmarkListEntry>();
+            for (String line : readBenchmarkList(destination)) {
+                BenchmarkListEntry br = new BenchmarkListEntry(line);
+                entries.add(br);
+                entriesByQName.put(br.getUserClassQName(), br);
+            }
+        } catch (UnsupportedOperationException e) {
+            destination.printWarning("Unable to read the existing benchmark list, because of UnsupportedOperationException. Run on JDK 7 or higher.");
+        }
 
-            // Try to read the benchmark entries from the previous generator sessions.
-            // Incremental compilation may add or remove @Benchmark entries. New entries
-            // are discovered and added from the current compilation session. It is harder
-            // to detect removed @Benchmark entries. To do so, we are overwriting all benchmark
-            // records that belong to a current compilation unit.
-            Multimap<String, BenchmarkListEntry> entriesByQName = new HashMultimap<String, BenchmarkListEntry>();
+        // Generate new benchmark entries
+        for (BenchmarkInfo info : benchmarkInfos) {
             try {
-                Reader reader = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1));
-                Collection<String> existingLines = FileUtils.readAllLines(reader);
-                for (String line : existingLines) {
-                    BenchmarkListEntry br = new BenchmarkListEntry(line);
-                    entries.add(br);
-                    entriesByQName.put(br.getUserClassQName(), br);
-                }
-            } catch (IOException e) {
-                // Expected in most cases, move on.
-            } catch (UnsupportedOperationException e) {
-                destination.printWarning("Unable to read the existing benchmark list, because of UnsupportedOperationException. Run on JDK 7 or higher.");
-            }
+                MethodGroup group = info.methodGroup;
+                for (Mode m : group.getModes()) {
+                    BenchmarkListEntry br = new BenchmarkListEntry(
+                            info.userClassQName,
+                            info.generatedClassQName,
+                            group.getName(),
+                            m,
+                            group.getThreads(),
+                            group.getTotalThreadCount(),
+                            group.getWarmupIterations(),
+                            group.getWarmupTime(),
+                            group.getWarmupBatchSize(),
+                            group.getMeasurementIterations(),
+                            group.getMeasurementTime(),
+                            group.getMeasurementBatchSize(),
+                            group.getForks(),
+                            group.getWarmupForks(),
+                            group.getJvm(),
+                            group.getJvmArgs(),
+                            group.getJvmArgsPrepend(),
+                            group.getJvmArgsAppend(),
+                            group.getParams(),
+                            group.getOutputTimeUnit(),
+                            group.getOperationsPerInvocation(),
+                            group.getTimeout()
+                    );
 
-            // Generate new benchmark entries
-            for (BenchmarkInfo info : benchmarkInfos) {
-                try {
-                    MethodGroup group = info.methodGroup;
-                    for (Mode m : group.getModes()) {
-                        BenchmarkListEntry br = new BenchmarkListEntry(
-                                info.userClassQName,
-                                info.generatedClassQName,
-                                group.getName(),
-                                m,
-                                group.getThreads(),
-                                group.getTotalThreadCount(),
-                                group.getWarmupIterations(),
-                                group.getWarmupTime(),
-                                group.getWarmupBatchSize(),
-                                group.getMeasurementIterations(),
-                                group.getMeasurementTime(),
-                                group.getMeasurementBatchSize(),
-                                group.getForks(),
-                                group.getWarmupForks(),
-                                group.getJvm(),
-                                group.getJvmArgs(),
-                                group.getJvmArgsPrepend(),
-                                group.getJvmArgsAppend(),
-                                group.getParams(),
-                                group.getOutputTimeUnit(),
-                                group.getOperationsPerInvocation(),
-                                group.getTimeout()
-                        );
-
-                        if (entriesByQName.keys().contains(info.userClassQName)) {
-                            destination.printNote("Benchmark entries for " + info.userClassQName + " already exist, overwriting");
-                            entries.removeAll(entriesByQName.get(info.userClassQName));
-                            entriesByQName.remove(info.userClassQName);
-                        }
-
-                        entries.add(br);
+                    if (entriesByQName.keys().contains(info.userClassQName)) {
+                        destination.printNote("Benchmark entries for " + info.userClassQName + " already exist, overwriting");
+                        entries.removeAll(entriesByQName.get(info.userClassQName));
+                        entriesByQName.remove(info.userClassQName);
                     }
-                } catch (GenerationException ge) {
-                    destination.printError(ge.getMessage(), ge.getElement());
-                }
-            }
 
+                    entries.add(br);
+                }
+            } catch (GenerationException ge) {
+                destination.printError(ge.getMessage(), ge.getElement());
+            }
+        }
+
+        writeBenchmarkList(destination, entries);
+    }
+
+    private Collection<String> readBenchmarkList(GeneratorDestination destination) {
+        Reader reader = null;
+        try {
+            reader = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1));
+            return FileUtils.readAllLines(reader);
+        } catch (IOException e) {
+            // okay, move on
+        } finally {
+            FileUtils.safelyClose(reader);
+        }
+        return Collections.emptyList();
+    }
+
+    private void writeBenchmarkList(GeneratorDestination destination, Collection<BenchmarkListEntry> entries) {
+        PrintWriter writer = null;
+        try {
             // Write out the complete benchmark list
-            PrintWriter writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
+            writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
             for (BenchmarkListEntry entry : entries) {
                 writer.println(entry.toLine());
             }
-            writer.close();
-
         } catch (IOException ex) {
             destination.printError("Error writing benchmark list", ex);
+        } finally {
+            FileUtils.safelyClose(writer);
         }
     }
 
