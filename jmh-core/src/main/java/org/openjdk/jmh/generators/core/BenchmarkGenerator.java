@@ -42,7 +42,6 @@ import org.openjdk.jmh.util.SampleBuffer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.lang.annotation.IncompleteAnnotationException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -262,77 +261,20 @@ public class BenchmarkGenerator {
             throw new GenerationException("Benchmark classes should not be final.", clazz);
         }
 
-        Collection<ClassInfo> states = new ArrayList<ClassInfo>();
-
         // validate all arguments are @State-s
         for (MethodInfo e : methods) {
-            for (ParameterInfo var : e.getParameters()) {
-                if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) == null) {
-                    throw new GenerationException(
-                            "Method parameters should be @" + State.class.getSimpleName() + " classes.",
-                            e);
-                }
-                states.add(var.getType());
-            }
+            StateObjectHandler.validateStateArgs(e);
         }
+
+        boolean explicitState = BenchmarkGeneratorUtils.getAnnSuper(clazz, State.class) != null;
 
         // validate if enclosing class is implicit @State
-        if (BenchmarkGeneratorUtils.getAnnSuper(clazz, State.class) != null) {
-            states.add(clazz);
-        }
-
-        // validate @State classes
-        for (ClassInfo state : states) {
-            // Because of https://bugs.openjdk.java.net/browse/JDK-8031122,
-            // we need to preemptively check the annotation value, and
-            // the API can only allow that by catching the exception, argh.
-            try {
-                BenchmarkGeneratorUtils.getAnnSuper(state, State.class).value();
-            } catch (IncompleteAnnotationException iae) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation should have the explicit " + Scope.class.getSimpleName() + " argument",
-                        state);
-            }
-
-            if (!state.isPublic()) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation only supports public classes.", state);
-            }
-
-            if (state.isFinal()) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation does not support final classes.", state);
-            }
-
-            if (state.isInner()) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation does not support inner classes, make sure your class is static.", state);
-            }
-
-            if (state.isAbstract()) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation does not support abstract classes.", state);
-            }
-
-            boolean hasDefaultConstructor = false;
-            for (MethodInfo constructor : state.getConstructors()) {
-                hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
-            }
-
-            // These classes use the special init sequence:
-            hasDefaultConstructor |= state.getQualifiedName().equals(BenchmarkParams.class.getCanonicalName());
-            hasDefaultConstructor |= state.getQualifiedName().equals(IterationParams.class.getCanonicalName());
-            hasDefaultConstructor |= state.getQualifiedName().equals(ThreadParams.class.getCanonicalName());
-
-            if (!hasDefaultConstructor) {
-                throw new GenerationException("The " + State.class.getSimpleName() +
-                        " annotation can only be applied to the classes having the default public constructor.",
-                        state);
-            }
+        if (explicitState) {
+            StateObjectHandler.validateState(clazz);
         }
 
         // validate against rogue fields
-        if (BenchmarkGeneratorUtils.getAnnSuper(clazz, State.class) == null || clazz.isAbstract()) {
+        if (!explicitState || clazz.isAbstract()) {
             for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
                 // allow static fields
                 if (fi.isStatic()) continue;
@@ -345,28 +287,15 @@ public class BenchmarkGenerator {
 
         // validate rogue annotations on classes
         BenchmarkGeneratorUtils.checkAnnotations(clazz);
-        for (ClassInfo state : states) {
-            BenchmarkGeneratorUtils.checkAnnotations(state);
-        }
 
         // validate rogue annotations on fields
         for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
             BenchmarkGeneratorUtils.checkAnnotations(fi);
         }
-        for (ClassInfo state : states) {
-            for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(state)) {
-                BenchmarkGeneratorUtils.checkAnnotations(fi);
-            }
-        }
 
         // validate rogue annotations on methods
         for (MethodInfo mi : methods) {
             BenchmarkGeneratorUtils.checkAnnotations(mi);
-        }
-        for (ClassInfo state : states) {
-            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(state)) {
-                BenchmarkGeneratorUtils.checkAnnotations(mi);
-            }
         }
 
         // check modifiers

@@ -35,6 +35,7 @@ import org.openjdk.jmh.util.Multimap;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
@@ -63,6 +64,92 @@ class StateObjectHandler {
         this.identifiers = new Identifiers();
     }
 
+    public static void validateState(ClassInfo state) {
+        // Because of https://bugs.openjdk.java.net/browse/JDK-8031122,
+        // we need to preemptively check the annotation value, and
+        // the API can only allow that by catching the exception, argh.
+        try {
+            State ann = BenchmarkGeneratorUtils.getAnnSuper(state, State.class);
+            if (ann != null) {
+                ann.value();
+            }
+        } catch (IncompleteAnnotationException iae) {
+            throw new GenerationException("The @" + State.class.getSimpleName() +
+                    " annotation should have the explicit " + Scope.class.getSimpleName() + " argument",
+                    state);
+        }
+
+        if (!state.isPublic()) {
+            throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
+                    " annotation only supports public classes.", state);
+        }
+
+        if (state.isFinal()) {
+            throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
+                    " annotation does not support final classes. This class is not " , state);
+        }
+
+        if (state.isInner()) {
+            throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
+                    " annotation does not support inner classes, make sure your class is static.", state);
+        }
+
+        if (state.isAbstract()) {
+            throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
+                    " class cannot be abstract.", state);
+        }
+
+        boolean hasDefaultConstructor = false;
+        for (MethodInfo constructor : state.getConstructors()) {
+            hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
+        }
+
+        // These classes use the special init sequence:
+        hasDefaultConstructor |= state.getQualifiedName().equals(BenchmarkParams.class.getCanonicalName());
+        hasDefaultConstructor |= state.getQualifiedName().equals(IterationParams.class.getCanonicalName());
+        hasDefaultConstructor |= state.getQualifiedName().equals(ThreadParams.class.getCanonicalName());
+
+        if (!hasDefaultConstructor) {
+            throw new GenerationException("The @" + State.class.getSimpleName() +
+                    " annotation can only be applied to the classes having the default public constructor.",
+                    state);
+        }
+
+        // validate rogue annotations on classes
+        BenchmarkGeneratorUtils.checkAnnotations(state);
+        for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(state)) {
+            BenchmarkGeneratorUtils.checkAnnotations(fi);
+        }
+
+        // validate rogue annotations on methods
+        for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(state)) {
+            BenchmarkGeneratorUtils.checkAnnotations(mi);
+        }
+
+        // check @Setup/@TearDown have only @State arguments
+        for (MethodInfo mi : BenchmarkGeneratorUtils.getAllMethods(state)) {
+            if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
+                for (ParameterInfo var : mi.getParameters()) {
+                    if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) == null) {
+                        throw new GenerationException(
+                                "Method parameters should be @" + State.class.getSimpleName() + " classes.",
+                                mi);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void validateStateArgs(MethodInfo e) {
+        for (ParameterInfo var : e.getParameters()) {
+            if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) == null) {
+                throw new GenerationException(
+                        "Method parameters should be @" + State.class.getSimpleName() + " classes.",
+                        e);
+            }
+        }
+    }
+
     public State getState(ClassInfo ci, ParameterInfo pi) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
         if (ann == null) {
@@ -74,6 +161,9 @@ class StateObjectHandler {
     public void bindMethodGroup(MethodGroup mg) {
         for (MethodInfo method : mg.methods()) {
             Set<StateObject> seen = new HashSet<StateObject>();
+
+            // Check that all arguments are states.
+            validateStateArgs(method);
 
             for (ParameterInfo ppi : method.getParameters()) {
                 ClassInfo pci = ppi.getType();
@@ -130,6 +220,9 @@ class StateObjectHandler {
     }
 
     private void bindState(MethodInfo execMethod, StateObject so, ClassInfo ci) {
+        // Check it is a valid state
+        validateState(ci);
+
         // auxiliary result, produce the accessors
         if (ci.getAnnotation(AuxCounters.class) != null) {
             if (so.scope != Scope.Thread) {

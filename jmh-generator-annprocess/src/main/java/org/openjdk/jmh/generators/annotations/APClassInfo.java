@@ -62,7 +62,7 @@ class APClassInfo extends APMetadataInfo implements ClassInfo {
     }
 
     public APClassInfo(ProcessingEnvironment processEnv, TypeMirror mirror) {
-        super(processEnv, null);
+        super(processEnv, processEnv.getTypeUtils().asElement(mirror));
         this.mirror = mirror;
         this.isSpecial = mirror.getKind().isPrimitive() || (mirror.getKind() == TypeKind.ARRAY);
         if (isSpecial) {
