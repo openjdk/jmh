@@ -134,6 +134,30 @@ public class FileUtils {
         }
     }
 
+    public static void writeLines(File file, Collection<String> lines) throws IOException {
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(file);
+            for (String line : lines) {
+                pw.println(line);
+            }
+            pw.close();
+        } finally {
+            FileUtils.safelyClose(pw);
+        }
+    }
+
+    public static void appendLines(File file, Collection<String> lines) throws IOException {
+        Collection<String> newLines = new ArrayList<String>();
+        try {
+            newLines.addAll(readAllLines(file));
+        } catch (IOException e) {
+            // no file
+        }
+        newLines.addAll(lines);
+        writeLines(file, newLines);
+    }
+
     public static Collection<File> getClasses(File root) {
         Collection<File> result = new ArrayList<File>();
 

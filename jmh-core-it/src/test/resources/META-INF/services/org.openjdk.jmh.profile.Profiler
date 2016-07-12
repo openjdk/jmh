@@ -1,5 +1,6 @@
 org.openjdk.jmh.it.profilers.ItInternalProfiler
 org.openjdk.jmh.it.profilers.ItExternalProfiler
+org.openjdk.jmh.it.profilers.ChangeJVMOptsExternalProfiler
 org.openjdk.jmh.it.profilers.order.InternalProfiler1
 org.openjdk.jmh.it.profilers.order.InternalProfiler2
 org.openjdk.jmh.it.profilers.order.InternalProfiler3

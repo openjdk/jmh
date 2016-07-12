@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.profile.ExternalProfiler;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.FileUtils;
@@ -65,7 +66,7 @@ public class RunnerTest {
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(), Collections.<String>emptyList(),
                 TimeValue.days(1));
-        List<String> command = blade.getForkedMainCommand(bp, Collections.<String>emptyList(), Collections.<String>emptyList(), DUMMY_HOST, DUMMY_PORT);
+        List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(command);
@@ -96,7 +97,7 @@ public class RunnerTest {
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints),
                 TimeValue.days(1));
-        List<String> command = blade.getForkedMainCommand(bp, Collections.<String>emptyList(), Collections.<String>emptyList(), DUMMY_HOST, DUMMY_PORT);
+        List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(command);
@@ -132,7 +133,7 @@ public class RunnerTest {
                 Utils.getCurrentJvm(),
                 Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
                 TimeValue.days(1));
-        List<String> command = blade.getForkedMainCommand(bp, Collections.<String>emptyList(), Collections.<String>emptyList(), DUMMY_HOST, DUMMY_PORT);
+        List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 
         // expecting 1 compile command file
         List<String> files = CompilerHints.getCompileCommandFiles(command);

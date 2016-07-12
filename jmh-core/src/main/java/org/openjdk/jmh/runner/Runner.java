@@ -587,11 +587,7 @@ public class Runner extends BaseRunner {
 
             boolean printOut = true;
             boolean printErr = true;
-            List<String> javaInvokeOptions = new ArrayList<String>();
-            List<String> javaOptions = new ArrayList<String>();
             for (ExternalProfiler prof : profilers) {
-                javaInvokeOptions.addAll(prof.addJVMInvokeOptions(params));
-                javaOptions.addAll(prof.addJVMOptions(params));
                 printOut &= prof.allowPrintOut();
                 printErr &= prof.allowPrintErr();
             }
@@ -603,7 +599,6 @@ public class Runner extends BaseRunner {
             printOut = forcePrint || printOut;
             printErr = forcePrint || printErr;
 
-            List<String> forkedString  = getForkedMainCommand(params, javaInvokeOptions, javaOptions, server.getHost(), server.getPort());
             List<String> versionString = getVersionMainCommand(params);
 
             String opts = Utils.join(params.getJvmArgs(), " ");
@@ -621,8 +616,10 @@ public class Runner extends BaseRunner {
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();
             if (warmupForkCount > 0) {
-                out.verbosePrintln("Warmup forking " + warmupForkCount + " times using command: " + forkedString);
                 for (int i = 0; i < warmupForkCount; i++) {
+                    List<String> forkedString  = getForkedMainCommand(params, profilers, server.getHost(), server.getPort());
+                    out.verbosePrintln("Warmup forking using command: " + forkedString);
+
                     etaBeforeBenchmark();
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
 
@@ -636,8 +633,10 @@ public class Runner extends BaseRunner {
                 }
             }
 
-            out.verbosePrintln("Forking " + forkCount + " times using command: " + forkedString);
             for (int i = 0; i < forkCount; i++) {
+                List<String> forkedString  = getForkedMainCommand(params, profilers, server.getHost(), server.getPort());
+                out.verbosePrintln("Forking using command: " + forkedString);
+
                 etaBeforeBenchmark();
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
 
@@ -786,7 +785,15 @@ public class Runner extends BaseRunner {
      * @param port host VM port
      * @return
      */
-    List<String> getForkedMainCommand(BenchmarkParams benchmark, List<String> javaInvokeOptions, List<String> javaOptions, String host, int port) {
+    List<String> getForkedMainCommand(BenchmarkParams benchmark, List<ExternalProfiler> profilers, String host, int port) {
+        // Poll profilers for options
+        List<String> javaInvokeOptions = new ArrayList<String>();
+        List<String> javaOptions = new ArrayList<String>();
+        for (ExternalProfiler prof : profilers) {
+            javaInvokeOptions.addAll(prof.addJVMInvokeOptions(benchmark));
+            javaOptions.addAll(prof.addJVMOptions(benchmark));
+        }
+
         List<String> command = new ArrayList<String>();
 
         // prefix java invoke options, if any profiler wants it
