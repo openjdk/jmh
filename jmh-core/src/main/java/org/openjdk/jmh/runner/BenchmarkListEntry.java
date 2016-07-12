@@ -44,6 +44,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     private final String method;
     private final Mode mode;
     private final int[] threadGroups;
+    private final Optional<Collection<String>> threadGroupLabels;
     private final Optional<Integer> threads;
     private final Optional<Integer> warmupIterations;
     private final Optional<TimeValue> warmupTime;
@@ -64,7 +65,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     private WorkloadParams workloadParams;
 
-    public BenchmarkListEntry(String userClassQName, String generatedClassQName, String method, Mode mode, int[] threadGroups, Optional<Integer> threads,
+    public BenchmarkListEntry(String userClassQName, String generatedClassQName, String method, Mode mode,
+                              Optional<Integer> threads, int[] threadGroups, Optional<Collection<String>> threadGroupLabels,
                               Optional<Integer> warmupIterations, Optional<TimeValue> warmupTime, Optional<Integer> warmupBatchSize,
                               Optional<Integer> measurementIterations, Optional<TimeValue> measurementTime, Optional<Integer> measurementBatchSize,
                               Optional<Integer> forks, Optional<Integer> warmupForks,
@@ -77,6 +79,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.mode = mode;
         this.threadGroups = threadGroups;
         this.threads = threads;
+        this.threadGroupLabels = threadGroupLabels;
         this.warmupIterations = warmupIterations;
         this.warmupTime = warmupTime;
         this.warmupBatchSize = warmupBatchSize;
@@ -99,7 +102,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     public BenchmarkListEntry(String line) {
         String[] args = line.split(BR_SEPARATOR);
 
-        if (args.length != 22) {
+        if (args.length != 23) {
             throw new IllegalStateException("Mismatched format for the line: " + line);
         }
 
@@ -110,8 +113,9 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.generatedClassQName = args[idx++].trim();
         this.method = args[idx++].trim();
         this.mode = Mode.deepValueOf(args[idx++].trim());
-        this.threadGroups = Utils.unmarshalIntArray(args[idx++]);
         this.threads = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
+        this.threadGroups = Utils.unmarshalIntArray(args[idx++]);
+        this.threadGroupLabels = Optional.of(args[idx++], STRING_COLLECTION_UNMARSHALLER);
         this.warmupIterations = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
         this.warmupTime = Optional.of(args[idx++], TIME_VALUE_UNMARSHALLER);
         this.warmupBatchSize = Optional.of(args[idx++], INTEGER_UNMARSHALLER);
@@ -130,18 +134,10 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         this.timeout = Optional.of(args[idx++], TIME_VALUE_UNMARSHALLER);
     }
 
-    public BenchmarkListEntry(String userClassQName, String generatedName, String method, Mode mode) {
-        this(userClassQName, generatedName, method, mode, new int[]{}, Optional.<Integer>none(),
-                Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(), Optional.<Integer>none(), Optional.<TimeValue>none(), Optional.<Integer>none(),
-                Optional.<Integer>none(), Optional.<Integer>none(),
-                Optional.<String>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(), Optional.<Collection<String>>none(),
-                Optional.<Map<String, String[]>>none(), Optional.<TimeUnit>none(), Optional.<Integer>none(),
-                Optional.<TimeValue>none());
-    }
-
     public String toLine() {
-        return userClassQName + BR_SEPARATOR + generatedClassQName + BR_SEPARATOR + method + BR_SEPARATOR + mode + BR_SEPARATOR + Utils.marshalIntArray(threadGroups) + BR_SEPARATOR +
-                threads + BR_SEPARATOR + warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
+        return userClassQName + BR_SEPARATOR + generatedClassQName + BR_SEPARATOR + method + BR_SEPARATOR + mode + BR_SEPARATOR +
+                threads + BR_SEPARATOR + Utils.marshalIntArray(threadGroups) + BR_SEPARATOR + threadGroupLabels.toString(STRING_COLLECTION_MARSHALLER) + BR_SEPARATOR +
+                warmupIterations + BR_SEPARATOR + warmupTime + BR_SEPARATOR + warmupBatchSize + BR_SEPARATOR +
                 measurementIterations + BR_SEPARATOR + measurementTime + BR_SEPARATOR + measurementBatchSize + BR_SEPARATOR +
                 forks + BR_SEPARATOR + warmupForks + BR_SEPARATOR +
                 jvm.toString(STRING_MARSHALLER) + BR_SEPARATOR +
@@ -154,7 +150,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     }
 
     public BenchmarkListEntry cloneWith(Mode mode) {
-        return new BenchmarkListEntry(userClassQName, generatedClassQName, method, mode, threadGroups, threads,
+        return new BenchmarkListEntry(userClassQName, generatedClassQName, method, mode,
+                threads, threadGroups, threadGroupLabels,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks,
@@ -164,7 +161,8 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
     }
 
     public BenchmarkListEntry cloneWith(WorkloadParams p) {
-        BenchmarkListEntry br = new BenchmarkListEntry(userClassQName, generatedClassQName, method, mode, threadGroups, threads,
+        BenchmarkListEntry br = new BenchmarkListEntry(userClassQName, generatedClassQName, method, mode,
+                threads, threadGroups, threadGroupLabels,
                 warmupIterations, warmupTime, warmupBatchSize,
                 measurementIterations, measurementTime, measurementBatchSize,
                 forks, warmupForks,
@@ -240,6 +238,10 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     public int[] getThreadGroups() {
         return Arrays.copyOf(threadGroups, threadGroups.length);
+    }
+
+    public Optional<Collection<String>> getThreadGroupLabels() {
+        return threadGroupLabels;
     }
 
     @Override

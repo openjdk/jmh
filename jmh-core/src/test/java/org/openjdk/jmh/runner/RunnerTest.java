@@ -57,7 +57,9 @@ public class RunnerTest {
     @Test
     public void testEmptyOptsHaveCompileCommandFile() {
         Runner blade = new Runner(new OptionsBuilder());
-        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
+        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false,
+                1, new int[]{1}, Collections.<String>emptyList(),
+                1, 1,
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
@@ -86,7 +88,9 @@ public class RunnerTest {
                 Arrays.asList("inline,we/like/to/move/it.*"));
         Set<String> extraHints = CompilerHints.fromFile(tempHints).get();
         Runner blade = new Runner(new OptionsBuilder().build());
-        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
+        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false,
+                1, new int[]{1}, Collections.<String>emptyList(),
+                1, 1,
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
@@ -119,7 +123,9 @@ public class RunnerTest {
                 Arrays.asList("inline,we/like/to/move/it.*"));
         Set<String> extraHints2 = CompilerHints.fromFile(tempHints2).get();
         Runner blade = new Runner(new OptionsBuilder().build());
-        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false, 1, new int[]{1}, 1, 1,
+        BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false,
+                1, new int[]{1}, Collections.<String>emptyList(),
+                1, 1,
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,

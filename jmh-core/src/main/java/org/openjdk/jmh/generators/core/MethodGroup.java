@@ -128,13 +128,25 @@ class MethodGroup implements Comparable<MethodGroup> {
         return modes;
     }
 
-    public int[] getThreads() {
+    public int[] getGroupThreads() {
         int[] threads = new int[methods.size()];
         int c = 0;
         for (MethodInvocation mi : methods.keySet()) {
             threads[c++] = mi.threads;
         }
         return threads;
+    }
+
+    public Optional<Collection<String>> getGroupLabels() {
+        if (methods.size() > 1) {
+            Collection<String> labels = new ArrayList<String>();
+            for (MethodInvocation mi : methods.keySet()) {
+                labels.add(mi.method.getName());
+            }
+            return Optional.eitherOf(labels);
+        } else {
+            return Optional.none();
+        }
     }
 
     public Optional<Integer> getOperationsPerInvocation() {

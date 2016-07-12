@@ -49,7 +49,9 @@ public class TestAggregateResult {
     @BeforeClass
     public static void setupClass() {
         result = new IterationResult(
-                new BenchmarkParams("blah", "blah", false, 1, new int[]{1}, 1, 1,
+                new BenchmarkParams("blah", "blah", false,
+                        1, new int[]{1}, Collections.<String>emptyList(),
+                        1, 1,
                         new IterationParams(IterationType.WARMUP, 1, TimeValue.seconds(1), 1),
                         new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                         Mode.Throughput, null, TimeUnit.SECONDS, 1,

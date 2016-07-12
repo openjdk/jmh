@@ -62,6 +62,7 @@ public class ResultFormatTest {
                     false,
                     r.nextInt(1000),
                     new int[]{ r.nextInt(1000) },
+                    Collections.<String>emptyList(),
                     r.nextInt(1000),
                     r.nextInt(1000),
                     new IterationParams(IterationType.WARMUP,      r.nextInt(1000), TimeValue.seconds(r.nextInt(1000)), 1),

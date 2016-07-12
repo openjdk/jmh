@@ -36,9 +36,12 @@ import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -76,10 +79,26 @@ class TextReportFormat extends AbstractOutputFormat {
                 (timeout.convertTo(TimeUnit.NANOSECONDS) <= warmup.getTime().convertTo(TimeUnit.NANOSECONDS));
         out.println("# Timeout: " + timeout + " per iteration" + (timeoutWarning ? ", ***WARNING: The timeout might be too low!***" : ""));
 
-        out.println("# Threads: " + params.getThreads() + " " + getThreadsString(params.getThreads()) +
-                (params.shouldSynchIterations() ?
-                        ", will synchronize iterations" :
-                        (params.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***"));
+        out.print("# Threads: " + params.getThreads() + " " + getThreadsString(params.getThreads()));
+
+        if (!params.getThreadGroupLabels().isEmpty()) {
+            int[] tg = params.getThreadGroups();
+
+            // TODO: Make params.getThreadGroupLabels return List
+            List<String> labels = new ArrayList<String>(params.getThreadGroupLabels());
+            String[] ss = new String[tg.length];
+            for (int cnt = 0; cnt < tg.length; cnt++) {
+                ss[cnt] = tg[cnt] + "x \"" + labels.get(cnt) + "\"";
+            }
+
+            int groupCount = params.getThreads() / Utils.sum(tg);
+            out.print(" (" + groupCount + " " + getGroupsString(groupCount) + "; " + Utils.join(ss, ", ") + " in each group)");
+        }
+
+        out.println(params.shouldSynchIterations() ?
+                ", will synchronize iterations" :
+                (params.getMode() == Mode.SingleShotTime) ? "" : ", ***WARNING: Synchronize iterations are disabled!***");
+
 
         out.println("# Benchmark mode: " + params.getMode().longLabel());
         out.println("# Benchmark: " + params.getBenchmark());
@@ -118,6 +137,14 @@ class TextReportFormat extends AbstractOutputFormat {
             return "threads";
         } else {
             return "thread";
+        }
+    }
+
+    protected static String getGroupsString(int g) {
+        if (g > 1) {
+            return "groups";
+        } else {
+            return "group";
         }
     }
 
