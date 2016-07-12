@@ -112,6 +112,15 @@ public class ProfilerFactory {
     }
 
     public static void listProfilers(PrintStream out) {
+        int maxLen = 0;
+        for (String s : BUILT_IN.keySet()) {
+            maxLen = Math.max(maxLen, s.length());
+        }
+        for (Class<? extends Profiler> s : ProfilerFactory.getDiscoveredProfilers()) {
+            maxLen = Math.max(maxLen, s.getCanonicalName().length());
+        }
+        maxLen += 2;
+
         StringBuilder supported = new StringBuilder();
         StringBuilder unsupported = new StringBuilder();
 
@@ -121,13 +130,13 @@ public class ProfilerFactory {
                 String descr = (prof != null) ? prof.getDescription() : "(unable to instantiate the profiler)";
 
                 if (prof != null) {
-                    supported.append(String.format("%20s: %s %s\n", s, descr, ""));
+                    supported.append(String.format("%" + maxLen + "s: %s %s\n", s, descr, ""));
                 } else {
-                    unsupported.append(String.format("%20s: %s %s\n", s, descr, ""));
+                    unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s, descr, ""));
                     unsupported.append("\n");
                 }
             } catch (ProfilerException e) {
-                unsupported.append(String.format("%20s: %s %s\n", s, "<none>", ""));
+                unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s, "<none>", ""));
                 unsupported.append(e.getMessage());
                 unsupported.append("\n");
             }
@@ -139,13 +148,13 @@ public class ProfilerFactory {
                 String descr = (prof != null) ? prof.getDescription() : "(unable to instantiate the profiler)";
 
                 if (prof != null) {
-                    supported.append(String.format("%20s: %s %s\n", "<none>", descr, "(discovered)"));
+                    supported.append(String.format("%" + maxLen + "s: %s %s\n", s.getCanonicalName(), descr, "(discovered)"));
                 } else {
-                    unsupported.append(String.format("%20s: %s %s\n", "<none>", descr, "(discovered)"));
+                    unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s.getCanonicalName(), descr, "(discovered)"));
                     unsupported.append("\n");
                 }
             } catch (ProfilerException e) {
-                unsupported.append(String.format("%20s: %s %s\n", s, "<none>", ""));
+                unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s, s.getCanonicalName(), ""));
                 unsupported.append(e.getMessage());
                 unsupported.append("\n");
             }
