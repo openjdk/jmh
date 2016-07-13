@@ -32,24 +32,13 @@ import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.Utils;
 
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
+import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CompileTest {
 
@@ -134,12 +123,7 @@ public class CompileTest {
 
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);
-
-        try {
-            fm.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(System.getProperty("java.io.tmpdir"))));
-        } catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
+        setupClassOutput(fm);
 
         Collection<JavaSourceFromString> sources = new ArrayList<JavaSourceFromString>();
         for (Map.Entry<String, String> e : destination.getClasses().entrySet()) {
@@ -166,12 +150,7 @@ public class CompileTest {
 
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);
-
-        try {
-            fm.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(System.getProperty("java.io.tmpdir"))));
-        } catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
+        setupClassOutput(fm);
 
         String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".java";
         String shortName = klass.getName();
@@ -199,6 +178,22 @@ public class CompileTest {
             return success;
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    private static void setupClassOutput(StandardJavaFileManager fm) {
+        try {
+            File tmp = File.createTempFile("jmh-core-ct", "temp");
+            if (!tmp.delete()) {
+                throw new IOException("Cannot delete temp file: " + tmp);
+            }
+            if (!tmp.mkdirs()) {
+                throw new IOException("Cannot create temp dir: " + tmp);
+            }
+            tmp.deleteOnExit();
+            fm.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(tmp));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
         }
     }
 
