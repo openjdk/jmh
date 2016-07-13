@@ -24,12 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,10 +35,12 @@ class AbstractResourceReader {
 
     private final String file;
     private final String resource;
+    private final String strings;
 
-    protected AbstractResourceReader(String file, String resource) {
+    protected AbstractResourceReader(String file, String resource, String strings) {
         this.file = file;
         this.resource = resource;
+        this.strings = strings;
     }
 
     /**
@@ -52,6 +49,10 @@ class AbstractResourceReader {
      * @return a correct Reader instance
      */
     protected List<Reader> getReaders() {
+        if (strings != null) {
+            return Collections.<Reader>singletonList(new StringReader(strings));
+        }
+
         if (file != null) {
             try {
                 return Collections.<Reader>singletonList(new FileReader(file));

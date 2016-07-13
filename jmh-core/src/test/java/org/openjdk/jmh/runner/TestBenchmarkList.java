@@ -26,14 +26,15 @@ package org.openjdk.jmh.runner;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.format.OutputFormat;
 import org.openjdk.jmh.runner.format.OutputFormatFactory;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
+import org.openjdk.jmh.util.Optional;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -46,9 +47,162 @@ public class TestBenchmarkList {
     private static BenchmarkList list;
     private static OutputFormat out;
 
+    private static void stub(StringBuilder sb, String userClassQName, String generatedClassQName, String method, Mode mode) {
+        BenchmarkListEntry br = new BenchmarkListEntry(
+                userClassQName,
+                generatedClassQName,
+                method,
+                mode,
+                Optional.<Integer>none(),
+                new int[]{1},
+                Optional.<Collection<String>>none(),
+                Optional.<Integer>none(),
+                Optional.<TimeValue>none(),
+                Optional.<Integer>none(),
+                Optional.<Integer>none(),
+                Optional.<TimeValue>none(),
+                Optional.<Integer>none(),
+                Optional.<Integer>none(),
+                Optional.<Integer>none(),
+                Optional.<String>none(),
+                Optional.<Collection<String>>none(),
+                Optional.<Collection<String>>none(),
+                Optional.<Collection<String>>none(),
+                Optional.<Map<String, String[]>>none(),
+                Optional.<TimeUnit>none(),
+                Optional.<Integer>none(),
+                Optional.<TimeValue>none()
+        );
+
+        sb.append(br.toLine());
+        sb.append(String.format("%n"));
+    }
+
     @BeforeClass
     public static void setUpClass() throws Exception {
-        list = BenchmarkList.fromResource("/org/openjdk/jmh/runner/MicroBenchmarks");
+        StringBuilder sb = new StringBuilder();
+
+        stub(sb,
+                "oracle.micro.benchmarks.api.java.util.concurrent.NormalMaps",
+                "oracle.micro.benchmarks.api.java.util.concurrent.generated.NormalMaps",
+                "testConcurrentHashMap",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap",
+                "oracle.micro.benchmarks.app.jbb05.generated.GeneratedSPECjbb2005HashMap",
+                "jbb2005HashMapGetIntThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap",
+                "oracle.micro.benchmarks.app.jbb05.generated.GeneratedSPECjbb2005HashMap",
+                "jbb2005HashMapGetIntGCThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap",
+                "oracle.micro.benchmarks.app.jbb05.generated.GeneratedSPECjbb2005HashMap",
+                "jbb2005HashMapGetIntegerThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap",
+                "oracle.micro.benchmarks.app.jbb05.generated.GeneratedSPECjbb2005HashMap",
+                "jbb2005ResizedHashMapGetIntThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.jbb05.GeneratedSPECjbb2005HashMap",
+                "oracle.micro.benchmarks.app.jbb05.generated.GeneratedSPECjbb2005HashMap",
+                "jbb2005ResizedHashMapGetIntegerThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64",
+                "oracle.micro.benchmarks.app.sjent.generated.GeneratedPrintBase64",
+                "printBase64Binary_128bytesThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64",
+                "oracle.micro.benchmarks.app.sjent.generated.GeneratedPrintBase64",
+                "printBase64Binary_32bytesThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.app.sjent.GeneratedPrintBase64",
+                "oracle.micro.benchmarks.app.sjent.generated.GeneratedPrintBase64",
+                "printBase64Binary_512bytesThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "oracle.micro.benchmarks.api.java.util.concurrent.GeneratedMaps",
+                "oracle.micro.benchmarks.api.java.util.concurrent.generated.GeneratedMaps",
+                "testConcurrentHashMap",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "dummy",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "dummyWarmThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "dummyWarmOnlyThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "dummySetupPayloadThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "boom_ExceptionThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "boom_ErrorThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "boom_ThrowableThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestMicro",
+                "org.openjdk.jmh.runner.generated.TestMicro",
+                "blackholedThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestBrokenMicro",
+                "org.openjdk.jmh.runner.generated.TestBrokenMicro",
+                "dummyPayloadThroughput",
+                Mode.AverageTime);
+
+        stub(sb,
+                "org.openjdk.jmh.runner.TestExceptionThrowingMicro",
+                "org.openjdk.jmh.runner.generated.TestExceptionThrowingMicro",
+                "ouchThroughput",
+                Mode.AverageTime);
+
+        list = BenchmarkList.fromString(sb.toString());
         out = OutputFormatFactory.createFormatInstance(System.out, VerboseMode.NORMAL);
     }
 

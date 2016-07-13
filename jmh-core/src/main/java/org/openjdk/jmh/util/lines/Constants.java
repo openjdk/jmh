@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,23 +22,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util;
+package org.openjdk.jmh.util.lines;
 
-import org.junit.Test;
+public class Constants {
 
-import java.io.File;
+    public static final String MAGIC = "JMH ";
 
-import static org.junit.Assert.assertTrue;
-
-/**
- * Test for FileUtils
- */
-public class TestFileUtils {
-
-    @Test
-    public void testExtractFromResource() throws Exception {
-        File test = FileUtils.extractFromResource("/org/openjdk/jmh/results/format/output-golden.json");
-        test.deleteOnExit();
-        assertTrue(test.exists());
-    }
+    public static final char TAG_EMPTY_OPTIONAL     = 'E';
+    public static final char TAG_STRING             = 'S';
+    public static final char TAG_INT                = 'I';
+    public static final char TAG_TIMEVALUE          = 'T';
+    public static final char TAG_STRING_COLLECTION  = 'L';
+    public static final char TAG_INT_ARRAY          = 'A';
+    public static final char TAG_PARAM_MAP          = 'M';
+    public static final char TAG_TIMEUNIT           = 'U';
 }

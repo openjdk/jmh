@@ -73,21 +73,6 @@ public class Optional<T> implements Serializable {
         return new Optional<T>(val);
     }
 
-    /**
-     * Parse the existing string value into the Option
-     * @param source source string
-     * @param unmarshaller unmarshaller lambda parsing the (String -&gt; T)
-     * @param <T> type
-     * @return value wrapped in the Option
-     */
-    public static <T> Optional<T> of(String source, Unmarshaller<T> unmarshaller) {
-        if (source.equals("[]")) {
-            return Optional.none();
-        } else {
-            return Optional.of(unmarshaller.valueOf(source.substring(1, source.length() - 1)));
-        }
-    }
-
     public static <T> Optional<T> eitherOf(T val) {
         if (val == null) {
             return Optional.none();
@@ -105,14 +90,6 @@ public class Optional<T> implements Serializable {
             return "[]";
         } else {
             return "[" + val + "]";
-        }
-    }
-
-    public String toString(Marshaller<T> m) {
-        if (val == null) {
-            return "[]";
-        } else {
-            return "[" + m.valueOf(val) + "]";
         }
     }
 
@@ -138,14 +115,6 @@ public class Optional<T> implements Serializable {
     @Override
     public int hashCode() {
         return val != null ? val.hashCode() : 0;
-    }
-
-    public interface Unmarshaller<T> {
-        T valueOf(String s);
-    }
-
-    public interface Marshaller<T> {
-        String valueOf(T val);
     }
 
 }

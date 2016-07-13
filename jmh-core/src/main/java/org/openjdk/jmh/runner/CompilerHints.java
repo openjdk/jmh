@@ -85,7 +85,7 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     private CompilerHints(String file, String resource) {
-        super(file, resource);
+        super(file, resource, null);
         hints = Collections.unmodifiableSet(read());
     }
 

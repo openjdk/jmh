@@ -29,12 +29,7 @@ import org.openjdk.jmh.runner.format.OutputFormat;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -49,16 +44,20 @@ public class BenchmarkList extends AbstractResourceReader {
         return fromResource(BENCHMARK_LIST);
     }
 
-    public static BenchmarkList fromResource(String resource) {
-        return new BenchmarkList(null, resource);
-    }
-
     public static BenchmarkList fromFile(String file) {
-        return new BenchmarkList(file, null);
+        return new BenchmarkList(file, null, null);
     }
 
-    private BenchmarkList(String file, String resource) {
-        super(file, resource);
+    public static BenchmarkList fromResource(String resource) {
+        return new BenchmarkList(null, resource, null);
+    }
+
+    public static BenchmarkList fromString(String strings) {
+        return new BenchmarkList(null, null, strings);
+    }
+
+    private BenchmarkList(String file, String resource, String strings) {
+        super(file, resource, strings);
     }
 
     /**
