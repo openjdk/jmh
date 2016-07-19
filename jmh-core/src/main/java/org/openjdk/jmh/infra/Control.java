@@ -24,18 +24,13 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.util.Utils;
 
 /**
  * Control object, used to communicate significant information from JMH to the benchmark.
  * WARNING: The API for this class is considered unstable, and can be changed without notice.
  */
-@State(Scope.Benchmark)
-public class Control extends ControlL4 {
+public final class Control extends ControlL4 {
 
     /**
      * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
@@ -71,12 +66,6 @@ abstract class ControlL1 extends ControlL0 {
 }
 
 abstract class ControlL2 extends ControlL1 {
-
-    @Setup(Level.Iteration)
-    public void setup() {
-        startMeasurement = false;
-        stopMeasurement = false;
-    }
 
     /**
      * Transitions to "true", once JMH had started the measurement for the current iteration.

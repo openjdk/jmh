@@ -47,10 +47,16 @@ public class BlackholeTest {
     @Test
     public void testUserConstructor() {
         try {
-            new Blackhole();
+            new Blackhole("Boyaa");
             Assert.fail("Should have failed");
         } catch (IllegalStateException e) {
             // expected
+        }
+
+        try {
+            new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
+        } catch (Throwable e) {
+            Assert.fail("Failed unexpectedly");
         }
     }
 

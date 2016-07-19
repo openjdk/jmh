@@ -49,7 +49,6 @@ import java.util.concurrent.TimeUnit;
  *     info about the benchmark</li>
  * </ol>
  */
-@State(Scope.Thread)
 public class BenchmarkParams extends BenchmarkParamsL4 {
     private static final long serialVersionUID = -1068219503090299117L;
 
@@ -64,10 +63,6 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
         Utils.check(BenchmarkParams.class, "mode", "params");
         Utils.check(BenchmarkParams.class, "timeUnit", "opsPerInvocation");
         Utils.check(BenchmarkParams.class, "jvm", "jvmArgs");
-    }
-
-    public BenchmarkParams(BenchmarkParams other) {
-        super(other);
     }
 
     public BenchmarkParams(String benchmark, String generatedTarget, boolean synchIterations,
@@ -109,10 +104,6 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
                 jvm, jvmArgs,
                 timeout);
     }
-
-    public BenchmarkParamsL4(BenchmarkParams other) {
-        super(other);
-    }
 }
 
 abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
@@ -151,10 +142,6 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
                 timeUnit, opsPerInvocation,
                 jvm, jvmArgs,
                 timeout);
-    }
-
-    public BenchmarkParamsL3(BenchmarkParams other) {
-        super(other);
     }
 }
 
@@ -227,26 +214,6 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.jvm = jvm;
         this.jvmArgs = jvmArgs;
         this.timeout = timeout;
-    }
-
-    public BenchmarkParamsL2(BenchmarkParams other) {
-        this.benchmark = other.benchmark;
-        this.generatedTarget = other.generatedTarget;
-        this.synchIterations = other.synchIterations;
-        this.threads = other.threads;
-        this.threadGroups = other.threadGroups;
-        this.threadGroupLabels = other.threadGroupLabels;
-        this.forks = other.forks;
-        this.warmupForks = other.warmupForks;
-        this.warmup = other.warmup;
-        this.measurement = other.measurement;
-        this.mode = other.mode;
-        this.params = other.params;
-        this.timeUnit = other.timeUnit;
-        this.opsPerInvocation = other.opsPerInvocation;
-        this.jvm = other.jvm;
-        this.jvmArgs = other.jvmArgs;
-        this.timeout = other.timeout;
     }
 
     /**

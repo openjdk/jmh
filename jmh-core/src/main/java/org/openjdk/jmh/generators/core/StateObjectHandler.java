@@ -25,12 +25,10 @@
 package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.Control;
-import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.infra.ThreadParams;
+import org.openjdk.jmh.infra.*;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,21 +43,27 @@ class StateObjectHandler {
 
     private final Identifiers identifiers;
 
-    private final Multimap<String, StateObject> args;
-    private final Multimap<String, StateObject> stateHelperArgs;
-    private final Multimap<StateObject, StateObject> stateObjectDeps;
-    private final Map<String, StateObject> implicits;
+    private final Multimap<String, StateObject> roots;
+    private final Multimap<String, ClassInfo> specials;
+
     private final Set<StateObject> stateObjects;
+    private final Map<String, StateObject> implicits;
+    private final Multimap<StateObject, StateObject> stateObjectDeps;
+
+    private final Multimap<String, String> benchmarkArgs;
+    private final Multimap<String, String> stateHelperArgs;
 
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
 
     public StateObjectHandler(CompilerControlPlugin compileControl) {
         this.compileControl = compileControl;
-        this.args = new HashMultimap<String, StateObject>();
+        this.roots = new HashMultimap<String, StateObject>();
+        this.benchmarkArgs = new HashMultimap<String, String>();
         this.implicits = new HashMap<String, StateObject>();
+        this.specials = new HashMultimap<String, ClassInfo>();
         this.stateObjects = new HashSet<StateObject>();
-        this.stateHelperArgs = new HashMultimap<String, StateObject>();
+        this.stateHelperArgs = new HashMultimap<String, String>();
         this.stateObjectDeps = new HashMultimap<StateObject, StateObject>();
         this.identifiers = new Identifiers();
     }
@@ -129,25 +133,41 @@ class StateObjectHandler {
         // check @Setup/@TearDown have only @State arguments
         for (MethodInfo mi : BenchmarkGeneratorUtils.getAllMethods(state)) {
             if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
-                for (ParameterInfo var : mi.getParameters()) {
-                    if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) == null) {
-                        throw new GenerationException(
-                                "Method parameters should be @" + State.class.getSimpleName() + " classes.",
-                                mi);
-                    }
-                }
+                validateStateArgs(mi);
             }
         }
     }
 
     public static void validateStateArgs(MethodInfo e) {
         for (ParameterInfo var : e.getParameters()) {
-            if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) == null) {
-                throw new GenerationException(
-                        "Method parameters should be @" + State.class.getSimpleName() + " classes.",
+            if (BenchmarkGeneratorUtils.getAnnSuper(var.getType(), State.class) != null) continue;
+            if (isSpecialClass(var.getType())) continue;
+
+            throw new GenerationException(
+                        "Method parameters should be either @" + State.class.getSimpleName() + " classes", // TODO: Change the message
                         e);
-            }
         }
+    }
+
+    private static boolean isSpecialClass(ClassInfo ci) {
+        String name = ci.getQualifiedName();
+        return
+                name.equals(BenchmarkParams.class.getCanonicalName()) ||
+                name.equals(IterationParams.class.getCanonicalName()) ||
+                name.equals(ThreadParams.class.getCanonicalName()) ||
+                name.equals(Blackhole.class.getCanonicalName()) ||
+                name.equals(Control.class.getCanonicalName())
+                ;
+    }
+
+    private String getSpecialClassAccessor(ClassInfo pci) {
+        String name = pci.getQualifiedName();
+        if (name.equals(BenchmarkParams.class.getCanonicalName()))  return "benchmarkParams";
+        if (name.equals(IterationParams.class.getCanonicalName()))  return "iterationParams";
+        if (name.equals(ThreadParams.class.getCanonicalName()))     return "threadParams";
+        if (name.equals(Blackhole.class.getCanonicalName()))        return "blackhole";
+        if (name.equals(Control.class.getCanonicalName()))          return "notifyControl";
+        throw new GenerationException("Internal error, unhandled special class: " + pci, pci);
     }
 
     public State getState(ClassInfo ci, ParameterInfo pi) {
@@ -168,14 +188,20 @@ class StateObjectHandler {
             for (ParameterInfo ppi : method.getParameters()) {
                 ClassInfo pci = ppi.getType();
 
-                StateObject pso = new StateObject(identifiers, pci, getState(pci, ppi).value());
-                stateObjects.add(pso);
-                args.put(method.getName(), pso);
-                bindState(method, pso, pci);
+                if (isSpecialClass(pci)) {
+                    benchmarkArgs.put(method.getName(), getSpecialClassAccessor(pci));
+                    specials.put(method.getName(), pci);
+                } else {
+                    StateObject pso = new StateObject(identifiers, pci, getState(pci, ppi).value());
+                    stateObjects.add(pso);
+                    roots.put(method.getName(), pso);
+                    benchmarkArgs.put(method.getName(), pso.toLocal());
+                    bindState(method, pso, pci);
 
-                seen.add(pso);
+                    seen.add(pso);
 
-                recursiveStateResolve(method, pci, pso, seen);
+                    recursiveStateResolve(method, pci, pso, seen);
+                }
             }
         }
     }
@@ -190,23 +216,29 @@ class StateObjectHandler {
                 for (ParameterInfo pi : mi.getParameters()) {
                     ClassInfo ci = pi.getType();
 
-                    StateObject so = new StateObject(identifiers, ci, getState(ci, pi).value());
+                    if (isSpecialClass(ci)) {
+                        stateHelperArgs.put(mi.getQualifiedName(), getSpecialClassAccessor(ci));
+                        specials.put(mi.getQualifiedName(), ci);
+                    } else {
+                        StateObject so = new StateObject(identifiers, ci, getState(ci, pi).value());
 
-                    if (!seen.add(so)) {
-                        throw new GenerationException("@" + State.class.getSimpleName() + " dependency cycle is detected.", pi);
-                    }
+                        if (!seen.add(so)) {
+                            throw new GenerationException("@" + State.class.getSimpleName() + " dependency cycle is detected.", pi);
+                        }
 
-                    if (!stateHelperArgs.get(mi.getQualifiedName()).contains(so)) {
-                        stateObjects.add(so);
-                        stateObjectDeps.put(pso, so);
-                        stateHelperArgs.put(mi.getQualifiedName(), so);
-                        bindState(method, so, ci);
-                        recursiveStateResolve(method, ci, so, seen);
+                        if (!stateHelperArgs.get(mi.getQualifiedName()).contains(so.toLocal())) {
+                            stateObjects.add(so);
+                            stateObjectDeps.put(pso, so);
+                            stateHelperArgs.put(mi.getQualifiedName(), so.toLocal());
+                            bindState(method, so, ci);
+                            recursiveStateResolve(method, ci, so, seen);
+                        }
                     }
                 }
             }
         }
     }
+
 
     public void bindImplicit(ClassInfo ci, String label, Scope scope) {
         State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
@@ -438,7 +470,7 @@ class StateObjectHandler {
     }
 
     public String getBenchmarkArgList(MethodInfo methodInfo) {
-        return getArgList(args.get(methodInfo.getName()));
+        return Utils.join(benchmarkArgs.get(methodInfo.getName()), ", ");
     }
 
     public String getArgList(MethodInfo methodInfo) {
@@ -517,8 +549,8 @@ class StateObjectHandler {
             if (type == HelperType.SETUP) {
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
-                        Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
             }
@@ -530,8 +562,8 @@ class StateObjectHandler {
             if (type == HelperType.TEARDOWN) {
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
             }
@@ -547,8 +579,8 @@ class StateObjectHandler {
                 result.add("        if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
-                        Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
                 result.add("            " + so.localIdentifier + ".ready" + helperLevel + " = true;");
@@ -573,8 +605,8 @@ class StateObjectHandler {
                 result.add("        if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        Collection<StateObject> args = stateHelperArgs.get(mi.method.getQualifiedName());
-                        result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + getArgList(args) + ");");
+                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
                 result.add("            " + so.localIdentifier + ".ready" + helperLevel + " = false;");
@@ -646,7 +678,7 @@ class StateObjectHandler {
             result.add("");
             result.add("static volatile " + so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
             result.add("    " + so.type + " val = " + so.fieldIdentifier + ";");
             result.add("    if (val != null) {");
             result.add("        return val;");
@@ -670,8 +702,8 @@ class StateObjectHandler {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                Collection<StateObject> args = stateHelperArgs.get(hmi.method.getQualifiedName());
-                result.add("        val." + hmi.method.getName() + "(" + getArgList(args) + ");");
+                Collection<String> args = stateHelperArgs.get(hmi.method.getQualifiedName());
+                result.add("        val." + hmi.method.getName() + "(" + Utils.join(args, ",") + ");");
             }
             result.add("        val.ready" + Level.Trial + " = true;");
             result.add("        " + so.fieldIdentifier + " = val;");
@@ -686,25 +718,7 @@ class StateObjectHandler {
             result.add("");
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
-            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
-
-            // These special classes are copying the external environment.
-            if (so.userType.equals(BenchmarkParams.class.getCanonicalName())) {
-                result.add("    " + so.fieldIdentifier + " = new " + so.type + "(control.benchmarkParams);");
-                result.add("    return " + so.fieldIdentifier + ";");
-                result.add("}");
-                continue;
-            } else if (so.userType.equals(IterationParams.class.getCanonicalName())) {
-                result.add("    " + so.fieldIdentifier + " = new " + so.type + "(control.iterationParams);");
-                result.add("    return " + so.fieldIdentifier + ";");
-                result.add("}");
-                continue;
-            } else if (so.userType.equals(ThreadParams.class.getCanonicalName())) {
-                result.add("    " + so.fieldIdentifier + " = new " + so.type + "(threadParams);");
-                result.add("    return " + so.fieldIdentifier + ";");
-                result.add("}");
-                continue;
-            }
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
 
             result.add("    " + so.type + " val = " + so.fieldIdentifier + ";");
             result.add("    if (val == null) {");
@@ -723,8 +737,8 @@ class StateObjectHandler {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                Collection<StateObject> args = stateHelperArgs.get(hmi.method.getQualifiedName());
-                result.add("        val." + hmi.method.getName() + "(" + getArgList(args) + ");");
+                Collection<String> args = stateHelperArgs.get(hmi.method.getQualifiedName());
+                result.add("        val." + hmi.method.getName() + "(" + Utils.join(args, ",") + ");");
             }
             result.add("        " + so.fieldIdentifier + " = val;");
             result.add("    }");
@@ -738,13 +752,14 @@ class StateObjectHandler {
             result.add("");
             result.add("static java.util.Map<Integer, " + so.type + "> " + so.fieldIdentifier + "_map = java.util.Collections.synchronizedMap(new java.util.HashMap<Integer, " + so.type + ">());");
             result.add("");
-            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control, ThreadParams threadParams" + soDependency_TypeArgs(so) + ") throws Throwable {");
-            result.add("    " + so.type + " val = " + so.fieldIdentifier + "_map.get(threadParams.getGroupIndex());");
+            result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
+            result.add("    int groupIdx = threadParams.getGroupIndex();");
+            result.add("    " + so.type + " val = " + so.fieldIdentifier + "_map.get(groupIdx);");
             result.add("    if (val != null) {");
             result.add("        return val;");
             result.add("    }");
             result.add("    synchronized(this.getClass()) {");
-            result.add("        val = " + so.fieldIdentifier + "_map.get(threadParams.getGroupIndex());");
+            result.add("        val = " + so.fieldIdentifier + "_map.get(groupIdx);");
             result.add("        if (val != null) {");
             result.add("            return val;");
             result.add("        }");
@@ -762,11 +777,11 @@ class StateObjectHandler {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                Collection<StateObject> args = stateHelperArgs.get(hmi.method.getQualifiedName());
-                result.add("        val." + hmi.method.getName() + "(" + getArgList(args) + ");");
+                Collection<String> args = stateHelperArgs.get(hmi.method.getQualifiedName());
+                result.add("        val." + hmi.method.getName() + "(" + Utils.join(args, ",") + ");");
             }
             result.add("        " + "val.ready" + Level.Trial + " = true;");
-            result.add("        " + so.fieldIdentifier + "_map.put(threadParams.getGroupIndex(), val);");
+            result.add("        " + so.fieldIdentifier + "_map.put(groupIdx, val);");
             result.add("    }");
             result.add("    return val;");
             result.add("}");
@@ -810,7 +825,7 @@ class StateObjectHandler {
     public List<String> getStateGetters(MethodInfo method) {
         List<String> result = new ArrayList<String>();
         for (StateObject so : stateOrder(method, true)) {
-            result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control, threadParams" + soDependency_Args(so) + ");");
+            result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control" + soDependency_Args(so) + ");");
         }
         return result;
     }
@@ -822,9 +837,8 @@ class StateObjectHandler {
         List<StateObject> stratum = new ArrayList<StateObject>();
 
         // These are roots
-        stratum.addAll(args.get(method.getName()));
+        stratum.addAll(roots.get(method.getName()));
         stratum.addAll(implicits.values());
-        stratum.addAll(getControls());
 
         // Recursively walk the DAG
         while (!stratum.isEmpty()) {
@@ -843,17 +857,6 @@ class StateObjectHandler {
         return new LinkedHashSet<StateObject>(linearOrder);
     }
 
-    public void addSuperCall(PrintWriter writer, StateObject so, String suffix) throws IOException {
-        // These classes have copying constructor:
-        if (so.userType.equals(BenchmarkParams.class.getCanonicalName()) ||
-            so.userType.equals(IterationParams.class.getCanonicalName()) ||
-            so.userType.equals(ThreadParams.class.getCanonicalName())) {
-            writer.println("    public " + so.type + suffix + "(" + so.userType + " other) {");
-            writer.println("        super(other);");
-            writer.println("    }");
-        }
-    }
-
     public void writeStateOverrides(BenchmarkGeneratorSession sess, GeneratorDestination dst) throws IOException {
 
         for (StateObject so : cons(stateObjects)) {
@@ -868,7 +871,6 @@ class StateObjectHandler {
 
                 pw.println("public class " + so.type + "_B1 extends " + so.userType + " {");
                 Paddings.padding(pw);
-                addSuperCall(pw, so, "_B1");
                 pw.println("}");
 
                 pw.close();
@@ -907,8 +909,6 @@ class StateObjectHandler {
                         throw new IllegalStateException("Unknown state scope: " + so.scope);
                 }
 
-                addSuperCall(pw, so, "_B2");
-
                 pw.println("}");
 
                 pw.close();
@@ -918,10 +918,8 @@ class StateObjectHandler {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B3"));
 
                 pw.println("package " + so.packageName + ";");
-
                 pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
                 Paddings.padding(pw);
-                addSuperCall(pw, so, "_B3");
                 pw.println("}");
                 pw.println("");
 
@@ -932,9 +930,7 @@ class StateObjectHandler {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type));
 
                 pw.println("package " + so.packageName + ";");
-
                 pw.println("public class " + so.type + " extends " + so.type + "_B3 {");
-                addSuperCall(pw, so, "");
                 pw.println("}");
                 pw.println("");
 
@@ -951,16 +947,6 @@ class StateObjectHandler {
         return implicits.get(label);
     }
 
-    public Collection<StateObject> getControls() {
-        Collection<StateObject> s = new ArrayList<StateObject>();
-        for (StateObject so : cons(args.values())) {
-            if (so.userType.equals(Control.class.getName())) {
-                s.add(so);
-            }
-        }
-        return s;
-    }
-
     public Collection<String> getAuxResultNames(MethodInfo method) {
         return auxNames.get(method.getName());
     }
@@ -974,4 +960,5 @@ class StateObjectHandler {
             writer.println("import " + so.packageName + "." + so.type + ";");
         }
     }
+
 }

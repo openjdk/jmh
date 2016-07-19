@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
@@ -46,16 +44,11 @@ import java.io.Serializable;
  *     info about the benchmark</li>
  * </ol>
  */
-@State(Scope.Thread)
-public class IterationParams extends IterationParamsL4 {
+public final class IterationParams extends IterationParamsL4 {
     private static final long serialVersionUID = -8111111319033802892L;
 
     static {
         Utils.check(IterationParams.class, "type", "count", "timeValue", "batchSize");
-    }
-
-    public IterationParams(IterationParams other) {
-        super(other);
     }
 
     public IterationParams(IterationType type, int count, TimeValue time, int batchSize) {
@@ -69,10 +62,6 @@ abstract class IterationParamsL4 extends IterationParamsL3 {
     private int markerEnd;
     public IterationParamsL4(IterationType type, int count, TimeValue time, int batchSize) {
         super(type, count, time, batchSize);
-    }
-
-    public IterationParamsL4(IterationParams other) {
-        super(other);
     }
 }
 
@@ -98,10 +87,6 @@ abstract class IterationParamsL3 extends IterationParamsL2 {
 
     public IterationParamsL3(IterationType type, int count, TimeValue time, int batchSize) {
         super(type, count, time, batchSize);
-    }
-
-    public IterationParamsL3(IterationParams other) {
-        super(other);
     }
 }
 
@@ -156,13 +141,6 @@ abstract class IterationParamsL2 extends IterationParamsL1 implements Serializab
         this.count = count;
         this.timeValue = time;
         this.batchSize = batchSize;
-    }
-
-    public IterationParamsL2(IterationParams other) {
-        this.type = other.type;
-        this.count = other.count;
-        this.timeValue = other.timeValue;
-        this.batchSize = other.batchSize;
     }
 
     /**

@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.util.Utils;
 
 import java.util.Random;
@@ -152,8 +151,7 @@ abstract class BlackholeL4 extends BlackholeL3 {
  * value is actually used afterwards. This can save from the dead-code elimination
  * of the computations resulting in the given values.</p>
  */
-@State(Scope.Thread) // Blackholes are always acting like a thread-local state
-public class Blackhole extends BlackholeL4 {
+public final class Blackhole extends BlackholeL4 {
 
     /**
      * IMPLEMENTATION NOTES:
@@ -257,7 +255,7 @@ public class Blackhole extends BlackholeL4 {
         Utils.check(Blackhole.class, "obj1", "objs1");
     }
 
-    public Blackhole() {
+    public Blackhole(String challengeResponse) {
         /*
          * Prevent instantiation by user code. Without additional countermeasures
          * to properly escape Blackhole, its magic is not working. The instances
@@ -277,34 +275,9 @@ public class Blackhole extends BlackholeL4 {
          * directly though.
          */
 
-        IllegalStateException iae = new IllegalStateException("Blackholes should not be instantiated directly.");
-        StackTraceElement[] stackTrace = iae.getStackTrace();
-
-        // Somebody disabled the stack traces? Oh well.
-        if (stackTrace.length == 0) {
-            return;
+        if (!challengeResponse.equals("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.")) {
+            throw new IllegalStateException("Blackholes should not be instantiated directly.");
         }
-
-        for (StackTraceElement el : stackTrace) {
-            // Either we instantiate from the JMH generated code,
-            // or our user is a tricky bastard, and gets what's coming to him.
-            if (el.getMethodName().startsWith("_jmh_tryInit_") &&
-                    el.getClassName().contains("generated"))
-                return;
-        }
-        throw iae;
-    }
-
-    /*
-     * Need to clear the sinks to break the GC from keeping the
-     * consumed objects forever.
-     */
-
-    @Setup(Level.Iteration)
-    @TearDown(Level.Iteration)
-    public void clearSinks() {
-        obj1 = new Object();
-        objs1 = new Object[]{new Object()};
     }
 
     /**

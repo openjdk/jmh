@@ -25,10 +25,7 @@
 package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.infra.ThreadParams;
+import org.openjdk.jmh.infra.*;
 import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.runner.BenchmarkList;
 import org.openjdk.jmh.runner.BenchmarkListEntry;
@@ -467,9 +464,6 @@ public class BenchmarkGenerator {
         // benchmark instance is implicit
         states.bindImplicit(classInfo, "bench", Scope.Thread);
 
-        // default blackhole is implicit
-        states.bindImplicit(source.resolveClass(Blackhole.class.getCanonicalName()), "blackhole", Scope.Thread);
-
         // bind all methods
         states.bindMethodGroup(info.methodGroup);
 
@@ -491,6 +485,11 @@ public class BenchmarkGenerator {
         Paddings.padding(writer);
 
         writer.println(ident(1) + "int startRndMask;");
+        writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
+        writer.println(ident(1) + "IterationParams iterationParams;");
+        writer.println(ident(1) + "ThreadParams threadParams;");
+        writer.println(ident(1) + "Blackhole blackhole;");
+        writer.println(ident(1) + "Control notifyControl;");
 
         // write all methods
         for (Mode benchmarkKind : Mode.values()) {
@@ -531,7 +530,8 @@ public class BenchmarkGenerator {
                 SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
                 BenchmarkMode.class, RawResults.class, ResultRole.class,
-                Field.class, BenchmarkParams.class, IterationParams.class
+                Field.class, BenchmarkParams.class, IterationParams.class,
+                Blackhole.class, Control.class
         };
 
         for (Class<?> c : imports) {
@@ -594,18 +594,14 @@ public class BenchmarkGenerator {
             writer.println();
 
             // control objects get a special treatment
-            for (StateObject so : states.getControls()) {
-                writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-            }
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
 
             // measurement loop call
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX +
-                    "(control, res" + prefix(states.getArgList(method)) + ");");
+                    "(" + getStubArgs() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
-            for (StateObject so : states.getControls()) {
-                writer.println(ident(3) + so.localIdentifier + ".stopMeasurement = true;");
-            }
+            writer.println(ident(3) + "notifyControl.stopMeasurement = true;");
 
             // synchronize iterations epilog: announce ready
             writer.println(ident(3) + "control.announceWarmdownReady();");
@@ -641,8 +637,8 @@ public class BenchmarkGenerator {
                It's prudent to make the multiplication first to get more accuracy.
              */
 
-            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
-            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
+            writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int opsPerInv = benchmarkParams.getOpsPerInvocation();");
 
             writer.println(ident(3) + "res.allOps *= opsPerInv;");
             writer.println(ident(3) + "res.allOps /= batchSize;");
@@ -650,13 +646,16 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps /= batchSize;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
-            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
+            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), benchmarkParams.getTimeUnit()));");
             }
+
+            methodEpilog(writer, methodGroup);
+
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
@@ -671,7 +670,8 @@ public class BenchmarkGenerator {
 
             compilerControl.defaultForceInline(method);
 
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public static" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(" +
+                    getStubTypeArgs() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -722,17 +722,13 @@ public class BenchmarkGenerator {
             writer.println();
 
             // control objects get a special treatment
-            for (StateObject so : states.getControls()) {
-                writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-            }
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
 
             // measurement loop call
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(" + getStubArgs() + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
-            for (StateObject so : states.getControls()) {
-                writer.println(ident(3) + so.localIdentifier + ".stopMeasurement = true;");
-            }
+            writer.println(ident(3) + "notifyControl.stopMeasurement = true;");
 
             // synchronize iterations epilog: announce ready
             writer.println(ident(3) + "control.announceWarmdownReady();");
@@ -767,8 +763,8 @@ public class BenchmarkGenerator {
                It's prudent to make the multiplication first to get more accuracy.
              */
 
-            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
-            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
+            writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int opsPerInv = benchmarkParams.getOpsPerInvocation();");
 
             writer.println(ident(3) + "res.allOps *= opsPerInv;");
             writer.println(ident(3) + "res.allOps /= batchSize;");
@@ -776,13 +772,15 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps /= batchSize;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
-            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
+            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), benchmarkParams.getTimeUnit()));");
             }
+            methodEpilog(writer, methodGroup);
+
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
@@ -796,8 +794,8 @@ public class BenchmarkGenerator {
             String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
 
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
-                    "(InfraControl control, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public static" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
+                    "(" + getStubTypeArgs() + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -817,8 +815,27 @@ public class BenchmarkGenerator {
         }
     }
 
+    private String getStubArgs() {
+        return "control, res, benchmarkParams, iterationParams, threadParams, blackhole, notifyControl, startRndMask";
+    }
+
+    private String getStubTypeArgs() {
+        return "InfraControl control, RawResults result, " +
+                "BenchmarkParams benchmarkParams, IterationParams iterationParams, ThreadParams threadParams, " +
+                "Blackhole blackhole, Control notifyControl, int startRndMask";
+    }
+
     private void methodProlog(PrintWriter writer, MethodGroup methodGroup) {
         // do nothing
+        writer.println(ident(2) + "this.benchmarkParams = control.benchmarkParams;");
+        writer.println(ident(2) + "this.iterationParams = control.iterationParams;");
+        writer.println(ident(2) + "this.threadParams    = threadParams;");
+        writer.println(ident(2) + "this.notifyControl   = new Control();");
+        writer.println(ident(2) + "this.blackhole       = new Blackhole(\"Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.\");");
+    }
+
+    private void methodEpilog(PrintWriter writer, MethodGroup methodGroup) {
+        writer.println(ident(3) + "this.blackhole = null;");
     }
 
     private String prefix(String argList) {
@@ -860,21 +877,18 @@ public class BenchmarkGenerator {
             writer.println();
 
             // control objects get a special treatment
-            for (StateObject so : states.getControls()) {
-                writer.println(ident(3) + so.localIdentifier + ".startMeasurement = true;");
-            }
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
 
             // measurement loop call
             writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
-            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
-            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
+            writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
+            writer.println(ident(3) + "int opsPerInv = benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, res, buffer, targetSamples, opsPerInv, batchSize" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(" +
+                    getStubArgs() + ", buffer, targetSamples, opsPerInv, batchSize" + prefix(states.getArgList(method)) + ");");
 
             // control objects get a special treatment
-            for (StateObject so : states.getControls()) {
-                writer.println(ident(3) + so.localIdentifier + ".stopMeasurement = true;");
-            }
+            writer.println(ident(3) + "notifyControl.stopMeasurement = true;");
 
             // synchronize iterations epilog: announce ready
             writer.println(ident(3) + "control.announceWarmdownReady();");
@@ -912,10 +926,12 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
-            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
+            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
             }
+            methodEpilog(writer, methodGroup);
+
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
@@ -929,7 +945,9 @@ public class BenchmarkGenerator {
             String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
 
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(InfraControl control, RawResults result, SampleBuffer buffer, int targetSamples, long opsPerInv, int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public static" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName + "(" +
+                    getStubTypeArgs() + ", SampleBuffer buffer, int targetSamples, long opsPerInv, int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
@@ -991,8 +1009,9 @@ public class BenchmarkGenerator {
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults();");
-            writer.println(ident(3) + "int batchSize = control.iterationParams.getBatchSize();");
-            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(control, batchSize, res" + prefix(states.getArgList(method)) + ");");
+            writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
+            writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(" +
+                    getStubArgs() + ", batchSize" + prefix(states.getArgList(method)) + ");");
 
             writer.println(ident(3) + "control.preTearDown();");
 
@@ -1009,10 +1028,12 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "long totalOps = opsPerInv;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(totalOps, totalOps);");
-            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
+            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
             if (!isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), control.benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
             }
+            methodEpilog(writer, methodGroup);
+
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
@@ -1026,8 +1047,8 @@ public class BenchmarkGenerator {
             String methodName = method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX;
             compilerControl.defaultForceInline(method);
 
-            writer.println(ident(1) + "public" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
-                    "(InfraControl control, int batchSize, RawResults result" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
+            writer.println(ident(1) + "public static" + (methodGroup.isStrictFP() ? " strictfp" : "") + " void " + methodName +
+                    "(" + getStubTypeArgs() + ", int batchSize" + prefix(states.getTypeArgList(method)) + ") throws Throwable {");
 
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "result.startTime = System.nanoTime();");
@@ -1090,7 +1111,7 @@ public class BenchmarkGenerator {
         if ("void".equalsIgnoreCase(method.getReturnType())) {
             return states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getBenchmarkArgList(method) + ")";
         } else {
-            return states.getImplicit("blackhole").localIdentifier + ".consume(" + states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getBenchmarkArgList(method) + "))";
+            return "blackhole.consume(" + states.getImplicit("bench").localIdentifier + "." + method.getName() + "(" + states.getBenchmarkArgList(method) + "))";
         }
     }
 

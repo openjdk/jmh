@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.infra;
 
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.util.Utils;
 
 /**
@@ -35,16 +33,11 @@ import org.openjdk.jmh.util.Utils;
  * not limited to the number of threads, thread indicies, group information, etc. Some
  * of that info duplicates what is available in {@link org.openjdk.jmh.infra.BenchmarkParams}.</p>
  */
-@State(Scope.Thread)
-public class ThreadParams extends ThreadParamsL4 {
+public final class ThreadParams extends ThreadParamsL4 {
     public ThreadParams(int threadIdx, int threadCount, int groupIdx, int groupCount, int subgroupIdx, int subgroupCount,
                         int groupThreadIdx, int groupThreadCount, int subgroupThreadIdx, int subgroupThreadCount) {
         super(threadIdx, threadCount, groupIdx, groupCount, subgroupIdx, subgroupCount,
                 groupThreadIdx, groupThreadCount, subgroupThreadIdx, subgroupThreadCount);
-    }
-
-    public ThreadParams(ThreadParams other) {
-        super(other);
     }
 
     static {
@@ -250,20 +243,6 @@ abstract class ThreadParamsL2 extends ThreadParamsL1 {
         this.subgroupThreadIdx = subgroupThreadIdx;
         this.subgroupThreadCount = subgroupThreadCount;
     }
-
-    public ThreadParamsL2(ThreadParams other) {
-        this.threadIdx = other.threadIdx;
-        this.threadCount = other.threadCount;
-        this.groupIdx = other.groupIdx;
-        this.groupCount = other.groupCount;
-        this.subgroupIdx = other.subgroupIdx;
-        this.subgroupCount = other.subgroupCount;
-        this.groupThreadIdx = other.groupThreadIdx;
-        this.subgroupThreadIdx = other.subgroupThreadIdx;
-        this.subgroupThreadCount = other.subgroupThreadCount;
-        this.groupThreadCount = other.groupThreadCount;
-    }
-
 }
 
 abstract class ThreadParamsL3 extends ThreadParamsL2 {
@@ -289,10 +268,6 @@ abstract class ThreadParamsL3 extends ThreadParamsL2 {
         super(threadIdx, threadCount, groupIdx, groupCount, subgroupIdx, subgroupCount,
                 groupThreadIdx, groupThreadCount, subgroupThreadIdx, subgroupThreadCount);
     }
-
-    public ThreadParamsL3(ThreadParams other) {
-        super(other);
-    }
 }
 
 abstract class ThreadParamsL4 extends ThreadParamsL3 {
@@ -302,9 +277,5 @@ abstract class ThreadParamsL4 extends ThreadParamsL3 {
                           int groupThreadIdx, int groupThreadCount, int subgroupThreadIdx, int subgroupThreadCount) {
         super(threadIdx, threadCount, groupIdx, groupCount, subgroupIdx, subgroupCount,
                 groupThreadIdx, groupThreadCount, subgroupThreadIdx, subgroupThreadCount);
-    }
-
-    public ThreadParamsL4(ThreadParams other) {
-        super(other);
     }
 }
