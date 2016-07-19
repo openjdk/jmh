@@ -37,6 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Version {
 
+    private static final int UPDATE_INTERVAL = 180;
+
     public static String getVersion() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -84,7 +86,7 @@ public class Version {
             long diff = (System.currentTimeMillis() - parse.getTime()) / TimeUnit.DAYS.toMillis(1);
             if (diff > 0) {
                 pw.print(String.format("%d days ago", diff));
-                if (diff > 90) {
+                if (diff > UPDATE_INTERVAL) {
                     pw.print(", please consider updating!");
                 }
             } else {
