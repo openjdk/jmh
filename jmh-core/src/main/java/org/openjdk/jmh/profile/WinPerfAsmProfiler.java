@@ -183,13 +183,12 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     protected PerfEvents readEvents(double skipSec) {
         FileReader fr = null;
         try {
-            Deduplicator<String> dedup = new Deduplicator<String>();
+            Deduplicator<MethodDesc> dedup = new Deduplicator<MethodDesc>();
 
             fr = new FileReader(perfParsedData);
             BufferedReader reader = new BufferedReader(fr);
 
-            Map<Long, String> methods = new HashMap<Long, String>();
-            Map<Long, String> libs = new HashMap<Long, String>();
+            Multimap<MethodDesc, Long> methods = new HashMultimap<MethodDesc, Long>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<String, Multiset<Long>>();
             for (String evName : this.events) {
                 events.put(evName, new TreeMultiset<Long>());
@@ -245,8 +244,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 try {
                     Long addr = Long.valueOf(addrStr, 16);
                     evs.add(addr);
-                    methods.put(addr, dedup.dedup(symbol));
-                    libs.put(addr, dedup.dedup(lib));
+                    methods.put(dedup.dedup(MethodDesc.nativeMethod(symbol, lib)), addr);
                 } catch (NumberFormatException e) {
                     // kernel addresses like "ffffffff810c1b00" overflow signed long,
                     // record them as dummy address
@@ -254,9 +252,13 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 }
             }
 
-            methods.put(0L, "<kernel>");
+            IntervalMap<MethodDesc> methodMap = new IntervalMap<MethodDesc>();
+            for (MethodDesc md : methods.keys()) {
+                Collection<Long> longs = methods.get(md);
+                methodMap.add(md, Utils.min(longs), Utils.max(longs));
+            }
 
-            return new PerfEvents(this.events, events, methods, libs);
+            return new PerfEvents(this.events, events, methodMap);
         } catch (IOException e) {
             return new PerfEvents(events);
         } finally {

@@ -396,12 +396,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         for (Region r : regions) {
             if (r.getEventCount(events, mainEvent) > threshold) {
                 if (!headerPrinted) {
-                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n", regionRateThreshold * 100, mainEvent);
+                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n%n", regionRateThreshold * 100, mainEvent);
                     headerPrinted = true;
                 }
 
                 printDottedLine(pw, "Hottest Region " + cnt);
-                pw.printf(" [0x%x:0x%x] in %s%n%n", r.begin, r.end, r.getName());
+                pw.printf("%s, %s (%d bytes) %n%n", r.desc().source(), r.desc().name(), r.end - r.begin);
                 r.printCode(pw, events);
 
                 printDottedLine(pw);
@@ -420,6 +420,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         }
 
+        int lenSource = 0;
+        for (Region r : regions) {
+            lenSource = Math.max(lenSource, r.desc().source().length());
+        }
+
         /**
          * 6. Print out the hottest regions
          */
@@ -434,7 +439,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     for (String event : this.events) {
                         printLine(pw, events, event, r.getEventCount(events, event));
                     }
-                    pw.printf("[0x%x:0x%x] in %s%n", r.begin, r.end, r.getName());
+                    pw.printf("%" + lenSource + "s  %s (%d bytes) %n", r.desc().source(), r.desc().name(), r.end - r.begin);
                 } else {
                     for (String event : this.events) {
                         other.add(event, r.getEventCount(events, event));
@@ -461,8 +466,19 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         final Map<String, Multiset<String>> methodsByType = new HashMap<String, Multiset<String>>();
+        final Map<String, Multiset<MethodDesc>> methods = new HashMap<String, Multiset<MethodDesc>>();
+
         for (String event : this.events) {
             methodsByType.put(event, new HashMultiset<String>());
+            methods.put(event, new HashMultiset<MethodDesc>());
+        }
+
+        for (Region r : regions) {
+            for (String event : this.events) {
+                long count = r.getEventCount(events, event);
+                methods.get(event).add(r.desc(), count);
+                methodsByType.get(event).add(r.desc().source(), count);
+            }
         }
 
         /**
@@ -471,30 +487,17 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         {
             printDottedLine(pw, "Hottest Methods (after inlining)");
 
-            Map<String, Multiset<String>> methods = new HashMap<String, Multiset<String>>();
-            for (String event : this.events) {
-                methods.put(event, new HashMultiset<String>());
-            }
-
-            for (Region r : regions) {
-                for (String event : this.events) {
-                    long count = r.getEventCount(events, event);
-                    methods.get(event).add(r.getName(), count);
-                    methodsByType.get(event).add(r.getType(), count);
-                }
-            }
-
             Multiset<String> total = new HashMultiset<String>();
             Multiset<String> other = new HashMultiset<String>();
 
             int shownMethods = 0;
-            List<String> top = Multisets.sortedDesc(methods.get(mainEvent));
-            for (String m : top) {
+            List<MethodDesc> top = Multisets.sortedDesc(methods.get(mainEvent));
+            for (MethodDesc m : top) {
                 if (shownMethods++ < regionShowTop) {
                     for (String event : this.events) {
                         printLine(pw, events, event, methods.get(event).count(m));
                     }
-                    pw.printf("%s%n", m);
+                    pw.printf("%" + lenSource + "s  %s %n", m.source(), m.name());
                 } else {
                     for (String event : this.events) {
                         other.add(event, methods.get(event).count(m));
@@ -524,13 +527,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * Print hot methods distribution
          */
         {
-            printDottedLine(pw, "Distribution by Area");
+            printDottedLine(pw, "Distribution by Source");
 
             for (String m : Multisets.sortedDesc(methodsByType.get(mainEvent))) {
                 for (String event : this.events) {
                     printLine(pw, events, event, methodsByType.get(event).count(m));
                 }
-                pw.printf("%s%n", m);
+                pw.printf("%" + lenSource + "s%n", m);
             }
 
             printDottedLine(pw);
@@ -667,48 +670,59 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     List<Region> makeRegions(Assembly asms, PerfEvents events) {
         List<Region> regions = new ArrayList<Region>();
 
-        SortedSet<Long> addrs = events.getAllAddresses();
+        SortedSet<Long> allAddrs = events.getAllAddresses();
+        for (Interval intv : figureHotIntervals(allAddrs, allAddrs.first(), allAddrs.last())) {
+            SortedSet<Long> eventfulAddrs = allAddrs.subSet(intv.src, intv.dst + 1);
 
-        Set<Long> eventfulAddrs = new HashSet<Long>();
-        Long lastBegin = null;
-        Long lastAddr = null;
-        for (Long addr : addrs) {
-            if (addr == 0) {
-                regions.add(new UnknownRegion());
-                continue;
-            }
+            List<ASMLine> regionLines = asms.getLines(intv.src, intv.dst, printMargin);
 
-            if (lastAddr == null) {
-                lastAddr = addr;
-                lastBegin = addr;
-            } else {
-                if (addr - lastAddr > mergeMargin) {
-                    List<ASMLine> regionLines = asms.getLines(lastBegin, lastAddr, printMargin);
+            if (!regionLines.isEmpty()) {
+                // has some associated assembly
 
-                    long minAddr = Long.MAX_VALUE;
-                    long maxAddr = Long.MIN_VALUE;
-                    for (ASMLine line : regionLines) {
-                        if (line.addr != null) {
-                            minAddr = Math.min(minAddr, line.addr);
-                            maxAddr = Math.max(maxAddr, line.addr);
-                        }
-                    }
-
-                    if (!regionLines.isEmpty()) {
-                        regions.add(new GeneratedRegion(this.events, asms, minAddr, maxAddr, regionLines, eventfulAddrs, regionTooBigThreshold, drawIntraJumps, drawInterJumps));
-                    } else {
-                        regions.add(new NativeRegion(events, lastBegin, lastAddr, eventfulAddrs));
-                    }
-
-                    lastBegin = addr;
-                    eventfulAddrs = new HashSet<Long>();
+                // TODO: Should scan and split regions for multiple descs?
+                MethodDesc desc = asms.getMethod(intv.src);
+                if (desc == null) {
+                    desc = MethodDesc.unknown();
                 }
-                lastAddr = addr;
+
+                regions.add(new GeneratedRegion(this.events, asms, desc, intv.src, intv.dst,
+                        regionLines, eventfulAddrs, regionTooBigThreshold, drawIntraJumps, drawInterJumps));
+            } else {
+                // has no assembly, should be a native region
+
+                // TODO: Should scan and split regions for multiple descs?
+                MethodDesc desc = events.getMethod(intv.src);
+                if (desc == null) {
+                    desc = MethodDesc.unknown();
+                }
+
+                regions.add(new NativeRegion(desc, intv.src, intv.dst, eventfulAddrs));
             }
-            eventfulAddrs.add(addr);
         }
 
         return regions;
+    }
+
+
+    private List<Interval> figureHotIntervals(SortedSet<Long> allAddrs, long from, long to) {
+        List<Interval> intervals = new ArrayList<Interval>();
+        SortedSet<Long> addrs = allAddrs.subSet(from, to);
+
+        long begAddr = addrs.first();
+        long lastAddr = addrs.first();
+        for (long addr : addrs) {
+            if (addr - lastAddr > mergeMargin) {
+                intervals.add(new Interval(begAddr, lastAddr));
+                begAddr = addr;
+            }
+            lastAddr = addr;
+        }
+
+        if (begAddr != lastAddr) {
+            intervals.add(new Interval(begAddr, lastAddr));
+        }
+
+        return intervals;
     }
 
     Collection<Collection<String>> splitAssembly(File stdOut) {
@@ -754,11 +768,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     Assembly readAssembly(File stdOut) {
         List<ASMLine> lines = new ArrayList<ASMLine>();
         SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
-        SortedMap<Long, String> methodMap = new TreeMap<Long, String>();
+
+        IntervalMap<MethodDesc> stubs       = new IntervalMap<MethodDesc>();
+        IntervalMap<MethodDesc> javaMethods = new IntervalMap<MethodDesc>();
+
         Set<Interval> intervals = new HashSet<Interval>();
 
         for (Collection<String> cs : splitAssembly(stdOut)) {
-            String method = null;
             String prevLine = "";
             for (String line : cs) {
                 String trim = line.trim();
@@ -769,26 +785,20 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 ASMLine asmLine = new ASMLine(line);
 
                 // Handle the most frequent case first.
-                if (elements.length >= 1 && elements[0].startsWith("0x")) {
+                if (trim.startsWith("0x")) {
                     // Seems to be line with address.
                     try {
-                        Long addr = Long.valueOf(elements[0].replace("0x", "").replace(":", ""), 16);
+                        Long addr = parseAddress(elements[0]);
                         int idx = lines.size();
                         addressMap.put(addr, idx);
 
-                        // Record the starting address for the method, if any.
-                        if (method != null) {
-                            methodMap.put(addr, method);
-                            method = null;
-                        }
-
                         asmLine = new ASMLine(addr, line);
 
-                        if (drawInterJumps || drawIntraJumps) {
+                        if (elements.length > 1 && (drawInterJumps || drawIntraJumps)) {
                             for (int c = 1; c < elements.length; c++) {
                                 if (elements[c].startsWith("0x")) {
                                     try {
-                                        Long target = Long.valueOf(elements[c].replace("0x", "").replace(":", ""), 16);
+                                        Long target = parseAddress(elements[c]);
                                         intervals.add(new Interval(addr, target));
                                     } catch (NumberFormatException e) {
                                         // nope
@@ -799,37 +809,75 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     } catch (NumberFormatException e) {
                         // Nope, not the address line.
                     }
-                } else if (line.contains("# {method}")) {
-                    // Handle the compiled code line.
-                    if (elements.length == 6) {
-                        // old JDKs may print the line with 6 fields: # {method} <name> <signature> in <class>
-                        method = (elements[5].replace("/", ".") + "::" + elements[2]).replace("'", "");
-                    } else if (elements.length == 7) {
-                        // newer JDKs always print 7 fields: # {method} <address> <name> <signature> in <class>
-                        method = (elements[6].replace("/", ".") + "::" + elements[3]).replace("'", "");
-                    } else {
-                        // {method} line is corrupted, other writer had possibly interjected;
-                        // honestly say we can't figure the method name out instead of lying.
-                        method = "<name unparseable>";
-                    }
-                    method = method.replace("&apos;", "");
-                    method = method.replace("&lt;", "<");
-                    method = method.replace("&gt;", ">");
-                } else if (prevLine.contains("--------")) {
-                    if (line.trim().endsWith("bytes")) {
-                        // Handle the VM stub/interpreter line.
-                        method = "<stub: " + line.substring(0, line.indexOf("[")).trim() + ">";
-                    }
-                } else if (line.contains("StubRoutines::")) {
-                    // Handle the VM stub/interpreter line (another format)
-                    method = elements[0];
                 }
+
+                if (prevLine.contains("--------") || line.contains("StubRoutines::")) {
+                    // Try parsing the interpreter/runtime stub:
+                    // ----------------------------------------------------------------------
+                    // invokehandle  233 invokehandle  [0x00007f631d023100, 0x00007f631d0233c0]  704 bytes
+                    // StubRoutines::catch_exception [0x00007feb43fa7b27, 0x00007feb43fa7b46[ (31 bytes)
+
+                    Pattern pattern = Pattern.compile("(.+)( +)\\[(.+), (.+)[\\]\\[](.*)");
+                    Matcher matcher = pattern.matcher(line);
+
+                    if (matcher.matches()) {
+                        Long startAddr = parseAddress(matcher.group(3));
+                        Long endAddr = parseAddress(matcher.group(4));
+
+                        if (line.contains("StubRoutines::")) {
+                            stubs.add(MethodDesc.runtimeStub(matcher.group(1)), startAddr, endAddr);
+                        } else {
+                            stubs.add(MethodDesc.interpreter(matcher.group(1)), startAddr, endAddr);
+                        }
+                    }
+                }
+
+                if (line.contains("<nmethod")) {
+                    // <nmethod compile_id='481' compiler='C1' level='3' entry='0x00007f26f51fb640' size='1392'
+                    //   address='0x00007f26f51fb4d0' relocation_offset='296' insts_offset='368' stub_offset='976'
+                    //   scopes_data_offset='1152' scopes_pcs_offset='1208' dependencies_offset='1368' nul_chk_table_offset='1376'
+                    //   method='java/lang/reflect/Constructor getParameterTypes ()[Ljava/lang/Class;' bytes='11'
+                    //   count='258' iicount='258' stamp='8.590'/>
+
+                    Matcher matcher = Pattern.compile("(.*?)<nmethod (.*?)/>(.*?)").matcher(line);
+                    if (matcher.matches()) {
+                        String body = matcher.group(2);
+                        body = body.replaceAll("='", "=");
+                        String[] kvs = body.split("' ");
+
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        for (String kv : kvs) {
+                            String[] pair = kv.split("=");
+                            map.put(pair[0], pair[1]);
+                        }
+
+                        // Record the starting address for the method
+                        Long addr = parseAddress(map.get("entry"));
+
+                        javaMethods.add(
+                                MethodDesc.javaMethod(map.get("method"), map.get("compiler"), map.get("level"), map.get("compile_id")),
+                                addr,
+                                addr + Long.valueOf(map.get("size"))
+                        );
+                    }
+                }
+
                 lines.add(asmLine);
 
                 prevLine = line;
             }
         }
+
+        // Important to get the order right: all Java methods take precedence over interpreter/runtime stubs.
+        IntervalMap<MethodDesc> methodMap = new IntervalMap<MethodDesc>();
+        methodMap.merge(stubs);
+        methodMap.merge(javaMethods);
+
         return new Assembly(lines, addressMap, methodMap, intervals);
+    }
+
+    private Long parseAddress(String address) {
+        return Long.valueOf(address.replace("0x", "").replace(":", ""), 16);
     }
 
     static class PerfResult extends Result<PerfResult> {
@@ -874,58 +922,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    static class Interval implements Comparable<Interval> {
-        private final long src;
-        private final long dst;
-
-        public Interval(long src, long dst) {
-            this.src = src;
-            this.dst = dst;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Interval interval = (Interval) o;
-
-            if (dst != interval.dst) return false;
-            if (src != interval.src) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = (int) (src ^ (src >>> 32));
-            result = 31 * result + (int) (dst ^ (dst >>> 32));
-            return result;
-        }
-
-        @Override
-        public int compareTo(Interval o) {
-            if (src < o.src) {
-                return -1;
-            } else if (src > o.src) {
-                return 1;
-            } else {
-                return (dst < o.dst) ? -1 : ((dst == o.dst) ? 0 : 1);
-            }
-        }
-    }
-
-
     protected static class PerfEvents {
         final Map<String, Multiset<Long>> events;
-        final Map<Long, String> methods;
-        final Map<Long, String> libs;
+        final IntervalMap<MethodDesc> methods;
         final Map<String, Long> totalCounts;
 
-        PerfEvents(Collection<String> tracedEvents, Map<String, Multiset<Long>> events, Map<Long, String> methods, Map<Long, String> libs) {
+        PerfEvents(Collection<String> tracedEvents, Map<String, Multiset<Long>> events, IntervalMap<MethodDesc> methods) {
             this.events = events;
             this.methods = methods;
-            this.libs = libs;
             this.totalCounts = new HashMap<String, Long>();
             for (String event : tracedEvents) {
                 totalCounts.put(event, events.get(event).size());
@@ -933,7 +937,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         public PerfEvents(Collection<String> tracedEvents) {
-            this(tracedEvents, Collections.<String, Multiset<Long>>emptyMap(), Collections.<Long, String>emptyMap(), Collections.<Long, String>emptyMap());
+            this(tracedEvents, Collections.<String, Multiset<Long>>emptyMap(), new IntervalMap<MethodDesc>());
         }
 
         public boolean isEmpty() {
@@ -955,15 +959,19 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         public Long getTotalEvents(String event) {
             return totalCounts.get(event);
         }
+
+        public MethodDesc getMethod(long addr) {
+            return methods.get(addr);
+        }
     }
 
     static class Assembly {
         final List<ASMLine> lines;
         final SortedMap<Long, Integer> addressMap;
-        final SortedMap<Long, String> methodMap;
+        final IntervalMap<MethodDesc> methodMap;
         final Set<Interval> intervals;
 
-        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, SortedMap<Long, String> methodMap, Set<Interval> intervals) {
+        public Assembly(List<ASMLine> lines, SortedMap<Long, Integer> addressMap, IntervalMap<MethodDesc> methodMap, Set<Interval> intervals) {
             this.lines = lines;
             this.addressMap = addressMap;
             this.methodMap = methodMap;
@@ -1009,16 +1017,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             }
         }
 
-        public String getMethod(long addr) {
-            if (methodMap.containsKey(addr)) {
-                return methodMap.get(addr);
-            }
-            SortedMap<Long, String> head = methodMap.headMap(addr);
-            if (head.isEmpty()) {
-                return "<unresolved>";
-            } else {
-                return methodMap.get(head.lastKey());
-            }
+        public MethodDesc getMethod(long addr) {
+            return methodMap.get(addr);
         }
     }
 
@@ -1037,13 +1037,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     static class Region {
-        final String method;
+        final MethodDesc method;
         final long begin;
         final long end;
         final Set<Long> eventfulAddrs;
         final Map<String, Long> eventCountCache;
 
-        Region(String method, long begin, long end, Set<Long> eventfulAddrs) {
+        Region(MethodDesc method, long begin, long end, Set<Long> eventfulAddrs) {
             this.method = method;
             this.begin = begin;
             this.end = end;
@@ -1067,12 +1067,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             pw.println("<no code>");
         }
 
-        public String getName() {
+        public MethodDesc desc() {
             return method;
-        }
-
-        public String getType() {
-            return "<unknown>";
         }
     }
 
@@ -1084,27 +1080,16 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final boolean drawIntraJumps;
         final boolean drawInterJumps;
 
-        GeneratedRegion(Collection<String> tracedEvents, Assembly asms, long begin, long end,
+        GeneratedRegion(Collection<String> tracedEvents, Assembly asms, MethodDesc desc, long begin, long end,
                         Collection<ASMLine> code, Set<Long> eventfulAddrs,
                         int threshold, boolean drawIntraJumps, boolean drawInterJumps) {
-            super(generateName(asms, eventfulAddrs), begin, end, eventfulAddrs);
+            super(desc, begin, end, eventfulAddrs);
             this.tracedEvents = tracedEvents;
             this.asms = asms;
             this.code = code;
             this.threshold = threshold;
             this.drawIntraJumps = drawIntraJumps;
             this.drawInterJumps = drawInterJumps;
-        }
-
-        static String generateName(Assembly asm, Set<Long> eventfulAddrs) {
-            Set<String> methods = new HashSet<String>();
-            for (Long ea : eventfulAddrs) {
-                String m = asm.getMethod(ea);
-                if (m != null) {
-                    methods.add(m);
-                }
-            }
-            return Utils.join(methods, "; ");
         }
 
         @Override
@@ -1194,66 +1179,106 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 }
             }
         }
-
-        @Override
-        public String getType() {
-            return "<generated code>";
-        }
     }
 
     static class NativeRegion extends Region {
-        private final String lib;
 
-        NativeRegion(PerfEvents events, long begin, long end, Set<Long> eventfulAddrs) {
-            super(generateName(events, eventfulAddrs), begin, end, eventfulAddrs);
-            lib = resolveLib(events, eventfulAddrs);
-        }
-
-        static String generateName(PerfEvents events, Set<Long> eventfulAddrs) {
-            Set<String> methods = new HashSet<String>();
-            for (Long ea : eventfulAddrs) {
-                methods.add(events.methods.get(ea));
-            }
-            return Utils.join(methods, "; ");
-        }
-
-        static String resolveLib(PerfEvents events, Set<Long> eventfulAddrs) {
-            Set<String> libs = new HashSet<String>();
-            for (Long ea : eventfulAddrs) {
-                libs.add(events.libs.get(ea));
-            }
-            return Utils.join(libs, "; ");
+        NativeRegion(MethodDesc desc, long begin, long end, Set<Long> eventfulAddrs) {
+            super(desc, begin, end, eventfulAddrs);
         }
 
         @Override
         public void printCode(PrintWriter pw, PerfEvents events) {
             pw.println(" <no assembly is recorded, native region>");
         }
-
-        @Override
-        public String getType() {
-            return "<native code in (" + lib + ")>";
-        }
-
-        @Override
-        public String getName() {
-            return method + " (" + lib + ")";
-        }
     }
 
     static class UnknownRegion extends Region {
         UnknownRegion() {
-            super("<unknown>", 0L, 0L, Collections.singleton(0L));
+            super(MethodDesc.unknown(), 0L, 0L, Collections.singleton(0L));
         }
 
         @Override
         public void printCode(PrintWriter pw, PerfEvents events) {
             pw.println(" <no assembly is recorded, unknown region>");
         }
+    }
+
+    static class MethodDesc {
+        private final String name;
+        private final String source;
+
+        protected MethodDesc(String name, String source) {
+            this.name = name;
+            this.source = source;
+        }
+
+        public static MethodDesc unresolved() {
+            return new MethodDesc("<unresolved>", "");
+        }
+
+        public static MethodDesc unknown() {
+            return new MethodDesc("<unknown>", "");
+        }
+
+        public static MethodDesc kernel() {
+            return new MethodDesc("<kernel>", "kernel");
+        }
+
+        public static MethodDesc interpreter(String name) {
+            return new MethodDesc(name, "interpreter");
+        }
+
+        public static MethodDesc runtimeStub(String name) {
+            return new MethodDesc(name, "runtime stub");
+        }
+
+        public static MethodDesc javaMethod(String name, String compiler, String level, String ver) {
+            String methodName = name.replace("/", ".").replaceFirst(" ", "::").split(" ")[0];
+            return new MethodDesc(
+                    methodName + ", version " + ver,
+                    (compiler != null ? compiler : "Unknown") + (level != null ? ", level " + level : "")
+            );
+        }
+
+        public static MethodDesc nativeMethod(String symbol, String lib) {
+            return new MethodDesc(symbol, lib);
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public String source() {
+            return source;
+        }
 
         @Override
-        public String getType() {
-            return "<unknown>";
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            MethodDesc that = (MethodDesc) o;
+
+            if (!name.equals(that.name)) return false;
+            return source.equals(that.source);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = name.hashCode();
+            result = 31 * result + source.hashCode();
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "MethodDesc{" +
+                    "name='" + name + '\'' +
+                    ", source='" + source + '\'' +
+                    '}';
         }
     }
+
 }

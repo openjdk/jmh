@@ -34,9 +34,8 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -56,6 +55,41 @@ public class Utils {
 
     private Utils() {
 
+    }
+
+    private static final ConcurrentMap<String, Pattern> PATTERNS = new ConcurrentHashMap<String, Pattern>();
+
+    public static Pattern lazyCompile(String pattern) {
+        Pattern patt = PATTERNS.get(pattern);
+        if (patt == null) {
+            patt = Pattern.compile(pattern);
+            PATTERNS.put(pattern, patt);
+        }
+        return patt;
+    }
+
+    public static <T extends Comparable<T>> T min(Collection<T> ts) {
+        T min = null;
+        for (T t : ts) {
+            if (min == null) {
+                min = t;
+            } else {
+                min = min.compareTo(t) < 0 ? min : t;
+            }
+        }
+        return min;
+    }
+
+    public static <T extends Comparable<T>> T max(Collection<T> ts) {
+        T max = null;
+        for (T t : ts) {
+            if (max == null) {
+                max = t;
+            } else {
+                max = max.compareTo(t) > 0 ? max : t;
+            }
+        }
+        return max;
     }
 
     public static String[] concat(String[] t1, String[] t2) {
