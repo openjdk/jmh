@@ -49,10 +49,11 @@ THE POSSIBILITY OF SUCH DAMAGE.
             <artifactId>jmh-core</artifactId>
             <version>\${jmh.version}</version>
         </dependency>
-        <!--
-           Put the dependency on Groovy here:
-             org.codehaus.groovy:groovy:2.2.2 is on of the possible dependencies
-         -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>\${groovy.version}</version>
+        </dependency>
     </dependencies>
 
     <prerequisites>
@@ -61,9 +62,35 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--
+            JMH version to use with this project.
+          -->
         <jmh.version>${project.version}</jmh.version>
-        <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
-        <javac.target>1.6</javac.target>
+
+        <!--
+            Java source/target to use for compilation.
+          -->
+        <javac.target>1.8</javac.target>
+
+        <!--
+           Put an approriate Groovy version here.
+           Available versions are listed here:
+               https://mvnrepository.com/artifact/org.codehaus.groovy/groovy
+         -->
+        <groovy.version>2.4.7</groovy.version>
+
+        <!--
+            Select a JMH benchmark generator to use. Available options:
+               default:    whatever JMH chooses by default;
+               asm:        parse bytecode with ASM;
+               reflection: load classes and use Reflection over them;
+          -->
+        <jmh.generator>default</jmh.generator>
+
+        <!--
+            Name of the benchmark Uber-JAR to generate.
+          -->
         <uberjar.name>benchmarks</uberjar.name>
     </properties>
 

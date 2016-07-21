@@ -63,15 +63,35 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--
+            JMH version to use with this project.
+          -->
         <jmh.version>${project.version}</jmh.version>
-        <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
-        <javac.target>1.6</javac.target>
+
+        <!--
+            Java source/target to use for compilation.
+          -->
+        <javac.target>1.8</javac.target>
+
         <!--
            Put an approriate Kotlin compiler and stdlib version here.
            Available versions are listed here:
                 http://kotlinlang.org/docs/reference/using-maven.html#plugin-and-versions
          -->
         <kotlin.version>1.0.2</kotlin.version>
+
+        <!--
+            Select a JMH benchmark generator to use. Available options:
+               default:    whatever JMH chooses by default;
+               asm:        parse bytecode with ASM;
+               reflection: load classes and use Reflection over them;
+          -->
+        <jmh.generator>default</jmh.generator>
+
+        <!--
+            Name of the benchmark Uber-JAR to generate.
+          -->
         <uberjar.name>benchmarks</uberjar.name>
     </properties>
 
