@@ -50,10 +50,11 @@ THE POSSIBILITY OF SUCH DAMAGE.
             <artifactId>jmh-core</artifactId>
             <version>\${jmh.version}</version>
         </dependency>
-        <!--
-          Put the dependency on Kotlin stdlib here:
-            org.jetbrains.kotlin:kotlin-stdlib:0.6.2517 is one of the choices
-         -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>\${kotlin.version}</version>
+        </dependency>
     </dependencies>
 
     <prerequisites>
@@ -65,6 +66,12 @@ THE POSSIBILITY OF SUCH DAMAGE.
         <jmh.version>${project.version}</jmh.version>
         <jmh.generator>default</jmh.generator>  <!-- or "asm", or "reflection" -->
         <javac.target>1.6</javac.target>
+        <!--
+           Put an approriate Kotlin compiler and stdlib version here.
+           Available versions are listed here:
+                http://kotlinlang.org/docs/reference/using-maven.html#plugin-and-versions
+         -->
+        <kotlin.version>1.0.2</kotlin.version>
         <uberjar.name>benchmarks</uberjar.name>
     </properties>
 
@@ -80,7 +87,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
                 <!--
                    Put an approriate Kotlin compiler version here.
                  -->
-                <version>PUT_THE_VERSION_HERE</version>
+                <version>\${kotlin.version}</version>
 
                 <executions>
                     <execution>

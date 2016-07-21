@@ -30,7 +30,7 @@ questions.
     <fileSet filtered="true" packaged="true" encoding="UTF-8">
       <directory>src/main/kotlin</directory>
       <includes>
-        <include>**/*.ktm</include>
+        <include>**/*.kt</include>
       </includes>
     </fileSet>
  </fileSets>
