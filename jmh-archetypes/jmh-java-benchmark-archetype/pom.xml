@@ -33,7 +33,6 @@ questions.
         <version>1.13-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openjdk.jmh</groupId>
     <artifactId>jmh-java-benchmark-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
@@ -52,25 +51,17 @@ questions.
             </extension>
         </extensions>
 
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-archetype-plugin</artifactId>
-                    <version>2.2</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-archetype-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <escapeString>\</escapeString>
-                </configuration>
             </plugin>
         </plugins>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
