@@ -1097,12 +1097,22 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             if (code.size() > threshold) {
                 pw.printf(" <region is too big to display, has %d lines, but threshold is %d>%n", code.size(), threshold);
             } else {
+                long beginLine = begin;
+                long endLine = end;
+                for (ASMLine line : code) {
+                    Long addr = line.addr;
+                    if (addr != null) {
+                        beginLine = Math.min(beginLine, addr);
+                        endLine = Math.max(endLine, addr);
+                    }
+                }
+
                 Set<Interval> interIvs = new TreeSet<Interval>();
                 Set<Interval> intraIvs = new TreeSet<Interval>();
 
                 for (Interval it : asms.intervals) {
-                    boolean srcInline = (begin < it.src && it.src < end);
-                    boolean dstInline = (begin < it.dst && it.dst < end);
+                    boolean srcInline = (beginLine < it.src && it.src < endLine);
+                    boolean dstInline = (beginLine < it.dst && it.dst < endLine);
                     if (srcInline && dstInline) {
                         if (drawInterJumps) {
                             interIvs.add(it);
