@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.dag;
+package org.openjdk.jmh.ct.states.dag.doublets;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -31,32 +31,30 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class CycleThreadTest {
+public class ThreadBenchmarkTest {
 
     @State(Scope.Thread)
-    public static class B1 {
-        @Setup
-        public void setup(B2 b1) {
+    public static class L {
 
-        }
     }
 
-    @State(Scope.Thread)
-    public static class B2 {
+    @State(Scope.Benchmark)
+    public static class G {
         @Setup
-        public void setup(B1 b1) {
+        public void setup(L l1) {
 
         }
     }
 
     @Benchmark
-    public void test(B1 b1) {
+    public void test(G g1, G g2) {
 
     }
 
     @Test
     public void compileTest() {
-        CompileTest.assertFail(this.getClass());
+        CompileTest.assertOK(this.getClass());
     }
+
 
 }

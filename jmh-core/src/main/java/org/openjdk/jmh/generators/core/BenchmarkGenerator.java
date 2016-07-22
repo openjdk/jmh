@@ -271,6 +271,11 @@ public class BenchmarkGenerator {
             StateObjectHandler.validateState(clazz);
         }
 
+        // validate no @State cycles
+        for (MethodInfo e : methods) {
+            StateObjectHandler.validateNoCycles(e);
+        }
+
         // validate against rogue fields
         if (!explicitState || clazz.isAbstract()) {
             for (FieldInfo fi : BenchmarkGeneratorUtils.getAllFields(clazz)) {
@@ -461,11 +466,8 @@ public class BenchmarkGenerator {
     private void generateClass(GeneratorSource source, GeneratorDestination destination, ClassInfo classInfo, BenchmarkInfo info) throws IOException {
         StateObjectHandler states = new StateObjectHandler(compilerControl);
 
-        // benchmark instance is implicit
-        states.bindImplicit(classInfo, "bench", Scope.Thread);
-
         // bind all methods
-        states.bindMethodGroup(info.methodGroup);
+        states.bindMethods(classInfo, info.methodGroup);
 
         // Create file and open an outputstream
         PrintWriter writer = new PrintWriter(destination.newClass(info.generatedClassQName), false);

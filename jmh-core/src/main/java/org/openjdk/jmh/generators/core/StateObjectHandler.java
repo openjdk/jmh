@@ -48,10 +48,9 @@ class StateObjectHandler {
 
     private final Set<StateObject> stateObjects;
     private final Map<String, StateObject> implicits;
-    private final Multimap<StateObject, StateObject> stateObjectDeps;
+
 
     private final Multimap<String, String> benchmarkArgs;
-    private final Multimap<String, String> stateHelperArgs;
 
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
@@ -63,8 +62,6 @@ class StateObjectHandler {
         this.implicits = new HashMap<String, StateObject>();
         this.specials = new HashMultimap<String, ClassInfo>();
         this.stateObjects = new HashSet<StateObject>();
-        this.stateHelperArgs = new HashMultimap<String, String>();
-        this.stateObjectDeps = new HashMultimap<StateObject, StateObject>();
         this.identifiers = new Identifiers();
     }
 
@@ -178,13 +175,24 @@ class StateObjectHandler {
         return ann;
     }
 
-    public void bindMethodGroup(MethodGroup mg) {
+    public void bindMethods(ClassInfo holder, MethodGroup mg) {
         for (MethodInfo method : mg.methods()) {
-            Set<StateObject> seen = new HashSet<StateObject>();
+            // Bind the holder implicitly:
+            {
+                State ann = BenchmarkGeneratorUtils.getAnnSuper(holder, State.class);
+                Scope scope = (ann != null) ? ann.value() : Scope.Thread;
+                StateObject holderSo = new StateObject(identifiers, holder, scope);
+                stateObjects.add(holderSo);
+                implicits.put("bench", holderSo);
+                bindState(method, holderSo, holder);
+
+                resolveDependencies(method, holder, holderSo);
+            }
 
             // Check that all arguments are states.
             validateStateArgs(method);
 
+            // Bind all @Benchmark parameters
             for (ParameterInfo ppi : method.getParameters()) {
                 ClassInfo pci = ppi.getType();
 
@@ -198,9 +206,41 @@ class StateObjectHandler {
                     benchmarkArgs.put(method.getName(), pso.toLocal());
                     bindState(method, pso, pci);
 
-                    seen.add(pso);
+                    resolveDependencies(method, pci, pso);
+                }
+            }
+        }
+    }
 
-                    recursiveStateResolve(method, pci, pso, seen);
+    public static void validateNoCycles(MethodInfo method) {
+        try {
+            validateNoCyclesStep(Collections.<String>emptyList(), method, true);
+        } catch (StackOverflowError e) {
+            // "YOLO Engineering"
+            throw new GenerationException("@" + State.class.getSimpleName() +
+                    " dependency cycle is detected.", method);
+        }
+    }
+
+    private static void validateNoCyclesStep(List<String> states, MethodInfo method, boolean includeHolder) {
+        List<ClassInfo> stratum = new ArrayList<ClassInfo>();
+        if (includeHolder) {
+            stratum.add(method.getDeclaringClass());
+        }
+        for (ParameterInfo ppi : method.getParameters()) {
+            stratum.add(ppi.getType());
+        }
+
+        List<String> newStates = new ArrayList<String>();
+        newStates.addAll(states);
+        for (ClassInfo ci : stratum) {
+            newStates.add(ci.getQualifiedName());
+        }
+
+        for (ClassInfo ci : stratum) {
+            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
+                if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
+                    validateNoCyclesStep(newStates, mi, false);
                 }
             }
         }
@@ -209,7 +249,7 @@ class StateObjectHandler {
     /**
      * Recursively resolve if there are any other states referenced through helper methods.
      */
-    private void recursiveStateResolve(MethodInfo method, ClassInfo pci, StateObject pso, Set<StateObject> seen) {
+    private void resolveDependencies(MethodInfo method, ClassInfo pci, StateObject pso) {
 
         for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(pci)) {
             if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
@@ -217,38 +257,23 @@ class StateObjectHandler {
                     ClassInfo ci = pi.getType();
 
                     if (isSpecialClass(ci)) {
-                        stateHelperArgs.put(mi.getQualifiedName(), getSpecialClassAccessor(ci));
+                        pso.helperArgs.put(mi.getQualifiedName(), getSpecialClassAccessor(ci));
                         specials.put(mi.getQualifiedName(), ci);
                     } else {
                         StateObject so = new StateObject(identifiers, ci, getState(ci, pi).value());
 
-                        if (!seen.add(so)) {
-                            throw new GenerationException("@" + State.class.getSimpleName() + " dependency cycle is detected.", pi);
-                        }
-
-                        if (!stateHelperArgs.get(mi.getQualifiedName()).contains(so.toLocal())) {
+                        if (!pso.helperArgs.get(mi.getQualifiedName()).contains(so.toLocal())) {
                             stateObjects.add(so);
-                            stateObjectDeps.put(pso, so);
-                            stateHelperArgs.put(mi.getQualifiedName(), so.toLocal());
+                            pso.depends.add(so);
+                            pso.helperArgs.put(mi.getQualifiedName(), so.toLocal());
+
                             bindState(method, so, ci);
-                            recursiveStateResolve(method, ci, so, seen);
+                            resolveDependencies(method, ci, so);
                         }
                     }
                 }
             }
         }
-    }
-
-
-    public void bindImplicit(ClassInfo ci, String label, Scope scope) {
-        State ann = BenchmarkGeneratorUtils.getAnnSuper(ci, State.class);
-        StateObject so = new StateObject(identifiers, ci, (ann != null) ? ann.value() : scope);
-        stateObjects.add(so);
-        implicits.put(label, so);
-        bindState(null, so, ci);
-
-        Set<StateObject> seen = new HashSet<StateObject>();
-        recursiveStateResolve(null, ci, so, seen);
     }
 
     private void bindState(MethodInfo execMethod, StateObject so, ClassInfo ci) {
@@ -549,7 +574,7 @@ class StateObjectHandler {
             if (type == HelperType.SETUP) {
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
-                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
                         result.add(so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
@@ -562,7 +587,7 @@ class StateObjectHandler {
             if (type == HelperType.TEARDOWN) {
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
                         result.add(so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
@@ -579,7 +604,7 @@ class StateObjectHandler {
                 result.add("        if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
-                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
                         result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
@@ -605,7 +630,7 @@ class StateObjectHandler {
                 result.add("        if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        Collection<String> args = stateHelperArgs.get(mi.method.getQualifiedName());
+                        Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
                         result.add("            " + so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
                     }
                 }
@@ -702,7 +727,7 @@ class StateObjectHandler {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                Collection<String> args = stateHelperArgs.get(hmi.method.getQualifiedName());
+                Collection<String> args = so.helperArgs.get(hmi.method.getQualifiedName());
                 result.add("        val." + hmi.method.getName() + "(" + Utils.join(args, ",") + ");");
             }
             result.add("        val.ready" + Level.Trial + " = true;");
@@ -737,7 +762,7 @@ class StateObjectHandler {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                Collection<String> args = stateHelperArgs.get(hmi.method.getQualifiedName());
+                Collection<String> args = so.helperArgs.get(hmi.method.getQualifiedName());
                 result.add("        val." + hmi.method.getName() + "(" + Utils.join(args, ",") + ");");
             }
             result.add("        " + so.fieldIdentifier + " = val;");
@@ -777,7 +802,7 @@ class StateObjectHandler {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel != Level.Trial) continue;
                 if (hmi.type != HelperType.SETUP) continue;
-                Collection<String> args = stateHelperArgs.get(hmi.method.getQualifiedName());
+                Collection<String> args = so.helperArgs.get(hmi.method.getQualifiedName());
                 result.add("        val." + hmi.method.getName() + "(" + Utils.join(args, ",") + ");");
             }
             result.add("        " + "val.ready" + Level.Trial + " = true;");
@@ -790,11 +815,11 @@ class StateObjectHandler {
     }
 
     private String soDependency_TypeArgs(StateObject so) {
-        return (stateObjectDeps.get(so).isEmpty() ? "" : ", " + getTypeArgList(stateObjectDeps.get(so)));
+        return (so.depends.isEmpty() ? "" : ", " + getTypeArgList(so.depends));
     }
 
     private String soDependency_Args(StateObject so) {
-        return (stateObjectDeps.get(so).isEmpty() ? "" : ", " + getArgList(stateObjectDeps.get(so)));
+        return (so.depends.isEmpty() ? "" : ", " + getArgList(so.depends));
     }
 
     public Collection<String> getStateDestructors(MethodInfo method) {
@@ -845,7 +870,7 @@ class StateObjectHandler {
             linearOrder.addAll(stratum);
             List<StateObject> newStratum = new ArrayList<StateObject>();
             for (StateObject so : stratum) {
-                newStratum.addAll(stateObjectDeps.get(so));
+                newStratum.addAll(so.depends);
             }
             stratum = newStratum;
         }

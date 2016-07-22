@@ -25,13 +25,11 @@
 package org.openjdk.jmh.generators.core;
 
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 class StateObject {
 
@@ -50,6 +48,8 @@ class StateObject {
     public final String fieldIdentifier;
     public final Multimap<String, FieldInfo> params;
     public final SortedSet<HelperMethodInvocation> helpers;
+    public final Multimap<String, String> helperArgs;
+    public final List<StateObject> depends;
 
     public StateObject(Identifiers identifiers, ClassInfo info, Scope scope) {
         this.packageName = info.getPackageName() + ".generated";
@@ -63,6 +63,8 @@ class StateObject {
 
         this.params = new TreeMultimap<String, FieldInfo>();
         this.helpers = new TreeSet<HelperMethodInvocation>();
+        this.helperArgs = new HashMultimap<String, String>();
+        this.depends = new ArrayList<StateObject>();
     }
 
     @Override
