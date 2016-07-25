@@ -146,4 +146,10 @@ public class Defaults {
      * Default timeout.
      */
     public static final TimeValue TIMEOUT = TimeValue.minutes(10);
+
+    /**
+     * Default benchmarks to include.
+     */
+    public static final String INCLUDE_BENCHMARKS = ".*";
+
 }

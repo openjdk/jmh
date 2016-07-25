@@ -44,6 +44,9 @@ public class OptionFormatter implements HelpFormatter {
         sb.append(" \"+\" means comma-separated list of values.\n");
         sb.append(" \"time\" arguments accept time suffixes, like \"100ms\".\n");
         sb.append("\n");
+        sb.append("Command line options usually take precedence over annotations.");
+        sb.append("\n");
+        sb.append("\n");
         for (OptionDescriptor each : options.values()) {
             sb.append(lineFor(each));
         }

@@ -28,6 +28,7 @@ import joptsimple.*;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.profile.ProfilerFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.Defaults;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.Optional;
@@ -92,70 +93,88 @@ public class CommandLineOptions implements Options {
         parser.formatHelpWith(new OptionFormatter());
 
         OptionSpec<Integer> optMeasureCount = parser.accepts("i", "Number of measurement iterations to do. " +
-                "Measurement iterations are counted towards the benchmark score.")
+                "Measurement iterations are counted towards the benchmark score. " +
+                "(default: " + Defaults.MEASUREMENT_ITERATIONS_SINGLESHOT + " for " + Mode.SingleShotTime + ", and " +
+                Defaults.MEASUREMENT_ITERATIONS + " for all other modes)")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
         OptionSpec<Integer> optMeasureBatchSize = parser.accepts("bs", "Batch size: number of benchmark method " +
-                "calls per operation. Some benchmark modes may ignore this setting, please check this separately.")
+                "calls per operation. Some benchmark modes may ignore this setting, please check this separately. " +
+                "(default: " + Defaults.MEASUREMENT_BATCHSIZE + ")")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
         OptionSpec<TimeValue> optMeasureTime = parser.accepts("r", "Minimum time to spend at each measurement " +
-                "iteration. Benchmarks may generally run longer than iteration duration.")
+                "iteration. Benchmarks may generally run longer than iteration duration. " +
+                "(default: " + Defaults.MEASUREMENT_TIME + ")")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         OptionSpec<Integer> optWarmupCount = parser.accepts("wi", "Number of warmup iterations to do. Warmup " +
-                "iterations are not counted towards the benchmark score.")
+                "iterations are not counted towards the benchmark score. " +
+                "(default: " + Defaults.WARMUP_ITERATIONS_SINGLESHOT + " for " + Mode.SingleShotTime + ", and " +
+                Defaults.WARMUP_ITERATIONS + " for all other modes)")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
         OptionSpec<Integer> optWarmupBatchSize = parser.accepts("wbs", "Warmup batch size: number of benchmark " +
-                "method calls per operation. Some benchmark modes may ignore this setting.")
+                "method calls per operation. Some benchmark modes may ignore this setting. " +
+                "(default: " + Defaults.WARMUP_BATCHSIZE + ")")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
         OptionSpec<TimeValue> optWarmupTime = parser.accepts("w", "Minimum time to spend at each warmup iteration. " +
-                "Benchmarks may generally run longer than iteration duration.")
+                "Benchmarks may generally run longer than iteration duration. " +
+                "(default: " + Defaults.WARMUP_TIME + ")")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         OptionSpec<TimeValue> optTimeoutTime = parser.accepts("to", "Timeout for benchmark iteration. After reaching " +
                 "this timeout, JMH will try to interrupt the running tasks. Non-cooperating benchmarks may ignore " +
-                "this timeout.")
+                "this timeout. " +
+                "(default: " + Defaults.TIMEOUT + ")")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         OptionSpec<Integer> optThreads = parser.accepts("t", "Number of worker threads to run with. 'max' means the " +
-                "maximum number of hardware threads available on the machine, figured out by JMH itself.")
+                "maximum number of hardware threads available on the machine, figured out by JMH itself. " +
+                "(default: " + Defaults.THREADS + ")")
                 .withRequiredArg().withValuesConvertedBy(ThreadsValueConverter.INSTANCE).describedAs("int");
 
-        OptionSpec<String> optBenchmarkMode = parser.accepts("bm", "Benchmark mode. Available modes are: " + Mode.getKnown())
+        OptionSpec<String> optBenchmarkMode = parser.accepts("bm", "Benchmark mode. Available modes are: " + Mode.getKnown() + ". " +
+                "(default: " + Defaults.BENCHMARK_MODE + ")")
                 .withRequiredArg().ofType(String.class).withValuesSeparatedBy(',').describedAs("mode");
 
         OptionSpec<Boolean> optSyncIters = parser.accepts("si", "Should JMH synchronize iterations? This would " +
                 "significantly lower the noise in multithreaded tests, by making sure the measured part happens only " +
-                "when all workers are running.")
+                "when all workers are running. " +
+                "(default: " + Defaults.SYNC_ITERATIONS + ")")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optGC = parser.accepts("gc", "Should JMH force GC between iterations? Forcing the GC may " +
                 "help to lower the noise in GC-heavy benchmarks, at the expense of jeopardizing GC ergonomics " +
-                "decisions. Use with care.")
+                "decisions. Use with care. " +
+                "(default: " + Defaults.DO_GC + ")")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optFOE = parser.accepts("foe", "Should JMH fail immediately if any benchmark had " +
                 "experienced an unrecoverable error? This helps to make quick sanity tests for benchmark suites, as " +
-                "well as make the automated runs with checking error codes.")
+                "well as make the automated runs with checking error codes. " +
+                "(default: " + Defaults.FAIL_ON_ERROR + ")")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<String> optVerboseMode = parser.accepts("v", "Verbosity mode. Available modes are: " + Arrays.toString(VerboseMode.values()))
+        OptionSpec<String> optVerboseMode = parser.accepts("v", "Verbosity mode. Available modes are: " + Arrays.toString(VerboseMode.values()) + ". " +
+                "(default: " + Defaults.VERBOSITY + ")")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
-        OptionSpec<String> optArgs = parser.nonOptions("Benchmarks to run (regexp+).")
+        OptionSpec<String> optArgs = parser.nonOptions("Benchmarks to run (regexp+). " +
+                "(default: " + Defaults.INCLUDE_BENCHMARKS + ")")
                 .describedAs("regexp+");
 
         OptionSpec<Integer> optForks = parser.accepts("f", "How many times to fork a single benchmark. Use 0 to " +
                 "disable forking altogether. Warning: disabling forking may have detrimental impact on benchmark and " +
-                "infrastructure reliability, you might want to use different warmup mode instead.")
+                "infrastructure reliability, you might want to use different warmup mode instead. " +
+                "(default: " + Defaults.MEASUREMENT_FORKS + ")")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
         OptionSpec<Integer> optWarmupForks = parser.accepts("wf", "How many warmup forks to make for a single benchmark. " +
                 "All iterations within the warmup fork are not counted towards the benchmark score. Use 0 to disable " +
-                "warmup forks.")
+                "warmup forks. " +
+                "(default: " + Defaults.WARMUP_FORKS + ")")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.NON_NEGATIVE).describedAs("int");
 
         OptionSpec<String> optOutput = parser.accepts("o", "Redirect human-readable output to a given file.")
@@ -163,7 +182,8 @@ public class CommandLineOptions implements Options {
 
         OptionSpec<String> optOutputResults = parser.accepts("rff", "Write machine-readable results to a given file. " +
                 "The file format is controlled by -rf option. Please see the list of result formats for available " +
-                "formats.")
+                "formats. " +
+                "(default: " + Defaults.RESULT_FILE_PREFIX + ".<result-format>)")
                 .withRequiredArg().ofType(String.class).describedAs("filename");
 
         OptionSpec<String> optProfilers = parser.accepts("prof", "Use profilers to collect additional benchmark data. " +
@@ -195,19 +215,23 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optTU = parser.accepts("tu", "Override time unit in benchmark results. Available time units " +
-                "are: [m, s, ms, us, ns].")
+                "are: [m, s, ms, us, ns]. " +
+                "(default: " + Defaults.OUTPUT_TIMEUNIT + ")")
                 .withRequiredArg().ofType(String.class).describedAs("TU");
 
         OptionSpec<Integer> optOPI = parser.accepts("opi", "Override operations per invocation, see " +
-                "@OperationsPerInvocation Javadoc for details.")
+                "@OperationsPerInvocation Javadoc for details. " +
+                "(default: " + Defaults.OPS_PER_INVOCATION + ")")
                 .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("int");
 
         OptionSpec<String> optResultFormat = parser.accepts("rf", "Format type for machine-readable results. These " +
-                "results are written to a separate file (see -rff). See the list of available result formats with -lrf.")
+                "results are written to a separate file (see -rff). See the list of available result formats with -lrf. " +
+                "(default: " + Defaults.RESULT_FORMAT +")")
                 .withRequiredArg().ofType(String.class).describedAs("type");
 
         OptionSpec<String> optWarmupMode = parser.accepts("wm", "Warmup mode for warming up selected benchmarks. " +
-                "Warmup modes are: " + warmupModesDesc())
+                "Warmup modes are: " + warmupModesDesc() +
+                "(default: " + Defaults.WARMUP_MODE + ")")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
         OptionSpec<String> optExcludes = parser.accepts("e", "Benchmarks to exclude from the run.")
@@ -225,9 +249,9 @@ public class CommandLineOptions implements Options {
 
         parser.accepts("l", "List the benchmarks that match a filter, and exit.");
         parser.accepts("lp", "List the benchmarks that match a filter, along with parameters, and exit.");
-        parser.accepts("lrf", "List machine-readable result formats.");
-        parser.accepts("lprof", "List profilers.");
-        parser.accepts("h", "Display help.");
+        parser.accepts("lrf", "List machine-readable result formats, and exit.");
+        parser.accepts("lprof", "List profilers, and exit.");
+        parser.accepts("h", "Display help, and exit.");
 
         try {
             OptionSet set = parser.parse(argv);

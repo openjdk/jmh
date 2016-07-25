@@ -84,7 +84,7 @@ public class BenchmarkList extends AbstractResourceReader {
         // assume we match all benchmarks when include is empty
         List<String> regexps = new ArrayList<String>(includes);
         if (regexps.isEmpty()) {
-            regexps.add(".*");
+            regexps.add(Defaults.INCLUDE_BENCHMARKS);
         }
 
         // compile all patterns

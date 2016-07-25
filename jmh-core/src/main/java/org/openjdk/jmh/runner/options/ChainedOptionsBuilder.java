@@ -53,6 +53,7 @@ public interface ChainedOptionsBuilder {
      *
      * @param regexp to match benchmarks against
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#INCLUDE_BENCHMARKS
      */
     ChainedOptionsBuilder include(String regexp);
 
@@ -69,6 +70,7 @@ public interface ChainedOptionsBuilder {
      * ResultFormatType to use in the run
      * @param type resultformat type
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#RESULT_FORMAT
      */
     ChainedOptionsBuilder resultFormat(ResultFormatType type);
 
@@ -83,6 +85,7 @@ public interface ChainedOptionsBuilder {
      * Output filename to write the result to
      * @param filename file name
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#RESULT_FILE_PREFIX
      */
     ChainedOptionsBuilder result(String filename);
 
@@ -90,6 +93,7 @@ public interface ChainedOptionsBuilder {
      * Should do GC between measurementIterations?
      * @param value flag
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#DO_GC
      */
     ChainedOptionsBuilder shouldDoGC(boolean value);
 
@@ -127,6 +131,7 @@ public interface ChainedOptionsBuilder {
      * Control verbosity level.
      * @param mode flag
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#VERBOSITY
      */
     ChainedOptionsBuilder verbosity(VerboseMode mode);
 
@@ -134,6 +139,7 @@ public interface ChainedOptionsBuilder {
      * Should fail on first benchmark error?
      * @param value flag
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#FAIL_ON_ERROR
      */
     ChainedOptionsBuilder shouldFailOnError(boolean value);
 
@@ -142,6 +148,7 @@ public interface ChainedOptionsBuilder {
      * @param count number of threads
      * @return builder
      * @see org.openjdk.jmh.annotations.Threads
+     * @see org.openjdk.jmh.runner.Defaults#THREADS
      */
     ChainedOptionsBuilder threads(int count);
 
@@ -158,6 +165,7 @@ public interface ChainedOptionsBuilder {
      * Should synchronize measurementIterations?
      * @param value flag
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#SYNC_ITERATIONS
      */
     ChainedOptionsBuilder syncIterations(boolean value);
 
@@ -166,6 +174,8 @@ public interface ChainedOptionsBuilder {
      * @param value flag
      * @return builder
      * @see org.openjdk.jmh.annotations.Warmup
+     * @see org.openjdk.jmh.runner.Defaults#WARMUP_ITERATIONS
+     * @see org.openjdk.jmh.runner.Defaults#WARMUP_ITERATIONS_SINGLESHOT
      */
     ChainedOptionsBuilder warmupIterations(int value);
 
@@ -174,6 +184,7 @@ public interface ChainedOptionsBuilder {
      * @param value batch size
      * @return builder
      * @see org.openjdk.jmh.annotations.Warmup
+     * @see org.openjdk.jmh.runner.Defaults#WARMUP_BATCHSIZE
      */
     ChainedOptionsBuilder warmupBatchSize(int value);
 
@@ -182,6 +193,7 @@ public interface ChainedOptionsBuilder {
      * @param value time
      * @return builder
      * @see org.openjdk.jmh.annotations.Warmup
+     * @see org.openjdk.jmh.runner.Defaults#WARMUP_TIME
      */
     ChainedOptionsBuilder warmupTime(TimeValue value);
 
@@ -189,6 +201,7 @@ public interface ChainedOptionsBuilder {
      * Warmup mode to use
      * @param mode to use
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#WARMUP_MODE
      */
     ChainedOptionsBuilder warmupMode(WarmupMode mode);
 
@@ -204,6 +217,8 @@ public interface ChainedOptionsBuilder {
      * @param count number of iterations
      * @return builder
      * @see org.openjdk.jmh.annotations.Measurement
+     * @see org.openjdk.jmh.runner.Defaults#MEASUREMENT_ITERATIONS
+     * @see org.openjdk.jmh.runner.Defaults#MEASUREMENT_ITERATIONS_SINGLESHOT
      */
     ChainedOptionsBuilder measurementIterations(int count);
 
@@ -212,6 +227,7 @@ public interface ChainedOptionsBuilder {
      * @param value batch size
      * @return builder
      * @see org.openjdk.jmh.annotations.Measurement
+     * @see org.openjdk.jmh.runner.Defaults#MEASUREMENT_BATCHSIZE
      */
     ChainedOptionsBuilder measurementBatchSize(int value);
 
@@ -220,6 +236,7 @@ public interface ChainedOptionsBuilder {
      * @param value time
      * @return builder
      * @see org.openjdk.jmh.annotations.Measurement
+     * @see org.openjdk.jmh.runner.Defaults#MEASUREMENT_TIME
      */
     ChainedOptionsBuilder measurementTime(TimeValue value);
 
@@ -230,6 +247,7 @@ public interface ChainedOptionsBuilder {
      * @param mode benchmark mode
      * @return builder
      * @see org.openjdk.jmh.annotations.BenchmarkMode
+     * @see org.openjdk.jmh.runner.Defaults#BENCHMARK_MODE
      */
     ChainedOptionsBuilder mode(Mode mode);
 
@@ -238,6 +256,7 @@ public interface ChainedOptionsBuilder {
      * @param tu time unit
      * @return builder
      * @see org.openjdk.jmh.annotations.OutputTimeUnit
+     * @see org.openjdk.jmh.runner.Defaults#OUTPUT_TIMEUNIT
      */
     ChainedOptionsBuilder timeUnit(TimeUnit tu);
 
@@ -246,6 +265,7 @@ public interface ChainedOptionsBuilder {
      * @param value operations per invocation.
      * @return builder
      * @see org.openjdk.jmh.annotations.OperationsPerInvocation
+     * @see org.openjdk.jmh.runner.Defaults#OPS_PER_INVOCATION
      */
     ChainedOptionsBuilder operationsPerInvocation(int value);
 
@@ -254,6 +274,7 @@ public interface ChainedOptionsBuilder {
      * @param value number of forks
      * @return builder
      * @see org.openjdk.jmh.annotations.Fork
+     * @see org.openjdk.jmh.runner.Defaults#MEASUREMENT_FORKS
      */
     ChainedOptionsBuilder forks(int value);
 
@@ -262,6 +283,7 @@ public interface ChainedOptionsBuilder {
      * @param value number of ignored forks
      * @return builder
      * @see org.openjdk.jmh.annotations.Fork
+     * @see org.openjdk.jmh.runner.Defaults#WARMUP_FORKS
      */
     ChainedOptionsBuilder warmupForks(int value);
 
@@ -325,6 +347,7 @@ public interface ChainedOptionsBuilder {
      * How long to wait for iteration execution?
      * @param value time
      * @return builder
+     * @see org.openjdk.jmh.runner.Defaults#TIMEOUT
      */
     ChainedOptionsBuilder timeout(TimeValue value);
 
