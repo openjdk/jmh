@@ -477,4 +477,20 @@ public class Utils {
         return messages;
     }
 
+    /**
+     * Adapts Iterator for Iterable.
+     * Can be iterated only once!
+     *
+     * @param it iterator
+     * @return iterable for given iterator
+     */
+    public static <T> Iterable<T> adaptForLoop(final Iterator<T> it) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return it;
+            }
+        };
+    }
+
 }

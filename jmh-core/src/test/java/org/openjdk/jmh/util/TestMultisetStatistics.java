@@ -28,6 +28,8 @@ import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -383,6 +385,52 @@ public class TestMultisetStatistics {
                 new double[] {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100},
                 new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
         );
+    }
+
+    /**
+     * Test of iterator which make accessible raw data.
+     * Iterate over default instance with no duplicates.
+     */
+    @Test
+    public strictfp void testRawDataIterator_no_duplicates() {
+        int itemCount = 0;
+        for (Map.Entry<Double, Long> entry : Utils.adaptForLoop(instance.getRawData())) {
+            Assert.assertEquals(entry.getValue().longValue(), 1L);
+
+            // Check if key (the actual data) is in the VALUES collection,
+            // else fail the test (the Multiset was constructed with values
+            // from VALUES collection, so it should be there).
+            boolean keyIsPresent = false;
+            double key = entry.getKey();
+            for (double value : VALUES) {
+                if (Double.compare(value, key) == 0) {
+                    keyIsPresent = true;
+                }
+            }
+            Assert.assertTrue("Value from iterator is not present in source collection", keyIsPresent);
+
+            itemCount++;
+        }
+        Assert.assertEquals(itemCount, VALUES.length);
+    }
+
+    /**
+     * Test of iterator which make accessible raw data.
+     * Iterate over new instance with duplicates.
+     */
+    @Test
+    public strictfp void testRawDataIterator_duplicates() {
+        MultisetStatistics s = new MultisetStatistics();
+        for (int c = 0; c <= 10; c++) {
+            s.addValue(c * 10, c);
+        }
+
+        int itemCount = 0;
+        for (Map.Entry<Double, Long> entry : Utils.adaptForLoop(s.getRawData())) {
+            Assert.assertEquals(entry.getKey(), (double)(entry.getValue() * 10));
+            itemCount++;
+        }
+        Assert.assertEquals(itemCount, 10);
     }
 
 }

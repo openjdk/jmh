@@ -27,6 +27,9 @@ package org.openjdk.jmh.util;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 
 import java.io.Serializable;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
 
 public interface Statistics extends Serializable, StatisticalSummary, Comparable<Statistics> {
 
@@ -133,4 +136,14 @@ public interface Statistics extends Serializable, StatisticalSummary, Comparable
      * @return histogram data
      */
     int[] getHistogram(double[] levels);
+
+    /**
+     * Returns the raw data for this statistics. This data can be useful for
+     * custom postprocessing and statistics computations.  Note, that values of
+     * multiple calls may not be unique. Ordering of the values is not specified.
+     *
+     * @return iterator to raw data. Each item is pair of actual value and
+     *          number of occurrences of this value.
+     */
+    Iterator<Entry<Double, Long>> getRawData();
 }

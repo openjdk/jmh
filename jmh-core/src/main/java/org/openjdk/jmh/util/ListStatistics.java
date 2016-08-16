@@ -26,7 +26,10 @@ package org.openjdk.jmh.util;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Calculate statistics over a list of doubles.
@@ -150,6 +153,11 @@ public class ListStatistics extends AbstractStatistics {
     }
 
     @Override
+    public Iterator<Map.Entry<Double, Long>> getRawData() {
+        return new ListStatisticsIterator();
+    }
+
+    @Override
     public double getVariance() {
         if (count > 1) {
             double v = 0;
@@ -160,6 +168,25 @@ public class ListStatistics extends AbstractStatistics {
             return v / (count - 1);
         } else {
             return Double.NaN;
+        }
+    }
+
+    private class ListStatisticsIterator implements Iterator<Map.Entry<Double, Long>> {
+        private int currentIndex = 0;
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < count;
+        }
+
+        @Override
+        public Map.Entry<Double, Long> next() {
+            return new AbstractMap.SimpleImmutableEntry<Double, Long>(values[currentIndex++], 1L);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Element cannot be removed.");
         }
     }
 

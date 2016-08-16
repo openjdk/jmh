@@ -214,8 +214,7 @@
                 ]
             }
         }
-    }
-    ,
+    },
     {
         "benchmark" : "benchmark_1",
         "mode" : "thrpt",
@@ -314,8 +313,7 @@
                 ]
             }
         }
-    }
-    ,
+    },
     {
         "benchmark" : "benchmark_2",
         "mode" : "thrpt",
@@ -476,8 +474,7 @@
                 ]
             }
         }
-    }
-    ,
+    },
     {
         "benchmark" : "benchmark_3",
         "mode" : "thrpt",
@@ -670,8 +667,7 @@
                 ]
             }
         }
-    }
-    ,
+    },
     {
         "benchmark" : "benchmark_4",
         "mode" : "thrpt",

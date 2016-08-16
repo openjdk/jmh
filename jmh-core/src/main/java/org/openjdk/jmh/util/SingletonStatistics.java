@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.util;
 
+import java.util.AbstractMap;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Calculate statistics with just a single value.
  */
@@ -77,5 +81,30 @@ public class SingletonStatistics extends AbstractStatistics {
             }
         }
         return result;
+    }
+
+    @Override
+    public Iterator<Map.Entry<Double, Long>> getRawData() {
+        return new SingletonStatisticsIterator();
+    }
+
+    private class SingletonStatisticsIterator implements Iterator<Map.Entry<Double, Long>> {
+        private boolean entryReturned = false;
+
+        @Override
+        public boolean hasNext() {
+            return !entryReturned;
+        }
+
+        @Override
+        public Map.Entry<Double, Long> next() {
+            entryReturned = true;
+            return new AbstractMap.SimpleImmutableEntry<Double, Long>(value, 1L);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Element cannot be removed.");
+        }
     }
 }

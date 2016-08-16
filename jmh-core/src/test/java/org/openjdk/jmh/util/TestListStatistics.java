@@ -28,6 +28,9 @@ import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -390,6 +393,21 @@ public class TestListStatistics {
                 new double[] {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100},
                 new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
         );
+    }
+
+    /**
+     * Test of iterator which make accessible raw data.
+     */
+    @Test
+    public strictfp void testRawDataIterator() {
+        Iterator<Map.Entry<Double, Long>> listIter = instance.getRawData();
+        for (double item : VALUES) {
+            Assert.assertTrue(listIter.hasNext());
+            Map.Entry<Double, Long> entry = listIter.next();
+            Assert.assertEquals(entry.getKey(), item);
+            Assert.assertEquals(entry.getValue().longValue(), 1L);
+        }
+        Assert.assertFalse(listIter.hasNext());
     }
 
 }

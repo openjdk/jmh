@@ -30,6 +30,7 @@ import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.util.Statistics;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -39,6 +40,9 @@ import java.util.Collection;
 import java.util.Map;
 
 class JSONResultFormat implements ResultFormat {
+
+    private static final boolean PRINT_RAW_DATA =
+            Boolean.parseBoolean(System.getProperty("jmh.json.rawData", "true"));
 
     private final PrintStream out;
 
@@ -59,6 +63,7 @@ class JSONResultFormat implements ResultFormat {
 
             if (first) {
                 first = false;
+                pw.println();
             } else {
                 pw.println(",");
             }
@@ -88,20 +93,18 @@ class JSONResultFormat implements ResultFormat {
             pw.println("\"scoreConfidence\" : " + emit(primaryResult.getScoreConfidence()) + ",");
             pw.println(emitPercentiles(primaryResult.getStatistics()));
             pw.println("\"scoreUnit\" : \"" + primaryResult.getScoreUnit() + "\",");
-            pw.println("\"rawData\" :");
 
-            {
-                Collection<String> l1 = new ArrayList<String>();
-                for (BenchmarkResult benchmarkResult : runResult.getBenchmarkResults()) {
-                    Collection<String> scores = new ArrayList<String>();
-                    for (IterationResult r : benchmarkResult.getIterationResults()) {
-                        scores.add(emit(r.getPrimaryResult().getScore()));
-                    }
-                    l1.add(printMultiple(scores, "[", "]"));
-                }
-                pw.println(printMultiple(l1, "[", "]"));
-                pw.println("},");
+            switch (params.getMode()) {
+                case SampleTime:
+                    pw.println("\"rawDataHistogram\" :");
+                    pw.println(getRawData(runResult, true));
+                    break;
+                default:
+                    pw.println("\"rawData\" :");
+                    pw.println(getRawData(runResult, false));
             }
+
+            pw.println("},"); // primaryMetric end
 
             Collection<String> secondaries = new ArrayList<String>();
             for (Map.Entry<String, Result> e : runResult.getSecondaryResults().entrySet()) {
@@ -137,12 +140,37 @@ class JSONResultFormat implements ResultFormat {
             pw.println(printMultiple(secondaries, "", ""));
             pw.println("}");
 
-            pw.println("}");
-
+            pw.print("}"); // benchmark end
         }
         pw.println("]");
 
         out.println(tidy(sw.toString()));
+    }
+
+    private String getRawData(RunResult runResult, boolean histogram) {
+        StringBuilder sb = new StringBuilder();
+        Collection<String> runs = new ArrayList<String>();
+
+        if (PRINT_RAW_DATA) {
+            for (BenchmarkResult benchmarkResult : runResult.getBenchmarkResults()) {
+                Collection<String> iterations = new ArrayList<String>();
+                for (IterationResult r : benchmarkResult.getIterationResults()) {
+                    if (histogram) {
+                        Collection<String> singleIter = new ArrayList<String>();
+                        for (Map.Entry<Double, Long> item : Utils.adaptForLoop(r.getPrimaryResult().getStatistics().getRawData())) {
+                            singleIter.add("< " + emit(item.getKey()) + "; " + item.getValue() + " >");
+                        }
+                        iterations.add(printMultiple(singleIter, "[", "]"));
+                    } else {
+                        iterations.add(emit(r.getPrimaryResult().getScore()));
+                    }
+                }
+                runs.add(printMultiple(iterations, "[", "]"));
+            }
+        }
+        sb.append(printMultiple(runs, "[", "]"));
+
+        return sb.toString();
     }
 
     private String emitParams(BenchmarkParams params) {
@@ -218,6 +246,11 @@ class JSONResultFormat implements ResultFormat {
         s = s.replaceAll("\\}\n,\n", "},\n");
         s = s.replaceAll("\n( *)\n", "\n");
 
+        // Keep these inline:
+        s = s.replaceAll(";", ",");
+        s = s.replaceAll("\\<", "[");
+        s = s.replaceAll("\\>", "]");
+
         String[] lines = s.split("\n");
 
         StringBuilder sb = new StringBuilder();
@@ -228,7 +261,7 @@ class JSONResultFormat implements ResultFormat {
             if (prevL != null && (prevL.endsWith("{") || prevL.endsWith("["))) {
                 ident++;
             }
-            if (l.endsWith("}") || l.endsWith("]") || l.endsWith("},") || l.endsWith("],")) {
+            if (l.equals("}") || l.equals("]") || l.equals("},") || l.equals("],")) {
                 ident--;
             }
 

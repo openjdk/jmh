@@ -24,9 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MultisetStatistics extends AbstractStatistics {
     private static final long serialVersionUID = -4401871054963903938L;
@@ -135,5 +133,10 @@ public class MultisetStatistics extends AbstractStatistics {
         }
 
         return result;
+    }
+
+    @Override
+    public Iterator<Map.Entry<Double, Long>> getRawData() {
+        return values.entrySet().iterator();
     }
 }
