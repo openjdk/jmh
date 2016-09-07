@@ -45,8 +45,16 @@ public class CustomTest {
 
     @Test
     public void test() throws IOException {
-        File file = FileUtils.extractFromResource('/' + CustomBenchmarkProcessor.CBP_LIST);
-        Collection<String> strings = FileUtils.readAllLines(file);
+        if (!"default".equals(System.getProperty("jmh.core.it.profile"))) {
+            return;
+        }
+
+        InputStream list = CustomTest.class.getResourceAsStream('/' + CustomBenchmarkProcessor.CBP_LIST);
+        if (list == null) {
+            throw new IllegalStateException(CustomBenchmarkProcessor.class.getSimpleName() + " list is not found");
+        }
+
+        Collection<String> strings = FileUtils.readAllLines(list);
         Assert.assertTrue(strings.contains(CustomTest.class.getSimpleName()));
     }
 

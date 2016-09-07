@@ -115,13 +115,13 @@ public class FileUtils {
     }
 
     public static Collection<String> readAllLines(Reader src) throws IOException {
-            BufferedReader reader = new BufferedReader(src);
-            List<String> lines = new ArrayList<String>();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-            return lines;
+        BufferedReader reader = new BufferedReader(src);
+        List<String> lines = new ArrayList<String>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            lines.add(line);
+        }
+        return lines;
     }
 
     public static Collection<String> readAllLines(File file) throws IOException {
@@ -131,6 +131,16 @@ public class FileUtils {
             return readAllLines(fr);
         } finally {
             FileUtils.safelyClose(fr);
+        }
+    }
+
+    public static Collection<String> readAllLines(InputStream stream) throws IOException {
+        InputStreamReader reader = new InputStreamReader(stream);
+        try {
+            return readAllLines(reader);
+        } finally {
+            FileUtils.safelyClose(reader);
+            FileUtils.safelyClose(stream);
         }
     }
 

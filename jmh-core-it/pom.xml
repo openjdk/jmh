@@ -73,7 +73,7 @@ questions.
                 <version>2.14.1</version>
                 <configuration>
                     <!-- Integration tests are not measuring performance, OK to run them concurrently -->
-                    <argLine>-Djmh.ignoreLock=true -Xms256m -Xmx256m</argLine>
+                    <argLine>-Djmh.ignoreLock=true -Xms256m -Xmx256m -Djmh.core.it.profile=${jmh.core.it.profile}</argLine>
                     <forkCount>1C</forkCount>
                     <reuseForks>true</reuseForks>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
@@ -107,6 +107,9 @@ questions.
     <profiles>
         <profile>
             <id>default</id>
+            <properties>
+                <jmh.core.it.profile>default</jmh.core.it.profile>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.openjdk.jmh</groupId>
@@ -136,6 +139,9 @@ questions.
 
         <profile>
             <id>asm</id>
+            <properties>
+                <jmh.core.it.profile>asm</jmh.core.it.profile>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.openjdk.jmh</groupId>
@@ -223,6 +229,9 @@ questions.
 
         <profile>
             <id>reflection</id>
+            <properties>
+                <jmh.core.it.profile>reflection</jmh.core.it.profile>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.openjdk.jmh</groupId>
