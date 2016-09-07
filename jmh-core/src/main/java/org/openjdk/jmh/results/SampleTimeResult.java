@@ -28,6 +28,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.SampleBuffer;
 import org.openjdk.jmh.util.Statistics;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
@@ -62,25 +63,17 @@ public class SampleTimeResult extends Result<SampleTimeResult> {
     }
 
     @Override
-    public String toString() {
-        Statistics stats = getStatistics();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("n = ").append(stats.getN()).append(", ");
-        sb.append(String.format("mean = %.0f %s",
-                stats.getMean(),
-                getScoreUnit()));
-        sb.append(String.format(", p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f %s",
-                stats.getPercentile(0),
-                stats.getPercentile(50),
-                stats.getPercentile(90),
-                stats.getPercentile(95),
-                stats.getPercentile(99),
-                stats.getPercentile(99.9),
-                stats.getPercentile(99.99),
-                stats.getPercentile(100),
-                getScoreUnit()));
-        return sb.toString();
+    protected Collection<? extends Result> getDerivativeResults() {
+        return Arrays.asList(
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.00",   statistics.getPercentile(0),        getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.50",   statistics.getPercentile(50),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.90",   statistics.getPercentile(90),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.95",   statistics.getPercentile(95),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.99",   statistics.getPercentile(99),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.999",  statistics.getPercentile(99.9),     getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p0.9999", statistics.getPercentile(99.99),    getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(label + Defaults.PREFIX + "p1.00",   statistics.getPercentile(100),      getScoreUnit(), AggregationPolicy.AVG)
+        );
     }
 
     @Override

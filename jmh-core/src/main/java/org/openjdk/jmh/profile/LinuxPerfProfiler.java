@@ -194,7 +194,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         private final long instructions;
 
         public PerfResult(String output, long cycles, long instructions) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "cpi", of(1.0 * cycles / instructions), "CPI", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, Defaults.PREFIX + "perf", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.output = output;
             this.cycles = cycles;
             this.instructions = instructions;
@@ -208,6 +208,13 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         @Override
         protected Aggregator<PerfResult> getIterationAggregator() {
             return new PerfResultAggregator();
+        }
+
+        @Override
+        protected Collection<? extends Result> getDerivativeResults() {
+            return Collections.singletonList(
+                    new ScalarDerivativeResult(Defaults.PREFIX + "cpi", 1.0 * cycles / instructions, "CPI", AggregationPolicy.AVG)
+            );
         }
 
         @Override

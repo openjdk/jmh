@@ -319,53 +319,19 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         }
     }
 
-    static class PerfResult extends Result<PerfResult> {
+    static class PerfResult extends ScalarResult {
         private static final long serialVersionUID = -1262685915873231436L;
 
-        private final String key;
-
         public PerfResult(String key, double value) {
-            this(key, of(value));
-        }
-
-        public PerfResult(String key, Statistics stat) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + key, stat, "#/op", AggregationPolicy.AVG);
-            this.key = key;
-        }
-
-        @Override
-        protected Aggregator<PerfResult> getThreadAggregator() {
-            return new PerfResultAggregator();
-        }
-
-        @Override
-        protected Aggregator<PerfResult> getIterationAggregator() {
-            return new PerfResultAggregator();
-        }
-
-        @Override
-        public String toString() {
-            return String.format(" %s %s/op", ScoreFormatter.format(getScore()), key);
+            super(key, value, "#/op", AggregationPolicy.AVG);
         }
 
         @Override
         public String extendedInfo() {
+            // omit printing in extended info
             return "";
         }
     }
 
-    static class PerfResultAggregator implements Aggregator<PerfResult> {
-
-        @Override
-        public PerfResult aggregate(Collection<PerfResult> results) {
-            String key = "";
-            ListStatistics stat = new ListStatistics();
-            for (PerfResult r : results) {
-                key = r.key;
-                stat.addValue(r.getScore());
-            }
-            return new PerfResult(key, stat);
-        }
-    }
 
 }

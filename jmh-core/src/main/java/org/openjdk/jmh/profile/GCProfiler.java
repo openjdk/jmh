@@ -26,9 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.Multiset;
 
@@ -86,25 +84,25 @@ public class GCProfiler implements InternalProfiler {
             gcTime += bean.getCollectionTime();
         }
 
-        List<ProfilerResult> results = new ArrayList<ProfilerResult>();
+        List<ScalarResult> results = new ArrayList<ScalarResult>();
 
         if (beforeAllocated == HotspotAllocationSnapshot.EMPTY) {
             // When allocation profiling fails, make sure it is distinguishable in report
-            results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate",
+            results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
                     Double.NaN,
                     "MB/sec", AggregationPolicy.AVG));
         } else {
             HotspotAllocationSnapshot newSnapshot = VMSupport.getSnapshot();
             long allocated = newSnapshot.subtract(beforeAllocated);
             // When no allocations measured, we still need to report results to avoid user confusion
-            results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate",
+            results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
                             (afterTime != beforeTime) ?
                                     1.0 * allocated / 1024 / 1024 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) :
                                     Double.NaN,
                             "MB/sec", AggregationPolicy.AVG));
             if (allocated != 0) {
                 long allOps = iResult.getMetadata().getAllOps();
-                results.add(new ProfilerResult(Defaults.PREFIX + "gc.alloc.rate.norm",
+                results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate.norm",
                                 (allOps != 0) ?
                                         1.0 * allocated / allOps :
                                         Double.NaN,
@@ -112,14 +110,14 @@ public class GCProfiler implements InternalProfiler {
             }
         }
 
-        results.add(new ProfilerResult(
+        results.add(new ScalarResult(
                 Defaults.PREFIX + "gc.count",
                 gcCount - beforeGCCount,
                 "counts",
                 AggregationPolicy.SUM));
 
         if (gcCount != beforeGCCount || gcTime != beforeGCTime) {
-            results.add(new ProfilerResult(
+            results.add(new ScalarResult(
                     Defaults.PREFIX + "gc.time",
                     gcTime - beforeGCTime,
                     "ms",
@@ -136,13 +134,14 @@ public class GCProfiler implements InternalProfiler {
 
             String spaceName = space.replaceAll(" ", "_");
 
-            results.add(new ProfilerResult(
+            results.add(new ScalarResult(
                     Defaults.PREFIX + "gc.churn." + spaceName + "",
                     churnRate,
                     "MB/sec",
                     AggregationPolicy.AVG));
 
-            results.add(new ProfilerResult(Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
+            results.add(new ScalarResult(
+                    Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
                     churnNorm,
                     "B/op",
                     AggregationPolicy.AVG));

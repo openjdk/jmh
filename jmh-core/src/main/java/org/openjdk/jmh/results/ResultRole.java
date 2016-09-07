@@ -37,6 +37,11 @@ public enum ResultRole {
     SECONDARY,
 
     /**
+     * Same as {@link #SECONDARY}, but always recomputed.
+     */
+    SECONDARY_DERIVATIVE,
+
+    /**
      * Does not participate in any metric, garbage result.
      */
     OMITTED,
@@ -47,7 +52,11 @@ public enum ResultRole {
     }
 
     public boolean isSecondary() {
-        return this == SECONDARY;
+        return this == SECONDARY || this == SECONDARY_DERIVATIVE;
+    }
+
+    public boolean isDerivative() {
+        return this == SECONDARY_DERIVATIVE;
     }
 
 }

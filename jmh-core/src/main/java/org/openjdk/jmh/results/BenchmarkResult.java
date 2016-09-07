@@ -29,10 +29,7 @@ import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Benchmark result.
@@ -106,6 +103,9 @@ public class BenchmarkResult implements Serializable {
         for (IterationResult ir : iterationResults) {
             Map<String, Result> secondaryResults = ir.getSecondaryResults();
             for (Map.Entry<String, Result> entry : secondaryResults.entrySet()) {
+                // skip derivatives from aggregation here
+                if (entry.getValue().getRole().isDerivative()) continue;
+
                 allSecondary.put(entry.getKey(), entry.getValue());
             }
         }
@@ -142,7 +142,7 @@ public class BenchmarkResult implements Serializable {
             Aggregator<Result> aggregator = null;
             Collection<Result> results = new ArrayList<Result>();
             for (Result r : benchmarkResults.get(label)) {
-                if (r.getRole().isSecondary()) {
+                if (r.getRole().isSecondary() && !r.getRole().isDerivative()) {
                     results.add(r);
                     aggregator = r.getIterationAggregator();
                 }
@@ -152,7 +152,25 @@ public class BenchmarkResult implements Serializable {
             }
         }
 
+        // put all secondary derivative results on top: from primaries
+        answers.putAll(produceDerivative(getPrimaryResult()));
+
+        // add all derivative results on top: from secondaries
+        Map<String, Result> adds = new HashMap<String, Result>();
+        for (Result r : answers.values()) {
+            adds.putAll(produceDerivative(r));
+        }
+        answers.putAll(adds);
+
         return answers;
+    }
+
+    private Map<String, Result> produceDerivative(Result r) {
+        Map<String, Result> map = new HashMap<String, Result>();
+        for (Object rr : r.getDerivativeResults()) {
+            map.put(((Result) rr).getLabel(), (Result) rr);
+        }
+        return map;
     }
 
     public String getScoreUnit() {

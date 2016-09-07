@@ -22,9 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.profile;
+package org.openjdk.jmh.results;
 
-class Defaults {
+public class Defaults {
 
     public static final String PREFIX = "\u00b7";
 

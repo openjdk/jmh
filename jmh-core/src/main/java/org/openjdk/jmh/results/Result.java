@@ -32,6 +32,8 @@ import org.openjdk.jmh.util.Statistics;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Base class for all types of results that can be returned by a benchmark.
@@ -177,6 +179,15 @@ public abstract class Result<T extends Result<T>> implements Serializable {
      */
     protected T getZeroResult() {
         return null;
+    }
+
+    /**
+     * Get derivative results for this result. These do not participate in aggregation,
+     * and computed on the spot from the aggregated result.
+     * @return
+     */
+    protected Collection<? extends Result> getDerivativeResults() {
+        return Collections.emptyList();
     }
 
     /**

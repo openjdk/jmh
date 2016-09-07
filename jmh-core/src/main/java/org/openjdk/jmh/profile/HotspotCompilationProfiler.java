@@ -26,9 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.*;
 import sun.management.HotspotCompilationMBean;
 import sun.management.counter.Counter;
 
@@ -57,51 +55,51 @@ public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
-                new ProfilerResult(Defaults.PREFIX + "compiler.totalTime",
+                new ScalarResult(Defaults.PREFIX + "compiler.totalTime",
                         current.get("java.ci.totalTime") * 1D / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.totalCompiles",
+                new ScalarResult(Defaults.PREFIX + "compiler.totalCompiles",
                         current.get("sun.ci.totalCompiles"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.totalBailouts",
+                new ScalarResult(Defaults.PREFIX + "compiler.totalBailouts",
                         current.get("sun.ci.totalBailouts"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.totalInvalidates",
+                new ScalarResult(Defaults.PREFIX + "compiler.totalInvalidates",
                         current.get("sun.ci.totalInvalidates"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.nmethodCodeSize",
+                new ScalarResult(Defaults.PREFIX + "compiler.nmethodCodeSize",
                         current.get("sun.ci.nmethodCodeSize") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.nmethodSize",
+                new ScalarResult(Defaults.PREFIX + "compiler.nmethodSize",
                         current.get("sun.ci.nmethodSize") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.osrCompiles",
+                new ScalarResult(Defaults.PREFIX + "compiler.osrCompiles",
                         current.get("sun.ci.osrCompiles"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.osrBytes",
+                new ScalarResult(Defaults.PREFIX + "compiler.osrBytes",
                         current.get("sun.ci.osrBytes") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.osrTime",
+                new ScalarResult(Defaults.PREFIX + "compiler.osrTime",
                         current.get("sun.ci.osrTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.standardCompiles",
+                new ScalarResult(Defaults.PREFIX + "compiler.standardCompiles",
                         current.get("sun.ci.standardCompiles"),
                         "methods", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.standardBytes",
+                new ScalarResult(Defaults.PREFIX + "compiler.standardBytes",
                         current.get("sun.ci.standardBytes") / 1024d,
                         "Kb", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "compiler.standardTime",
+                new ScalarResult(Defaults.PREFIX + "compiler.standardTime",
                         current.get("sun.ci.standardTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX)
         );

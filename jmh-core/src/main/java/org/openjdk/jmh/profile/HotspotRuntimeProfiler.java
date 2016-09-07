@@ -26,9 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.*;
 import sun.management.HotspotRuntimeMBean;
 import sun.management.counter.Counter;
 
@@ -57,43 +55,43 @@ public class HotspotRuntimeProfiler extends AbstractHotspotProfiler {
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         Map<String, Long> current = counters().getCurrent();
         return Arrays.asList(
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.fatMonitors",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.fatMonitors",
                         current.get("sun.rt._sync_MonExtant"),
                         "monitors", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.monitorInflations",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.monitorInflations",
                         current.get("sun.rt._sync_Inflations"),
                         "monitors", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.monitorDeflations",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.monitorDeflations",
                         current.get("sun.rt._sync_Deflations"),
                         "monitors", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.contendedLockAttempts",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.contendedLockAttempts",
                         current.get("sun.rt._sync_ContendedLockAttempts"),
                         "locks", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.parks",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.parks",
                         current.get("sun.rt._sync_Parks"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.notifications",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.notifications",
                         current.get("sun.rt._sync_Notifications"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.sync.futileWakeups",
+                new ScalarResult(Defaults.PREFIX + "rt.sync.futileWakeups",
                         current.get("sun.rt._sync_FutileWakeups"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.safepoints",
+                new ScalarResult(Defaults.PREFIX + "rt.safepoints",
                         current.get("sun.rt.safepoints"),
                         "counts", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.safepointSyncTime",
+                new ScalarResult(Defaults.PREFIX + "rt.safepointSyncTime",
                         current.get("sun.rt.safepointSyncTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX),
 
-                new ProfilerResult(Defaults.PREFIX + "rt.safepointTime",
+                new ScalarResult(Defaults.PREFIX + "rt.safepointTime",
                         current.get("sun.rt.safepointTime") * 1d / TimeUnit.MILLISECONDS.toNanos(1),
                         "ms", AggregationPolicy.MAX)
         );

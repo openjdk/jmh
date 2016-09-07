@@ -26,9 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.*;
 
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
@@ -68,8 +66,8 @@ public class CompilerProfiler implements InternalProfiler {
         try {
             long curTime = comp.getTotalCompilationTime();
             return Arrays.asList(
-                new ProfilerResult(Defaults.PREFIX + "compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
-                new ProfilerResult(Defaults.PREFIX + "compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
+                new ScalarResult(Defaults.PREFIX + "compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
+                new ScalarResult(Defaults.PREFIX + "compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
             );
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();

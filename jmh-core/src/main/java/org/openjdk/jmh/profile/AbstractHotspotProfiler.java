@@ -26,9 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.*;
 import sun.management.counter.Counter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -55,9 +53,9 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         HotspotInternalResult res = counters();
-        Collection<ProfilerResult> results = new ArrayList<ProfilerResult>();
+        Collection<ScalarResult> results = new ArrayList<ScalarResult>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
-            results.add(new ProfilerResult(Defaults.PREFIX + "." + e.getKey(), e.getValue(), "?", AggregationPolicy.AVG));
+            results.add(new ScalarResult(Defaults.PREFIX + e.getKey(), e.getValue(), "?", AggregationPolicy.AVG));
         }
         return results;
     }

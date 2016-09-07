@@ -30,12 +30,7 @@ import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Class contains all info returned by benchmark iteration or/and collected during benchmark iteration.
@@ -112,7 +107,26 @@ public class IterationResult implements Serializable {
             Result result = aggregator.aggregate(results);
             answer.put(label, result);
         }
+
+        // put all secondary derivative results on top: from primaries
+        answer.putAll(produceDerivative(getPrimaryResult()));
+
+        // add all secondary derivative results on top: from secondaries
+        Map<String, Result> adds = new HashMap<String, Result>();
+        for (Result r : answer.values()) {
+            adds.putAll(produceDerivative(r));
+        }
+        answer.putAll(adds);
+
         return answer;
+    }
+
+    private Map<String, Result> produceDerivative(Result r) {
+        Map<String, Result> map = new HashMap<String, Result>();
+        for (Object rr : r.getDerivativeResults()) {
+            map.put(((Result) rr).getLabel(), (Result) rr);
+        }
+        return map;
     }
 
     public Result getPrimaryResult() {

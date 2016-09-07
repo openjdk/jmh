@@ -22,37 +22,52 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.profile;
+package org.openjdk.jmh.results;
 
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.Aggregator;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ResultRole;
+import org.openjdk.jmh.util.ListStatistics;
 import org.openjdk.jmh.util.Statistics;
 
-public class ProfilerResult extends Result<ProfilerResult> {
+import java.util.Collection;
+
+public class ScalarResult extends Result<ScalarResult> {
     private static final long serialVersionUID = 3407232747805728586L;
 
-    public ProfilerResult(String label, double n, String unit, AggregationPolicy policy) {
+    public ScalarResult(String label, double n, String unit, AggregationPolicy policy) {
         this(label, of(n), unit, policy);
     }
 
-    ProfilerResult(String label, Statistics s, String unit, AggregationPolicy policy) {
+    ScalarResult(String label, Statistics s, String unit, AggregationPolicy policy) {
         super(ResultRole.SECONDARY, label, s, unit, policy);
     }
 
     @Override
-    protected Aggregator<ProfilerResult> getThreadAggregator() {
-        return new ProfilerResultAggregator();
+    protected Aggregator<ScalarResult> getThreadAggregator() {
+        return new ScalarResultAggregator();
     }
 
     @Override
-    protected Aggregator<ProfilerResult> getIterationAggregator() {
-        return new ProfilerResultAggregator();
+    protected Aggregator<ScalarResult> getIterationAggregator() {
+        return new ScalarResultAggregator();
     }
 
     @Override
-    protected ProfilerResult getZeroResult() {
-        return new ProfilerResult(label, 0, unit, policy);
+    protected ScalarResult getZeroResult() {
+        return new ScalarResult(label, 0, unit, policy);
+    }
+
+    static class ScalarResultAggregator implements Aggregator<ScalarResult> {
+        @Override
+        public ScalarResult aggregate(Collection<ScalarResult> results) {
+            ListStatistics stats = new ListStatistics();
+            for (ScalarResult r : results) {
+                stats.addValue(r.getScore());
+            }
+            return new ScalarResult(
+                    AggregatorUtils.aggregateLabels(results),
+                    stats,
+                    AggregatorUtils.aggregateUnits(results),
+                    AggregatorUtils.aggregatePolicies(results)
+            );
+        }
     }
 }

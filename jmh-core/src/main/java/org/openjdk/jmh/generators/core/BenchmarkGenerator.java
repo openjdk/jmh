@@ -648,8 +648,10 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps /= batchSize;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
-            writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
-            if (!isSingleMethod) {
+            if (isSingleMethod) {
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
+            } else {
+                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
@@ -774,8 +776,10 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps /= batchSize;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
-            writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
-            if (!isSingleMethod) {
+            if (isSingleMethod) {
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
+            } else {
+                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
             for (String ops : states.getAuxResultNames(method)) {
@@ -928,8 +932,10 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "res.measuredOps *= opsPerInv;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(res.allOps, res.measuredOps);");
-            writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
-            if (!isSingleMethod) {
+            if (isSingleMethod) {
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + method.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
+            } else {
+                writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
             }
             methodEpilog(writer, methodGroup);
@@ -1030,8 +1036,10 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "long totalOps = opsPerInv;");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(totalOps, totalOps);");
-            writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
-            if (!isSingleMethod) {
+            if (isSingleMethod) {
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
+            } else {
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
             }
             methodEpilog(writer, methodGroup);

@@ -37,10 +37,13 @@ public class TestBenchmarkResult {
     @Test
     public void testMissingSecondaries() {
         IterationResult ir1 = new IterationResult(null, null, null);
+        ir1.addResult(new PrimaryResult());
         ir1.addResult(new SecondaryResult("label1", 1));
         IterationResult ir2 = new IterationResult(null, null, null);
+        ir2.addResult(new PrimaryResult());
         ir2.addResult(new SecondaryResult("label2", 2));
         IterationResult ir3 = new IterationResult(null, null, null);
+        ir3.addResult(new PrimaryResult());
         ir3.addResult(new SecondaryResult("label2", 3));
         BenchmarkResult br = new BenchmarkResult(null, Arrays.asList(ir1, ir2, ir3));
 
@@ -48,6 +51,22 @@ public class TestBenchmarkResult {
         Assert.assertEquals(2, sr.size());
         Assert.assertEquals(1.0D, sr.get("label1").getScore(), 0.001);
         Assert.assertEquals(5.0D, sr.get("label2").getScore(), 0.001);
+    }
+
+    public static class PrimaryResult extends Result<PrimaryResult> {
+        public PrimaryResult() {
+            super(ResultRole.PRIMARY, "Boo", of(1.0D), "unit", AggregationPolicy.SUM);
+        }
+
+        @Override
+        protected Aggregator<PrimaryResult> getThreadAggregator() {
+            return new PrimaryResultAggregator();
+        }
+
+        @Override
+        protected Aggregator<PrimaryResult> getIterationAggregator() {
+            return new PrimaryResultAggregator();
+        }
     }
 
     public static class SecondaryResult extends Result<SecondaryResult> {
@@ -62,6 +81,13 @@ public class TestBenchmarkResult {
         @Override
         protected Aggregator<SecondaryResult> getIterationAggregator() {
             return new SecondaryResultAggregator();
+        }
+    }
+
+    public static class PrimaryResultAggregator implements Aggregator<PrimaryResult> {
+        @Override
+        public PrimaryResult aggregate(Collection<PrimaryResult> results) {
+            return new PrimaryResult();
         }
     }
 
