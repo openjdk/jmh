@@ -187,6 +187,7 @@ public class ProfilerFactory {
         BUILT_IN.put("perfnorm", LinuxPerfNormProfiler.class);
         BUILT_IN.put("perfasm",  LinuxPerfAsmProfiler.class);
         BUILT_IN.put("xperfasm", WinPerfAsmProfiler.class);
+        BUILT_IN.put("pauses",   PausesProfiler.class);
     }
 
     private static List<Class<? extends Profiler>> getDiscoveredProfilers() {

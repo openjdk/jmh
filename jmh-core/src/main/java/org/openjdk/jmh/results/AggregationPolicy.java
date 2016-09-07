@@ -32,6 +32,8 @@ public enum AggregationPolicy {
 
     MAX("Maximum"),
 
+    MIN("Minimum"),
+
     ;
 
     private String label;

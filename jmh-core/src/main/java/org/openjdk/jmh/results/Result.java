@@ -112,6 +112,8 @@ public abstract class Result<T extends Result<T>> implements Serializable {
                 return statistics.getSum();
             case MAX:
                 return statistics.getMax();
+            case MIN:
+                return statistics.getMin();
             default:
                 throw new IllegalStateException("Unknown aggregation policy: " + policy);
         }
@@ -127,6 +129,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
             case AVG:
                 return statistics.getMeanErrorAt(0.999);
             case SUM:
+            case MIN:
             case MAX:
                 return Double.NaN;
             default:
@@ -144,6 +147,7 @@ public abstract class Result<T extends Result<T>> implements Serializable {
             case AVG:
                 return statistics.getConfidenceIntervalAt(0.999);
             case MAX:
+            case MIN:
             case SUM:
                 double score = getScore();
                 return new double[] {score, score};
