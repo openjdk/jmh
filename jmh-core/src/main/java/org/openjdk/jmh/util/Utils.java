@@ -248,19 +248,14 @@ public class Utils {
                     return Charset.forName((String) res);
                 }
             }
-        } catch (NoSuchFieldException e) {
-            // fall-through
-        } catch (IllegalAccessException e) {
-            // fall-through
-        } catch (NoSuchMethodException e) {
-            // fall-through
-        } catch (InvocationTargetException e) {
+        } catch (Exception e) {
             // fall-through
         }
 
         // Try 2. Try to poke stdout.
         // When System.console() is null, that is, an application is not attached to a console, the actual
         // charset of standard output should be extracted from System.out, not from System.console().
+        // If we indeed have the console, but failed to poll its charset, it is still better to poke stdout.
         try {
             PrintStream out = System.out;
             if (out != null) {
@@ -274,15 +269,21 @@ public class Utils {
                     }
                 }
             }
-        } catch (NoSuchFieldException e) {
-            // fall-through
-        } catch (IllegalAccessException e) {
-            // fall-through
-        } catch (UnsupportedCharsetException e) {
+        } catch (Exception e) {
             // fall-through
         }
 
-        // Try 3. Nothing left to do, except for returning a (possibly mismatched) default charset.
+        // Try 3. Try to poll internal properties.
+        String prop = System.getProperty("sun.stdout.encoding");
+        if (prop != null) {
+            try {
+                return Charset.forName(prop);
+            } catch (Exception e) {
+                // fall-through
+            }
+        }
+
+        // Try 4. Nothing left to do, except for returning a (possibly mismatched) default charset.
         return Charset.defaultCharset();
     }
 
