@@ -103,7 +103,11 @@ public class SampleTimeResult extends Result<SampleTimeResult> {
             TimeUnit tu = null;
             for (SampleTimeResult r : results) {
                 buffer.addAll(r.buffer);
-                tu = r.outputTimeUnit;
+                if (tu == null) {
+                    tu = r.outputTimeUnit;
+                } else if (!tu.equals(r.outputTimeUnit)){
+                    throw new IllegalStateException("Combining the results with different timeunits");
+                }
             }
             return new SampleTimeResult(
                     AggregatorUtils.aggregateRoles(results),

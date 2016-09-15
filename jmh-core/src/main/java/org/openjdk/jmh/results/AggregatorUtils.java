@@ -32,54 +32,49 @@ public final class AggregatorUtils {
         // prevent instantation
     }
 
-    public static ResultRole aggregateRoles(Collection<? extends Result> results) {
+    static ResultRole aggregateRoles(Collection<? extends Result> results) {
         ResultRole result = null;
         for (Result r : results) {
             if (result == null) {
                 result = r.role;
-            } else {
-                if (result != r.role) {
-                    throw new IllegalStateException("Combining the results with different roles");
-                }
+            } else if (result != r.role) {
+                throw new IllegalStateException("Combining the results with different roles");
             }
         }
         return result;
     }
 
-    public static String aggregateUnits(Collection<? extends Result> results) {
+    static String aggregateUnits(Collection<? extends Result> results) {
         String result = null;
         for (Result r : results) {
             if (result == null) {
                 result = r.unit;
-            } else {
-                if (!result.equals(r.unit)) {
-                    throw new IllegalStateException("Combining the results with different units");
-                }
+            } else if (!result.equals(r.unit)) {
+                throw new IllegalStateException("Combining the results with different units");
             }
         }
         return result;
     }
 
-    public static String aggregateLabels(Collection<? extends Result> results) {
+    static String aggregateLabels(Collection<? extends Result> results) {
         String result = null;
         for (Result r : results) {
-            // pick the first one
             if (result == null) {
                 result = r.label;
+            } else if (!result.equals(r.label)) {
+                throw new IllegalStateException("Combining the results with different labels");
             }
         }
         return result;
     }
 
-    public static AggregationPolicy aggregatePolicies(Collection<? extends Result> results) {
+    static AggregationPolicy aggregatePolicies(Collection<? extends Result> results) {
         AggregationPolicy result = null;
         for (Result r : results) {
             if (result == null) {
                 result = r.policy;
-            } else {
-                if (!result.equals(r.policy)) {
-                    throw new IllegalStateException("Combining the results with different aggregation policies");
-                }
+            } else if (!result.equals(r.policy)) {
+                throw new IllegalStateException("Combining the results with different aggregation policies");
             }
         }
         return result;
