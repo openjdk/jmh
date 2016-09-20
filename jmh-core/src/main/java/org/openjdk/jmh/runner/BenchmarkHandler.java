@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.Control;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.infra.ThreadParams;
 import org.openjdk.jmh.profile.InternalProfiler;
@@ -311,7 +312,9 @@ class BenchmarkHandler {
         // result object to accumulate the results in
         List<Result> iterationResults = new ArrayList<Result>();
 
-        InfraControl control = new InfraControl(benchmarkParams, params, preSetupBarrier, preTearDownBarrier, last);
+        InfraControl control = new InfraControl(benchmarkParams, params,
+                preSetupBarrier, preTearDownBarrier, last,
+                new Control());
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
@@ -358,7 +361,7 @@ class BenchmarkHandler {
         }
 
         // now we communicate all worker threads should stop
-        control.isDone = true;
+        control.announceDone();
 
         // wait for all workers to transit to teardown
         control.awaitWarmdownReady();

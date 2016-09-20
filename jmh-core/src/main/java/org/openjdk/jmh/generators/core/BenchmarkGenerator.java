@@ -836,7 +836,7 @@ public class BenchmarkGenerator {
         writer.println(ident(2) + "this.benchmarkParams = control.benchmarkParams;");
         writer.println(ident(2) + "this.iterationParams = control.iterationParams;");
         writer.println(ident(2) + "this.threadParams    = threadParams;");
-        writer.println(ident(2) + "this.notifyControl   = new Control();");
+        writer.println(ident(2) + "this.notifyControl   = control.notifyControl;");
         writer.println(ident(2) + "this.blackhole       = new Blackhole(\"Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.\");");
     }
 
@@ -1014,6 +1014,9 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "if (threadParams.getSubgroupIndex() == " + subGroup + ") {");
 
             iterationProlog(writer, 3, method, states);
+
+            // control objects get a special treatment
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
 
             // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults();");

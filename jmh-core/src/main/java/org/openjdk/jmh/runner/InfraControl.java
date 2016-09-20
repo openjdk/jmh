@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.Control;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.util.Utils;
 
@@ -54,8 +55,10 @@ public class InfraControl extends InfraControlL4 {
         Utils.check(InfraControl.class, "shouldSynchIterations", "threads");
     }
 
-    public InfraControl(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);
+    public InfraControl(BenchmarkParams benchmarkParams, IterationParams iterationParams,
+                        CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration,
+                        Control notifyControl) {
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration, notifyControl);
     }
 
     /**
@@ -98,6 +101,12 @@ public class InfraControl extends InfraControlL4 {
     public boolean isLastIteration() {
         return lastIteration;
     }
+
+    public void announceDone() {
+        isDone = true;
+        notifyControl.stopMeasurement = true;
+    }
+
 }
 
 abstract class InfraControlL0 {
@@ -141,11 +150,14 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
     public final BenchmarkParams benchmarkParams;
     public final IterationParams iterationParams;
+    public final Control notifyControl;
 
     private final boolean shouldSynchIterations;
     private final int threads;
 
-    public InfraControlL2(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
+    public InfraControlL2(BenchmarkParams benchmarkParams, IterationParams iterationParams,
+                          CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration,
+                          Control notifyControl) {
         warmupVisited = new AtomicInteger();
         warmdownVisited = new AtomicInteger();
 
@@ -157,6 +169,8 @@ abstract class InfraControlL2 extends InfraControlL1 {
 
         warmupShouldWait = shouldSynchIterations;
         warmdownShouldWait = shouldSynchIterations;
+
+        this.notifyControl = notifyControl;
 
         this.preSetup = preSetup;
         this.preTearDown = preTearDown;
@@ -240,16 +254,20 @@ abstract class InfraControlL3 extends InfraControlL2 {
     private boolean q161, q162, q163, q164, q165, q166, q167, q168;
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 
-    public InfraControlL3(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);
+    public InfraControlL3(BenchmarkParams benchmarkParams, IterationParams iterationParams,
+                          CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration,
+                          Control notifyControl) {
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration, notifyControl);
     }
 }
 
 abstract class InfraControlL4 extends InfraControlL3 {
     private int markerEnd;
 
-    public InfraControlL4(BenchmarkParams benchmarkParams, IterationParams iterationParams, CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration);
+    public InfraControlL4(BenchmarkParams benchmarkParams, IterationParams iterationParams,
+                          CountDownLatch preSetup, CountDownLatch preTearDown, boolean lastIteration,
+                          Control notifyControl) {
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, lastIteration, notifyControl);
     }
 }
 
