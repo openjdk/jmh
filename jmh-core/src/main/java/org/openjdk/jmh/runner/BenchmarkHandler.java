@@ -54,7 +54,7 @@ class BenchmarkHandler {
     private final ExecutorService executor;
 
     // (Aleksey) Forgive me, Father, for I have sinned.
-    private final ThreadLocal<Object> instances;
+    private final ThreadLocal<ThreadData> threadData;
 
     private final OutputFormat out;
     private final List<InternalProfiler> profilers;
@@ -72,11 +72,19 @@ class BenchmarkHandler {
         this.profilersRev = new ArrayList<InternalProfiler>(profilers);
         Collections.reverse(profilersRev);
 
-        this.instances = new ThreadLocal<Object>() {
+        final BlockingQueue<ThreadParams> tps = new ArrayBlockingQueue<ThreadParams>(executionParams.getThreads());
+        tps.addAll(distributeThreads(executionParams.getThreads(), executionParams.getThreadGroups()));
+
+        this.threadData = new ThreadLocal<ThreadData>() {
             @Override
-            protected Object initialValue() {
+            protected ThreadData initialValue() {
                 try {
-                    return clazz.newInstance();
+                    Object o = clazz.newInstance();
+                    ThreadParams t = tps.poll();
+                    if (t == null) {
+                        throw new IllegalStateException("Cannot get another thread params");
+                    }
+                    return new ThreadData(o, t);
                 } catch (InstantiationException e) {
                     throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
                 } catch (IllegalAccessException e) {
@@ -84,6 +92,7 @@ class BenchmarkHandler {
                 }
             }
         };
+
         this.out = out;
         try {
             this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
@@ -92,8 +101,8 @@ class BenchmarkHandler {
         }
     }
 
-    static ThreadParams[] distributeThreads(int threads, int[] groups) {
-        ThreadParams[] result = new ThreadParams[threads];
+    static List<ThreadParams> distributeThreads(int threads, int[] groups) {
+        List<ThreadParams> result = new ArrayList<ThreadParams>();
         int totalGroupThreads = Utils.sum(groups);
         int totalGroups = (int) Math.ceil(1D * threads / totalGroupThreads);
         int totalSubgroups = groups.length;
@@ -113,13 +122,14 @@ class BenchmarkHandler {
                 currentSubgroupThread = 0;
             }
 
-            result[t] = new ThreadParams(
+            result.add(new ThreadParams(
                     t, threads,
                     currentGroup, totalGroups,
                     currentSubgroup, totalSubgroups,
                     currentGroupThread, totalGroupThreads,
                     currentSubgroupThread, groups[currentSubgroup]
-                  );
+                  )
+            );
 
             currentGroupThread++;
             currentSubgroupThread++;
@@ -318,10 +328,8 @@ class BenchmarkHandler {
 
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
-
-        ThreadParams[] threadParamses = distributeThreads(numThreads, benchmarkParams.getThreadGroups());
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(control, threadParamses[i]);
+            runners[i] = new BenchmarkTask(control);
         }
 
         long waitDeadline = System.nanoTime() + benchmarkParams.getTimeout().convertTo(TimeUnit.NANOSECONDS);
@@ -424,14 +432,11 @@ class BenchmarkHandler {
      * Worker body.
      */
     class BenchmarkTask implements Callable<BenchmarkTaskResult> {
-
         private volatile Thread runner;
         private final InfraControl control;
-        private final ThreadParams threadParams;
 
-        BenchmarkTask(InfraControl control, ThreadParams threadParams) {
+        BenchmarkTask(InfraControl control) {
             this.control = control;
-            this.threadParams = threadParams;
         }
 
         @Override
@@ -441,7 +446,8 @@ class BenchmarkHandler {
                 runner = Thread.currentThread();
 
                 // go for the run
-                return (BenchmarkTaskResult) method.invoke(instances.get(), control, threadParams);
+                ThreadData td = threadData.get();
+                return (BenchmarkTaskResult) method.invoke(td.instance, control, td.params);
             } catch (Throwable e) {
                 // about to fail the iteration;
                 // compensate for missed sync-iteration latches, we don't care about that anymore
@@ -467,6 +473,29 @@ class BenchmarkHandler {
                 // unbind the executor thread
                 runner = null;
             }
+        }
+    }
+
+    /**
+     * Handles thread-local data for each worker that should not change
+     * between the iterations.
+     */
+    private static class ThreadData {
+        /**
+         * Synthetic benchmark instance, which holds the benchmark metadata.
+         * Expected to be touched by a single thread only.
+         */
+        final Object instance;
+
+        /**
+         * Thread parameters. Among other things, holds the thread's place
+         * in group distribution, and thus should be the same for a given thread.
+         */
+        final ThreadParams params;
+
+        public ThreadData(Object instance, ThreadParams params) {
+            this.instance = instance;
+            this.params = params;
         }
     }
 
