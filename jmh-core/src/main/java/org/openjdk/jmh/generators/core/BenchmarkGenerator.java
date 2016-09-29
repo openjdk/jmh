@@ -533,7 +533,8 @@ public class BenchmarkGenerator {
                 Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
                 BenchmarkMode.class, RawResults.class, ResultRole.class,
                 Field.class, BenchmarkParams.class, IterationParams.class,
-                Blackhole.class, Control.class
+                Blackhole.class, Control.class,
+                ScalarResult.class, AggregationPolicy.class
         };
 
         for (Class<?> c : imports) {
@@ -654,8 +655,8 @@ public class BenchmarkGenerator {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
-            for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), benchmarkParams.getTimeUnit()));");
+            for (String res : states.getAuxResults(method, "ThroughputResult")) {
+                writer.println(ident(3) + "results.add(" + res + ");");
             }
 
             methodEpilog(writer, methodGroup);
@@ -692,6 +693,12 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "result.measuredOps = operations;");
             writer.println(ident(1) + "}");
             writer.println();
+        }
+    }
+
+    private void addAuxCounters(PrintWriter writer, String resName, StateObjectHandler states, MethodInfo method) {
+        for (String res : states.getAuxResults(method, resName)) {
+            writer.println(ident(3) + "results.add(" + res + ");");
         }
     }
 
@@ -782,9 +789,8 @@ public class BenchmarkGenerator {
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
-            for (String ops : states.getAuxResultNames(method)) {
-                writer.println(ident(3) + "results.add(new AverageTimeResult(ResultRole.SECONDARY, \"" + ops + "\", " + states.getAuxResultAccessor(method, ops) + ", res.getTime(), benchmarkParams.getTimeUnit()));");
-            }
+            addAuxCounters(writer, "AverageTimeResult", states, method);
+
             methodEpilog(writer, methodGroup);
 
             writer.println(ident(3) + "return results;");
@@ -1108,6 +1114,11 @@ public class BenchmarkGenerator {
 
         for (String s : states.getIterationSetups(method)) writer.println(ident(prefix) + s);
         writer.println();
+
+        // reset @AuxCounters
+        for (String s : states.getAuxResets(method)) writer.println(ident(prefix) + s);
+        writer.println();
+
     }
 
     private void iterationEpilog(PrintWriter writer, int prefix, MethodInfo method, StateObjectHandler states) {

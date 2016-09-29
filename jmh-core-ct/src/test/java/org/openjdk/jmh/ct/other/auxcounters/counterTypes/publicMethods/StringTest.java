@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,59 +22,31 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.other;
+package org.openjdk.jmh.ct.other.auxcounters.counterTypes.publicMethods;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class AuxCountersTest {
-
-    @State(Scope.Benchmark)
-    public static class BenchmarkState {
-        public int x;
-    }
-
-    @State(Scope.Group)
-    public static class GroupState {
-        public int y;
-    }
+public class StringTest {
 
     @AuxCounters
     @State(Scope.Thread)
-    public static class ThreadState {
-        public int z;
+    public static class S {
+        public String cnt() { return ""; }
     }
 
     @Benchmark
-    public void testThread(ThreadState s) {
-
-    }
-
-    @Benchmark
-    @Group("test_gt")
-    public void testGroupThread_1(GroupState gs, ThreadState ts) {
-
-    }
-
-    @Benchmark
-    @Group("test_gt")
-    public void testGroupThread_2(GroupState gs, ThreadState ts) {
-
-    }
-
-    @Benchmark
-    public void testBenchThread(BenchmarkState bs, ThreadState ts) {
-
+    public void benchmark(S s) {
+        // intentionally left blank
     }
 
     @Test
     public void compileTest() {
-        CompileTest.assertOK(this.getClass());
+        CompileTest.assertFail(this.getClass(), "Illegal type for the return type of public method");
     }
 
 }

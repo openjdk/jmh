@@ -37,9 +37,9 @@ import java.util.concurrent.TimeUnit;
 public class AverageTimeResult extends Result<AverageTimeResult> {
     private static final long serialVersionUID = 6937689337229703312L;
 
-    public AverageTimeResult(ResultRole mode, String label, long operations, long durationNs, TimeUnit tu) {
+    public AverageTimeResult(ResultRole mode, String label, double operations, long durationNs, TimeUnit tu) {
         this(mode, label,
-                of(1.0D * durationNs / (operations * TimeUnit.NANOSECONDS.convert(1, tu))),
+                of(durationNs / (operations * TimeUnit.NANOSECONDS.convert(1, tu))),
                 TimeValue.tuToString(tu) + "/op");
     }
 

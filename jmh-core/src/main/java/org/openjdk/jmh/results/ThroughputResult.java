@@ -37,9 +37,9 @@ import java.util.concurrent.TimeUnit;
 public class ThroughputResult extends Result<ThroughputResult> {
     private static final long serialVersionUID = 7269598073169413322L;
 
-    public ThroughputResult(ResultRole role, String label, long operations, long durationNs, TimeUnit outputTimeUnit) {
+    public ThroughputResult(ResultRole role, String label, double operations, long durationNs, TimeUnit outputTimeUnit) {
         this(role, label,
-                of(1.0D * operations * TimeUnit.NANOSECONDS.convert(1, outputTimeUnit) / durationNs),
+                of(operations * TimeUnit.NANOSECONDS.convert(1, outputTimeUnit) / durationNs),
                 "ops/" + TimeValue.tuToString(outputTimeUnit),
                 AggregationPolicy.SUM);
     }

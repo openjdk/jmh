@@ -53,7 +53,9 @@ class StateObjectHandler {
     private final Multimap<String, String> benchmarkArgs;
 
     private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
+    private final Map<String, AuxCounters.Type> auxType = new HashMap<String, AuxCounters.Type>();
     private final Map<String, String> auxAccessors = new HashMap<String, String>();
+    private final Map<String, Boolean> auxResettable = new HashMap<String, Boolean>();
 
     public StateObjectHandler(CompilerControlPlugin compileControl) {
         this.compileControl = compileControl;
@@ -281,7 +283,8 @@ class StateObjectHandler {
         validateState(ci);
 
         // auxiliary result, produce the accessors
-        if (ci.getAnnotation(AuxCounters.class) != null) {
+        AuxCounters auxCountAnn = ci.getAnnotation(AuxCounters.class);
+        if (auxCountAnn != null) {
             if (so.scope != Scope.Thread) {
                 throw new GenerationException("@" + AuxCounters.class.getSimpleName() +
                         " can only be used with " + Scope.class.getSimpleName() + "." + Scope.Thread + " states.", ci);
@@ -289,34 +292,39 @@ class StateObjectHandler {
 
             for (FieldInfo sub : ci.getFields()) {
                 if (sub.isPublic()) {
-                    String fieldType = sub.getType().getQualifiedName();
-                    if (fieldType.equals("int") || fieldType.equals("long")) {
-                        String name = sub.getName();
-                        String meth = execMethod.getName();
-                        auxNames.put(meth, name);
-                        String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name);
-                        if (prev != null) {
-                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
+                    if (!isAuxCompatible(sub.getType().getQualifiedName())) {
+                        throw new GenerationException("Illegal type for the public field in @" + AuxCounters.class.getSimpleName() + ".", sub);
+                    }
+                    String name = sub.getName();
+                    String meth = execMethod.getName();
+                    auxNames.put(meth, name);
+                    auxType.put(name, auxCountAnn.value());
+                    auxResettable.put(name, true);
+                    String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name);
+                    if (prev != null) {
+                        throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
                                 " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
                                 " injected into this method.", sub);
-                        }
                     }
                 }
             }
 
             for (MethodInfo sub : ci.getMethods()) {
                 if (sub.isPublic()) {
-                    String returnType = sub.getReturnType();
-                    if (returnType.equals("int") || returnType.equals("long")) {
-                        String name = sub.getName();
-                        String meth = execMethod.getName();
-                        auxNames.put(meth, name);
-                        String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name + "()");
-                        if (prev != null) {
-                            throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
-                                    " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
-                                    " injected into this method.", sub);
-                        }
+                    if (!isAuxCompatible(sub.getReturnType())) {
+                        throw new GenerationException("Illegal type for the return type of public method in @" + AuxCounters.class.getSimpleName() + ".", sub);
+                    }
+
+                    String name = sub.getName();
+                    String meth = execMethod.getName();
+                    auxNames.put(meth, name);
+                    auxType.put(name, auxCountAnn.value());
+                    auxResettable.put(name, false);
+                    String prev = auxAccessors.put(meth + name, so.localIdentifier + "." + name + "()");
+                    if (prev != null) {
+                        throw new GenerationException("Conflicting @" + AuxCounters.class.getSimpleName() +
+                                " counters. Make sure there are no @" + State.class.getSimpleName() + "-s with the same counter " +
+                                " injected into this method.", sub);
                     }
                 }
             }
@@ -346,6 +354,16 @@ class StateObjectHandler {
                 compileControl.defaultForceInline(mi);
             }
         }
+    }
+
+    private boolean isAuxCompatible(String typeName) {
+        if (typeName.equals("byte")     || typeName.equals("java.lang.Byte")) return true;
+        if (typeName.equals("short")    || typeName.equals("java.lang.Short")) return true;
+        if (typeName.equals("int")      || typeName.equals("java.lang.Integer")) return true;
+        if (typeName.equals("float")    || typeName.equals("java.lang.Float")) return true;
+        if (typeName.equals("long")     || typeName.equals("java.lang.Long")) return true;
+        if (typeName.equals("double")   || typeName.equals("java.lang.Double")) return true;
+        return false;
     }
 
     private void checkParam(FieldInfo fi) {
@@ -972,18 +990,38 @@ class StateObjectHandler {
         return implicits.get(label);
     }
 
-    public Collection<String> getAuxResultNames(MethodInfo method) {
-        return auxNames.get(method.getName());
-    }
-
-    public String getAuxResultAccessor(MethodInfo method, String name) {
-        return auxAccessors.get(method.getName() + name);
-    }
-
     public void addImports(PrintWriter writer) {
         for (StateObject so : cons(stateObjects)) {
             writer.println("import " + so.packageName + "." + so.type + ";");
         }
     }
 
+    public Collection<String> getAuxResets(MethodInfo method) {
+        Collection<String> result = new ArrayList<String>();
+        for (String name : auxNames.get(method.getName())) {
+            if (auxResettable.get(name)) {
+                result.add(auxAccessors.get(method.getName() + name) + " = 0;");
+            }
+        }
+        return result;
+    }
+
+    public Collection<String> getAuxResults(MethodInfo method, String opResName) {
+        Collection<String> result = new ArrayList<String>();
+        for (String ops : auxNames.get(method.getName())) {
+            AuxCounters.Type type = auxType.get(ops);
+            switch (type) {
+                case OPERATIONS:
+                    result.add("new " + opResName + "(ResultRole.SECONDARY, \"" + ops + "\", " +
+                            auxAccessors.get(method.getName() + ops) + ", res.getTime(), benchmarkParams.getTimeUnit())");
+                    break;
+                case EVENTS:
+                    result.add("new ScalarResult(\"" + ops + "\", " + auxAccessors.get(method.getName() + ops) + ", \"#\", AggregationPolicy.SUM)");
+                    break;
+                default:
+                    throw new GenerationException("Unknown @" + AuxCounters.class + " type: " + type, method);
+            }
+        }
+        return result;
+    }
 }
