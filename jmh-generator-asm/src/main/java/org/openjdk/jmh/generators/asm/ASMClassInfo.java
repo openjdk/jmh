@@ -120,9 +120,10 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     public MethodVisitor visitMethod(int access, final String methodName, String methodDesc, String signature, String[] exceptions) {
         ASMMethodInfo mi = new ASMMethodInfo(super.visitMethod(access, methodName, methodDesc, signature, exceptions),
                 classInfos, this, access, methodName, methodDesc, signature);
-        methods.add(mi);
         if (methodName.equals("<init>")) {
             constructors.add(mi);
+        } else {
+            methods.add(mi);
         }
         return mi;
     }
