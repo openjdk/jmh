@@ -27,10 +27,8 @@ package org.openjdk.jmh.generators.core;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.*;
 import org.openjdk.jmh.results.*;
-import org.openjdk.jmh.runner.BenchmarkList;
-import org.openjdk.jmh.runner.BenchmarkListEntry;
+import org.openjdk.jmh.runner.*;
 import org.openjdk.jmh.runner.Defaults;
-import org.openjdk.jmh.runner.InfraControl;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
@@ -534,7 +532,8 @@ public class BenchmarkGenerator {
                 BenchmarkMode.class, RawResults.class, ResultRole.class,
                 Field.class, BenchmarkParams.class, IterationParams.class,
                 Blackhole.class, Control.class,
-                ScalarResult.class, AggregationPolicy.class
+                ScalarResult.class, AggregationPolicy.class,
+                FailureAssistException.class
         };
 
         for (Class<?> c : imports) {

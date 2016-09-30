@@ -400,29 +400,43 @@ class BenchmarkHandler {
         // either normally or abnormally. This means, Future.get() would never block.
         long allOps = 0;
         long measuredOps = 0;
-        IterationResult result;
-        try {
-            for (Future<BenchmarkTaskResult> fr : completed) {
-                try {
-                    BenchmarkTaskResult btr = fr.get();
-                    iterationResults.addAll(btr.getResults());
-                    allOps += btr.getAllOps();
-                    measuredOps += btr.getMeasuredOps();
-                } catch (ExecutionException ex) {
-                    // unwrap: ExecutionException -> Throwable-wrapper -> InvocationTargetException
-                    Throwable cause = ex.getCause().getCause().getCause();
-                    throw new BenchmarkException(cause);
-                } catch (InterruptedException ex) {
-                    throw new BenchmarkException(ex);
-                }
-            }
-        } finally {
-            result = new IterationResult(benchmarkParams, params, new IterationResultMetaData(allOps, measuredOps));
-            result.addResults(iterationResults);
 
-            // profilers stop when after all threads are confirmed to be
-            // finished to capture the edge behaviors; or, on a failure path
-            stopProfilers(benchmarkParams, params, result);
+        List<Throwable> errors = new ArrayList<Throwable>();
+        for (Future<BenchmarkTaskResult> fr : completed) {
+            try {
+                BenchmarkTaskResult btr = fr.get();
+                iterationResults.addAll(btr.getResults());
+                allOps += btr.getAllOps();
+                measuredOps += btr.getMeasuredOps();
+            } catch (ExecutionException ex) {
+                // unwrap: ExecutionException -> Throwable-wrapper -> InvocationTargetException
+                Throwable cause = ex.getCause().getCause().getCause();
+
+                // record exception, unless it is the assist exception
+                if (!(cause instanceof FailureAssistException)) {
+                    errors.add(cause);
+                }
+            } catch (InterruptedException ex) {
+                // cannot happen here, Future.get() should never block.
+                throw new BenchmarkException(ex);
+            }
+        }
+
+        IterationResult result = new IterationResult(benchmarkParams, params, new IterationResultMetaData(allOps, measuredOps));
+        result.addResults(iterationResults);
+
+        // profilers stop when after all threads are confirmed to be
+        // finished to capture the edge behaviors; or, on a failure path
+        stopProfilers(benchmarkParams, params, result);
+
+        if (!errors.isEmpty()) {
+            Throwable first = errors.get(0);
+            if (errors.size() > 1) {
+                // TODO: Once we switch to JDK 7, make use of #addSupressed.
+                throw new BenchmarkException(errors.size() + " pending exceptions, reporting the first", first);
+            } else {
+                throw new BenchmarkException(first);
+            }
         }
 
         return result;
@@ -450,6 +464,10 @@ class BenchmarkHandler {
                 return (BenchmarkTaskResult) method.invoke(td.instance, control, td.params);
             } catch (Throwable e) {
                 // about to fail the iteration;
+
+                // notify other threads we have failed
+                control.isFailing = true;
+
                 // compensate for missed sync-iteration latches, we don't care about that anymore
                 control.preSetupForce();
                 control.preTearDownForce();

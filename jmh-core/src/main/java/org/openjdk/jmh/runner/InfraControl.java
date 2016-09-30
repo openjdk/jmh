@@ -44,7 +44,7 @@ public class InfraControl extends InfraControlL4 {
      * @see org.openjdk.jmh.infra.Blackhole description for the rationale
      */
     static {
-        Utils.check(InfraControl.class, "isDone");
+        Utils.check(InfraControl.class, "isDone", "isFailing");
         Utils.check(InfraControl.class, "volatileSpoiler");
         Utils.check(InfraControl.class, "preSetup", "preTearDown");
         Utils.check(InfraControl.class, "lastIteration");
@@ -133,10 +133,17 @@ abstract class InfraControlL1 extends InfraControlL0 {
 }
 
 abstract class InfraControlL2 extends InfraControlL1 {
-    /* Flag for if we are done or not.
+    /**
+     * Flag that checks for time expiration.
      * This is specifically the public field, so to spare one virtual call.
      */
     public volatile boolean isDone;
+
+    /**
+     * Flag that checks for failure experienced by any measurement thread.
+     * This is specifically the public field, so to spare one virtual call.
+     */
+    public volatile boolean isFailing;
 
     public volatile boolean volatileSpoiler;
 

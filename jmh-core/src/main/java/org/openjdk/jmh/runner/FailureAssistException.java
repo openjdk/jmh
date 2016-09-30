@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,16 +25,9 @@
 package org.openjdk.jmh.runner;
 
 /**
- * Internal exception in JMH. Always wraps the real cause.
+ * Thrown by worker threads when they detect other threads have failed.
  */
-public class BenchmarkException extends RuntimeException {
-    private static final long serialVersionUID = 4064666042830679837L;
+public class FailureAssistException extends RuntimeException {
 
-    public BenchmarkException(Throwable ex) {
-        super(ex);
-    }
 
-    public BenchmarkException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
 }

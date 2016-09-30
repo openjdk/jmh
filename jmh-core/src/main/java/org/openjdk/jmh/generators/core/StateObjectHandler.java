@@ -619,6 +619,7 @@ class StateObjectHandler {
             if (type == HelperType.SETUP) {
                 result.add("if (" + so.type + ".setup" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
                 result.add("    try {");
+                result.add("        if (control.isFailing) throw new FailureAssistException();");
                 result.add("        if (!" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
@@ -628,11 +629,15 @@ class StateObjectHandler {
                 }
                 result.add("            " + so.localIdentifier + ".ready" + helperLevel + " = true;");
                 result.add("        }");
+                result.add("    } catch (Throwable t) {");
+                result.add("        control.isFailing = true;");
+                result.add("        throw t;");
                 result.add("    } finally {");
                 result.add("        " + so.type + ".setup" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("    }");
                 result.add("} else {");
                 result.add("    while (" + so.type + ".setup" + helperLevel + "MutexUpdater.get(" + so.localIdentifier + ") == 1) {");
+                result.add("        if (control.isFailing) throw new FailureAssistException();");
                 result.add("        if (Thread.interrupted()) throw new InterruptedException();");
                 result.add("    }");
                 result.add("}");
@@ -645,6 +650,7 @@ class StateObjectHandler {
             if (type == HelperType.TEARDOWN) {
                 result.add("if (" + so.type + ".tear" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
                 result.add("    try {");
+                result.add("        if (control.isFailing) throw new FailureAssistException();");
                 result.add("        if (" + so.localIdentifier + ".ready" + helperLevel + ") {");
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
@@ -654,6 +660,9 @@ class StateObjectHandler {
                 }
                 result.add("            " + so.localIdentifier + ".ready" + helperLevel + " = false;");
                 result.add("        }");
+                result.add("    } catch (Throwable t) {");
+                result.add("        control.isFailing = true;");
+                result.add("        throw t;");
                 result.add("    } finally {");
                 result.add("        " + so.type + ".tear" + helperLevel + "MutexUpdater.set(" + so.localIdentifier + ", 0);");
                 result.add("    }");
@@ -673,6 +682,7 @@ class StateObjectHandler {
                     result.add("        " + so.localIdentifier + "_backoff = Math.max(1024, " + so.localIdentifier + "_backoff * 2);");
                 }
 
+                result.add("        if (control.isFailing) throw new FailureAssistException();");
                 result.add("        if (Thread.interrupted()) throw new InterruptedException();");
                 result.add("    }");
                 result.add("}");
@@ -727,6 +737,8 @@ class StateObjectHandler {
             result.add("        return val;");
             result.add("    }");
             result.add("    synchronized(this.getClass()) {");
+            result.add("        try {");
+            result.add("        if (control.isFailing) throw new FailureAssistException();");
             result.add("        val = " + so.fieldIdentifier + ";");
             result.add("        if (val != null) {");
             result.add("            return val;");
@@ -750,6 +762,10 @@ class StateObjectHandler {
             }
             result.add("        val.ready" + Level.Trial + " = true;");
             result.add("        " + so.fieldIdentifier + " = val;");
+            result.add("        } catch (Throwable t) {");
+            result.add("            control.isFailing = true;");
+            result.add("            throw t;");
+            result.add("        }");
             result.add("    }");
             result.add("    return val;");
             result.add("}");
@@ -762,7 +778,7 @@ class StateObjectHandler {
             result.add(so.type + " " + so.fieldIdentifier + ";");
             result.add("");
             result.add(so.type + " _jmh_tryInit_" + so.fieldIdentifier + "(InfraControl control" + soDependency_TypeArgs(so) + ") throws Throwable {");
-
+            result.add("    if (control.isFailing) throw new FailureAssistException();");
             result.add("    " + so.type + " val = " + so.fieldIdentifier + ";");
             result.add("    if (val == null) {");
             result.add("        val = new " + so.type + "();");
@@ -802,6 +818,8 @@ class StateObjectHandler {
             result.add("        return val;");
             result.add("    }");
             result.add("    synchronized(this.getClass()) {");
+            result.add("        try {");
+            result.add("        if (control.isFailing) throw new FailureAssistException();");
             result.add("        val = " + so.fieldIdentifier + "_map.get(groupIdx);");
             result.add("        if (val != null) {");
             result.add("            return val;");
@@ -825,6 +843,10 @@ class StateObjectHandler {
             }
             result.add("        " + "val.ready" + Level.Trial + " = true;");
             result.add("        " + so.fieldIdentifier + "_map.put(groupIdx, val);");
+            result.add("        } catch (Throwable t) {");
+            result.add("            control.isFailing = true;");
+            result.add("            throw t;");
+            result.add("        }");
             result.add("    }");
             result.add("    return val;");
             result.add("}");
