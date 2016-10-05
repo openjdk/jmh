@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,21 +22,34 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.other.auxcounters.counterTypes.publicMethods;
+package org.openjdk.jmh.ct.other.auxcounters;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.AuxCounters;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class VoidTest {
+public class HelperConflictTest {
 
     @AuxCounters
     @State(Scope.Thread)
     public static class S {
-        public void cnt() { }
+        @Setup(Level.Trial)
+        public void setupTrial() {}
+
+        @Setup(Level.Iteration)
+        public void setupIteration() {}
+
+        @Setup(Level.Invocation)
+        public void setupInvocation() {}
+
+        @TearDown(Level.Invocation)
+        public void tearDownInvocation() {}
+
+        @TearDown(Level.Iteration)
+        public void tearDownIteration() {}
+
+        @TearDown(Level.Trial)
+        public void tearDownTrial() {}
     }
 
     @Benchmark

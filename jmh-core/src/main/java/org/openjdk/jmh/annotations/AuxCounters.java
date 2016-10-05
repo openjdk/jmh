@@ -51,7 +51,12 @@ import java.lang.annotation.Target;
  *
  *     <li>Only numeric fields and numeric-returning methods are considered as
  *     metrics. These include all primitives and their corresponding boxed counterTypes,
- *     except {@code boolean}/{@link Boolean} and {@code char}/{@link Character}</li>
+ *     except {@code boolean}/{@link Boolean} and {@code char}/{@link Character}.
+ *     It is a compile-time error to use the public field/method with incompatible type.</li>
+ *
+ *     <li>Methods with {@code void} return type are exempted from type checking.
+ *     This means helper {@link Setup} and {@link TearDown} methods are fine in
+ *     {@link AuxCounters}.</li>
  *
  *     <li>Public fields in {@link AuxCounters} instances would be reset before
  *     starting the iteration, and read back at the end of iteration. This allows

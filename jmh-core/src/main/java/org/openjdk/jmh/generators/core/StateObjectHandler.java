@@ -310,7 +310,7 @@ class StateObjectHandler {
             }
 
             for (MethodInfo sub : ci.getMethods()) {
-                if (sub.isPublic()) {
+                if (sub.isPublic() && !sub.getReturnType().equals("void")) {
                     if (!isAuxCompatible(sub.getReturnType())) {
                         throw new GenerationException("Illegal type for the return type of public method in @" + AuxCounters.class.getSimpleName() + ".", sub);
                     }
