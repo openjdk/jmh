@@ -229,10 +229,11 @@ public class BenchmarkGenerator {
 
         Multimap<ClassInfo, MethodInfo> result = new HashMultimap<ClassInfo, MethodInfo>();
         for (ClassInfo currentClass : source.getClasses()) {
+            if (currentClass.getQualifiedName().contains("generated")) continue;
+            if (currentClass.isAbstract()) continue;
+
             ClassInfo walk = currentClass;
             do {
-                if (currentClass.getQualifiedName().contains("generated")) continue;
-                if (currentClass.isAbstract()) continue;
                 for (MethodInfo mi : walk.getMethods()) {
                     Benchmark ann = mi.getAnnotation(Benchmark.class);
                     if (ann != null) {
