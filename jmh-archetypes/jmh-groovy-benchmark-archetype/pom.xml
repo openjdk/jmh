@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-archetypes</artifactId>
-        <version>1.16</version>
+        <version>1.17-SNAPSHOT</version>
     </parent>
 
     <artifactId>jmh-groovy-benchmark-archetype</artifactId>
