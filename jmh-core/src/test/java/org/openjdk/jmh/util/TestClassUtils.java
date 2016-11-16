@@ -28,6 +28,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public class TestClassUtils {
 
     @Test
     public void testDenseClasses2() {
-        List<String> src = Arrays.asList("org.openjdk.benches.ForkJoinTest.test1");
+        List<String> src = Collections.singletonList("org.openjdk.benches.ForkJoinTest.test1");
         Map<String,String> map = ClassUtils.denseClassNames(src);
 
         Assert.assertEquals("ForkJoinTest.test1", map.get("org.openjdk.benches.ForkJoinTest.test1"));
@@ -52,7 +53,7 @@ public class TestClassUtils {
 
     @Test
     public void testDenseClasses3() {
-        List<String> src = Arrays.asList("org.openjdk.benches.ForkJoinTest.test1:label1");
+        List<String> src = Collections.singletonList("org.openjdk.benches.ForkJoinTest.test1:label1");
         Map<String,String> map = ClassUtils.denseClassNames(src);
 
         Assert.assertEquals("ForkJoinTest.test1:label1", map.get("org.openjdk.benches.ForkJoinTest.test1:label1"));

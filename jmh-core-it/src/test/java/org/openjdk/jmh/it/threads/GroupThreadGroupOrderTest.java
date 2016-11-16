@@ -48,9 +48,9 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Group)
 public class GroupThreadGroupOrderTest {
 
-    private Set<Thread> abc = Collections.synchronizedSet(new HashSet<Thread>());
-    private Set<Thread> def = Collections.synchronizedSet(new HashSet<Thread>());
-    private Set<Thread> ghi = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> abc = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> def = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> ghi = Collections.synchronizedSet(new HashSet<Thread>());
 
     @Setup(Level.Iteration)
     public void prepare() {

@@ -47,7 +47,7 @@ public @interface Threads {
      * The magic value for MAX threads.
      * This means Runtime.getRuntime().availableProcessors() threads.
      */
-    public static int MAX = -1;
+    int MAX = -1;
 
     /**
      * @return Number of threads; use Threads.MAX to run with all available threads.

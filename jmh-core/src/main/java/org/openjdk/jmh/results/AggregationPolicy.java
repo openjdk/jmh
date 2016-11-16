@@ -36,7 +36,7 @@ public enum AggregationPolicy {
 
     ;
 
-    private String label;
+    private final String label;
 
     AggregationPolicy(String label) {
         this.label = label;

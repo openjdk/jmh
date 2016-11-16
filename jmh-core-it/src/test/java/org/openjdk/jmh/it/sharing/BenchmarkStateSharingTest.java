@@ -52,7 +52,7 @@ public class BenchmarkStateSharingTest {
 
     @State(Scope.Benchmark)
     public static class MyState {
-        Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
+        final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
 
         @TearDown(Level.Trial)
         public void tearDown() {

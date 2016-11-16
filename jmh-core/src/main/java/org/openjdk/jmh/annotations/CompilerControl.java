@@ -58,7 +58,7 @@ public @interface CompilerControl {
     /**
      * Compilation mode.
      */
-    public enum Mode {
+    enum Mode {
 
         /**
          * Insert the breakpoint into the generated compiled code.

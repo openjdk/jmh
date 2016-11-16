@@ -43,9 +43,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Fork {
 
-    static final int BLANK_FORKS = -1;
+    int BLANK_FORKS = -1;
 
-    static final String BLANK_ARGS = "blank_blank_blank_2014";
+    String BLANK_ARGS = "blank_blank_blank_2014";
 
     /** @return number of times harness should fork, zero means "no fork" */
     int value() default BLANK_FORKS;

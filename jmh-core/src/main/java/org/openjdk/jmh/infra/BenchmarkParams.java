@@ -25,8 +25,6 @@
 package org.openjdk.jmh.infra;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.WorkloadParams;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;

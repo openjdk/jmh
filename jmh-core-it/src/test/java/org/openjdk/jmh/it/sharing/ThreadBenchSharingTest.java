@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ThreadBenchSharingTest {
 
-    Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
+    final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
 
     @TearDown(Level.Trial)
     public void tearDown() {

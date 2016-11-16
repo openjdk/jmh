@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class MaxThreadCountTest {
 
-    private Set<Thread> threads = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> threads = Collections.synchronizedSet(new HashSet<Thread>());
 
     @TearDown(Level.Iteration)
     public void tearDown() {

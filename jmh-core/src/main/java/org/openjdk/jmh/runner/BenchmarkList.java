@@ -68,7 +68,7 @@ public class BenchmarkList extends AbstractResourceReader {
      * @return A list of all benchmarks, excluding matched
      */
     public Set<BenchmarkListEntry> getAll(OutputFormat out, List<String> excludes) {
-        return find(out, Arrays.asList(".*"), excludes);
+        return find(out, Collections.singletonList(".*"), excludes);
     }
 
     /**

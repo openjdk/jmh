@@ -47,9 +47,9 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Measurement {
 
-    static final int BLANK_ITERATIONS = -1;
-    static final int BLANK_TIME = -1;
-    static final int BLANK_BATCHSIZE = -1;
+    int BLANK_ITERATIONS = -1;
+    int BLANK_TIME = -1;
+    int BLANK_BATCHSIZE = -1;
 
     /** @return Number of measurement iterations */
     int iterations() default BLANK_ITERATIONS;

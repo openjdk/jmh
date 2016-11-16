@@ -31,6 +31,7 @@ import org.openjdk.jmh.results.format.ResultFormatType;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +48,7 @@ public class TestParentOptions {
     public void testIncludes_Parent() throws Exception {
         Options parent = new OptionsBuilder().include(".*").build();
         Options builder = new OptionsBuilder().parent(parent).build();
-        Assert.assertEquals(Arrays.asList(".*"), builder.getIncludes());
+        Assert.assertEquals(Collections.singletonList(".*"), builder.getIncludes());
     }
 
     @Test
@@ -68,7 +69,7 @@ public class TestParentOptions {
     public void testExcludes_Parent() throws Exception {
         Options parent = new OptionsBuilder().include(".*").build();
         Options builder = new OptionsBuilder().parent(parent).build();
-        Assert.assertEquals(Arrays.asList(".*"), builder.getIncludes());
+        Assert.assertEquals(Collections.singletonList(".*"), builder.getIncludes());
     }
 
     @Test
@@ -575,7 +576,7 @@ public class TestParentOptions {
     public void testWarmupMicros_Parent() throws Exception {
         Options parent = new OptionsBuilder().includeWarmup(".*").build();
         Options builder = new OptionsBuilder().parent(parent).build();
-        Assert.assertEquals(Arrays.asList(".*"), builder.getWarmupIncludes());
+        Assert.assertEquals(Collections.singletonList(".*"), builder.getWarmupIncludes());
     }
 
     @Test

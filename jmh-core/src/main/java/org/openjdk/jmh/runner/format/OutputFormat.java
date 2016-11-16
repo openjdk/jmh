@@ -45,7 +45,7 @@ public interface OutputFormat {
      * @param params iteration params in use
      * @param iteration iteration-number
      */
-    public void iteration(BenchmarkParams benchParams, IterationParams params, int iteration);
+    void iteration(BenchmarkParams benchParams, IterationParams params, int iteration);
 
     /**
      * Format for end-of-iteration.
@@ -55,31 +55,31 @@ public interface OutputFormat {
      * @param iteration iteration-number
      * @param data    result of iteration
      */
-    public void iterationResult(BenchmarkParams benchParams, IterationParams params, int iteration, IterationResult data);
+    void iterationResult(BenchmarkParams benchParams, IterationParams params, int iteration, IterationResult data);
 
     /**
      * Format for start-of-benchmark output.
      * @param benchParams benchmark params
      */
-    public void startBenchmark(BenchmarkParams benchParams);
+    void startBenchmark(BenchmarkParams benchParams);
 
     /**
      * Format for end-of-benchmark.
      *
      * @param result statistics of the run
      */
-    public void endBenchmark(BenchmarkResult result);
+    void endBenchmark(BenchmarkResult result);
 
     /**
      * Format for start-of-benchmark output.
      */
-    public void startRun();
+    void startRun();
 
     /**
      * Format for end-of-benchmark.
      * @param result benchmark results
      */
-    public void endRun(Collection<RunResult> result);
+    void endRun(Collection<RunResult> result);
 
     /* ------------- RAW OUTPUT METHODS ------------------- */
 

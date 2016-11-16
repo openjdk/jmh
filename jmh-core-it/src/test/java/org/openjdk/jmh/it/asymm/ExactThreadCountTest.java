@@ -57,8 +57,8 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 public class ExactThreadCountTest {
 
-    private Set<Thread> test1threads = Collections.synchronizedSet(new HashSet<Thread>());
-    private Set<Thread> test2threads = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> test1threads = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> test2threads = Collections.synchronizedSet(new HashSet<Thread>());
 
     @Setup(Level.Iteration)
     public void setup() {

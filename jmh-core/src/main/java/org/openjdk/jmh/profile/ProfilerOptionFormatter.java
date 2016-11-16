@@ -46,7 +46,7 @@ class ProfilerOptionFormatter implements HelpFormatter {
         sb.append("Usage: -prof <profiler-name>:opt1=value1,value2;opt2=value3");
         sb.append(LINE_SEPARATOR);
         sb.append(LINE_SEPARATOR);
-        sb.append("Options accepted by " + name + ":");
+        sb.append("Options accepted by ").append(name).append(":");
         for (OptionDescriptor each : options.values()) {
             sb.append(lineFor(each));
         }

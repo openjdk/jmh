@@ -45,9 +45,9 @@ import java.util.concurrent.TimeUnit;
 @Inherited
 public @interface Warmup {
 
-    static final int BLANK_ITERATIONS = -1;
-    static final int BLANK_TIME = -1;
-    static final int BLANK_BATCHSIZE = -1;
+    int BLANK_ITERATIONS = -1;
+    int BLANK_TIME = -1;
+    int BLANK_BATCHSIZE = -1;
 
     /** @return Number of warmup iterations */
     int iterations() default BLANK_ITERATIONS;

@@ -38,11 +38,9 @@ import java.io.Writer;
 
 public class APGeneratorDestinaton implements GeneratorDestination {
 
-    private final RoundEnvironment roundEnv;
     private final ProcessingEnvironment processingEnv;
 
     public APGeneratorDestinaton(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
-        this.roundEnv = roundEnv;
         this.processingEnv = processingEnv;
     }
 

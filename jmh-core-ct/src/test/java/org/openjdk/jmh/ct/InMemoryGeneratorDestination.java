@@ -40,12 +40,12 @@ import java.util.Map;
 
 public class InMemoryGeneratorDestination implements GeneratorDestination {
 
-    private List<String> errors = new ArrayList<>();
-    private List<String> warnings = new ArrayList<>();
-    private List<String> infos = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
+    private final List<String> warnings = new ArrayList<>();
+    private final List<String> infos = new ArrayList<>();
 
-    private Map<String, StringWriter> classBodies = new HashMap<>();
-    private Map<String, StringWriter> resourceBodies = new HashMap<>();
+    private final Map<String, StringWriter> classBodies = new HashMap<>();
+    private final Map<String, StringWriter> resourceBodies = new HashMap<>();
 
     @Override
     public Writer newResource(String resourcePath) throws IOException {

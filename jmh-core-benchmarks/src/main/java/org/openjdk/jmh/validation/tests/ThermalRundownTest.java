@@ -39,7 +39,7 @@ import java.io.PrintWriter;
 
 public class ThermalRundownTest implements ValidationTest {
 
-    private int iterations;
+    private final int iterations;
 
     public ThermalRundownTest(int iterations) {
         this.iterations = iterations;

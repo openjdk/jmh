@@ -86,7 +86,7 @@ public class RunnerTest {
     public void testOptsWithCompileCommandFileResultInMergedCompileCommandFile() throws IOException {
         // add a hints file
         String tempHints = FileUtils.createTempFileWithLines("fileWithLines",
-                Arrays.asList("inline,we/like/to/move/it.*"));
+                Collections.singletonList("inline,we/like/to/move/it.*"));
         Set<String> extraHints = CompilerHints.fromFile(tempHints).get();
         Runner blade = new Runner(new OptionsBuilder().build());
         BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false,
@@ -95,7 +95,7 @@ public class RunnerTest {
                 new IterationParams(IterationType.WARMUP,      1, TimeValue.seconds(1), 1),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
-                Utils.getCurrentJvm(), Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints),
+                Utils.getCurrentJvm(), Collections.singletonList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints),
                 TimeValue.days(1));
         List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 
@@ -118,10 +118,10 @@ public class RunnerTest {
     public void testOptsWith2CompileCommandFilesResultInMergedCompileCommandFile() throws IOException {
         // add hints files
         String tempHints1 = FileUtils.createTempFileWithLines("fileWithLines",
-                Arrays.asList("inline,we/like/to/move/it/move/it.*"));
+                Collections.singletonList("inline,we/like/to/move/it/move/it.*"));
         Set<String> extraHints1 = CompilerHints.fromFile(tempHints1).get();
         String tempHints2 = FileUtils.createTempFileWithLines("fileWithLines",
-                Arrays.asList("inline,we/like/to/move/it.*"));
+                Collections.singletonList("inline,we/like/to/move/it.*"));
         Set<String> extraHints2 = CompilerHints.fromFile(tempHints2).get();
         Runner blade = new Runner(new OptionsBuilder().build());
         BenchmarkParams bp = new BenchmarkParams("Foo", "bar", false,

@@ -37,7 +37,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.ClassUtils;
 import org.openjdk.jmh.util.Utils;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.*;
@@ -79,13 +79,13 @@ class BenchmarkHandler {
             @Override
             protected ThreadData initialValue() {
                 try {
-                    Object o = clazz.newInstance();
+                    Object o = clazz.getConstructor().newInstance();
                     ThreadParams t = tps.poll();
                     if (t == null) {
                         throw new IllegalStateException("Cannot get another thread params");
                     }
                     return new ThreadData(o, t);
-                } catch (InstantiationException | IllegalAccessException e) {
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                     throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
                 }
             }

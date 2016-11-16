@@ -28,9 +28,7 @@ import org.junit.Test;
 import org.junit.Assert;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;

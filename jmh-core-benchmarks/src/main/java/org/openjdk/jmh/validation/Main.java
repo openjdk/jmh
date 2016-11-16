@@ -216,7 +216,7 @@ public class Main {
         }
     }
 
-    public static enum Test {
+    public enum Test {
         timing,
         compiler_hints,
         thermal,
@@ -229,7 +229,7 @@ public class Main {
         blackhole_consec,
     }
 
-    public static enum Mode {
+    public enum Mode {
         flash,
         quick,
         normal,

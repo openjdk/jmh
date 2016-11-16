@@ -192,7 +192,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private List<ProfilerConfig> profilers = new ArrayList<>();
+    private final List<ProfilerConfig> profilers = new ArrayList<>();
 
     @Override
     public ChainedOptionsBuilder addProfiler(Class<? extends Profiler> prof) {
@@ -490,7 +490,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private EnumSet<Mode> benchModes = EnumSet.noneOf(Mode.class);
+    private final EnumSet<Mode> benchModes = EnumSet.noneOf(Mode.class);
 
     @Override
     public ChainedOptionsBuilder mode(Mode mode) {
@@ -672,7 +672,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private Multimap<String, String> params = new HashMultimap<>();
+    private final Multimap<String, String> params = new HashMultimap<>();
 
     @Override
     public Optional<Collection<String>> getParameter(String name) {

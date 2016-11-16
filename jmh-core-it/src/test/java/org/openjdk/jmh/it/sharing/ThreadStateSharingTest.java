@@ -52,7 +52,7 @@ public class ThreadStateSharingTest {
 
     @State(Scope.Thread)
     public static class MyState {
-        Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
+        final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
 
         @TearDown(Level.Trial)
         public void tearDown() {

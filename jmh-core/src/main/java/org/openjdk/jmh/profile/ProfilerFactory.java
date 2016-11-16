@@ -79,14 +79,19 @@ public class ProfilerFactory {
     }
 
     private static Profiler instantiate(ProfilerConfig cfg, Class<? extends Profiler> p) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        Profiler prof;
         try {
-            Constructor<? extends Profiler> constructor = p.getConstructor(String.class);
-            prof = constructor.newInstance(cfg.getOpts());
+            return p.getConstructor(String.class).newInstance(cfg.getOpts());
         } catch (NoSuchMethodException e) {
-            prof = p.newInstance();
+            // fallthrough
         }
-        return prof;
+
+        try {
+            return p.getConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            // fallthrough
+        }
+
+        throw new IllegalStateException("Cannot instantiate profiler");
     }
 
     public static List<ExternalProfiler> getSupportedExternal(Collection<ProfilerConfig> cfg) {
@@ -127,14 +132,7 @@ public class ProfilerFactory {
         for (String s : BUILT_IN.keySet()) {
             try {
                 Profiler prof = getProfilerOrException(new ProfilerConfig(s, ""));
-                String descr = (prof != null) ? prof.getDescription() : "(unable to instantiate the profiler)";
-
-                if (prof != null) {
-                    supported.append(String.format("%" + maxLen + "s: %s %s\n", s, descr, ""));
-                } else {
-                    unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s, descr, ""));
-                    unsupported.append("\n");
-                }
+                supported.append(String.format("%" + maxLen + "s: %s %s\n", s, prof.getDescription(), ""));
             } catch (ProfilerException e) {
                 unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s, "<none>", ""));
                 unsupported.append(e.getMessage());
@@ -145,14 +143,7 @@ public class ProfilerFactory {
         for (Class<? extends Profiler> s : ProfilerFactory.getDiscoveredProfilers()) {
             try {
                 Profiler prof = getProfilerOrException(new ProfilerConfig(s.getCanonicalName(), ""));
-                String descr = (prof != null) ? prof.getDescription() : "(unable to instantiate the profiler)";
-
-                if (prof != null) {
-                    supported.append(String.format("%" + maxLen + "s: %s %s\n", s.getCanonicalName(), descr, "(discovered)"));
-                } else {
-                    unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s.getCanonicalName(), descr, "(discovered)"));
-                    unsupported.append("\n");
-                }
+                supported.append(String.format("%" + maxLen + "s: %s %s\n", s.getCanonicalName(), prof.getDescription(), "(discovered)"));
             } catch (ProfilerException e) {
                 unsupported.append(String.format("%" + maxLen + "s: %s %s\n", s, s.getCanonicalName(), ""));
                 unsupported.append(e.getMessage());

@@ -150,7 +150,7 @@ public class PausesProfiler implements InternalProfiler {
     }
 
     static class PausesProfilerResult extends Result<PausesProfilerResult> {
-        private SampleBuffer buffer;
+        private final SampleBuffer buffer;
 
         public PausesProfilerResult(SampleBuffer buffer) {
             super(ResultRole.SECONDARY, Defaults.PREFIX + "pauses", buffer.getStatistics(1D / 1000000), "ms", AggregationPolicy.SUM);

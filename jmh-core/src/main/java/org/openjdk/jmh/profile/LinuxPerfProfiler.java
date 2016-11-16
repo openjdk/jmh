@@ -30,7 +30,6 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.*;
-import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.ScoreFormatter;
 import org.openjdk.jmh.util.Utils;
 

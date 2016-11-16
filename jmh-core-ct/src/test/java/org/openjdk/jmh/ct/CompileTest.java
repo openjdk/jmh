@@ -111,11 +111,6 @@ public class CompileTest {
         gen.complete(source, destination);
 
         if (destination.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed with:\n");
-            for (String e : destination.getErrors()) {
-                sb.append(e).append("\n");
-            }
             return false;
         }
 

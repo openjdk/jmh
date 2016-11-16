@@ -35,7 +35,7 @@ import static org.openjdk.jmh.util.lines.Constants.*;
 
 public class TestLineWriter {
 
-    private StringBuilder line;
+    private final StringBuilder line;
 
     public TestLineWriter() {
         line = new StringBuilder();

@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Param {
 
-    static final String BLANK_ARGS = "blank_blank_blank_2014";
+    String BLANK_ARGS = "blank_blank_blank_2014";
 
     /**
      * Default values sequence for the parameter. By default, the parameter

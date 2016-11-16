@@ -45,7 +45,7 @@ class OutputFrame implements Serializable {
         return type;
     }
 
-    public static enum Type {
+    public enum Type {
         OUT,
         ERR,
     }
