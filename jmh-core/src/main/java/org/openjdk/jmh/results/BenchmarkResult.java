@@ -50,7 +50,7 @@ public class BenchmarkResult implements Serializable {
 
     public BenchmarkResult(BenchmarkParams params, Collection<IterationResult> data, BenchmarkResultMetaData md) {
         this.metadata = md;
-        this.benchmarkResults = new HashMultimap<String, Result>();
+        this.benchmarkResults = new HashMultimap<>();
         this.iterationResults = data;
         this.params = params;
     }
@@ -76,7 +76,7 @@ public class BenchmarkResult implements Serializable {
 
     public Result getPrimaryResult() {
         Aggregator<Result> aggregator = null;
-        Collection<Result> aggrs = new ArrayList<Result>();
+        Collection<Result> aggrs = new ArrayList<>();
         for (IterationResult r : iterationResults) {
             Result e = r.getPrimaryResult();
             aggrs.add(e);
@@ -97,7 +97,7 @@ public class BenchmarkResult implements Serializable {
 
     public Map<String, Result> getSecondaryResults() {
         // label -> collection of results
-        Multimap<String, Result> allSecondary = new HashMultimap<String, Result>();
+        Multimap<String, Result> allSecondary = new HashMultimap<>();
 
         // Build multiset of all results to capture if some labels are missing in some of the iterations
         for (IterationResult ir : iterationResults) {
@@ -110,7 +110,7 @@ public class BenchmarkResult implements Serializable {
             }
         }
 
-        Map<String, Result> answers = new TreeMap<String, Result>();
+        Map<String, Result> answers = new TreeMap<>();
 
         int totalIterations = iterationResults.size();
         // Create "0" entries in case certain labels did not appear in some of the iterations
@@ -140,7 +140,7 @@ public class BenchmarkResult implements Serializable {
 
         for (String label : benchmarkResults.keys()) {
             Aggregator<Result> aggregator = null;
-            Collection<Result> results = new ArrayList<Result>();
+            Collection<Result> results = new ArrayList<>();
             for (Result r : benchmarkResults.get(label)) {
                 if (r.getRole().isSecondary() && !r.getRole().isDerivative()) {
                     results.add(r);
@@ -156,7 +156,7 @@ public class BenchmarkResult implements Serializable {
         answers.putAll(produceDerivative(getPrimaryResult()));
 
         // add all derivative results on top: from secondaries
-        Map<String, Result> adds = new HashMap<String, Result>();
+        Map<String, Result> adds = new HashMap<>();
         for (Result r : answers.values()) {
             adds.putAll(produceDerivative(r));
         }
@@ -166,7 +166,7 @@ public class BenchmarkResult implements Serializable {
     }
 
     private Map<String, Result> produceDerivative(Result r) {
-        Map<String, Result> map = new HashMap<String, Result>();
+        Map<String, Result> map = new HashMap<>();
         for (Object rr : r.getDerivativeResults()) {
             map.put(((Result) rr).getLabel(), (Result) rr);
         }

@@ -57,7 +57,7 @@ public class APGeneratorSource implements GeneratorSource {
             return classInfos;
         }
 
-        Collection<TypeElement> discoveredClasses = new TreeSet<TypeElement>(new Comparator<TypeElement>() {
+        Collection<TypeElement> discoveredClasses = new TreeSet<>(new Comparator<TypeElement>() {
             @Override
             public int compare(TypeElement o1, TypeElement o2) {
                 return o1.getQualifiedName().toString().compareTo(o2.getQualifiedName().toString());
@@ -78,7 +78,7 @@ public class APGeneratorSource implements GeneratorSource {
         int lastSize = 0;
         while (discoveredClasses.size() > lastSize) {
             lastSize = discoveredClasses.size();
-            List<TypeElement> newClasses = new ArrayList<TypeElement>();
+            List<TypeElement> newClasses = new ArrayList<>();
             for (Element e : discoveredClasses) {
                 try {
                     TypeElement walk = (TypeElement) e;
@@ -110,7 +110,7 @@ public class APGeneratorSource implements GeneratorSource {
     }
 
     protected Collection<ClassInfo> convert(Collection<TypeElement> els) {
-        List<ClassInfo> list = new ArrayList<ClassInfo>();
+        List<ClassInfo> list = new ArrayList<>();
         for (TypeElement el : els) {
             list.add(new APClassInfo(processingEnv, el));
         }

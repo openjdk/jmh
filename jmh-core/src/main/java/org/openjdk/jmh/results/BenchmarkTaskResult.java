@@ -44,7 +44,7 @@ public class BenchmarkTaskResult {
     public BenchmarkTaskResult(long allOperations, long measuredOperations) {
         this.allOperations = allOperations;
         this.measuredOperations = measuredOperations;
-        this.results = new ArrayList<Result>();
+        this.results = new ArrayList<>();
     }
 
     public void add(Result result) {

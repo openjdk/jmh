@@ -78,7 +78,7 @@ abstract class BaseRunner {
     }
 
     protected Multimap<BenchmarkParams, BenchmarkResult> runBenchmarksEmbedded(ActionPlan actionPlan) {
-        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
+        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<>();
 
         for (Action action : actionPlan.getActions()) {
             BenchmarkParams params = action.getParams();
@@ -101,8 +101,8 @@ abstract class BaseRunner {
             out.println("# *** WARNING: Non-forked runs may silently omit JVM options, mess up profilers, disable compiler hints, etc. ***");
             out.println("# *** WARNING: Use non-forked runs only for debugging purposes, not for actual performance runs. ***");
 
-            final List<IterationResult> res = new ArrayList<IterationResult>();
-            final List<BenchmarkResultMetaData> mds = new ArrayList<BenchmarkResultMetaData>();
+            final List<IterationResult> res = new ArrayList<>();
+            final List<BenchmarkResultMetaData> mds = new ArrayList<>();
 
             IterationResultAcceptor acceptor = new IterationResultAcceptor() {
                 @Override
@@ -308,7 +308,7 @@ abstract class BaseRunner {
      */
     public boolean runSystemGC() {
         if (options.shouldDoGC().orElse(Defaults.DO_GC)) {
-            List<GarbageCollectorMXBean> enabledBeans = new ArrayList<GarbageCollectorMXBean>();
+            List<GarbageCollectorMXBean> enabledBeans = new ArrayList<>();
 
             long beforeGcCount = 0;
             for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {

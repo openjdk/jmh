@@ -56,7 +56,7 @@ class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
         this.access = access;
         this.name = name;
         this.returnType = Type.getReturnType(desc).getClassName();
-        this.annotations = new HashMap<String, AnnotationInvocationHandler>();
+        this.annotations = new HashMap<>();
         this.argumentTypes = Type.getArgumentTypes(desc);
     }
 
@@ -103,7 +103,7 @@ class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
 
     @Override
     public Collection<ParameterInfo> getParameters() {
-        Collection<ParameterInfo> result = new ArrayList<ParameterInfo>();
+        Collection<ParameterInfo> result = new ArrayList<>();
         for (Type t : argumentTypes) {
             ClassInfo ci = repo.get(t.getClassName());
             result.add(new ASMParameterInfo(ci));

@@ -60,7 +60,7 @@ public class CompilerHints extends AbstractResourceReader {
         if (hintsFile == null) {
             try {
                 final Set<String> defaultHints = defaultList().get();
-                List<String> hints = new ArrayList<String>(defaultHints.size() + 2);
+                List<String> hints = new ArrayList<>(defaultHints.size() + 2);
                 hints.add("quiet");
                 if (Boolean.getBoolean("jmh.blackhole.forceInline")) {
                     hints.add("inline,org/openjdk/jmh/infra/Blackhole.*");
@@ -111,10 +111,7 @@ public class CompilerHints extends AbstractResourceReader {
                 } else if (Integer.valueOf(versionDigits[0]) == 5 && Integer.valueOf(versionDigits[1]) >= 10) {
                     return true;
                 }
-            } catch (NumberFormatException e) {
-                // unknown Zing version format
-                System.err.println("ERROR: Zing version format does not match 1.*.0-zing_*.*.*.*");
-            } catch (ArrayIndexOutOfBoundsException e) {
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 // unknown Zing version format
                 System.err.println("ERROR: Zing version format does not match 1.*.0-zing_*.*.*.*");
             }
@@ -127,7 +124,7 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     private Set<String> read() {
-        Set<String> result = new TreeSet<String>();
+        Set<String> result = new TreeSet<>();
 
         try {
             for (Reader r : getReaders()) {
@@ -167,7 +164,7 @@ public class CompilerHints extends AbstractResourceReader {
      * @return the compiler hint files specified by the command
      */
     public static List<String> getCompileCommandFiles(List<String> command){
-        List<String> compileCommandFiles = new ArrayList<String>();
+        List<String> compileCommandFiles = new ArrayList<>();
         for (String cmdLineWord : command) {
             if (cmdLineWord.startsWith(XX_COMPILE_COMMAND_FILE)) {
                 compileCommandFiles.add(cmdLineWord.substring(XX_COMPILE_COMMAND_FILE.length()));
@@ -196,7 +193,7 @@ public class CompilerHints extends AbstractResourceReader {
             return;
         }
 
-        List<String> hintFiles = new ArrayList<String>();
+        List<String> hintFiles = new ArrayList<>();
         hintFiles.add(hintsFile());
         removeCompileCommandFiles(command, hintFiles);
         if (hintFiles.size() == 1) {
@@ -228,7 +225,7 @@ public class CompilerHints extends AbstractResourceReader {
             return compileCommandFiles.get(0);
         }
         try {
-            Set<String> hints = new TreeSet<String>();
+            Set<String> hints = new TreeSet<>();
             for(String file : compileCommandFiles) {
                 hints.addAll(fromFile(file).get());
             }

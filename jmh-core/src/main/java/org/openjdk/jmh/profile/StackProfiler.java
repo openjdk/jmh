@@ -107,7 +107,7 @@ public class StackProfiler implements InternalProfiler {
 
             boolean excludePackages = set.valueOf(optExclude);
             excludePackageNames = excludePackages ?
-                    new HashSet<String>(set.valuesOf(optExcludeClasses)) :
+                    new HashSet<>(set.valuesOf(optExcludeClasses)) :
                     Collections.<String>emptySet();
         } catch (OptionException e) {
             throw new ProfilerException(e.getMessage());
@@ -139,7 +139,7 @@ public class StackProfiler implements InternalProfiler {
         private final Map<Thread.State, Multiset<StackRecord>> stacks;
 
         public SamplingTask() {
-            stacks = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
+            stacks = new EnumMap<>(Thread.State.class);
             for (Thread.State s : Thread.State.values()) {
                 stacks.put(s, new HashMultiset<StackRecord>());
             }
@@ -167,7 +167,7 @@ public class StackProfiler implements InternalProfiler {
                     //   - Get the remaining number of stack lines and build the stack record
 
                     StackTraceElement[] stack = info.getStackTrace();
-                    List<String> lines = new ArrayList<String>();
+                    List<String> lines = new ArrayList<>();
 
                     for (StackTraceElement l : stack) {
                         String className = l.getClassName();
@@ -278,7 +278,7 @@ public class StackProfiler implements InternalProfiler {
         }
 
         public String getStack(final Map<Thread.State, Multiset<StackRecord>> stacks) {
-            List<Thread.State> sortedStates = new ArrayList<Thread.State>(stacks.keySet());
+            List<Thread.State> sortedStates = new ArrayList<>(stacks.keySet());
             Collections.sort(sortedStates, new Comparator<Thread.State>() {
 
                 private long stateSize(Thread.State state) {
@@ -379,7 +379,7 @@ public class StackProfiler implements InternalProfiler {
         @Override
         public StackResult aggregate(Collection<StackResult> results) {
             int topStacks = 0;
-            Map<Thread.State, Multiset<StackRecord>> sum = new EnumMap<Thread.State, Multiset<StackRecord>>(Thread.State.class);
+            Map<Thread.State, Multiset<StackRecord>> sum = new EnumMap<>(Thread.State.class);
             for (StackResult r : results) {
                 for (Map.Entry<Thread.State, Multiset<StackRecord>> entry : r.stacks.entrySet()) {
                     if (!sum.containsKey(entry.getKey())) {

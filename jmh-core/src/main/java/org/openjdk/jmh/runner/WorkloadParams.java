@@ -36,7 +36,7 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
     private final SortedMap<String, Value> params;
 
     public WorkloadParams() {
-        params = new TreeMap<String, Value>();
+        params = new TreeMap<>();
     }
 
     private WorkloadParams(SortedMap<String, Value> params) {

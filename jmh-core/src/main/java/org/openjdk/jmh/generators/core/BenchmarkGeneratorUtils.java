@@ -65,7 +65,7 @@ class BenchmarkGeneratorUtils {
                 State.class, TearDown.class, Threads.class, Warmup.class
         );
 
-        JMH_ANNOTATION_TARGETS = new HashMultimap<Class<? extends Annotation>, ElementType>();
+        JMH_ANNOTATION_TARGETS = new HashMultimap<>();
 
         for (Class<? extends Annotation> ann : JMH_ANNOTATIONS) {
             Target target = ann.getAnnotation(Target.class);
@@ -89,7 +89,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static <T extends Annotation> Collection<MethodInfo> getMethodsAnnotatedWith(GeneratorSource source, Class<T> annClass) {
-        List<MethodInfo> mis = new ArrayList<MethodInfo>();
+        List<MethodInfo> mis = new ArrayList<>();
         for (ClassInfo ci : source.getClasses()) {
             for (MethodInfo mi : ci.getMethods()) {
                 if (mi.getAnnotation(annClass) != null) {
@@ -101,7 +101,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static <T extends Annotation> Collection<ClassInfo> getClassesAnnotatedWith(GeneratorSource source, Class<T> annClass) {
-        List<ClassInfo> cis = new ArrayList<ClassInfo>();
+        List<ClassInfo> cis = new ArrayList<>();
         for (ClassInfo ci : source.getClasses()) {
             if (ci.getAnnotation(annClass) != null) {
                 cis.add(ci);
@@ -111,7 +111,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static <T extends Annotation> Collection<FieldInfo> getFieldsAnnotatedWith(GeneratorSource source, Class<T> annClass) {
-        List<FieldInfo> mis = new ArrayList<FieldInfo>();
+        List<FieldInfo> mis = new ArrayList<>();
         for (ClassInfo ci : source.getClasses()) {
             for (FieldInfo mi : ci.getFields()) {
                 if (mi.getAnnotation(annClass) != null) {
@@ -123,7 +123,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static Collection<FieldInfo> getAllFields(ClassInfo ci) {
-        List<FieldInfo> ls = new ArrayList<FieldInfo>();
+        List<FieldInfo> ls = new ArrayList<>();
         do {
             ls.addAll(ci.getFields());
         } while ((ci = ci.getSuperClass()) != null);
@@ -131,7 +131,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static Collection<MethodInfo> getAllMethods(ClassInfo ci) {
-        List<MethodInfo> ls = new ArrayList<MethodInfo>();
+        List<MethodInfo> ls = new ArrayList<>();
         do {
             ls.addAll(ci.getMethods());
         } while ((ci = ci.getSuperClass()) != null);
@@ -139,7 +139,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static Collection<MethodInfo> getMethods(ClassInfo ci) {
-        List<MethodInfo> ls = new ArrayList<MethodInfo>();
+        List<MethodInfo> ls = new ArrayList<>();
         do {
             ls.addAll(ci.getMethods());
         } while ((ci = ci.getSuperClass()) != null);
@@ -200,7 +200,7 @@ class BenchmarkGeneratorUtils {
     }
 
     public static <T extends Annotation> Collection<T> getAnnSuperAll(MethodInfo mi, ClassInfo startCi, Class<T> annClass) {
-        Collection<T> results = new ArrayList<T>();
+        Collection<T> results = new ArrayList<>();
         {
             T ann = mi.getAnnotation(annClass);
             if (ann != null) {

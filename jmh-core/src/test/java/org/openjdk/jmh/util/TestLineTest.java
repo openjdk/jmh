@@ -61,7 +61,7 @@ public class TestLineTest {
         writer.putOptionalStringCollection(Optional.<Collection<String>>eitherOf(Arrays.asList("foo", "bar", "baz")));
         writer.putOptionalStringCollection(Optional.<Collection<String>>none());
 
-        HashMap<String, String[]> expectedMap = new HashMap<String, String[]>();
+        HashMap<String, String[]> expectedMap = new HashMap<>();
         expectedMap.put("key1", new String[] {"val1", "val2"});
         expectedMap.put("key2", new String[] {"val3", "val4"});
         writer.putOptionalParamCollection(Optional.<Map<String,String[]>>eitherOf(expectedMap));

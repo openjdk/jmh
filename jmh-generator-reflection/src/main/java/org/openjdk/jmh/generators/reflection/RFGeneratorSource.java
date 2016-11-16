@@ -36,12 +36,12 @@ public class RFGeneratorSource implements GeneratorSource {
     private final Collection<Class> classes;
 
     public RFGeneratorSource() {
-        this.classes = new ArrayList<Class>();
+        this.classes = new ArrayList<>();
     }
 
     @Override
     public Collection<ClassInfo> getClasses() {
-        Collection<ClassInfo> cis = new ArrayList<ClassInfo>();
+        Collection<ClassInfo> cis = new ArrayList<>();
         for (Class c : classes) {
             cis.add(new RFClassInfo(c));
         }

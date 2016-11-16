@@ -52,18 +52,18 @@ class StateObjectHandler {
 
     private final Multimap<String, String> benchmarkArgs;
 
-    private final Multimap<String, String> auxNames = new HashMultimap<String, String>();
-    private final Map<String, AuxCounters.Type> auxType = new HashMap<String, AuxCounters.Type>();
-    private final Map<String, String> auxAccessors = new HashMap<String, String>();
-    private final Map<String, Boolean> auxResettable = new HashMap<String, Boolean>();
+    private final Multimap<String, String> auxNames = new HashMultimap<>();
+    private final Map<String, AuxCounters.Type> auxType = new HashMap<>();
+    private final Map<String, String> auxAccessors = new HashMap<>();
+    private final Map<String, Boolean> auxResettable = new HashMap<>();
 
     public StateObjectHandler(CompilerControlPlugin compileControl) {
         this.compileControl = compileControl;
-        this.roots = new HashMultimap<String, StateObject>();
-        this.benchmarkArgs = new HashMultimap<String, String>();
-        this.implicits = new HashMap<String, StateObject>();
-        this.specials = new HashMultimap<String, ClassInfo>();
-        this.stateObjects = new HashSet<StateObject>();
+        this.roots = new HashMultimap<>();
+        this.benchmarkArgs = new HashMultimap<>();
+        this.implicits = new HashMap<>();
+        this.specials = new HashMultimap<>();
+        this.stateObjects = new HashSet<>();
         this.identifiers = new Identifiers();
     }
 
@@ -225,7 +225,7 @@ class StateObjectHandler {
     }
 
     private static void validateNoCyclesStep(List<String> states, MethodInfo method, boolean includeHolder) {
-        List<ClassInfo> stratum = new ArrayList<ClassInfo>();
+        List<ClassInfo> stratum = new ArrayList<>();
         if (includeHolder) {
             stratum.add(method.getDeclaringClass());
         }
@@ -233,7 +233,7 @@ class StateObjectHandler {
             stratum.add(ppi.getType());
         }
 
-        List<String> newStates = new ArrayList<String>();
+        List<String> newStates = new ArrayList<>();
         newStates.addAll(states);
         for (ClassInfo ci : stratum) {
             newStates.add(ci.getQualifiedName());
@@ -551,8 +551,9 @@ class StateObjectHandler {
         return sb.toString();
     }
 
+    @SafeVarargs
     public static Collection<StateObject> cons(Collection<StateObject>... colls) {
-        SortedSet<StateObject> r = new TreeSet<StateObject>(StateObject.ID_COMPARATOR);
+        SortedSet<StateObject> r = new TreeSet<>(StateObject.ID_COMPARATOR);
         for (Collection<StateObject> coll : colls) {
             r.addAll(coll);
         }
@@ -563,7 +564,7 @@ class StateObjectHandler {
 
         // Look for the offending methods.
         // This will be used to skip the irrelevant blocks for state objects down the stream.
-        List<StateObject> statesForward = new ArrayList<StateObject>();
+        List<StateObject> statesForward = new ArrayList<>();
         for (StateObject so : stateOrder(method, true)) {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel == helperLevel) {
@@ -573,7 +574,7 @@ class StateObjectHandler {
             }
         }
 
-        List<StateObject> statesReverse = new ArrayList<StateObject>();
+        List<StateObject> statesReverse = new ArrayList<>();
         for (StateObject so : stateOrder(method, false)) {
             for (HelperMethodInvocation hmi : so.getHelpers()) {
                 if (hmi.helperLevel == helperLevel) {
@@ -583,7 +584,7 @@ class StateObjectHandler {
             }
         }
 
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         // Handle Thread object helpers
         for (StateObject so : statesForward) {
@@ -723,7 +724,7 @@ class StateObjectHandler {
     public List<String> getStateInitializers() {
         Collection<StateObject> sos = cons(stateObjects);
 
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         for (StateObject so : sos) {
             if (so.scope != Scope.Benchmark) continue;
@@ -865,7 +866,7 @@ class StateObjectHandler {
     public Collection<String> getStateDestructors(MethodInfo method) {
         Collection<StateObject> sos = stateOrder(method, false);
 
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (StateObject so : sos) {
             if (so.scope != Scope.Benchmark) continue;
             result.add("synchronized(this.getClass()) {");
@@ -888,7 +889,7 @@ class StateObjectHandler {
     }
 
     public List<String> getStateGetters(MethodInfo method) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (StateObject so : stateOrder(method, true)) {
             result.add(so.type + " " + so.localIdentifier + " = _jmh_tryInit_" + so.fieldIdentifier + "(control" + soDependency_Args(so) + ");");
         }
@@ -897,9 +898,9 @@ class StateObjectHandler {
 
     private LinkedHashSet<StateObject> stateOrder(MethodInfo method, boolean reverse) {
         // Linearize @State dependency DAG
-        List<StateObject> linearOrder = new ArrayList<StateObject>();
+        List<StateObject> linearOrder = new ArrayList<>();
 
-        List<StateObject> stratum = new ArrayList<StateObject>();
+        List<StateObject> stratum = new ArrayList<>();
 
         // These are roots
         stratum.addAll(roots.get(method.getName()));
@@ -908,7 +909,7 @@ class StateObjectHandler {
         // Recursively walk the DAG
         while (!stratum.isEmpty()) {
             linearOrder.addAll(stratum);
-            List<StateObject> newStratum = new ArrayList<StateObject>();
+            List<StateObject> newStratum = new ArrayList<>();
             for (StateObject so : stratum) {
                 newStratum.addAll(so.depends);
             }
@@ -919,7 +920,7 @@ class StateObjectHandler {
             Collections.reverse(linearOrder);
         }
 
-        return new LinkedHashSet<StateObject>(linearOrder);
+        return new LinkedHashSet<>(linearOrder);
     }
 
     public void writeStateOverrides(BenchmarkGeneratorSession sess, GeneratorDestination dst) throws IOException {
@@ -1019,7 +1020,7 @@ class StateObjectHandler {
     }
 
     public Collection<String> getAuxResets(MethodInfo method) {
-        Collection<String> result = new ArrayList<String>();
+        Collection<String> result = new ArrayList<>();
         for (String name : auxNames.get(method.getName())) {
             if (auxResettable.get(name)) {
                 result.add(auxAccessors.get(method.getName() + name) + " = 0;");
@@ -1029,7 +1030,7 @@ class StateObjectHandler {
     }
 
     public Collection<String> getAuxResults(MethodInfo method, String opResName) {
-        Collection<String> result = new ArrayList<String>();
+        Collection<String> result = new ArrayList<>();
         for (String ops : auxNames.get(method.getName())) {
             AuxCounters.Type type = auxType.get(ops);
             switch (type) {

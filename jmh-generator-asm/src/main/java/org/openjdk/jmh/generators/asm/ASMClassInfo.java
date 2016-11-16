@@ -54,7 +54,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private final List<MethodInfo> methods;
     private final List<MethodInfo> constructors;
     private final List<FieldInfo> fields;
-    private final Map<String, AnnotationInvocationHandler> annotations = new HashMap<String, AnnotationInvocationHandler>();
+    private final Map<String, AnnotationInvocationHandler> annotations = new HashMap<>();
     private final ClassInfoRepo classInfos;
     private String superName;
     private String declaringClass;
@@ -64,9 +64,9 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     public ASMClassInfo(ClassInfoRepo classInfos) {
         super(Opcodes.ASM4);
         this.classInfos = classInfos;
-        methods = new ArrayList<MethodInfo>();
-        constructors = new ArrayList<MethodInfo>();
-        fields = new ArrayList<FieldInfo>();
+        this.methods = new ArrayList<>();
+        this.constructors = new ArrayList<>();
+        this.fields = new ArrayList<>();
     }
 
     public String getIdName() {
@@ -219,7 +219,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     public Collection<String> getEnumConstants() {
         if (isEnum()) {
             try {
-                Collection<String> res = new ArrayList<String>();
+                Collection<String> res = new ArrayList<>();
                 for (Object cnst : Class.forName(origQualifiedName, false, Thread.currentThread().getContextClassLoader()).getEnumConstants()) {
                     res.add(cnst.toString());
                 }

@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 class ForkedMain {
 
     private static final AtomicBoolean hangupFuse = new AtomicBoolean();
-    private static final AtomicReference<BinaryLinkClient> linkRef = new AtomicReference<BinaryLinkClient>();
+    private static final AtomicReference<BinaryLinkClient> linkRef = new AtomicReference<>();
 
     private static volatile boolean gracefullyFinished;
     private static volatile Throwable exception;

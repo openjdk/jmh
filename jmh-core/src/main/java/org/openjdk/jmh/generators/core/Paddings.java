@@ -33,7 +33,7 @@ public class Paddings {
     private static final List<String> PADDING_CACHE;
 
     static {
-        PADDING_CACHE = new ArrayList<String>();
+        PADDING_CACHE = new ArrayList<>();
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
             sb.append("    ");

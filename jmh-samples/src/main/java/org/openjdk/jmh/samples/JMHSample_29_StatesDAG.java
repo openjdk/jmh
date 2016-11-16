@@ -109,12 +109,12 @@ public class JMHSample_29_StatesDAG {
 
         @Setup
         public synchronized void setup() {
-            all = new ArrayList<Counter>();
+            all = new ArrayList<>();
             for (int c = 0; c < 10; c++) {
                 all.add(new Counter());
             }
 
-            available = new LinkedList<Counter>();
+            available = new LinkedList<>();
             available.addAll(all);
         }
 

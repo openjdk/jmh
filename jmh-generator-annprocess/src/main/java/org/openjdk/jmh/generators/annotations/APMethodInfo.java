@@ -70,7 +70,7 @@ class APMethodInfo extends APMetadataInfo implements MethodInfo {
 
     @Override
     public Collection<ParameterInfo> getParameters() {
-        Collection<ParameterInfo> pis = new ArrayList<ParameterInfo>();
+        Collection<ParameterInfo> pis = new ArrayList<>();
         for (VariableElement v : el.getParameters()) {
             pis.add(new APParameterInfo(processEnv, v));
         }

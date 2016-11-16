@@ -69,7 +69,7 @@ public class ClassloaderProfiler implements InternalProfiler {
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         afterTime = System.nanoTime();
 
-        List<Result> results = new ArrayList<Result>();
+        List<Result> results = new ArrayList<>();
 
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
 

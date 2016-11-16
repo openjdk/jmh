@@ -38,6 +38,6 @@ public class HashsetMultimap<K, V> extends DelegatingMultimap<K, V> implements S
 
     @Override
     protected Collection<V> createValueCollection() {
-        return new HashSet<V>();
+        return new HashSet<>();
     }
 }

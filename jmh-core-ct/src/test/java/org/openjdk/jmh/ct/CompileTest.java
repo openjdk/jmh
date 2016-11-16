@@ -61,7 +61,7 @@ public class CompileTest {
             Assert.fail("Should have failed.");
         }
 
-        List<String> testErrors = new ArrayList<String>();
+        List<String> testErrors = new ArrayList<>();
         boolean contains = false;
         for (String e : destination.getErrors()) {
             if (!e.startsWith(SRC_PREFIX)) {
@@ -119,13 +119,13 @@ public class CompileTest {
             return false;
         }
 
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);
         setupClassOutput(fm);
 
-        Collection<JavaSourceFromString> sources = new ArrayList<JavaSourceFromString>();
+        Collection<JavaSourceFromString> sources = new ArrayList<>();
         for (Map.Entry<String, String> e : destination.getClasses().entrySet()) {
             sources.add(new JavaSourceFromString(e.getKey(), e.getValue()));
         }
@@ -146,7 +146,7 @@ public class CompileTest {
     }
 
     private static boolean doTestAnnprocess(Class<?> klass, InMemoryGeneratorDestination destination) {
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);

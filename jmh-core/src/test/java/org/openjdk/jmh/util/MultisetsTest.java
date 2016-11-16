@@ -32,7 +32,7 @@ import java.util.List;
 public class MultisetsTest {
     @Test
     public void testCountHighest() {
-        Multiset<Integer> set = new HashMultiset<Integer>();
+        Multiset<Integer> set = new HashMultiset<>();
         set.add(10);
         set.add(10);
         set.add(10);
@@ -50,7 +50,7 @@ public class MultisetsTest {
     public void testCountHighest_2() {
         // Regression test for CODETOOLS-7901411
 
-        Multiset<String> set = new HashMultiset<String>();
+        Multiset<String> set = new HashMultiset<>();
         set.add("Meh", 85);
         set.add("Blah", 17);
         set.add("Choo", 1);
@@ -65,7 +65,7 @@ public class MultisetsTest {
 
     @Test
     public void testSortedDesc() {
-        Multiset<Integer> set = new HashMultiset<Integer>();
+        Multiset<Integer> set = new HashMultiset<>();
         set.add(10);
         set.add(10);
         set.add(10);

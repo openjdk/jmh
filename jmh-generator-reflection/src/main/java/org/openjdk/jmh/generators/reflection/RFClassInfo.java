@@ -77,7 +77,7 @@ class RFClassInfo implements ClassInfo {
 
     @Override
     public Collection<FieldInfo> getFields() {
-        Collection<FieldInfo> fis = new ArrayList<FieldInfo>();
+        Collection<FieldInfo> fis = new ArrayList<>();
         for (Field f : klass.getDeclaredFields()) {
             fis.add(new RFFieldInfo(this, f));
         }
@@ -86,7 +86,7 @@ class RFClassInfo implements ClassInfo {
 
     @Override
     public Collection<MethodInfo> getConstructors() {
-        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
+        Collection<MethodInfo> mis = new ArrayList<>();
         for (Constructor m : klass.getDeclaredConstructors()) {
             mis.add(new RFConstructorInfo(this, m));
         }
@@ -95,7 +95,7 @@ class RFClassInfo implements ClassInfo {
 
     @Override
     public Collection<MethodInfo> getMethods() {
-        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
+        Collection<MethodInfo> mis = new ArrayList<>();
         for (Method m : klass.getDeclaredMethods()) {
             mis.add(new RFMethodInfo(this, m));
         }
@@ -160,7 +160,7 @@ class RFClassInfo implements ClassInfo {
 
     @Override
     public Collection<String> getEnumConstants() {
-        Collection<String> res = new ArrayList<String>();
+        Collection<String> res = new ArrayList<>();
         for (Object cnst : klass.getEnumConstants()) {
             res.add(cnst.toString());
         }

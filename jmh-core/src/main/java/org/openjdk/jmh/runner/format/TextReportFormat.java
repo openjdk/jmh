@@ -85,7 +85,7 @@ class TextReportFormat extends AbstractOutputFormat {
             int[] tg = params.getThreadGroups();
 
             // TODO: Make params.getThreadGroupLabels return List
-            List<String> labels = new ArrayList<String>(params.getThreadGroupLabels());
+            List<String> labels = new ArrayList<>(params.getThreadGroupLabels());
             String[] ss = new String[tg.length];
             for (int cnt = 0; cnt < tg.length; cnt++) {
                 ss[cnt] = tg[cnt] + "x \"" + labels.get(cnt) + "\"";

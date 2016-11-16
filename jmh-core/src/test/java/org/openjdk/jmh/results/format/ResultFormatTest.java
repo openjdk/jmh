@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 public class ResultFormatTest {
 
     private Collection<RunResult> getStub() {
-        Collection<RunResult> results = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
+        Collection<RunResult> results = new TreeSet<>(RunResult.DEFAULT_SORT_COMPARATOR);
 
         Random r = new Random(12345);
         Random ar = new Random(12345);
@@ -74,9 +74,9 @@ public class ResultFormatTest {
                     Collections.<String>emptyList(),
                     TimeValue.days(1));
 
-            Collection<BenchmarkResult> benchmarkResults = new ArrayList<BenchmarkResult>();
+            Collection<BenchmarkResult> benchmarkResults = new ArrayList<>();
             for (int f = 0; f < r.nextInt(10); f++) {
-                Collection<IterationResult> iterResults = new ArrayList<IterationResult>();
+                Collection<IterationResult> iterResults = new ArrayList<>();
                 for (int c = 0; c < r.nextInt(10); c++) {
                     IterationResult res = new IterationResult(params, params.getMeasurement(), null);
                     res.addResult(new ThroughputResult(ResultRole.PRIMARY, "test", r.nextInt(1000), 1000 * 1000, TimeUnit.MILLISECONDS));

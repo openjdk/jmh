@@ -107,7 +107,7 @@ public class LogConsumeProfiler implements ExternalProfiler {
             @Override
             public LogConsumeResult aggregate(Collection<LogConsumeResult> results) {
                 String label = null;
-                Collection<String> allLines = new ArrayList<String>();
+                Collection<String> allLines = new ArrayList<>();
                 for (LogConsumeResult r : results) {
                     label = r.label;
                     allLines.addAll(r.getLines());

@@ -42,8 +42,7 @@ public class SampleBuffer implements Serializable {
     }
 
     public void half() {
-        for (int i = 0; i < hdr.length; i++) {
-            int[] bucket = hdr[i];
+        for (int[] bucket : hdr) {
             if (bucket != null) {
                 for (int j = 0; j < bucket.length; j++) {
                     int nV = bucket[j] / 2;

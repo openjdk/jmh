@@ -53,7 +53,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         HotspotInternalResult res = counters();
-        Collection<ScalarResult> results = new ArrayList<ScalarResult>();
+        Collection<ScalarResult> results = new ArrayList<>();
         for (Map.Entry<String, Long> e : res.getDiff().entrySet()) {
             results.add(new ScalarResult(Defaults.PREFIX + e.getKey(), e.getValue(), "?", AggregationPolicy.AVG));
         }
@@ -62,7 +62,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
 
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        prevs = new HashMap<String, Long>();
+        prevs = new HashMap<>();
         for (Counter counter : getCounters()) {
             prevs.put(counter.getName(), convert(counter.getValue()));
         }
@@ -77,8 +77,8 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     }
 
     protected HotspotInternalResult counters() {
-        Map<String, Long> difference = new TreeMap<String, Long>();
-        Map<String, Long> current = new TreeMap<String, Long>();
+        Map<String, Long> difference = new TreeMap<>();
+        Map<String, Long> current = new TreeMap<>();
         for (Counter counter : getCounters()) {
             Long prev = prevs.get(counter.getName());
             if (prev != null) {
@@ -95,13 +95,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
         try {
             Object o = Class.forName("sun.management.ManagementFactoryHelper").getMethod("get" + name).invoke(null);
             return (T) o;
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Should not be here");
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException("Should not be here");
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("Should not be here");
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new IllegalStateException("Should not be here");
         }
     }

@@ -40,7 +40,7 @@ public class DelegatingMultimap<K, V> implements Multimap<K, V>, Serializable {
     }
 
     protected Collection<V> createValueCollection() {
-        return new ArrayList<V>();
+        return new ArrayList<>();
     }
 
     @Override

@@ -38,7 +38,7 @@ import java.util.*;
 public class IterationResult implements Serializable {
     private static final long serialVersionUID = 960397066774710819L;
 
-    private static final Multimap<String, Result> EMPTY_MAP = new TreeMultimap<String, Result>();
+    private static final Multimap<String, Result> EMPTY_MAP = new TreeMultimap<>();
     private static final List<Result> EMPTY_LIST = Collections.emptyList();
 
     private final BenchmarkParams benchmarkParams;
@@ -70,7 +70,7 @@ public class IterationResult implements Serializable {
             if (primaryResults == EMPTY_LIST) {
                 primaryResults = Collections.singleton(result);
             } else if (primaryResults.size() == 1) {
-                List<Result> newResults = new ArrayList<Result>(2);
+                List<Result> newResults = new ArrayList<>(2);
                 newResults.addAll(primaryResults);
                 newResults.add(result);
                 primaryResults = newResults;
@@ -81,7 +81,7 @@ public class IterationResult implements Serializable {
 
         if (result.getRole().isSecondary()) {
             if (secondaryResults == EMPTY_MAP) {
-                secondaryResults = new TreeMultimap<String, Result>();
+                secondaryResults = new TreeMultimap<>();
             }
             secondaryResults.put(result.getLabel(), result);
         }
@@ -96,7 +96,7 @@ public class IterationResult implements Serializable {
     }
 
     public Map<String, Result> getSecondaryResults() {
-        Map<String, Result> answer = new TreeMap<String, Result>();
+        Map<String, Result> answer = new TreeMap<>();
         for (String label : secondaryResults.keys()) {
             Collection<Result> results = secondaryResults.get(label);
 
@@ -112,7 +112,7 @@ public class IterationResult implements Serializable {
         answer.putAll(produceDerivative(getPrimaryResult()));
 
         // add all secondary derivative results on top: from secondaries
-        Map<String, Result> adds = new HashMap<String, Result>();
+        Map<String, Result> adds = new HashMap<>();
         for (Result r : answer.values()) {
             adds.putAll(produceDerivative(r));
         }
@@ -122,7 +122,7 @@ public class IterationResult implements Serializable {
     }
 
     private Map<String, Result> produceDerivative(Result r) {
-        Map<String, Result> map = new HashMap<String, Result>();
+        Map<String, Result> map = new HashMap<>();
         for (Object rr : r.getDerivativeResults()) {
             map.put(((Result) rr).getLabel(), (Result) rr);
         }

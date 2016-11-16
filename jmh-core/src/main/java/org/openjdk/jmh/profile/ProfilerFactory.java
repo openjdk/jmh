@@ -90,7 +90,7 @@ public class ProfilerFactory {
     }
 
     public static List<ExternalProfiler> getSupportedExternal(Collection<ProfilerConfig> cfg) {
-        List<ExternalProfiler> profilers = new ArrayList<ExternalProfiler>();
+        List<ExternalProfiler> profilers = new ArrayList<>();
         for (ProfilerConfig p : cfg) {
             Profiler prof = ProfilerFactory.getProfilerOrNull(p);
             if (prof instanceof ExternalProfiler) {
@@ -101,7 +101,7 @@ public class ProfilerFactory {
     }
 
     public static List<InternalProfiler> getSupportedInternal(Collection<ProfilerConfig> cfg) {
-        List<InternalProfiler> profilers = new ArrayList<InternalProfiler>();
+        List<InternalProfiler> profilers = new ArrayList<>();
         for (ProfilerConfig p : cfg) {
             Profiler prof = ProfilerFactory.getProfilerOrNull(p);
             if (prof instanceof InternalProfiler) {
@@ -173,7 +173,7 @@ public class ProfilerFactory {
     private static final Map<String, Class<? extends Profiler>> BUILT_IN;
 
     static {
-        BUILT_IN = new TreeMap<String, Class<? extends Profiler>>();
+        BUILT_IN = new TreeMap<>();
         BUILT_IN.put("cl",       ClassloaderProfiler.class);
         BUILT_IN.put("comp",     CompilerProfiler.class);
         BUILT_IN.put("gc",       GCProfiler.class);
@@ -191,7 +191,7 @@ public class ProfilerFactory {
     }
 
     private static List<Class<? extends Profiler>> getDiscoveredProfilers() {
-        List<Class<? extends Profiler>> profs = new ArrayList<Class<? extends Profiler>>();
+        List<Class<? extends Profiler>> profs = new ArrayList<>();
         for (Profiler s : ServiceLoader.load(Profiler.class)) {
             profs.add(s.getClass());
         }

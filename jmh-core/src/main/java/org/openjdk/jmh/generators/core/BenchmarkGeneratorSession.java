@@ -28,5 +28,5 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BenchmarkGeneratorSession {
-    public final Set<String> generatedStateOverrides = new HashSet<String>();
+    public final Set<String> generatedStateOverrides = new HashSet<>();
 }

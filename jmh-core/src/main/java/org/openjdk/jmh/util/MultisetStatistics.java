@@ -32,7 +32,7 @@ public class MultisetStatistics extends AbstractStatistics {
     private final Multiset<Double> values;
 
     public MultisetStatistics() {
-        values = new TreeMultiset<Double>();
+        values = new TreeMultiset<>();
     }
 
     public void addValue(double d, long count) {
@@ -118,7 +118,7 @@ public class MultisetStatistics extends AbstractStatistics {
             throw new IllegalArgumentException("Expected more than two levels");
         }
 
-        List<Double> vs = new ArrayList<Double>(values.keys());
+        List<Double> vs = new ArrayList<>(values.keys());
         Collections.sort(vs);
 
         int[] result = new int[levels.length - 1];

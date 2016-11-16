@@ -33,11 +33,11 @@ import java.util.Set;
 
 class Identifiers {
 
-    private final Map<String, String> collapsedTypes = new HashMap<String, String>();
+    private final Map<String, String> collapsedTypes = new HashMap<>();
     private int collapsedIndex = 0;
 
-    private final Set<String> claimedJmhTypes = new HashSet<String>();
-    private final Map<String, String> jmhTypes = new HashMap<String, String>();
+    private final Set<String> claimedJmhTypes = new HashSet<>();
+    private final Map<String, String> jmhTypes = new HashMap<>();
 
     public String getJMHtype(ClassInfo type) {
         String id = BenchmarkGeneratorUtils.getGeneratedName(type);

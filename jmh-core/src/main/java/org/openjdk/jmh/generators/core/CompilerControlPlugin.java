@@ -36,16 +36,16 @@ import java.util.TreeSet;
 
 class CompilerControlPlugin {
 
-    private final SortedSet<String> lines = new TreeSet<String>();
+    private final SortedSet<String> lines = new TreeSet<>();
 
-    private final Set<MethodInfo> defaultForceInlineMethods = new TreeSet<MethodInfo>(new Comparator<MethodInfo>() {
+    private final Set<MethodInfo> defaultForceInlineMethods = new TreeSet<>(new Comparator<MethodInfo>() {
         @Override
         public int compare(MethodInfo o1, MethodInfo o2) {
             return o1.getQualifiedName().compareTo(o2.getQualifiedName());
         }
     });
 
-    private final Set<String> alwaysDontInlineMethods = new TreeSet<String>();
+    private final Set<String> alwaysDontInlineMethods = new TreeSet<>();
 
     public void defaultForceInline(MethodInfo methodInfo) {
         defaultForceInlineMethods.add(methodInfo);

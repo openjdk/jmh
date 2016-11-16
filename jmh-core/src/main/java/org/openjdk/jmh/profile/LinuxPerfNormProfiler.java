@@ -67,7 +67,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     private final int incrementInterval;
     private final boolean isIncrementable;
 
-    private final Collection<String> supportedEvents = new ArrayList<String>();
+    private final Collection<String> supportedEvents = new ArrayList<>();
 
     public LinuxPerfNormProfiler(String initLine) throws ProfilerException {
         OptionParser parser = new OptionParser();
@@ -135,7 +135,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        List<String> cmd = new ArrayList<String>();
+        List<String> cmd = new ArrayList<>();
         if (useDefaultStats) {
             cmd.addAll(Arrays.asList("perf", "stat", "--log-fd", "2", "--field-separator", ",", "--detailed", "--detailed", "--detailed"));
         } else {
@@ -195,7 +195,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     }
 
     private Collection<? extends Result> process(BenchmarkResult br, File stdOut, File stdErr) {
-        Multiset<String> events = new HashMultiset<String>();
+        Multiset<String> events = new HashMultiset<>();
 
         FileReader fr = null;
         try {
@@ -293,7 +293,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 } else {
                     totalOpts = md.getWarmupOps() + md.getMeasurementOps();
                 }
-                Collection<Result> results = new ArrayList<Result>();
+                Collection<Result> results = new ArrayList<>();
                 for (String key : events.keys()) {
                     results.add(new PerfResult(key, events.count(key) * 1.0 / totalOpts));
                 }

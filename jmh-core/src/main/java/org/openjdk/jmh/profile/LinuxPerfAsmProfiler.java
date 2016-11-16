@@ -96,9 +96,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             outDrainer.join();
 
             FileUtils.safelyClose(fos);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
-        } catch (InterruptedException ex) {
+        } catch (IOException | InterruptedException ex) {
             throw new IllegalStateException(ex);
         }
     }
@@ -107,13 +105,13 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     protected PerfEvents readEvents(double skipSec) {
         FileReader fr = null;
         try {
-            Deduplicator<MethodDesc> dedup = new Deduplicator<MethodDesc>();
+            Deduplicator<MethodDesc> dedup = new Deduplicator<>();
 
             fr = new FileReader(perfParsedData);
             BufferedReader reader = new BufferedReader(fr);
 
-            Multimap<MethodDesc, Long> methods = new HashMultimap<MethodDesc, Long>();
-            Map<String, Multiset<Long>> events = new LinkedHashMap<String, Multiset<Long>>();
+            Multimap<MethodDesc, Long> methods = new HashMultimap<>();
+            Map<String, Multiset<Long>> events = new LinkedHashMap<>();
             for (String evName : this.events) {
                 events.put(evName, new TreeMultiset<Long>());
             }
@@ -181,7 +179,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 methods.put(dedup.dedup(MethodDesc.nativeMethod(symbol, lib)), addr);
             }
 
-            IntervalMap<MethodDesc> methodMap = new IntervalMap<MethodDesc>();
+            IntervalMap<MethodDesc> methodMap = new IntervalMap<>();
             for (MethodDesc md : methods.keys()) {
                 Collection<Long> addrs = methods.get(md);
                 methodMap.add(md, Utils.min(addrs), Utils.max(addrs));

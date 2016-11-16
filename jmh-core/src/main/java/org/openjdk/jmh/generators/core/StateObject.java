@@ -61,10 +61,10 @@ class StateObject {
         this.localIdentifier = "l_" + id;
         this.fieldIdentifier = "f_" + id;
 
-        this.params = new TreeMultimap<String, FieldInfo>();
-        this.helpers = new TreeSet<HelperMethodInvocation>();
-        this.helperArgs = new HashMultimap<String, String>();
-        this.depends = new ArrayList<StateObject>();
+        this.params = new TreeMultimap<>();
+        this.helpers = new TreeSet<>();
+        this.helperArgs = new HashMultimap<>();
+        this.depends = new ArrayList<>();
     }
 
     @Override

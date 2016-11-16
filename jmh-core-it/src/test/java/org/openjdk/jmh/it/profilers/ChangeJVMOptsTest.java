@@ -94,7 +94,7 @@ public class ChangeJVMOptsTest {
     }
 
     private void check() throws IOException {
-        Set<String> lines = new HashSet<String>();
+        Set<String> lines = new HashSet<>();
         for (String line : FileUtils.readAllLines(TMP_FILE)) {
             if (!lines.add(line)) {
                 Assert.fail("Duplicate line: " + line);

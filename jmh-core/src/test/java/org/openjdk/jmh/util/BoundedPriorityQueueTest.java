@@ -33,7 +33,7 @@ import java.util.Queue;
 public class BoundedPriorityQueueTest {
     @Test
     public void top3Smallest() {
-        Queue<Integer> queue = new BoundedPriorityQueue<Integer>(3);
+        Queue<Integer> queue = new BoundedPriorityQueue<>(3);
         queue.add(50);
         queue.add(40);
         queue.add(10);
@@ -50,7 +50,7 @@ public class BoundedPriorityQueueTest {
 
     @Test
     public void top3Largest() {
-        Queue<Integer> queue = new BoundedPriorityQueue<Integer>(3, Collections.reverseOrder());
+        Queue<Integer> queue = new BoundedPriorityQueue<>(3, Collections.reverseOrder());
         queue.add(50);
         queue.add(40);
         queue.add(10);

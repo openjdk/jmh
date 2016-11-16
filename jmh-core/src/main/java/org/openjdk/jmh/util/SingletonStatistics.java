@@ -99,7 +99,7 @@ public class SingletonStatistics extends AbstractStatistics {
         @Override
         public Map.Entry<Double, Long> next() {
             entryReturned = true;
-            return new AbstractMap.SimpleImmutableEntry<Double, Long>(value, 1L);
+            return new AbstractMap.SimpleImmutableEntry<>(value, 1L);
         }
 
         @Override

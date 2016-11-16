@@ -62,7 +62,7 @@ public class EmptyLeadingStringParamTest {
 
         Collection<RunResult> res = new Runner(opts).run();
 
-        Set<String> actualP = new HashSet<String>();
+        Set<String> actualP = new HashSet<>();
         for (RunResult r : res) {
             actualP.add(r.getParams().getParam("x"));
         }
@@ -83,7 +83,7 @@ public class EmptyLeadingStringParamTest {
 
         Collection<RunResult> res = new Runner(opts).run();
 
-        Set<String> actualP = new HashSet<String>();
+        Set<String> actualP = new HashSet<>();
         for (RunResult r : res) {
             actualP.add(r.getParams().getParam("x"));
         }

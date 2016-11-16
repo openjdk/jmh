@@ -32,7 +32,7 @@ public class Deduplicator<T> {
     final ConcurrentMap<T, T> map;
 
     public Deduplicator() {
-        map = new ConcurrentHashMap<T, T>();
+        map = new ConcurrentHashMap<>();
     }
 
     public T dedup(T t) {

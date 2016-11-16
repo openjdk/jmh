@@ -66,7 +66,7 @@ class RFMethodInfo implements MethodInfo {
 
     @Override
     public Collection<ParameterInfo> getParameters() {
-        Collection<ParameterInfo> pis = new ArrayList<ParameterInfo>();
+        Collection<ParameterInfo> pis = new ArrayList<>();
         for (Class<?> cl : m.getParameterTypes()) {
             pis.add(new RFParameterInfo(cl));
         }

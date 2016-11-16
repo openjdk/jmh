@@ -35,7 +35,7 @@ import java.util.Set;
 public class Shared {
 
     public static void compare(Collection<RunResult> res, int[] xs, String[] ys) {
-        Set<String> actualPairs = new HashSet<String>();
+        Set<String> actualPairs = new HashSet<>();
         for (RunResult r : res) {
             BenchmarkParams params = r.getParams();
             actualPairs.add(params.getParam("x") + params.getParam("y"));

@@ -76,8 +76,8 @@ public class JMHSample_31_InfraParams {
     @Setup
     public void setup(BenchmarkParams params) {
         int capacity = 16 * THREAD_SLICE * params.getThreads();
-        mapSingle        = new ConcurrentHashMap<String, String>(capacity, 0.75f, 1);
-        mapFollowThreads = new ConcurrentHashMap<String, String>(capacity, 0.75f, params.getThreads());
+        mapSingle        = new ConcurrentHashMap<>(capacity, 0.75f, 1);
+        mapFollowThreads = new ConcurrentHashMap<>(capacity, 0.75f, params.getThreads());
     }
 
     /*
@@ -90,7 +90,7 @@ public class JMHSample_31_InfraParams {
 
         @Setup
         public void setup(ThreadParams threads) {
-            ids = new ArrayList<String>();
+            ids = new ArrayList<>();
             for (int c = 0; c < THREAD_SLICE; c++) {
                 ids.add("ID" + (THREAD_SLICE * threads.getThreadIndex() + c));
             }

@@ -51,17 +51,17 @@ public class CommandLineOptions implements Options {
     private final Optional<Integer> warmupIterations;
     private final Optional<TimeValue> warmupTime;
     private final Optional<Integer> warmupBatchSize;
-    private final List<Mode> benchMode = new ArrayList<Mode>();
+    private final List<Mode> benchMode = new ArrayList<>();
     private final Optional<Integer> threads;
-    private final List<Integer> threadGroups = new ArrayList<Integer>();
+    private final List<Integer> threadGroups = new ArrayList<>();
     private final Optional<Boolean> synchIterations;
     private final Optional<Boolean> gcEachIteration;
     private final Optional<VerboseMode> verbose;
     private final Optional<Boolean> failOnError;
-    private final List<ProfilerConfig> profilers = new ArrayList<ProfilerConfig>();
+    private final List<ProfilerConfig> profilers = new ArrayList<>();
     private final Optional<TimeUnit> timeUnit;
     private final Optional<Integer> opsPerInvocation;
-    private final List<String> regexps = new ArrayList<String>();
+    private final List<String> regexps = new ArrayList<>();
     private final Optional<Integer> fork;
     private final Optional<Integer> warmupFork;
     private final Optional<String> output;
@@ -71,10 +71,10 @@ public class CommandLineOptions implements Options {
     private final Optional<Collection<String>> jvmArgs;
     private final Optional<Collection<String>> jvmArgsAppend;
     private final Optional<Collection<String>> jvmArgsPrepend;
-    private final List<String> excludes = new ArrayList<String>();
+    private final List<String> excludes = new ArrayList<>();
     private final Optional<WarmupMode> warmupMode;
-    private final List<String> warmupMicros = new ArrayList<String>();
-    private final Multimap<String, String> params = new HashMultimap<String, String>();
+    private final List<String> warmupMicros = new ArrayList<>();
+    private final Multimap<String, String> params = new HashMultimap<>();
     private final boolean list;
     private final boolean listWithParams;
     private final boolean listResultFormats;
@@ -333,7 +333,7 @@ public class CommandLineOptions implements Options {
 
             if (set.has(optBenchmarkMode)) {
                 try {
-                    List<Mode> modes = new ArrayList<Mode>();
+                    List<Mode> modes = new ArrayList<>();
                     for (String m : optBenchmarkMode.values(set)) {
                         modes.add(Mode.deepValueOf(m));
                     }
@@ -653,7 +653,7 @@ public class CommandLineOptions implements Options {
 
     @Override
     public Collection<Mode> getBenchModes() {
-        return new HashSet<Mode>(benchMode);
+        return new HashSet<>(benchMode);
     }
 
     @Override

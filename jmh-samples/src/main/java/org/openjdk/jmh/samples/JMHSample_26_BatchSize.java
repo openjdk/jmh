@@ -69,7 +69,7 @@ public class JMHSample_26_BatchSize {
      * Suppose we want to measure insertion in the middle of the list.
      */
 
-    List<String> list = new LinkedList<String>();
+    List<String> list = new LinkedList<>();
 
     @Benchmark
     @Warmup(iterations = 5, time = 1)

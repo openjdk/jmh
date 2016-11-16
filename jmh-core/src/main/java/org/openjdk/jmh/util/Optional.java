@@ -60,7 +60,7 @@ public class Optional<T> implements Serializable {
      * @return empty option
      */
     public static <T> Optional<T> none() {
-        return new Optional<T>();
+        return new Optional<>();
     }
 
     /**
@@ -70,7 +70,7 @@ public class Optional<T> implements Serializable {
      * @return option with value
      */
     public static <T> Optional<T> of(T val) {
-        return new Optional<T>(val);
+        return new Optional<>(val);
     }
 
     public static <T> Optional<T> eitherOf(T val) {

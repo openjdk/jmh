@@ -44,7 +44,7 @@ class AnnotationInvocationHandler extends AnnotationVisitor implements Invocatio
     public AnnotationInvocationHandler(String className, AnnotationVisitor annotationVisitor) {
         super(Opcodes.ASM4, annotationVisitor);
         this.className = className;
-        this.values = new HashMultimap<String, Object>();
+        this.values = new HashMultimap<>();
     }
 
     @Override
@@ -58,12 +58,13 @@ class AnnotationInvocationHandler extends AnnotationVisitor implements Invocatio
             return equalsImpl(args[0]);
         if (paramTypes.length != 0)
             throw new AssertionError("Too many parameters for an annotation method");
-        if (member.equals("toString")) {
-            return toStringImpl();
-        } else if (member.equals("hashCode")) {
-            return hashcodeImpl();
-        } else if (member.equals("annotationType")) {
-            throw new IllegalStateException("annotationType is not implemented");
+        switch (member) {
+            case "toString":
+                return toStringImpl();
+            case "hashCode":
+                return hashcodeImpl();
+            case "annotationType":
+                throw new IllegalStateException("annotationType is not implemented");
         }
 
         /*
@@ -162,7 +163,7 @@ class AnnotationInvocationHandler extends AnnotationVisitor implements Invocatio
                 return false;
             }
 
-            Set<String> keys = new HashSet<String>();
+            Set<String> keys = new HashSet<>();
             keys.addAll(values.keys());
             keys.addAll(other.values.keys());
 

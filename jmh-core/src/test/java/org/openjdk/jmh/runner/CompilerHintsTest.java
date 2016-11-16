@@ -47,7 +47,7 @@ public class CompilerHintsTest {
     public void testListNotEmptyForCompliantJvms() {
         for (String name : CompilerHints.HINT_COMPATIBLE_JVMS) {
             System.setProperty("java.vm.name", name);
-            List<String> args = new ArrayList<String>();
+            List<String> args = new ArrayList<>();
             CompilerHints.addCompilerHints(args);
             assertFalse(args.isEmpty());
         }
@@ -58,7 +58,7 @@ public class CompilerHintsTest {
         System.setProperty("java.vm.name", "Zing");
         System.setProperty("java.version", "1.7.0-zing_5.9.2.0");
         // load up some default hints
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CompilerHints.addCompilerHints(args);
         assertTrue(args.isEmpty());
     }
@@ -68,7 +68,7 @@ public class CompilerHintsTest {
         System.setProperty("java.vm.name", "Zing");
         System.setProperty("java.version", "1.7.0-zing_5.10.2.0");
         // load up some default hints
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CompilerHints.addCompilerHints(args);
         assertFalse(args.isEmpty());
     }
@@ -76,7 +76,7 @@ public class CompilerHintsTest {
     @Test
     public void testListEmptyForNonCompliantJvms() {
         System.setProperty("java.vm.name", "StupidVmCantTakeAHint");
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CompilerHints.addCompilerHints(args);
         assertTrue(args.isEmpty());
     }

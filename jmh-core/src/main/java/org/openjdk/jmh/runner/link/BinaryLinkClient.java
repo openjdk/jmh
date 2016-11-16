@@ -120,10 +120,7 @@ public final class BinaryLinkClient {
     private Object readFrame() throws IOException, ClassNotFoundException {
         try {
             return ois.readObject();
-        } catch (ClassNotFoundException ex) {
-            failed = true;
-            throw ex;
-        } catch (IOException ex) {
+        } catch (ClassNotFoundException | IOException ex) {
             failed = true;
             throw ex;
         }

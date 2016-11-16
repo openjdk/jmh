@@ -59,8 +59,8 @@ public class BenchmarkGenerator {
     private final BenchmarkGeneratorSession session;
 
     public BenchmarkGenerator() {
-        benchmarkInfos = new HashSet<BenchmarkInfo>();
-        processedBenchmarks = new HashSet<String>();
+        benchmarkInfos = new HashSet<>();
+        processedBenchmarks = new HashSet<>();
         compilerControl = new CompilerControlPlugin();
         session = new BenchmarkGeneratorSession();
     }
@@ -123,14 +123,14 @@ public class BenchmarkGenerator {
 
         // Processing completed, final round.
         // Collect all benchmark entries here
-        Set<BenchmarkListEntry> entries = new HashSet<BenchmarkListEntry>();
+        Set<BenchmarkListEntry> entries = new HashSet<>();
 
         // Try to read the benchmark entries from the previous generator sessions.
         // Incremental compilation may add or remove @Benchmark entries. New entries
         // are discovered and added from the current compilation session. It is harder
         // to detect removed @Benchmark entries. To do so, we are overwriting all benchmark
         // records that belong to a current compilation unit.
-        Multimap<String, BenchmarkListEntry> entriesByQName = new HashMultimap<String, BenchmarkListEntry>();
+        Multimap<String, BenchmarkListEntry> entriesByQName = new HashMultimap<>();
         try {
             for (String line : readBenchmarkList(destination)) {
                 BenchmarkListEntry br = new BenchmarkListEntry(line);
@@ -227,7 +227,7 @@ public class BenchmarkGenerator {
         //   We skip the generated classes, which we had probably generated during the previous rounds
         //   of processing. Abstract classes are of no interest for us either.
 
-        Multimap<ClassInfo, MethodInfo> result = new HashMultimap<ClassInfo, MethodInfo>();
+        Multimap<ClassInfo, MethodInfo> result = new HashMultimap<>();
         for (ClassInfo currentClass : source.getClasses()) {
             if (currentClass.getQualifiedName().contains("generated")) continue;
             if (currentClass.isAbstract()) continue;
@@ -402,7 +402,7 @@ public class BenchmarkGenerator {
      * @return BenchmarkInfo
      */
     private Collection<BenchmarkInfo> makeBenchmarkInfo(ClassInfo clazz, Collection<MethodInfo> methods) {
-        Map<String, MethodGroup> result = new TreeMap<String, MethodGroup>();
+        Map<String, MethodGroup> result = new TreeMap<>();
 
         for (MethodInfo method : methods) {
             Group groupAnn = method.getAnnotation(Group.class);
@@ -445,7 +445,7 @@ public class BenchmarkGenerator {
             }
         }
 
-        Collection<BenchmarkInfo> benchmarks = new ArrayList<BenchmarkInfo>();
+        Collection<BenchmarkInfo> benchmarks = new ArrayList<>();
         for (MethodGroup group : result.values()) {
             String sourcePackage = clazz.getPackageName();
             String generatedPackageName = sourcePackage + ".generated";

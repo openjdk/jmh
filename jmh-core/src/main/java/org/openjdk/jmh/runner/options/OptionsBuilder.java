@@ -72,7 +72,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private final List<String> regexps = new ArrayList<String>();
+    private final List<String> regexps = new ArrayList<>();
 
     @Override
     public ChainedOptionsBuilder include(String regexp) {
@@ -82,7 +82,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<String> getIncludes() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         result.addAll(regexps);
         if (otherOptions != null) {
@@ -94,7 +94,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private final List<String> excludes = new ArrayList<String>();
+    private final List<String> excludes = new ArrayList<>();
 
     @Override
     public ChainedOptionsBuilder exclude(String regexp) {
@@ -104,7 +104,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<String> getExcludes() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         result.addAll(excludes);
         if (otherOptions != null) {
@@ -192,7 +192,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private List<ProfilerConfig> profilers = new ArrayList<ProfilerConfig>();
+    private List<ProfilerConfig> profilers = new ArrayList<>();
 
     @Override
     public ChainedOptionsBuilder addProfiler(Class<? extends Profiler> prof) {
@@ -410,7 +410,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private final List<String> warmupMicros = new ArrayList<String>();
+    private final List<String> warmupMicros = new ArrayList<>();
 
     @Override
     public ChainedOptionsBuilder includeWarmup(String regexp) {
@@ -420,7 +420,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<String> getWarmupIncludes() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         result.addAll(warmupMicros);
         if (otherOptions != null) {
             result.addAll(otherOptions.getWarmupIncludes());
@@ -672,7 +672,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     // ---------------------------------------------------------------------------
 
-    private Multimap<String, String> params = new HashMultimap<String, String>();
+    private Multimap<String, String> params = new HashMultimap<>();
 
     @Override
     public Optional<Collection<String>> getParameter(String name) {

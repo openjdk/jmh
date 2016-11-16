@@ -89,12 +89,15 @@ public class JMHSample_35_Profilers {
 
         @Setup
         public void setup() {
-            if (type.equals("hashmap")) {
-                map = new HashMap<Integer, Integer>();
-            } else if (type.equals("treemap")) {
-                map = new TreeMap<Integer, Integer>();
-            } else {
-                throw new IllegalStateException("Unknown type: " + type);
+            switch (type) {
+                case "hashmap":
+                    map = new HashMap<>();
+                    break;
+                case "treemap":
+                    map = new TreeMap<>();
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown type: " + type);
             }
 
             begin = 1;

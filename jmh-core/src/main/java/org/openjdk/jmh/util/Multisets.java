@@ -29,7 +29,7 @@ import java.util.*;
 public class Multisets {
 
     public static <T> List<T> countHighest(Multiset<T> set, int top) {
-        Queue<Map.Entry<T, Long>> q = new BoundedPriorityQueue<Map.Entry<T, Long>>(top, new Comparator<Map.Entry<T, Long>>() {
+        Queue<Map.Entry<T, Long>> q = new BoundedPriorityQueue<>(top, new Comparator<Map.Entry<T, Long>>() {
             @Override
             public int compare(Map.Entry<T, Long> o1, Map.Entry<T, Long> o2) {
                 return o2.getValue().compareTo(o1.getValue());
@@ -38,7 +38,7 @@ public class Multisets {
 
         q.addAll(set.entrySet());
 
-        List<T> result = new ArrayList<T>(q.size());
+        List<T> result = new ArrayList<>(q.size());
 
         Map.Entry<T, Long> pair;
         while ((pair = q.poll()) != null) {
@@ -52,7 +52,7 @@ public class Multisets {
     }
 
     public static <T> List<T> sortedDesc(final Multiset<T> set) {
-        List<T> sorted = new ArrayList<T>();
+        List<T> sorted = new ArrayList<>();
         sorted.addAll(set.keys());
 
         Collections.sort(sorted, new Comparator<T>() {

@@ -32,7 +32,7 @@ public class IntervalMap<T>  {
     final SortedMap<Long, T> from;
 
     public IntervalMap() {
-        from = new TreeMap<Long, T>();
+        from = new TreeMap<>();
     }
 
     public void add(T val, long from, long to) {

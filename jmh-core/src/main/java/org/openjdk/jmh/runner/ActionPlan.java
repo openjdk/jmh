@@ -36,7 +36,7 @@ public class ActionPlan implements Serializable {
 
     public ActionPlan(ActionType type) {
         this.type = type;
-        actions = new ArrayList<Action>();
+        this.actions = new ArrayList<>();
     }
 
     public ActionType getType() {
@@ -56,7 +56,7 @@ public class ActionPlan implements Serializable {
     }
 
     public List<Action> getMeasurementActions() {
-        List<Action> result = new ArrayList<Action>();
+        List<Action> result = new ArrayList<>();
         for (Action action : actions) {
             switch (action.getMode()) {
                 case MEASUREMENT:

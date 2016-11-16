@@ -46,9 +46,7 @@ public class Utils {
             Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
             unsafe.setAccessible(true);
             U = (Unsafe) unsafe.get(null);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -57,7 +55,7 @@ public class Utils {
 
     }
 
-    private static final ConcurrentMap<String, Pattern> PATTERNS = new ConcurrentHashMap<String, Pattern>();
+    private static final ConcurrentMap<String, Pattern> PATTERNS = new ConcurrentHashMap<>();
 
     public static Pattern lazyCompile(String pattern) {
         Pattern patt = PATTERNS.get(pattern);
@@ -118,7 +116,7 @@ public class Utils {
     }
 
     public static Collection<String> splitQuotedEscape(String src) {
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();
         boolean escaped = false;
@@ -203,7 +201,7 @@ public class Utils {
         int warmupTime = 1000;
         long lastChange = System.currentTimeMillis();
 
-        List<Future<?>> futures = new ArrayList<Future<?>>();
+        List<Future<?>> futures = new ArrayList<>();
         futures.add(service.submit(new BurningTask()));
 
         int max = 0;
@@ -312,7 +310,7 @@ public class Utils {
     }
 
     public static Collection<String> rewrap(String lines) {
-        Collection<String> result = new ArrayList<String>();
+        Collection<String> result = new ArrayList<>();
         String[] words = lines.split("[ \n]");
         String line = "";
         int cols = 0;
@@ -421,7 +419,7 @@ public class Utils {
     }
 
     public static Collection<String> tryWith(String... cmd) {
-        Collection<String> messages = new ArrayList<String>();
+        Collection<String> messages = new ArrayList<>();
         try {
             Process p = new ProcessBuilder(cmd).start();
 
@@ -451,7 +449,7 @@ public class Utils {
     }
 
     public static Collection<String> runWith(List<String> cmd) {
-        Collection<String> messages = new ArrayList<String>();
+        Collection<String> messages = new ArrayList<>();
         try {
             Process p = new ProcessBuilder(cmd).start();
 

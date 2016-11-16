@@ -181,7 +181,7 @@ public class ListStatistics extends AbstractStatistics {
 
         @Override
         public Map.Entry<Double, Long> next() {
-            return new AbstractMap.SimpleImmutableEntry<Double, Long>(values[currentIndex++], 1L);
+            return new AbstractMap.SimpleImmutableEntry<>(values[currentIndex++], 1L);
         }
 
         @Override

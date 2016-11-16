@@ -74,7 +74,7 @@ class AbstractResourceReader {
             }
 
             if (urls.hasMoreElements()) {
-                List<Reader> readers = new ArrayList<Reader>();
+                List<Reader> readers = new ArrayList<>();
                 URL url = null;
                 try {
                     while (urls.hasMoreElements()) {

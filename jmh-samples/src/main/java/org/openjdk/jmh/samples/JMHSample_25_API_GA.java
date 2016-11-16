@@ -162,7 +162,7 @@ public class JMHSample_25_API_GA {
      * Population.
      */
     public static class Population {
-        private final List<Chromosome> list = new ArrayList<Chromosome>();
+        private final List<Chromosome> list = new ArrayList<>();
 
         public void addChromosome(Chromosome c) {
             list.add(c);

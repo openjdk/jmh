@@ -33,7 +33,7 @@ import java.util.Map;
 
 class ClassInfoRepo {
 
-    private final Map<String, ClassInfo> map = new HashMap<String, ClassInfo>();
+    private final Map<String, ClassInfo> map = new HashMap<>();
 
     public ClassInfo get(String desc) {
         desc = desc.replace('/', '.');

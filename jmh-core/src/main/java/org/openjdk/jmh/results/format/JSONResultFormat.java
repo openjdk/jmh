@@ -106,7 +106,7 @@ class JSONResultFormat implements ResultFormat {
 
             pw.println("},"); // primaryMetric end
 
-            Collection<String> secondaries = new ArrayList<String>();
+            Collection<String> secondaries = new ArrayList<>();
             for (Map.Entry<String, Result> e : runResult.getSecondaryResults().entrySet()) {
                 String secondaryName = e.getKey();
                 Result result = e.getValue();
@@ -120,9 +120,9 @@ class JSONResultFormat implements ResultFormat {
                 sb.append("\"scoreUnit\" : \"").append(result.getScoreUnit()).append("\",");
                 sb.append("\"rawData\" : ");
 
-                Collection<String> l2 = new ArrayList<String>();
+                Collection<String> l2 = new ArrayList<>();
                 for (BenchmarkResult benchmarkResult : runResult.getBenchmarkResults()) {
-                    Collection<String> scores = new ArrayList<String>();
+                    Collection<String> scores = new ArrayList<>();
                     for (IterationResult r : benchmarkResult.getIterationResults()) {
                         Result rr = r.getSecondaryResults().get(secondaryName);
                         if (rr != null) {
@@ -149,14 +149,14 @@ class JSONResultFormat implements ResultFormat {
 
     private String getRawData(RunResult runResult, boolean histogram) {
         StringBuilder sb = new StringBuilder();
-        Collection<String> runs = new ArrayList<String>();
+        Collection<String> runs = new ArrayList<>();
 
         if (PRINT_RAW_DATA) {
             for (BenchmarkResult benchmarkResult : runResult.getBenchmarkResults()) {
-                Collection<String> iterations = new ArrayList<String>();
+                Collection<String> iterations = new ArrayList<>();
                 for (IterationResult r : benchmarkResult.getIterationResults()) {
                     if (histogram) {
-                        Collection<String> singleIter = new ArrayList<String>();
+                        Collection<String> singleIter = new ArrayList<>();
                         for (Map.Entry<Double, Long> item : Utils.adaptForLoop(r.getPrimaryResult().getStatistics().getRawData())) {
                             singleIter.add("< " + emit(item.getKey()) + "; " + item.getValue() + " >");
                         }

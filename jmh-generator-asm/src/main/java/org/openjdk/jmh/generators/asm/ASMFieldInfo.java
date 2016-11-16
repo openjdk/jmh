@@ -50,7 +50,7 @@ class ASMFieldInfo extends FieldVisitor implements FieldInfo {
         this.access = access;
         this.name = name;
         this.type = type;
-        this.annotations = new HashMap<String, AnnotationInvocationHandler>();
+        this.annotations = new HashMap<>();
     }
 
     @Override

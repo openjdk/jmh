@@ -81,7 +81,7 @@ class APClassInfo extends APMetadataInfo implements ClassInfo {
     @Override
     public Collection<MethodInfo> getConstructors() {
         if (isSpecial) return Collections.emptyList();
-        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
+        Collection<MethodInfo> mis = new ArrayList<>();
         for (ExecutableElement e : ElementFilter.constructorsIn(el.getEnclosedElements())) {
             mis.add(new APMethodInfo(processEnv, this, e));
         }
@@ -103,7 +103,7 @@ class APClassInfo extends APMetadataInfo implements ClassInfo {
     @Override
     public Collection<FieldInfo> getFields() {
         if (isSpecial) return Collections.emptyList();
-        List<FieldInfo> ls = new ArrayList<FieldInfo>();
+        List<FieldInfo> ls = new ArrayList<>();
         for (VariableElement e : ElementFilter.fieldsIn(el.getEnclosedElements())) {
             ls.add(new APFieldInfo(processEnv, e));
         }
@@ -113,7 +113,7 @@ class APClassInfo extends APMetadataInfo implements ClassInfo {
     @Override
     public Collection<MethodInfo> getMethods() {
         if (isSpecial) return Collections.emptyList();
-        Collection<MethodInfo> mis = new ArrayList<MethodInfo>();
+        Collection<MethodInfo> mis = new ArrayList<>();
         for (ExecutableElement e : ElementFilter.methodsIn(el.getEnclosedElements())) {
             mis.add(new APMethodInfo(processEnv, this, e));
         }
@@ -191,7 +191,7 @@ class APClassInfo extends APMetadataInfo implements ClassInfo {
 
     @Override
     public Collection<String> getEnumConstants() {
-        Collection<String> result = new ArrayList<String>();
+        Collection<String> result = new ArrayList<>();
         for (Element e : el.getEnclosedElements()) {
             if (e.getKind() == ElementKind.ENUM_CONSTANT) {
                 result.add(e.getSimpleName().toString());

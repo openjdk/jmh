@@ -44,8 +44,8 @@ public class FileSystemDestination implements GeneratorDestination {
     public FileSystemDestination(File resourceDir, File sourceDir) {
         this.resourceDir = resourceDir;
         this.sourceDir = sourceDir;
-        this.sourceErrors = new ArrayList<SourceError>();
-        this.sourceWarnings = new ArrayList<SourceWarning>();
+        this.sourceErrors = new ArrayList<>();
+        this.sourceWarnings = new ArrayList<>();
     }
 
     @Override

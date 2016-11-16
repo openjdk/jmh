@@ -81,8 +81,8 @@ public final class BinaryLinkServer {
     public BinaryLinkServer(Options opts, OutputFormat out) throws IOException {
         this.opts = opts;
         this.out = out;
-        this.methods = new HashMap<String, Method>();
-        this.forbidden = new HashSet<String>();
+        this.methods = new HashMap<>();
+        this.forbidden = new HashSet<>();
 
         // enumerate methods
         for (Method m : OutputFormat.class.getMethods()) {
@@ -101,11 +101,11 @@ public final class BinaryLinkServer {
         acceptor = new Acceptor();
         acceptor.start();
 
-        handler = new AtomicReference<Handler>();
-        metadata = new AtomicReference<BenchmarkResultMetaData>();
+        handler = new AtomicReference<>();
+        metadata = new AtomicReference<>();
         results = new AtomicReference<List<IterationResult>>(new ArrayList<IterationResult>());
-        exception = new AtomicReference<BenchmarkException>();
-        plan = new AtomicReference<ActionPlan>();
+        exception = new AtomicReference<>();
+        plan = new AtomicReference<>();
     }
 
     public void terminate() {
@@ -174,11 +174,7 @@ public final class BinaryLinkServer {
         try {
             Method m = InetAddress.class.getMethod("getLoopbackAddress");
             return (InetAddress) m.invoke(null);
-        } catch (InvocationTargetException e) {
-            // shun
-        } catch (NoSuchMethodException e) {
-            // shun
-        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             // shun
         }
 

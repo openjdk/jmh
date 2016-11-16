@@ -139,7 +139,7 @@ public class TestLineReader {
             return Optional.none();
         } else if (tag == TAG_STRING_COLLECTION) {
             int len = readLen();
-            Collection<String> list = new ArrayList<String>();
+            Collection<String> list = new ArrayList<>();
             for (int c = 0; c < len; c++) {
                 list.add(readString());
             }
@@ -168,7 +168,7 @@ public class TestLineReader {
         if (tag == Constants.TAG_EMPTY_OPTIONAL) {
             return Optional.none();
         } else if (tag == TAG_PARAM_MAP) {
-            Map<String, String[]> result = new HashMap<String, String[]>();
+            Map<String, String[]> result = new HashMap<>();
 
             int kvs = readLen();
             for (int kv = 0; kv < kvs; kv++) {

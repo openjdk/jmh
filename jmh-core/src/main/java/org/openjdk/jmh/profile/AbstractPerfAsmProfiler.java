@@ -228,7 +228,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     @Override
     public Collection<String> addJVMOptions(BenchmarkParams params) {
         if (!skipAssembly) {
-            Collection<String> opts = new ArrayList<String>();
+            Collection<String> opts = new ArrayList<>();
             opts.addAll(Arrays.asList(
                 "-XX:+UnlockDiagnosticVMOptions",
                 "-XX:+LogCompilation",
@@ -429,8 +429,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * 6. Print out the hottest regions
          */
         {
-            Multiset<String> total = new HashMultiset<String>();
-            Multiset<String> other = new HashMultiset<String>();
+            Multiset<String> total = new HashMultiset<>();
+            Multiset<String> other = new HashMultiset<>();
 
             printDottedLine(pw, "Hottest Regions");
             int shown = 0;
@@ -465,8 +465,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         }
 
-        final Map<String, Multiset<String>> methodsByType = new HashMap<String, Multiset<String>>();
-        final Map<String, Multiset<MethodDesc>> methods = new HashMap<String, Multiset<MethodDesc>>();
+        final Map<String, Multiset<String>> methodsByType = new HashMap<>();
+        final Map<String, Multiset<MethodDesc>> methods = new HashMap<>();
 
         for (String event : this.events) {
             methodsByType.put(event, new HashMultiset<String>());
@@ -487,8 +487,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         {
             printDottedLine(pw, "Hottest Methods (after inlining)");
 
-            Multiset<String> total = new HashMultiset<String>();
-            Multiset<String> other = new HashMultiset<String>();
+            Multiset<String> total = new HashMultiset<>();
+            Multiset<String> other = new HashMultiset<>();
 
             int shownMethods = 0;
             List<MethodDesc> top = Multisets.sortedDesc(methods.get(mainEvent));
@@ -552,7 +552,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          */
 
         {
-            Set<Long> addrHistory = new HashSet<Long>();
+            Set<Long> addrHistory = new HashSet<>();
             for (Long addr : assembly.addressMap.keySet()) {
                 if (!addrHistory.add(addr)) {
                     pw.println("WARNING: Duplicate instruction addresses detected. This is probably due to compiler reusing\n " +
@@ -668,7 +668,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     List<Region> makeRegions(Assembly asms, PerfEvents events) {
-        List<Region> regions = new ArrayList<Region>();
+        List<Region> regions = new ArrayList<>();
 
         SortedSet<Long> allAddrs = events.getAllAddresses();
         for (Interval intv : figureHotIntervals(allAddrs, allAddrs.first(), allAddrs.last())) {
@@ -705,7 +705,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
 
     private List<Interval> figureHotIntervals(SortedSet<Long> allAddrs, long from, long to) {
-        List<Interval> intervals = new ArrayList<Interval>();
+        List<Interval> intervals = new ArrayList<>();
         SortedSet<Long> addrs = allAddrs.subSet(from, to);
 
         long begAddr = addrs.first();
@@ -728,7 +728,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     Collection<Collection<String>> splitAssembly(File stdOut) {
         FileReader in = null;
         try {
-            Multimap<Long, String> writerToLines = new HashMultimap<Long, String>();
+            Multimap<Long, String> writerToLines = new HashMultimap<>();
             Long writerId = -1L;
 
             Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
@@ -753,7 +753,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 writerToLines.put(writerId, line);
             }
 
-            Collection<Collection<String>> r = new ArrayList<Collection<String>>();
+            Collection<Collection<String>> r = new ArrayList<>();
             for (long id : writerToLines.keys()) {
                 r.add(writerToLines.get(id));
             }
@@ -766,13 +766,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     Assembly readAssembly(File stdOut) {
-        List<ASMLine> lines = new ArrayList<ASMLine>();
-        SortedMap<Long, Integer> addressMap = new TreeMap<Long, Integer>();
+        List<ASMLine> lines = new ArrayList<>();
+        SortedMap<Long, Integer> addressMap = new TreeMap<>();
 
-        IntervalMap<MethodDesc> stubs       = new IntervalMap<MethodDesc>();
-        IntervalMap<MethodDesc> javaMethods = new IntervalMap<MethodDesc>();
+        IntervalMap<MethodDesc> stubs       = new IntervalMap<>();
+        IntervalMap<MethodDesc> javaMethods = new IntervalMap<>();
 
-        Set<Interval> intervals = new HashSet<Interval>();
+        Set<Interval> intervals = new HashSet<>();
 
         for (Collection<String> cs : splitAssembly(stdOut)) {
             String prevLine = "";
@@ -845,7 +845,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         body = body.replaceAll("='", "=");
                         String[] kvs = body.split("' ");
 
-                        HashMap<String, String> map = new HashMap<String, String>();
+                        HashMap<String, String> map = new HashMap<>();
                         for (String kv : kvs) {
                             String[] pair = kv.split("=");
                             map.put(pair[0], pair[1]);
@@ -869,7 +869,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         // Important to get the order right: all Java methods take precedence over interpreter/runtime stubs.
-        IntervalMap<MethodDesc> methodMap = new IntervalMap<MethodDesc>();
+        IntervalMap<MethodDesc> methodMap = new IntervalMap<>();
         methodMap.merge(stubs);
         methodMap.merge(javaMethods);
 
@@ -930,7 +930,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         PerfEvents(Collection<String> tracedEvents, Map<String, Multiset<Long>> events, IntervalMap<MethodDesc> methods) {
             this.events = events;
             this.methods = methods;
-            this.totalCounts = new HashMap<String, Long>();
+            this.totalCounts = new HashMap<>();
             for (String event : tracedEvents) {
                 totalCounts.put(event, events.get(event).size());
             }
@@ -949,7 +949,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         public SortedSet<Long> getAllAddresses() {
-            SortedSet<Long> addrs = new TreeSet<Long>();
+            SortedSet<Long> addrs = new TreeSet<>();
             for (Multiset<Long> e : events.values()) {
                 addrs.addAll(e.keys());
             }
@@ -1048,7 +1048,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             this.begin = begin;
             this.end = end;
             this.eventfulAddrs = eventfulAddrs;
-            this.eventCountCache = new HashMap<String, Long>();
+            this.eventCountCache = new HashMap<>();
         }
 
         long getEventCount(PerfEvents events, String event) {
@@ -1107,8 +1107,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     }
                 }
 
-                Set<Interval> interIvs = new TreeSet<Interval>();
-                Set<Interval> intraIvs = new TreeSet<Interval>();
+                Set<Interval> interIvs = new TreeSet<>();
+                Set<Interval> intraIvs = new TreeSet<>();
 
                 for (Interval it : asms.intervals) {
                     boolean srcInline = (beginLine < it.src && it.src < endLine);

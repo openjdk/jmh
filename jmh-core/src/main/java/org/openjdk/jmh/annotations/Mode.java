@@ -128,7 +128,7 @@ public enum Mode {
     }
 
     public static List<String> getKnown() {
-        List<String> res = new ArrayList<String>();
+        List<String> res = new ArrayList<>();
         for (Mode type : Mode.values()) {
             res.add(type.name() + "/" + type.shortLabel());
         }

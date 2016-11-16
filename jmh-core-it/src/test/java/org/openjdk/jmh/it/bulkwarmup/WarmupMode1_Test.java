@@ -54,7 +54,7 @@ import static junit.framework.Assert.assertEquals;
 @State(Scope.Thread)
 public class WarmupMode1_Test {
 
-    private static Queue<String> testSequence = new ConcurrentLinkedQueue<String>();
+    private static Queue<String> testSequence = new ConcurrentLinkedQueue<>();
 
     boolean recorded;
 

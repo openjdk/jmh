@@ -41,7 +41,7 @@ public class BlackholeBench {
     @Setup(Level.Iteration)
     public void makeGarbage() {
         // make some garbage to evict blackhole from the TLAB/eden
-        strs = new ArrayList<String>();
+        strs = new ArrayList<>();
         for (int i = 0; i < 100000; i++) {
             strs.add("str" + i);
         }

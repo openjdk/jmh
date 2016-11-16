@@ -84,7 +84,7 @@ public class GCProfiler implements InternalProfiler {
             gcTime += bean.getCollectionTime();
         }
 
-        List<ScalarResult> results = new ArrayList<ScalarResult>();
+        List<ScalarResult> results = new ArrayList<>();
 
         if (beforeAllocated == HotspotAllocationSnapshot.EMPTY) {
             // When allocation profiling fails, make sure it is distinguishable in report
@@ -171,7 +171,7 @@ public class GCProfiler implements InternalProfiler {
          * @return estimated number of allocated bytes between profiler calls
          */
         public long subtract(HotspotAllocationSnapshot other) {
-            HashMap<Long, Integer> prevIndex = new HashMap<Long, Integer>();
+            HashMap<Long, Integer> prevIndex = new HashMap<>();
             for (int i = 0; i < other.threadIds.length; i++) {
                 long id = other.threadIds[i];
                 prevIndex.put(id, i);
@@ -254,15 +254,13 @@ public class GCProfiler implements InternalProfiler {
         private static long[] getAllocatedBytes(long[] threadIds) {
             try {
                 return (long[]) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, (Object) threadIds);
-            } catch (InvocationTargetException e) {
-                throw new IllegalStateException(e);
-            } catch (IllegalAccessException e) {
+            } catch (InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalStateException(e);
             }
         }
 
         private static NotificationListener newListener() {
-            churn = new HashMultiset<String>();
+            churn = new HashMultiset<>();
             try {
                 final Class<?> infoKlass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
                 final Field notifNameField = infoKlass.getField("GARBAGE_COLLECTION_NOTIFICATION");
@@ -290,9 +288,7 @@ public class GCProfiler implements InternalProfiler {
                                     }
                                 }
                             }
-                        } catch (IllegalAccessException e) {
-                            // Do nothing, counters would not get populated
-                        } catch (InvocationTargetException e) {
+                        } catch (IllegalAccessException | InvocationTargetException e) {
                             // Do nothing, counters would not get populated
                         }
                     }

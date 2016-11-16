@@ -48,7 +48,7 @@ class XSVResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Collection<RunResult> results) {
-        SortedSet<String> params = new TreeSet<String>();
+        SortedSet<String> params = new TreeSet<>();
         for (RunResult res : results) {
             params.addAll(res.getParams().getParamsKeys());
         }

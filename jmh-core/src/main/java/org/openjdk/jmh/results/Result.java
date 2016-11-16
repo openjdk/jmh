@@ -40,7 +40,7 @@ import java.util.Collections;
  */
 public abstract class Result<T extends Result<T>> implements Serializable {
     private static final long serialVersionUID = -7332879501317733312L;
-    private static final Deduplicator<String> DEDUP = new Deduplicator<String>();
+    private static final Deduplicator<String> DEDUP = new Deduplicator<>();
 
     protected final ResultRole role;
     protected final String label;

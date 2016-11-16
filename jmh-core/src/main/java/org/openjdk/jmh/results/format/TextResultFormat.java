@@ -49,7 +49,7 @@ class TextResultFormat implements ResultFormat {
     public void writeOut(Collection<RunResult> runResults) {
         final int COLUMN_PAD = 2;
 
-        Collection<String> benchNames = new ArrayList<String>();
+        Collection<String> benchNames = new ArrayList<>();
         for (RunResult runResult : runResults) {
             benchNames.add(runResult.getParams().getBenchmark());
             for (String label : runResult.getSecondaryResults().keySet()) {
@@ -66,8 +66,8 @@ class TextResultFormat implements ResultFormat {
         }
 
         // determine param lengths
-        Map<String, Integer> paramLengths = new HashMap<String, Integer>();
-        SortedSet<String> params = new TreeSet<String>();
+        Map<String, Integer> paramLengths = new HashMap<>();
+        SortedSet<String> params = new TreeSet<>();
         for (RunResult runResult : runResults) {
             BenchmarkParams bp = runResult.getParams();
             for (String k : bp.getParamsKeys()) {

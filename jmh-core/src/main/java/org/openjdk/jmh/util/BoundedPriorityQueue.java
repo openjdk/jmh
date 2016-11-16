@@ -62,7 +62,7 @@ public class BoundedPriorityQueue<E> extends AbstractQueue<E> implements Seriali
     public BoundedPriorityQueue(int maxSize, Comparator<? super E> comparator) {
         this.maxSize = maxSize;
         this.comparator = reverse(comparator);
-        this.queue = new PriorityQueue<E>(10, this.comparator);
+        this.queue = new PriorityQueue<>(10, this.comparator);
     }
 
     /**

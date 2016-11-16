@@ -82,23 +82,23 @@ public class BenchmarkList extends AbstractResourceReader {
     public SortedSet<BenchmarkListEntry> find(OutputFormat out, List<String> includes, List<String> excludes) {
 
         // assume we match all benchmarks when include is empty
-        List<String> regexps = new ArrayList<String>(includes);
+        List<String> regexps = new ArrayList<>(includes);
         if (regexps.isEmpty()) {
             regexps.add(Defaults.INCLUDE_BENCHMARKS);
         }
 
         // compile all patterns
-        List<Pattern> includePatterns = new ArrayList<Pattern>(regexps.size());
+        List<Pattern> includePatterns = new ArrayList<>(regexps.size());
         for (String regexp : regexps) {
             includePatterns.add(Pattern.compile(regexp));
         }
-        List<Pattern> excludePatterns = new ArrayList<Pattern>(excludes.size());
+        List<Pattern> excludePatterns = new ArrayList<>(excludes.size());
         for (String regexp : excludes) {
             excludePatterns.add(Pattern.compile(regexp));
         }
 
         // find all benchmarks containing pattern
-        SortedSet<BenchmarkListEntry> result = new TreeSet<BenchmarkListEntry>();
+        SortedSet<BenchmarkListEntry> result = new TreeSet<>();
         try {
             for (Reader r : getReaders()) {
                 BufferedReader reader = null;

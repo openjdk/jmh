@@ -61,7 +61,7 @@ public class ThreadScalingTest implements ValidationTest {
         pw.println("  Threads are scaled from 1 to the number of hardware threads.");
         pw.println();
 
-        SortedSet<Integer> threads = new TreeSet<Integer>();
+        SortedSet<Integer> threads = new TreeSet<>();
         int max = Utils.figureOutHotCPUs();
         for (int t = max; t > 0; t /= 2) {
             threads.add(t);

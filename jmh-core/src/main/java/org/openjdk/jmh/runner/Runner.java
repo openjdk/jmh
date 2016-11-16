@@ -264,7 +264,7 @@ public class Runner extends BaseRunner {
         // override the benchmark types;
         // this may yield new benchmark records
         if (!options.getBenchModes().isEmpty()) {
-            List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
+            List<BenchmarkListEntry> newBenchmarks = new ArrayList<>();
             for (BenchmarkListEntry br : benchmarks) {
                 for (Mode m : options.getBenchModes()) {
                     newBenchmarks.add(br.cloneWith(m));
@@ -278,7 +278,7 @@ public class Runner extends BaseRunner {
 
         // clone with all the modes
         {
-            List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
+            List<BenchmarkListEntry> newBenchmarks = new ArrayList<>();
             for (BenchmarkListEntry br : benchmarks) {
                 if (br.getMode() == Mode.All) {
                     for (Mode mode : Mode.values()) {
@@ -296,7 +296,7 @@ public class Runner extends BaseRunner {
 
         // clone with all parameters
         {
-            List<BenchmarkListEntry> newBenchmarks = new ArrayList<BenchmarkListEntry>();
+            List<BenchmarkListEntry> newBenchmarks = new ArrayList<>();
             for (BenchmarkListEntry br : benchmarks) {
                 if (br.getParams().hasValue()) {
                     for (WorkloadParams p : explodeAllParams(br)) {
@@ -332,7 +332,7 @@ public class Runner extends BaseRunner {
     private List<ActionPlan> getActionPlans(Set<BenchmarkListEntry> benchmarks) {
         ActionPlan base = new ActionPlan(ActionType.FORKED);
 
-        LinkedHashSet<BenchmarkListEntry> warmupBenches = new LinkedHashSet<BenchmarkListEntry>();
+        LinkedHashSet<BenchmarkListEntry> warmupBenches = new LinkedHashSet<>();
 
         List<String> warmupMicrosRegexp = options.getWarmupIncludes();
         if (warmupMicrosRegexp != null && !warmupMicrosRegexp.isEmpty()) {
@@ -351,7 +351,7 @@ public class Runner extends BaseRunner {
 
         boolean addEmbedded = false;
 
-        List<ActionPlan> result = new ArrayList<ActionPlan>();
+        List<ActionPlan> result = new ArrayList<>();
         for (BenchmarkListEntry br : benchmarks) {
             BenchmarkParams params = newBenchmarkParams(br, ActionMode.UNDEF);
 
@@ -465,7 +465,7 @@ public class Runner extends BaseRunner {
         String jvm = options.getJvm().orElse(
                 benchmark.getJvm().orElse(Utils.getCurrentJvm()));
 
-        Collection<String> jvmArgs = new ArrayList<String>();
+        Collection<String> jvmArgs = new ArrayList<>();
 
         jvmArgs.addAll(options.getJvmArgsPrepend().orElse(
                 benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList())));
@@ -488,7 +488,7 @@ public class Runner extends BaseRunner {
 
     private List<WorkloadParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
         Map<String, String[]> benchParams = br.getParams().orElse(Collections.<String, String[]>emptyMap());
-        List<WorkloadParams> ps = new ArrayList<WorkloadParams>();
+        List<WorkloadParams> ps = new ArrayList<>();
         for (Map.Entry<String, String[]> e : benchParams.entrySet()) {
             String k = e.getKey();
             String[] vals = e.getValue();
@@ -507,7 +507,7 @@ public class Runner extends BaseRunner {
                     idx++;
                 }
             } else {
-                List<WorkloadParams> newPs = new ArrayList<WorkloadParams>();
+                List<WorkloadParams> newPs = new ArrayList<>();
                 for (WorkloadParams p : ps) {
                     int idx = 0;
                     for (String v : values) {
@@ -526,7 +526,7 @@ public class Runner extends BaseRunner {
     private Collection<RunResult> runBenchmarks(SortedSet<BenchmarkListEntry> benchmarks) throws RunnerException {
         out.startRun();
 
-        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<BenchmarkParams, BenchmarkResult>();
+        Multimap<BenchmarkParams, BenchmarkResult> results = new TreeMultimap<>();
         List<ActionPlan> plan = getActionPlans(benchmarks);
 
         etaBeforeBenchmarks(plan);
@@ -561,7 +561,7 @@ public class Runner extends BaseRunner {
     }
 
     private SortedSet<RunResult> mergeRunResults(Multimap<BenchmarkParams, BenchmarkResult> results) {
-        SortedSet<RunResult> result = new TreeSet<RunResult>(RunResult.DEFAULT_SORT_COMPARATOR);
+        SortedSet<RunResult> result = new TreeSet<>(RunResult.DEFAULT_SORT_COMPARATOR);
         for (BenchmarkParams key : results.keys()) {
             result.add(new RunResult(key, results.get(key)));
         }
@@ -569,7 +569,7 @@ public class Runner extends BaseRunner {
     }
 
     private Multimap<BenchmarkParams, BenchmarkResult> runSeparate(ActionPlan actionPlan) {
-        Multimap<BenchmarkParams, BenchmarkResult> results = new HashMultimap<BenchmarkParams, BenchmarkResult>();
+        Multimap<BenchmarkParams, BenchmarkResult> results = new HashMultimap<>();
 
         if (actionPlan.getMeasurementActions().size() != 1) {
             throw new IllegalStateException("Expect only single benchmark in the action plan, but was " + actionPlan.getMeasurementActions().size());
@@ -592,7 +592,7 @@ public class Runner extends BaseRunner {
                 printErr &= prof.allowPrintErr();
             }
 
-            List<ExternalProfiler> profilersRev = new ArrayList<ExternalProfiler>(profilers);
+            List<ExternalProfiler> profilersRev = new ArrayList<>(profilers);
             Collections.reverse(profilersRev);
 
             boolean forcePrint = options.verbosity().orElse(Defaults.VERBOSITY).equalsOrHigherThan(VerboseMode.EXTRA);
@@ -651,7 +651,7 @@ public class Runner extends BaseRunner {
                     }
                     out.println("");
 
-                    List<String> consumed = new ArrayList<String>();
+                    List<String> consumed = new ArrayList<>();
                     if (!printOut) consumed.add("stdout");
                     if (!printErr) consumed.add("stderr");
                     if (!consumed.isEmpty()) {
@@ -787,14 +787,14 @@ public class Runner extends BaseRunner {
      */
     List<String> getForkedMainCommand(BenchmarkParams benchmark, List<ExternalProfiler> profilers, String host, int port) {
         // Poll profilers for options
-        List<String> javaInvokeOptions = new ArrayList<String>();
-        List<String> javaOptions = new ArrayList<String>();
+        List<String> javaInvokeOptions = new ArrayList<>();
+        List<String> javaOptions = new ArrayList<>();
         for (ExternalProfiler prof : profilers) {
             javaInvokeOptions.addAll(prof.addJVMInvokeOptions(benchmark));
             javaOptions.addAll(prof.addJVMOptions(benchmark));
         }
 
-        List<String> command = new ArrayList<String>();
+        List<String> command = new ArrayList<>();
 
         // prefix java invoke options, if any profiler wants it
         command.addAll(javaInvokeOptions);
@@ -834,7 +834,7 @@ public class Runner extends BaseRunner {
      * @return
      */
     List<String> getVersionMainCommand(BenchmarkParams benchmark) {
-        List<String> command = new ArrayList<String>();
+        List<String> command = new ArrayList<>();
 
         // use supplied jvm, if given
         command.add(benchmark.getJvm());

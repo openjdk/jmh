@@ -57,7 +57,7 @@ public class ClassUtils {
      * @return list of methods.
      */
     public static List<Method> enumerateMethods(Class<?> clazz) {
-        List<Method> result = new ArrayList<Method>();
+        List<Method> result = new ArrayList<>();
         Class<?> current = clazz;
         while (current != null) {
             result.addAll(Arrays.asList(current.getDeclaredMethods()));
@@ -149,7 +149,7 @@ public class ClassUtils {
             prefix[c] = prefixCut ? String.valueOf(prefix[c].charAt(0)) : "";
         }
 
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (String s : src) {
             int prefixLen = prefix.length;
 

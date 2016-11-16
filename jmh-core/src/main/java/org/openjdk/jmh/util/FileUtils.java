@@ -100,7 +100,7 @@ public class FileUtils {
         try {
             fis = new FileInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
-            LinkedList<String> lines = new LinkedList<String>();
+            LinkedList<String> lines = new LinkedList<>();
             String line;
             while ((line = reader.readLine()) != null) {
                 lines.add(line);
@@ -116,7 +116,7 @@ public class FileUtils {
 
     public static Collection<String> readAllLines(Reader src) throws IOException {
         BufferedReader reader = new BufferedReader(src);
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         String line;
         while ((line = reader.readLine()) != null) {
             lines.add(line);
@@ -158,7 +158,7 @@ public class FileUtils {
     }
 
     public static void appendLines(File file, Collection<String> lines) throws IOException {
-        Collection<String> newLines = new ArrayList<String>();
+        Collection<String> newLines = new ArrayList<>();
         try {
             newLines.addAll(readAllLines(file));
         } catch (IOException e) {
@@ -169,12 +169,12 @@ public class FileUtils {
     }
 
     public static Collection<File> getClasses(File root) {
-        Collection<File> result = new ArrayList<File>();
+        Collection<File> result = new ArrayList<>();
 
-        List<File> newDirs = new ArrayList<File>();
+        List<File> newDirs = new ArrayList<>();
         newDirs.add(root);
         while (!newDirs.isEmpty()) {
-            List<File> add = new ArrayList<File>();
+            List<File> add = new ArrayList<>();
             for (File dir : newDirs) {
                 File[] files = dir.listFiles();
                 if (files != null) {

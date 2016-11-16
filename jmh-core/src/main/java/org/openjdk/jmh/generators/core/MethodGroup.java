@@ -43,9 +43,9 @@ class MethodGroup implements Comparable<MethodGroup> {
     public MethodGroup(ClassInfo ci, String name) {
         this.ci = ci;
         this.name = name;
-        this.methods = new TreeMap<MethodInvocation, MethodInvocation>();
+        this.methods = new TreeMap<>();
         this.modes = EnumSet.noneOf(Mode.class);
-        this.params = new TreeMap<String, String[]>();
+        this.params = new TreeMap<>();
     }
 
     @Override
@@ -84,7 +84,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public Collection<MethodInfo> methods() {
-        Collection<MethodInfo> result = new ArrayList<MethodInfo>();
+        Collection<MethodInfo> result = new ArrayList<>();
         for (MethodInvocation m : methods.keySet()) {
             result.add(m.method);
         }
@@ -139,7 +139,7 @@ class MethodGroup implements Comparable<MethodGroup> {
 
     public Optional<Collection<String>> getGroupLabels() {
         if (methods.size() > 1) {
-            Collection<String> labels = new ArrayList<String>();
+            Collection<String> labels = new ArrayList<>();
             for (MethodInvocation mi : methods.keySet()) {
                 labels.add(mi.method.getName());
             }
@@ -282,7 +282,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     private <T extends Annotation> Collection<T> getAll(Class<T> annClass) {
-        Collection<T> results = new ArrayList<T>();
+        Collection<T> results = new ArrayList<>();
         for (MethodInvocation mi : methods.keySet()) {
             Collection<T> anns = BenchmarkGeneratorUtils.getAnnSuperAll(mi.method, ci, annClass);
             if (!(results.isEmpty() || anns.isEmpty() || results.equals(anns))) {
@@ -294,7 +294,7 @@ class MethodGroup implements Comparable<MethodGroup> {
     }
 
     public Optional<Map<String, String[]>> getParams() {
-        Map<String, String[]> map = new TreeMap<String, String[]>();
+        Map<String, String[]> map = new TreeMap<>();
 
         for (Map.Entry<String, String[]> e : params.entrySet()) {
             String key = e.getKey();

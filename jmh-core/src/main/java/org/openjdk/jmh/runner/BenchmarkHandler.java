@@ -69,10 +69,10 @@ class BenchmarkHandler {
 
         this.method = BenchmarkHandler.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
         this.profilers = ProfilerFactory.getSupportedInternal(options.getProfilers());
-        this.profilersRev = new ArrayList<InternalProfiler>(profilers);
+        this.profilersRev = new ArrayList<>(profilers);
         Collections.reverse(profilersRev);
 
-        final BlockingQueue<ThreadParams> tps = new ArrayBlockingQueue<ThreadParams>(executionParams.getThreads());
+        final BlockingQueue<ThreadParams> tps = new ArrayBlockingQueue<>(executionParams.getThreads());
         tps.addAll(distributeThreads(executionParams.getThreads(), executionParams.getThreadGroups()));
 
         this.threadData = new ThreadLocal<ThreadData>() {
@@ -85,9 +85,7 @@ class BenchmarkHandler {
                         throw new IllegalStateException("Cannot get another thread params");
                     }
                     return new ThreadData(o, t);
-                } catch (InstantiationException e) {
-                    throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-                } catch (IllegalAccessException e) {
+                } catch (InstantiationException | IllegalAccessException e) {
                     throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
                 }
             }
@@ -102,7 +100,7 @@ class BenchmarkHandler {
     }
 
     static List<ThreadParams> distributeThreads(int threads, int[] groups) {
-        List<ThreadParams> result = new ArrayList<ThreadParams>();
+        List<ThreadParams> result = new ArrayList<>();
         int totalGroupThreads = Utils.sum(groups);
         int totalGroups = (int) Math.ceil(1D * threads / totalGroupThreads);
         int totalSubgroups = groups.length;
@@ -320,7 +318,7 @@ class BenchmarkHandler {
         CountDownLatch preTearDownBarrier = new CountDownLatch(numThreads);
 
         // result object to accumulate the results in
-        List<Result> iterationResults = new ArrayList<Result>();
+        List<Result> iterationResults = new ArrayList<>();
 
         InfraControl control = new InfraControl(benchmarkParams, params,
                 preSetupBarrier, preTearDownBarrier, last,
@@ -339,8 +337,8 @@ class BenchmarkHandler {
         startProfilers(benchmarkParams, params);
 
         // submit tasks to threadpool
-        List<Future<BenchmarkTaskResult>> completed = new ArrayList<Future<BenchmarkTaskResult>>();
-        CompletionService<BenchmarkTaskResult> srv = new ExecutorCompletionService<BenchmarkTaskResult>(executor);
+        List<Future<BenchmarkTaskResult>> completed = new ArrayList<>();
+        CompletionService<BenchmarkTaskResult> srv = new ExecutorCompletionService<>(executor);
         for (BenchmarkTask runner : runners) {
             srv.submit(runner);
         }
@@ -401,7 +399,7 @@ class BenchmarkHandler {
         long allOps = 0;
         long measuredOps = 0;
 
-        List<Throwable> errors = new ArrayList<Throwable>();
+        List<Throwable> errors = new ArrayList<>();
         for (Future<BenchmarkTaskResult> fr : completed) {
             try {
                 BenchmarkTaskResult btr = fr.get();

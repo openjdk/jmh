@@ -40,12 +40,12 @@ import java.util.Map;
 
 public class InMemoryGeneratorDestination implements GeneratorDestination {
 
-    private List<String> errors = new ArrayList<String>();
-    private List<String> warnings = new ArrayList<String>();
-    private List<String> infos = new ArrayList<String>();
+    private List<String> errors = new ArrayList<>();
+    private List<String> warnings = new ArrayList<>();
+    private List<String> infos = new ArrayList<>();
 
-    private Map<String, StringWriter> classBodies = new HashMap<String, StringWriter>();
-    private Map<String, StringWriter> resourceBodies = new HashMap<String, StringWriter>();
+    private Map<String, StringWriter> classBodies = new HashMap<>();
+    private Map<String, StringWriter> resourceBodies = new HashMap<>();
 
     @Override
     public Writer newResource(String resourcePath) throws IOException {
@@ -117,7 +117,7 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
     }
 
     public Map<String, String> getClasses() {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (Map.Entry<String, StringWriter> e : classBodies.entrySet()) {
             result.put(e.getKey(), e.getValue().toString());
         }
@@ -125,7 +125,7 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
     }
 
     public Map<String, String> getResources() {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (Map.Entry<String, StringWriter> e : resourceBodies.entrySet()) {
             result.put(e.getKey(), e.getValue().toString());
         }

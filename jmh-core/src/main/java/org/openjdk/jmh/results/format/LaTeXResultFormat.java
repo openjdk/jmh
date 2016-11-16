@@ -48,10 +48,10 @@ class LaTeXResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Collection<RunResult> results) {
-        SortedSet<String> params = new TreeSet<String>();
-        Set<String> benchNames = new HashSet<String>();
+        SortedSet<String> params = new TreeSet<>();
+        Set<String> benchNames = new HashSet<>();
 
-        Set<String> units = new HashSet<String>();
+        Set<String> units = new HashSet<>();
         for (RunResult rr : results) {
             String benchmark = rr.getParams().getBenchmark();
             benchNames.add(benchmark);

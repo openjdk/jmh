@@ -79,7 +79,7 @@ public class JMHSample_30_Interrupts {
 
     @Setup
     public void setup() {
-        q = new ArrayBlockingQueue<Integer>(1);
+        q = new ArrayBlockingQueue<>(1);
     }
 
     @Group("Q")

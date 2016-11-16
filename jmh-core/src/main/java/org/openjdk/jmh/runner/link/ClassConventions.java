@@ -30,7 +30,7 @@ import java.util.Map;
 
 class ClassConventions {
 
-    private static final Map<Method, String> METHOD_NAMES = new HashMap<Method, String>();
+    private static final Map<Method, String> METHOD_NAMES = new HashMap<>();
 
     public static String getMethodName(Method m) {
         String result = METHOD_NAMES.get(m);

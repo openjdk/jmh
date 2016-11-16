@@ -57,7 +57,7 @@ public final class InputStreamDrainer extends Thread {
      */
     public InputStreamDrainer(InputStream in, OutputStream out) {
         this.in = in;
-        outs = new ArrayList<OutputStream>();
+        this.outs = new ArrayList<>();
         addOutputStream(out);
     }
 
