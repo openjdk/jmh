@@ -179,12 +179,9 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     protected PerfEvents readEvents(double skipSec) {
-        FileReader fr = null;
-        try {
+        try (FileReader fr = new FileReader(perfParsedData);
+             BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
-
-            fr = new FileReader(perfParsedData);
-            BufferedReader reader = new BufferedReader(fr);
 
             Multimap<MethodDesc, Long> methods = new HashMultimap<>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<>();
@@ -259,8 +256,6 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
             return new PerfEvents(this.events, events, methodMap);
         } catch (IOException e) {
             return new PerfEvents(events);
-        } finally {
-            FileUtils.safelyClose(fr);
         }
     }
 

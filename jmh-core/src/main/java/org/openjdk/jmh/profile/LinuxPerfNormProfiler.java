@@ -197,10 +197,8 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     private Collection<? extends Result> process(BenchmarkResult br, File stdOut, File stdErr) {
         Multiset<String> events = new HashMultiset<>();
 
-        FileReader fr = null;
-        try {
-            fr = new FileReader(stdErr);
-            BufferedReader reader = new BufferedReader(fr);
+        try (FileReader fr = new FileReader(stdErr);
+             BufferedReader reader = new BufferedReader(fr)) {
 
             long delayNs = getDelay(br);
 
@@ -314,8 +312,6 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
-        } finally {
-            FileUtils.safelyClose(fr);
         }
     }
 

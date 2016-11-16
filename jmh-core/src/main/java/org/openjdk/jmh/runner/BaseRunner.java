@@ -149,7 +149,9 @@ abstract class BaseRunner {
         } catch (BenchmarkException be) {
             out.println("<failure>");
             out.println("");
-            out.println(Utils.throwableToString(be.getCause()));
+            for (Throwable cause : be.getSuppressed()) {
+                out.println(Utils.throwableToString(cause));
+            }
             out.println("");
 
             if (options.shouldFailOnError().orElse(Defaults.FAIL_ON_ERROR)) {

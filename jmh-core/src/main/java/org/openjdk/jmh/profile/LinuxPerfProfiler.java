@@ -127,10 +127,8 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
-        FileReader fr = null;
-        try {
-            fr = new FileReader(stdErr);
-            BufferedReader reader = new BufferedReader(fr);
+        try (FileReader fr = new FileReader(stdErr);
+             BufferedReader reader = new BufferedReader(fr)) {
 
             long cycles = 0;
             long insns = 0;
@@ -181,8 +179,6 @@ public class LinuxPerfProfiler implements ExternalProfiler {
             );
         } catch (IOException e) {
             throw new IllegalStateException(e);
-        } finally {
-            FileUtils.safelyClose(fr);
         }
     }
 

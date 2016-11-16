@@ -77,13 +77,11 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     protected void parseEvents() {
-        try {
+        try (FileOutputStream fos = new FileOutputStream(perfParsedData)) {
             ProcessBuilder pb = new ProcessBuilder("perf", "script", "--fields", "time,event,ip,sym,dso", "--input", perfBinData);
             Process p = pb.start();
 
             // drain streams, else we might lock up
-            FileOutputStream fos = new FileOutputStream(perfParsedData);
-
             InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), fos);
             InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), fos);
 
@@ -94,8 +92,6 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
             errDrainer.join();
             outDrainer.join();
-
-            FileUtils.safelyClose(fos);
         } catch (IOException | InterruptedException ex) {
             throw new IllegalStateException(ex);
         }
@@ -103,12 +99,9 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     protected PerfEvents readEvents(double skipSec) {
-        FileReader fr = null;
-        try {
+        try (FileReader fr = new FileReader(perfParsedData);
+             BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
-
-            fr = new FileReader(perfParsedData);
-            BufferedReader reader = new BufferedReader(fr);
 
             Multimap<MethodDesc, Long> methods = new HashMultimap<>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<>();
@@ -188,8 +181,6 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             return new PerfEvents(this.events, events, methodMap);
         } catch (IOException e) {
             return new PerfEvents(events);
-        } finally {
-            FileUtils.safelyClose(fr);
         }
     }
 

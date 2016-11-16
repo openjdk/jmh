@@ -53,12 +53,9 @@ public class FileUtils {
      * @throws IOException if things go crazy
      */
     public static File extractFromResource(String name) throws IOException {
-        InputStream fis = null;
-        OutputStream fos = null;
-        try {
-            File temp = FileUtils.tempFile("extracted");
-            fis = FileUtils.class.getResourceAsStream(name);
-            fos = new FileOutputStream(temp);
+        File temp = FileUtils.tempFile("extracted");
+        try (InputStream fis = FileUtils.class.getResourceAsStream(name);
+             OutputStream fos = new FileOutputStream(temp)) {
 
             byte[] buf = new byte[8192];
             int read;
@@ -69,9 +66,6 @@ public class FileUtils {
             fos.close();
 
             return temp;
-        } finally {
-            FileUtils.safelyClose(fis);
-            FileUtils.safelyClose(fos);
         }
     }
 
@@ -96,10 +90,9 @@ public class FileUtils {
     }
 
     public static Collection<String> tail(File file, int num) throws IOException {
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+        try (FileInputStream fis = new FileInputStream(file);
+             InputStreamReader is = new InputStreamReader(fis);
+             BufferedReader reader = new BufferedReader(is)) {
             LinkedList<String> lines = new LinkedList<>();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -109,8 +102,6 @@ public class FileUtils {
                 }
             }
             return lines;
-        } finally {
-            FileUtils.safelyClose(fis);
         }
     }
 
@@ -125,35 +116,25 @@ public class FileUtils {
     }
 
     public static Collection<String> readAllLines(File file) throws IOException {
-        FileReader fr = null;
-        try {
-            fr = new FileReader(file);
+        try (FileReader fr = new FileReader(file)) {
             return readAllLines(fr);
-        } finally {
-            FileUtils.safelyClose(fr);
         }
     }
 
     public static Collection<String> readAllLines(InputStream stream) throws IOException {
-        InputStreamReader reader = new InputStreamReader(stream);
-        try {
+        try (InputStreamReader reader = new InputStreamReader(stream)) {
             return readAllLines(reader);
         } finally {
-            FileUtils.safelyClose(reader);
             FileUtils.safelyClose(stream);
         }
     }
 
     public static void writeLines(File file, Collection<String> lines) throws IOException {
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(file);
+        try (PrintWriter pw = new PrintWriter(file)) {
             for (String line : lines) {
                 pw.println(line);
             }
             pw.close();
-        } finally {
-            FileUtils.safelyClose(pw);
         }
     }
 
@@ -197,12 +178,8 @@ public class FileUtils {
     }
 
     public static void copy(String src, String dst) throws IOException {
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        try {
-            fis = new FileInputStream(src);
-            fos = new FileOutputStream(dst);
-
+        try (FileInputStream fis = new FileInputStream(src);
+             FileOutputStream fos = new FileOutputStream(dst)) {
             byte[] buf = new byte[8192];
             int read;
             while ((read = fis.read(buf)) != -1) {
@@ -210,9 +187,6 @@ public class FileUtils {
             }
 
             fos.close();
-        } finally {
-            FileUtils.safelyClose(fis);
-            FileUtils.safelyClose(fos);
         }
     }
 

@@ -207,15 +207,12 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use new ForkJoinPool (JDK 7+)
+         * Use ForkJoinPool.
          */
         FJP {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
-                // (Aleksey):
-                // requires some of the reflection magic to untie from JDK 7 compile-time dependencies
-                Constructor<?> c = Class.forName("java.util.concurrent.ForkJoinPool").getConstructor(int.class);
-                return (ExecutorService) c.newInstance(maxThreads);
+                return new ForkJoinPool(maxThreads);
             }
         },
 
@@ -428,13 +425,7 @@ class BenchmarkHandler {
         stopProfilers(benchmarkParams, params, result);
 
         if (!errors.isEmpty()) {
-            Throwable first = errors.get(0);
-            if (errors.size() > 1) {
-                // TODO: Once we switch to JDK 7, make use of #addSupressed.
-                throw new BenchmarkException(errors.size() + " pending exceptions, reporting the first", first);
-            } else {
-                throw new BenchmarkException(first);
-            }
+            throw new BenchmarkException("Benchmark error during the run", errors);
         }
 
         return result;

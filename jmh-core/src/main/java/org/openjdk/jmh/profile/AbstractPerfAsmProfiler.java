@@ -612,10 +612,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             String target = (saveLogToFile == null) ?
                 saveLogTo + "/" + br.getParams().id() + ".log" :
                 saveLogToFile;
-            FileOutputStream asm;
-            try {
-                asm = new FileOutputStream(target);
-                PrintWriter pwAsm = new PrintWriter(asm);
+            try (FileOutputStream asm = new FileOutputStream(target);
+                 PrintWriter pwAsm = new PrintWriter(asm)) {
                 for (ASMLine line : assembly.lines) {
                     for (String event : this.events) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
@@ -623,9 +621,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     }
                     pwAsm.println(line.code);
                 }
-                pwAsm.flush();
-                FileUtils.safelyClose(asm);
-
                 pw.println("Perf-annotated Hotspot log is saved to " + target);
             } catch (IOException e) {
                 pw.println("Unable to save Hotspot log to " + target);
@@ -726,16 +721,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     Collection<Collection<String>> splitAssembly(File stdOut) {
-        FileReader in = null;
-        try {
+        try (FileReader in = new FileReader(stdOut);
+             BufferedReader br = new BufferedReader(in)) {
             Multimap<Long, String> writerToLines = new HashMultimap<>();
             Long writerId = -1L;
 
             Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
             String line;
 
-            in = new FileReader(stdOut);
-            BufferedReader br = new BufferedReader(in);
             while ((line = br.readLine()) != null) {
                 // Parse the writer threads IDs:
                 //    <writer thread='140703710570240'/>
@@ -760,8 +753,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             return r;
         } catch (IOException e) {
             return Collections.emptyList();
-        } finally {
-            FileUtils.safelyClose(in);
         }
     }
 

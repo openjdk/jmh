@@ -556,7 +556,7 @@ public class Runner extends BaseRunner {
             out.endRun(runResults);
             return runResults;
         } catch (BenchmarkException be) {
-            throw new RunnerException("Benchmark caught the exception", be.getCause());
+            throw new RunnerException("Benchmark caught the exception", be);
         }
     }
 
@@ -706,14 +706,10 @@ public class Runner extends BaseRunner {
 
     private List<IterationResult> doFork(BinaryLinkServer reader, List<String> commandString,
                                                               File stdOut, File stdErr, boolean printOut, boolean printErr) {
-        FileOutputStream fosErr = null;
-        FileOutputStream fosOut = null;
-        try {
+        try (FileOutputStream fosErr = new FileOutputStream(stdErr);
+             FileOutputStream fosOut = new FileOutputStream(stdOut)) {
             ProcessBuilder pb = new ProcessBuilder(commandString);
             Process p = pb.start();
-
-            fosErr = new FileOutputStream(stdErr);
-            fosOut = new FileOutputStream(stdOut);
 
             // drain streams, else we might lock up
             InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), fosErr);
@@ -774,9 +770,6 @@ public class Runner extends BaseRunner {
             out.println("<host VM has been interrupted waiting for forked VM: " + ex.getMessage() + ">");
             out.println("");
             throw new BenchmarkException(ex);
-        } finally {
-            FileUtils.safelyClose(fosErr);
-            FileUtils.safelyClose(fosOut);
         }
     }
 

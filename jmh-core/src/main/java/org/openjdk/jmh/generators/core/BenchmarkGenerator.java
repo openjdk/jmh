@@ -138,7 +138,7 @@ public class BenchmarkGenerator {
                 entriesByQName.put(br.getUserClassQName(), br);
             }
         } catch (UnsupportedOperationException e) {
-            destination.printWarning("Unable to read the existing benchmark list, because of UnsupportedOperationException. Run on JDK 7 or higher.");
+            destination.printError("Unable to read the existing benchmark list.", e);
         }
 
         // Generate new benchmark entries
@@ -189,30 +189,24 @@ public class BenchmarkGenerator {
     }
 
     private Collection<String> readBenchmarkList(GeneratorDestination destination) {
-        Reader reader = null;
-        try {
-            reader = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1));
+        String list = BenchmarkList.BENCHMARK_LIST.substring(1);
+        try (Reader reader = destination.getResource(list)) {
             return FileUtils.readAllLines(reader);
         } catch (IOException e) {
             // okay, move on
-        } finally {
-            FileUtils.safelyClose(reader);
         }
         return Collections.emptyList();
     }
 
     private void writeBenchmarkList(GeneratorDestination destination, Collection<BenchmarkListEntry> entries) {
-        PrintWriter writer = null;
-        try {
+        String list = BenchmarkList.BENCHMARK_LIST.substring(1);
+        try (PrintWriter writer = new PrintWriter(destination.newResource(list))) {
             // Write out the complete benchmark list
-            writer = new PrintWriter(destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1)));
             for (BenchmarkListEntry entry : entries) {
                 writer.println(entry.toLine());
             }
         } catch (IOException ex) {
             destination.printError("Error writing benchmark list", ex);
-        } finally {
-            FileUtils.safelyClose(writer);
         }
     }
 
