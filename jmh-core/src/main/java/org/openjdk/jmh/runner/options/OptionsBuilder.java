@@ -220,10 +220,12 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public List<ProfilerConfig> getProfilers() {
+        List<ProfilerConfig> result = new ArrayList<>();
+        result.addAll(profilers);
         if (otherOptions != null) {
-            profilers.addAll(otherOptions.getProfilers());
+            result.addAll(otherOptions.getProfilers());
         }
-        return profilers;
+        return result;
     }
 
     // ---------------------------------------------------------------------------
