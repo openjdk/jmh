@@ -95,4 +95,16 @@ public class SampleBuffer implements Serializable {
             }
         }
     }
+
+    public int count() {
+        int count = 0;
+        for (int[] bucket : hdr) {
+            if (bucket != null) {
+                for (int v : bucket) {
+                    count += v;
+                }
+            }
+        }
+        return count;
+    }
 }

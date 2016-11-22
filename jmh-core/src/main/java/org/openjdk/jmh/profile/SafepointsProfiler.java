@@ -33,14 +33,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SafepointsProfiler implements ExternalProfiler {
+
+    private static final long NO_LONG_VALUE = Long.MIN_VALUE;
 
     @Override
     public String getDescription() {
@@ -54,7 +54,16 @@ public class SafepointsProfiler implements ExternalProfiler {
 
     @Override
     public Collection<String> addJVMOptions(BenchmarkParams params) {
-        return Collections.singletonList("-Xlog:safepoint=info");
+        return Arrays.asList(
+                // make sure old JVMs don't barf on Unified Logging
+                "-XX:+IgnoreUnrecognizedVMOptions",
+
+                // JDK 9+: preferred, Unified Logging
+                "-Xlog:safepoint=info",
+
+                // pre JDK-9: special options
+                "-XX:+PrintGCApplicationStoppedTime", "-XX:+PrintGCTimeStamps"
+        );
     }
 
     @Override
@@ -66,8 +75,7 @@ public class SafepointsProfiler implements ExternalProfiler {
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         long skip = br.getMetadata().getMeasurementTime() - br.getMetadata().getStartTime();
 
-        SampleBuffer pauseBuff = new SampleBuffer();
-        SampleBuffer ttspBuff = new SampleBuffer();
+        List<ParsedData> ds = new ArrayList<>();
 
         try (BufferedReader reader =
                      Files.newBufferedReader(stdOut.toPath(), Charset.defaultCharset())) {
@@ -75,19 +83,39 @@ public class SafepointsProfiler implements ExternalProfiler {
             while ((line = reader.readLine()) != null) {
                 ParsedData data = parse(line);
                 if (data != null) {
-                    if (data.timestamp < skip) continue;
-                    pauseBuff.add(data.stopTime);
-                    ttspBuff.add(data.ttspTime);
+                    ds.add(data);
                 }
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
 
-        return Arrays.asList(
-                new SafepointProfilerResult("pause", pauseBuff),
-                new SafepointProfilerResult("ttsp", ttspBuff)
-        );
+        // Only accept the lines from the highest version.
+        long maxVer = Long.MIN_VALUE;
+        for (ParsedData d : ds) {
+            maxVer = Math.max(maxVer, d.ver);
+        }
+
+        SampleBuffer pauseBuff = new SampleBuffer();
+        SampleBuffer ttspBuff = new SampleBuffer();
+
+        for (ParsedData d : ds) {
+            if (d.ver == maxVer && d.timestamp > skip) {
+                pauseBuff.add(d.stopTime);
+                if (d.ttspTime != NO_LONG_VALUE) {
+                    ttspBuff.add(d.ttspTime);
+                }
+            }
+        }
+
+        Collection<SafepointProfilerResult> results = new ArrayList<>();
+        results.add(new SafepointProfilerResult("pause", pauseBuff));
+
+        // JDK 7 does not have TTSP measurements, ignore the zero metric:
+        if (maxVer > 7) {
+            results.add(new SafepointProfilerResult("ttsp", ttspBuff));
+        }
+        return results;
     }
 
     static long parseNs(String str) {
@@ -163,16 +191,49 @@ public class SafepointsProfiler implements ExternalProfiler {
         }
     }
 
+    private static final Pattern JDK_7_LINE =
+            Pattern.compile("([0-9\\.,]*): (.*) stopped: ([0-9\\.,]*) seconds");
+
+    private static final Pattern JDK_8_LINE =
+            Pattern.compile("([0-9\\.,]*): (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
+
+    private static final Pattern JDK_9_LINE =
+            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint\\] (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
+
     /**
      * Parse the line into the triplet. This is tested with unit tests, make sure to
      * update those if changing this code.
      */
     static ParsedData parse(String line) {
-        Pattern p = Pattern.compile("\\[(.*?)s\\]\\[info\\]\\[safepoint\\] (.*) stopped: (.*) seconds, (.*) took: (.*) seconds");
-        if (line.contains("[info][safepoint]")) {
-            Matcher m = p.matcher(line);
+        {
+            Matcher m = JDK_7_LINE.matcher(line);
             if (m.matches()) {
                 return new ParsedData(
+                        7,
+                        parseNs(m.group(1)),
+                        parseNs(m.group(3)),
+                        NO_LONG_VALUE
+                );
+            }
+        }
+
+        {
+            Matcher m = JDK_8_LINE.matcher(line);
+            if (m.matches()) {
+                return new ParsedData(
+                        8,
+                        parseNs(m.group(1)),
+                        parseNs(m.group(3)),
+                        parseNs(m.group(5))
+                );
+            }
+        }
+
+        {
+            Matcher m = JDK_9_LINE.matcher(line);
+            if (m.matches()) {
+                return new ParsedData(
+                        9,
                         parseNs(m.group(1)),
                         parseNs(m.group(3)),
                         parseNs(m.group(5))
@@ -184,11 +245,13 @@ public class SafepointsProfiler implements ExternalProfiler {
     }
 
     static class ParsedData {
+        int ver;
         long timestamp;
         long stopTime;
         long ttspTime;
 
-        public ParsedData(long timestamp, long stopTime, long ttspTime) {
+        public ParsedData(int ver, long timestamp, long stopTime, long ttspTime) {
+            this.ver = ver;
             this.timestamp = timestamp;
             this.stopTime = stopTime;
             this.ttspTime = ttspTime;

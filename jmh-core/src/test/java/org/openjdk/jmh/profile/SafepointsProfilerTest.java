@@ -30,6 +30,26 @@ import org.junit.Test;
 public class SafepointsProfilerTest {
 
     @Test
+    public void parseJDK7u77() {
+        SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
+                "1.095: Total time for which application threads were stopped: 0.0014010 seconds");
+        Assert.assertNotNull(data);
+        Assert.assertEquals(1_095_000_000L, data.timestamp);
+        Assert.assertEquals(    1_401_000L, data.stopTime);
+        Assert.assertEquals(Long.MIN_VALUE, data.ttspTime);
+    }
+
+    @Test
+    public void parseJDK8u101() {
+        SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
+                "5.042: Total time for which application threads were stopped: 0.0028944 seconds, Stopping threads took: 0.0028351 seconds");
+        Assert.assertNotNull(data);
+        Assert.assertEquals(5_042_000_000L, data.timestamp);
+        Assert.assertEquals(    2_894_400L, data.stopTime);
+        Assert.assertEquals(    2_835_100L, data.ttspTime);
+    }
+
+    @Test
     public void parseJDK9b140() {
         SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
                 "[71.633s][info][safepoint] Total time for which application threads were stopped: 0.0359611 seconds, Stopping threads took: 0.0000516 seconds");
