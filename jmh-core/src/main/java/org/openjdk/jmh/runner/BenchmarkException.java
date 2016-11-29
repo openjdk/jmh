@@ -46,6 +46,6 @@ public class BenchmarkException extends RuntimeException {
 
     @Override
     public Throwable getCause() {
-        throw new UnsupportedOperationException("BenchmarkException only has suppressed causes");
+        return null;
     }
 }
