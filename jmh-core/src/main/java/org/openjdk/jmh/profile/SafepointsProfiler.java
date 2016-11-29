@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -119,7 +120,7 @@ public class SafepointsProfiler implements ExternalProfiler {
     }
 
     static long parseNs(String str) {
-        return (long) (Double.parseDouble(str) * TimeUnit.SECONDS.toNanos(1));
+        return (long) (Double.parseDouble(str.replace(',', '.')) * TimeUnit.SECONDS.toNanos(1));
     }
 
     @Override
