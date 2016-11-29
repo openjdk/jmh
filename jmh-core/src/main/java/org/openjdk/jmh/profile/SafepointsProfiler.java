@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -74,7 +73,7 @@ public class SafepointsProfiler implements ExternalProfiler {
 
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
-        long skip = br.getMetadata().getMeasurementTime() - br.getMetadata().getStartTime();
+        long skip = ProfilerUtils.warmupDelayMs(br);
 
         List<ParsedData> ds = new ArrayList<>();
 

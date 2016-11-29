@@ -29,7 +29,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.util.*;
 
@@ -179,16 +178,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
     public long getDelay(BenchmarkResult br) {
         if (delayMs == -1) { // not set
-            BenchmarkResultMetaData md = br.getMetadata();
-            if (md != null) {
-                // try to ask harness itself:
-                return TimeUnit.MILLISECONDS.toNanos(md.getMeasurementTime() - md.getStartTime());
-            } else {
-                // metadata is not available, let's make a guess:
-                IterationParams wp = br.getParams().getWarmup();
-                return wp.getCount() * wp.getTime().convertTo(TimeUnit.NANOSECONDS)
-                        + TimeUnit.SECONDS.toNanos(1); // loosely account for the JVM lag
-            }
+            return TimeUnit.MILLISECONDS.toNanos(ProfilerUtils.warmupDelayMs(br));
         } else {
             return TimeUnit.MILLISECONDS.toNanos(delayMs);
         }

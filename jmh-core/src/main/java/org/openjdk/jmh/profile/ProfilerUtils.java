@@ -28,9 +28,13 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.results.BenchmarkResult;
+import org.openjdk.jmh.results.BenchmarkResultMetaData;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.concurrent.TimeUnit;
 
 class ProfilerUtils {
 
@@ -78,5 +82,17 @@ class ProfilerUtils {
         return set;
     }
 
+    public static long warmupDelayMs(BenchmarkResult br) {
+        BenchmarkResultMetaData md = br.getMetadata();
+        if (md != null) {
+            // try to ask harness itself:
+            return md.getMeasurementTime() - md.getStartTime();
+        } else {
+            // metadata is not available, let's make a guess:
+            IterationParams wp = br.getParams().getWarmup();
+            return wp.getCount() * wp.getTime().convertTo(TimeUnit.MILLISECONDS)
+                    + TimeUnit.SECONDS.toMillis(1); // loosely account for the JVM lag
+        }
+    }
 
 }
