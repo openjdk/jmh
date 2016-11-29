@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-archetypes</artifactId>
-        <version>1.17.1</version>
+        <version>1.18-SNAPSHOT</version>
     </parent>
 
     <artifactId>jmh-java-benchmark-archetype</artifactId>
