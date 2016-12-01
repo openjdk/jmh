@@ -829,7 +829,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         HashMap<String, String> map = new HashMap<>();
                         for (String kv : kvs) {
                             String[] pair = kv.split("=");
-                            map.put(pair[0], pair[1]);
+
+                            // Guard against "key=''"
+                            if (pair.length == 2) {
+                                map.put(pair[0], pair[1]);
+                            } else {
+                                map.put(pair[0], null);
+                            }
                         }
 
                         // Record the starting address for the method
