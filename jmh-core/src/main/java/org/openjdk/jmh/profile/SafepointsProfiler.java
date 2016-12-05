@@ -73,8 +73,11 @@ public class SafepointsProfiler implements ExternalProfiler {
 
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
-        long skip = ProfilerUtils.warmupDelayMs(br);
-        long measuredTime = ProfilerUtils.measuredTimeMs(br);
+        long measuredTimeMs = ProfilerUtils.measuredTimeMs(br);
+        long measuredTimeNs = TimeUnit.MILLISECONDS.toNanos(measuredTimeMs);
+
+        long measureFrom = TimeUnit.MILLISECONDS.toNanos(ProfilerUtils.warmupDelayMs(br));
+        long measureTo = measureFrom + measuredTimeNs;
 
         List<ParsedData> ds = new ArrayList<>();
 
@@ -101,7 +104,8 @@ public class SafepointsProfiler implements ExternalProfiler {
         SampleBuffer ttspBuff = new SampleBuffer();
 
         for (ParsedData d : ds) {
-            if (d.ver == maxVer && d.timestamp > skip) {
+            if (d.ver == maxVer &&
+                    (d.timestamp > measureFrom) && (d.timestamp < measureTo)) {
                 pauseBuff.add(d.stopTime);
                 if (d.ttspTime != NO_LONG_VALUE) {
                     ttspBuff.add(d.ttspTime);
@@ -111,9 +115,8 @@ public class SafepointsProfiler implements ExternalProfiler {
 
         Collection<Result> results = new ArrayList<>();
 
-        results.add(new ScalarResult(Defaults.PREFIX + "safepoints.app.stopped",
-                pauseBuff.getStatistics(100).getSum() / TimeUnit.MILLISECONDS.toNanos(measuredTime),
-                "%", AggregationPolicy.AVG));
+        results.add(new ScalarResult(Defaults.PREFIX + "safepoints.interval",
+                measuredTimeMs, "ms", AggregationPolicy.SUM));
 
         results.add(new SafepointProfilerResult("pause", pauseBuff));
 
