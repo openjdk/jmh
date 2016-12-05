@@ -46,7 +46,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "cycles", "instructions");
 
-        Collection<String> failMsg = Utils.tryWith("perf", "stat", "--log-fd", "2", "echo", "1");
+        Collection<String> failMsg = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "echo", "1");
         if (!failMsg.isEmpty()) {
             throw new ProfilerException(failMsg.toString());
         }
@@ -67,7 +67,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList("perf", "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(events, ","), "--output", perfBinData);
+        return Arrays.asList(PerfSupport.PERF_EXEC, "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(events, ","), "--output", perfBinData);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void parseEvents() {
         try (FileOutputStream fos = new FileOutputStream(perfParsedData)) {
-            ProcessBuilder pb = new ProcessBuilder("perf", "script", "--fields", "time,event,ip,sym,dso", "--input", perfBinData);
+            ProcessBuilder pb = new ProcessBuilder(PerfSupport.PERF_EXEC, "script", "--fields", "time,event,ip,sym,dso", "--input", perfBinData);
             Process p = pb.start();
 
             // drain streams, else we might lock up
