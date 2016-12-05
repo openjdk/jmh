@@ -74,6 +74,7 @@ public class SafepointsProfiler implements ExternalProfiler {
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         long skip = ProfilerUtils.warmupDelayMs(br);
+        long measuredTime = ProfilerUtils.measuredTimeMs(br);
 
         List<ParsedData> ds = new ArrayList<>();
 
@@ -108,7 +109,12 @@ public class SafepointsProfiler implements ExternalProfiler {
             }
         }
 
-        Collection<SafepointProfilerResult> results = new ArrayList<>();
+        Collection<Result> results = new ArrayList<>();
+
+        results.add(new ScalarResult(Defaults.PREFIX + "safepoints.app.stopped",
+                pauseBuff.getStatistics(100).getSum() / TimeUnit.MILLISECONDS.toNanos(measuredTime),
+                "%", AggregationPolicy.AVG));
+
         results.add(new SafepointProfilerResult("pause", pauseBuff));
 
         // JDK 7 does not have TTSP measurements, ignore the zero metric:

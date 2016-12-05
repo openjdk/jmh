@@ -95,4 +95,15 @@ class ProfilerUtils {
         }
     }
 
+    public static long measuredTimeMs(BenchmarkResult br) {
+        BenchmarkResultMetaData md = br.getMetadata();
+        if (md != null) {
+            // try to ask harness itself:
+            return md.getStopTime() - md.getMeasurementTime();
+        } else {
+            // metadata is not available, let's make a guess:
+            IterationParams mp = br.getParams().getMeasurement();
+            return mp.getCount() * mp.getTime().convertTo(TimeUnit.MILLISECONDS);
+        }
+    }
 }
