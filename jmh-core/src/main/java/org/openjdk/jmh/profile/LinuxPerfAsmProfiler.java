@@ -98,7 +98,10 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     }
 
     @Override
-    protected PerfEvents readEvents(double skipSec) {
+    protected PerfEvents readEvents(double skipMs, double lenMs) {
+        double readFrom = skipMs / 1000D;
+        double readTo = (skipMs + lenMs) / 1000D;
+
         try (FileReader fr = new FileReader(perfParsedData);
              BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
@@ -139,7 +142,10 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
                     if (startTime == null) {
                         startTime = time;
                     } else {
-                        if (time - startTime < skipSec) {
+                        if (time - startTime < readFrom) {
+                            continue;
+                        }
+                        if (time - startTime > readTo) {
                             continue;
                         }
                     }

@@ -178,7 +178,10 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     }
 
     @Override
-    protected PerfEvents readEvents(double skipSec) {
+    protected PerfEvents readEvents(double skipMs, double lenMs) {
+        double readFrom = skipMs / 1000D;
+        double readTo = (skipMs + lenMs) / 1000D;
+
         try (FileReader fr = new FileReader(perfParsedData);
              BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
@@ -220,7 +223,9 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
                 double time = Double.valueOf(timeStr) / 1000000;
 
-                if (time < skipSec)
+                if (time < readFrom)
+                    continue;
+                if (time > readTo)
                     continue;
 
                 // Get address.

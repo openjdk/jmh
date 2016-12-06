@@ -34,7 +34,6 @@ import org.openjdk.jmh.util.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +47,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private final int printMargin;
     private final int mergeMargin;
     private final int delayMsec;
+    private final int lengthMsec;
 
     private final boolean skipAssembly;
     private final boolean skipInterpreter;
@@ -115,6 +115,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         OptionSpec<Integer> optDelay = parser.accepts("delay",
                         "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
+                .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
+
+        OptionSpec<Integer> optLength = parser.accepts("length",
+                        "Do the collection for a given time, in milliseconds; -1 to detect automatically.")
                 .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
 
         OptionSpec<Boolean> optSkipAsm = parser.accepts("skipAsm",
@@ -196,6 +200,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printMargin = set.valueOf(optPrintMargin);
             mergeMargin = set.valueOf(optMergeMargin);
             delayMsec = set.valueOf(optDelay);
+            lengthMsec = set.valueOf(optLength);
 
             skipAssembly = set.valueOf(optSkipAsm);
             skipInterpreter = set.valueOf(optSkipInterpreter);
@@ -288,10 +293,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     /**
      * Read parsed events.
      *
-     * @param skipSec Seconds to skip.
+     * @param skipMs Milliseconds to skip.
+     * @param lenMs Milliseconds to capture after skip
      * @return Events.
      */
-    protected abstract PerfEvents readEvents(double skipSec);
+    protected abstract PerfEvents readEvents(double skipMs, double lenMs);
 
     /**
      * Get perf binary data extension (optional).
@@ -331,19 +337,24 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * 3. Read out perf output
          */
 
-        long delayNs;
+        long skipMs;
         if (delayMsec == -1) { // not set
-            delayNs = TimeUnit.MILLISECONDS.toNanos(ProfilerUtils.warmupDelayMs(br));
+            skipMs = ProfilerUtils.warmupDelayMs(br);
         } else {
-            delayNs = TimeUnit.MILLISECONDS.toNanos(delayMsec);
+            skipMs = delayMsec;
         }
 
-        double skipSec = 1.0 * delayNs / TimeUnit.SECONDS.toNanos(1);
+        double lenMs;
+        if (lengthMsec == -1) { // not set
+            lenMs = ProfilerUtils.measuredTimeMs(br);
+        } else {
+            lenMs = lengthMsec;
+        }
 
-        final PerfEvents events = readEvents(skipSec);
+        final PerfEvents events = readEvents(skipMs, lenMs);
 
         if (!events.isEmpty()) {
-            pw.printf("Perf output processed (skipped %.3f seconds):%n", skipSec);
+            pw.printf("Perf output processed (skipped %.3f seconds):%n", skipMs / 1000D);
             int cnt = 1;
             for (String event : this.events) {
                 pw.printf(" Column %d: %s (%d events)%n", cnt, event, events.get(event).size());

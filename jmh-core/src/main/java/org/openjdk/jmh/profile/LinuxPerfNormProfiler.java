@@ -61,6 +61,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     };
 
     private final int delayMs;
+    private final int lengthMs;
     private final boolean useDefaultStats;
     private final long highPassFilter;
     private final int incrementInterval;
@@ -78,6 +79,10 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         OptionSpec<Integer> optDelay = parser.accepts("delay",
                         "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
+                .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
+
+        OptionSpec<Integer> optLength = parser.accepts("length",
+                "Do the collection for a given time, in milliseconds; -1 to detect automatically.")
                 .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
 
         OptionSpec<Integer> optIncrementInterval = parser.accepts("interval",
@@ -99,6 +104,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         try {
             delayMs = set.valueOf(optDelay);
+            lengthMs = set.valueOf(optLength);
             incrementInterval = set.valueOf(optIncrementInterval);
             highPassFilter = set.valueOf(optHighPassFilter);
             useDefaultStats = set.valueOf(optDefaultStat);
@@ -176,21 +182,29 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         return "Linux perf statistics, normalized by operation count";
     }
 
-    public long getDelay(BenchmarkResult br) {
-        if (delayMs == -1) { // not set
-            return TimeUnit.MILLISECONDS.toNanos(ProfilerUtils.warmupDelayMs(br));
-        } else {
-            return TimeUnit.MILLISECONDS.toNanos(delayMs);
-        }
-    }
-
     private Collection<? extends Result> process(BenchmarkResult br, File stdOut, File stdErr) {
         Multiset<String> events = new HashMultiset<>();
 
         try (FileReader fr = new FileReader(stdErr);
              BufferedReader reader = new BufferedReader(fr)) {
 
-            long delayNs = getDelay(br);
+            long skipMs;
+            if (delayMs == -1) { // not set
+                skipMs = ProfilerUtils.warmupDelayMs(br);
+            } else {
+                skipMs = delayMs;
+            }
+
+            double lenMs;
+            if (lengthMs == -1) { // not set
+                lenMs = ProfilerUtils.measuredTimeMs(br);
+            } else {
+                lenMs = lengthMs;
+            }
+
+            double readFrom = skipMs / 1000D;
+            double softTo = (skipMs + lenMs) / 1000D;
+            double readTo = (skipMs + lenMs + incrementInterval) / 1000D;
 
             NumberFormat nf = NumberFormat.getInstance();
 
@@ -222,12 +236,44 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                         continue nextline;
                     }
 
+                    double multiplier = 1D;
                     try {
                         double timeSec = nf.parse(time).doubleValue();
-                        if (timeSec * TimeUnit.SECONDS.toNanos(1) < delayNs) {
+                        if (timeSec < readFrom) {
                             // warmup, ignore
                             continue nextline;
                         }
+                        if (timeSec > readTo) {
+                            // post-run, ignore
+                            continue nextline;
+                        }
+
+                        // Handle partial events:
+                        double intervalSec = incrementInterval / 1000D;
+                        if (timeSec - intervalSec < readFrom) {
+                            // Event _starts_ before the measurement window
+                            //     .............[============|============
+                            //               readFrom     timeSec
+                            //           [<----------------->|  // event
+                            //             incrementInterval
+                            //
+                            // Only count the tail after readFrom:
+
+                            multiplier = (timeSec - readFrom) / intervalSec;
+                        }
+                        if (timeSec > softTo) {
+                            // Event is past the measurement window
+                            //    =============].............|............
+                            //               softTo       timeSec
+                            //           [<----------------->|  // event
+                            //             incrementInterval
+                            //
+                            // Only count the head before softTo:
+                            multiplier = 1 - (timeSec - softTo) / intervalSec;
+                        }
+
+                        // Defensive, keep multiplier in bounds:
+                        multiplier = Math.max(1D, Math.min(0D, multiplier));
                     } catch (ParseException e) {
                         // don't care then, continue
                         continue nextline;
@@ -239,7 +285,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                             // anomalous value, pretend we did not see it
                             continue nextline;
                         }
-                        events.add(event, lValue);
+                        events.add(event, (long) (lValue * multiplier));
                     } catch (ParseException e) {
                         // do nothing, continue
                         continue nextline;
