@@ -837,11 +837,13 @@ public class BenchmarkGenerator {
         writer.println(ident(2) + "this.iterationParams = control.iterationParams;");
         writer.println(ident(2) + "this.threadParams    = threadParams;");
         writer.println(ident(2) + "this.notifyControl   = control.notifyControl;");
-        writer.println(ident(2) + "this.blackhole       = new Blackhole(\"Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.\");");
+        writer.println(ident(2) + "if (this.blackhole == null) {");
+        writer.println(ident(3) + "this.blackhole = new Blackhole(\"Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.\");");
+        writer.println(ident(2) + "}");
     }
 
     private void methodEpilog(PrintWriter writer, MethodGroup methodGroup) {
-        writer.println(ident(3) + "this.blackhole = null;");
+        writer.println(ident(3) + "this.blackhole.purge();");
     }
 
     private String prefix(String argList) {

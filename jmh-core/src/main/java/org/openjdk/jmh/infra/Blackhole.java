@@ -281,6 +281,14 @@ public final class Blackhole extends BlackholeL4 {
     }
 
     /**
+     * Clear internal waste, if any.
+     */
+    public void purge() {
+        obj1 = null;
+        objs1 = null;
+    }
+
+    /**
      * Consume object. This call provides a side effect preventing JIT to eliminate dependent computations.
      *
      * @param obj object to consume.
