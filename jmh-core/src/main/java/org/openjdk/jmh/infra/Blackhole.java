@@ -281,9 +281,15 @@ public final class Blackhole extends BlackholeL4 {
     }
 
     /**
-     * Clear internal waste, if any.
+     * Make any consumed data begone.
+     *
+     * WARNING: This method should only be called by the infrastructure code, in clearly understood cases.
+     * Even though it is public, it is not supposed to be called by users.
      */
-    public void purge() {
+    public void evaporate(String challengeResponse) {
+        if (!challengeResponse.equals("You'll see Stephen Hawking pole vaulting before this method becomes useful to you.")) {
+            throw new IllegalStateException("Can't touch it.");
+        }
         obj1 = null;
         objs1 = null;
     }
