@@ -26,6 +26,7 @@ package org.openjdk.jmh.infra;
 
 import org.openjdk.jmh.util.Utils;
 
+import java.lang.ref.WeakReference;
 import java.util.Random;
 
 /*
@@ -73,7 +74,6 @@ abstract class BlackholeL2 extends BlackholeL1 {
     public float f2;
     public double d2;
     public volatile Object obj1;
-    public volatile Object[] objs1;
     public volatile BlackholeL2 nullBait = null;
     public int tlr;
     public volatile int tlrMask;
@@ -83,7 +83,6 @@ abstract class BlackholeL2 extends BlackholeL1 {
         tlr = r.nextInt();
         tlrMask = 1;
         obj1 = new Object();
-        objs1 = new Object[]{new Object()};
 
         b1 = (byte) r.nextInt(); b2 = (byte) (b1 + 1);
         bool1 = r.nextBoolean(); bool2 = !bool1;
@@ -221,7 +220,11 @@ public final class Blackhole extends BlackholeL4 {
      * with infinitesimal probability. Then again, smart compilers may skip from
      * generating the slow path, and apply the previous logic to constant-fold
      * the condition to "false". We are warming up the slow-path in the beginning
-     * to evade that effect.
+     * to evade that effect. Some caution needs to be exercised not to retain the
+     * captured objects forever: this is normally achieved by calling evaporate()
+     * regularly, but we also additionally protect with retaining the object on
+     * weak reference (contrary to phantom-ref, publishing object still has to
+     * happen, because reference users might need to discover the object).
      *
      * Observation (4) provides us with an opportunity to create a safety net in case
      * either (1), (2) or (3) fails. This is why Blackhole methods are prohibited from
@@ -291,7 +294,6 @@ public final class Blackhole extends BlackholeL4 {
             throw new IllegalStateException("Can't touch it.");
         }
         obj1 = null;
-        objs1 = null;
     }
 
     /**
@@ -304,22 +306,7 @@ public final class Blackhole extends BlackholeL4 {
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = obj;
-            this.tlrMask = (tlrMask << 1) + 1;
-        }
-    }
-
-    /**
-     * Consume object. This call provides a side effect preventing JIT to eliminate dependent computations.
-     *
-     * @param objs objects to consume.
-     */
-    public final void consume(Object[] objs) {
-        int tlrMask = this.tlrMask; // volatile read
-        int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
-        if ((tlr & tlrMask) == 0) {
-            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.objs1 = objs;
+            this.obj1 = new WeakReference<>(obj);
             this.tlrMask = (tlrMask << 1) + 1;
         }
     }
