@@ -325,6 +325,14 @@ public class GCProfiler implements InternalProfiler {
             if (listener == null) {
                 throw new IllegalStateException("Churn profile already stopped");
             }
+
+            // Notifications are asynchronous, need to wait a bit before deregistering the listener.
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // do not care
+            }
+
             for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
                 try {
                     ((NotificationEmitter) bean).removeNotificationListener(listener);
