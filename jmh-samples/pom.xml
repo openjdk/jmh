@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>1.17.3</version>
+        <version>1.18-SNAPSHOT</version>
     </parent>
 
     <name>JMH Samples</name>
