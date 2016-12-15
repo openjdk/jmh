@@ -255,7 +255,7 @@ public final class Blackhole extends BlackholeL4 {
         Utils.check(Blackhole.class, "l1", "l2");
         Utils.check(Blackhole.class, "f1", "f2");
         Utils.check(Blackhole.class, "d1", "d2");
-        Utils.check(Blackhole.class, "obj1", "objs1");
+        Utils.check(Blackhole.class, "obj1");
     }
 
     public Blackhole(String challengeResponse) {
@@ -290,8 +290,8 @@ public final class Blackhole extends BlackholeL4 {
      * Even though it is public, it is not supposed to be called by users.
      */
     public void evaporate(String challengeResponse) {
-        if (!challengeResponse.equals("You'll see Stephen Hawking pole vaulting before this method becomes useful to you.")) {
-            throw new IllegalStateException("Can't touch it.");
+        if (!challengeResponse.equals("Yes, I am Stephen Hawking, and know a thing or two about black holes.")) {
+            throw new IllegalStateException("Who are you?");
         }
         obj1 = null;
     }

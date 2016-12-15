@@ -843,7 +843,7 @@ public class BenchmarkGenerator {
     }
 
     private void methodEpilog(PrintWriter writer, MethodGroup methodGroup) {
-        writer.println(ident(3) + "this.blackhole.evaporate(\"You'll see Stephen Hawking pole vaulting before this method becomes useful to you.\");");
+        writer.println(ident(3) + "this.blackhole.evaporate(\"Yes, I am Stephen Hawking, and know a thing or two about black holes.\");");
     }
 
     private String prefix(String argList) {
