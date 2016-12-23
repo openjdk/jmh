@@ -146,21 +146,21 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void parseEvents() {
         // 1. Stop profiling by calling xperf dumper.
-        Collection<String> errs = Utils.tryWith(path, "-d", perfBinData);
+        Collection<String> errs = Utils.tryWith(path, "-d", perfBinData.getAbsolutePath());
 
         if (!errs.isEmpty())
             throw new IllegalStateException("Failed to stop xperf: " + errs);
 
         // 2. Convert binary data to text form.
         try {
-            ProcessBuilder pb = new ProcessBuilder(path, "-i", perfBinData, "-symbols", "-a", "dumper");
+            ProcessBuilder pb = new ProcessBuilder(path, "-i", perfBinData.getAbsolutePath(), "-symbols", "-a", "dumper");
             if (symbolDir != null) {
                 pb.environment().put("_NT_SYMBOL_PATH", symbolDir);
             }
 
             Process p = pb.start();
 
-            FileOutputStream fos = new FileOutputStream(perfParsedData);
+            FileOutputStream fos = new FileOutputStream(perfParsedData.file());
 
             InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), fos);
             InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), fos);
@@ -182,7 +182,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         double readFrom = skipMs / 1000D;
         double readTo = (skipMs + lenMs) / 1000D;
 
-        try (FileReader fr = new FileReader(perfParsedData);
+        try (FileReader fr = new FileReader(perfParsedData.file());
              BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
 

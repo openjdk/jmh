@@ -39,6 +39,32 @@ public class FileUtils {
 
     }
 
+    static final TempFileManager TEMP_FILE_MANAGER = new TempFileManager();
+
+    /**
+     * Creates the temp file, and retains it as long as the reference to it
+     * is reachable.
+     *
+     * @param suffix suffix
+     * @return temp file
+     * @throws IOException
+     */
+    public static TempFile weakTempFile(String suffix) throws IOException {
+        return TEMP_FILE_MANAGER.create(suffix);
+    }
+
+    public static void purgeTemps() {
+        TEMP_FILE_MANAGER.purge();
+    }
+
+    /**
+     * Creates the temp file with given suffix. The file would be removed
+     * on JVM exit, or when caller deletes the file itself.
+     *
+     * @param suffix suffix
+     * @return temporary file
+     * @throws IOException
+     */
     public static File tempFile(String suffix) throws IOException {
         File file = File.createTempFile("jmh", suffix);
         file.deleteOnExit();

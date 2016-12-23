@@ -68,18 +68,18 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private final boolean printCompilationInfo;
     private final boolean intelSyntax;
 
-    protected final String hsLog;
-    protected final String perfBinData;
-    protected final String perfParsedData;
+    protected final TempFile hsLog;
+    protected final TempFile perfBinData;
+    protected final TempFile perfParsedData;
     protected final OptionSet set;
     private final boolean drawIntraJumps;
     private final boolean drawInterJumps;
 
     protected AbstractPerfAsmProfiler(String initLine, String... events) throws ProfilerException {
         try {
-            hsLog = FileUtils.tempFile("hslog").getAbsolutePath();
-            perfBinData = FileUtils.tempFile("perfbin").getAbsolutePath();
-            perfParsedData = FileUtils.tempFile("perfparsed").getAbsolutePath();
+            hsLog = FileUtils.weakTempFile("hslog");
+            perfBinData = FileUtils.weakTempFile("perfbin");
+            perfParsedData = FileUtils.weakTempFile("perfparsed");
         } catch (IOException e) {
             throw new ProfilerException(e);
         }
@@ -236,7 +236,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             opts.addAll(Arrays.asList(
                 "-XX:+UnlockDiagnosticVMOptions",
                 "-XX:+LogCompilation",
-                "-XX:LogFile=" + hsLog,
+                "-XX:LogFile=" + hsLog.getAbsolutePath(),
                 "-XX:+PrintAssembly"));
 
             if (!skipInterpreter) {
@@ -271,6 +271,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
         PerfResult result = processAssembly(br, stdOut, stdErr);
+
+        // we know these are not needed anymore, proactively delete
+        hsLog.delete();
+        perfBinData.delete();
+        perfParsedData.delete();
 
         return Collections.singleton(result);
     }
@@ -320,7 +325,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * 2. Read out PrintAssembly output
          */
 
-        Assembly assembly = readAssembly(new File(hsLog));
+        Assembly assembly = readAssembly(hsLog.file());
         if (assembly.size() > 0) {
             pw.printf("PrintAssembly processed: %d total address lines.%n", assembly.size());
         } else if (skipAssembly) {
@@ -584,7 +589,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 savePerfOutputTo + "/" + br.getParams().id() + ".perf" :
                 savePerfOutputToFile;
             try {
-                FileUtils.copy(perfParsedData, target);
+                FileUtils.copy(perfParsedData.getAbsolutePath(), target);
                 pw.println("Perf output saved to " + target);
             } catch (IOException e) {
                 pw.println("Unable to save perf output to " + target);
@@ -599,7 +604,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 savePerfBinTo + "/" + br.getParams().id() + perfBinaryExtension() :
                 savePerfBinFile;
             try {
-                FileUtils.copy(perfBinData, target);
+                FileUtils.copy(perfBinData.getAbsolutePath(), target);
                 pw.println("Perf binary output saved to " + target);
             } catch (IOException e) {
                 pw.println("Unable to save perf binary output to " + target);

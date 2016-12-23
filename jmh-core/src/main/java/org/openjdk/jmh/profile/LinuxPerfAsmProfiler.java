@@ -67,7 +67,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList(PerfSupport.PERF_EXEC, "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(events, ","), "--output", perfBinData);
+        return Arrays.asList(PerfSupport.PERF_EXEC, "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(events, ","), "--output", perfBinData.getAbsolutePath());
     }
 
     @Override
@@ -77,8 +77,8 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     protected void parseEvents() {
-        try (FileOutputStream fos = new FileOutputStream(perfParsedData)) {
-            ProcessBuilder pb = new ProcessBuilder(PerfSupport.PERF_EXEC, "script", "--fields", "time,event,ip,sym,dso", "--input", perfBinData);
+        try (FileOutputStream fos = new FileOutputStream(perfParsedData.file())) {
+            ProcessBuilder pb = new ProcessBuilder(PerfSupport.PERF_EXEC, "script", "--fields", "time,event,ip,sym,dso", "--input", perfBinData.getAbsolutePath());
             Process p = pb.start();
 
             // drain streams, else we might lock up
@@ -102,7 +102,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         double readFrom = skipMs / 1000D;
         double readTo = (skipMs + lenMs) / 1000D;
 
-        try (FileReader fr = new FileReader(perfParsedData);
+        try (FileReader fr = new FileReader(perfParsedData.file());
              BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
 

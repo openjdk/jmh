@@ -623,13 +623,17 @@ public class Runner extends BaseRunner {
                     etaBeforeBenchmark();
                     out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
 
-                    File stdErr = FileUtils.tempFile("stderr");
-                    File stdOut = FileUtils.tempFile("stdout");
+                    TempFile stdErr = FileUtils.weakTempFile("stderr");
+                    TempFile stdOut = FileUtils.weakTempFile("stdout");
 
-                    doFork(server, forkedString, stdOut, stdErr, printOut, printErr);
+                    doFork(server, forkedString, stdOut.file(), stdErr.file(), printOut, printErr);
 
                     etaAfterBenchmark(params);
                     out.println("");
+
+                    // we know these are not needed anymore, proactively delete
+                    stdErr.delete();
+                    stdOut.delete();
                 }
             }
 
@@ -640,8 +644,8 @@ public class Runner extends BaseRunner {
                 etaBeforeBenchmark();
                 out.println("# Fork: " + (i + 1) + " of " + forkCount);
 
-                File stdErr = FileUtils.tempFile("stderr");
-                File stdOut = FileUtils.tempFile("stdout");
+                TempFile stdErr = FileUtils.weakTempFile("stderr");
+                TempFile stdOut = FileUtils.weakTempFile("stdout");
 
                 if (!profilers.isEmpty()) {
                     out.print("# Preparing profilers: ");
@@ -659,7 +663,7 @@ public class Runner extends BaseRunner {
                     }
                 }
 
-                List<IterationResult> result = doFork(server, forkedString, stdOut, stdErr, printOut, printErr);
+                List<IterationResult> result = doFork(server, forkedString, stdOut.file(), stdErr.file(), printOut, printErr);
                 if (!result.isEmpty()) {
                     long pid = server.getClientPid();
 
@@ -670,7 +674,7 @@ public class Runner extends BaseRunner {
                         out.print("# Processing profiler results: ");
                         for (ExternalProfiler profiler : profilersRev) {
                             out.print(profiler.getClass().getSimpleName() + " ");
-                            for (Result profR : profiler.afterTrial(br, pid, stdOut, stdErr)) {
+                            for (Result profR : profiler.afterTrial(br, pid, stdOut.file(), stdErr.file())) {
                                 br.addBenchmarkResult(profR);
                             }
                         }
@@ -682,6 +686,10 @@ public class Runner extends BaseRunner {
 
                 etaAfterBenchmark(params);
                 out.println("");
+
+                // we know these are not needed anymore, proactively delete
+                stdOut.delete();
+                stdErr.delete();
             }
 
             out.endBenchmark(new RunResult(params, results.get(params)).getAggregatedResult());
@@ -699,6 +707,7 @@ public class Runner extends BaseRunner {
             if (server != null) {
                 server.terminate();
             }
+            FileUtils.purgeTemps();
         }
 
         return results;
