@@ -185,14 +185,14 @@ class TextReportFormat extends AbstractOutputFormat {
                 Result r = result.getPrimaryResult();
                 String s = r.extendedInfo();
                 if (!s.trim().isEmpty()) {
-                    out.println("Result \"" + r.getLabel() + "\":");
+                    out.println("Result \"" + result.getParams().getBenchmark() + "\":");
                     out.println(s);
                 }
             }
             for (Result r : result.getSecondaryResults().values()) {
                 String s = r.extendedInfo();
                 if (!s.trim().isEmpty()) {
-                    out.println("Secondary result \"" + r.getLabel() + "\":");
+                    out.println("Secondary result \"" + result.getParams().getBenchmark() + ":" + r.getLabel() + "\":");
                     out.println(s);
                 }
             }
