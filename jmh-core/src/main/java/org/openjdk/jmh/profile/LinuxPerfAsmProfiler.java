@@ -97,6 +97,122 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         }
     }
 
+    static PerfLine parsePerfLine(String line) {
+        if (line.startsWith("#")) {
+            return null;
+        }
+
+        // Demangled symbol names can contain spaces, so we need to parse the lines
+        // in a complicated manner. Using regexps will not solve this without sacrificing
+        // lots of performance, so we need to get tricky.
+        //
+        // We are forcing perf to print: time event ip sym dso
+        //
+        //  328992.235251: instructions:      7fa85da61a09 match_symbol (/lib/x86_64-linux-gnu/ld-2.23.so)
+        //
+
+        // Remove excess spaces
+        int lastLength = -1;
+        while (line.length() != lastLength) {
+            lastLength = line.length();
+            line = line.replace("  ", " ");
+        }
+
+        // Chomp the time
+        int timeIdx = line.indexOf(": ");
+        if (timeIdx == -1) return null;
+        String strTime = line.substring(0, timeIdx);
+        line = line.substring(timeIdx + 2);
+
+        double time;
+        try {
+            time = Double.valueOf(strTime);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        // Chomp the library, handling spaces properly:
+        int libIdx = line.lastIndexOf(" (");
+        if (libIdx == -1) return null;
+        String lib = line.substring(libIdx);
+        lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
+        line = line.substring(0, libIdx);
+
+        // Chomp the event name:
+        int evIdx = line.indexOf(": ");
+        if (evIdx == -1) return null;
+        String evName = line.substring(0, evIdx);
+        int tagIdx = evName.lastIndexOf(":");
+        if (tagIdx != -1) {
+            evName = evName.substring(0, tagIdx);
+        }
+        line = line.substring(evIdx + 2);
+
+        // Chomp the addr:
+        int addrIdx = line.indexOf(" ");
+        if (addrIdx == -1) return null;
+        String strAddr = line.substring(0, addrIdx);
+        line = line.substring(addrIdx + 1);
+
+        // Try to parse the positive address lightly first.
+        // If that fails, try to parse the negative address.
+        // If that fails as well, then address is unresolvable.
+        long addr;
+        try {
+            addr = Long.valueOf(strAddr, 16);
+        } catch (NumberFormatException e) {
+            try {
+                addr = new BigInteger(strAddr, 16).longValue();
+                if (addr < 0L && lib.contains("unknown")) {
+                    lib = "kernel";
+                }
+            } catch (NumberFormatException e1) {
+                addr = 0L;
+            }
+        }
+
+        // Whatever is left is symbol:
+        String symbol = line;
+
+        return new PerfLine(time, evName, addr, symbol, lib);
+    }
+
+    static class PerfLine {
+        final double time;
+        final String event;
+        final long addr;
+        final String symbol;
+        final String lib;
+
+        public PerfLine(double time, String event, long addr, String symbol, String lib) {
+            this.time = time;
+            this.event = event;
+            this.addr = addr;
+            this.symbol = symbol;
+            this.lib = lib;
+        }
+
+        public double time() {
+            return time;
+        }
+
+        public String eventName() {
+            return event;
+        }
+
+        public long addr() {
+            return addr;
+        }
+
+        public String symbol() {
+            return symbol;
+        }
+
+        public String lib() {
+            return lib;
+        }
+    }
+
     @Override
     protected PerfEvents readEvents(double skipMs, double lenMs) {
         double readFrom = skipMs / 1000D;
@@ -114,68 +230,33 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
             Double startTime = null;
 
-            // Demangled symbol names can contain spaces, so we need to parse the lines
-            // in a complicated manner. Using regexps will not solve this without sacrificing
-            // lots of performance, so we need to get tricky, and merge the symbol names back
-            // after splitting.
-            //
-            // We are forcing perf to print: time event ip sym dso
-            //
-
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("#")) continue;
-
-                String[] elems = line.trim().split("[ ]+");
-
-                if (elems.length < 4) continue;
-
-                String strTime = elems[0].replace(":", "");
-                String evName = elems[1].replace(":", "");
-                String strAddr = elems[2];
-                String symbol = Utils.join(Arrays.copyOfRange(elems, 3, elems.length - 1), " ");
-                String lib = elems[elems.length - 1];
-                lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
-
-                try {
-                    Double time = Double.valueOf(strTime);
-                    if (startTime == null) {
-                        startTime = time;
-                    } else {
-                        if (time - startTime < readFrom) {
-                            continue;
-                        }
-                        if (time - startTime > readTo) {
-                            continue;
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    // misformatted line, no timestamp
+                PerfLine perfline = parsePerfLine(line);
+                if (perfline == null) {
                     continue;
                 }
 
-                Multiset<Long> evs = events.get(evName);
+                if (startTime == null) {
+                    startTime = perfline.time();
+                } else {
+                    if (perfline.time() - startTime < readFrom) {
+                        continue;
+                    }
+                    if (perfline.time() - startTime > readTo) {
+                        continue;
+                    }
+                }
+
+                Multiset<Long> evs = events.get(perfline.eventName());
                 if (evs == null) {
                     // we are not prepared to handle this event, skip
                     continue;
                 }
 
-                // Try to parse the positive address lightly first.
-                // If that fails, try to parse the negative address.
-                // If that fails as well, then address is unresolvable.
-                Long addr;
-                try {
-                    addr = Long.valueOf(strAddr, 16);
-                } catch (NumberFormatException e) {
-                    try {
-                        addr = new BigInteger(strAddr, 16).longValue();
-                    } catch (NumberFormatException e1) {
-                        addr = 0L;
-                    }
-                }
-
-                evs.add(addr);
-                methods.put(dedup.dedup(MethodDesc.nativeMethod(symbol, lib)), addr);
+                evs.add(perfline.addr());
+                MethodDesc desc = dedup.dedup(MethodDesc.nativeMethod(perfline.symbol(), perfline.lib()));
+                methods.put(desc, perfline.addr());
             }
 
             IntervalMap<MethodDesc> methodMap = new IntervalMap<>();
