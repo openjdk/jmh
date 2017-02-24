@@ -672,7 +672,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         List<Region> regions = new ArrayList<>();
 
         SortedSet<Long> allAddrs = events.getAllAddresses();
-        for (Interval intv : figureHotIntervals(allAddrs, allAddrs.first(), allAddrs.last())) {
+        for (Interval intv : figureHotIntervals(allAddrs)) {
             SortedSet<Long> eventfulAddrs = allAddrs.subSet(intv.src, intv.dst + 1);
 
             List<ASMLine> regionLines = asms.getLines(intv.src, intv.dst, printMargin);
@@ -705,10 +705,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
 
-    private List<Interval> figureHotIntervals(SortedSet<Long> allAddrs, long from, long to) {
-        List<Interval> intervals = new ArrayList<>();
-        SortedSet<Long> addrs = allAddrs.subSet(from, to);
+    private List<Interval> figureHotIntervals(SortedSet<Long> addrs) {
+        if (addrs.isEmpty()) {
+            return Collections.emptyList();
+        }
 
+        List<Interval> intervals = new ArrayList<>();
         long begAddr = addrs.first();
         long lastAddr = addrs.first();
         for (long addr : addrs) {
