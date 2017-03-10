@@ -25,10 +25,10 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.runner.format.OutputFormat;
+import org.openjdk.jmh.util.FileUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -54,6 +54,25 @@ public class BenchmarkList extends AbstractResourceReader {
 
     public static BenchmarkList fromString(String strings) {
         return new BenchmarkList(null, null, strings);
+    }
+
+    public static Collection<BenchmarkListEntry> readBenchmarkList(InputStream stream) throws IOException {
+        try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            Collection<BenchmarkListEntry> entries = new ArrayList<>();
+            for (String line : FileUtils.readAllLines(reader)) {
+                BenchmarkListEntry ble = new BenchmarkListEntry(line);
+                entries.add(ble);
+            }
+            return entries;
+        }
+    }
+
+    public static void writeBenchmarkList(OutputStream stream, Collection<BenchmarkListEntry> entries) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8))) {
+            for (BenchmarkListEntry entry : entries) {
+                writer.println(entry.toLine());
+            }
+        }
     }
 
     private BenchmarkList(String file, String resource, String strings) {

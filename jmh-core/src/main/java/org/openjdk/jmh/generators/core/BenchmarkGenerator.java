@@ -29,14 +29,11 @@ import org.openjdk.jmh.infra.*;
 import org.openjdk.jmh.results.*;
 import org.openjdk.jmh.runner.*;
 import org.openjdk.jmh.runner.Defaults;
-import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.SampleBuffer;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -131,12 +128,13 @@ public class BenchmarkGenerator {
         // to detect removed @Benchmark entries. To do so, we are overwriting all benchmark
         // records that belong to a current compilation unit.
         Multimap<String, BenchmarkListEntry> entriesByQName = new HashMultimap<>();
-        try {
-            for (String line : readBenchmarkList(destination)) {
-                BenchmarkListEntry br = new BenchmarkListEntry(line);
-                entries.add(br);
-                entriesByQName.put(br.getUserClassQName(), br);
+        try (InputStream stream = destination.getResource(BenchmarkList.BENCHMARK_LIST.substring(1))) {
+            for (BenchmarkListEntry ble : BenchmarkList.readBenchmarkList(stream)) {
+                entries.add(ble);
+                entriesByQName.put(ble.getUserClassQName(), ble);
             }
+        } catch (IOException e) {
+            // okay, move on
         } catch (UnsupportedOperationException e) {
             destination.printError("Unable to read the existing benchmark list.", e);
         }
@@ -185,26 +183,8 @@ public class BenchmarkGenerator {
             }
         }
 
-        writeBenchmarkList(destination, entries);
-    }
-
-    private Collection<String> readBenchmarkList(GeneratorDestination destination) {
-        String list = BenchmarkList.BENCHMARK_LIST.substring(1);
-        try (Reader reader = destination.getResource(list)) {
-            return FileUtils.readAllLines(reader);
-        } catch (IOException e) {
-            // okay, move on
-        }
-        return Collections.emptyList();
-    }
-
-    private void writeBenchmarkList(GeneratorDestination destination, Collection<BenchmarkListEntry> entries) {
-        String list = BenchmarkList.BENCHMARK_LIST.substring(1);
-        try (PrintWriter writer = new PrintWriter(destination.newResource(list))) {
-            // Write out the complete benchmark list
-            for (BenchmarkListEntry entry : entries) {
-                writer.println(entry.toLine());
-            }
+        try (OutputStream stream = destination.newResource(BenchmarkList.BENCHMARK_LIST.substring(1))) {
+            BenchmarkList.writeBenchmarkList(stream, entries);
         } catch (IOException ex) {
             destination.printError("Error writing benchmark list", ex);
         }

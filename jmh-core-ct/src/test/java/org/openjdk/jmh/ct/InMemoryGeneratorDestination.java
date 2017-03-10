@@ -27,12 +27,7 @@ package org.openjdk.jmh.ct;
 import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,22 +40,22 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
     private final List<String> infos = new ArrayList<>();
 
     private final Map<String, StringWriter> classBodies = new HashMap<>();
-    private final Map<String, StringWriter> resourceBodies = new HashMap<>();
+    private final Map<String, ByteArrayOutputStream> resourceBodies = new HashMap<>();
 
     @Override
-    public Writer newResource(String resourcePath) throws IOException {
-        StringWriter sw = new StringWriter();
+    public OutputStream newResource(String resourcePath) throws IOException {
+        ByteArrayOutputStream sw = new ByteArrayOutputStream();
         resourceBodies.put(resourcePath, sw);
-        return new PrintWriter(sw, true);
+        return sw;
     }
 
     @Override
-    public Reader getResource(String resourcePath) throws IOException {
-        StringWriter sw = resourceBodies.get(resourcePath);
+    public InputStream getResource(String resourcePath) throws IOException {
+        ByteArrayOutputStream sw = resourceBodies.get(resourcePath);
         if (sw == null) {
             throw new IOException("Does not exist: " + resourcePath);
         }
-        return new StringReader(sw.toString());
+        return new ByteArrayInputStream(sw.toByteArray());
     }
 
     @Override
@@ -126,8 +121,12 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
 
     public Map<String, String> getResources() {
         Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, StringWriter> e : resourceBodies.entrySet()) {
-            result.put(e.getKey(), e.getValue().toString());
+        for (Map.Entry<String, ByteArrayOutputStream> e : resourceBodies.entrySet()) {
+            try {
+                result.put(e.getKey(), e.getValue().toString("UTF-8"));
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            }
         }
         return result;
     }

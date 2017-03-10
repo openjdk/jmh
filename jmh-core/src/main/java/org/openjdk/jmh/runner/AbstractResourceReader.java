@@ -26,6 +26,7 @@ package org.openjdk.jmh.runner;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -55,7 +56,7 @@ class AbstractResourceReader {
 
         if (file != null) {
             try {
-                return Collections.<Reader>singletonList(new FileReader(file));
+                return Collections.<Reader>singletonList(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("ERROR: Could not find resource", e);
             }
@@ -80,7 +81,7 @@ class AbstractResourceReader {
                     while (urls.hasMoreElements()) {
                         url = urls.nextElement();
                         InputStream stream = url.openStream();
-                        readers.add(new InputStreamReader(stream));
+                        readers.add(new InputStreamReader(stream, StandardCharsets.UTF_8));
                     }
                 } catch (IOException e) {
                     for (Reader r : readers) {

@@ -32,9 +32,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 
 public class APGeneratorDestinaton implements GeneratorDestination {
 
@@ -45,13 +43,13 @@ public class APGeneratorDestinaton implements GeneratorDestination {
     }
 
     @Override
-    public Writer newResource(String resourcePath) throws IOException {
-        return processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openWriter();
+    public OutputStream newResource(String resourcePath) throws IOException {
+        return processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openOutputStream();
     }
 
     @Override
-    public Reader getResource(String resourcePath) throws IOException {
-        return processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openReader(true);
+    public InputStream getResource(String resourcePath) throws IOException {
+        return processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", resourcePath).openInputStream();
     }
 
     @Override

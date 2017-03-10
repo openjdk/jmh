@@ -24,9 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 
 /**
  * Generator destination.
@@ -36,24 +34,24 @@ import java.io.Writer;
 public interface GeneratorDestination {
 
     /**
-     * Returns the Writer for the given resource.
-     * Callers are responsible for closing Writers.
+     * Returns the stream for the given resource.
+     * Callers are responsible for closing streams.
      *
      * @param resourcePath resource path
-     * @return writer usable to write the resource
+     * @return output stream to write the resource to.
      * @throws java.io.IOException if something wacked happens
      */
-    Writer newResource(String resourcePath) throws IOException;
+    OutputStream newResource(String resourcePath) throws IOException;
 
     /**
-     * Returns the Reader for the given resource.
-     * Callers are responsible for closing Readers.
+     * Returns the stream for the given resource.
+     * Callers are responsible for closing streams.
      *
      * @param resourcePath resource path
-     * @return reader usable to read the resource
+     * @return stream usable to read the resource
      * @throws java.io.IOException if something wacked happens
      */
-    Reader getResource(String resourcePath) throws IOException;
+    InputStream getResource(String resourcePath) throws IOException;
 
     /**
      * Returns the Writer for the given class.

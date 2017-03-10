@@ -28,7 +28,10 @@ import org.openjdk.jmh.annotations.CompilerControl;
 import org.openjdk.jmh.runner.CompilerHints;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.SortedSet;
@@ -97,8 +100,8 @@ class CompilerControlPlugin {
     }
 
     public void finish(GeneratorSource source, GeneratorDestination destination) {
-        try {
-            PrintWriter writer = new PrintWriter(destination.newResource(CompilerHints.LIST.substring(1)));
+        try (Writer w = new OutputStreamWriter(destination.newResource(CompilerHints.LIST.substring(1)), StandardCharsets.UTF_8)){
+            PrintWriter writer = new PrintWriter(w);
             for (String line : lines) {
                 writer.println(line);
             }

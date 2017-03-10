@@ -24,12 +24,7 @@
  */
 package org.openjdk.jmh.generators.core;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -49,23 +44,23 @@ public class FileSystemDestination implements GeneratorDestination {
     }
 
     @Override
-    public Writer newResource(String resourcePath) throws IOException {
+    public OutputStream newResource(String resourcePath) throws IOException {
         String pathName = resourceDir.getAbsolutePath() + "/" + resourcePath;
         File p = new File(pathName.substring(0, pathName.lastIndexOf("/")));
         if (!p.mkdirs() && !p.isDirectory()) {
             throw new IOException("Unable to create " + p.getAbsolutePath());
         }
-        return new FileWriter(new File(pathName));
+        return new FileOutputStream(new File(pathName));
     }
 
     @Override
-    public Reader getResource(String resourcePath) throws IOException {
+    public InputStream getResource(String resourcePath) throws IOException {
         String pathName = resourceDir.getAbsolutePath() + "/" + resourcePath;
         File p = new File(pathName.substring(0, pathName.lastIndexOf("/")));
         if (!p.isFile() && !p.exists()) {
             throw new IOException("Unable to open " + pathName);
         }
-        return new FileReader(new File(pathName));
+        return new FileInputStream(new File(pathName));
     }
 
     @Override
