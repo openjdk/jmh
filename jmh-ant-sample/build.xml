@@ -31,27 +31,34 @@ questions.
     </description>
 
     <!--
-        Point this to JMH JAR file. We default this to the result
-        of Maven build, but really, you can point it to the standalone JAR.
-    -->
-    <property name="jmh.jar" location="../jmh-core/target/jmh-core-1.0-SNAPSHOT.jar"/>
-    <property name="jmh-generator-annprocess.jar" location="../jmh-generator-annprocess/target/jmh-generator-annprocess-1.0-SNAPSHOT.jar"/>
-
-    <!--
-        Point this to joptsimple dependency. Again, we default to the one
-        Maven already resolved for us, but you can point it elsewhere.
-    -->
-    <property name="joptsimple.jar" location="${user.home}/.m2/repository/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"/>
-
-    <!--
-        Point this to commons-math dependency. Again, we default to the one
-        Maven already resolved for us, but you can point it elsewhere.
-    -->
-    <property name="commonsmath.jar" location="${user.home}/.m2/repository/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar"/>
+        Select JMH version to build with. Requires clean rebuild if changed.
+      -->
+    <property name="jmh.ver" value="1.18" />
 
     <property name="src" location="src"/>
     <property name="build" location="build"/>
     <property name="dist" location="dist"/>
+
+    <property name="jmh-core.jar" location="${build}/libs/jmh-core.jar"/>
+    <property name="jmh-generator-annprocess.jar" location="${build}/libs/jmh-generator-annprocess.jar"/>
+    <property name="joptsimple.jar" location="${build}/libs/joptsimple.jar"/>
+    <property name="commonsmath.jar" location="${build}/libs/commonsmath.jar"/>
+
+    <target name="download-libs" description="Download libraries">
+       <mkdir dir="${build}/libs/" />
+       <get src="http://central.maven.org/maven2/org/openjdk/jmh/jmh-core/${jmh.ver}/jmh-core-${jmh.ver}.jar"
+            dest="${jmh-core.jar}"
+            verbose="true" usetimestamp="true" skipexisting="true"/>
+       <get src="http://central.maven.org/maven2/org/openjdk/jmh/jmh-generator-annprocess/${jmh.ver}/jmh-generator-annprocess-${jmh.ver}.jar"
+            dest="${jmh-generator-annprocess.jar}"
+            verbose="true" usetimestamp="true" skipexisting="true"/>
+       <get src="http://central.maven.org/maven2/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"
+            dest="${joptsimple.jar}"
+            verbose="true" usetimestamp="true" skipexisting="true"/>
+       <get src="http://central.maven.org/maven2/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar"
+            dest="${commonsmath.jar}"
+            verbose="true" usetimestamp="true" skipexisting="true"/>
+    </target>
 
     <!--
         The workflow is as follows:
@@ -65,11 +72,10 @@ questions.
                 take note of the META-INF/* files in that case)
               * Filter out META-INF/services/ to disable JMH processors for the future
     -->
-    <target name="jar" description="Generate the self-contained JAR">
-        <delete dir="${build}"/>
+    <target name="jar" description="Generate the self-contained JAR" depends="download-libs">
         <mkdir dir="${build}"/>
 
-        <javac srcdir="${src}" destdir="${build}" classpath="${jmh.jar};${jmh-generator-annprocess.jar}"/>
+        <javac srcdir="${src}" destdir="${build}" classpath="${jmh-core.jar};${jmh-generator-annprocess.jar}"/>
 
         <delete dir="${dist} "/>
         <mkdir dir="${dist}"/>
@@ -78,7 +84,7 @@ questions.
             <manifest>
                 <attribute name="Main-Class" value="org.openjdk.jmh.Main"/>
             </manifest>
-            <zipfileset src="${jmh.jar}" excludes="**/META-INF/services/**" />
+            <zipfileset src="${jmh-core.jar}" excludes="**/META-INF/services/**" />
             <zipfileset src="${joptsimple.jar}" />
             <zipfileset src="${commonsmath.jar}" />
         </jar>
