@@ -41,20 +41,28 @@ public class MultisetStatistics extends AbstractStatistics {
 
     @Override
     public double getMax() {
-        double max = Double.NEGATIVE_INFINITY;
-        for (double d : values.keys()) {
-            max = Math.max(max, d);
+        if (!values.isEmpty()) {
+            double max = Double.NEGATIVE_INFINITY;
+            for (double d : values.keys()) {
+                max = Math.max(max, d);
+            }
+            return max;
+        } else {
+            return Double.NaN;
         }
-        return max;
     }
 
     @Override
     public double getMin() {
-        double min = Double.POSITIVE_INFINITY;
-        for (double d : values.keys()) {
-            min = Math.min(min, d);
+        if (!values.isEmpty()) {
+            double min = Double.POSITIVE_INFINITY;
+            for (double d : values.keys()) {
+                min = Math.min(min, d);
+            }
+            return min;
+        } else {
+            return Double.NaN;
         }
-        return min;
     }
 
     @Override
@@ -64,11 +72,15 @@ public class MultisetStatistics extends AbstractStatistics {
 
     @Override
     public double getSum() {
-        double sum = 0;
-        for (double d : values.keys()) {
-            sum += d*values.count(d);
+        if (!values.isEmpty()) {
+            double sum = 0;
+            for (double d : values.keys()) {
+                sum += d * values.count(d);
+            }
+            return sum;
+        } else {
+            return Double.NaN;
         }
-        return sum;
     }
 
     private double get(long index) {

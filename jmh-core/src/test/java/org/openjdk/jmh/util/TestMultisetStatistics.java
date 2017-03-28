@@ -59,8 +59,8 @@ public class TestMultisetStatistics {
      */
     @Test
     public strictfp void testAdd_double() {
-        ListStatistics stats = new ListStatistics();
-        stats.addValue(VALUES[0]);
+        MultisetStatistics stats = new MultisetStatistics();
+        stats.addValue(VALUES[0], 1);
         assertEquals(1, stats.getN());
         assertEquals(VALUES[0], stats.getSum(), 0.0);
         assertEquals(VALUES[0], stats.getMax(), 0.0);
@@ -229,7 +229,7 @@ public class TestMultisetStatistics {
 
     @Test
     public strictfp void testEmpty() {
-        Statistics s = new ListStatistics();
+        Statistics s = new MultisetStatistics();
 
         Assert.assertEquals(0, s.getN());
         Assert.assertEquals(Double.NaN, s.getSum());
