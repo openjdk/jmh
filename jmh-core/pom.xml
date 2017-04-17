@@ -69,10 +69,6 @@ questions.
         </dependency>
     </dependencies>
 
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildDate>${maven.build.timestamp}</buildDate>

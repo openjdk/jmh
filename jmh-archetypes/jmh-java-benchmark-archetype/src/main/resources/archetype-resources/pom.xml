@@ -45,10 +45,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
        Edit as needed.
     -->
 
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
