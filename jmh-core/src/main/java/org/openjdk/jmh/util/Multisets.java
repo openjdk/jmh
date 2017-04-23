@@ -58,7 +58,7 @@ public class Multisets {
         Collections.sort(sorted, new Comparator<T>() {
             @Override
             public int compare(T o1, T o2) {
-                return Long.valueOf(set.count(o2)).compareTo(set.count(o1));
+                return Long.compare(set.count(o2), set.count(o1));
             }
         });
         return sorted;

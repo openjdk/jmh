@@ -253,7 +253,7 @@ public class JMHSample_25_API_GA {
         @Override
         public int compareTo(Chromosome o) {
             // Order by score, descending.
-            return -Double.valueOf(score()).compareTo(o.score());
+            return -Double.compare(score(), o.score());
         }
 
         @Override

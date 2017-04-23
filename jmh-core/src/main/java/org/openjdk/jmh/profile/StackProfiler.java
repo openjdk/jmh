@@ -288,7 +288,7 @@ public class StackProfiler implements InternalProfiler {
 
                 @Override
                 public int compare(Thread.State s1, Thread.State s2) {
-                    return Long.valueOf(stateSize(s2)).compareTo(stateSize(s1));
+                    return Long.compare(stateSize(s2), stateSize(s1));
                 }
 
             });

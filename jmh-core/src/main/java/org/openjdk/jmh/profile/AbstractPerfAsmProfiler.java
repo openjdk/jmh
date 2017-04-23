@@ -389,8 +389,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         Collections.sort(regions, new Comparator<Region>() {
             @Override
             public int compare(Region o1, Region o2) {
-                return Long.valueOf(o2.getEventCount(events, mainEvent)).
-                    compareTo(o1.getEventCount(events, mainEvent));
+                return Long.compare(o2.getEventCount(events, mainEvent),
+                                    o1.getEventCount(events, mainEvent));
             }
         });
 

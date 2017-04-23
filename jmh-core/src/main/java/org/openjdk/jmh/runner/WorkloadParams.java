@@ -123,7 +123,7 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
 
         @Override
         public int compareTo(Value o) {
-            return Integer.valueOf(order).compareTo(o.order);
+            return Integer.compare(order, o.order);
         }
 
         @Override
