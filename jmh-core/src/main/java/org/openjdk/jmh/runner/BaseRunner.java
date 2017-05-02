@@ -321,8 +321,20 @@ abstract class BaseRunner {
                 beforeGcCount += bean.getCollectionCount();
             }
 
-            // this call is asynchronous, should check whether it completes
+            // Run the GC twice, and force finalization before each GCs.
+            System.runFinalization();
             System.gc();
+            System.runFinalization();
+            System.gc();
+
+            // Now make sure GC actually happened. We have to wait for two things:
+            //   a) That at least two collections happened, indicating GC work.
+            //   b) That counter updates have not happened for a while, indicating GC work had ceased.
+            //
+            // Note there is an opportunity window for a concurrent GC to happen before the first
+            // System.gc() call, which would get counted towards our GCs. This race is unresolvable
+            // unless we have GC-specific information about the collection cycles, and verify those
+            // were indeed GCs triggered by us.
 
             final int MAX_WAIT_MSEC = 20 * 1000;
 
@@ -335,6 +347,8 @@ abstract class BaseRunner {
                 }
                 return true;
             }
+
+            boolean gcHappened = false;
 
             long start = System.nanoTime();
             while (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < MAX_WAIT_MSEC) {
@@ -349,12 +363,24 @@ abstract class BaseRunner {
                     afterGcCount += bean.getCollectionCount();
                 }
 
-                if (afterGcCount > beforeGcCount) {
-                    return true;
+                if (!gcHappened) {
+                    if (afterGcCount - beforeGcCount >= 2) {
+                        gcHappened = true;
+                    }
+                } else {
+                    if (afterGcCount == beforeGcCount) {
+                        // Stable!
+                        return true;
+                    }
+                    beforeGcCount = afterGcCount;
                 }
             }
 
-            out.println("WARNING: System.gc() was invoked but couldn't detect a GC occuring, is System.gc() disabled?");
+            if (gcHappened) {
+                out.println("WARNING: System.gc() was invoked but unable to wait while GC stopped, is GC too asynchronous?");
+            } else {
+                out.println("WARNING: System.gc() was invoked but couldn't detect a GC occurring, is System.gc() disabled?");
+            }
             return false;
         }
         return false;
