@@ -46,6 +46,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class ResultFormatTest {
 
+    /**
+     * Use constant dummy for JVM instead of current JVM to compare with golden file.
+     */
+    private static final String JVM_DUMMY = "javadummy";
+
+    /**
+     * Use constant dummy for JVM instead of current JVM to compare with golden file.
+     */
+    private static final String JDK_VERSION_DUMMY = "1.8-dummy";
+
+    private static final String VM_VERSION_DUMMY = "4711";
+
+    private static final String JMH_VERSION_DUMMY = "1.18";
+
     private Collection<RunResult> getStub() {
         Collection<RunResult> results = new TreeSet<>(RunResult.DEFAULT_SORT_COMPARATOR);
 
@@ -70,8 +84,9 @@ public class ResultFormatTest {
                     Mode.Throughput,
                     ps,
                     TimeUnit.SECONDS, 1,
-                    Utils.getCurrentJvm(),
+                    JVM_DUMMY,
                     Collections.<String>emptyList(),
+                    JDK_VERSION_DUMMY, VM_VERSION_DUMMY, JMH_VERSION_DUMMY,
                     TimeValue.days(1));
 
             Collection<BenchmarkResult> benchmarkResults = new ArrayList<>();

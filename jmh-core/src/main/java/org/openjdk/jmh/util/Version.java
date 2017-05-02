@@ -39,6 +39,9 @@ public class Version {
 
     private static final int UPDATE_INTERVAL = 180;
 
+    /**
+     * @return the version, build date and update hint.
+     */
     public static String getVersion() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -46,6 +49,29 @@ public class Version {
         printVersion(pw);
         pw.close();
         return sw.toString();
+    }
+
+    /**
+     * @return only version, e.g. "1.19", or "-" if the version cannot be determined.
+     */
+    public static String getPlainVersion() {
+        Properties p = new Properties();
+        InputStream s = Version.class.getResourceAsStream("/jmh.properties");
+        if (s == null) {
+            return "-";
+        }
+        try {
+            p.load(s);
+        } catch (IOException e) {
+            return "-";
+        } finally {
+            FileUtils.safelyClose(s);
+        }
+        String version = (String) p.get("jmh.version");
+        if (version == null) {
+            return "-";
+        }
+        return version;
     }
 
     private static void printVersion(PrintWriter pw) {

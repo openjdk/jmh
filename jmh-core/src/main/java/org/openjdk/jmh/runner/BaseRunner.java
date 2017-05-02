@@ -84,16 +84,6 @@ abstract class BaseRunner {
             BenchmarkParams params = action.getParams();
             ActionMode mode = action.getMode();
 
-            String realOpts = Utils.join(ManagementFactory.getRuntimeMXBean().getInputArguments(), " ").trim();
-            if (realOpts.isEmpty()) {
-                realOpts = "<none>";
-            }
-
-            out.println("# " + Version.getVersion());
-            out.println("# VM version: " + Utils.getCurrentJvmVersion());
-            out.println("# VM invoker: " + Utils.getCurrentJvm());
-            out.println("# VM options: " + realOpts);
-
             out.startBenchmark(params);
             out.println("");
             etaBeforeBenchmark();

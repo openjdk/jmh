@@ -69,10 +69,18 @@ class JSONResultFormat implements ResultFormat {
             }
 
             pw.println("{");
+            pw.println("\"jmhVersion\" : \"" + params.getJmhVersion() + "\",");
             pw.println("\"benchmark\" : \"" + params.getBenchmark() + "\",");
             pw.println("\"mode\" : \"" + params.getMode().shortLabel() + "\",");
             pw.println("\"threads\" : " + params.getThreads() + ",");
             pw.println("\"forks\" : " + params.getForks() + ",");
+            pw.println("\"jvm\" : " + toJsonString(params.getJvm()) + ",");
+            // if empty, write an empty array.
+            pw.println("\"jvmArgs\" : [");
+            printStringArray(pw, params.getJvmArgs());
+            pw.println("],");
+            pw.println("\"jdkVersion\" : " + toJsonString(params.getJdkVersion()) + ",");
+            pw.println("\"vmVersion\" : " + toJsonString(params.getVmVersion()) + ",");
             pw.println("\"warmupIterations\" : " + params.getWarmup().getCount() + ",");
             pw.println("\"warmupTime\" : \"" + params.getWarmup().getTime() + "\",");
             pw.println("\"warmupBatchSize\" : " + params.getWarmup().getBatchSize() + ",");
@@ -234,7 +242,41 @@ class JSONResultFormat implements ResultFormat {
         return String.valueOf(d);
     }
 
-    private String tidy(String s) {
+    /**
+     * Escaping for a JSON string. Does the typical escaping of double quotes and backslash.
+     * Also escapes characters that are handled by the tidying process, so that every ASCII
+     * character makes it correctly into the JSON output. Control characters are filtered.
+     */
+    static String toJsonString(String s) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\"");
+        for (char c : s.toCharArray()) {
+            if (Character.isISOControl(c)) {
+                continue;
+            }
+            switch (c) {
+                // use & as escape character to escape the tidying
+                case '&': sb.append("&&"); break;
+                // we cannot escape to \\\\ since this would create sequences interpreted by the tidying
+                case '\\': sb.append("&/"); break;
+                case '"': sb.append("&'"); break;
+                // escape spacial chars for the tidying formatting below that might appear in a string
+                case ',': sb.append(";"); break;
+                case '[': sb.append("<"); break;
+                case ']': sb.append(">"); break;
+                case '<': sb.append("&-"); break;
+                case '>': sb.append("&="); break;
+                case ';': sb.append("&:"); break;
+                case '{': sb.append("&("); break;
+                case '}': sb.append("&)"); break;
+                default: sb.append(c);
+            }
+        }
+        sb.append("\"");
+        return sb.toString();
+    }
+
+    static String tidy(String s) {
         s = s.replaceAll("\r", "");
         s = s.replaceAll("\n", " ");
         s = s.replaceAll(",", ",\n");
@@ -250,6 +292,15 @@ class JSONResultFormat implements ResultFormat {
         s = s.replaceAll(";", ",");
         s = s.replaceAll("\\<", "[");
         s = s.replaceAll("\\>", "]");
+        // translate back from string escaping to keep all string characters intact
+        s = s.replaceAll("&:", ";");
+        s = s.replaceAll("&'", "\\\\\"");
+        s = s.replaceAll("&\\(", "{");
+        s = s.replaceAll("&\\)", "}");
+        s = s.replaceAll("&-", "<");
+        s = s.replaceAll("&=", ">");
+        s = s.replaceAll("&/", "\\\\\\\\");
+        s = s.replaceAll("&&", "&");
 
         String[] lines = s.split("\n");
 
@@ -290,6 +341,18 @@ class JSONResultFormat implements ResultFormat {
         }
         sb.append(rightBracket);
         return sb.toString();
+    }
+
+    private static void printStringArray(PrintWriter pw, Collection<String> col) {
+        boolean isFirst = true;
+        for (String e : col) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                pw.print(',');
+            }
+            pw.print(toJsonString(e));
+        }
     }
 
 }

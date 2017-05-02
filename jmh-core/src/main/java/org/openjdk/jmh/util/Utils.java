@@ -475,6 +475,49 @@ public class Utils {
     }
 
     /**
+     * We don't access the complete system properties via {@link System#getProperties()} because
+     * this would require read/write permissions to the properties. Just copy the properties we
+     * want to record in the result.
+     *
+     * @return Copy of system properties we want to record in the results.
+     */
+    public static Properties getRecordedSystemProperties() {
+        String[] names = new String[]{"java.version", "java.vm.version"};
+        Properties p = new Properties();
+        for (String i : names) {
+            p.setProperty(i, System.getProperty(i));
+        }
+        return p;
+    }
+
+    public static Properties readPropertiesFromCommand(List<String> cmd) {
+        Properties out = new Properties();
+        try {
+            Process p = new ProcessBuilder(cmd).start();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            // drain streams, else we might lock up
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), System.err);
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
+
+            errDrainer.start();
+            outDrainer.start();
+
+            int err = p.waitFor();
+
+            errDrainer.join();
+            outDrainer.join();
+            out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        } catch (InterruptedException ex) {
+            throw new IllegalStateException(ex);
+        }
+        return out;
+    }
+
+    /**
      * Adapts Iterator for Iterable.
      * Can be iterated only once!
      *

@@ -186,9 +186,8 @@ public abstract class Result<T extends Result<T>> implements Serializable {
     }
 
     /**
-     * Get derivative results for this result. These do not participate in aggregation,
-     * and computed on the spot from the aggregated result.
-     * @return
+     * @return derivative results for this result. These do not participate in aggregation,
+     *         and computed on the spot from the aggregated result.
      */
     protected Collection<? extends Result> getDerivativeResults() {
         return Collections.emptyList();

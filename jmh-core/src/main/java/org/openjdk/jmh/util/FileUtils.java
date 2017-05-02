@@ -47,7 +47,7 @@ public class FileUtils {
      *
      * @param suffix suffix
      * @return temp file
-     * @throws IOException
+     * @throws IOException if things go crazy
      */
     public static TempFile weakTempFile(String suffix) throws IOException {
         return TEMP_FILE_MANAGER.create(suffix);
@@ -63,7 +63,7 @@ public class FileUtils {
      *
      * @param suffix suffix
      * @return temporary file
-     * @throws IOException
+     * @throws IOException if things go crazy
      */
     public static File tempFile(String suffix) throws IOException {
         File file = File.createTempFile("jmh", suffix);

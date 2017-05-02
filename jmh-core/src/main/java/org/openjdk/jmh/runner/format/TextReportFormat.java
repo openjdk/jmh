@@ -56,6 +56,16 @@ class TextReportFormat extends AbstractOutputFormat {
 
     @Override
     public void startBenchmark(BenchmarkParams params) {
+        String opts = Utils.join(params.getJvmArgs(), " ");
+        if (opts.trim().isEmpty()) {
+            opts = "<none>";
+        }
+
+        println("# JMH version: " + params.getJmhVersion());
+        println("# VM version:  JDK " + params.getJdkVersion() + ", VM " + params.getVmVersion());
+        println("# VM invoker:  " + params.getJvm());
+        println("# VM options:  " + opts);
+
         IterationParams warmup = params.getWarmup();
         if (warmup.getCount() > 0) {
             out.println("# Warmup: " + warmup.getCount() + " iterations, " +

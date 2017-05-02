@@ -288,6 +288,8 @@ public final class Blackhole extends BlackholeL4 {
      *
      * WARNING: This method should only be called by the infrastructure code, in clearly understood cases.
      * Even though it is public, it is not supposed to be called by users.
+     *
+     * @param challengeResponse arbitrary string
      */
     public void evaporate(String challengeResponse) {
         if (!challengeResponse.equals("Yes, I am Stephen Hawking, and know a thing or two about black holes.")) {

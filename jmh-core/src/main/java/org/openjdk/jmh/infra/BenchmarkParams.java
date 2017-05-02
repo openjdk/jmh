@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.WorkloadParams;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
+import org.openjdk.jmh.util.Version;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -64,20 +65,23 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
     }
 
     public BenchmarkParams(String benchmark, String generatedTarget, boolean synchIterations,
-                             int threads, int[] threadGroups, Collection<String> threadGroupLabels,
-                             int forks, int warmupForks,
-                             IterationParams warmup, IterationParams measurement,
-                             Mode mode, WorkloadParams params,
-                             TimeUnit timeUnit, int opsPerInvocation,
-                             String jvm, Collection<String> jvmArgs,
-                             TimeValue timeout) {
+                           int threads, int[] threadGroups, Collection<String> threadGroupLabels,
+                           int forks, int warmupForks,
+                           IterationParams warmup, IterationParams measurement,
+                           Mode mode, WorkloadParams params,
+                           TimeUnit timeUnit, int opsPerInvocation,
+                           String jvm, Collection<String> jvmArgs,
+                           String jdkVersion, String vmVersion, String jmhVersion,
+                           TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, threadGroupLabels,
                 forks, warmupForks,
                 warmup, measurement,
                 mode, params,
                 timeUnit, opsPerInvocation,
-                jvm, jvmArgs, timeout);
+                jvm, jvmArgs,
+                jdkVersion, vmVersion, jmhVersion,
+                timeout);
     }
 }
 
@@ -92,6 +96,7 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              String jvm, Collection<String> jvmArgs,
+                             String jdkVersion, String vmVersion, String jmhVersion,
                              TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, threadGroupLabels,
@@ -100,6 +105,7 @@ abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
                 mode, params,
                 timeUnit, opsPerInvocation,
                 jvm, jvmArgs,
+                jdkVersion, vmVersion, jmhVersion,
                 timeout);
     }
 }
@@ -131,6 +137,7 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              String jvm, Collection<String> jvmArgs,
+                             String jdkVersion, String vmVersion, String jmhVersion,
                              TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, threadGroupLabels,
@@ -139,6 +146,7 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
                 mode, params,
                 timeUnit, opsPerInvocation,
                 jvm, jvmArgs,
+                jdkVersion, vmVersion, jmhVersion,
                 timeout);
     }
 }
@@ -185,6 +193,9 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     protected final int opsPerInvocation;
     protected final String jvm;
     protected final Collection<String> jvmArgs;
+    protected final String jdkVersion;
+    protected final String jmhVersion;
+    protected final String vmVersion;
     protected final TimeValue timeout;
 
     public BenchmarkParamsL2(String benchmark, String generatedTarget, boolean synchIterations,
@@ -194,6 +205,7 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
                              Mode mode, WorkloadParams params,
                              TimeUnit timeUnit, int opsPerInvocation,
                              String jvm, Collection<String> jvmArgs,
+                             String jdkVersion, String vmVersion, String jmhVersion,
                              TimeValue timeout) {
         this.benchmark = benchmark;
         this.generatedTarget = generatedTarget;
@@ -211,6 +223,9 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         this.opsPerInvocation = opsPerInvocation;
         this.jvm = jvm;
         this.jvmArgs = jvmArgs;
+        this.jdkVersion = jdkVersion;
+        this.vmVersion = vmVersion;
+        this.jmhVersion = jmhVersion;
         this.timeout = timeout;
     }
 
@@ -333,8 +348,19 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
         return generatedTarget;
     }
 
+    /**
+     * @return JVM executable path
+     */
     public String getJvm() {
         return jvm;
+    }
+
+    /**
+     * @return JMH version identical to {@link Version#getPlainVersion()}, but output format should
+     *          get there input via bean for testing purposes.
+     */
+    public String getJmhVersion() {
+        return jmhVersion;
     }
 
     /**
@@ -342,6 +368,22 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
      */
     public Collection<String> getJvmArgs() {
         return Collections.unmodifiableCollection(jvmArgs);
+    }
+
+    /**
+     * @return version information as returned by the effective target JVM,
+     *         via system property {@code java.version} and {@code java.vm.version}
+     */
+    public String getJdkVersion() {
+        return jdkVersion;
+    }
+
+    /**
+     * @return version information as returned by the effective target JVM,
+     *         via system property {@code java.vm.version}
+     */
+    public String getVmVersion() {
+        return vmVersion;
     }
 
     @Override

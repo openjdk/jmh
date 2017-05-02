@@ -465,6 +465,13 @@ public class Runner extends BaseRunner {
         String jvm = options.getJvm().orElse(
                 benchmark.getJvm().orElse(Utils.getCurrentJvm()));
 
+        Properties targetProperties;
+        if (jvm.equals(Utils.getCurrentJvm())) {
+            targetProperties = Utils.getRecordedSystemProperties();
+        } else {
+            targetProperties = Utils.readPropertiesFromCommand(getPrintPropertiesCommand(jvm));
+        }
+
         Collection<String> jvmArgs = new ArrayList<>();
 
         jvmArgs.addAll(options.getJvmArgsPrepend().orElse(
@@ -479,11 +486,15 @@ public class Runner extends BaseRunner {
         TimeValue timeout = options.getTimeout().orElse(
                 benchmark.getTimeout().orElse(Defaults.TIMEOUT));
 
+        String jdkVersion = targetProperties.getProperty("java.version");
+        String vmVersion = targetProperties.getProperty("java.vm.version");
         return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
                 threads, threadGroups, benchmark.getThreadGroupLabels().orElse(Collections.<String>emptyList()),
                 forks, warmupForks,
                 warmup, measurement, benchmark.getMode(), benchmark.getWorkloadParams(), timeUnit, opsPerInvocation,
-                jvm, jvmArgs, timeout);
+                jvm, jvmArgs,
+                jdkVersion, vmVersion, Version.getPlainVersion(),
+                timeout);
     }
 
     private List<WorkloadParams> explodeAllParams(BenchmarkListEntry br) throws RunnerException {
@@ -599,17 +610,6 @@ public class Runner extends BaseRunner {
             printOut = forcePrint || printOut;
             printErr = forcePrint || printErr;
 
-            List<String> versionString = getVersionMainCommand(params);
-
-            String opts = Utils.join(params.getJvmArgs(), " ");
-            if (opts.trim().isEmpty()) {
-                opts = "<none>";
-            }
-
-            out.println("# " + Version.getVersion());
-            out.print("# VM version: " + Utils.join(Utils.runWith(versionString), "\n"));
-            out.println("# VM invoker: " + params.getJvm());
-            out.println("# VM options: " + opts);
             out.startBenchmark(params);
             out.println("");
 
@@ -832,14 +832,11 @@ public class Runner extends BaseRunner {
         return command;
     }
 
-    /**
-     * @return
-     */
-    List<String> getVersionMainCommand(BenchmarkParams benchmark) {
+    private List<String> getPrintPropertiesCommand(String jvm) {
         List<String> command = new ArrayList<>();
 
         // use supplied jvm, if given
-        command.add(benchmark.getJvm());
+        command.add(jvm);
 
         // assemble final process command
         command.add("-cp");
@@ -849,7 +846,7 @@ public class Runner extends BaseRunner {
             command.add(System.getProperty("java.class.path"));
         }
 
-        command.add(VersionMain.class.getName());
+        command.add(PrintPropertiesMain.class.getName());
 
         return command;
     }
