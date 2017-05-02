@@ -28,14 +28,16 @@ import java.io.Serializable;
 
 public class BenchmarkResultMetaData implements Serializable {
 
-    private final long startTime;
+    private long startTime;
+    private final long warmupTime;
     private final long measurementTime;
     private final long stopTime;
     private final long warmupOps;
     private final long measurementOps;
 
-    public BenchmarkResultMetaData(long startTime, long measurementTime, long stopTime, long warmupOps, long measurementOps) {
-        this.startTime = startTime;
+    public BenchmarkResultMetaData(long warmupTime, long measurementTime, long stopTime, long warmupOps, long measurementOps) {
+        this.startTime = Long.MIN_VALUE;
+        this.warmupTime = warmupTime;
         this.measurementTime = measurementTime;
         this.stopTime = stopTime;
         this.warmupOps = warmupOps;
@@ -43,7 +45,14 @@ public class BenchmarkResultMetaData implements Serializable {
     }
 
     public long getStartTime() {
+        if (startTime == Long.MIN_VALUE) {
+            throw new IllegalStateException("Unset start time");
+        }
         return startTime;
+    }
+
+    public long getWarmupTime() {
+        return warmupTime;
     }
 
     public long getMeasurementTime() {
@@ -60,5 +69,9 @@ public class BenchmarkResultMetaData implements Serializable {
 
     public long getWarmupOps() {
         return warmupOps;
+    }
+
+    public void adjustStart(long startTime) {
+        this.startTime = startTime;
     }
 }

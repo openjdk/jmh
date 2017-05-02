@@ -344,7 +344,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         long skipMs;
         if (delayMsec == -1) { // not set
-            skipMs = ProfilerUtils.warmupDelayMs(br);
+            skipMs = ProfilerUtils.measurementDelayMs(br);
         } else {
             skipMs = delayMsec;
         }

@@ -82,7 +82,7 @@ class ProfilerUtils {
         return set;
     }
 
-    public static long warmupDelayMs(BenchmarkResult br) {
+    public static long measurementDelayMs(BenchmarkResult br) {
         BenchmarkResultMetaData md = br.getMetadata();
         if (md != null) {
             // try to ask harness itself:

@@ -76,7 +76,7 @@ public class SafepointsProfiler implements ExternalProfiler {
         long measuredTimeMs = ProfilerUtils.measuredTimeMs(br);
         long measuredTimeNs = TimeUnit.MILLISECONDS.toNanos(measuredTimeMs);
 
-        long measureFrom = TimeUnit.MILLISECONDS.toNanos(ProfilerUtils.warmupDelayMs(br));
+        long measureFrom = TimeUnit.MILLISECONDS.toNanos(ProfilerUtils.measurementDelayMs(br));
         long measureTo = measureFrom + measuredTimeNs;
 
         List<ParsedData> ds = new ArrayList<>();

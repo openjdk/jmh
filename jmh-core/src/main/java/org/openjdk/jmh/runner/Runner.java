@@ -663,11 +663,17 @@ public class Runner extends BaseRunner {
                     }
                 }
 
+                long startTime = System.currentTimeMillis();
+
                 List<IterationResult> result = doFork(server, forkedString, stdOut.file(), stdErr.file(), printOut, printErr);
                 if (!result.isEmpty()) {
                     long pid = server.getClientPid();
 
                     BenchmarkResultMetaData md = server.getMetadata();
+                    if (md != null) {
+                        md.adjustStart(startTime);
+                    }
+
                     BenchmarkResult br = new BenchmarkResult(params, result, md);
 
                     if (!profilersRev.isEmpty()) {

@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class LinuxPerfNormProfiler implements ExternalProfiler {
 
@@ -188,7 +187,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
             long skipMs;
             if (delayMs == -1) { // not set
-                skipMs = ProfilerUtils.warmupDelayMs(br);
+                skipMs = ProfilerUtils.measurementDelayMs(br);
             } else {
                 skipMs = delayMs;
             }

@@ -84,6 +84,8 @@ abstract class BaseRunner {
             BenchmarkParams params = action.getParams();
             ActionMode mode = action.getMode();
 
+            long startTime = System.currentTimeMillis();
+
             out.startBenchmark(params);
             out.println("");
             etaBeforeBenchmark();
@@ -109,7 +111,12 @@ abstract class BaseRunner {
             doSingle(params, mode, acceptor);
 
             if (!res.isEmpty()) {
-                BenchmarkResult br = new BenchmarkResult(params, res, mds.get(0));
+                BenchmarkResultMetaData md = mds.get(0);
+                if (md != null) {
+                    md.adjustStart(startTime);
+                }
+
+                BenchmarkResult br = new BenchmarkResult(params, res, md);
                 results.put(params, br);
                 out.endBenchmark(br);
             }
@@ -237,7 +244,7 @@ abstract class BaseRunner {
     }
 
     protected void runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler, IterationResultAcceptor acceptor) {
-        long startTime = System.currentTimeMillis();
+        long warmupTime = System.currentTimeMillis();
 
         long allWarmup = 0;
         long allMeasurement = 0;
@@ -285,7 +292,7 @@ abstract class BaseRunner {
         long stopTime = System.currentTimeMillis();
 
         BenchmarkResultMetaData md = new BenchmarkResultMetaData(
-                startTime, measurementTime, stopTime,
+                warmupTime, measurementTime, stopTime,
                 allWarmup, allMeasurement);
 
         if (acceptor != null) {
