@@ -89,4 +89,14 @@ public class SafepointsProfilerTest {
         Assert.assertEquals(        51_600L, data.ttspTime);
     }
 
+    @Test
+    public void parseJDK9b140_Whitespace() {
+        SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
+                "[71,633s][info][safepoint    ] Total time for which application threads were stopped: 0,0359611 seconds, Stopping threads took: 0.0000516 seconds");
+        Assert.assertNotNull(data);
+        Assert.assertEquals(71_633_000_000L, data.timestamp);
+        Assert.assertEquals(    35_961_100L, data.stopTime);
+        Assert.assertEquals(        51_600L, data.ttspTime);
+    }
+
 }

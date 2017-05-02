@@ -207,7 +207,7 @@ public class SafepointsProfiler implements ExternalProfiler {
             Pattern.compile("([0-9\\.,]*): (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
 
     private static final Pattern JDK_9_LINE =
-            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint\\] (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
+            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
 
     /**
      * Parse the line into the triplet. This is tested with unit tests, make sure to
@@ -244,8 +244,8 @@ public class SafepointsProfiler implements ExternalProfiler {
                 return new ParsedData(
                         9,
                         parseNs(m.group(1)),
-                        parseNs(m.group(3)),
-                        parseNs(m.group(5))
+                        parseNs(m.group(4)),
+                        parseNs(m.group(6))
                 );
             }
         }
