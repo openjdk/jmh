@@ -207,7 +207,7 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optJvmArgsAppend = parser.accepts("jvmArgsAppend", "Same as jvmArgs, but append these " +
-                "options before the already given JVM args.")
+                "options after the already given JVM args.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optJvmArgsPrepend = parser.accepts("jvmArgsPrepend", "Same as jvmArgs, but prepend these " +
