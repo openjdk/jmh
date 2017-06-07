@@ -225,8 +225,12 @@ public class Runner extends BaseRunner {
     }
 
     private Collection<RunResult> internalRun() throws RunnerException {
+        Set<String> profilerClasses = new HashSet<>();
         boolean someProfilersFail = false;
         for (ProfilerConfig p : options.getProfilers()) {
+            if (!profilerClasses.add(p.getKlass())) {
+                throw new RunnerException("Cannot instantiate the same profiler more than once: " + p.getKlass());
+            }
             try {
                 ProfilerFactory.getProfilerOrException(p);
             } catch (ProfilerException e) {
