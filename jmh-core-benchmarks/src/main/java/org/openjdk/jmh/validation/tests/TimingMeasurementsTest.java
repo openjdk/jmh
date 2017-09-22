@@ -24,6 +24,10 @@
  */
 package org.openjdk.jmh.validation.tests;
 
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.benchmarks.CurrentTimeMillisTimerBench;
+import org.openjdk.jmh.benchmarks.EmptyBench;
 import org.openjdk.jmh.benchmarks.NanoTimerBench;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
@@ -50,36 +54,88 @@ public class TimingMeasurementsTest implements ValidationTest {
                 80, 2);
         pw.println();
 
-        {
-            Options opts = new OptionsBuilder()
-                    .parent(parent)
-                    .include(NanoTimerBench.class.getCanonicalName() + ".latency$")
-                    .verbosity(VerboseMode.SILENT)
-                    .build();
+        doNanoTime(pw, parent, "latency", false);
+        doNanoTime(pw, parent, "latency", true);
 
-            RunResult result = new Runner(opts).runSingle();
-            Result r = result.getPrimaryResult();
+        pw.println();
 
-            pw.printf("%50s", "System.nanoTime latency: ");
-            pw.flush();
-            pw.printf("%.2f \u00b1 %.2f ns\n", r.getScore(), r.getScoreError());
+        doCurrentTimeMillis(pw, parent, "latency", false);
+        doCurrentTimeMillis(pw, parent, "latency", true);
+
+        pw.println();
+
+        doNanoTime(pw, parent, "granularity", false);
+        doNanoTime(pw, parent, "granularity", true);
+
+        pw.println();
+
+        doCurrentTimeMillis(pw, parent, "granularity", false);
+        doCurrentTimeMillis(pw, parent, "granularity", true);
+
+        pw.println();
+
+        for (Mode mode : Mode.values()) {
+            if (mode == Mode.All) continue;
+            doEmpty(pw, parent, mode, false);
         }
 
-        {
-            Options opts = new OptionsBuilder()
-                    .parent(parent)
-                    .include(NanoTimerBench.class.getCanonicalName() + ".granularity$")
-                    .verbosity(VerboseMode.SILENT)
-                    .build();
+        pw.println();
 
-            RunResult result = new Runner(opts).runSingle();
-            Result r = result.getPrimaryResult();
-
-            pw.printf("%50s", "System.nanoTime granularity: ");
-            pw.flush();
-            pw.printf("%.2f \u00b1 %.2f ns\n", r.getScore(), r.getScoreError());
+        for (Mode mode : Mode.values()) {
+            if (mode == Mode.All) continue;
+            doEmpty(pw, parent, mode, true);
         }
 
         pw.println();
     }
+
+    private void doEmpty(PrintWriter pw, Options parent, Mode mode, boolean max) throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .parent(parent)
+                .include(EmptyBench.class.getCanonicalName())
+                .verbosity(VerboseMode.SILENT)
+                .threads(max ? Threads.MAX : 1)
+                .mode(mode)
+                .build();
+
+        RunResult result = new Runner(opts).runSingle();
+        Result r = result.getPrimaryResult();
+
+        pw.printf("%50s", mode + ", empty benchmark, " + (max ? "max thread" : "one thread") + ": ");
+        pw.flush();
+        pw.printf("%10.2f \u00b1 %10.2f %s\n", r.getScore(), r.getScoreError(), r.getScoreUnit());
+    }
+
+    void doNanoTime(PrintWriter pw, Options parent, String type, boolean max) throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .parent(parent)
+                .include(NanoTimerBench.class.getCanonicalName() + "." + type + "$")
+                .verbosity(VerboseMode.SILENT)
+                .threads(max ? Threads.MAX : 1)
+                .build();
+
+        RunResult result = new Runner(opts).runSingle();
+        Result r = result.getPrimaryResult();
+
+        pw.printf("%50s", "nanoTime() " + type + ", " + (max ? "max thread" : "one thread") + ": ");
+        pw.flush();
+        pw.printf("%10.2f \u00b1 %10.2f ns\n", r.getScore(), r.getScoreError());
+    }
+
+    void doCurrentTimeMillis(PrintWriter pw, Options parent, String type, boolean max) throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .parent(parent)
+                .include(CurrentTimeMillisTimerBench.class.getCanonicalName() + "." + type + "$")
+                .verbosity(VerboseMode.SILENT)
+                .threads(max ? Threads.MAX : 1)
+                .build();
+
+        RunResult result = new Runner(opts).runSingle();
+        Result r = result.getPrimaryResult();
+
+        pw.printf("%50s", "currentTimeMillis() " + type + ", " + (max ? "max thread" : "one thread") + ": ");
+        pw.flush();
+        pw.printf("%10.2f \u00b1 %10.2f ns\n", r.getScore(), r.getScoreError());
+    }
+
 }
