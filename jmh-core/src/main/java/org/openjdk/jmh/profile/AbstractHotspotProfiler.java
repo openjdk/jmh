@@ -27,26 +27,27 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
-import sun.management.counter.Counter;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 abstract class AbstractHotspotProfiler implements InternalProfiler {
 
+    private final Method getListMethod;
+    private final Object bean;
+
     private Map<String, Long> prevs;
 
-    /**
-     * Returns internal counters for specific MXBean
-     * @return list of internal counters.
-     */
-    protected abstract Collection<Counter> getCounters();
-
-    public AbstractHotspotProfiler() throws ProfilerException {
+    public AbstractHotspotProfiler(String beanName) throws ProfilerException {
         try {
-            Class.forName("sun.management.ManagementFactoryHelper");
-        } catch (ClassNotFoundException e) {
-            throw new ProfilerException("Class not found: " + e.getMessage() + ", are you running HotSpot VM?");
+            Class<?> helper = Class.forName("sun.management.ManagementFactoryHelper");
+            bean = helper.getMethod("get" + beanName).invoke(null);
+            getListMethod = bean.getClass().getMethod("getInternalRuntimeCounters");
+            getListMethod.setAccessible(true);
+            getListMethod.invoke(bean); // try
+        } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new ProfilerException("Problem initializing profiler (" + e.getMessage() + "), are you running HotSpot VM?");
         }
     }
 
@@ -63,7 +64,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         prevs = new HashMap<>();
-        for (Counter counter : getCounters()) {
+        for (HotspotCounter counter : getCounters()) {
             prevs.put(counter.getName(), convert(counter.getValue()));
         }
     }
@@ -79,7 +80,7 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
     protected HotspotInternalResult counters() {
         Map<String, Long> difference = new TreeMap<>();
         Map<String, Long> current = new TreeMap<>();
-        for (Counter counter : getCounters()) {
+        for (HotspotCounter counter : getCounters()) {
             Long prev = prevs.get(counter.getName());
             if (prev != null) {
                 long diff = convert(counter.getValue()) - prev;
@@ -91,12 +92,19 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
         return new HotspotInternalResult(current, difference);
     }
 
-    public static <T> T getInstance(String name) {
+    public List<HotspotCounter> getCounters() {
         try {
-            Object o = Class.forName("sun.management.ManagementFactoryHelper").getMethod("get" + name).invoke(null);
-            return (T) o;
-        } catch (ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new IllegalStateException("Should not be here");
+            List<HotspotCounter> counters = new ArrayList<>();
+            for (Object c : (List) getListMethod.invoke(bean)) {
+                try {
+                    counters.add(new HotspotCounter(c));
+                } catch (UnsupportedOperationException e) {
+                    // ignore this counter
+                }
+            }
+            return counters;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Should not be here", e);
         }
     }
 
@@ -125,4 +133,71 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
             return "difference: " + diff.toString();
         }
     }
+
+    /**
+     * Reflective proxy for Hotspot counters to dodge compatibility problems.
+     */
+    private static class HotspotCounter {
+        private static final Method GET_VALUE;
+        private static final Method GET_NAME;
+
+        static {
+            Method name = null;
+            Method value = null;
+            try {
+                Class<?> cntClass = Class.forName("sun.management.counter.Counter");
+                if (cntClass != null) {
+                    try {
+                        name = cntClass.getMethod("getName");
+                    } catch (NoSuchMethodException e) {
+                        // do nothing
+                    }
+                    try {
+                        value = cntClass.getMethod("getValue");
+                    } catch (NoSuchMethodException e) {
+                        // do nothing
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                // no nothing
+            }
+
+            GET_NAME = name;
+            GET_VALUE = value;
+        }
+
+        private final Object proxy;
+
+        public HotspotCounter(Object proxy) throws UnsupportedOperationException {
+            this.proxy = proxy;
+
+            // Try these right now
+            if (GET_NAME == null || GET_VALUE == null)  {
+                throw new UnsupportedOperationException();
+            }
+            try {
+                String k = (String) GET_NAME.invoke(proxy);
+                Object v = GET_VALUE.invoke(proxy);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new UnsupportedOperationException(e);
+            }
+        }
+
+        public String getName() {
+            try {
+                return (String) GET_NAME.invoke(proxy);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Cannot be here");
+            }
+        }
+
+        public Object getValue() {
+            try {
+                return GET_VALUE.invoke(proxy);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Cannot be here");
+            }
+        }
+    }
+
 }

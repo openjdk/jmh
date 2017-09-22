@@ -24,19 +24,10 @@
  */
 package org.openjdk.jmh.profile;
 
-import sun.management.HotspotMemoryMBean;
-import sun.management.counter.Counter;
-
-import java.util.List;
-
 public class HotspotMemoryProfiler extends AbstractHotspotProfiler {
 
     public HotspotMemoryProfiler() throws ProfilerException {
-    }
-
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotMemoryMBean>getInstance("HotspotMemoryMBean").getInternalMemoryCounters();
+        super("HotspotMemoryMBean");
     }
 
     @Override

@@ -24,19 +24,10 @@
  */
 package org.openjdk.jmh.profile;
 
-import sun.management.HotspotClassLoadingMBean;
-import sun.management.counter.Counter;
-
-import java.util.List;
-
 public class HotspotClassloadingProfiler extends AbstractHotspotProfiler {
 
     public HotspotClassloadingProfiler() throws ProfilerException {
-    }
-
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotClassLoadingMBean>getInstance("HotspotClassLoadingMBean").getInternalClassLoadingCounters();
+        super("HotspotClassLoadingMBean");
     }
 
     @Override

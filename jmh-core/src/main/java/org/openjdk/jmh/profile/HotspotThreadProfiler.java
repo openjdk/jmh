@@ -27,22 +27,15 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
-import sun.management.HotspotThreadMBean;
-import sun.management.counter.Counter;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public class HotspotThreadProfiler extends AbstractHotspotProfiler {
 
     public HotspotThreadProfiler() throws ProfilerException {
-    }
-
-    @Override
-    public List<Counter> getCounters() {
-        return AbstractHotspotProfiler.<HotspotThreadMBean>getInstance("HotspotThreadMBean").getInternalThreadingCounters();
+        super("HotspotThreadMBean");
     }
 
     @Override

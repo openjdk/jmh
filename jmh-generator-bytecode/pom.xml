@@ -68,7 +68,6 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
                 <configuration>
                     <compilerVersion>1.7</compilerVersion>
                     <source>1.7</source>
@@ -80,7 +79,6 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.14.1</version>
                 <configuration>
                     <useFile>false</useFile>
                 </configuration>
@@ -89,7 +87,6 @@ questions.
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
-                <version>1.10.b1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -111,7 +108,6 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
