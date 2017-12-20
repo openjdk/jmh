@@ -35,7 +35,7 @@ import java.util.Map;
 public class HotspotThreadProfiler extends AbstractHotspotProfiler {
 
     public HotspotThreadProfiler() throws ProfilerException {
-        super("HotspotThreadMBean");
+        super("HotspotThreadMBean", "getInternalThreadingCounters");
     }
 
     @Override

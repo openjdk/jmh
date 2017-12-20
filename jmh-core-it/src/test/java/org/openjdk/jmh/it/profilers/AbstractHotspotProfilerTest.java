@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,16 +22,27 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.profile;
+package org.openjdk.jmh.it.profilers;
 
-public class HotspotClassloadingProfiler extends AbstractHotspotProfiler {
+import org.openjdk.jmh.annotations.*;
 
-    public HotspotClassloadingProfiler() throws ProfilerException {
-        super("HotspotClassLoadingMBean", "getInternalClassLoadingCounters");
+import java.util.concurrent.TimeUnit;
+
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Fork(1) // 0 to enable debugging
+@Warmup(iterations = 5)
+@Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@BenchmarkMode(Mode.AverageTime)
+public class AbstractHotspotProfilerTest {
+
+    @Benchmark
+    public Object alloc() {
+        return new Object();
     }
 
-    @Override
-    public String getDescription() {
-        return "HotSpot (tm) classloader profiling via implementation-specific MBeans";
+    boolean isHotspotVM() {
+        String name = System.getProperty("java.vm.name");
+        return (name.contains("OpenJDK") || name.contains("HotSpot"));
     }
+
 }

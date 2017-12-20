@@ -39,11 +39,11 @@ abstract class AbstractHotspotProfiler implements InternalProfiler {
 
     private Map<String, Long> prevs;
 
-    public AbstractHotspotProfiler(String beanName) throws ProfilerException {
+    public AbstractHotspotProfiler(String beanName, String methodName) throws ProfilerException {
         try {
             Class<?> helper = Class.forName("sun.management.ManagementFactoryHelper");
             bean = helper.getMethod("get" + beanName).invoke(null);
-            getListMethod = bean.getClass().getMethod("getInternalRuntimeCounters");
+            getListMethod = bean.getClass().getMethod(methodName);
             getListMethod.setAccessible(true);
             getListMethod.invoke(bean); // try
         } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

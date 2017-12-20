@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,16 +22,33 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.profile;
+package org.openjdk.jmh.it.profilers;
 
-public class HotspotClassloadingProfiler extends AbstractHotspotProfiler {
+import junit.framework.Assert;
+import org.junit.Test;
+import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.profile.HotspotRuntimeProfiler;
+import org.openjdk.jmh.profile.HotspotThreadProfiler;
+import org.openjdk.jmh.profile.ProfilerException;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-    public HotspotClassloadingProfiler() throws ProfilerException {
-        super("HotspotClassLoadingMBean", "getInternalClassLoadingCounters");
-    }
+public class HotspotThreadProfilerTest extends AbstractHotspotProfilerTest {
 
-    @Override
-    public String getDescription() {
-        return "HotSpot (tm) classloader profiling via implementation-specific MBeans";
+    @Test
+    public void test() throws RunnerException {
+        try {
+            new HotspotThreadProfiler();
+        } catch (ProfilerException e) {
+            Assert.assertFalse("HotSpot VMs should support this profiler", isHotspotVM());
+            return;
+        }
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(HotspotThreadProfiler.class)
+                .build();
+        new Runner(opts).run();
     }
 }

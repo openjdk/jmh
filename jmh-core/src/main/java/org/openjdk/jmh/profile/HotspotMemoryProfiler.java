@@ -27,7 +27,7 @@ package org.openjdk.jmh.profile;
 public class HotspotMemoryProfiler extends AbstractHotspotProfiler {
 
     public HotspotMemoryProfiler() throws ProfilerException {
-        super("HotspotMemoryMBean");
+        super("HotspotMemoryMBean", "getInternalMemoryCounters");
     }
 
     @Override

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class HotspotCompilationProfiler extends AbstractHotspotProfiler {
 
     public HotspotCompilationProfiler() throws ProfilerException {
-        super("HotspotCompilationMBean");
+        super("HotspotCompilationMBean", "getInternalCompilerCounters");
     }
 
     @Override
