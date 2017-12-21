@@ -619,34 +619,21 @@ public class Runner extends BaseRunner {
 
             int forkCount = params.getForks();
             int warmupForkCount = params.getWarmupForks();
-            if (warmupForkCount > 0) {
-                for (int i = 0; i < warmupForkCount; i++) {
-                    List<String> forkedString  = getForkedMainCommand(params, profilers, server.getHost(), server.getPort());
-                    out.verbosePrintln("Warmup forking using command: " + forkedString);
+            int totalForks = warmupForkCount + forkCount;
 
-                    etaBeforeBenchmark();
-                    out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
-
-                    TempFile stdErr = FileUtils.weakTempFile("stderr");
-                    TempFile stdOut = FileUtils.weakTempFile("stdout");
-
-                    doFork(server, forkedString, stdOut.file(), stdErr.file(), printOut, printErr);
-
-                    etaAfterBenchmark(params);
-                    out.println("");
-
-                    // we know these are not needed anymore, proactively delete
-                    stdErr.delete();
-                    stdOut.delete();
-                }
-            }
-
-            for (int i = 0; i < forkCount; i++) {
+            for (int i = 0; i < totalForks; i++) {
+                boolean warmupFork = (i < warmupForkCount);
                 List<String> forkedString  = getForkedMainCommand(params, profilers, server.getHost(), server.getPort());
-                out.verbosePrintln("Forking using command: " + forkedString);
 
                 etaBeforeBenchmark();
-                out.println("# Fork: " + (i + 1) + " of " + forkCount);
+
+                if (warmupFork) {
+                    out.verbosePrintln("Warmup forking using command: " + forkedString);
+                    out.println("# Warmup Fork: " + (i + 1) + " of " + warmupForkCount);
+                } else {
+                    out.verbosePrintln("Forking using command: " + forkedString);
+                    out.println("# Fork: " + (i + 1 - warmupForkCount) + " of " + forkCount);
+                }
 
                 TempFile stdErr = FileUtils.weakTempFile("stderr");
                 TempFile stdOut = FileUtils.weakTempFile("stdout");
@@ -691,7 +678,9 @@ public class Runner extends BaseRunner {
                         out.println("");
                     }
 
-                    results.put(params, br);
+                    if (!warmupFork) {
+                        results.put(params, br);
+                    }
                 }
 
                 etaAfterBenchmark(params);
