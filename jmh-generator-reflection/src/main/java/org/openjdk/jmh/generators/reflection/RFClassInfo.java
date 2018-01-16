@@ -162,7 +162,7 @@ class RFClassInfo implements ClassInfo {
     public Collection<String> getEnumConstants() {
         Collection<String> res = new ArrayList<>();
         for (Object cnst : klass.getEnumConstants()) {
-            res.add(cnst.toString());
+            res.add(((Enum<?>) cnst).name());
         }
         return res;
     }

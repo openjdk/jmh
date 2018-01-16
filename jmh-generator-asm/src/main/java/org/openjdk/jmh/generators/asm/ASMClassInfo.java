@@ -221,7 +221,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
             try {
                 Collection<String> res = new ArrayList<>();
                 for (Object cnst : Class.forName(origQualifiedName, false, Thread.currentThread().getContextClassLoader()).getEnumConstants()) {
-                    res.add(cnst.toString());
+                    res.add(((Enum<?>) cnst).name());
                 }
                 return res;
             } catch (ClassNotFoundException e) {
