@@ -588,9 +588,9 @@ class StateObjectHandler {
 
         // Handle Thread object helpers
         for (StateObject so : statesForward) {
-            if (so.scope != Scope.Thread) continue;
+            if (type != HelperType.SETUP) continue;
 
-            if (type == HelperType.SETUP) {
+            if (so.scope == Scope.Thread) {
                 for (HelperMethodInvocation mi : so.getHelpers()) {
                     if (mi.helperLevel == helperLevel && mi.type == HelperType.SETUP) {
                         Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
@@ -598,26 +598,8 @@ class StateObjectHandler {
                     }
                 }
             }
-        }
 
-        for (StateObject so : statesReverse) {
-            if (so.scope != Scope.Thread) continue;
-
-            if (type == HelperType.TEARDOWN) {
-                for (HelperMethodInvocation mi : so.getHelpers()) {
-                    if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
-                        Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
-                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
-                    }
-                }
-            }
-        }
-
-        // Handle Benchmark/Group object helpers
-        for (StateObject so : statesForward) {
-            if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
-
-            if (type == HelperType.SETUP) {
+            if (so.scope == Scope.Benchmark || so.scope == Scope.Group) {
                 result.add("if (" + so.type + ".setup" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
                 result.add("    try {");
                 result.add("        if (control.isFailing) throw new FailureAssistException();");
@@ -646,9 +628,18 @@ class StateObjectHandler {
         }
 
         for (StateObject so : statesReverse) {
-            if (so.scope != Scope.Benchmark && so.scope != Scope.Group) continue;
+            if (type != HelperType.TEARDOWN) continue;
 
-            if (type == HelperType.TEARDOWN) {
+            if (so.scope == Scope.Thread) {
+                for (HelperMethodInvocation mi : so.getHelpers()) {
+                    if (mi.helperLevel == helperLevel && mi.type == HelperType.TEARDOWN) {
+                        Collection<String> args = so.helperArgs.get(mi.method.getQualifiedName());
+                        result.add(so.localIdentifier + "." + mi.method.getName() + "(" + Utils.join(args, ",") + ");");
+                    }
+                }
+            }
+
+            if (so.scope == Scope.Benchmark || so.scope == Scope.Group) {
                 result.add("if (" + so.type + ".tear" + helperLevel + "MutexUpdater.compareAndSet(" + so.localIdentifier + ", 0, 1)) {");
                 result.add("    try {");
                 result.add("        if (control.isFailing) throw new FailureAssistException();");
