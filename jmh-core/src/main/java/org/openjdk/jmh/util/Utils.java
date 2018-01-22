@@ -446,6 +446,31 @@ public class Utils {
         return messages;
     }
 
+    public static Process runAsync(String... cmd) {
+        try {
+            return new ProcessBuilder(cmd).start();
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    public static Collection<String> destroy(Process process) {
+        Collection<String> messages = new ArrayList<>();
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            process.destroy();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                return Collections.emptyList();
+            }
+
+            messages.add(baos.toString());
+            return messages;
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static Collection<String> runWith(List<String> cmd) {
         Collection<String> messages = new ArrayList<>();
         try {

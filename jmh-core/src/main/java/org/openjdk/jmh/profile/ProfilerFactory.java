@@ -27,7 +27,6 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.runner.options.ProfilerConfig;
 
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -178,6 +177,7 @@ public class ProfilerFactory {
         BUILT_IN.put("perfnorm", LinuxPerfNormProfiler.class);
         BUILT_IN.put("perfasm",  LinuxPerfAsmProfiler.class);
         BUILT_IN.put("xperfasm", WinPerfAsmProfiler.class);
+        BUILT_IN.put("dtraceasm", DTraceAsmProfiler.class);
         BUILT_IN.put("pauses",   PausesProfiler.class);
         BUILT_IN.put("safepoints", SafepointsProfiler.class);
     }

@@ -270,7 +270,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
-        PerfResult result = processAssembly(br, stdOut, stdErr);
+        PerfResult result = processAssembly(br);
 
         // we know these are not needed anymore, proactively delete
         hsLog.delete();
@@ -311,7 +311,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
      */
     protected abstract String perfBinaryExtension();
 
-    private PerfResult processAssembly(BenchmarkResult br, File stdOut, File stdErr) {
+    private PerfResult processAssembly(BenchmarkResult br) {
         /**
          * 1. Parse binary events.
          */
@@ -647,11 +647,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    void printDottedLine(PrintWriter pw) {
+    private void printDottedLine(PrintWriter pw) {
         printDottedLine(pw, null);
     }
 
-    void printDottedLine(PrintWriter pw, String header) {
+    private void printDottedLine(PrintWriter pw, String header) {
         final int HEADER_WIDTH = 100;
 
         pw.print("....");
@@ -668,7 +668,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         pw.println();
     }
 
-    List<Region> makeRegions(Assembly asms, PerfEvents events) {
+    private List<Region> makeRegions(Assembly asms, PerfEvents events) {
         List<Region> regions = new ArrayList<>();
 
         SortedSet<Long> allAddrs = events.getAllAddresses();
@@ -728,7 +728,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         return intervals;
     }
 
-    Collection<Collection<String>> splitAssembly(File stdOut) {
+    private Collection<Collection<String>> splitAssembly(File stdOut) {
         try (FileReader in = new FileReader(stdOut);
              BufferedReader br = new BufferedReader(in)) {
             Multimap<Long, String> writerToLines = new HashMultimap<>();
@@ -764,7 +764,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    Assembly readAssembly(File stdOut) {
+    private Assembly readAssembly(File stdOut) {
         List<ASMLine> lines = new ArrayList<>();
         SortedMap<Long, Integer> addressMap = new TreeMap<>();
 
@@ -919,11 +919,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     static class PerfResultAggregator implements Aggregator<PerfResult> {
         @Override
         public PerfResult aggregate(Collection<PerfResult> results) {
-            String output = "";
+            StringBuilder output = new StringBuilder();
             for (PerfResult r : results) {
-                output += r.output;
+                output.append(r.output);
             }
-            return new PerfResult(output);
+            return new PerfResult(output.toString());
         }
     }
 

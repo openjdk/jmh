@@ -33,6 +33,7 @@ package org.openjdk.jmh.samples;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.profile.ClassloaderProfiler;
+import org.openjdk.jmh.profile.DTraceAsmProfiler;
 import org.openjdk.jmh.profile.LinuxPerfProfiler;
 import org.openjdk.jmh.profile.StackProfiler;
 import org.openjdk.jmh.runner.Runner;
@@ -352,7 +353,7 @@ public class JMHSample_35_Profilers {
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perfnorm -f 3 (Linux)
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perfasm  -f 1 (Linux)
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof xperfasm -f 1 (Windows)
-         *
+         *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof dtraceasm -f 1 (Mac OS X)
          * b) Via the Java API:
          *    (see the JMH homepage for possible caveats when running from IDE:
          *      http://openjdk.java.net/projects/code-tools/jmh/)
@@ -365,6 +366,7 @@ public class JMHSample_35_Profilers {
 //                    .addProfiler(LinuxPerfNormProfiler.class)
 //                    .addProfiler(LinuxPerfAsmProfiler.class)
 //                    .addProfiler(WinPerfAsmProfiler.class)
+//                    .addProfiler(DTraceAsmProfiler.class)
                     .build();
 
             new Runner(opt).run();
