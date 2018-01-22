@@ -44,7 +44,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     private OptionSpec<Long> optFrequency;
 
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
-        super(initLine, "cycles", "instructions");
+        super(initLine, "cycles");
 
         Collection<String> failMsg = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "echo", "1");
         if (!failMsg.isEmpty()) {
