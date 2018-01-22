@@ -576,8 +576,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             }
 
             if (sum < 1000) {
-                pw.println("WARNING: The perf event count is suspiciously low (" + sum + "). The performance data might be\n" +
-                    "inaccurate or misleading. Try to do the profiling again, or tune up the sampling frequency.");
+                pw.println("WARNING: The perf event count is suspiciously low (" + sum + "). The performance data might be");
+                pw.println("inaccurate or misleading. Try to do the profiling again, or tune up the sampling frequency.");
+                pw.println("With some profilers on Mac OS X, System Integrity Protection (SIP) may prevent profiling.");
+                pw.println("In such case, temporarily disabling SIP with 'csrutil disable' might help.");
             }
         }
 
