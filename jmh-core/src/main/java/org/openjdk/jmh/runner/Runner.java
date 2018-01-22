@@ -45,8 +45,11 @@ import java.lang.management.ManagementFactory;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.*;
+import java.util.zip.*;
 
 /**
  * Runner executes JMH benchmarks.
@@ -813,12 +816,7 @@ public class Runner extends BaseRunner {
         CompilerHints.addCompilerHints(command);
 
         // assemble final process command
-        command.add("-cp");
-        if (Utils.isWindows()) {
-            command.add('"' + System.getProperty("java.class.path") + '"');
-        } else {
-            command.add(System.getProperty("java.class.path"));
-        }
+        addClasspath(command);
 
         command.add(ForkedMain.class.getName());
 
@@ -838,16 +836,81 @@ public class Runner extends BaseRunner {
         command.add(jvm);
 
         // assemble final process command
-        command.add("-cp");
-        if (Utils.isWindows()) {
-            command.add('"' + System.getProperty("java.class.path") + '"');
-        } else {
-            command.add(System.getProperty("java.class.path"));
-        }
+        addClasspath(command);
 
         command.add(PrintPropertiesMain.class.getName());
 
         return command;
+    }
+
+    private void addClasspath(List<String> command) {
+        command.add("-cp");
+
+        String cpProp = System.getProperty("java.class.path");
+        File tmpFile = null;
+
+        String jvmargs = ""
+                + options.getJvmArgs().orElse(Collections.<String>emptyList())
+                + options.getJvmArgsPrepend().orElse(Collections.<String>emptyList())
+                + options.getJvmArgsAppend().orElse(Collections.<String>emptyList());
+
+        // The second (creepy) test is for the cases when external plugins are not supplying
+        // the options properly. Looking at you, JMH Gradle plugin. In this case, we explicitly
+        // check if the option is provided by the user.
+
+        if (Boolean.getBoolean("jmh.separateClasspathJAR")
+                || jvmargs.contains("jmh.separateClasspathJAR=true")) {
+
+            // Classpath can be too long and overflow the command line length.
+            // Looking at you, Windows.
+            //
+            // The trick is to generate the JAR file with appropriate Class-Path manifest entry,
+            // and link it. The complication is that Class-Path entry paths are specified relative
+            // to JAR file loaded, which is probably somewhere in java.io.tmpdir, outside of current
+            // directory. Therefore, we have to relativize the paths to all the JAR entries.
+
+            try {
+                tmpFile = FileUtils.tempFile("classpath.jar");
+                Path tmpFileDir = tmpFile.toPath().getParent();
+
+                StringBuilder sb = new StringBuilder();
+                for (String cp : cpProp.split(File.pathSeparator)) {
+                    String rel = tmpFileDir.relativize(new File(cp).getAbsoluteFile().toPath()).toString();
+                    sb.append(rel.replace('\\', '/').replace(" ", "%20"));
+                    if (!cp.endsWith(".jar")) {
+                        sb.append('/');
+                    }
+                    sb.append(" ");
+                }
+                String classPath = sb.toString().trim();
+
+                Manifest manifest = new Manifest();
+                Attributes attrs = manifest.getMainAttributes();
+                attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+                attrs.putValue("Class-Path", classPath);
+
+                try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(tmpFile), manifest)) {
+                    jos.putNextEntry(new ZipEntry("META-INF/"));
+                }
+            } catch (IOException ex) {
+                // Something is wrong in file generation, give up and fall-through to usual thing
+                tmpFile = null;
+            }
+        }
+
+        if (tmpFile != null) {
+            if (Utils.isWindows()) {
+                command.add("\"" + tmpFile.getAbsolutePath() + "\"");
+            } else {
+                command.add(tmpFile.getAbsolutePath());
+            }
+        } else {
+            if (Utils.isWindows()) {
+                command.add('"' + cpProp + '"');
+            } else {
+                command.add(cpProp);
+            }
+        }
     }
 
 }
