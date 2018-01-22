@@ -334,7 +334,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         } else {
             pw.println();
-            pw.println("ERROR: No address lines detected in assembly capture, make sure your JDK is PrintAssembly-enabled:\n    https://wiki.openjdk.java.net/display/HotSpot/PrintAssembly");
+            pw.println("ERROR: No address lines detected in assembly capture. Make sure your JDK is properly configured to");
+            pw.println("print generated assembly. The most probable cause for this failure is that hsdis is not available,");
+            pw.println("or resides at the wrong path within the JDK. Try to run the same JDK with -XX:+PrintAssembly with");
+            pw.println("a simple non-JMH program and look for warning messages. For details, see the link below:");
+            pw.println("    https://wiki.openjdk.java.net/display/HotSpot/PrintAssembly");
             pw.println();
         }
 
