@@ -98,7 +98,7 @@ public class JMHSample_10_ConstantFold {
      * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/benchmarks.jar JMHSample_10 -i 5 -f 1
-     *    (we requested 5 iterations, single fork)
+     *    (we requested single fork; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -108,8 +108,6 @@ public class JMHSample_10_ConstantFold {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_10_ConstantFold.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .forks(1)
                 .build();
 

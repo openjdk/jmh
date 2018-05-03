@@ -124,8 +124,8 @@ public class JMHSample_16_CompilerControl {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_16 -wi 1 -i 3 -f 1
-     *    (we requested 1 warmup iterations, 3 iterations, single fork)
+     *    $ java -jar target/benchmarks.jar JMHSample_16 -wi 0 -i 3 -f 1
+     *    (we requested no warmup iterations, 3 iterations, single fork; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -135,7 +135,7 @@ public class JMHSample_16_CompilerControl {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_16_CompilerControl.class.getSimpleName())
-                .warmupIterations(1)
+                .warmupIterations(0)
                 .measurementIterations(3)
                 .forks(1)
                 .build();

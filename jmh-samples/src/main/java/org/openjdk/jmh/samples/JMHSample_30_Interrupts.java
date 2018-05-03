@@ -101,8 +101,8 @@ public class JMHSample_30_Interrupts {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_30 -wi 5 -i 5 -t 2 -f 5 -to 5
-     *    (we requested 5 warmup iterations, 5 iterations, 2 threads, 5 forks, and 5 sec timeout)
+     *    $ java -jar target/benchmarks.jar JMHSample_30 -t 2 -f 5 -to 10
+     *    (we requested 2 threads, 5 forks, and 10 sec timeout)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -112,11 +112,9 @@ public class JMHSample_30_Interrupts {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_30_Interrupts.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .threads(2)
                 .forks(5)
-                .timeout(TimeValue.seconds(5))
+                .timeout(TimeValue.seconds(10))
                 .build();
 
         new Runner(opt).run();

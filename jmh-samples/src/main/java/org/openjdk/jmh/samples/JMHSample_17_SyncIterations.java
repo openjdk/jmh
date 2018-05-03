@@ -38,6 +38,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.concurrent.TimeUnit;
 
@@ -103,8 +104,8 @@ public class JMHSample_17_SyncIterations {
      * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/benchmarks.jar JMHSample_17 \
-     *        -i 20 -wi 1 -f 1 -t ${CPU*16} -si {true|false}
-     *    (we requested 1 warmup iterations, 20 iterations, single fork,
+     *        -w 1s -r 1s -f 1 -t ${CPU*16} -si {true|false}
+     *    (we requested shorter warmup/measurement iterations, single fork,
      *     lots of threads, and changeable "synchronize iterations" option)
      *
      * b) Via the Java API:
@@ -115,8 +116,8 @@ public class JMHSample_17_SyncIterations {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_17_SyncIterations.class.getSimpleName())
-                .warmupIterations(1)
-                .measurementIterations(20)
+                .warmupTime(TimeValue.seconds(1))
+                .measurementTime(TimeValue.seconds(1))
                 .threads(Runtime.getRuntime().availableProcessors()*16)
                 .forks(1)
                 .syncIterations(true) // try to switch to "false"

@@ -194,8 +194,6 @@ public class JMHSample_34_SafeLooping {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_34_SafeLooping.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .forks(3)
                 .build();
 

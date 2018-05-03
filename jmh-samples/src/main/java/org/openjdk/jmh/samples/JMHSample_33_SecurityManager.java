@@ -117,8 +117,8 @@ public class JMHSample_33_SecurityManager {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_33 -wi 5 -i 5 -f 1
-     *    (we requested 5 warmup iterations, 5 iterations, 2 threads, 5 forks)
+     *    $ java -jar target/benchmarks.jar JMHSample_33 -f 1
+     *    (we requested 5 warmup iterations, 5 forks; there are also other options, see -h))
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:

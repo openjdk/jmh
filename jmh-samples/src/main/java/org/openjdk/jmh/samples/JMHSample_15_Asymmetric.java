@@ -107,8 +107,8 @@ public class JMHSample_15_Asymmetric {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_15 -wi 5 -i 5 -f 1
-     *    (we requested 5 warmup/measurement iterations, single fork)
+     *    $ java -jar target/benchmarks.jar JMHSample_15 -f 1
+     *    (we requested single fork; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -118,8 +118,6 @@ public class JMHSample_15_Asymmetric {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_15_Asymmetric.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .forks(1)
                 .build();
 

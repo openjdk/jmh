@@ -120,8 +120,8 @@ public class JMHSample_31_InfraParams {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_31 -wi 5 -i 5 -t 4 -f 5
-     *    (we requested 5 warmup iterations, 5 iterations, 2 threads, and 5 forks)
+     *    $ java -jar target/benchmarks.jar JMHSample_31 -t 4 -f 5
+     *    (we requested 4 threads, and 5 forks; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -131,8 +131,6 @@ public class JMHSample_31_InfraParams {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_31_InfraParams.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .threads(4)
                 .forks(5)
                 .build();

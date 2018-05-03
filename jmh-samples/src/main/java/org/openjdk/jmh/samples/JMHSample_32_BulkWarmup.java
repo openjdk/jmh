@@ -129,8 +129,8 @@ public class JMHSample_32_BulkWarmup {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_32 -f 1 -wi 5 -i 5 -wm BULK
-     *    (we requested a single fork, 5 warmup/measurement iterations, and bulk warmup mode)
+     *    $ java -jar target/benchmarks.jar JMHSample_32 -f 1 -wm BULK
+     *    (we requested a single fork, and bulk warmup mode; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -142,8 +142,6 @@ public class JMHSample_32_BulkWarmup {
                 .include(JMHSample_32_BulkWarmup.class.getSimpleName())
                 // .includeWarmup(...) <-- this may include other benchmarks into warmup
                 .warmupMode(WarmupMode.BULK) // see other WarmupMode.* as well
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .forks(1)
                 .build();
 

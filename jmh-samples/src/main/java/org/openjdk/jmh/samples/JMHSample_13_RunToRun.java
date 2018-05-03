@@ -109,7 +109,7 @@ public class JMHSample_13_RunToRun {
      * a) Via the command line:
      *    $ mvn clean install
      *    $ java -jar target/benchmarks.jar JMHSample_13 -wi 0 -i 3
-     *    (we requested no warmup, 3 measurement iterations)
+     *    (we requested no warmup, 3 measurement iterations; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -120,7 +120,7 @@ public class JMHSample_13_RunToRun {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_13_RunToRun.class.getSimpleName())
                 .warmupIterations(0)
-                .measurementIterations(5)
+                .measurementIterations(3)
                 .build();
 
         new Runner(opt).run();

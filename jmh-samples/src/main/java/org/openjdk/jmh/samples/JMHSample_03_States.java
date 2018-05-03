@@ -105,8 +105,8 @@ public class JMHSample_03_States {
      *
      * a) Via the command line:
      *    $ mvn clean install
-     *    $ java -jar target/benchmarks.jar JMHSample_03 -wi 5 -i 5 -t 4 -f 1
-     *    (we requested 5 measurement/warmup iterations, with 4 threads, single fork)
+     *    $ java -jar target/benchmarks.jar JMHSample_03 -t 4 -f 1
+     *    (we requested 4 threads, single fork; there are also other options, see -h)
      *
      * b) Via the Java API:
      *    (see the JMH homepage for possible caveats when running from IDE:
@@ -116,8 +116,6 @@ public class JMHSample_03_States {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JMHSample_03_States.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
                 .threads(4)
                 .forks(1)
                 .build();
