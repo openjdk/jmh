@@ -56,6 +56,8 @@ public class ResultFormatTest {
      */
     private static final String JDK_VERSION_DUMMY = "1.8-dummy";
 
+    private static final String VM_NAME_DUMMY = "DummyVM";
+
     private static final String VM_VERSION_DUMMY = "4711";
 
     private static final String JMH_VERSION_DUMMY = "1.18";
@@ -86,7 +88,7 @@ public class ResultFormatTest {
                     TimeUnit.SECONDS, 1,
                     JVM_DUMMY,
                     Collections.<String>emptyList(),
-                    JDK_VERSION_DUMMY, VM_VERSION_DUMMY, JMH_VERSION_DUMMY,
+                    JDK_VERSION_DUMMY, VM_NAME_DUMMY, VM_VERSION_DUMMY, JMH_VERSION_DUMMY,
                     TimeValue.days(1));
 
             Collection<BenchmarkResult> benchmarkResults = new ArrayList<>();

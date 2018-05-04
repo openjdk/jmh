@@ -9,6 +9,7 @@
         "jvmArgs" : [
         ],
         "jdkVersion" : "1.8-dummy",
+        "vmName" : "DummyVM",
         "vmVersion" : "4711",
         "warmupIterations" : 84,
         "warmupTime" : "375 s",
@@ -231,6 +232,7 @@
         "jvmArgs" : [
         ],
         "jdkVersion" : "1.8-dummy",
+        "vmName" : "DummyVM",
         "vmVersion" : "4711",
         "warmupIterations" : 544,
         "warmupTime" : "409 s",
@@ -336,6 +338,7 @@
         "jvmArgs" : [
         ],
         "jdkVersion" : "1.8-dummy",
+        "vmName" : "DummyVM",
         "vmVersion" : "4711",
         "warmupIterations" : 384,
         "warmupTime" : "105 s",
@@ -503,6 +506,7 @@
         "jvmArgs" : [
         ],
         "jdkVersion" : "1.8-dummy",
+        "vmName" : "DummyVM",
         "vmVersion" : "4711",
         "warmupIterations" : 628,
         "warmupTime" : "207 s",
@@ -702,6 +706,7 @@
         "jvmArgs" : [
         ],
         "jdkVersion" : "1.8-dummy",
+        "vmName" : "DummyVM",
         "vmVersion" : "4711",
         "warmupIterations" : 997,
         "warmupTime" : "651 s",

@@ -62,7 +62,7 @@ class TextReportFormat extends AbstractOutputFormat {
         }
 
         println("# JMH version: " + params.getJmhVersion());
-        println("# VM version: JDK " + params.getJdkVersion() + ", VM " + params.getVmVersion());
+        println("# VM version: JDK " + params.getJdkVersion() + ", " + params.getVmName() + ", " + params.getVmVersion());
         println("# VM invoker: " + params.getJvm());
         println("# VM options: " + opts);
 

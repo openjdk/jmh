@@ -80,6 +80,7 @@ class JSONResultFormat implements ResultFormat {
             printStringArray(pw, params.getJvmArgs());
             pw.println("],");
             pw.println("\"jdkVersion\" : " + toJsonString(params.getJdkVersion()) + ",");
+            pw.println("\"vmName\" : " + toJsonString(params.getVmName()) + ",");
             pw.println("\"vmVersion\" : " + toJsonString(params.getVmVersion()) + ",");
             pw.println("\"warmupIterations\" : " + params.getWarmup().getCount() + ",");
             pw.println("\"warmupTime\" : \"" + params.getWarmup().getTime() + "\",");

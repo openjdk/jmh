@@ -507,7 +507,7 @@ public class Utils {
      * @return Copy of system properties we want to record in the results.
      */
     public static Properties getRecordedSystemProperties() {
-        String[] names = new String[]{"java.version", "java.vm.version"};
+        String[] names = new String[]{"java.version", "java.vm.version", "java.vm.name"};
         Properties p = new Properties();
         for (String i : names) {
             p.setProperty(i, System.getProperty(i));

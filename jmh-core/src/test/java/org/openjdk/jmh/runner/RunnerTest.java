@@ -66,7 +66,7 @@ public class RunnerTest {
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(), Collections.<String>emptyList(),
-                System.getProperty("java.version"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
+                System.getProperty("java.version"), System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
                 TimeValue.days(1));
         List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 
@@ -98,7 +98,7 @@ public class RunnerTest {
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(), Collections.singletonList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints),
-                System.getProperty("java.version"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
+                System.getProperty("java.version"), System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
                 TimeValue.days(1));
         List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 
@@ -135,7 +135,7 @@ public class RunnerTest {
                 Mode.Throughput, null, TimeUnit.SECONDS, 1,
                 Utils.getCurrentJvm(),
                 Arrays.asList(CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints1, CompilerHints.XX_COMPILE_COMMAND_FILE + tempHints2),
-                System.getProperty("java.version"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
+                System.getProperty("java.version"), System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
                 TimeValue.days(1));
         List<String> command = blade.getForkedMainCommand(bp, Collections.<ExternalProfiler>emptyList(), DUMMY_HOST, DUMMY_PORT);
 

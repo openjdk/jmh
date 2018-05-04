@@ -495,12 +495,13 @@ public class Runner extends BaseRunner {
 
         String jdkVersion = targetProperties.getProperty("java.version");
         String vmVersion = targetProperties.getProperty("java.vm.version");
+        String vmName = targetProperties.getProperty("java.vm.name");
         return new BenchmarkParams(benchmark.getUsername(), benchmark.generatedTarget(), synchIterations,
                 threads, threadGroups, benchmark.getThreadGroupLabels().orElse(Collections.<String>emptyList()),
                 forks, warmupForks,
                 warmup, measurement, benchmark.getMode(), benchmark.getWorkloadParams(), timeUnit, opsPerInvocation,
                 jvm, jvmArgs,
-                jdkVersion, vmVersion, Version.getPlainVersion(),
+                jdkVersion, vmName, vmVersion, Version.getPlainVersion(),
                 timeout);
     }
 

@@ -57,7 +57,7 @@ public class TestAggregateResult {
                         new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.seconds(1), 1),
                         Mode.Throughput, null, TimeUnit.SECONDS, 1,
                         Utils.getCurrentJvm(), Collections.<String>emptyList(),
-                        System.getProperty("java.version"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
+                        System.getProperty("java.version"), System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), Version.getPlainVersion(),
                         TimeValue.days(1)),
                 new IterationParams(IterationType.MEASUREMENT, 1, TimeValue.days(1), 1),
                 null
