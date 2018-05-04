@@ -85,7 +85,7 @@ public class Defaults {
     /**
      * Number of forks in which we measure the workload.
      */
-    public static final int MEASUREMENT_FORKS = 10;
+    public static final int MEASUREMENT_FORKS = 5;
 
     /**
      * Number of warmup forks we discard.
