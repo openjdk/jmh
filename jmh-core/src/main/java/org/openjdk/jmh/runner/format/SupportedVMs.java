@@ -22,13 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.runner;
+package org.openjdk.jmh.runner.format;
 
 
 /**
  * JMH VM support tester
  */
-public class SupportedVMs {
+class SupportedVMs {
 
     static final String[] FULL_SUPPORT = {
             "OpenJDK",
