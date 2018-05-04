@@ -34,6 +34,7 @@ import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.IterationType;
+import org.openjdk.jmh.runner.SupportedVMs;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
 import org.openjdk.jmh.util.Utils;
@@ -63,6 +64,20 @@ class TextReportFormat extends AbstractOutputFormat {
 
         println("# JMH version: " + params.getJmhVersion());
         println("# VM version: JDK " + params.getJdkVersion() + ", " + params.getVmName() + ", " + params.getVmVersion());
+
+        switch (SupportedVMs.supportLevel(params.getVmName())) {
+            case FULL:
+                break;
+            case EXPERIMENTAL:
+                println("# *** WARNING: JMH support for this VM is experimental. Be extra careful with the produced data.");
+                break;
+            case NONE:
+                println("# *** WARNING: This VM is not supported by JMH. The produced benchmark data can be completely wrong.");
+                break;
+            default:
+                throw new IllegalStateException("Unknown support level");
+        }
+
         println("# VM invoker: " + params.getJvm());
         println("# VM options: " + opts);
 
