@@ -37,8 +37,10 @@ import java.io.*;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,6 +49,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
     private final boolean isDelayed;
     private final int delayMs;
+    private final List<String> events;
 
     public LinuxPerfProfiler(String initLine) throws ProfilerException {
         OptionParser parser = new OptionParser();
@@ -56,9 +59,14 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                 "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
                 .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(-1);
 
+        OptionSpec<String> optEvents = parser.accepts("events",
+                        "Events to gather.")
+                .withRequiredArg().ofType(String.class).withValuesSeparatedBy(",").describedAs("event");
+
         OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
 
         try {
+            events = set.valuesOf(optEvents);
             delayMs = set.valueOf(optDelay);
         } catch (OptionException e) {
             throw new ProfilerException(e.getMessage());
@@ -84,11 +92,18 @@ public class LinuxPerfProfiler implements ExternalProfiler {
             delay = delayMs;
         }
 
+        List<String> invokeOptions = new ArrayList<>(Arrays.asList(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--detailed", "--detailed", "--detailed"));
+
         if (isDelayed) {
-            return Arrays.asList(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--detailed", "--detailed", "--detailed", "--delay", String.valueOf(delay));
-        } else {
-            return Arrays.asList(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--detailed", "--detailed", "--detailed");
+            invokeOptions.add("--delay");
+            invokeOptions.add(String.valueOf(delay));
         }
+        if (!events.isEmpty()) {
+            invokeOptions.add("-e");
+            invokeOptions.add(Utils.join(events, ","));
+        }
+
+        return invokeOptions;
     }
 
     @Override
