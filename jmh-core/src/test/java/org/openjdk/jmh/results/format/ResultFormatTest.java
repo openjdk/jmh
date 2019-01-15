@@ -69,9 +69,11 @@ public class ResultFormatTest {
         Random ar = new Random(12345);
         for (int b = 0; b < r.nextInt(10); b++) {
             WorkloadParams ps = new WorkloadParams();
-            for (int p = 0; p < 5; p++) {
-                ps.put("param" + p, "value" + p, p);
-            }
+            ps.put("param0", "value0",     0);
+            ps.put("param1", "[value1]",   1);
+            ps.put("param2", "{value2}",   2);
+            ps.put("param3", "'value3'",   3);
+            ps.put("param4", "\"value4\"", 4);
             BenchmarkParams params = new BenchmarkParams(
                     "benchmark_" + b,
                     JSONResultFormat.class.getName() + ".benchmark_" + b + "_" + Mode.Throughput,

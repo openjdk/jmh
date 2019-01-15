@@ -192,7 +192,7 @@ class JSONResultFormat implements ResultFormat {
                 sb.append(", ");
             }
             sb.append("\"").append(k).append("\" : ");
-            sb.append("\"").append(params.getParam(k)).append("\"");
+            sb.append(toJsonString(params.getParam(k)));
         }
         return sb.toString();
     }

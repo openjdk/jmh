@@ -19,10 +19,10 @@
         "measurementBatchSize" : 1,
         "params" : {
             "param0" : "value0",
-            "param1" : "value1",
-            "param2" : "value2",
-            "param3" : "value3",
-            "param4" : "value4"
+            "param1" : "[value1]",
+            "param2" : "{value2}",
+            "param3" : "'value3'",
+            "param4" : "\"value4\""
         },
         "primaryMetric" : {
             "score" : 528.8571428571429,
@@ -242,10 +242,10 @@
         "measurementBatchSize" : 1,
         "params" : {
             "param0" : "value0",
-            "param1" : "value1",
-            "param2" : "value2",
-            "param3" : "value3",
-            "param4" : "value4"
+            "param1" : "[value1]",
+            "param2" : "{value2}",
+            "param3" : "'value3'",
+            "param4" : "\"value4\""
         },
         "primaryMetric" : {
             "score" : 439.0,
@@ -348,10 +348,10 @@
         "measurementBatchSize" : 1,
         "params" : {
             "param0" : "value0",
-            "param1" : "value1",
-            "param2" : "value2",
-            "param3" : "value3",
-            "param4" : "value4"
+            "param1" : "[value1]",
+            "param2" : "{value2}",
+            "param3" : "'value3'",
+            "param4" : "\"value4\""
         },
         "primaryMetric" : {
             "score" : 545.0,
@@ -516,10 +516,10 @@
         "measurementBatchSize" : 1,
         "params" : {
             "param0" : "value0",
-            "param1" : "value1",
-            "param2" : "value2",
-            "param3" : "value3",
-            "param4" : "value4"
+            "param1" : "[value1]",
+            "param2" : "{value2}",
+            "param3" : "'value3'",
+            "param4" : "\"value4\""
         },
         "primaryMetric" : {
             "score" : 417.57142857142856,
@@ -716,10 +716,10 @@
         "measurementBatchSize" : 1,
         "params" : {
             "param0" : "value0",
-            "param1" : "value1",
-            "param2" : "value2",
-            "param3" : "value3",
-            "param4" : "value4"
+            "param1" : "[value1]",
+            "param2" : "{value2}",
+            "param3" : "'value3'",
+            "param4" : "\"value4\""
         },
         "primaryMetric" : {
             "score" : 956.0,

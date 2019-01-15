@@ -127,7 +127,9 @@ class LaTeXResultFormat implements ResultFormat {
 
     private static String escape(String s) {
         return s.replaceAll("_", "\\\\_")
-                .replaceAll("#", "\\\\#");
+                .replaceAll("#", "\\\\#")
+                .replaceAll("\\{", "\\\\{")
+                .replaceAll("\\}", "\\\\}");
     }
 
 }
