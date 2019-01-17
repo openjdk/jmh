@@ -78,9 +78,6 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
     private OptionSpec<String> optXperfProviders;
     private OptionSpec<String> optSymbolDir;
 
-    /**
-     * Constructor.
-     */
     public WinPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "SampledProfile");
 

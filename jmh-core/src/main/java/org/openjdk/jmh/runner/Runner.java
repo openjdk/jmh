@@ -129,7 +129,7 @@ public class Runner extends BaseRunner {
 
     /**
      * Print matching benchmarks with parameters into output.
-     * @param options
+     * @param options options to use.
      */
     public void listWithParams(CommandLineOptions options) {
         Set<BenchmarkListEntry> benchmarks = list.find(out, options.getIncludes(), options.getExcludes());

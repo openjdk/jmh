@@ -69,6 +69,7 @@ public interface ExternalProfiler extends Profiler {
      * after benchmark JVM had stopped.
      *
      * @param br benchmark result that was the result of the trial
+     * @param pid pid that the forked JVM had
      * @param stdOut file containing the standard output from the benchmark JVM
      * @param stdErr file containing the standard error from the benchmark JVM
      * @return profiler results

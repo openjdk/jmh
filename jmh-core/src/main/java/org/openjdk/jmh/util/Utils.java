@@ -546,6 +546,7 @@ public class Utils {
      * Adapts Iterator for Iterable.
      * Can be iterated only once!
      *
+     * @param <T> element type
      * @param it iterator
      * @return iterable for given iterator
      */

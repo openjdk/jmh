@@ -122,6 +122,7 @@ questions.
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <quiet>true</quiet>
+                    <source>8</source>
                 </configuration>
                 <executions>
                     <execution>
