@@ -37,6 +37,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
+import java.util.Collection;
+
 public class CompilerControlExcludeActualTest {
 
     @CompilerControl(CompilerControl.Mode.EXCLUDE)
@@ -64,23 +66,26 @@ public class CompilerControlExcludeActualTest {
                     .mode(mode)
                     .shouldFailOnError(true)
                     .addProfiler(LogConsumeProfiler.class)
-                    .measurementIterations(mode == Mode.SingleShotTime ? 10000 : 1)
+                    .measurementIterations(mode == Mode.SingleShotTime ? 200000 : 1)
                     .measurementTime(TimeValue.seconds(5))
                     .warmupIterations(0)
                     .forks(1)
+                    .jvmArgsPrepend("-XX:CICompilerCount=2") // need to serialize the output properly
                     .build();
             RunResult runResult = new Runner(opts).runSingle();
 
-            if (CompilerControlUtils.check(runResult, "@", "callee")) { // Poor man's check -XX:+PrintInlining works
+            Collection<String> log = CompilerControlUtils.getLog(runResult);
+
+            if (CompilerControlUtils.check(log, "@", "callee")) { // Poor man's check -XX:+PrintInlining works
                 Assert.assertTrue("Failed with " + mode,
-                         CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "excluded by") ||
-                         CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "not compilable") ||
-                         CompilerControlUtils.check(runResult, this.getClass().getName() + "::compilerControlSpecimen", "disallowed by CompileCommand")
+                         CompilerControlUtils.check(log, this.getClass().getName() + "::compilerControlSpecimen", "excluded by") ||
+                         CompilerControlUtils.check(log, this.getClass().getName() + "::compilerControlSpecimen", "not compilable") ||
+                         CompilerControlUtils.check(log, this.getClass().getName() + "::compilerControlSpecimen", "disallowed by CompileCommand")
                 );
                 Assert.assertTrue("Failed with " + mode,
-                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "excluded by") ||
-                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "not compilable") ||
-                        CompilerControlUtils.check(runResult, this.getClass().getName() + "::strawMethod", "disallowed by CompileCommand")
+                        CompilerControlUtils.check(log, this.getClass().getName() + "::strawMethod", "excluded by") ||
+                        CompilerControlUtils.check(log, this.getClass().getName() + "::strawMethod", "not compilable") ||
+                        CompilerControlUtils.check(log, this.getClass().getName() + "::strawMethod", "disallowed by CompileCommand")
                 );
             }
         }

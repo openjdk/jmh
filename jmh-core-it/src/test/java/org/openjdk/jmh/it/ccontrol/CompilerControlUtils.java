@@ -31,11 +31,13 @@ import java.util.Collection;
 
 public class CompilerControlUtils {
 
-    public static boolean check(RunResult runResult, String... checkFor) {
+    public static Collection<String> getLog(RunResult runResult) {
         LogConsumeProfiler.LogConsumeResult r = (LogConsumeProfiler.LogConsumeResult) runResult.getSecondaryResults().get("logout");
-        Collection<String> lines = r.getLines();
+        return r.getLines();
+    }
 
-        line: for (String line : lines) {
+    public static boolean check(Collection<String> log, String... checkFor) {
+        line: for (String line : log) {
             System.out.println(line);
             for (String m : checkFor) {
                 if (!line.contains(m)) continue line;
