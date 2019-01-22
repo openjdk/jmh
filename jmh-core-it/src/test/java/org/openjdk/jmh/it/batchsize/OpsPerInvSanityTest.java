@@ -43,6 +43,8 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.util.Statistics;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,28 +52,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @State(Scope.Thread)
 public class OpsPerInvSanityTest {
 
-    private static final AtomicInteger invCount = new AtomicInteger();
-    private static volatile long startTime;
-    private static volatile long stopTime;
-
-    @Setup(Level.Iteration)
-    public void beforeIter() {
-        startTime = System.nanoTime();
-    }
-
-    @TearDown(Level.Iteration)
-    public void afterIter() {
-        stopTime = System.nanoTime();
-    }
+    private static final int SLEEP_TIME_MS = 5;
 
     @Benchmark
-    @Fork(0)
-    @Warmup(iterations = 0)
-    @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void test() throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(1);
-        invCount.incrementAndGet();
+        TimeUnit.MILLISECONDS.sleep(SLEEP_TIME_MS);
     }
 
     @Test
@@ -85,11 +70,14 @@ public class OpsPerInvSanityTest {
     }
 
     private void doWith(Mode mode, int opsPerInv) throws RunnerException {
-        invCount.set(0);
-
         Options opt = new OptionsBuilder()
             .include(Fixtures.getTestMask(this.getClass()))
             .shouldFailOnError(true)
+            .warmupIterations(0)
+            .measurementTime(TimeValue.seconds(1))
+            .measurementIterations(5)
+            .forks(1)
+            .timeUnit(TimeUnit.MILLISECONDS)
             .operationsPerInvocation(opsPerInv)
             .mode(mode)
             .build();
@@ -97,27 +85,30 @@ public class OpsPerInvSanityTest {
 
         final double TOLERANCE = 0.30;
 
-        double expectedScore = 0.0;
-
-        double time = stopTime - startTime;
-        double calls = invCount.get();
+        double expectedScore;
+        double actualScore;
+        Statistics statistics = run.getPrimaryResult().getStatistics();
 
         switch (mode) {
             case Throughput:
-                expectedScore = (calls * opsPerInv) / time;
+                expectedScore = 1.0 * opsPerInv / SLEEP_TIME_MS;
+                actualScore   = statistics.getMax();
                 break;
             case AverageTime:
             case SampleTime:
-                expectedScore = time / (calls * opsPerInv);
+                expectedScore = 1.0 * SLEEP_TIME_MS / opsPerInv;
+                actualScore   = statistics.getMin();
                 break;
             case SingleShotTime:
-                expectedScore = time;
+                expectedScore = SLEEP_TIME_MS;
+                actualScore   = statistics.getMin();
                 break;
             default:
+                expectedScore = Double.NaN;
+                actualScore   = Double.NaN;
                 Assert.fail("Unhandled mode: " + mode);
         }
 
-        double actualScore = run.getPrimaryResult().getScore();
         Assert.assertTrue(mode + ", " + opsPerInv + ": " + expectedScore + " vs " + actualScore,
                 Math.abs(1 - actualScore / expectedScore) < TOLERANCE);
     }
