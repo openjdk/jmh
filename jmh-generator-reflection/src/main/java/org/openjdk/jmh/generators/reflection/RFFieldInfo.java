@@ -74,4 +74,9 @@ class RFFieldInfo implements FieldInfo {
     public boolean isFinal() {
         return Modifier.isFinal(f.getModifiers());
     }
+
+    @Override
+    public String toString() {
+        return declaringClass.getQualifiedName() + "." + f.getName();
+    }
 }
