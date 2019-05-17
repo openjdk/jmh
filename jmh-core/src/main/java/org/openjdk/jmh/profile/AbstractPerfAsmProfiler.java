@@ -46,6 +46,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private final int regionTooBigThreshold;
     private final int printMargin;
     private final int mergeMargin;
+    private final boolean mergeMethods;
     private final int delayMsec;
     private final int lengthMsec;
 
@@ -112,6 +113,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         OptionSpec<Integer> optMergeMargin = parser.accepts("mergeMargin",
                         "Merge margin. The regions separated by less than the margin are merged.")
                 .withRequiredArg().ofType(Integer.class).describedAs("lines").defaultsTo(32);
+
+        OptionSpec<Boolean> optMergeMethods = parser.accepts("mergeMethods",
+                "Merge all regions from the same method")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
 
         OptionSpec<Integer> optDelay = parser.accepts("delay",
                         "Delay collection for a given time, in milliseconds; -1 to detect automatically.")
@@ -199,6 +204,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             regionTooBigThreshold = set.valueOf(optThreshold);
             printMargin = set.valueOf(optPrintMargin);
             mergeMargin = set.valueOf(optMergeMargin);
+            mergeMethods = set.valueOf(optMergeMethods);
             delayMsec = set.valueOf(optDelay);
             lengthMsec = set.valueOf(optLength);
 
@@ -678,7 +684,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         List<Region> regions = new ArrayList<>();
 
         SortedSet<Long> allAddrs = events.getAllAddresses();
-        for (Interval intv : figureHotIntervals(allAddrs)) {
+        for (Interval intv : figureHotIntervals(allAddrs, asms)) {
             SortedSet<Long> eventfulAddrs = allAddrs.subSet(intv.src, intv.dst + 1);
 
             List<ASMLine> regionLines = asms.getLines(intv.src, intv.dst, printMargin);
@@ -711,7 +717,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
 
-    private List<Interval> figureHotIntervals(SortedSet<Long> addrs) {
+    private List<Interval> figureHotIntervals(SortedSet<Long> addrs, Assembly asms) {
         if (addrs.isEmpty()) {
             return Collections.emptyList();
         }
@@ -721,17 +727,32 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         long lastAddr = addrs.first();
         for (long addr : addrs) {
             if (addr - lastAddr > mergeMargin) {
-                intervals.add(new Interval(begAddr, lastAddr));
+                addInterval(intervals, begAddr, lastAddr, asms);
                 begAddr = addr;
             }
             lastAddr = addr;
         }
 
         if (begAddr != lastAddr) {
-            intervals.add(new Interval(begAddr, lastAddr));
+            addInterval(intervals, begAddr, lastAddr, asms);
         }
 
         return intervals;
+    }
+
+    private void addInterval(List<Interval> intervals, long begAddr, long lastAddr, Assembly asms) {
+        if (!mergeMethods || intervals.isEmpty()) {
+            intervals.add(new Interval(begAddr, lastAddr));
+        } else {
+            Interval prev = intervals.get(intervals.size() - 1);
+            MethodDesc prevMethod = asms.getMethod(prev.src);
+            MethodDesc method = asms.getMethod(begAddr);
+            if (prevMethod == null || method == null || !prevMethod.equals(method)) {
+                intervals.add(new Interval(begAddr, lastAddr));
+            } else {
+                intervals.set(intervals.size() - 1, new Interval(prev.src, lastAddr));
+            }
+        }
     }
 
     private Collection<Collection<String>> splitAssembly(File stdOut) {
@@ -994,6 +1015,33 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             return addressMap.size();
         }
 
+        private boolean isSameMethod(MethodDesc method, int idx) {
+            ASMLine line = lines.get(idx);
+            Long addr = line != null ? line.addr : null;
+            MethodDesc m = addr != null ? getMethod(addr) : null;
+            return m == null ? true : Objects.equals(m, method);
+            // if can't find method for the line assume it equals
+        }
+
+        private int adjustWindowForward(MethodDesc method, int beginIdx, int window) {
+            for (; beginIdx > 0 && window > 0; beginIdx--, window--) {
+                if (!isSameMethod(method, beginIdx - 1)) {
+                    return beginIdx;
+                }
+            }
+            return beginIdx;
+        }
+
+        private int adjustWindowBackward(MethodDesc method, int endIdx, int window) {
+            int size = lines.size();
+            for (; endIdx < size && window > 0; endIdx++, window--) {
+                if (!isSameMethod(method, endIdx)) {
+                    return endIdx;
+                }
+            }
+            return endIdx;
+        }
+
         public List<ASMLine> getLines(long begin, long end, int window) {
             SortedMap<Long, Integer> tailMap = addressMap.tailMap(begin);
 
@@ -1016,9 +1064,9 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             } else {
                 return Collections.emptyList();
             }
-
-            beginIdx = Math.max(0, beginIdx - window);
-            endIdx = Math.min(lines.size(), endIdx + 2 + window);
+            MethodDesc method = getMethod(begin);
+            beginIdx = adjustWindowForward(method, beginIdx, window);
+            endIdx = adjustWindowBackward(method, endIdx, 2 + window);
 
             // Compensate for minute discrepancies
             if (beginIdx < endIdx) {
