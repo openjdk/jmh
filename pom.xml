@@ -278,7 +278,7 @@ questions.
             <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
-                <version>5.0.3</version>
+                <version>7.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
