@@ -968,10 +968,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             }
         }
 
-        public PerfEvents(Collection<String> tracedEvents) {
-            this(tracedEvents, Collections.<String, Multiset<Long>>emptyMap(), new IntervalMap<MethodDesc>());
-        }
-
         public boolean isEmpty() {
             return events.isEmpty();
         }

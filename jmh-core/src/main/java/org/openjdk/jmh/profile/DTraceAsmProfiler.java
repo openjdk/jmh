@@ -205,7 +205,7 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
             return new PerfEvents(this.events, allEvents, methodMap);
 
         } catch (IOException e) {
-            return new PerfEvents(events);
+            throw new RuntimeException(e);
         }
 
     }

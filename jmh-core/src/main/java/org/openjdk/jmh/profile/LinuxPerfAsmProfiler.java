@@ -267,7 +267,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
             return new PerfEvents(this.events, events, methodMap);
         } catch (IOException e) {
-            return new PerfEvents(events);
+            throw new RuntimeException(e);
         }
     }
 
