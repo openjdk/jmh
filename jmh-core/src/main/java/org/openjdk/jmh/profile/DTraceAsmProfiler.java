@@ -145,6 +145,11 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
                 line = line.trim();
                 line = line.substring(line.indexOf(":profile"));
                 String[] splits = line.split(" ", 5);
+                if (splits.length < 2) {
+                    // Suspect completely corrupted line, skip
+                    continue;
+                }
+
                 String sampledPid = splits[1];
 
                 if (!sampledPid.equals(pid)) {
