@@ -45,7 +45,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public final class BinaryLinkClient {
 
@@ -62,6 +64,8 @@ public final class BinaryLinkClient {
     private final OutputFormat outputFormat;
     private volatile boolean failed;
     private int resetToGo;
+    private final List<Serializable> delayedFrames;
+    private boolean inFrame;
 
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.lock = new Object();
@@ -86,6 +90,8 @@ public final class BinaryLinkClient {
                     }
                 }
         );
+
+        this.delayedFrames = new ArrayList<>();
     }
 
     private void pushFrame(Serializable frame) throws IOException {
@@ -102,7 +108,18 @@ public final class BinaryLinkClient {
         // pushed something out.
 
         synchronized (lock) {
+            if (inFrame) {
+                // Something had produced this frame while we were writing another one.
+                // Most probably, stdout/stderr message was produced when serializing data.
+                // Delay this frame until the write is over, and let the original writer to
+                // pick it up later.
+                delayedFrames.add(frame);
+                return;
+            }
+
             try {
+                inFrame = true;
+
                 if (resetToGo-- < 0) {
                     oos.reset();
                     resetToGo = RESET_EACH;
@@ -110,9 +127,22 @@ public final class BinaryLinkClient {
 
                 oos.writeObject(frame);
                 oos.flush();
+
+                // Do all delayed frames now. On the off-chance their writes produce more frames,
+                // drain them recursively.
+                while (!delayedFrames.isEmpty()) {
+                    List<Serializable> frames = new ArrayList<>(delayedFrames);
+                    delayedFrames.clear();
+                    for (Serializable f : frames) {
+                        oos.writeObject(f);
+                    }
+                    oos.flush();
+                }
             } catch (IOException e) {
                 failed = true;
                 throw e;
+            } finally {
+                inFrame = false;
             }
         }
     }
