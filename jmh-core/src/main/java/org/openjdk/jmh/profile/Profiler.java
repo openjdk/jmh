@@ -36,6 +36,12 @@ package org.openjdk.jmh.profile;
  * The message in {@link org.openjdk.jmh.profile.ProfilerException} should
  * clearly articulate the reason.
  *
+ * <p>JMH will try to discover profiler implementations using the SPI mechanism.
+ * Note: discoverable implementations <em>must</em> provide a no-arg constructor
+ * for initial discovery; the instance created during discovery will be rejected.
+ * If implementation would have a constructor accepting the String option line,
+ * it would be preferred for subsequent instantiation over the no-arg constructor.
+ *
  * <p>Profilers normally implement one of the subinterfaces.</p>
  * @see org.openjdk.jmh.profile.ExternalProfiler
  * @see org.openjdk.jmh.profile.InternalProfiler
