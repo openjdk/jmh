@@ -843,7 +843,17 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     // invokehandle  233 invokehandle  [0x00007f631d023100, 0x00007f631d0233c0]  704 bytes
                     // StubRoutines::catch_exception [0x00007feb43fa7b27, 0x00007feb43fa7b46[ (31 bytes)
 
-                    Pattern pattern = Pattern.compile("(.+)( +)\\[(.+), (.+)[\\]\\[](.*)");
+                    // JDK 13 adds another "-------" line after StubRoutines line, so we need to filter out
+                    // mismatched lines that follow it. This is why regexp is anchored at the start of the line.
+                    // Example:
+                    //
+                    // StubRoutines::updateBytesCRC32 [0x0000ffff6c819700, 0x0000ffff6c819870] (368 bytes)
+                    // --------------------------------------------------------------------------------
+                    //  0x0000ffff6c819700:   stp     x29, x30, [sp, #-16]!  <--- do not match this
+                    //  0x0000ffff6c819704:   mov     x29, sp
+                    //  0x0000ffff6c819708:   mvn     w0, w0
+
+                    Pattern pattern = Pattern.compile("^(\\S.*)( +)\\[(.+), (.+)[\\]\\[](.*)");
                     Matcher matcher = pattern.matcher(line);
 
                     if (matcher.matches()) {
