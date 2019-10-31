@@ -193,7 +193,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
 
-                String[] elems = line.split(",");
+                String[] elems = line.split(",\\s+");
 
                 String evName = elems[0].trim();
 
