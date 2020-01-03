@@ -1115,19 +1115,27 @@ public class BenchmarkGenerator {
         }
     }
 
-    static String[] INDENTS = new String[0];
+    static volatile String[] INDENTS;
+    static final Object INDENTS_LOCK = new Object();
 
     static String ident(int tabs) {
-        final int TAB_SIZE = 4;
-        if (tabs >= INDENTS.length) {
-            INDENTS = new String[tabs + 1];
-            for (int p = 0; p <= tabs; p++) {
-                char[] chars = new char[p * TAB_SIZE];
-                Arrays.fill(chars, ' ');
-                INDENTS[p] = new String(chars);
+        String[] is = INDENTS;
+        if (is == null || tabs >= is.length) {
+            synchronized (INDENTS_LOCK) {
+                is = INDENTS;
+                if (is == null || tabs >= is.length) {
+                    final int TAB_SIZE = 4;
+                    is = new String[tabs + 1];
+                    for (int p = 0; p <= tabs; p++) {
+                        char[] cs = new char[p * TAB_SIZE];
+                        Arrays.fill(cs, ' ');
+                        is[p] = new String(cs);
+                    }
+                    INDENTS = is;
+                }
             }
         }
-        return INDENTS[tabs];
+        return is[tabs];
     }
 
 }
