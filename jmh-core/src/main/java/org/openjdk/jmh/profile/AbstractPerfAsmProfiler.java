@@ -822,12 +822,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
                         if (elements.length > 1 && (drawInterJumps || drawIntraJumps)) {
                             for (int c = 1; c < elements.length; c++) {
-                                if (elements[c].startsWith("0x")) {
+                                if (maybeAddress(elements[c])) {
                                     try {
                                         Long target = parseAddress(elements[c]);
                                         intervals.add(new Interval(addr, target));
                                     } catch (NumberFormatException e) {
-                                        // nope
+                                        // Nope, not the address.
                                     }
                                 }
                             }
@@ -918,8 +918,18 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         return new Assembly(lines, addressMap, methodMap, intervals);
     }
 
+    private boolean maybeAddress(String str) {
+        return str.startsWith("0x") || str.endsWith("h");
+    }
+
     private Long parseAddress(String address) {
-        return Long.valueOf(address.replace("0x", "").replace(":", ""), 16);
+        if (address.startsWith("0x")) { // AT&T
+            return Long.valueOf(address.replace("0x", "").replace(":", ""), 16);
+        } else if (address.endsWith("h")) { // Intel
+            return Long.valueOf(address.replace("h", ""), 16);
+        } else {
+            throw new NumberFormatException("Address format not recognized: " + address);
+        }
     }
 
     static class PerfResult extends Result<PerfResult> {
