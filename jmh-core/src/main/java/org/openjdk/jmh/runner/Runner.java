@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -484,8 +484,15 @@ public class Runner extends BaseRunner {
         jvmArgs.addAll(options.getJvmArgsPrepend().orElse(
                 benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList())));
 
-        jvmArgs.addAll(options.getJvmArgs().orElse(
-                benchmark.getJvmArgs().orElse(ManagementFactory.getRuntimeMXBean().getInputArguments())));
+        // We want to be extra lazy when accessing ManagementFactory, because security manager
+        // may prevent us doing so. When JMH upgrades to Java 8, replaces this with proper Optional
+        // and lazy Supplier.
+        Optional<Collection<String>> jvmArgsMid = options.getJvmArgs().orAnother(benchmark.getJvmArgs());
+        if (jvmArgsMid.hasValue()) {
+            jvmArgs.addAll(jvmArgsMid.get());
+        } else {
+            jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+        }
 
         jvmArgs.addAll(options.getJvmArgsAppend().orElse(
                 benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
