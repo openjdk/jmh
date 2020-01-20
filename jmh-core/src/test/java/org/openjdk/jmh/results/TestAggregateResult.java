@@ -68,12 +68,12 @@ public class TestAggregateResult {
     }
 
     @Test
-    public void testScore() throws Exception {
+    public void testScore() {
         assertEquals(15.0, result.getPrimaryResult().getScore(), 0.00001);
     }
 
     @Test
-    public void testScoreUnit() throws Exception {
+    public void testScoreUnit() {
         assertEquals((new ThroughputResult(ResultRole.PRIMARY, "test1", 1, 1, TimeUnit.MILLISECONDS)).getScoreUnit(), result.getScoreUnit());
     }
 

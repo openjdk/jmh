@@ -56,7 +56,7 @@ public class TestLineReader {
             c = line.charAt(cursor);
         }
         cursor++;
-        return Integer.valueOf(sb.toString());
+        return Integer.parseInt(sb.toString());
     }
 
     private String readString() {
@@ -155,7 +155,7 @@ public class TestLineReader {
             int len = readLen();
             int[] rs = new int[len];
             for (int c = 0; c < len; c++) {
-                rs[c] = Integer.valueOf(readString());
+                rs[c] = Integer.parseInt(readString());
             }
             return rs;
         } else {

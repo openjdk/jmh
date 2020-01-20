@@ -37,7 +37,7 @@ class OutputFormatAdapter extends OutputStream {
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         out.write(b);
     }
 

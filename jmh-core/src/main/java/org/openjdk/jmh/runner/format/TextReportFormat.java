@@ -236,7 +236,7 @@ class TextReportFormat extends AbstractOutputFormat {
         out.println("experiments, perform baseline and negative tests that provide experimental control, make sure");
         out.println("the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.");
         out.println("Do not assume the numbers tell you what you want them to tell.");
-        out.println("");
+        out.println();
 
         ResultFormatFactory.getInstance(ResultFormatType.TEXT, out).writeOut(runResults);
     }

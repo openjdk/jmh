@@ -72,7 +72,7 @@ public class JMHSample_32_BulkWarmup {
         int inc();
     }
 
-    public class Counter1 implements Counter {
+    public static class Counter1 implements Counter {
         private int x;
 
         @Override
@@ -81,7 +81,7 @@ public class JMHSample_32_BulkWarmup {
         }
     }
 
-    public class Counter2 implements Counter {
+    public static class Counter2 implements Counter {
         private int x;
 
         @Override

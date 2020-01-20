@@ -29,6 +29,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Iteration parameters.
@@ -184,7 +185,7 @@ abstract class IterationParamsL2 extends IterationParamsL1 implements Serializab
 
         if (count != that.count) return false;
         if (batchSize != that.batchSize) return false;
-        if (timeValue != null ? !timeValue.equals(that.timeValue) : that.timeValue != null) return false;
+        if (!Objects.equals(timeValue, that.timeValue)) return false;
 
         return true;
     }

@@ -33,6 +33,7 @@ import org.openjdk.jmh.util.lines.TestLineWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
@@ -216,9 +217,9 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
         BenchmarkListEntry record = (BenchmarkListEntry) o;
 
         if (mode != record.mode) return false;
-        if (workloadParams != null ? !workloadParams.equals(record.workloadParams) : record.workloadParams != null) return false;
-        if (userClassQName != null ? !userClassQName.equals(record.userClassQName) : record.userClassQName != null) return false;
-        if (method != null ? !method.equals(record.method) : record.method != null) return false;
+        if (!Objects.equals(workloadParams, record.workloadParams)) return false;
+        if (!Objects.equals(userClassQName, record.userClassQName)) return false;
+        if (!Objects.equals(method, record.method)) return false;
 
         return true;
     }
@@ -258,7 +259,7 @@ public class BenchmarkListEntry implements Comparable<BenchmarkListEntry> {
 
     @Override
     public String toString() {
-        return "{\'" + userClassQName + "." + method + "\', " + mode + ", " + workloadParams + "}";
+        return "{'" + userClassQName + "." + method + "', " + mode + ", " + workloadParams + "}";
     }
 
     public Optional<TimeValue> getWarmupTime() {

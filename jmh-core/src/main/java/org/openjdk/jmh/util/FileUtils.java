@@ -160,7 +160,6 @@ public class FileUtils {
             for (String line : lines) {
                 pw.println(line);
             }
-            pw.close();
         }
     }
 
@@ -212,7 +211,6 @@ public class FileUtils {
                 fos.write(buf, 0, read);
             }
 
-            fos.close();
         }
     }
 

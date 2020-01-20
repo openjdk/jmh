@@ -62,7 +62,7 @@ public class JMHSample_12_Forking {
         int inc();
     }
 
-    public class Counter1 implements Counter {
+    public static class Counter1 implements Counter {
         private int x;
 
         @Override
@@ -71,7 +71,7 @@ public class JMHSample_12_Forking {
         }
     }
 
-    public class Counter2 implements Counter {
+    public static class Counter2 implements Counter {
         private int x;
 
         @Override

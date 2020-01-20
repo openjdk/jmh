@@ -211,7 +211,7 @@ class BenchmarkHandler {
          */
         FJP {
             @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
+            ExecutorService createExecutor(int maxThreads, String prefix) {
                 return new ForkJoinPool(maxThreads);
             }
         },

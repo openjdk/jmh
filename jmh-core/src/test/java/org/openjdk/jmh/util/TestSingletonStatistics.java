@@ -44,7 +44,7 @@ public class TestSingletonStatistics {
     private static final SingletonStatistics singStats = new SingletonStatistics(VALUE);
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() {
         listStats.addValue(VALUE);
     }
 

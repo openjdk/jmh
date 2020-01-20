@@ -161,7 +161,7 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
                     continue;
                 }
 
-                long timestamp = Long.valueOf(splits[3]);
+                long timestamp = Long.parseLong(splits[3]);
                 if (dtraceTimestampBase == 0) {
                     // Use first event timestamp as base for time comparison
                     dtraceTimestampBase = timestamp;

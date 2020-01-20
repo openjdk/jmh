@@ -102,8 +102,7 @@ class AnnotationInvocationHandler extends AnnotationVisitor implements Invocatio
 
             } else if (componentType.isAssignableFrom(String.class)) {
                 // Dealing with String[]:
-                return vs.toArray(new String[vs.size()]);
-
+                return vs.toArray(new String[0]);
             } else {
                 // "Dealing" with primitive array:
                 // We do not have any primitive-array-valued annotations yet, so we don't bother to implement this.

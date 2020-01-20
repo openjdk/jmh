@@ -48,9 +48,6 @@ public class GCProfiler implements InternalProfiler {
     private long beforeGCTime;
     private HotspotAllocationSnapshot beforeAllocated;
 
-    public GCProfiler() throws ProfilerException {
-    }
-
     @Override
     public String getDescription() {
         return "GC profiling via standard MBeans";

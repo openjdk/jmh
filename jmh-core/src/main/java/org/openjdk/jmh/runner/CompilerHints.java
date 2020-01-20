@@ -106,9 +106,9 @@ public class CompilerHints extends AbstractResourceReader {
             try {
                 // get the version digits
                 String[] versionDigits = version.substring(version.indexOf('_') + 1).split("\\.");
-                if (Integer.valueOf(versionDigits[0]) > 5) {
+                if (Integer.parseInt(versionDigits[0]) > 5) {
                     return true;
-                } else if (Integer.valueOf(versionDigits[0]) == 5 && Integer.valueOf(versionDigits[1]) >= 10) {
+                } else if (Integer.parseInt(versionDigits[0]) == 5 && Integer.parseInt(versionDigits[1]) >= 10) {
                     return true;
                 }
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -128,9 +128,7 @@ public class CompilerHints extends AbstractResourceReader {
 
         try {
             for (Reader r : getReaders()) {
-                BufferedReader reader = null;
-                try {
-                    reader = new BufferedReader(r);
+                try (BufferedReader reader = new BufferedReader(r)) {
                     for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                         if (line.startsWith("#")) {
                             continue;
@@ -141,14 +139,6 @@ public class CompilerHints extends AbstractResourceReader {
                         }
 
                         result.add(line);
-                    }
-                } finally {
-                    try {
-                        if (reader != null) {
-                            reader.close();
-                        }
-                    } catch (IOException e) {
-                        // ignore
                     }
                 }
             }

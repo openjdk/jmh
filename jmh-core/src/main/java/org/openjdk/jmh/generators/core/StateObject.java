@@ -77,7 +77,7 @@ class StateObject {
         if (!fieldIdentifier.equals(that.fieldIdentifier))
             return false;
         if (scope != that.scope) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (!Objects.equals(type, that.type)) return false;
 
         return true;
     }

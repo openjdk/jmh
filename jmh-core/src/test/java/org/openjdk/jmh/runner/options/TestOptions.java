@@ -70,7 +70,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testIncludes_Default() throws Exception {
+    public void testIncludes_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getIncludes(), EMPTY_CMDLINE.getIncludes());
     }
 
@@ -82,7 +82,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testExcludes_Default() throws Exception {
+    public void testExcludes_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getExcludes(), EMPTY_CMDLINE.getExcludes());
     }
 
@@ -94,7 +94,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testOutput_Default() throws Exception {
+    public void testOutput_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getOutput(), EMPTY_CMDLINE.getOutput());
     }
 
@@ -126,7 +126,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testResultFormats_Default() throws Exception {
+    public void testResultFormats_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getResultFormat(), EMPTY_CMDLINE.getResultFormat());
     }
 
@@ -138,7 +138,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testResult_Default() throws Exception {
+    public void testResult_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getResult(), EMPTY_CMDLINE.getResult());
     }
 
@@ -157,7 +157,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testGC_Default() throws Exception {
+    public void testGC_Default() {
         Assert.assertEquals(EMPTY_BUILDER.shouldDoGC(), EMPTY_CMDLINE.shouldDoGC());
     }
 
@@ -169,7 +169,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testProfilers_Default() throws Exception {
+    public void testProfilers_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getProfilers(), EMPTY_CMDLINE.getProfilers());
     }
 
@@ -201,7 +201,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testVerbose_Default() throws Exception {
+    public void testVerbose_Default() {
         Assert.assertEquals(EMPTY_BUILDER.verbosity(), EMPTY_CMDLINE.verbosity());
     }
 
@@ -220,7 +220,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testSFOE_Default() throws Exception {
+    public void testSFOE_Default() {
         Assert.assertEquals(EMPTY_BUILDER.shouldFailOnError(), EMPTY_CMDLINE.shouldFailOnError());
     }
 
@@ -239,7 +239,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreads_Zero() throws Exception {
+    public void testThreads_Zero() {
         try {
             new CommandLineOptions("-t", "0");
             Assert.fail();
@@ -249,7 +249,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreads_Zero_OptionsBuilder() throws Exception {
+    public void testThreads_Zero_OptionsBuilder() {
         try {
             new OptionsBuilder().threads(0);
             Assert.fail();
@@ -259,7 +259,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreads_MinusOne() throws Exception {
+    public void testThreads_MinusOne() {
         try {
             new CommandLineOptions("-t", "-1");
             Assert.fail();
@@ -269,7 +269,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreads_Minus42() throws Exception {
+    public void testThreads_Minus42() {
         try {
             new CommandLineOptions("-t", "-42");
             Assert.fail();
@@ -279,7 +279,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreads_Minus42_OptionsBuilder() throws Exception {
+    public void testThreads_Minus42_OptionsBuilder() {
         try {
             new OptionsBuilder().threads(-42);
         } catch (IllegalArgumentException e) {
@@ -288,7 +288,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreads_Default() throws Exception {
+    public void testThreads_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getThreads(), EMPTY_CMDLINE.getThreads());
     }
 
@@ -300,7 +300,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreadGroups_Default() throws Exception {
+    public void testThreadGroups_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getThreadGroups(), EMPTY_CMDLINE.getThreadGroups());
     }
 
@@ -312,7 +312,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreadGroups_AllZero() throws Exception {
+    public void testThreadGroups_AllZero() {
         try {
             new CommandLineOptions("-tg", "0,0,0");
             Assert.fail();
@@ -322,7 +322,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreadGroups_AllZero_OptionsBuilder() throws Exception {
+    public void testThreadGroups_AllZero_OptionsBuilder() {
         try {
             new OptionsBuilder().threadGroups(0, 0, 0);
             Assert.fail();
@@ -332,7 +332,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreadGroups_WithNegative() throws Exception {
+    public void testThreadGroups_WithNegative() {
         try {
             new CommandLineOptions("-tg", "-1,-2");
             Assert.fail();
@@ -342,7 +342,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testThreadGroups_WithNegative_OptionsBuilder() throws Exception {
+    public void testThreadGroups_WithNegative_OptionsBuilder() {
         try {
             new OptionsBuilder().threadGroups(-1,-2);
             Assert.fail();
@@ -366,7 +366,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testSynchIterations_Default() throws Exception {
+    public void testSynchIterations_Default() {
         Assert.assertEquals(EMPTY_BUILDER.shouldSyncIterations(), EMPTY_CMDLINE.shouldSyncIterations());
     }
 
@@ -378,7 +378,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupIterations_Default() throws Exception {
+    public void testWarmupIterations_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupIterations(), EMPTY_CMDLINE.getWarmupIterations());
     }
 
@@ -390,7 +390,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupIterations_MinusOne() throws Exception {
+    public void testWarmupIterations_MinusOne() {
         try {
             new CommandLineOptions("-wi", "-1");
             Assert.fail();
@@ -400,7 +400,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupIterations_MinusOne_OptionsBuilder() throws Exception {
+    public void testWarmupIterations_MinusOne_OptionsBuilder() {
         try {
             new OptionsBuilder().warmupIterations(-1);
             Assert.fail();
@@ -417,7 +417,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupTime_Default() throws Exception {
+    public void testWarmupTime_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupTime(), EMPTY_CMDLINE.getWarmupTime());
     }
 
@@ -429,12 +429,12 @@ public class TestOptions {
     }
 
     @Test
-    public void testRuntimeIterations_Default() throws Exception {
+    public void testRuntimeIterations_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getMeasurementIterations(), EMPTY_CMDLINE.getMeasurementIterations());
     }
 
     @Test
-    public void testRuntimeIterations_Zero() throws Exception {
+    public void testRuntimeIterations_Zero() {
         try {
             new CommandLineOptions("-i", "0");
             Assert.fail();
@@ -444,7 +444,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testRuntimeIterations_Zero_OptionsBuilder() throws Exception {
+    public void testRuntimeIterations_Zero_OptionsBuilder() {
         try {
             new OptionsBuilder().measurementIterations(0);
             Assert.fail();
@@ -461,7 +461,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testRuntime_Default() throws Exception {
+    public void testRuntime_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getMeasurementTime(), EMPTY_CMDLINE.getMeasurementTime());
     }
 
@@ -473,7 +473,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupMicros_Default() throws Exception {
+    public void testWarmupMicros_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupIncludes(), EMPTY_CMDLINE.getWarmupIncludes());
     }
 
@@ -486,7 +486,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testBenchModes_Default() throws Exception {
+    public void testBenchModes_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getBenchModes(), EMPTY_CMDLINE.getBenchModes());
     }
 
@@ -498,7 +498,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testTimeunit_Default() throws Exception {
+    public void testTimeunit_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getTimeUnit(), EMPTY_CMDLINE.getTimeUnit());
     }
 
@@ -510,7 +510,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testOPI_Zero() throws Exception {
+    public void testOPI_Zero() {
         try {
             new CommandLineOptions("-opi", "0");
             Assert.fail();
@@ -520,7 +520,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testOPI_Zero_OptionsBuilder() throws Exception {
+    public void testOPI_Zero_OptionsBuilder() {
         try {
             new OptionsBuilder().operationsPerInvocation(0);
             Assert.fail();
@@ -530,7 +530,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testOPI_Default() throws Exception {
+    public void testOPI_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getOperationsPerInvocation(), EMPTY_CMDLINE.getOperationsPerInvocation());
     }
 
@@ -549,12 +549,12 @@ public class TestOptions {
     }
 
     @Test
-    public void testFork_Default() throws Exception {
+    public void testFork_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getForkCount(), EMPTY_CMDLINE.getForkCount());
     }
 
     @Test
-    public void testFork_MinusOne() throws Exception {
+    public void testFork_MinusOne() {
         try {
             new CommandLineOptions("-f", "-1");
             Assert.fail();
@@ -564,7 +564,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testFork__MinusOne_OptionsBuilder() throws Exception {
+    public void testFork__MinusOne_OptionsBuilder() {
         try {
             new OptionsBuilder().forks(-1);
             Assert.fail();
@@ -588,12 +588,12 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupFork_Default() throws Exception {
+    public void testWarmupFork_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupForkCount(), EMPTY_CMDLINE.getWarmupForkCount());
     }
 
     @Test
-    public void testWarmupFork_MinusOne() throws Exception {
+    public void testWarmupFork_MinusOne() {
         try {
             new CommandLineOptions("-wf", "-1");
             Assert.fail();
@@ -603,7 +603,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupFork_MinusOne_OptionsBuilder() throws Exception {
+    public void testWarmupFork_MinusOne_OptionsBuilder() {
         try {
             new OptionsBuilder().warmupForks(-1);
             Assert.fail();
@@ -620,7 +620,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testJvm_Default() throws Exception {
+    public void testJvm_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getJvm(), EMPTY_CMDLINE.getJvm());
     }
 
@@ -632,7 +632,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testJvmArgs_Default() throws Exception {
+    public void testJvmArgs_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getJvmArgs(), EMPTY_CMDLINE.getJvmArgs());
     }
 
@@ -644,7 +644,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testJvmArgsAppend_Default() throws Exception {
+    public void testJvmArgsAppend_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getJvmArgsAppend(), EMPTY_CMDLINE.getJvmArgsAppend());
     }
 
@@ -656,7 +656,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testJvmArgsPrepend_Default() throws Exception {
+    public void testJvmArgsPrepend_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getJvmArgsPrepend(), EMPTY_CMDLINE.getJvmArgsPrepend());
     }
 
@@ -668,12 +668,12 @@ public class TestOptions {
     }
 
     @Test
-    public void testBatchSize_Default() throws Exception {
+    public void testBatchSize_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getMeasurementBatchSize(), EMPTY_CMDLINE.getMeasurementBatchSize());
     }
 
     @Test
-    public void testBatchSize_Zero() throws Exception {
+    public void testBatchSize_Zero() {
         try {
             new CommandLineOptions("-bs", "0");
             Assert.fail();
@@ -683,7 +683,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testBatchSize_Zero_OptionsBuilder() throws Exception {
+    public void testBatchSize_Zero_OptionsBuilder() {
         try {
             new OptionsBuilder().measurementBatchSize(0);
             Assert.fail();
@@ -700,12 +700,12 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupBatchSize_Default() throws Exception {
+    public void testWarmupBatchSize_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getWarmupBatchSize(), EMPTY_CMDLINE.getWarmupBatchSize());
     }
 
     @Test
-    public void testWarmupBatchSize_Zero() throws Exception {
+    public void testWarmupBatchSize_Zero() {
         try {
             new CommandLineOptions("-wbs", "0");
             Assert.fail();
@@ -715,7 +715,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testWarmupBatchSize_Zero_OptionsBuilder() throws Exception {
+    public void testWarmupBatchSize_Zero_OptionsBuilder() {
         try {
             new OptionsBuilder().warmupBatchSize(0);
             Assert.fail();
@@ -769,7 +769,7 @@ public class TestOptions {
     }
 
     @Test
-    public void testTimeout_Default() throws Exception {
+    public void testTimeout_Default() {
         Assert.assertEquals(EMPTY_BUILDER.getTimeout(), EMPTY_CMDLINE.getTimeout());
     }
 

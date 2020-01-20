@@ -49,7 +49,7 @@ public class TestListStatistics {
     private static final ListStatistics instance = new ListStatistics();
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() {
         for (double value : VALUES) {
             instance.addValue(value);
         }
@@ -76,7 +76,7 @@ public class TestListStatistics {
      */
     @Test
     public strictfp void testGetN() {
-        assertEquals((long) VALUES.length, instance.getN());
+        assertEquals(VALUES.length, instance.getN());
     }
 
     /**

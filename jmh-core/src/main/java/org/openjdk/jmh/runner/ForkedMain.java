@@ -51,7 +51,7 @@ class ForkedMain {
      *
      * @param argv Command line arguments
      */
-    public static void main(String[] argv) throws Exception {
+    public static void main(String[] argv) {
         if (argv.length != 2) {
             throw new IllegalArgumentException("Expected two arguments for forked VM");
         } else {
@@ -66,7 +66,7 @@ class ForkedMain {
                 //   1) host name to back-connect
                 //   2) host port to back-connect
                 String hostName = argv[0];
-                int hostPort = Integer.valueOf(argv[1]);
+                int hostPort = Integer.parseInt(argv[1]);
 
                 // establish the link to host VM and pull the options
                 BinaryLinkClient link = new BinaryLinkClient(hostName, hostPort);

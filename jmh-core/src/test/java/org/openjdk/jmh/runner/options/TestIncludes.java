@@ -40,7 +40,7 @@ public class TestIncludes {
     }
 
     @Test
-    public void testOptBuilder_OptBuilder() throws CommandLineOptionException {
+    public void testOptBuilder_OptBuilder() {
         Options opts = new OptionsBuilder()
                 .parent(new OptionsBuilder().build())
                 .include(".*boo.*")

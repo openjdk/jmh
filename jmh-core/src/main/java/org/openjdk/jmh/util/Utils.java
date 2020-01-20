@@ -170,7 +170,7 @@ public class Utils {
         int[] arr = new int[ss.length];
         int cnt = 0;
         for (String s : ss) {
-            arr[cnt] = Integer.valueOf(s.trim());
+            arr[cnt] = Integer.parseInt(s.trim());
             cnt++;
         }
         return arr;
@@ -407,7 +407,7 @@ public class Utils {
             if (idx != -1) {
                 String str = name.substring(0, name.indexOf(DELIM));
                 try {
-                    return Long.valueOf(str);
+                    return Long.parseLong(str);
                 } catch (NumberFormatException nfe) {
                     throw new IllegalStateException("Process PID is not a number: " + str);
                 }

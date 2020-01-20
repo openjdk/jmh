@@ -126,7 +126,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
         double time;
         try {
-            time = Double.valueOf(strTime);
+            time = Double.parseDouble(strTime);
         } catch (NumberFormatException e) {
             return null;
         }
@@ -135,7 +135,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         int libIdx = line.lastIndexOf(" (");
         if (libIdx == -1) return null;
         String lib = line.substring(libIdx);
-        lib = lib.substring(lib.lastIndexOf("/") + 1, lib.length()).replace("(", "").replace(")", "");
+        lib = lib.substring(lib.lastIndexOf("/") + 1).replace("(", "").replace(")", "");
         line = line.substring(0, libIdx);
 
         // Chomp the event name:
@@ -159,7 +159,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         // If that fails as well, then address is unresolvable.
         long addr;
         try {
-            addr = Long.valueOf(strAddr, 16);
+            addr = Long.parseLong(strAddr, 16);
         } catch (NumberFormatException e) {
             try {
                 addr = new BigInteger(strAddr, 16).longValue();

@@ -35,7 +35,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.util.Multimap;
 import org.openjdk.jmh.util.TreeMultimap;
 import org.openjdk.jmh.util.Utils;
-import org.openjdk.jmh.util.Version;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;

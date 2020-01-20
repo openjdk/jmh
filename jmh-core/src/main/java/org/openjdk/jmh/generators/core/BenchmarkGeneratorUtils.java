@@ -287,7 +287,7 @@ class BenchmarkGeneratorUtils {
                         + "Declare some constants or remove the @" + Param.class.getSimpleName() + ".",
                         fi);
             }
-            return enumConstants.toArray(new String[enumConstants.size()]);
+            return enumConstants.toArray(new String[0]);
         } else {
             return annotatedValues;
         }

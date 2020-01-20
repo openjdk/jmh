@@ -48,7 +48,7 @@ public class TestMultisetStatistics {
     private static final MultisetStatistics instance = new MultisetStatistics();
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() {
         for (double value : VALUES) {
             instance.addValue(value, 1);
         }
@@ -75,7 +75,7 @@ public class TestMultisetStatistics {
      */
     @Test
     public strictfp void testGetN() {
-        assertEquals((long) VALUES.length, instance.getN());
+        assertEquals(VALUES.length, instance.getN());
     }
 
     /**
@@ -405,6 +405,7 @@ public class TestMultisetStatistics {
             for (double value : VALUES) {
                 if (Double.compare(value, key) == 0) {
                     keyIsPresent = true;
+                    break;
                 }
             }
             Assert.assertTrue("Value from iterator is not present in source collection", keyIsPresent);

@@ -25,6 +25,7 @@
 package org.openjdk.jmh.util;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Option class
@@ -107,7 +108,7 @@ public class Optional<T> implements Serializable {
 
         Optional optional = (Optional) o;
 
-        if (val != null ? !val.equals(optional.val) : optional.val != null) return false;
+        if (!Objects.equals(val, optional.val)) return false;
 
         return true;
     }

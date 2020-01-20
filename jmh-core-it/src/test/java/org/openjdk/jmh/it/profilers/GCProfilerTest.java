@@ -77,12 +77,6 @@ public class GCProfilerTest {
 
     @Test
     public void testAllocationProfiler() throws RunnerException {
-        try {
-            new GCProfiler();
-        } catch (ProfilerException e) {
-            // not supported
-            return;
-        }
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .addProfiler(GCProfiler.class)

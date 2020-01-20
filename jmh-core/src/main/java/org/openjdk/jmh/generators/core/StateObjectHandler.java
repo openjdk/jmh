@@ -441,9 +441,10 @@ class StateObjectHandler {
         }
         if (typeName.equals("byte") || typeName.equals("java.lang.Byte")) {
             try {
-                Byte.valueOf(val);
+                Byte.parseByte(val);
                 return true;
             } catch (NumberFormatException nfe) {
+                return false;
             }
         }
         if (typeName.equals("char") || typeName.equals("java.lang.Character")) {
@@ -451,37 +452,42 @@ class StateObjectHandler {
         }
         if (typeName.equals("short") || typeName.equals("java.lang.Short")) {
             try {
-                Short.valueOf(val);
+                Short.parseShort(val);
                 return true;
             } catch (NumberFormatException nfe) {
+                return false;
             }
         }
         if (typeName.equals("int") || typeName.equals("java.lang.Integer")) {
             try {
-                Integer.valueOf(val);
+                Integer.parseInt(val);
                 return true;
             } catch (NumberFormatException nfe) {
+                return false;
             }
         }
         if (typeName.equals("float") || typeName.equals("java.lang.Float")) {
             try {
-                Float.valueOf(val);
+                Float.parseFloat(val);
                 return true;
             } catch (NumberFormatException nfe) {
+                return false;
             }
         }
         if (typeName.equals("long") || typeName.equals("java.lang.Long")) {
             try {
-                Long.valueOf(val);
+                Long.parseLong(val);
                 return true;
             } catch (NumberFormatException nfe) {
+                return false;
             }
         }
         if (typeName.equals("double") || typeName.equals("java.lang.Double")) {
             try {
-                Double.valueOf(val);
+                Double.parseDouble(val);
                 return true;
             } catch (NumberFormatException nfe) {
+                return false;
             }
         }
         return false;

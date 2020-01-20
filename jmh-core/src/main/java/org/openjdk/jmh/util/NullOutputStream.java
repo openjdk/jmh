@@ -24,23 +24,22 @@
  */
 package org.openjdk.jmh.util;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 public class NullOutputStream extends OutputStream {
 
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(byte[] b) {
         // drop
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) {
         // drop
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         // drop
     }
 }

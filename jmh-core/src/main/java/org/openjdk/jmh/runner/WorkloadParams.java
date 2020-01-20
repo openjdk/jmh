@@ -25,10 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class WorkloadParams implements Comparable<WorkloadParams>, Serializable {
     private static final long serialVersionUID = 780563934988950196L;
@@ -82,10 +79,7 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
         if (o == null || getClass() != o.getClass()) return false;
 
         WorkloadParams that = (WorkloadParams) o;
-
-        if (params != null ? !params.equals(that.params) : that.params != null) return false;
-
-        return true;
+        return Objects.equals(params, that.params);
     }
 
     @Override
@@ -133,9 +127,7 @@ public class WorkloadParams implements Comparable<WorkloadParams>, Serializable 
 
             Value value1 = (Value) o;
 
-            if (value != null ? !value.equals(value1.value) : value1.value != null) return false;
-
-            return true;
+            return Objects.equals(value, value1.value);
         }
 
         @Override

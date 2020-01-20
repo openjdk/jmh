@@ -669,7 +669,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     @Override
     public ChainedOptionsBuilder detectJvmArgs() {
         List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        return jvmArgs(inputArguments.toArray(new String[inputArguments.size()]));
+        return jvmArgs(inputArguments.toArray(new String[0]));
     }
 
     // ---------------------------------------------------------------------------

@@ -79,7 +79,7 @@ public class TestBenchmarkList {
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() {
         StringBuilder sb = new StringBuilder();
 
         stub(sb,
@@ -207,7 +207,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListGetNothing() throws Exception {
+    public void testListGetNothing() {
         // make sure we get nothing
         List<String> excludes = Collections.singletonList(".*");
         Set<BenchmarkListEntry> micros = list.getAll(out, excludes);
@@ -215,7 +215,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListGetAll() throws Exception {
+    public void testListGetAll() {
         // make sure we get em all
         List<String> excludes = Collections.emptyList();
         Set<BenchmarkListEntry> micros = list.getAll(out, excludes);
@@ -223,7 +223,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindSingleByPattern() throws Exception {
+    public void testListFindSingleByPattern() {
         // check find without excludes
         List<String> includes = Collections.singletonList(".*Hash.*");
         List<String> excludes = Collections.emptyList();
@@ -232,7 +232,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindSingleBySubstring() throws Exception {
+    public void testListFindSingleBySubstring() {
         // check find without excludes
         List<String> includes = Collections.singletonList("Hash");
         List<String> excludes = Collections.emptyList();
@@ -241,7 +241,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindSingleByTypical() throws Exception {
+    public void testListFindSingleByTypical() {
         // check find without excludes
         // this would be a typical partial pattern with . abuse case
         List<String> includes = Collections.singletonList("jbb05.GeneratedSPECjbb2005HashMap");
@@ -251,7 +251,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindAnchored() throws Exception {
+    public void testListFindAnchored() {
         // check find without excludes
         // matches only: org.openjdk.jmh.runner.TestMicro.dummy
         List<String> includes = Collections.singletonList("^org\\.openjdk.*\\.dummy$");
@@ -261,7 +261,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindSingleWithExcludes() throws Exception {
+    public void testListFindSingleWithExcludes() {
         // check find with excludes
         List<String> includes = Collections.singletonList(".*Hash.*");
         List<String> excludes = Collections.singletonList(".*Int.*");
@@ -270,7 +270,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindAllWithSubstringExclude() throws Exception {
+    public void testListFindAllWithSubstringExclude() {
         // check find with excludes
         List<String> includes = Collections.singletonList("");
         List<String> excludes = Collections.singletonList("oracle");
@@ -279,7 +279,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindAllWithEmpty() throws Exception {
+    public void testListFindAllWithEmpty() {
         List<String> includes = Collections.emptyList();
         List<String> excludes = Collections.emptyList();
         Set<BenchmarkListEntry> micros = list.find(out, includes, excludes);
@@ -287,7 +287,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindIncludeList() throws Exception {
+    public void testListFindIncludeList() {
         // check find with excludes
         List<String> includes = Arrays.asList("^oracle", ".*openjmh.*");
         List<String> excludes = Collections.emptyList();
@@ -296,7 +296,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListFindWithIncludesAndExcludes() throws Exception {
+    public void testListFindWithIncludesAndExcludes() {
         List<String> includes = Collections.singletonList(".*Concurrent.*");
         List<String> excludes = Collections.singletonList(".*Int.*");
         Set<BenchmarkListEntry> micros = list.find(out, includes, excludes);
@@ -304,7 +304,7 @@ public class TestBenchmarkList {
     }
 
     @Test
-    public void testListIsSorted() throws Exception {
+    public void testListIsSorted() {
         // micros should be sorted
         List<String> includes = Collections.singletonList(".*Hash.*");
         List<String> excludes = Collections.singletonList(".*Int.*");

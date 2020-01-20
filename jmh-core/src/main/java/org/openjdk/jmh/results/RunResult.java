@@ -73,9 +73,7 @@ public class RunResult implements Serializable {
 
         Collection<IterationResult> results = new ArrayList<>();
         for (BenchmarkResult r : benchmarkResults) {
-            for (IterationResult ir : r.getIterationResults()) {
-                results.add(ir);
-            }
+            results.addAll(r.getIterationResults());
         }
         BenchmarkResult result = new BenchmarkResult(params, results);
         for (BenchmarkResult br : benchmarkResults) {

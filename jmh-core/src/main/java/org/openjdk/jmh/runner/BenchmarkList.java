@@ -67,7 +67,7 @@ public class BenchmarkList extends AbstractResourceReader {
         }
     }
 
-    public static void writeBenchmarkList(OutputStream stream, Collection<BenchmarkListEntry> entries) throws IOException {
+    public static void writeBenchmarkList(OutputStream stream, Collection<BenchmarkListEntry> entries) {
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8))) {
             for (BenchmarkListEntry entry : entries) {
                 writer.println(entry.toLine());
@@ -120,10 +120,7 @@ public class BenchmarkList extends AbstractResourceReader {
         SortedSet<BenchmarkListEntry> result = new TreeSet<>();
         try {
             for (Reader r : getReaders()) {
-                BufferedReader reader = null;
-                try {
-                    reader = new BufferedReader(r);
-
+                try (BufferedReader reader = new BufferedReader(r)) {
                     for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                         if (line.startsWith("#")) {
                             continue;
@@ -156,14 +153,6 @@ public class BenchmarkList extends AbstractResourceReader {
                             } else {
                                 out.verbosePrintln("Excluding: " + br.getUsername() + ", does not match " + pattern);
                             }
-                        }
-                    }
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            // ignore
                         }
                     }
                 }

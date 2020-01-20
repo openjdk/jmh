@@ -747,7 +747,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             Interval prev = intervals.get(intervals.size() - 1);
             MethodDesc prevMethod = asms.getMethod(prev.src);
             MethodDesc method = asms.getMethod(begAddr);
-            if (prevMethod == null || method == null || !prevMethod.equals(method)) {
+            if (prevMethod == null || !prevMethod.equals(method)) {
                 intervals.add(new Interval(begAddr, lastAddr));
             } else {
                 intervals.set(intervals.size() - 1, new Interval(prev.src, lastAddr));
@@ -759,7 +759,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         try (FileReader in = new FileReader(stdOut);
              BufferedReader br = new BufferedReader(in)) {
             Multimap<Long, String> writerToLines = new HashMultimap<>();
-            Long writerId = -1L;
+            long writerId = -1L;
 
             Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
             String line;
@@ -771,7 +771,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     Matcher m = pWriterThread.matcher(line);
                     if (m.matches()) {
                         try {
-                            writerId = Long.valueOf(m.group(2));
+                            writerId = Long.parseLong(m.group(2));
                         } catch (NumberFormatException e) {
                             // something is wrong, try to recover
                         }
@@ -814,7 +814,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 if (trim.startsWith("0x")) {
                     // Seems to be line with address.
                     try {
-                        Long addr = parseAddress(elements[0]);
+                        long addr = parseAddress(elements[0]);
                         int idx = lines.size();
                         addressMap.put(addr, idx);
 
@@ -824,7 +824,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                             for (int c = 1; c < elements.length; c++) {
                                 if (maybeAddress(elements[c])) {
                                     try {
-                                        Long target = parseAddress(elements[c]);
+                                        long target = parseAddress(elements[c]);
                                         intervals.add(new Interval(addr, target));
                                     } catch (NumberFormatException e) {
                                         // Nope, not the address.
@@ -857,8 +857,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     Matcher matcher = pattern.matcher(line);
 
                     if (matcher.matches()) {
-                        Long startAddr = parseAddress(matcher.group(3));
-                        Long endAddr = parseAddress(matcher.group(4));
+                        long startAddr = parseAddress(matcher.group(3));
+                        long endAddr = parseAddress(matcher.group(4));
 
                         if (line.contains("StubRoutines::")) {
                             stubs.add(MethodDesc.runtimeStub(matcher.group(1)), startAddr, endAddr);
@@ -894,12 +894,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         }
 
                         // Record the starting address for the method
-                        Long addr = parseAddress(map.get("entry"));
+                        long addr = parseAddress(map.get("entry"));
 
                         javaMethods.add(
                                 MethodDesc.javaMethod(map.get("method"), map.get("compiler"), map.get("level"), map.get("compile_id")),
                                 addr,
-                                addr + Long.valueOf(map.get("size"))
+                                addr + Long.parseLong(map.get("size"))
                         );
                     }
                 }
@@ -922,11 +922,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         return str.startsWith("0x") || str.endsWith("h");
     }
 
-    private Long parseAddress(String address) {
+    private long parseAddress(String address) {
         if (address.startsWith("0x")) { // AT&T
-            return Long.valueOf(address.replace("0x", "").replace(":", ""), 16);
+            return Long.parseLong(address.replace("0x", "").replace(":", ""), 16);
         } else if (address.endsWith("h")) { // Intel
-            return Long.valueOf(address.replace("h", ""), 16);
+            return Long.parseLong(address.replace("h", ""), 16);
         } else {
             throw new NumberFormatException("Address format not recognized: " + address);
         }
@@ -1035,8 +1035,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             ASMLine line = lines.get(idx);
             Long addr = line != null ? line.addr : null;
             MethodDesc m = addr != null ? getMethod(addr) : null;
-            return m == null ? true : Objects.equals(m, method);
-            // if can't find method for the line assume it equals
+            // If we cannot find a method for the line, assume it "equals"
+            return (m == null) || Objects.equals(m, method);
         }
 
         private int adjustWindowForward(MethodDesc method, int beginIdx, int window) {

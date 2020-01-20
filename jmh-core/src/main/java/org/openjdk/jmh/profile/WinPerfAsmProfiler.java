@@ -218,7 +218,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 // Check timestamp
                 String timeStr = elems[1].trim();
 
-                double time = Double.valueOf(timeStr) / 1000000;
+                double time = Double.parseDouble(timeStr) / 1000000;
 
                 if (time < readFrom)
                     continue;
@@ -239,7 +239,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 assert evs != null;
 
                 try {
-                    Long addr = Long.valueOf(addrStr, 16);
+                    Long addr = Long.parseLong(addrStr, 16);
                     evs.add(addr);
                     methods.put(dedup.dedup(MethodDesc.nativeMethod(symbol, lib)), addr);
                 } catch (NumberFormatException e) {

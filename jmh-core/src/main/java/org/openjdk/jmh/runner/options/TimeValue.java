@@ -120,7 +120,7 @@ public class TimeValue implements Serializable {
         if (time == 0) {
             return "single-shot";
         } else {
-            return String.valueOf(time) + " " + tuToString(timeUnit);
+            return time + " " + tuToString(timeUnit);
         }
     }
 

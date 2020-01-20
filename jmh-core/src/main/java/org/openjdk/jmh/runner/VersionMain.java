@@ -34,7 +34,7 @@ class VersionMain {
     /**
      * @param argv Command line arguments
      */
-    public static void main(String[] argv) throws Exception {
+    public static void main(String[] argv) {
         System.err.println(Utils.getCurrentJvmVersion());
     }
 

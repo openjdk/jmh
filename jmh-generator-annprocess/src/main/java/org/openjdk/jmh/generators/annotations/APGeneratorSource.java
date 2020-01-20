@@ -83,9 +83,7 @@ public class APGeneratorSource implements GeneratorSource {
                 try {
                     TypeElement walk = (TypeElement) e;
                     do {
-                        for (TypeElement nested : ElementFilter.typesIn(walk.getEnclosedElements())) {
-                            newClasses.add(nested);
-                        }
+                        newClasses.addAll(ElementFilter.typesIn(walk.getEnclosedElements()));
                     }
                     while ((walk = (TypeElement) processingEnv.getTypeUtils().asElement(walk.getSuperclass())) != null);
                 } catch (Exception t) {
