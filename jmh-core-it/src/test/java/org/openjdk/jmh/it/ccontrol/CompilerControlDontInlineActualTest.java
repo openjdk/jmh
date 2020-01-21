@@ -66,7 +66,7 @@ public class CompilerControlDontInlineActualTest {
                     .mode(mode)
                     .shouldFailOnError(true)
                     .addProfiler(LogConsumeProfiler.class)
-                    .measurementIterations(mode == Mode.SingleShotTime ? 200000 : 1)
+                    .measurementIterations(mode == Mode.SingleShotTime ? 200_000 : 1)
                     .measurementTime(TimeValue.seconds(5))
                     .warmupIterations(0)
                     .forks(1)

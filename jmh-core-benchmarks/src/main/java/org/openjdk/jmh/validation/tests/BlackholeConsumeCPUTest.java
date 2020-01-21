@@ -55,8 +55,8 @@ public class BlackholeConsumeCPUTest implements ValidationTest {
         pw.printf("%20s%n", "#Tokens: ");
 
         for (int delay : new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000,
-                5000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000}) {
+                20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1_000,
+                5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000, 10_000_000}) {
             Options opts = new OptionsBuilder()
                     .parent(parent)
                     .include(BlackholeConsumeCPUBench.class.getCanonicalName())

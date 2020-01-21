@@ -81,7 +81,7 @@ public class BlackholePipelinedTest implements ValidationTest {
                 "Array",
         };
 
-        int[] ss = {1, 10, 100, 1000, 10000};
+        int[] ss = {1, 10, 100, 1_000, 10_000};
 
         pw.println("  Scores are nanoseconds per (normalized) benchmark op.");
         pw.println("  Trying loops with " + Arrays.toString(ss) + " iterations.");

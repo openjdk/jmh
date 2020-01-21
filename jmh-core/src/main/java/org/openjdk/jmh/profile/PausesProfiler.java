@@ -102,7 +102,7 @@ public class PausesProfiler implements InternalProfiler {
         SampleBuffer buf = new SampleBuffer();
 
         long lastTime = System.nanoTime();
-        for (int c = 0; c < 10000; c++) {
+        for (int c = 0; c < 10_000; c++) {
             LockSupport.parkNanos(expectedNs);
             long time = System.nanoTime();
 
@@ -153,7 +153,7 @@ public class PausesProfiler implements InternalProfiler {
         private final SampleBuffer buffer;
 
         public PausesProfilerResult(SampleBuffer buffer) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "pauses", buffer.getStatistics(1D / 1000000), "ms", AggregationPolicy.SUM);
+            super(ResultRole.SECONDARY, Defaults.PREFIX + "pauses", buffer.getStatistics(1D / 1_000_000), "ms", AggregationPolicy.SUM);
             this.buffer = buffer;
         }
 

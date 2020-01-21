@@ -38,49 +38,49 @@ public class TestThroughputResult {
      */
     @Test
     public void testGetScore() {
-        ThroughputResult instance = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MILLISECONDS);
-        assertEquals(1000, instance.getScore(), 0.0);
-        ThroughputResult instance2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
-        assertEquals(1000000, instance2.getScore(), 0.0);
-        ThroughputResult instance3 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000L, TimeUnit.MILLISECONDS);
-        assertEquals(1000 / (1000 / (double) 1000000), instance3.getScore(), 0.0);
+        ThroughputResult instance = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.MILLISECONDS);
+        assertEquals(1_000, instance.getScore(), 0.0);
+        ThroughputResult instance2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.SECONDS);
+        assertEquals(1_000_000, instance2.getScore(), 0.0);
+        ThroughputResult instance3 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000L, TimeUnit.MILLISECONDS);
+        assertEquals(1_000 / (1_000 / (double) 1_000_000), instance3.getScore(), 0.0);
     }
 
     @Test
     public void testTimeUnits() {
-        ThroughputResult instanced = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.DAYS);
-        assertEquals(86400000000D, instanced.getScore(), 0.0);
+        ThroughputResult instanced = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.DAYS);
+        assertEquals(86_400_000_000D, instanced.getScore(), 0.0);
         assertEquals("ops/day", instanced.getScoreUnit());
 
-        ThroughputResult instanceh = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.HOURS);
-        assertEquals(3600000000D, instanceh.getScore(), 0.0);
+        ThroughputResult instanceh = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.HOURS);
+        assertEquals(3_600_000_000D, instanceh.getScore(), 0.0);
         assertEquals("ops/hr", instanceh.getScoreUnit());
 
-        ThroughputResult instancem = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MINUTES);
-        assertEquals(60000000, instancem.getScore(), 0.0);
+        ThroughputResult instancem = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.MINUTES);
+        assertEquals(60_000_000, instancem.getScore(), 0.0);
         assertEquals("ops/min", instancem.getScoreUnit());
 
-        ThroughputResult instance = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.SECONDS);
-        assertEquals(1000000, instance.getScore(), 0.0);
+        ThroughputResult instance = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.SECONDS);
+        assertEquals(1_000_000, instance.getScore(), 0.0);
         assertEquals("ops/s", instance.getScoreUnit());
 
-        ThroughputResult instance2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MILLISECONDS);
-        assertEquals(1000, instance2.getScore(), 0.0);
+        ThroughputResult instance2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.MILLISECONDS);
+        assertEquals(1_000, instance2.getScore(), 0.0);
         assertEquals("ops/ms", instance2.getScoreUnit());
 
-        ThroughputResult instance3 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.MICROSECONDS);
+        ThroughputResult instance3 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.MICROSECONDS);
         assertEquals(1, instance3.getScore(), 0.0);
         assertEquals("ops/us", instance3.getScoreUnit());
 
-        ThroughputResult instance4 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 1000000L, TimeUnit.NANOSECONDS);
+        ThroughputResult instance4 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 1_000_000L, TimeUnit.NANOSECONDS);
         assertEquals(0.001, instance4.getScore(), 0.0);
         assertEquals("ops/ns", instance4.getScoreUnit());
     }
 
     @Test
     public void testRunAggregator1() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 10_000_000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000L, 10_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(150.0, result.getScore());
@@ -89,8 +89,8 @@ public class TestThroughputResult {
 
     @Test
     public void testRunAggregator2() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 10_000_000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000L, 20_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals(100.0, result.getScore());
@@ -99,18 +99,18 @@ public class TestThroughputResult {
 
     @Test // regression test, check for overflow
     public void testIterationAggregator3() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000_000_000L, 10_000_000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000_000_000L, 20_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(100000000.0, result.getScore());
+        assertEquals(100_000_000.0, result.getScore());
         assertEquals("ops/ms", result.getScoreUnit());
     }
 
     @Test
     public void testThreadAggregator1() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 10000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 10_000_000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000L, 10_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
@@ -119,8 +119,8 @@ public class TestThroughputResult {
 
     @Test
     public void testThreadAggregator2() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000L, 10_000_000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000L, 20_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
@@ -129,11 +129,11 @@ public class TestThroughputResult {
 
     @Test  // regression test, check for overflow
     public void testThreadAggregator3() {
-        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1000000000L, 10000000L, TimeUnit.MILLISECONDS);
-        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2000000000L, 20000000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r1 = new ThroughputResult(ResultRole.PRIMARY, "test1", 1_000_000_000L, 10_000_000L, TimeUnit.MILLISECONDS);
+        ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000_000_000L, 20_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
-        assertEquals(200000000.0, result.getScore());
+        assertEquals(200_000_000.0, result.getScore());
     }
 }

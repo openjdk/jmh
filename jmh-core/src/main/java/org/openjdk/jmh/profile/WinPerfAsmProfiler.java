@@ -218,7 +218,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 // Check timestamp
                 String timeStr = elems[1].trim();
 
-                double time = Double.parseDouble(timeStr) / 1000000;
+                double time = Double.parseDouble(timeStr) / 1_000_000;
 
                 if (time < readFrom)
                     continue;

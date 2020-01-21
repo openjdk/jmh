@@ -34,7 +34,7 @@ public class BlackholeTest {
     public void test() {
         int tlr = 1;
         int tlrMask = 2;
-        for (int t = 0; t < 1000000000; t++) {
+        for (int t = 0; t < 1_000_000_000; t++) {
             tlr = (tlr * 48271);
             if ((tlr & tlrMask) == 0) {
                 // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT

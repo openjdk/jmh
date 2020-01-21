@@ -36,7 +36,7 @@ public class ThermalRundownBench {
 
     @Benchmark
     public void test() {
-        Blackhole.consumeCPU(1000000);
+        Blackhole.consumeCPU(1_000_000);
     }
 
 }

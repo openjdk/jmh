@@ -42,7 +42,7 @@ public class BlackholeBench {
     public void makeGarbage() {
         // make some garbage to evict blackhole from the TLAB/eden
         strs = new ArrayList<>();
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             strs.add("str" + i);
         }
     }

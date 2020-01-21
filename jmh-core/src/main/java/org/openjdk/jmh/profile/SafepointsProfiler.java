@@ -146,7 +146,7 @@ public class SafepointsProfiler implements ExternalProfiler {
         private final SampleBuffer buffer;
 
         public SafepointProfilerResult(String suffix, SampleBuffer buffer) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "safepoints." + suffix, buffer.getStatistics(1D / 1000000), "ms", AggregationPolicy.SUM);
+            super(ResultRole.SECONDARY, Defaults.PREFIX + "safepoints." + suffix, buffer.getStatistics(1D / 1_000_000), "ms", AggregationPolicy.SUM);
             this.suffix = suffix;
             this.buffer = buffer;
         }

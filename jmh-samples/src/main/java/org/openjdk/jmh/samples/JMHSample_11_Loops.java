@@ -106,21 +106,21 @@ public class JMHSample_11_Loops {
     }
 
     @Benchmark
-    @OperationsPerInvocation(1000)
+    @OperationsPerInvocation(1_000)
     public int measureWrong_1000() {
-        return reps(1000);
+        return reps(1_000);
     }
 
     @Benchmark
-    @OperationsPerInvocation(10000)
+    @OperationsPerInvocation(10_000)
     public int measureWrong_10000() {
-        return reps(10000);
+        return reps(10_000);
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(100_000)
     public int measureWrong_100000() {
-        return reps(100000);
+        return reps(100_000);
     }
 
     /*

@@ -89,7 +89,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
         OptionSpec<Long> optHighPassFilter = parser.accepts("highPassFilter",
                         "Ignore event increments larger that this.")
-                .withRequiredArg().ofType(Long.class).describedAs("#").defaultsTo(100000000000L);
+                .withRequiredArg().ofType(Long.class).describedAs("#").defaultsTo(100_000_000_000L);
 
         OptionSpec<Boolean> optDefaultStat = parser.accepts("useDefaultStat",
                         "Use \"perf stat -d -d -d\" instead of explicit counter list.")

@@ -50,7 +50,7 @@ public class ForkedFootprintTest {
                     .include(Fixtures.getTestMask(this.getClass()))
                     .mode(mode)
                     .shouldFailOnError(true)
-                    .measurementIterations(mode == Mode.SingleShotTime ? 500000 : 1000)
+                    .measurementIterations(mode == Mode.SingleShotTime ? 500_000 : 1_000)
                     .measurementTime(TimeValue.milliseconds(5))
                     .warmupIterations(0)
                     .forks(1)
