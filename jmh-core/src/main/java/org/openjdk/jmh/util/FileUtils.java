@@ -25,6 +25,7 @@
 package org.openjdk.jmh.util;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
