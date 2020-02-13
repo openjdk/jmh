@@ -49,6 +49,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BenchmarkGenerator {
 
     private static final String JMH_STUB_SUFFIX = "_jmhStub";
+    private static final String JMH_TESTCLASS_SUFFIX = "_jmhTest";
+    protected static final String JMH_GENERATED_SUBPACKAGE = "jmh_generated";
 
     private final Set<BenchmarkInfo> benchmarkInfos;
     private final CompilerControlPlugin compilerControl;
@@ -203,7 +205,7 @@ public class BenchmarkGenerator {
 
         Multimap<ClassInfo, MethodInfo> result = new HashMultimap<>();
         for (ClassInfo currentClass : source.getClasses()) {
-            if (currentClass.getQualifiedName().contains("generated")) continue;
+            if (currentClass.getQualifiedName().contains(JMH_GENERATED_SUBPACKAGE)) continue;
             if (currentClass.isAbstract()) continue;
 
             ClassInfo walk = currentClass;
@@ -422,8 +424,8 @@ public class BenchmarkGenerator {
         Collection<BenchmarkInfo> benchmarks = new ArrayList<>();
         for (MethodGroup group : result.values()) {
             String sourcePackage = clazz.getPackageName();
-            String generatedPackageName = sourcePackage + ".generated";
-            String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz) + "_" + group.getName() + "_jmhTest";
+            String generatedPackageName = sourcePackage + "." + JMH_GENERATED_SUBPACKAGE;
+            String generatedClassName = BenchmarkGeneratorUtils.getGeneratedName(clazz) + "_" + group.getName() + JMH_TESTCLASS_SUFFIX;
 
             BenchmarkInfo info = new BenchmarkInfo(clazz.getQualifiedName(), generatedPackageName, generatedClassName, group);
             validateBenchmarkInfo(info);

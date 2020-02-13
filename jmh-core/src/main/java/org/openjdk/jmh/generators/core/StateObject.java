@@ -52,7 +52,7 @@ class StateObject {
     public final List<StateObject> depends;
 
     public StateObject(Identifiers identifiers, ClassInfo info, Scope scope) {
-        this.packageName = info.getPackageName() + ".generated";
+        this.packageName = info.getPackageName() + "." + BenchmarkGenerator.JMH_GENERATED_SUBPACKAGE;
         this.userType = info.getQualifiedName();
         this.type = identifiers.getJMHtype(info);
         this.scope = scope;
