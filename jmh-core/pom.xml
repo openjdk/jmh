@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2005, 2020, Oracle and/or its affiliates. All rights reserved.
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
 This code is free software; you can redistribute it and/or modify it
@@ -81,7 +81,12 @@ questions.
                     <compilerVersion>1.7</compilerVersion>
                     <source>1.7</source>
                     <target>1.7</target>
-                    <compilerArgument>-proc:none</compilerArgument>
+                    <fork>true</fork>
+                    <compilerArgs>
+                        <arg>-proc:none</arg>
+                        <arg>-Xlint:serial</arg>
+                    </compilerArgs>
+                    <showWarnings>true</showWarnings>
                 </configuration>
             </plugin>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,6 +27,8 @@ package org.openjdk.jmh.runner.options;
 import java.io.Serializable;
 
 public class ProfilerConfig implements Serializable {
+
+    private static final long serialVersionUID = -5105358164257442449L;
 
     private final String klass;
     private final String opts;

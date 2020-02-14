@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,6 +25,9 @@
 package org.openjdk.jmh.profile;
 
 public class ProfilerException extends Exception {
+
+    private static final long serialVersionUID = 1095296690895652155L;
+
     public ProfilerException(Exception e) {
         super(e);
     }

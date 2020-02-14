@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2020, Red Hat Inc.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -150,6 +150,9 @@ public class PausesProfiler implements InternalProfiler {
     }
 
     static class PausesProfilerResult extends Result<PausesProfilerResult> {
+
+        private static final long serialVersionUID = 3806848321463539969L;
+
         private final SampleBuffer buffer;
 
         public PausesProfilerResult(SampleBuffer buffer) {

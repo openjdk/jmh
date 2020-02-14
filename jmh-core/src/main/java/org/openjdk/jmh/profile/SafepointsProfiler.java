@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2020, Red Hat Inc.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -142,6 +142,9 @@ public class SafepointsProfiler implements ExternalProfiler {
     }
 
     static class SafepointProfilerResult extends Result<SafepointProfilerResult> {
+
+        private static final long serialVersionUID = -88756998141554941L;
+
         private final String suffix;
         private final SampleBuffer buffer;
 

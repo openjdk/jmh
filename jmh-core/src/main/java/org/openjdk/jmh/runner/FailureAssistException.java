@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2016, 2020, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,5 +29,6 @@ package org.openjdk.jmh.runner;
  */
 public class FailureAssistException extends RuntimeException {
 
+    private static final long serialVersionUID = -7132741247248095175L;
 
 }
