@@ -37,7 +37,7 @@ public class Paddings {
         for (int p = 0; p < 16; p++) {
             StringBuilder sb = new StringBuilder();
             sb.append("    ");
-            sb.append(String.format("boolean p%03d", p * 16 + 0));
+            sb.append(String.format("byte p%03d", p * 16 + 0));
             for (int q = 1; q < 16; q++) {
                 sb.append(String.format(", p%03d", p * 16 + q));
             }
