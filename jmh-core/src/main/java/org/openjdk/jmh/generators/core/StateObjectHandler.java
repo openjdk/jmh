@@ -143,7 +143,8 @@ class StateObjectHandler {
             if (isSpecialClass(var.getType())) continue;
 
             throw new GenerationException(
-                        "Method parameters should be either @" + State.class.getSimpleName() + " classes", // TODO: Change the message
+                        "Method parameters should be either @" + State.class.getSimpleName() +
+                                " classes or one of special JMH classes (*Params, Blackhole, Control)",
                         e);
         }
     }
