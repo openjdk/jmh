@@ -157,7 +157,7 @@ questions.
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.0</version>
+                                    <version>3.2</version>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
@@ -282,10 +282,6 @@ questions.
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <prerequisites>
-        <maven>3.2</maven>
-    </prerequisites>
 
     <modules>
         <module>jmh-core</module>
