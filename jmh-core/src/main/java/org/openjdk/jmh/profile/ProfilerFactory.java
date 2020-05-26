@@ -181,6 +181,7 @@ public class ProfilerFactory {
         BUILT_IN.put("dtraceasm", DTraceAsmProfiler.class);
         BUILT_IN.put("pauses",   PausesProfiler.class);
         BUILT_IN.put("safepoints", SafepointsProfiler.class);
+        BUILT_IN.put("perfc2c",  LinuxPerfC2CProfiler.class);
     }
 
     private static List<Class<? extends Profiler>> getDiscoveredProfilers() {
