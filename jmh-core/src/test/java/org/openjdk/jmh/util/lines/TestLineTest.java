@@ -22,11 +22,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.util;
+package org.openjdk.jmh.util.lines;
 
 import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.util.Optional;
 import org.openjdk.jmh.util.lines.TestLineReader;
 import org.openjdk.jmh.util.lines.TestLineWriter;
 
@@ -64,6 +65,8 @@ public class TestLineTest {
         HashMap<String, String[]> expectedMap = new HashMap<>();
         expectedMap.put("key1", new String[] {"val1", "val2"});
         expectedMap.put("key2", new String[] {"val3", "val4"});
+        expectedMap.put("key3", new String[] {"val5\r", "val6"});
+        expectedMap.put("key4", new String[] {"val7\rn", "val8\n"});
         writer.putOptionalParamCollection(Optional.<Map<String,String[]>>eitherOf(expectedMap));
         writer.putOptionalParamCollection(Optional.<Map<String,String[]>>none());
 

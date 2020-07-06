@@ -48,6 +48,13 @@ public class TestLineWriter {
         line.append(" ");
     }
 
+    private void appendArmoredWithLen(String s) {
+        String as = Armor.encode(s);
+        appendLen(as.length());
+        line.append(as);
+        line.append(" ");
+    }
+
     private void appendLen(int len) {
         line.append(len);
         line.append(" ");
@@ -136,7 +143,7 @@ public class TestLineWriter {
                 appendLen(vals.length);
 
                 for (String value : vals) {
-                    appendWithLen(value);
+                    appendArmoredWithLen(value);
                 }
             }
         }

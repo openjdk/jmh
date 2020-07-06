@@ -66,6 +66,10 @@ public class TestLineReader {
         return s;
     }
 
+    private String readArmoredString() {
+        return Armor.decode(readString());
+    }
+
     private char readChar() {
         char c = line.charAt(cursor);
         cursor += 2;
@@ -177,7 +181,7 @@ public class TestLineReader {
                 int vlen = readLen();
                 String[] values = new String[vlen];
                 for (int v = 0; v < vlen; v++) {
-                    values[v] = readString();
+                    values[v] = readArmoredString();
                 }
 
                 result.put(key, values);
