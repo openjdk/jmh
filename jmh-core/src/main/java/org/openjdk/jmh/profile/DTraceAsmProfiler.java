@@ -64,7 +64,7 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
         super(initLine, "sampled_pc");
 
         // Check DTrace availability
-        Collection<String> messages = Utils.tryWith("sudo", "dtrace", "-V");
+        Collection<String> messages = Utils.tryWith("sudo", "-n", "dtrace", "-V");
         if (!messages.isEmpty()) {
             throw new ProfilerException(messages.toString());
         }
@@ -98,7 +98,7 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        dtraceProcess = Utils.runAsync("sudo", "dtrace", "-n", "profile-" + sampleFrequency +
+        dtraceProcess = Utils.runAsync("sudo", "-n", "dtrace", "-n", "profile-" + sampleFrequency +
                         " /arg1/ { printf(\"%d 0x%lx %d\", pid, arg1, timestamp); ufunc(arg1)}", "-o",
                 perfBinData.getAbsolutePath());
         return Collections.emptyList();

@@ -240,9 +240,9 @@ public class Runner extends BaseRunner {
                 out.println(e.getMessage());
                 someProfilersFail = true;
             }
-            if (someProfilersFail) {
-                throw new ProfilersFailedException();
-            }
+        }
+        if (someProfilersFail) {
+            throw new ProfilersFailedException();
         }
 
         // If user requested the result file in one way or the other, touch the result file,
