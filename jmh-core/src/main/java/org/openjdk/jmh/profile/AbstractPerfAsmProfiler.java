@@ -276,7 +276,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
-        PerfResult result = processAssembly(br);
+        TextResult result = processAssembly(br);
 
         // we know these are not needed anymore, proactively delete
         hsLog.delete();
@@ -317,7 +317,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
      */
     protected abstract String perfBinaryExtension();
 
-    private PerfResult processAssembly(BenchmarkResult br) {
+    private TextResult processAssembly(BenchmarkResult br) {
         /**
          * 1. Parse binary events.
          */
@@ -648,7 +648,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         pw.flush();
         pw.close();
 
-        return new PerfResult(sw.toString());
+        return new TextResult(sw.toString(), "asm");
     }
 
     private static void printLine(PrintWriter pw, PerfEvents events, String event, long count) {
@@ -932,47 +932,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    static class PerfResult extends Result<PerfResult> {
-        private static final long serialVersionUID = 6871141606856800453L;
-
-        private final String output;
-
-        public PerfResult(String output) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "asm", of(Double.NaN), "---", AggregationPolicy.AVG);
-            this.output = output;
-        }
-
-        @Override
-        protected Aggregator<PerfResult> getThreadAggregator() {
-            return new PerfResultAggregator();
-        }
-
-        @Override
-        protected Aggregator<PerfResult> getIterationAggregator() {
-            return new PerfResultAggregator();
-        }
-
-        @Override
-        public String toString() {
-            return "(text only)";
-        }
-
-        @Override
-        public String extendedInfo() {
-            return output;
-        }
-    }
-
-    static class PerfResultAggregator implements Aggregator<PerfResult> {
-        @Override
-        public PerfResult aggregate(Collection<PerfResult> results) {
-            StringBuilder output = new StringBuilder();
-            for (PerfResult r : results) {
-                output.append(r.output);
-            }
-            return new PerfResult(output.toString());
-        }
-    }
 
     protected static class PerfEvents {
         final Map<String, Multiset<Long>> events;
