@@ -79,8 +79,15 @@ public class Main {
                 }
                 System.exit(1);
             } catch (ProfilersFailedException e) {
-                // This is not exactly an error, set non-zero exit code
-                System.err.println(e.getMessage());
+                // This is not exactly an error, print all messages and set the non-zero exit code.
+                Throwable ex = e;
+                while (ex != null) {
+                    System.err.println(ex.getMessage());
+                    for (Throwable supp : ex.getSuppressed()) {
+                        System.err.println(supp.getMessage());
+                    }
+                    ex = ex.getCause();
+                }
                 System.exit(1);
             } catch (RunnerException e) {
                 System.err.print("ERROR: ");

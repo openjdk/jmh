@@ -229,7 +229,7 @@ public class Runner extends BaseRunner {
 
     private Collection<RunResult> internalRun() throws RunnerException {
         Set<String> profilerClasses = new HashSet<>();
-        boolean someProfilersFail = false;
+        ProfilersFailedException failedException = null;
         for (ProfilerConfig p : options.getProfilers()) {
             if (!profilerClasses.add(p.getKlass())) {
                 throw new RunnerException("Cannot instantiate the same profiler more than once: " + p.getKlass());
@@ -237,12 +237,15 @@ public class Runner extends BaseRunner {
             try {
                 ProfilerFactory.getProfilerOrException(p);
             } catch (ProfilerException e) {
-                out.println(e.getMessage());
-                someProfilersFail = true;
+                if (failedException == null) {
+                    failedException = new ProfilersFailedException(e);
+                } else {
+                    failedException.addSuppressed(e);
+                }
             }
         }
-        if (someProfilersFail) {
-            throw new ProfilersFailedException();
+        if (failedException != null) {
+            throw failedException;
         }
 
         // If user requested the result file in one way or the other, touch the result file,

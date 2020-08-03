@@ -35,4 +35,9 @@ public class ProfilerException extends Exception {
     public ProfilerException(String s) {
         super(s);
     }
+
+    public ProfilerException(String s, Throwable e) {
+        super(s, e);
+    }
+
 }
