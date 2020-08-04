@@ -488,12 +488,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
          * Enable or disable profile collection for threads.
          *
          * @param thread The thread to enable or disable.
-         *               <code>null</code> is a wildcard.
+         *               <code>null</code> indicates the current thread.
          * @param enable Whether to enable or disable.
          */
         public void filterThread(Thread thread, boolean enable) {
             if (thread == null) {
-                // All threads.
                 filterThread0(null, enable);
             } else {
                 synchronized (thread) {
@@ -511,6 +510,8 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         private native void stop0() throws IllegalStateException;
 
         private native String execute0(String command) throws IllegalArgumentException, IOException;
+
+        private native long getSamples();
 
         private native void filterThread0(Thread thread, boolean enable);
     }
