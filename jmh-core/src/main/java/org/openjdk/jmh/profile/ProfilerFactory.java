@@ -164,6 +164,7 @@ public class ProfilerFactory {
 
     static {
         BUILT_IN = new TreeMap<>();
+        BUILT_IN.put("async",    AsyncProfiler.class);
         BUILT_IN.put("cl",       ClassloaderProfiler.class);
         BUILT_IN.put("comp",     CompilerProfiler.class);
         BUILT_IN.put("gc",       GCProfiler.class);
