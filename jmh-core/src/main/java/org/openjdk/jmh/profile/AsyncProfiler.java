@@ -111,9 +111,15 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 "Size of profiler framebuffer")
                 .withRequiredArg().ofType(Long.class).describedAs("bytes");
 
+        OptionSpec<Boolean> optFilter = parser.accepts("filter",
+                "Enable thread filtering during collection. Useful for wall clock profiling, " +
+                "but only if the workload registers the relevant threads programatically " +
+                "via `AsyncProfiler.JavaApi.getInstance().filterThread(thread, enabled)`.")
+                .withRequiredArg().ofType(Boolean.class).defaultsTo(false).describedAs("boolean");
+
         OptionSpec<Boolean> optThreads = parser.accepts("threads",
                 "Profile threads separately")
-                .withRequiredArg().ofType(Boolean.class).describedAs("int");
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optSimple = parser.accepts("simple",
                 "Simple class names instead of FQN")
@@ -196,6 +202,10 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             builder.appendIfTrue(optSig);
             builder.appendIfTrue(optAnn);
             builder.appendIfExists(optFrameBuf);
+            if (optFilter.value(set)) {
+                builder.appendRaw("filter=0");
+            }
+            builder.appendIfExists(optFilter);
             builder.appendMulti(optInclude);
             builder.appendMulti(optExclude);
 
