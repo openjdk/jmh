@@ -78,11 +78,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         parser.formatHelpWith(new ProfilerOptionFormatter("async"));
 
         OptionSpec<OutputType> optOutput = parser.accepts("output",
-                "Output format(s). Supported: " + EnumSet.allOf(OutputType.class).toString())
+                "Output format(s). Supported: " + EnumSet.allOf(OutputType.class).toString() + ".")
                 .withRequiredArg().ofType(OutputType.class).withValuesSeparatedBy(",").describedAs("format+").defaultsTo(OutputType.text);
 
         OptionSpec<Direction> optDirection = parser.accepts("direction",
-                "Direction(s) of flame graph. Supported: " + EnumSet.allOf(Direction.class))
+                "Direction(s) of flame graph. Supported: " + EnumSet.allOf(Direction.class) + ".")
                 .withRequiredArg().ofType(Direction.class).describedAs("direction").defaultsTo(Direction.both);
 
         OptionSpec<String> optLibPath = parser.accepts("libPath",
@@ -100,15 +100,15 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("dir");
 
         OptionSpec<Long> optInterval = parser.accepts("interval",
-                "Profiling interval")
+                "Profiling interval.")
                 .withRequiredArg().ofType(Long.class).describedAs("ns");
 
         OptionSpec<Integer> optJstackDepth = parser.accepts("jstackdepth",
-                "Maximum Java stack depth")
+                "Maximum Java stack depth.")
                 .withRequiredArg().ofType(Integer.class).describedAs("frames");
 
         OptionSpec<Long> optFrameBuf = parser.accepts("framebuf",
-                "Size of profiler framebuffer")
+                "Size of profiler framebuffer.")
                 .withRequiredArg().ofType(Long.class).describedAs("bytes");
 
         OptionSpec<Boolean> optFilter = parser.accepts("filter",
@@ -118,27 +118,27 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 .withRequiredArg().ofType(Boolean.class).defaultsTo(false).describedAs("boolean");
 
         OptionSpec<Boolean> optThreads = parser.accepts("threads",
-                "Profile threads separately")
+                "Profile threads separately.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optSimple = parser.accepts("simple",
-                "Simple class names instead of FQN")
+                "Simple class names instead of FQN.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optSig = parser.accepts("sig",
-                "Print method signatures")
+                "Print method signatures.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optAnn = parser.accepts("ann",
-                "Annotate Java method names")
+                "Annotate Java method names.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<String> optInclude = parser.accepts("include",
-                "Output only stack traces containing the specified pattern")
+                "Output only stack traces containing the specified pattern.")
                 .withRequiredArg().withValuesSeparatedBy(",").ofType(String.class).describedAs("regexp+");
 
         OptionSpec<String> optExclude = parser.accepts("exclude",
-                "Exclude stack traces with the specified pattern")
+                "Exclude stack traces with the specified pattern.")
                 .withRequiredArg().withValuesSeparatedBy(",").ofType(String.class).describedAs("regexp+");
 
         OptionSpec<String> optRawCommand = parser.accepts("rawCommand",
@@ -147,38 +147,38 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("command");
 
         OptionSpec<String> optTitle = parser.accepts("title",
-                "SVG title")
+                "SVG title.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<Long> optWidth = parser.accepts("width",
-                "SVG width")
+                "SVG width.")
                 .withRequiredArg().ofType(Long.class).describedAs("pixels");
 
         OptionSpec<Long> optMinWidth = parser.accepts("minwidth", "Skip frames smaller than px")
                 .withRequiredArg().ofType(Long.class).describedAs("pixels");
 
         OptionSpec<Boolean> optAllKernel = parser.accepts("allkernel",
-                "Only include kernel-mode events")
+                "Only include kernel-mode events.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optAllUser = parser.accepts("alluser",
-                "Only include user-mode events")
+                "Only include user-mode events.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<CStackMode> optCStack = parser.accepts("cstack",
-                "How to traverse C stack: Supported: " + EnumSet.allOf(CStackMode.class))
-                .withRequiredArg().ofType(CStackMode.class).describedAs("bool");
+                "How to traverse C stack: Supported: " + EnumSet.allOf(CStackMode.class) + ".")
+                .withRequiredArg().ofType(CStackMode.class).describedAs("mode");
 
         OptionSpec<Boolean> optVerbose = parser.accepts("verbose",
-                "Output the sequence of commands")
+                "Output the sequence of commands.")
                 .withRequiredArg().ofType(Boolean.class).defaultsTo(false).describedAs("bool");
 
         OptionSpec<Integer> optTraces = parser.accepts("traces",
-                "Number of top traces to include in the default output")
+                "Number of top traces to include in the default output.")
                 .withRequiredArg().ofType(Integer.class).defaultsTo(200).describedAs("int");
 
         OptionSpec<Integer> optFlat = parser.accepts("flat",
-                "Number of top flat profiles to include in the default output")
+                "Number of top flat profiles to include in the default output.")
                 .withRequiredArg().ofType(Integer.class).defaultsTo(200).describedAs("int");
 
         OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
@@ -203,9 +203,8 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             builder.appendIfTrue(optAnn);
             builder.appendIfExists(optFrameBuf);
             if (optFilter.value(set)) {
-                builder.appendRaw("filter=0");
+                builder.appendRaw("filter");
             }
-            builder.appendIfExists(optFilter);
             builder.appendMulti(optInclude);
             builder.appendMulti(optExclude);
 
