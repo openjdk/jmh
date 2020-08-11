@@ -68,6 +68,9 @@ import java.util.*;
  */
 public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
+    private static final String MSG_UNABLE_START = "Unable to start the profiler. Please try running JMH as Administrator.";
+    private static final String MSG_UNABLE_STOP  = "Unable to stop the profiler. Please try running JMH as Administrator.";
+
     private final String xperfProviders;
     private final String symbolDir;
     private final String path;
@@ -90,9 +93,16 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(e.getMessage());
         }
 
-        Collection<String> errs = Utils.tryWith(path);
-        if (!errs.isEmpty()) {
-            throw new ProfilerException(errs.toString());
+        Collection<String> errsOn = Utils.tryWith(path, "-on", xperfProviders);
+        if (!errsOn.isEmpty()) {
+            errsOn.add(MSG_UNABLE_START);
+            throw new ProfilerException(errsOn.toString());
+        }
+
+        Collection<String> errsStop = Utils.tryWith(path, "-stop");
+        if (!errsStop.isEmpty()) {
+            errsStop.add(MSG_UNABLE_STOP);
+            throw new ProfilerException(errsStop.toString());
         }
     }
 
@@ -119,11 +129,13 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public void beforeTrial(BenchmarkParams params) {
-        // Start profiler before forked JVM is started.insta
+        // Start profiler before forked JVM is started.
         Collection<String> errs = Utils.tryWith(path, "-on", xperfProviders);
 
-        if (!errs.isEmpty())
-            throw new IllegalStateException("Failed to start xperf: " + errs);
+        if (!errs.isEmpty()) {
+            errs.add(MSG_UNABLE_START);
+            throw new IllegalStateException(errs.toString());
+        }
     }
 
     @Override
@@ -145,8 +157,10 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         // 1. Stop profiling by calling xperf dumper.
         Collection<String> errs = Utils.tryWith(path, "-d", perfBinData.getAbsolutePath());
 
-        if (!errs.isEmpty())
-            throw new IllegalStateException("Failed to stop xperf: " + errs);
+        if (!errs.isEmpty()) {
+            errs.add(MSG_UNABLE_STOP);
+            throw new IllegalStateException(errs.toString());
+        }
 
         // 2. Convert binary data to text form.
         try {
