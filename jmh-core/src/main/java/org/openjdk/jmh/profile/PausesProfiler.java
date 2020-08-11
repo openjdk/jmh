@@ -101,8 +101,11 @@ public class PausesProfiler implements InternalProfiler {
     private long calibrate() {
         SampleBuffer buf = new SampleBuffer();
 
-        long lastTime = System.nanoTime();
-        for (int c = 0; c < 10_000; c++) {
+        int cnt = 0;
+        long startTime = System.nanoTime();
+        long lastTime = startTime;
+        long limit = TimeUnit.SECONDS.toNanos(3);
+        while ((cnt++ < 10_000) && (lastTime - startTime < limit)) {
             LockSupport.parkNanos(expectedNs);
             long time = System.nanoTime();
 
