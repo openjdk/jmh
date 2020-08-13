@@ -173,6 +173,7 @@ public class ProfilerFactory {
         BUILT_IN.put("hs_gc",    HotspotMemoryProfiler.class);
         BUILT_IN.put("hs_rt",    HotspotRuntimeProfiler.class);
         BUILT_IN.put("hs_thr",   HotspotThreadProfiler.class);
+        BUILT_IN.put("jfr",      JavaFlightRecorderProfiler.class);
         BUILT_IN.put("stack",    StackProfiler.class);
         BUILT_IN.put("perf",     LinuxPerfProfiler.class);
         BUILT_IN.put("perfnorm", LinuxPerfNormProfiler.class);
