@@ -811,7 +811,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 ASMLine asmLine = new ASMLine(line);
 
                 // Handle the most frequent case first.
-                if (trim.startsWith("0x")) {
+                if (elements.length > 0 && maybeAddress(elements[0])) {
                     // Seems to be line with address.
                     try {
                         long addr = parseAddress(elements[0]);
@@ -857,13 +857,19 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     Matcher matcher = pattern.matcher(line);
 
                     if (matcher.matches()) {
-                        long startAddr = parseAddress(matcher.group(3));
-                        long endAddr = parseAddress(matcher.group(4));
+                        String name = matcher.group(1);
+                        String startS = matcher.group(3);
+                        String endS = matcher.group(4);
 
-                        if (line.contains("StubRoutines::")) {
-                            stubs.add(MethodDesc.runtimeStub(matcher.group(1)), startAddr, endAddr);
-                        } else {
-                            stubs.add(MethodDesc.interpreter(matcher.group(1)), startAddr, endAddr);
+                        if (maybeAddress(startS) && maybeAddress(endS)) {
+                            long startAddr = parseAddress(startS);
+                            long endAddr = parseAddress(endS);
+
+                            if (line.contains("StubRoutines::")) {
+                                stubs.add(MethodDesc.runtimeStub(name), startAddr, endAddr);
+                            } else {
+                                stubs.add(MethodDesc.interpreter(name), startAddr, endAddr);
+                            }
                         }
                     }
                 }
