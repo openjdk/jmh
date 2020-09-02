@@ -197,8 +197,9 @@ public final class JavaFlightRecorderProfiler implements ExternalProfiler, Inter
 
     private File findJcmd(String jvm) {
         // Try 1: same directory as JVM binary
+        File bin = new File(jvm).getParentFile();
         {
-            File jcmd = new File(new File(jvm).getParent(), "jcmd");
+            File jcmd = new File(bin, "jcmd" + (Utils.isWindows() ? ".exe" : ""));
             if (jcmd.exists()) {
                 return jcmd;
             }
@@ -206,7 +207,8 @@ public final class JavaFlightRecorderProfiler implements ExternalProfiler, Inter
 
         // Try 2: parent bin/ directory
         {
-            File jcmd = new File(jvm.replace("jre/bin/java", "bin/jcmd"));
+            final String s = File.separator;
+            File jcmd = new File(bin, ".." + s + ".." + s + "bin" + s + "jcmd" + (Utils.isWindows() ? ".exe" : ""));
             if (jcmd.exists()) {
                 return jcmd;
             }
