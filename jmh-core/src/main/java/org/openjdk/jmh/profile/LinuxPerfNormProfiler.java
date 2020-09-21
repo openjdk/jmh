@@ -326,21 +326,22 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 }
                 Collection<Result> results = new ArrayList<>();
                 for (String key : events.keys()) {
-                    results.add(new PerfResult(key, events.count(key) * 1.0 / totalOpts));
+                    results.add(new PerfResult(key, "#/op", events.count(key) * 1.0 / totalOpts));
                 }
 
-                // Also figure out CPI, if enough counters available:
+                // Also figure out IPC/CPI, if enough counters available:
                 {
                     long cycles = events.count("cycles");
                     long instructions = events.count("instructions");
                     if (cycles != 0 && instructions != 0) {
-                        results.add(new PerfResult("CPI", 1.0 * cycles / instructions));
+                        results.add(new PerfResult("CPI", "clks/insn", 1.0 * cycles / instructions));
+                        results.add(new PerfResult("IPC", "insns/clk", 1.0 * instructions / cycles));
                     }
                 }
 
                 return results;
             } else {
-                return Collections.singleton(new PerfResult("N/A", Double.NaN));
+                return Collections.singleton(new PerfResult("N/A", "", Double.NaN));
             }
 
         } catch (IOException e) {
@@ -351,8 +352,8 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     static class PerfResult extends ScalarResult {
         private static final long serialVersionUID = -1262685915873231436L;
 
-        public PerfResult(String key, double value) {
-            super(key, value, "#/op", AggregationPolicy.AVG);
+        public PerfResult(String key, String unit, double value) {
+            super(key, value, unit, AggregationPolicy.AVG);
         }
 
         @Override

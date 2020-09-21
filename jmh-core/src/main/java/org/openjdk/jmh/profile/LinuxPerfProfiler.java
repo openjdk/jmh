@@ -222,14 +222,23 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
         @Override
         protected Collection<? extends Result> getDerivativeResults() {
-            return Collections.singletonList(
-                    new ScalarDerivativeResult(Defaults.PREFIX + "cpi", 1.0 * cycles / instructions, "CPI", AggregationPolicy.AVG)
-            );
+            List<Result> res = new ArrayList<>();
+            if (cycles != 0 && instructions != 0) {
+                res.add(new ScalarDerivativeResult(Defaults.PREFIX + "ipc", 1.0 * instructions / cycles, "insns/clk", AggregationPolicy.AVG));
+                res.add(new ScalarDerivativeResult(Defaults.PREFIX + "cpi", 1.0 * cycles / instructions, "clks/insn", AggregationPolicy.AVG));
+            }
+            return res;
         }
 
         @Override
         public String toString() {
-            return String.format("%s cycles per instruction", ScoreFormatter.format(1.0 * cycles / instructions));
+            if (cycles != 0 && instructions != 0) {
+                return String.format("%s IPC, %s CPI",
+                        ScoreFormatter.format(1.0 * instructions / cycles),
+                        ScoreFormatter.format(1.0 * cycles / instructions));
+            } else {
+                return "N/A";
+            }
         }
 
         @Override
