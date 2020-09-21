@@ -61,8 +61,10 @@ public class JMHSample_26_BatchSize {
      * shot measurement.
      *
      * We can use "batch size" parameter to describe the number of
-     * benchmark calls to do per one invocation without looping the method
+     * @Benchmark invocations to do per one "shot" without looping the method
      * manually and protect from problems described in JMHSample_11_Loops.
+     * If there are any @Setup/@TearDown(Level.Invocation), they still run
+     * per each @Benchmark invocation.
      */
 
     /*
