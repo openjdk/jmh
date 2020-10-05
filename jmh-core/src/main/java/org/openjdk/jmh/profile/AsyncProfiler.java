@@ -254,7 +254,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         }
         if (iterationParams.getType() == IterationType.MEASUREMENT) {
             if (!measurementStarted) {
-                // Discard samples collected during warmup and start collecting again.
+                if (warmupStarted) {
+                    // Discard samples collected during warmup...
+                    execute("stop");
+                }
+                // ...and start collecting again.
                 execute("start," + profilerConfig);
                 measurementStarted = true;
             }
