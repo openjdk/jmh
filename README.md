@@ -138,9 +138,9 @@ If you have never contributed to OpenJDK before, then bots would require you to 
 Normally, you don't need to post patches anywhere else, or post to mailing lists, etc.
 If you do want to have a wider discussion about JMH, please refer to [jmh-dev](https://mail.openjdk.java.net/mailman/listinfo/jmh-dev).
 
-Short instructions to build and test bleeding-edge JMH:
+Short instructions to build, test bleeding-edge JMH, and install its JAR to local Maven repo:
 
-    $ mvn clean verify
+    $ mvn clean install
 
 If you already have the benchmark project, then it is enough to change JMH dependencies version
 to the latest `SNAPSHOT` version (look up the actual latest version in [root `pom.xml`](https://github.com/openjdk/jmh/blob/9f5b990334bbcb27856740d6330ba2d0c928d2f1/pom.xml#L33)). If not, create the JMH benchmark project and change the version there.
