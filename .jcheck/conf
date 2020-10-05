@@ -37,7 +37,7 @@ domain=openjdk.org
 files=.*\.cpp|.*\.hpp|.*\.c|.*\.h|.*\.java|.*\.cc|.*\.hh|.*\.m|.*\.mm
 
 [checks "reviewers"]
-reviewers=1
+committers=1
 ignore=duke
 
 [checks "committer"]
