@@ -95,7 +95,7 @@ If you want to build with an alternative build system, you may want to see the
 [Ant sample](https://github.com/openjdk/jmh/tree/master/jmh-ant-sample) which describes
 the steps to build JMH benchmark projects.
 
-## Support abd Development
+## Support and Development
 
 ### Pre-Requisite Steps
 
