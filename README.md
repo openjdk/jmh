@@ -54,7 +54,7 @@ which holds your benchmark, and all essential JMH infrastructure code:
 
 Run with `-h` to see the command line options available.
 
-When dealing with large projects, it is customary to keep the benchmarks in a separate subproject,
+When dealing with large projects, it is customary to keep the benchmarks in a separate sub-project,
 which then depends on the tested modules via the usual build dependencies.
 
 ### IDE Support
@@ -73,7 +73,7 @@ _NOTE: JMH is not intended to be used in the same way as a typical testing libra
 Simply adding the `jmh-core` jar file to your build is not enough to be able to run benchmarks._
 
 **Step 2. Building the benchmarks.** Most IDEs are able to open/import Maven projects, and infer
-the build configuration from Maven project configuration. IDEA and Netbeans are able to build
+the build configuration from Maven project configuration. IDEA and NetBeans are able to build
 JMH benchmark projects with little to no effort. Eclipse build configuration may need to set up
 JMH annotation processors to run.
 
@@ -91,7 +91,6 @@ community-supported bindings:
  - [Gradle JMH Plugin](https://github.com/melix/jmh-gradle-plugin)
  - [Scala SBT JMH Plugin](https://github.com/ktoso/sbt-jmh)
 
-
 If you want to build with an alternative build system, you may want to see the
 [Ant sample](https://github.com/openjdk/jmh/tree/master/jmh-ant-sample) which describes
 the steps to build JMH benchmark projects.
@@ -103,7 +102,7 @@ the steps to build JMH benchmark projects.
 Make sure you did this before publishing the benchmark, and/or requesting the JMH feature:
 
  - **JMH annotations Javadocs and Samples are essential reading.** Follow the [JMH Samples](https://github.com/openjdk/jmh/tree/master/jmh-samples/src/main/java/org/openjdk/jmh/samples)
-   to get familiar with the API, use cases, culprits, and pitfalls in building the microbenchmarks
+   to get familiar with the API, use cases, culprits, and pitfalls in building the benchmarks
    and using JMH.
  - **Your benchmarks should be peer-reviewed.** Do not assume that a nice harness will magically
    free you from considering benchmarking pitfalls. We only promise to make avoiding them easier,
@@ -132,7 +131,6 @@ If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/), plea
 
 If you don't have the access to JDK Bug System, submit the bug report at "Issues" here, and wait for maintainers to pick that up.
 
-
 ## Development
 
 JMH project accepts pull requests, like other OpenJDK projects.
@@ -142,8 +140,7 @@ If you do want to have a wider discussion about JMH, please refer to [jmh-dev](h
 
 Short instructions to build and test bleeding-edge JMH:
 
-    $ mvn clean install -DskipTests
-
+    $ mvn clean verify
 
 If you already have the benchmark project, then it is enough to change JMH dependencies version
 to the latest `SNAPSHOT` version (look up the actual latest version in [root `pom.xml`](https://github.com/openjdk/jmh/blob/9f5b990334bbcb27856740d6330ba2d0c928d2f1/pom.xml#L33)). If not, create the JMH benchmark project and change the version there.
