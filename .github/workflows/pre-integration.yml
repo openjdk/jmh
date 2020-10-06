@@ -1,0 +1,36 @@
+name: JMH Pre-Integration Tests
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_dispatch:
+  push:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        java: [8]
+        os: [ubuntu-18.04, windows-2019, macos-10.15]
+        profile: [default, reflection, asm]
+      fail-fast: true
+      max-parallel: 4
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}, ${{ matrix.profile }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
+        restore-keys: ${{ runner.os }}-maven
+    - name: Build all without tests
+      run: mvn clean install -DskipTests -P ${{ matrix.profile }} -B --file pom.xml
+    - name: Run tests
+      run: mvn test -P ${{ matrix.profile }} -B --file pom.xml
