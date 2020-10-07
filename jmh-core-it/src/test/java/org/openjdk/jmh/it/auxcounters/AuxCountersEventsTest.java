@@ -75,10 +75,16 @@ public class AuxCountersEventsTest {
 
             switch (mode) {
                 case Throughput:
-                case AverageTime: {
+                case AverageTime:
+                case SampleTime:
+                case SingleShotTime: {
                     Assert.assertNotNull("@AuxCounter result exists for " + mode, scnd);
-                    Assert.assertEquals(prim.getSampleCount(), scnd.getSampleCount());
                     Assert.assertEquals("#", scnd.getScoreUnit());
+
+                    // Sample time is special, because it is allowed to lose the samples.
+                    if (mode != Mode.SampleTime) {
+                        Assert.assertEquals(prim.getSampleCount(), scnd.getSampleCount());
+                    }
 
                     // 5 iterations, each returns exactly 42 events
                     Assert.assertEquals(5 * 42, scnd.getScore(), 0.001);
