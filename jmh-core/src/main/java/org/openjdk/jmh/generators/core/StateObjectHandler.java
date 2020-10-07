@@ -1033,8 +1033,19 @@ class StateObjectHandler {
             AuxCounters.Type type = auxType.get(ops);
             switch (type) {
                 case OPERATIONS:
-                    result.add("new " + opResName + "(ResultRole.SECONDARY, \"" + ops + "\", " +
-                            auxAccessors.get(method.getName() + ops) + ", res.getTime(), benchmarkParams.getTimeUnit())");
+                    switch (opResName) {
+                        case "ThroughputResult":
+                        case "AverageTimeResult":
+                            result.add("new " + opResName + "(ResultRole.SECONDARY, \"" + ops + "\", " +
+                                    auxAccessors.get(method.getName() + ops) + ", res.getTime(), benchmarkParams.getTimeUnit())");
+                            break;
+                        case "SampleTimeResult":
+                        case "SingleShotResult":
+                            // Not handled.
+                            break;
+                        default:
+                            throw new GenerationException("Unknown result name for @" + AuxCounters.class + ": " + opResName, method);
+                    }
                     break;
                 case EVENTS:
                     result.add("new ScalarResult(\"" + ops + "\", " + auxAccessors.get(method.getName() + ops) + ", \"#\", AggregationPolicy.SUM)");

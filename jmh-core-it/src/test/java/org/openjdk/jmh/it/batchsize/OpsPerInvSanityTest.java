@@ -26,37 +26,38 @@ package org.openjdk.jmh.it.batchsize;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
+import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.openjdk.jmh.util.Statistics;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @State(Scope.Thread)
 public class OpsPerInvSanityTest {
 
     private static final int SLEEP_TIME_MS = 5;
 
+    @AuxCounters(AuxCounters.Type.EVENTS)
+    @State(Scope.Thread)
+    public static class RawCounter {
+        public long time;
+        public int ops;
+    }
+
     @Benchmark
-    public void test() throws InterruptedException {
+    public void test(RawCounter cnt) throws InterruptedException {
+        long start = System.nanoTime();
         TimeUnit.MILLISECONDS.sleep(SLEEP_TIME_MS);
+        long stop = System.nanoTime();
+        cnt.ops++;
+        cnt.time += (stop - start);
     }
 
     @Test
@@ -85,23 +86,27 @@ public class OpsPerInvSanityTest {
 
         final double TOLERANCE = 0.30;
 
+        Map<String, Result> srs = run.getSecondaryResults();
+
+        Assert.assertNotNull("Ops counter is available for " + mode, srs.get("ops"));
+        Assert.assertNotNull("Time counter is available for " + mode, srs.get("time"));
+
+        double realOps = srs.get("ops").getScore();
+        double realTime = srs.get("time").getScore() / 1_000_000;
+
+        double actualScore = run.getPrimaryResult().getStatistics().getMean();
         double expectedScore;
-        double actualScore;
-        Statistics statistics = run.getPrimaryResult().getStatistics();
 
         switch (mode) {
             case Throughput:
-                expectedScore = 1.0 * opsPerInv / SLEEP_TIME_MS;
-                actualScore   = statistics.getMax();
+                expectedScore = 1.0 * (realOps * opsPerInv) / realTime;
                 break;
             case AverageTime:
             case SampleTime:
-                expectedScore = 1.0 * SLEEP_TIME_MS / opsPerInv;
-                actualScore   = statistics.getMin();
+                expectedScore = 1.0 * realTime / (realOps * opsPerInv);
                 break;
             case SingleShotTime:
-                expectedScore = SLEEP_TIME_MS;
-                actualScore   = statistics.getMin();
+                expectedScore = 1.0 * realTime / realOps;
                 break;
             default:
                 expectedScore = Double.NaN;

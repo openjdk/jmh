@@ -631,9 +631,7 @@ public class BenchmarkGenerator {
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new ThroughputResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.measuredOps, res.getTime(), benchmarkParams.getTimeUnit()));");
             }
-            for (String res : states.getAuxResults(method, "ThroughputResult")) {
-                writer.println(ident(3) + "results.add(" + res + ");");
-            }
+            addAuxCounters(writer, "ThroughputResult", states, method);
 
             methodEpilog(writer);
 
@@ -922,6 +920,8 @@ public class BenchmarkGenerator {
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new SampleTimeResult(ResultRole.SECONDARY, \"" + method.getName() + "\", buffer, benchmarkParams.getTimeUnit()));");
             }
+            addAuxCounters(writer, "SampleTimeResult", states, method);
+
             methodEpilog(writer);
 
             writer.println(ident(3) + "return results;");
@@ -1029,6 +1029,8 @@ public class BenchmarkGenerator {
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
             }
+            addAuxCounters(writer, "SingleShotResult", states, method);
+
             methodEpilog(writer);
 
             writer.println(ident(3) + "return results;");
