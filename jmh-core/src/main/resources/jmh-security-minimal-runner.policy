@@ -8,6 +8,6 @@ grant {
     permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
     permission java.util.PropertyPermission "*", "read";
     permission java.lang.management.ManagementPermission "monitor";
-    permission java.io.FilePermission "/-", "read,write,execute,delete";
+    permission java.io.FilePermission "<<ALL FILES>>", "read,write,execute,delete";
     permission java.net.SocketPermission "*", "connect,resolve,accept,listen";
 };
