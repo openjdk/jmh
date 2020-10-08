@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [8, 11, 15, 16-ea]
+        java: [7, 8, 11, 15, 16-ea]
         os: [ubuntu-18.04, windows-2019, macos-10.15]
         profile: [default, reflection, asm]
       fail-fast: false
@@ -28,7 +28,9 @@ jobs:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
         restore-keys: ${{ runner.os }}-maven
-    - name: Build all without tests
-      run: mvn clean install -DskipTests -P ${{ matrix.profile }} -B --file pom.xml
     - name: Run tests
-      run: mvn test -P ${{ matrix.profile }} -B --file pom.xml
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: matrix.os == 'Linux' || matrix.profile == 'default'
+    - name: Run build without tests
+      run: mvn clean install -DskipTests -P ${{ matrix.profile }} -B --file pom.xml
+      if: matrix.os != 'Linux' && matrix.profile != 'default'
