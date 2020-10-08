@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [opened, reopened, ready_for_review, synchronize]
   workflow_dispatch:
-  push:
 
 jobs:
   test:
