@@ -79,6 +79,7 @@ public class BatchSizeSanityTest {
             .measurementIterations(5)
             .forks(1)
             .timeUnit(TimeUnit.MILLISECONDS)
+            .syncIterations(false)
             .measurementBatchSize(batchSize)
             .mode(mode)
             .build();

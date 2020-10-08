@@ -79,6 +79,7 @@ public class OpsPerInvSanityTest {
             .measurementIterations(5)
             .forks(1)
             .timeUnit(TimeUnit.MILLISECONDS)
+            .syncIterations(false)
             .operationsPerInvocation(opsPerInv)
             .mode(mode)
             .build();
