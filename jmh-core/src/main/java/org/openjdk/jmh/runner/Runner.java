@@ -887,7 +887,7 @@ public class Runner extends BaseRunner {
                 StringBuilder sb = new StringBuilder();
                 for (String cp : cpProp.split(File.pathSeparator)) {
                     Path cpPath = new File(cp).getAbsoluteFile().toPath();
-                    if (!cpPath.getRoot().equals(tmpFileDir)) {
+                    if (!cpPath.getRoot().equals(tmpFileDir.getRoot())) {
                         throw new IOException("Cannot relativize: " + cpPath + " and " + tmpFileDir + " have different roots.");
                     }
 
@@ -908,6 +908,8 @@ public class Runner extends BaseRunner {
                 try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(tmpFile), manifest)) {
                     jos.putNextEntry(new ZipEntry("META-INF/"));
                 }
+
+                out.verbosePrintln("Using separate classpath JAR: " + tmpFile);
             } catch (IOException ex) {
                 // Something is wrong in file generation, give up and fall-through to usual thing
                 out.verbosePrintln("Caught IOException when building separate classpath JAR: " +
