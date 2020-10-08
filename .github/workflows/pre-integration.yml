@@ -28,9 +28,9 @@ jobs:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
         restore-keys: ${{ runner.os }}-maven
-    - name: Run tests
+    - name: Run build with tests
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: matrix.os == 'Linux' || matrix.profile == 'default'
+      if: (runner.os == 'Linux') || (matrix.profile == 'default')
     - name: Run build without tests
       run: mvn clean install -DskipTests -P ${{ matrix.profile }} -B --file pom.xml
-      if: matrix.os != 'Linux' && matrix.profile != 'default'
+      if: (runner.os != 'Linux') && (matrix.profile != 'default')
