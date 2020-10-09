@@ -145,6 +145,9 @@ Short instructions to build, test bleeding-edge JMH, and install its JAR to loca
 If you already have the benchmark project, then it is enough to change JMH dependencies version
 to the latest `SNAPSHOT` version (look up the actual latest version in [root `pom.xml`](https://github.com/openjdk/jmh/blob/9f5b990334bbcb27856740d6330ba2d0c928d2f1/pom.xml#L33)). If not, create the JMH benchmark project and change the version there.
 
+GitHub workflow "JMH Pre-Integration Tests" should pass on the changes. It would be triggered
+for PRs. You can also trigger it manually for your branch.
+
 ## Related projects
 
 These projects are supported by community, not by OpenJDK/JMH developers.
