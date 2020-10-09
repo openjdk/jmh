@@ -45,6 +45,7 @@ import java.lang.management.ManagementFactory;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -891,7 +892,12 @@ public class Runner extends BaseRunner {
                         throw new IOException("Cannot relativize: " + cpPath + " and " + tmpFileDir + " have different roots.");
                     }
 
-                    String rel = tmpFileDir.relativize(cpPath).toString();
+                    Path relPath = tmpFileDir.relativize(cpPath);
+                    if (!Files.isReadable(tmpFileDir.resolve(relPath))) {
+                        throw new IOException("Cannot read through the relativized path: " + relPath);
+                    }
+
+                    String rel = relPath.toString();
                     sb.append(rel.replace('\\', '/').replace(" ", "%20"));
                     if (!cp.endsWith(".jar")) {
                         sb.append('/');
@@ -910,6 +916,7 @@ public class Runner extends BaseRunner {
                 }
 
                 out.verbosePrintln("Using separate classpath JAR: " + tmpFile);
+                out.verbosePrintln("  Class-Path: " + classPath);
             } catch (IOException ex) {
                 // Something is wrong in file generation, give up and fall-through to usual thing
                 out.verbosePrintln("Caught IOException when building separate classpath JAR: " +
