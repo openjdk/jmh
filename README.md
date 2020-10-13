@@ -124,7 +124,7 @@ If all these did not help, you are welcome to report the issue.
 
 ### Reporting Harness and Test Bugs
 
-If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/), please submit the bug there:
+If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/browse/CODETOOLS-7902762?jql=project%20%3D%20CODETOOLS%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20tools%20AND%20Subcomponent%20%3D%20jmh), please submit the bug there:
  * Project: CODETOOLS
  * Component: tools
  * Sub-component: jmh
