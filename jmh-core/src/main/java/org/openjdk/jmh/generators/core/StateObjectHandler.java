@@ -104,7 +104,10 @@ class StateObjectHandler {
 
         boolean hasDefaultConstructor = false;
         for (MethodInfo constructor : state.getConstructors()) {
-            hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
+            if (constructor.getParameters().isEmpty()) {
+                hasDefaultConstructor = constructor.isPublic();
+                break;
+            }
         }
 
         // These classes use the special init sequence:
