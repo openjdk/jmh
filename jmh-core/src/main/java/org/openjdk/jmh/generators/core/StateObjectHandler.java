@@ -89,7 +89,7 @@ class StateObjectHandler {
 
         if (state.isFinal()) {
             throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
-                    " annotation does not support final classes. This class is not " , state);
+                    " annotation does not support final classes." , state);
         }
 
         if (state.isInner()) {
