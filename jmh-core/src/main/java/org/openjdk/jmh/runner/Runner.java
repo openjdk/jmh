@@ -181,6 +181,10 @@ public class Runner extends BaseRunner {
      * @throws org.openjdk.jmh.runner.RunnerException if something goes wrong
      */
     public Collection<RunResult> run() throws RunnerException {
+        if (JMH_LOCK_IGNORE) {
+            out.println("# WARNING: JMH lock is ignored by user request, make sure no other JMH instances are running");
+            return internalRun();
+        }
         FileChannel channel = null;
         FileLock lock = null;
         try {
@@ -199,23 +203,12 @@ public class Runner extends BaseRunner {
             }
 
             if (lock == null) {
-                String msg = "Unable to acquire the JMH lock (" + JMH_LOCK_FILE + "): already taken by another JMH instance";
-                if (JMH_LOCK_IGNORE) {
-                    out.println("# WARNING: " + msg + ", ignored by user's request.");
-                } else {
-                    throw new RunnerException("ERROR: " + msg + ", exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
-                }
+                throw new RunnerException("ERROR: Unable to acquire the JMH lock (" + JMH_LOCK_FILE + "): already taken by another JMH instance, exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
             }
 
             return internalRun();
         } catch (IOException e) {
-            String msg = "Exception while trying to acquire the JMH lock (" + JMH_LOCK_FILE + "): " + e.getMessage();
-            if (JMH_LOCK_IGNORE) {
-                out.println("# WARNING: " + msg + ", ignored by user's request.");
-                return internalRun();
-            } else {
-                throw new RunnerException("ERROR: " + msg  + ", exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
-            }
+            throw new RunnerException("ERROR: Exception while trying to acquire the JMH lock (" + JMH_LOCK_FILE + "), exiting. Use -Djmh.ignoreLock=true to forcefully continue.", e);
         } finally {
             try {
                 if (lock != null) {
