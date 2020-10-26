@@ -89,7 +89,7 @@ class StateObjectHandler {
 
         if (state.isFinal()) {
             throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
-                    " annotation does not support final classes. This class is not " , state);
+                    " annotation does not support final classes." , state);
         }
 
         if (state.isInner()) {
@@ -104,7 +104,10 @@ class StateObjectHandler {
 
         boolean hasDefaultConstructor = false;
         for (MethodInfo constructor : state.getConstructors()) {
-            hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
+            if (constructor.getParameters().isEmpty()) {
+                hasDefaultConstructor = constructor.isPublic();
+                break;
+            }
         }
 
         // These classes use the special init sequence:
