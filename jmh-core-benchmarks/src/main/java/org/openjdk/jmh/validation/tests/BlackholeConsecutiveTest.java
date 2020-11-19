@@ -37,16 +37,16 @@ import org.openjdk.jmh.validation.ValidationTest;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
-public class BlackholeConsecutiveTest implements ValidationTest {
-    private final boolean inlined;
+public class BlackholeConsecutiveTest extends ValidationTest {
+    private final BlackholeTestMode mode;
 
-    public BlackholeConsecutiveTest(boolean inlined) {
-        this.inlined = inlined;
+    public BlackholeConsecutiveTest(BlackholeTestMode mode) {
+        this.mode = mode;
     }
 
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
-        pw.println("--------- BLACKHOLE MERGING TEST" + (!inlined ? " (NORMAL)" : " (INLINE HINTS BROKEN)"));
+        pw.println("--------- BLACKHOLE MERGING TEST (" + blackholeModeString(mode) + ")");
         pw.println();
 
         org.openjdk.jmh.util.Utils.reflow(pw,
@@ -57,20 +57,12 @@ public class BlackholeConsecutiveTest implements ValidationTest {
                 80, 2);
         pw.println();
 
-        if (inlined) {
-            org.openjdk.jmh.util.Utils.reflow(pw,
-                    "This particular test mode forces the inline of Blackhole methods, and so demolishes one of the layers " +
-                            "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
-                            "JMH will have to provide more contingencies.",
-                    80, 2);
-            pw.println();
-        }
+        blackholeModeMessage(pw, mode);
 
         String[] types = new String[]  {
                 "boolean", "byte",   "short",
                 "char",    "int",    "float",
                 "long",    "double", "Object",
-                "Array",
         };
 
         int[] ss = new int[] {1, 4, 8};

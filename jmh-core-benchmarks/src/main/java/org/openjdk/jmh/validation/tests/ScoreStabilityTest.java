@@ -37,7 +37,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class ScoreStabilityTest implements ValidationTest {
+public class ScoreStabilityTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("--------- SCORE STABILITY TEST");

@@ -26,11 +26,50 @@ package org.openjdk.jmh.validation;
 
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.validation.tests.BlackholeTestMode;
 
 import java.io.PrintWriter;
 
-public interface ValidationTest {
+public abstract class ValidationTest {
 
-    void runWith(PrintWriter pw, Options parent) throws RunnerException;
+    public abstract void runWith(PrintWriter pw, Options parent) throws RunnerException;
+
+    protected String blackholeModeString(BlackholeTestMode mode) {
+        switch (mode) {
+            case normal:
+                return "NORMAL";
+            case noblackhole:
+                return "COMPILER BLACKHOLE BROKEN";
+            case noblackhole_inline:
+                return "COMPILER BLACKHOLE BROKEN + INLINE HINTS BROKEN";
+            default:
+                throw new IllegalStateException("Unknown blackhole mode: " + mode);
+        }
+    }
+
+    protected void blackholeModeMessage(PrintWriter pw, BlackholeTestMode mode) {
+        switch (mode) {
+            case normal:
+                break;
+            case noblackhole:
+                org.openjdk.jmh.util.Utils.reflow(pw,
+                        "This particular test mode omits the JIT/AOT compiler blackholing of Blackhole arguments, and so demolishes one of the layers " +
+                                "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
+                                "JMH will have to provide more contingencies.",
+                        80, 2);
+                pw.println();
+                break;
+            case noblackhole_inline:
+                org.openjdk.jmh.util.Utils.reflow(pw,
+                        "This particular test mode forces the inline of Blackhole methods, and so demolishes two of the layers " +
+                                "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
+                                "JMH will have to provide more contingencies.",
+                        80, 2);
+                pw.println();
+                break;
+            default:
+                throw new IllegalStateException("Unknown blackhole mode: " + mode);
+        }
+    }
 
 }

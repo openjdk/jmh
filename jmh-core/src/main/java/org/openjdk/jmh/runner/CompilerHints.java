@@ -25,6 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.JDKVersion;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,7 +45,6 @@ public class CompilerHints extends AbstractResourceReader {
     private static volatile CompilerHints defaultList;
     private static volatile String hintsFile;
 
-
     private final Set<String> hints;
 
     static final String XX_COMPILE_COMMAND_FILE = "-XX:CompileCommandFile=";
@@ -62,10 +62,14 @@ public class CompilerHints extends AbstractResourceReader {
                 final Set<String> defaultHints = defaultList().get();
                 List<String> hints = new ArrayList<>(defaultHints.size() + 2);
                 hints.add("quiet");
-                if (Boolean.getBoolean("jmh.blackhole.forceInline")) {
-                    hints.add("inline,org/openjdk/jmh/infra/Blackhole.*");
-                } else {
+                BlackholeMode bhMode = BlackholeMode.current();
+                if (bhMode.shouldBlackhole()) {
+                    hints.add("blackhole,org/openjdk/jmh/infra/Blackhole.consume");
+                }
+                if (bhMode.shouldNotInline()) {
                     hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.*");
+                } else {
+                    hints.add("inline,org/openjdk/jmh/infra/Blackhole.*");
                 }
                 hints.addAll(defaultHints);
                 hintsFile = FileUtils.createTempFileWithLines("compilecommand", hints);
@@ -222,6 +226,50 @@ public class CompilerHints extends AbstractResourceReader {
             return FileUtils.createTempFileWithLines("compilecommand", hints);
         } catch (IOException e) {
             throw new IllegalStateException("Error merging compiler hints files", e);
+        }
+    }
+
+    private enum BlackholeMode {
+        BLACKHOLE_DONTINLINE(true, true),
+        BLACKHOLE(true, false),
+        DONTINLINE(false, true),
+        NOTHING(false, false),
+        ;
+
+        private final boolean shouldBlackhole, shouldNotInline;
+
+        BlackholeMode(boolean shouldBlackhole, boolean shouldNotInline) {
+            this.shouldBlackhole = shouldBlackhole;
+            this.shouldNotInline = shouldNotInline;
+        }
+
+        public boolean shouldBlackhole() {
+            return shouldBlackhole;
+        }
+
+        public boolean shouldNotInline() {
+            return shouldNotInline;
+        }
+
+        private static BlackholeMode current() {
+            String prop = System.getProperty("jmh.blackhole.mode");
+            if (prop != null) {
+                try {
+                    return BlackholeMode.valueOf(prop);
+                } catch (IllegalArgumentException iae) {
+                    throw new IllegalStateException("Unknown Blackhole mode: " + prop);
+                }
+            } else {
+                // Try auto-detection
+                int majorVer = JDKVersion.parseMajor(System.getProperty("java.version"));
+                if (majorVer >= 16) {
+                    // Experimental: since JDK 16, Compiler blackholing is available.
+                    // See https://bugs.openjdk.java.net/browse/JDK-8252505.
+                    return BLACKHOLE_DONTINLINE;
+                } else {
+                    return DONTINLINE;
+                }
+            }
         }
     }
 }

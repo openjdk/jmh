@@ -195,20 +195,25 @@ public class Main {
                     new BlackholeSingleTest().runWith(pw, opts);
                     break;
                 case blackhole_pipelined:
-                    setBlackholeInline(false);
-                    new BlackholePipelinedTest(false, false).runWith(pw, opts);
-                    new BlackholePipelinedTest(true, false).runWith(pw, opts);
-                    setBlackholeInline(true);
-                    new BlackholePipelinedTest(false, true).runWith(pw, opts);
-                    new BlackholePipelinedTest(true, true).runWith(pw, opts);
-                    setBlackholeInline(false);
+                    setBlackholeOpts(BlackholeTestMode.normal);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.normal).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.normal).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.noblackhole);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.noblackhole).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.noblackhole).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.noblackhole_inline);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.noblackhole_inline).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.noblackhole_inline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 case blackhole_consec:
-                    setBlackholeInline(false);
-                    new BlackholeConsecutiveTest(false).runWith(pw, opts);
-                    setBlackholeInline(true);
-                    new BlackholeConsecutiveTest(true).runWith(pw, opts);
-                    setBlackholeInline(false);
+                    setBlackholeOpts(BlackholeTestMode.normal);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.normal).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.noblackhole);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.noblackhole).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.noblackhole_inline);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.noblackhole_inline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 default:
                     throw new IllegalStateException();
@@ -236,8 +241,19 @@ public class Main {
         longer,
     }
 
-    private static void setBlackholeInline(boolean inline) {
-        System.getProperties().setProperty("jmh.blackhole.forceInline", String.valueOf(inline));
+    private static void setBlackholeOpts(BlackholeTestMode mode) {
+        switch (mode) {
+            case normal:
+                // Do nothing
+                System.getProperties().remove("jmh.blackhole.mode");
+                break;
+            case noblackhole:
+                System.getProperties().setProperty("jmh.blackhole.mode", "DONTINLINE");
+                break;
+            case noblackhole_inline:
+                System.getProperties().setProperty("jmh.blackhole.mode", "NOTHING");
+                break;
+        }
 
         try {
             Field f = CompilerHints.class.getDeclaredField("hintsFile");
