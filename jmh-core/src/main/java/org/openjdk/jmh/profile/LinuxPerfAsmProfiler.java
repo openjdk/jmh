@@ -142,10 +142,6 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         int evIdx = line.indexOf(": ");
         if (evIdx == -1) return null;
         String evName = line.substring(0, evIdx);
-        int tagIdx = evName.lastIndexOf(":");
-        if (tagIdx != -1) {
-            evName = evName.substring(0, tagIdx);
-        }
         line = line.substring(evIdx + 2);
 
         // Chomp the addr:
