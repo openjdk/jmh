@@ -62,4 +62,26 @@ public class PerfParseTest {
         }
     }
 
+    @Test
+    public void parseOptionalTag() {
+        String[][] lines = new String[][] {
+            { "328650.667569: ", "instructions:u", ":      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
+            { "328650.667569: ", "instructions:uk", ":     7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
+            { "328650.667569: ", "instructions:k", ":      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
+            { "328650.667569: ", "instructions:HG", ":     7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
+            { "328650.667569: ", "instructions:H", ":      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
+            { "328650.667569: ", "instructions:", ":       7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" }
+        };
+        for (String[] line : lines) {
+            LinuxPerfAsmProfiler.PerfLine perfLine = LinuxPerfAsmProfiler.parsePerfLine(line[0] + line[1] + line[2]);
+
+            Assert.assertEquals(328650.667569D, perfLine.time());
+            Assert.assertEquals(line[1], perfLine.eventName());
+            Assert.assertEquals(0x7f82b6a8beb4L, perfLine.addr());
+            Assert.assertEquals("ConstantPoolCache::allocate", perfLine.symbol());
+            Assert.assertEquals("libjvm.so", perfLine.lib());
+        }
+    }
+
+
 }
