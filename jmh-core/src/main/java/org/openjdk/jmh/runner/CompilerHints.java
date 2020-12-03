@@ -265,7 +265,7 @@ public class CompilerHints extends AbstractResourceReader {
                 if (majorVer >= 16) {
                     // Experimental: since JDK 16, Compiler blackholing is available.
                     // See https://bugs.openjdk.java.net/browse/JDK-8252505.
-                    return BLACKHOLE_DONTINLINE;
+                    return BLACKHOLE;
                 } else {
                     return DONTINLINE;
                 }
