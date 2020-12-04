@@ -67,10 +67,9 @@ public class CompilerHints extends AbstractResourceReader {
                     hints.add("blackhole,org/openjdk/jmh/infra/Blackhole.consume");
                 }
                 if (bhMode.shouldNotInline()) {
-                    hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.*");
-                } else {
-                    hints.add("inline,org/openjdk/jmh/infra/Blackhole.*");
+                    hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consume");
                 }
+                hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consumeCPU");
                 hints.addAll(defaultHints);
                 hintsFile = FileUtils.createTempFileWithLines("compilecommand", hints);
             } catch (IOException e) {

@@ -201,9 +201,9 @@ public class Main {
                     setBlackholeOpts(BlackholeTestMode.noblackhole);
                     new BlackholePipelinedTest(false, BlackholeTestMode.noblackhole).runWith(pw, opts);
                     new BlackholePipelinedTest(true, BlackholeTestMode.noblackhole).runWith(pw, opts);
-                    setBlackholeOpts(BlackholeTestMode.noblackhole_inline);
-                    new BlackholePipelinedTest(false, BlackholeTestMode.noblackhole_inline).runWith(pw, opts);
-                    new BlackholePipelinedTest(true, BlackholeTestMode.noblackhole_inline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.nothing);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.nothing).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.nothing).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 case blackhole_consec:
@@ -211,8 +211,8 @@ public class Main {
                     new BlackholeConsecutiveTest(BlackholeTestMode.normal).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.noblackhole);
                     new BlackholeConsecutiveTest(BlackholeTestMode.noblackhole).runWith(pw, opts);
-                    setBlackholeOpts(BlackholeTestMode.noblackhole_inline);
-                    new BlackholeConsecutiveTest(BlackholeTestMode.noblackhole_inline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.nothing);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.nothing).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 default:
@@ -250,7 +250,7 @@ public class Main {
             case noblackhole:
                 System.getProperties().setProperty("jmh.blackhole.mode", "DONTINLINE");
                 break;
-            case noblackhole_inline:
+            case nothing:
                 System.getProperties().setProperty("jmh.blackhole.mode", "NOTHING");
                 break;
         }

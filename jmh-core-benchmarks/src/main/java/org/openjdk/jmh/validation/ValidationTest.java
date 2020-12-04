@@ -39,9 +39,9 @@ public abstract class ValidationTest {
             case normal:
                 return "NORMAL";
             case noblackhole:
-                return "COMPILER BLACKHOLE BROKEN";
-            case noblackhole_inline:
-                return "COMPILER BLACKHOLE BROKEN + INLINE HINTS BROKEN";
+                return "COMPILER BLACKHOLE BROKEN, NO INLINE";
+            case nothing:
+                return "COMPILER BLACKHOLE BROKEN, NO INLINE BROKEN";
             default:
                 throw new IllegalStateException("Unknown blackhole mode: " + mode);
         }
@@ -59,7 +59,7 @@ public abstract class ValidationTest {
                         80, 2);
                 pw.println();
                 break;
-            case noblackhole_inline:
+            case nothing:
                 org.openjdk.jmh.util.Utils.reflow(pw,
                         "This particular test mode forces the inline of Blackhole methods, and so demolishes two of the layers " +
                                 "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
