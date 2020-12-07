@@ -33,6 +33,7 @@ import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.results.format.ResultFormatFactory;
 import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.runner.options.VerboseMode;
@@ -79,6 +80,8 @@ class TextReportFormat extends AbstractOutputFormat {
 
         println("# VM invoker: " + params.getJvm());
         println("# VM options: " + opts);
+
+        CompilerHints.printBlackholeMode(out);
 
         IterationParams warmup = params.getWarmup();
         if (warmup.getCount() > 0) {

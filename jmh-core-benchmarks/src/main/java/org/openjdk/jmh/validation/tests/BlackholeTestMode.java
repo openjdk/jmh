@@ -26,6 +26,7 @@ package org.openjdk.jmh.validation.tests;
 
 public enum BlackholeTestMode {
     normal,
-    noblackhole,
-    nothing,
+    compiler,
+    full_dontinline,
+    full,
 }

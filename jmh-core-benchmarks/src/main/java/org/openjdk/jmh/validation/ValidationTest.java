@@ -37,11 +37,13 @@ public abstract class ValidationTest {
     protected String blackholeModeString(BlackholeTestMode mode) {
         switch (mode) {
             case normal:
-                return "NORMAL";
-            case noblackhole:
-                return "COMPILER BLACKHOLE BROKEN, NO INLINE";
-            case nothing:
-                return "COMPILER BLACKHOLE BROKEN, NO INLINE BROKEN";
+                return "DEFAULT";
+            case compiler:
+                return "COMPILER BLACKHOLE";
+            case full_dontinline:
+                return "FULL BLACKHOLE, NO INLINE";
+            case full:
+                return "FULL BLACKHOLE";
             default:
                 throw new IllegalStateException("Unknown blackhole mode: " + mode);
         }
@@ -51,15 +53,22 @@ public abstract class ValidationTest {
         switch (mode) {
             case normal:
                 break;
-            case noblackhole:
+            case compiler:
                 org.openjdk.jmh.util.Utils.reflow(pw,
-                        "This particular test mode omits the JIT/AOT compiler blackholing of Blackhole arguments, and so demolishes one of the layers " +
-                                "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
-                                "JMH will have to provide more contingencies.",
+                        "This particular test mode enables the compiler-assisted blackholes. " +
+                        "It should provide the most consistent performance across all types. " +
+                        "This mode is only available in modern JDKs.",
                         80, 2);
                 pw.println();
                 break;
-            case nothing:
+            case full_dontinline:
+                org.openjdk.jmh.util.Utils.reflow(pw,
+                        "This particular test mode omits the compiler-assisted blackholes. " +
+                            "It should provide the basic level of safety for all JDKs.",
+                        80, 2);
+                pw.println();
+                break;
+            case full:
                 org.openjdk.jmh.util.Utils.reflow(pw,
                         "This particular test mode forces the inline of Blackhole methods, and so demolishes two of the layers " +
                                 "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +

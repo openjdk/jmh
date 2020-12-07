@@ -27,10 +27,7 @@ package org.openjdk.jmh.runner;
 import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.JDKVersion;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
 public class CompilerHints extends AbstractResourceReader {
@@ -49,6 +46,8 @@ public class CompilerHints extends AbstractResourceReader {
 
     static final String XX_COMPILE_COMMAND_FILE = "-XX:CompileCommandFile=";
 
+    static final String BLACKHOLE_PROP_NAME = "jmh.blackhole.mode";
+
     public static CompilerHints defaultList() {
         if (defaultList == null) {
             defaultList = fromResource(LIST);
@@ -62,7 +61,7 @@ public class CompilerHints extends AbstractResourceReader {
                 final Set<String> defaultHints = defaultList().get();
                 List<String> hints = new ArrayList<>(defaultHints.size() + 2);
                 hints.add("quiet");
-                BlackholeMode bhMode = BlackholeMode.current();
+                BlackholeMode bhMode = blackholeMode();
                 if (bhMode.shouldBlackhole()) {
                     hints.add("blackhole,org/openjdk/jmh/infra/Blackhole.consume");
                 }
@@ -228,18 +227,52 @@ public class CompilerHints extends AbstractResourceReader {
         }
     }
 
+    private static BlackholeMode blackholeMode() {
+        String prop = System.getProperty(BLACKHOLE_PROP_NAME);
+        if (prop != null) {
+            try {
+                return BlackholeMode.valueOf(prop);
+            } catch (IllegalArgumentException iae) {
+                throw new IllegalStateException("Unknown Blackhole mode: " + prop);
+            }
+        }
+        return BlackholeMode.FULL_DONTINLINE;
+    }
+
+    public static void printBlackholeMode(PrintStream out) {
+        BlackholeMode mode = blackholeMode();
+        out.print("# JMH blackhole mode: " + mode.desc());
+
+        // Experimental: since JDK 16, Compiler blackholing is available.
+        // Tell user they can enable it explicitly. We need to consider enabling
+        // this by default when JDK 16 stabilizes.
+        int majorVer = JDKVersion.parseMajor(System.getProperty("java.version"));
+        if (!mode.shouldBlackhole() && compilerBlackholeAvailable()) {
+            out.print("; set -D" + BLACKHOLE_PROP_NAME + "=" + BlackholeMode.COMPILER.name() + " to get compiler-assisted ones");
+        }
+
+        out.println();
+    }
+
+    private static boolean compilerBlackholeAvailable() {
+        // See https://bugs.openjdk.java.net/browse/JDK-8252505.
+        return JDKVersion.parseMajor(System.getProperty("java.version")) >= 16;
+    }
+
     private enum BlackholeMode {
-        BLACKHOLE_DONTINLINE(true, true),
-        BLACKHOLE(true, false),
-        DONTINLINE(false, true),
-        NOTHING(false, false),
+        COMPILER(true, false, "compiler-assisted blackhole"),
+        FULL_DONTINLINE(false, true, "full blackhole + dont-inline hint"),
+        FULL(false, false, "full blackhole"),
         ;
 
-        private final boolean shouldBlackhole, shouldNotInline;
+        private final boolean shouldBlackhole;
+        private final boolean shouldNotInline;
+        private final String desc;
 
-        BlackholeMode(boolean shouldBlackhole, boolean shouldNotInline) {
+        BlackholeMode(boolean shouldBlackhole, boolean shouldNotInline, String desc) {
             this.shouldBlackhole = shouldBlackhole;
             this.shouldNotInline = shouldNotInline;
+            this.desc = desc;
         }
 
         public boolean shouldBlackhole() {
@@ -250,25 +283,7 @@ public class CompilerHints extends AbstractResourceReader {
             return shouldNotInline;
         }
 
-        private static BlackholeMode current() {
-            String prop = System.getProperty("jmh.blackhole.mode");
-            if (prop != null) {
-                try {
-                    return BlackholeMode.valueOf(prop);
-                } catch (IllegalArgumentException iae) {
-                    throw new IllegalStateException("Unknown Blackhole mode: " + prop);
-                }
-            } else {
-                // Try auto-detection
-                int majorVer = JDKVersion.parseMajor(System.getProperty("java.version"));
-                if (majorVer >= 16) {
-                    // Experimental: since JDK 16, Compiler blackholing is available.
-                    // See https://bugs.openjdk.java.net/browse/JDK-8252505.
-                    return BLACKHOLE;
-                } else {
-                    return DONTINLINE;
-                }
-            }
-        }
+        public String desc() { return desc; }
     }
+
 }

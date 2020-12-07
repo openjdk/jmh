@@ -28,6 +28,7 @@ import joptsimple.*;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.*;
+import org.openjdk.jmh.util.JDKVersion;
 import org.openjdk.jmh.util.Utils;
 import org.openjdk.jmh.util.Version;
 import org.openjdk.jmh.validation.tests.*;
@@ -153,6 +154,8 @@ public class Main {
                 throw new IllegalStateException();
         }
 
+        boolean testCompilerBlackhole = JDKVersion.parseMajor(System.getProperty("java.version")) >= 16;
+
         for (Test t : tests) {
             switch (t) {
                 case timing:
@@ -198,21 +201,30 @@ public class Main {
                     setBlackholeOpts(BlackholeTestMode.normal);
                     new BlackholePipelinedTest(false, BlackholeTestMode.normal).runWith(pw, opts);
                     new BlackholePipelinedTest(true, BlackholeTestMode.normal).runWith(pw, opts);
-                    setBlackholeOpts(BlackholeTestMode.noblackhole);
-                    new BlackholePipelinedTest(false, BlackholeTestMode.noblackhole).runWith(pw, opts);
-                    new BlackholePipelinedTest(true, BlackholeTestMode.noblackhole).runWith(pw, opts);
-                    setBlackholeOpts(BlackholeTestMode.nothing);
-                    new BlackholePipelinedTest(false, BlackholeTestMode.nothing).runWith(pw, opts);
-                    new BlackholePipelinedTest(true, BlackholeTestMode.nothing).runWith(pw, opts);
+                    if (testCompilerBlackhole) {
+                        setBlackholeOpts(BlackholeTestMode.compiler);
+                        new BlackholePipelinedTest(false, BlackholeTestMode.compiler).runWith(pw, opts);
+                        new BlackholePipelinedTest(true, BlackholeTestMode.compiler).runWith(pw, opts);
+                    }
+                    setBlackholeOpts(BlackholeTestMode.full_dontinline);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.full_dontinline).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.full_dontinline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.full);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.full).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.full).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 case blackhole_consec:
                     setBlackholeOpts(BlackholeTestMode.normal);
                     new BlackholeConsecutiveTest(BlackholeTestMode.normal).runWith(pw, opts);
-                    setBlackholeOpts(BlackholeTestMode.noblackhole);
-                    new BlackholeConsecutiveTest(BlackholeTestMode.noblackhole).runWith(pw, opts);
-                    setBlackholeOpts(BlackholeTestMode.nothing);
-                    new BlackholeConsecutiveTest(BlackholeTestMode.nothing).runWith(pw, opts);
+                    if (testCompilerBlackhole) {
+                        setBlackholeOpts(BlackholeTestMode.compiler);
+                        new BlackholeConsecutiveTest(BlackholeTestMode.compiler).runWith(pw, opts);
+                    }
+                    setBlackholeOpts(BlackholeTestMode.full_dontinline);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.full_dontinline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.full);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.full).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 default:
@@ -247,11 +259,14 @@ public class Main {
                 // Do nothing
                 System.getProperties().remove("jmh.blackhole.mode");
                 break;
-            case noblackhole:
-                System.getProperties().setProperty("jmh.blackhole.mode", "DONTINLINE");
+            case compiler:
+                System.getProperties().setProperty("jmh.blackhole.mode", "COMPILER");
                 break;
-            case nothing:
-                System.getProperties().setProperty("jmh.blackhole.mode", "NOTHING");
+            case full_dontinline:
+                System.getProperties().setProperty("jmh.blackhole.mode", "FULL_DONTINLINE");
+                break;
+            case full:
+                System.getProperties().setProperty("jmh.blackhole.mode", "FULL");
                 break;
         }
 
