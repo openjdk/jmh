@@ -194,6 +194,11 @@ public class CompilerHints extends AbstractResourceReader {
                 hintFiles.add(hotspotCompilerFile.getAbsolutePath());
             }
         }
+
+        if (needsDiagnosticUnlock()) {
+            command.add("-XX:+UnlockDiagnosticVMOptions");
+        }
+
         command.add(CompilerHints.XX_COMPILE_COMMAND_FILE + mergeHintFiles(hintFiles));
     }
 
@@ -246,7 +251,6 @@ public class CompilerHints extends AbstractResourceReader {
         // Experimental: since JDK 16, Compiler blackholing is available.
         // Tell user they can enable it explicitly. We need to consider enabling
         // this by default when JDK 16 stabilizes.
-        int majorVer = JDKVersion.parseMajor(System.getProperty("java.version"));
         if (!mode.shouldBlackhole() && compilerBlackholeAvailable()) {
             out.print("; set -D" + BLACKHOLE_PROP_NAME + "=" + BlackholeMode.COMPILER.name() + " to get compiler-assisted ones");
         }
@@ -257,6 +261,10 @@ public class CompilerHints extends AbstractResourceReader {
     private static boolean compilerBlackholeAvailable() {
         // See https://bugs.openjdk.java.net/browse/JDK-8252505.
         return JDKVersion.parseMajor(System.getProperty("java.version")) >= 16;
+    }
+
+    private static boolean needsDiagnosticUnlock() {
+        return blackholeMode() == BlackholeMode.COMPILER;
     }
 
     private enum BlackholeMode {
