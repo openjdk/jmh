@@ -87,8 +87,8 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
 
         OptionSpec<String> optLibPath = parser.accepts("libPath",
                 "Location of asyncProfiler library. If not specified, System.loadLibrary will be used " +
-                "and the library must be made available to the forked JVM in an entry of -Djava.library.path " +
-                "or LD_LIBRARY_PATH.")
+                "and the library must be made available to the forked JVM in an entry of -Djava.library.path, " +
+                "LD_LIBRARY_PATH (Linux), or DYLD_LIBRARY_PATH (Mac OS).")
                 .withRequiredArg().ofType(String.class).describedAs("path");
 
         OptionSpec<String> optEvent = parser.accepts("event",
@@ -233,7 +233,8 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 }
             } catch (UnsatisfiedLinkError e) {
                 throw new ProfilerException("Unable to load async-profiler. Ensure asyncProfiler library " +
-                        "is on LD_LIBRARY_PATH, -Djava.library.path or libPath=", e);
+                        "is on LD_LIBRARY_PATH (Linux), DYLD_LIBRARY_PATH (Mac OS), or -Djava.library.path. " +
+                        "Alternatively, point to explicit library location with -prof async:libPath=<path>.", e);
             }
             this.direction = optDirection.value(set);
             this.output = optOutput.values(set);
