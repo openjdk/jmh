@@ -247,54 +247,36 @@ public class BlackholeConsecutiveBench {
 
     @Benchmark
     public void test_Object_1(Blackhole bh) {
-        bh.consume(Double.valueOf(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
     }
 
     @Benchmark
     public void test_Object_4(Blackhole bh) {
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
     }
 
     @Benchmark
     public void test_Object_8(Blackhole bh) {
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
 
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
-        bh.consume(Double.valueOf(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
+        bh.consume(cachedObject(x / y + 1331));
     }
 
-    @Benchmark
-    public void test_Array_1(Blackhole bh) {
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-    }
-
-    @Benchmark
-    public void test_Array_4(Blackhole bh) {
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-    }
-
-    @Benchmark
-    public void test_Array_8(Blackhole bh) {
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
-        bh.consume(new Double[]{Double.valueOf(x / y + 1331)});
+    private Object cachedObject(int v) {
+        if (v == 4242/1414 + 1331) {
+            return 42;
+        } else {
+            return v;
+        }
     }
 
 }

@@ -38,18 +38,18 @@ import org.openjdk.jmh.validation.ValidationTest;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
-public class BlackholePipelinedTest implements ValidationTest {
+public class BlackholePipelinedTest extends ValidationTest {
     private final boolean payload;
-    private final boolean inlined;
+    private final BlackholeTestMode mode;
 
-    public BlackholePipelinedTest(boolean payload, boolean inlined) {
+    public BlackholePipelinedTest(boolean payload, BlackholeTestMode mode) {
         this.payload = payload;
-        this.inlined = inlined;
+        this.mode = mode;
     }
 
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
-        pw.println("--------- BLACKHOLE PIPELINED TEST" + (payload ? " + REAL PAYLOAD" : "") + (!inlined ? " (NORMAL)" : " (INLINE HINTS BROKEN)"));
+        pw.println("--------- BLACKHOLE PIPELINED TEST" + (payload ? " + REAL PAYLOAD" : "") + " (" + blackholeModeString(mode) + ")");
         pw.println();
 
         org.openjdk.jmh.util.Utils.reflow(pw,
@@ -64,15 +64,8 @@ public class BlackholePipelinedTest implements ValidationTest {
             pw.println("  Real payload is being injected into the benchmark.");
             pw.println();
         }
-        if (inlined) {
-            org.openjdk.jmh.util.Utils.reflow(pw,
-                    "This particular test mode forces the inline of Blackhole methods, and so demolishes one of the layers " +
-                            "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
-                            "JMH will have to provide more contingencies.",
-                    80, 2);
-            pw.println();
-        }
-        pw.println();
+
+        blackholeModeMessage(pw, mode);
 
         String[] types = new String[]  {
                 "boolean", "byte",   "short",

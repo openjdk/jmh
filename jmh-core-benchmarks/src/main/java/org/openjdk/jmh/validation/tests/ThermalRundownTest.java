@@ -37,7 +37,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class ThermalRundownTest implements ValidationTest {
+public class ThermalRundownTest extends ValidationTest {
 
     private final int iterations;
 
