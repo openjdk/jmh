@@ -36,7 +36,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class BlackholeConsumeCPUTest implements ValidationTest {
+public class BlackholeConsumeCPUTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("--------- BLACKHOLE CONSUME CPU TEST");

@@ -26,11 +26,59 @@ package org.openjdk.jmh.validation;
 
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.validation.tests.BlackholeTestMode;
 
 import java.io.PrintWriter;
 
-public interface ValidationTest {
+public abstract class ValidationTest {
 
-    void runWith(PrintWriter pw, Options parent) throws RunnerException;
+    public abstract void runWith(PrintWriter pw, Options parent) throws RunnerException;
+
+    protected String blackholeModeString(BlackholeTestMode mode) {
+        switch (mode) {
+            case normal:
+                return "DEFAULT";
+            case compiler:
+                return "COMPILER BLACKHOLE";
+            case full_dontinline:
+                return "FULL BLACKHOLE, NO INLINE";
+            case full:
+                return "FULL BLACKHOLE";
+            default:
+                throw new IllegalStateException("Unknown blackhole mode: " + mode);
+        }
+    }
+
+    protected void blackholeModeMessage(PrintWriter pw, BlackholeTestMode mode) {
+        switch (mode) {
+            case normal:
+                break;
+            case compiler:
+                org.openjdk.jmh.util.Utils.reflow(pw,
+                        "This particular test mode enables the compiler-assisted blackholes. " +
+                        "It should provide the most consistent performance across all types. " +
+                        "This mode is only available in modern JDKs.",
+                        80, 2);
+                pw.println();
+                break;
+            case full_dontinline:
+                org.openjdk.jmh.util.Utils.reflow(pw,
+                        "This particular test mode omits the compiler-assisted blackholes. " +
+                            "It should provide the basic level of safety for all JDKs.",
+                        80, 2);
+                pw.println();
+                break;
+            case full:
+                org.openjdk.jmh.util.Utils.reflow(pw,
+                        "This particular test mode forces the inline of Blackhole methods, and so demolishes two of the layers " +
+                                "in defence in depth. If this layer is broken, Blackhole should also survive. If it isn't, then " +
+                                "JMH will have to provide more contingencies.",
+                        80, 2);
+                pw.println();
+                break;
+            default:
+                throw new IllegalStateException("Unknown blackhole mode: " + mode);
+        }
+    }
 
 }

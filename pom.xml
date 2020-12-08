@@ -157,7 +157,7 @@ questions.
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.0</version>
+                                    <version>3.2</version>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
@@ -281,14 +281,10 @@ questions.
             <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
-                <version>5.0.3</version>
+                <version>9.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <prerequisites>
-        <maven>3.2</maven>
-    </prerequisites>
 
     <modules>
         <module>jmh-core</module>

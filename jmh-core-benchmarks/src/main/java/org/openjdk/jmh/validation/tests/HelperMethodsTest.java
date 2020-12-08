@@ -38,7 +38,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class HelperMethodsTest implements ValidationTest {
+public class HelperMethodsTest extends ValidationTest {
 
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {

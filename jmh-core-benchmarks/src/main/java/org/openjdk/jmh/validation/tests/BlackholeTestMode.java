@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,40 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.dag.doublets;
+package org.openjdk.jmh.validation.tests;
 
-import org.junit.Test;
-import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.ct.CompileTest;
-
-public class ThreadThreadTest {
-
-    @State(Scope.Thread)
-    public static class L {
-
-    }
-
-    @State(Scope.Thread)
-    public static class G {
-        @Setup
-        public void setup(L l1, L l2) {
-
-        }
-        @TearDown
-        public void teardown(L l1, L l2) {
-
-        }
-    }
-
-    @Benchmark
-    public void test(G g1, G g2) {
-
-    }
-
-    @Test
-    public void compileTest() {
-        CompileTest.assertOK(this.getClass());
-    }
-
-
+public enum BlackholeTestMode {
+    normal,
+    compiler,
+    full_dontinline,
+    full,
 }

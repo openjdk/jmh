@@ -40,7 +40,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class TimingMeasurementsTest implements ValidationTest {
+public class TimingMeasurementsTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("--------- TIMING MEASUREMENTS TEST");

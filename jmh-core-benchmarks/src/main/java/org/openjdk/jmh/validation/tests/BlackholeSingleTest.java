@@ -36,7 +36,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class BlackholeSingleTest implements ValidationTest {
+public class BlackholeSingleTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("--------- BLACKHOLE SINGLE INVOCATION TEST");

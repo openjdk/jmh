@@ -37,7 +37,7 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class CompilerHintsTest implements ValidationTest {
+public class CompilerHintsTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("--------- COMPILER HINTS TEST");

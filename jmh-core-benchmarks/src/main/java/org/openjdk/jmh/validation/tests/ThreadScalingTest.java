@@ -40,7 +40,7 @@ import java.io.PrintWriter;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class ThreadScalingTest implements ValidationTest {
+public class ThreadScalingTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
         pw.println("--------- THREAD SCALING TEST");
