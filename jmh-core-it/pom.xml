@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-parent</artifactId>
-        <version>1.26-SNAPSHOT</version>
+        <version>1.27-SNAPSHOT</version>
     </parent>
 
     <name>JMH Core Integration Tests</name>
@@ -69,7 +69,8 @@ questions.
                     <!-- Integration tests are not measuring performance, OK to run them concurrently -->
                     <argLine>-Djmh.ignoreLock=true -Xms256m -Xmx256m -Djmh.core.it.profile=${jmh.core.it.profile}</argLine>
                     <forkCount>1C</forkCount>
-                    <reuseForks>true</reuseForks>
+                    <!-- Integration tests sometimes set system properties, do not let them leak to other tests -->
+                    <reuseForks>false</reuseForks>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>

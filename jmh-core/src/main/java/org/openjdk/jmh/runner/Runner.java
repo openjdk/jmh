@@ -45,6 +45,7 @@ import java.lang.management.ManagementFactory;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -180,6 +181,10 @@ public class Runner extends BaseRunner {
      * @throws org.openjdk.jmh.runner.RunnerException if something goes wrong
      */
     public Collection<RunResult> run() throws RunnerException {
+        if (JMH_LOCK_IGNORE) {
+            out.println("# WARNING: JMH lock is ignored by user request, make sure no other JMH instances are running");
+            return internalRun();
+        }
         FileChannel channel = null;
         FileLock lock = null;
         try {
@@ -198,23 +203,12 @@ public class Runner extends BaseRunner {
             }
 
             if (lock == null) {
-                String msg = "Unable to acquire the JMH lock (" + JMH_LOCK_FILE + "): already taken by another JMH instance";
-                if (JMH_LOCK_IGNORE) {
-                    out.println("# WARNING: " + msg + ", ignored by user's request.");
-                } else {
-                    throw new RunnerException("ERROR: " + msg + ", exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
-                }
+                throw new RunnerException("ERROR: Unable to acquire the JMH lock (" + JMH_LOCK_FILE + "): already taken by another JMH instance, exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
             }
 
             return internalRun();
         } catch (IOException e) {
-            String msg = "Exception while trying to acquire the JMH lock (" + JMH_LOCK_FILE + "): " + e.getMessage();
-            if (JMH_LOCK_IGNORE) {
-                out.println("# WARNING: " + msg + ", ignored by user's request.");
-                return internalRun();
-            } else {
-                throw new RunnerException("ERROR: " + msg  + ", exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
-            }
+            throw new RunnerException("ERROR: Exception while trying to acquire the JMH lock (" + JMH_LOCK_FILE + "), exiting. Use -Djmh.ignoreLock=true to forcefully continue.", e);
         } finally {
             try {
                 if (lock != null) {
@@ -886,7 +880,17 @@ public class Runner extends BaseRunner {
 
                 StringBuilder sb = new StringBuilder();
                 for (String cp : cpProp.split(File.pathSeparator)) {
-                    String rel = tmpFileDir.relativize(new File(cp).getAbsoluteFile().toPath()).toString();
+                    Path cpPath = new File(cp).getAbsoluteFile().toPath();
+                    if (!cpPath.getRoot().equals(tmpFileDir.getRoot())) {
+                        throw new IOException("Cannot relativize: " + cpPath + " and " + tmpFileDir + " have different roots.");
+                    }
+
+                    Path relPath = tmpFileDir.relativize(cpPath);
+                    if (!Files.isReadable(tmpFileDir.resolve(relPath))) {
+                        throw new IOException("Cannot read through the relativized path: " + relPath);
+                    }
+
+                    String rel = relPath.toString();
                     sb.append(rel.replace('\\', '/').replace(" ", "%20"));
                     if (!cp.endsWith(".jar")) {
                         sb.append('/');
@@ -903,8 +907,13 @@ public class Runner extends BaseRunner {
                 try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(tmpFile), manifest)) {
                     jos.putNextEntry(new ZipEntry("META-INF/"));
                 }
+
+                out.verbosePrintln("Using separate classpath JAR: " + tmpFile);
+                out.verbosePrintln("  Class-Path: " + classPath);
             } catch (IOException ex) {
                 // Something is wrong in file generation, give up and fall-through to usual thing
+                out.verbosePrintln("Caught IOException when building separate classpath JAR: " +
+                        ex.getMessage() + ", falling back to default -cp.");
                 tmpFile = null;
             }
         }

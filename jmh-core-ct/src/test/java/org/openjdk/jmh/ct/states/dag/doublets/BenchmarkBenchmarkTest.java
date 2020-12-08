@@ -25,10 +25,7 @@
 package org.openjdk.jmh.ct.states.dag.doublets;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.ct.CompileTest;
 
 public class BenchmarkBenchmarkTest {
@@ -41,7 +38,11 @@ public class BenchmarkBenchmarkTest {
     @State(Scope.Benchmark)
     public static class G {
         @Setup
-        public void setup(L l1) {
+        public void setup(L l1, L l2) {
+
+        }
+        @TearDown
+        public void teardown(L l1, L l2) {
 
         }
     }

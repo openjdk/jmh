@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,32 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jmh.ct.states.dag.doublets;
+package org.openjdk.jmh.ct.states.dag.cycles;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.ct.CompileTest;
 
-public class ThreadThreadTest {
+public class NoDoubleUseCycleThreadTest {
 
     @State(Scope.Thread)
-    public static class L {
-
+    public static class B {
     }
 
     @State(Scope.Thread)
-    public static class G {
+    public static class A {
         @Setup
-        public void setup(L l1, L l2) {
+        public void setup(B b1, B b2) {
 
         }
         @TearDown
-        public void teardown(L l1, L l2) {
+        public void teardown(B b1, B b2) {
 
         }
     }
 
     @Benchmark
-    public void test(G g1, G g2) {
+    public void test(A a1, A a2) {
 
     }
 
@@ -56,6 +55,5 @@ public class ThreadThreadTest {
     public void compileTest() {
         CompileTest.assertOK(this.getClass());
     }
-
 
 }

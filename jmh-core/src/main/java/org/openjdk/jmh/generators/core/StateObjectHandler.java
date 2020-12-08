@@ -89,7 +89,7 @@ class StateObjectHandler {
 
         if (state.isFinal()) {
             throw new GenerationException("The instantiated @" + State.class.getSimpleName() +
-                    " annotation does not support final classes. This class is not " , state);
+                    " annotation does not support final classes." , state);
         }
 
         if (state.isInner()) {
@@ -104,7 +104,10 @@ class StateObjectHandler {
 
         boolean hasDefaultConstructor = false;
         for (MethodInfo constructor : state.getConstructors()) {
-            hasDefaultConstructor |= (constructor.getParameters().isEmpty() && constructor.isPublic());
+            if (constructor.getParameters().isEmpty()) {
+                hasDefaultConstructor = constructor.isPublic();
+                break;
+            }
         }
 
         // These classes use the special init sequence:
@@ -216,36 +219,65 @@ class StateObjectHandler {
     }
 
     public static void validateNoCycles(MethodInfo method) {
-        try {
-            validateNoCyclesStep(Collections.<String>emptyList(), method, true);
-        } catch (StackOverflowError e) {
-            // "YOLO Engineering"
-            throw new GenerationException("@" + State.class.getSimpleName() +
-                    " dependency cycle is detected.", method);
+        validateNoCyclesStep(Collections.<ClassQName>emptySet(), method, true);
+    }
+
+    private static void validateNoCyclesStep(Set<ClassQName> alreadySeen, MethodInfo method, boolean includeHolder) {
+        // Collect and check outgoing edges
+        Set<ClassQName> outgoing = new HashSet<>();
+        if (includeHolder) {
+            outgoing.add(new ClassQName(method.getDeclaringClass()));
+        }
+        for (ParameterInfo ppi : method.getParameters()) {
+            outgoing.add(new ClassQName(ppi.getType()));
+        }
+        if (outgoing.isEmpty()) {
+            // No outgoing edges, checks complete.
+            return;
+        }
+
+        Set<ClassQName> currentSeen = new HashSet<>();
+        currentSeen.addAll(alreadySeen);
+
+        for (ClassQName ci : outgoing) {
+            // Try see if we have already seen these edges for current method.
+            // If so, this is a dependency cycle.
+            if (!currentSeen.add(ci)) {
+                throw new GenerationException("@" + State.class.getSimpleName() +
+                        " dependency cycle is detected: " + ci.ci.getQualifiedName() + " " + currentSeen, method);
+            }
+
+            // For each fixture method that needs the state, see if we need to initialize those as well.
+            // Restart the search from already seen + the outgoing edge.
+            Set<ClassQName> nextSeen = new HashSet<>();
+            nextSeen.addAll(alreadySeen);
+            nextSeen.add(ci);
+            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci.ci)) {
+                if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
+                    validateNoCyclesStep(nextSeen, mi, false);
+                }
+            }
         }
     }
 
-    private static void validateNoCyclesStep(List<String> states, MethodInfo method, boolean includeHolder) {
-        List<ClassInfo> stratum = new ArrayList<>();
-        if (includeHolder) {
-            stratum.add(method.getDeclaringClass());
-        }
-        for (ParameterInfo ppi : method.getParameters()) {
-            stratum.add(ppi.getType());
+    private static class ClassQName {
+        private final ClassInfo ci;
+
+        private ClassQName(ClassInfo ci) {
+            this.ci = ci;
         }
 
-        List<String> newStates = new ArrayList<>();
-        newStates.addAll(states);
-        for (ClassInfo ci : stratum) {
-            newStates.add(ci.getQualifiedName());
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ClassQName cycleInfo = (ClassQName) o;
+            return Objects.equals(ci.getQualifiedName(), cycleInfo.ci.getQualifiedName());
         }
 
-        for (ClassInfo ci : stratum) {
-            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
-                if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
-                    validateNoCyclesStep(newStates, mi, false);
-                }
-            }
+        @Override
+        public int hashCode() {
+            return Objects.hash(ci.getQualifiedName());
         }
     }
 
@@ -264,12 +296,12 @@ class StateObjectHandler {
                         specials.put(mi.getQualifiedName(), ci);
                     } else {
                         StateObject so = new StateObject(identifiers, ci, getState(ci, pi).value());
+                        stateObjects.add(so);
 
-                        if (!pso.helperArgs.get(mi.getQualifiedName()).contains(so.toLocal())) {
-                            stateObjects.add(so);
+                        pso.helperArgs.put(mi.getQualifiedName(), so.toLocal());
+
+                        if (!pso.depends.contains(so)) {
                             pso.depends.add(so);
-                            pso.helperArgs.put(mi.getQualifiedName(), so.toLocal());
-
                             bindState(method, so, ci);
                             resolveDependencies(method, ci, so);
                         }
@@ -1033,8 +1065,19 @@ class StateObjectHandler {
             AuxCounters.Type type = auxType.get(ops);
             switch (type) {
                 case OPERATIONS:
-                    result.add("new " + opResName + "(ResultRole.SECONDARY, \"" + ops + "\", " +
-                            auxAccessors.get(method.getName() + ops) + ", res.getTime(), benchmarkParams.getTimeUnit())");
+                    switch (opResName) {
+                        case "ThroughputResult":
+                        case "AverageTimeResult":
+                            result.add("new " + opResName + "(ResultRole.SECONDARY, \"" + ops + "\", " +
+                                    auxAccessors.get(method.getName() + ops) + ", res.getTime(), benchmarkParams.getTimeUnit())");
+                            break;
+                        case "SampleTimeResult":
+                        case "SingleShotResult":
+                            // Not handled.
+                            break;
+                        default:
+                            throw new GenerationException("Unknown result name for @" + AuxCounters.class + ": " + opResName, method);
+                    }
                     break;
                 case EVENTS:
                     result.add("new ScalarResult(\"" + ops + "\", " + auxAccessors.get(method.getName() + ops) + ", \"#\", AggregationPolicy.SUM)");
