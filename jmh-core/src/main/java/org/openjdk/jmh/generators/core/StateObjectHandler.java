@@ -219,36 +219,65 @@ class StateObjectHandler {
     }
 
     public static void validateNoCycles(MethodInfo method) {
-        try {
-            validateNoCyclesStep(Collections.<String>emptyList(), method, true);
-        } catch (StackOverflowError e) {
-            // "YOLO Engineering"
-            throw new GenerationException("@" + State.class.getSimpleName() +
-                    " dependency cycle is detected.", method);
+        validateNoCyclesStep(Collections.<ClassQName>emptySet(), method, true);
+    }
+
+    private static void validateNoCyclesStep(Set<ClassQName> alreadySeen, MethodInfo method, boolean includeHolder) {
+        // Collect and check outgoing edges
+        Set<ClassQName> outgoing = new HashSet<>();
+        if (includeHolder) {
+            outgoing.add(new ClassQName(method.getDeclaringClass()));
+        }
+        for (ParameterInfo ppi : method.getParameters()) {
+            outgoing.add(new ClassQName(ppi.getType()));
+        }
+        if (outgoing.isEmpty()) {
+            // No outgoing edges, checks complete.
+            return;
+        }
+
+        Set<ClassQName> currentSeen = new HashSet<>();
+        currentSeen.addAll(alreadySeen);
+
+        for (ClassQName ci : outgoing) {
+            // Try see if we have already seen these edges for current method.
+            // If so, this is a dependency cycle.
+            if (!currentSeen.add(ci)) {
+                throw new GenerationException("@" + State.class.getSimpleName() +
+                        " dependency cycle is detected: " + ci.ci.getQualifiedName() + " " + currentSeen, method);
+            }
+
+            // For each fixture method that needs the state, see if we need to initialize those as well.
+            // Restart the search from already seen + the outgoing edge.
+            Set<ClassQName> nextSeen = new HashSet<>();
+            nextSeen.addAll(alreadySeen);
+            nextSeen.add(ci);
+            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci.ci)) {
+                if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
+                    validateNoCyclesStep(nextSeen, mi, false);
+                }
+            }
         }
     }
 
-    private static void validateNoCyclesStep(List<String> states, MethodInfo method, boolean includeHolder) {
-        List<ClassInfo> stratum = new ArrayList<>();
-        if (includeHolder) {
-            stratum.add(method.getDeclaringClass());
-        }
-        for (ParameterInfo ppi : method.getParameters()) {
-            stratum.add(ppi.getType());
+    private static class ClassQName {
+        private final ClassInfo ci;
+
+        private ClassQName(ClassInfo ci) {
+            this.ci = ci;
         }
 
-        List<String> newStates = new ArrayList<>();
-        newStates.addAll(states);
-        for (ClassInfo ci : stratum) {
-            newStates.add(ci.getQualifiedName());
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ClassQName cycleInfo = (ClassQName) o;
+            return Objects.equals(ci.getQualifiedName(), cycleInfo.ci.getQualifiedName());
         }
 
-        for (ClassInfo ci : stratum) {
-            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
-                if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
-                    validateNoCyclesStep(newStates, mi, false);
-                }
-            }
+        @Override
+        public int hashCode() {
+            return Objects.hash(ci.getQualifiedName());
         }
     }
 
