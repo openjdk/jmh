@@ -98,7 +98,7 @@ public class GCProfiler implements InternalProfiler {
                                     Double.NaN,
                             "MB/sec", AggregationPolicy.AVG));
             if (allocated != 0) {
-                double allOps = iResult.getMetadata().getAllOps();
+                long allOps = iResult.getMetadata().getAllOps();
                 results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate.norm",
                                 (allOps != 0) ?
                                         1.0 * allocated / allOps :

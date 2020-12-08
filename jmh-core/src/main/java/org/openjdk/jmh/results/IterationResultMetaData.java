@@ -30,19 +30,19 @@ public class IterationResultMetaData implements Serializable {
 
     private static final long serialVersionUID = -8302904925038356897L;
 
-    private final double allOps;
-    private final double measuredOps;
+    private final long allOps;
+    private final long measuredOps;
 
-    public IterationResultMetaData(double allOps, double measuredOps) {
+    public IterationResultMetaData(long allOps, long measuredOps) {
         this.allOps = allOps;
         this.measuredOps = measuredOps;
     }
 
-    public double getMeasuredOps() {
+    public long getMeasuredOps() {
         return measuredOps;
     }
 
-    public double getAllOps() {
+    public long getAllOps() {
         return allOps;
     }
 }

@@ -245,8 +245,8 @@ abstract class BaseRunner {
     protected void runBenchmark(BenchmarkParams benchParams, BenchmarkHandler handler, IterationResultAcceptor acceptor) {
         long warmupTime = System.currentTimeMillis();
 
-        double allWarmup = 0;
-        double allMeasurement = 0;
+        long allWarmup = 0;
+        long allMeasurement = 0;
 
         // warmup
         IterationParams wp = benchParams.getWarmup();
