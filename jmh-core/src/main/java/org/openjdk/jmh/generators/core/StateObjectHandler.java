@@ -267,12 +267,12 @@ class StateObjectHandler {
                         specials.put(mi.getQualifiedName(), ci);
                     } else {
                         StateObject so = new StateObject(identifiers, ci, getState(ci, pi).value());
+                        stateObjects.add(so);
 
-                        if (!pso.helperArgs.get(mi.getQualifiedName()).contains(so.toLocal())) {
-                            stateObjects.add(so);
+                        pso.helperArgs.put(mi.getQualifiedName(), so.toLocal());
+
+                        if (!pso.depends.contains(so)) {
                             pso.depends.add(so);
-                            pso.helperArgs.put(mi.getQualifiedName(), so.toLocal());
-
                             bindState(method, so, ci);
                             resolveDependencies(method, ci, so);
                         }
