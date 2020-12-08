@@ -199,7 +199,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
             Multimap<MethodDesc, Long> methods = new HashMultimap<>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<>();
-            for (String evName : this.events) {
+            for (String evName : requestedEventNames) {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
@@ -212,7 +212,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 String evName = elems[0].trim();
 
                 // We work with only one event type - "SampledProfile".
-                if (!this.events.get(0).equals(evName))
+                if (!requestedEventNames.get(0).equals(evName))
                     continue;
 
                 // Check PID.
@@ -269,7 +269,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 methodMap.add(md, Utils.min(longs), Utils.max(longs));
             }
 
-            return new PerfEvents(this.events, events, methodMap);
+            return new PerfEvents(requestedEventNames, events, methodMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

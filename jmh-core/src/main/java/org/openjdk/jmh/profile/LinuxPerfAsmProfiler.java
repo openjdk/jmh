@@ -67,7 +67,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return Arrays.asList(PerfSupport.PERF_EXEC, "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(events, ","), "--output", perfBinData.getAbsolutePath());
+        return Arrays.asList(PerfSupport.PERF_EXEC, "record", "--freq", String.valueOf(sampleFrequency), "--event", Utils.join(requestedEventNames, ","), "--output", perfBinData.getAbsolutePath());
     }
 
     @Override
@@ -142,6 +142,10 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         int evIdx = line.indexOf(": ");
         if (evIdx == -1) return null;
         String evName = line.substring(0, evIdx);
+        int tagIdx = evName.lastIndexOf(":");
+        if (tagIdx != -1) {
+            evName = evName.substring(0, tagIdx);
+        }
         line = line.substring(evIdx + 2);
 
         // Chomp the addr:
@@ -214,13 +218,15 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         double readFrom = skipMs / 1000D;
         double readTo = (skipMs + lenMs) / 1000D;
 
+        List<String> evNames = stripEventNames(requestedEventNames);
+
         try (FileReader fr = new FileReader(perfParsedData.file());
              BufferedReader reader = new BufferedReader(fr)) {
             Deduplicator<MethodDesc> dedup = new Deduplicator<>();
 
             Multimap<MethodDesc, Long> methods = new HashMultimap<>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<>();
-            for (String evName : this.events) {
+            for (String evName : evNames) {
                 events.put(evName, new TreeMultiset<Long>());
             }
 
@@ -261,7 +267,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
                 methodMap.add(md, Utils.min(addrs), Utils.max(addrs));
             }
 
-            return new PerfEvents(this.events, events, methodMap);
+            return new PerfEvents(evNames, events, methodMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -271,5 +277,23 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected String perfBinaryExtension() {
         return ".perfbin";
+    }
+
+    @Override
+    protected List<String> stripEventNames(List<String> events) {
+        return stripPerfEventNames(events);
+    }
+
+    static List<String> stripPerfEventNames(List<String> events) {
+        List<String> res = new ArrayList<>();
+        for (String ev : events) {
+            int tagIdx = ev.indexOf(':');
+            if (tagIdx != -1) {
+                res.add(ev.substring(0, tagIdx));
+            } else {
+                res.add(ev);
+            }
+        }
+        return res;
     }
 }

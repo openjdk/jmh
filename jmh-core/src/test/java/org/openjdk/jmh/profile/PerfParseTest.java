@@ -27,6 +27,9 @@ package org.openjdk.jmh.profile;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PerfParseTest {
 
     @Test
@@ -64,24 +67,37 @@ public class PerfParseTest {
 
     @Test
     public void parseOptionalTag() {
-        String[][] lines = new String[][] {
-            { "328650.667569: ", "instructions:u", ":      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
-            { "328650.667569: ", "instructions:uk", ":     7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
-            { "328650.667569: ", "instructions:k", ":      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
-            { "328650.667569: ", "instructions:HG", ":     7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
-            { "328650.667569: ", "instructions:H", ":      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" },
-            { "328650.667569: ", "instructions:", ":       7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)" }
+        String[] lines = new String[] {
+                "328650.667569: instructions:u:      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)",
+                "328650.667569: instructions:uk:     7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)",
+                "328650.667569: instructions:k:      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)",
+                "328650.667569: instructions:HG:     7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)",
+                "328650.667569: instructions:H:      7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)",
+                "328650.667569: instructions::       7f82b6a8beb4 ConstantPoolCache::allocate (/somewhere/on/my/filesystem/libjvm.so)"
         };
-        for (String[] line : lines) {
-            LinuxPerfAsmProfiler.PerfLine perfLine = LinuxPerfAsmProfiler.parsePerfLine(line[0] + line[1] + line[2]);
+        for (String line : lines) {
+            LinuxPerfAsmProfiler.PerfLine perfLine = LinuxPerfAsmProfiler.parsePerfLine(line);
 
             Assert.assertEquals(328650.667569D, perfLine.time());
-            Assert.assertEquals(line[1], perfLine.eventName());
+            Assert.assertEquals("instructions", perfLine.eventName());
             Assert.assertEquals(0x7f82b6a8beb4L, perfLine.addr());
             Assert.assertEquals("ConstantPoolCache::allocate", perfLine.symbol());
             Assert.assertEquals("libjvm.so", perfLine.lib());
         }
     }
 
+    @Test
+    public void stripEvents() {
+        List<String> list = new ArrayList<>();
+        list.add("cycles");
+        list.add("instructions:u:");
+        list.add("branches:pppu:");
+
+        List<String> stripped = LinuxPerfAsmProfiler.stripPerfEventNames(list);
+
+        Assert.assertEquals("cycles", stripped.get(0));
+        Assert.assertEquals("instructions", stripped.get(1));
+        Assert.assertEquals("branches", stripped.get(2));
+    }
 
 }

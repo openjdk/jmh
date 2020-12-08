@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
-    protected final List<String> events;
+    protected final List<String> requestedEventNames;
 
     private final double regionRateThreshold;
     private final int regionShowTop;
@@ -198,7 +198,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         set = ProfilerUtils.parseInitLine(initLine, parser);
 
         try {
-            this.events = set.valuesOf(optEvents);
+            requestedEventNames = set.valuesOf(optEvents);
             regionRateThreshold = set.valueOf(optThresholdRate);
             regionShowTop = set.valueOf(optShowTop);
             regionTooBigThreshold = set.valueOf(optThreshold);
@@ -311,6 +311,16 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     protected abstract PerfEvents readEvents(double skipMs, double lenMs);
 
     /**
+     * Some profilers strip modifiers from event names.
+     * To properly match the events in shared code, we need to know
+     * what those events were stripped to.
+     * @return stripped events
+     */
+    protected List<String> stripEventNames(List<String> src) {
+        return src;
+    }
+
+    /**
      * Get perf binary data extension (optional).
      *
      * @return Extension.
@@ -367,12 +377,17 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
 
         final PerfEvents events = readEvents(skipMs, lenMs);
+        List<String> evNames = stripEventNames(requestedEventNames);
 
         if (!events.isEmpty()) {
             pw.printf("Perf output processed (skipped %.3f seconds):%n", skipMs / 1000D);
             int cnt = 1;
-            for (String event : this.events) {
-                pw.printf(" Column %d: %s (%d events)%n", cnt, event, events.get(event).size());
+            for (int i = 0; i < evNames.size(); i++) {
+                String stripped = evNames.get(i);
+                String requested = requestedEventNames.get(i);
+                pw.printf(" Column %d: %s%s (%d events)%n", cnt,
+                        stripped, (requested.equals(stripped) ? "" : " (" + requested + ")"),
+                        events.get(stripped).size());
                 cnt++;
             }
             pw.println();
@@ -394,7 +409,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * We would sort the regions by the hotness of the first (main) event type.
          */
 
-        final String mainEvent = this.events.get(0);
+        final String mainEvent = evNames.get(0);
 
         Collections.sort(regions, new Comparator<Region>() {
             @Override
@@ -421,7 +436,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 r.printCode(pw, events);
 
                 printDottedLine(pw);
-                for (String event : this.events) {
+                for (String event : evNames) {
                     printLine(pw, events, event, r.getEventCount(events, event));
                 }
                 pw.println("<total for region " + cnt + ">");
@@ -452,29 +467,29 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             int shown = 0;
             for (Region r : regions) {
                 if (shown++ < regionShowTop) {
-                    for (String event : this.events) {
+                    for (String event : evNames) {
                         printLine(pw, events, event, r.getEventCount(events, event));
                     }
                     pw.printf("%" + lenSource + "s  %s (%d bytes) %n", r.desc().source(), r.desc().name(), r.end - r.begin);
                 } else {
-                    for (String event : this.events) {
+                    for (String event : evNames) {
                         other.add(event, r.getEventCount(events, event));
                     }
                 }
-                for (String event : this.events) {
+                for (String event : evNames) {
                     total.add(event, r.getEventCount(events, event));
                 }
             }
 
             if (regions.size() - regionShowTop > 0) {
-                for (String event : this.events) {
+                for (String event : evNames) {
                     printLine(pw, events, event, other.count(event));
                 }
                 pw.println("<...other " + (regions.size() - regionShowTop) + " warm regions...>");
             }
             printDottedLine(pw);
 
-            for (String event : this.events) {
+            for (String event : evNames) {
                 printLine(pw, events, event, total.count(event));
             }
             pw.println("<totals>");
@@ -484,13 +499,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final Map<String, Multiset<String>> methodsByType = new HashMap<>();
         final Map<String, Multiset<MethodDesc>> methods = new HashMap<>();
 
-        for (String event : this.events) {
+        for (String event : evNames) {
             methodsByType.put(event, new HashMultiset<String>());
             methods.put(event, new HashMultiset<MethodDesc>());
         }
 
         for (Region r : regions) {
-            for (String event : this.events) {
+            for (String event : evNames) {
                 long count = r.getEventCount(events, event);
                 methods.get(event).add(r.desc(), count);
                 methodsByType.get(event).add(r.desc().source(), count);
@@ -510,29 +525,29 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             List<MethodDesc> top = Multisets.sortedDesc(methods.get(mainEvent));
             for (MethodDesc m : top) {
                 if (shownMethods++ < regionShowTop) {
-                    for (String event : this.events) {
+                    for (String event : evNames) {
                         printLine(pw, events, event, methods.get(event).count(m));
                     }
                     pw.printf("%" + lenSource + "s  %s %n", m.source(), m.name());
                 } else {
-                    for (String event : this.events) {
+                    for (String event : evNames) {
                         other.add(event, methods.get(event).count(m));
                     }
                 }
-                for (String event : this.events) {
+                for (String event : evNames) {
                     total.add(event, methods.get(event).count(m));
                 }
             }
 
             if (top.size() - regionShowTop > 0) {
-                for (String event : this.events) {
+                for (String event : evNames) {
                     printLine(pw, events, event, other.count(event));
                 }
                 pw.println("<...other " + (top.size() - regionShowTop) + " warm methods...>");
             }
             printDottedLine(pw);
 
-            for (String event : this.events) {
+            for (String event : evNames) {
                 printLine(pw, events, event, total.count(event));
             }
             pw.println("<totals>");
@@ -546,7 +561,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printDottedLine(pw, "Distribution by Source");
 
             for (String m : Multisets.sortedDesc(methodsByType.get(mainEvent))) {
-                for (String event : this.events) {
+                for (String event : evNames) {
                     printLine(pw, events, event, methodsByType.get(event).count(m));
                 }
                 pw.printf("%" + lenSource + "s%n", m);
@@ -554,7 +569,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             printDottedLine(pw);
 
-            for (String event : this.events) {
+            for (String event : evNames) {
                 printLine(pw, events, event, methodsByType.get(event).size());
             }
 
@@ -633,7 +648,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             try (FileOutputStream asm = new FileOutputStream(target);
                  PrintWriter pwAsm = new PrintWriter(asm)) {
                 for (ASMLine line : assembly.lines) {
-                    for (String event : this.events) {
+                    for (String event : evNames) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
                         printLine(pwAsm, events, event, count);
                     }
@@ -681,6 +696,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     }
 
     private List<Region> makeRegions(Assembly asms, PerfEvents events) {
+        List<String> strippedEvents = stripEventNames(requestedEventNames);
         List<Region> regions = new ArrayList<>();
 
         SortedSet<Long> allAddrs = events.getAllAddresses();
@@ -698,7 +714,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     desc = MethodDesc.unknown();
                 }
 
-                regions.add(new GeneratedRegion(this.events, asms, desc, intv.src, intv.dst,
+                regions.add(new GeneratedRegion(strippedEvents, asms, desc, intv.src, intv.dst,
                         regionLines, eventfulAddrs, regionTooBigThreshold, drawIntraJumps, drawInterJumps));
             } else {
                 // has no assembly, should be a native region
