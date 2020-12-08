@@ -32,16 +32,16 @@ public class BenchmarkTaskResult {
     /**
      * Total benchmark ops done.
      */
-    private final long allOperations;
+    private final double allOperations;
 
     /**
      * Measured benchmark ops done: total without sync iterations.
      */
-    private final long measuredOperations;
+    private final double measuredOperations;
 
     private final Collection<Result> results;
 
-    public BenchmarkTaskResult(long allOperations, long measuredOperations) {
+    public BenchmarkTaskResult(double allOperations, double measuredOperations) {
         this.allOperations = allOperations;
         this.measuredOperations = measuredOperations;
         this.results = new ArrayList<>();
@@ -55,11 +55,11 @@ public class BenchmarkTaskResult {
         return results;
     }
 
-    public long getAllOps() {
+    public double getAllOps() {
         return allOperations;
     }
 
-    public long getMeasuredOps() {
+    public double getMeasuredOps() {
         return measuredOperations;
     }
 }

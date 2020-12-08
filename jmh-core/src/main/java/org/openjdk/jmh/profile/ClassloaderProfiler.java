@@ -73,7 +73,7 @@ public class ClassloaderProfiler implements InternalProfiler {
 
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
 
-        long allOps = result.getMetadata().getAllOps();
+        double allOps = result.getMetadata().getAllOps();
         double time = 1.0 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime);
 
         try {

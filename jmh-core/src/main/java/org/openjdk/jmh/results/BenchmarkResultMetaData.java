@@ -34,10 +34,10 @@ public class BenchmarkResultMetaData implements Serializable {
     private final long warmupTime;
     private final long measurementTime;
     private final long stopTime;
-    private final long warmupOps;
-    private final long measurementOps;
+    private final double warmupOps;
+    private final double measurementOps;
 
-    public BenchmarkResultMetaData(long warmupTime, long measurementTime, long stopTime, long warmupOps, long measurementOps) {
+    public BenchmarkResultMetaData(long warmupTime, long measurementTime, long stopTime, double warmupOps, double measurementOps) {
         this.startTime = Long.MIN_VALUE;
         this.warmupTime = warmupTime;
         this.measurementTime = measurementTime;
@@ -65,11 +65,11 @@ public class BenchmarkResultMetaData implements Serializable {
         return stopTime;
     }
 
-    public long getMeasurementOps() {
+    public double getMeasurementOps() {
         return measurementOps;
     }
 
-    public long getWarmupOps() {
+    public double getWarmupOps() {
         return warmupOps;
     }
 

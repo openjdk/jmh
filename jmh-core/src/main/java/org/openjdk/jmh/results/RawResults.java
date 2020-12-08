@@ -26,8 +26,8 @@ package org.openjdk.jmh.results;
 
 public class RawResults {
 
-    public long allOps;
-    public long measuredOps;
+    public double allOps;
+    public double measuredOps;
     public long realTime;
     public long startTime;
     public long stopTime;

@@ -393,8 +393,8 @@ class BenchmarkHandler {
 
         // Process the results: we get here after all worker threads have quit,
         // either normally or abnormally. This means, Future.get() would never block.
-        long allOps = 0;
-        long measuredOps = 0;
+        double allOps = 0;
+        double measuredOps = 0;
 
         List<Throwable> errors = new ArrayList<>();
         for (Future<BenchmarkTaskResult> fr : completed) {

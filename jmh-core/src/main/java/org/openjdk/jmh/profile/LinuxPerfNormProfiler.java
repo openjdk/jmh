@@ -315,7 +315,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                         "Therefore, perf performance data includes benchmark warmup.");
             }
 
-            long totalOpts;
+            double totalOpts;
 
             BenchmarkResultMetaData md = br.getMetadata();
             if (md != null) {

@@ -42,22 +42,36 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class OpsPerInvSanityTest {
 
-    private static final int SLEEP_TIME_MS = 5;
+    private static final int SLEEP_TIME_MS = 50;
 
     @AuxCounters(AuxCounters.Type.EVENTS)
     @State(Scope.Thread)
-    public static class RawCounter {
+    public static class TimeCounter {
         public long time;
+    }
+
+    @AuxCounters(AuxCounters.Type.EVENTS)
+    @State(Scope.Thread)
+    public static class OpsCounter {
         public int ops;
     }
 
+    private long startTime;
+
+    @Setup(Level.Iteration)
+    public void setup() {
+        startTime = System.nanoTime();
+    }
+
+    @TearDown(Level.Iteration)
+    public void tearDown(TimeCounter cnt) {
+        cnt.time = System.nanoTime() - startTime;
+    }
+
     @Benchmark
-    public void test(RawCounter cnt) throws InterruptedException {
-        long start = System.nanoTime();
+    public void test(OpsCounter cnt) throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(SLEEP_TIME_MS);
-        long stop = System.nanoTime();
         cnt.ops++;
-        cnt.time += (stop - start);
     }
 
     @Test
@@ -115,7 +129,10 @@ public class OpsPerInvSanityTest {
                 Assert.fail("Unhandled mode: " + mode);
         }
 
-        Assert.assertTrue(mode + ", " + opsPerInv + ": " + expectedScore + " vs " + actualScore,
+        Assert.assertTrue(
+                String.format("mode = %s, ops per inv = %d, expected score = %e, actual score = %e; real time = %.5f, real ops = %.5f",
+                        mode, opsPerInv, expectedScore, actualScore,
+                        realTime, realOps),
                 Math.abs(1 - actualScore / expectedScore) < TOLERANCE);
     }
 

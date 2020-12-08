@@ -39,25 +39,39 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class BatchSizeSanityTest {
 
-    private static final int SLEEP_TIME_MS = 1;
+    private static final int SLEEP_TIME_MS = 50;
 
     @AuxCounters(AuxCounters.Type.EVENTS)
     @State(Scope.Thread)
-    public static class RawCounter {
+    public static class TimeCounter {
         public long time;
+    }
+
+    @AuxCounters(AuxCounters.Type.EVENTS)
+    @State(Scope.Thread)
+    public static class OpsCounter {
         public int ops;
     }
 
+    private long startTime;
+
+    @Setup(Level.Iteration)
+    public void setup() {
+        startTime = System.nanoTime();
+    }
+
+    @TearDown(Level.Iteration)
+    public void tearDown(TimeCounter cnt) {
+        cnt.time = System.nanoTime() - startTime;
+    }
+
     @Benchmark
-    public void test(RawCounter cnt) throws InterruptedException {
-        long start = System.nanoTime();
+    public void test(OpsCounter cnt) throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(SLEEP_TIME_MS);
-        long stop = System.nanoTime();
         cnt.ops++;
-        cnt.time += (stop - start);
     }
 
     @Test
@@ -113,7 +127,10 @@ public class BatchSizeSanityTest {
                 Assert.fail("Unhandled mode: " + mode);
         }
 
-        Assert.assertTrue(mode + ", " + batchSize + ": " + expectedScore + " vs " + actualScore,
+        Assert.assertTrue(
+                String.format("mode = %s, batch size = %d, expected score = %e, actual score = %e; real time = %.5f, real ops = %.5f",
+                              mode, batchSize, expectedScore, actualScore,
+                              realTime, realOps),
                 Math.abs(1 - actualScore / expectedScore) < TOLERANCE);
     }
 
