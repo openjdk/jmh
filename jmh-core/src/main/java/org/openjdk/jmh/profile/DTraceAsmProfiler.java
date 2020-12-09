@@ -205,9 +205,9 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
             }
 
             Map<String, Multiset<Long>> allEvents = new TreeMap<>();
-            assert this.events.size() == 1;
-            allEvents.put(this.events.get(0), events);
-            return new PerfEvents(this.events, allEvents, methodMap);
+            assert requestedEventNames.size() == 1;
+            allEvents.put(requestedEventNames.get(0), events);
+            return new PerfEvents(requestedEventNames, allEvents, methodMap);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

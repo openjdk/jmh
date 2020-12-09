@@ -27,6 +27,9 @@ package org.openjdk.jmh.profile;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PerfParseTest {
 
     @Test
@@ -83,5 +86,18 @@ public class PerfParseTest {
         }
     }
 
+    @Test
+    public void stripEvents() {
+        List<String> list = new ArrayList<>();
+        list.add("cycles");
+        list.add("instructions:u:");
+        list.add("branches:pppu:");
+
+        List<String> stripped = LinuxPerfAsmProfiler.stripPerfEventNames(list);
+
+        Assert.assertEquals("cycles", stripped.get(0));
+        Assert.assertEquals("instructions", stripped.get(1));
+        Assert.assertEquals("branches", stripped.get(2));
+    }
 
 }
