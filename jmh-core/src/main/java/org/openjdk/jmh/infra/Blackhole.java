@@ -152,7 +152,7 @@ abstract class BlackholeL4 extends BlackholeL3 {
  */
 public final class Blackhole extends BlackholeL4 {
 
-    /**
+    /*
      * IMPLEMENTATION NOTES:
      *
      * The major things to dodge with Blackholes are:
@@ -236,6 +236,11 @@ public final class Blackhole extends BlackholeL4 {
      * In all cases, consumes do the volatile reads to have a consistent memory
      * semantics across all consume methods.
      *
+     * There is an experimental compiler support for Blackholes that instructs compilers
+     * to treat specific methods as blackholes: keeping their arguments alive. At some
+     * point in the future, we hope to switch to that mode by default, thus greatly
+     * simplifying the Blackhole code.
+     *
      * An utmost caution should be exercised when changing the Blackhole code. Nominally,
      * the JMH Core Benchmarks should be run on multiple platforms (and their generated code
      * examined) to check the effects are still in place, and the overheads are not prohibitive.
@@ -245,6 +250,8 @@ public final class Blackhole extends BlackholeL4 {
      * DO OVERNIGHT. IT REQUIRES A SIGNIFICANT JVM/COMPILER/PERFORMANCE EXPERTISE,
      * AND LOTS OF TIME OVER THAT. ADJUST YOUR PLANS ACCORDINGLY.
      */
+
+    private static final boolean COMPILER_BLACKHOLE = Boolean.getBoolean("compilerBlackholesEnabled");
 
     static {
         Utils.check(Blackhole.class, "b1", "b2");
@@ -304,12 +311,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param obj object to consume.
      */
     public final void consume(Object obj) {
-        int tlrMask = this.tlrMask; // volatile read
-        int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
-        if ((tlr & tlrMask) == 0) {
-            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = new WeakReference<>(obj);
-            this.tlrMask = (tlrMask << 1) + 1;
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(obj);
+        } else {
+            consumeFull(obj);
         }
     }
 
@@ -319,11 +324,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param b object to consume.
      */
     public final void consume(byte b) {
-        byte b1 = this.b1; // volatile read
-        byte b2 = this.b2;
-        if ((b ^ b1) == (b ^ b2)) {
-            // SHOULD NEVER HAPPEN
-            nullBait.b1 = b; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(b);
+        } else {
+            consumeFull(b);
         }
     }
 
@@ -333,11 +337,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param bool object to consume.
      */
     public final void consume(boolean bool) {
-        boolean bool1 = this.bool1; // volatile read
-        boolean bool2 = this.bool2;
-        if ((bool ^ bool1) == (bool ^ bool2)) {
-            // SHOULD NEVER HAPPEN
-            nullBait.bool1 = bool; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(bool);
+        } else {
+            consumeFull(bool);
         }
     }
 
@@ -347,11 +350,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param c object to consume.
      */
     public final void consume(char c) {
-        char c1 = this.c1; // volatile read
-        char c2 = this.c2;
-        if ((c ^ c1) == (c ^ c2)) {
-            // SHOULD NEVER HAPPEN
-            nullBait.c1 = c; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(c);
+        } else {
+            consumeFull(c);
         }
     }
 
@@ -361,11 +363,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param s object to consume.
      */
     public final void consume(short s) {
-        short s1 = this.s1; // volatile read
-        short s2 = this.s2;
-        if ((s ^ s1) == (s ^ s2)) {
-            // SHOULD NEVER HAPPEN
-            nullBait.s1 = s; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(s);
+        } else {
+            consumeFull(s);
         }
     }
 
@@ -375,11 +376,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param i object to consume.
      */
     public final void consume(int i) {
-        int i1 = this.i1; // volatile read
-        int i2 = this.i2;
-        if ((i ^ i1) == (i ^ i2)) {
-            // SHOULD NEVER HAPPEN
-            nullBait.i1 = i; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(i);
+        } else {
+            consumeFull(i);
         }
     }
 
@@ -389,11 +389,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param l object to consume.
      */
     public final void consume(long l) {
-        long l1 = this.l1; // volatile read
-        long l2 = this.l2;
-        if ((l ^ l1) == (l ^ l2)) {
-            // SHOULD NEVER HAPPEN
-            nullBait.l1 = l; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(l);
+        } else {
+            consumeFull(l);
         }
     }
 
@@ -403,11 +402,10 @@ public final class Blackhole extends BlackholeL4 {
      * @param f object to consume.
      */
     public final void consume(float f) {
-        float f1 = this.f1; // volatile read
-        float f2 = this.f2;
-        if (f == f1 & f == f2) {
-            // SHOULD NEVER HAPPEN
-            nullBait.f1 = f; // implicit null pointer exception
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(f);
+        } else {
+            consumeFull(f);
         }
     }
 
@@ -417,11 +415,107 @@ public final class Blackhole extends BlackholeL4 {
      * @param d object to consume.
      */
     public final void consume(double d) {
+        if (COMPILER_BLACKHOLE) {
+            consumeCompiler(d);
+        } else {
+            consumeFull(d);
+        }
+    }
+
+    // Compiler blackholes block: let compilers figure out how to deal with it.
+
+    private static void consumeCompiler(boolean v) {}
+    private static void consumeCompiler(byte v)    {}
+    private static void consumeCompiler(short v)   {}
+    private static void consumeCompiler(char v)    {}
+    private static void consumeCompiler(int v)     {}
+    private static void consumeCompiler(float v)   {}
+    private static void consumeCompiler(double v)  {}
+    private static void consumeCompiler(long v)    {}
+    private static void consumeCompiler(Object v)  {}
+
+    // Full blackholes block: confuse compilers to get blackholing effects.
+    // See implementation comments at the top to understand what this code is doing.
+
+    private void consumeFull(byte b) {
+        byte b1 = this.b1; // volatile read
+        byte b2 = this.b2;
+        if ((b ^ b1) == (b ^ b2)) {
+            // SHOULD NEVER HAPPEN
+            nullBait.b1 = b; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(boolean bool) {
+        boolean bool1 = this.bool1; // volatile read
+        boolean bool2 = this.bool2;
+        if ((bool ^ bool1) == (bool ^ bool2)) {
+            // SHOULD NEVER HAPPEN
+            nullBait.bool1 = bool; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(char c) {
+        char c1 = this.c1; // volatile read
+        char c2 = this.c2;
+        if ((c ^ c1) == (c ^ c2)) {
+            // SHOULD NEVER HAPPEN
+            nullBait.c1 = c; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(short s) {
+        short s1 = this.s1; // volatile read
+        short s2 = this.s2;
+        if ((s ^ s1) == (s ^ s2)) {
+            // SHOULD NEVER HAPPEN
+            nullBait.s1 = s; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(int i) {
+        int i1 = this.i1; // volatile read
+        int i2 = this.i2;
+        if ((i ^ i1) == (i ^ i2)) {
+            // SHOULD NEVER HAPPEN
+            nullBait.i1 = i; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(long l) {
+        long l1 = this.l1; // volatile read
+        long l2 = this.l2;
+        if ((l ^ l1) == (l ^ l2)) {
+            // SHOULD NEVER HAPPEN
+            nullBait.l1 = l; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(float f) {
+        float f1 = this.f1; // volatile read
+        float f2 = this.f2;
+        if (f == f1 & f == f2) {
+            // SHOULD NEVER HAPPEN
+            nullBait.f1 = f; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(double d) {
         double d1 = this.d1; // volatile read
         double d2 = this.d2;
         if (d == d1 & d == d2) {
             // SHOULD NEVER HAPPEN
             nullBait.d1 = d; // implicit null pointer exception
+        }
+    }
+
+    private void consumeFull(Object obj) {
+        int tlrMask = this.tlrMask; // volatile read
+        int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
+        if ((tlr & tlrMask) == 0) {
+            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
+            this.obj1 = new WeakReference<>(obj);
+            this.tlrMask = (tlrMask << 1) + 1;
         }
     }
 

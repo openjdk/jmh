@@ -61,14 +61,17 @@ public class CompilerHints extends AbstractResourceReader {
                 final Set<String> defaultHints = defaultList().get();
                 List<String> hints = new ArrayList<>(defaultHints.size() + 2);
                 hints.add("quiet");
+
+                // Set up Blackholes
                 BlackholeMode bhMode = blackholeMode();
+                hints.add("inline,org/openjdk/jmh/infra/Blackhole.consume");
+                hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consumeCPU");
                 if (bhMode.shouldBlackhole()) {
-                    hints.add("blackhole,org/openjdk/jmh/infra/Blackhole.consume");
+                    hints.add("blackhole,org/openjdk/jmh/infra/Blackhole.consumeCompiler");
                 }
                 if (bhMode.shouldNotInline()) {
-                    hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consume");
+                    hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consumeFull");
                 }
-                hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consumeCPU");
                 hints.addAll(defaultHints);
                 hintsFile = FileUtils.createTempFileWithLines("compilecommand", hints);
             } catch (IOException e) {
@@ -195,8 +198,10 @@ public class CompilerHints extends AbstractResourceReader {
             }
         }
 
-        if (needsDiagnosticUnlock()) {
+        if (blackholeMode() == BlackholeMode.COMPILER) {
             command.add("-XX:+UnlockDiagnosticVMOptions");
+            command.add("-XX:+UnlockExperimentalVMOptions");
+            command.add("-DcompilerBlackholesEnabled=true");
         }
 
         command.add(CompilerHints.XX_COMPILE_COMMAND_FILE + mergeHintFiles(hintFiles));
@@ -246,31 +251,14 @@ public class CompilerHints extends AbstractResourceReader {
 
     public static void printBlackholeMode(PrintStream out) {
         BlackholeMode mode = blackholeMode();
-        out.print("# JMH blackhole mode: " + mode.desc());
-
-        // Experimental: since JDK 16, Compiler blackholing is available.
-        // Tell user they can enable it explicitly. We need to consider enabling
-        // this by default when JDK 16 stabilizes.
-        if (!mode.shouldBlackhole() && compilerBlackholeAvailable()) {
-            out.print("; set -D" + BLACKHOLE_PROP_NAME + "=" + BlackholeMode.COMPILER.name() + " to get compiler-assisted ones");
-        }
-
+        out.print("# Blackhole mode: " + mode.desc());
         out.println();
     }
 
-    private static boolean compilerBlackholeAvailable() {
-        // See https://bugs.openjdk.java.net/browse/JDK-8252505.
-        return JDKVersion.parseMajor(System.getProperty("java.version")) >= 16;
-    }
-
-    private static boolean needsDiagnosticUnlock() {
-        return blackholeMode() == BlackholeMode.COMPILER;
-    }
-
     private enum BlackholeMode {
-        COMPILER(true, false, "compiler-assisted blackhole"),
-        FULL_DONTINLINE(false, true, "full blackhole + dont-inline hint"),
-        FULL(false, false, "full blackhole"),
+        COMPILER(true, false, "compiler-assisted (EXPERIMENTAL, check generated code)"),
+        FULL_DONTINLINE(false, true, "full + dont-inline hint"),
+        FULL(false, false, "full (DIAGNOSTIC)"),
         ;
 
         private final boolean shouldBlackhole;
