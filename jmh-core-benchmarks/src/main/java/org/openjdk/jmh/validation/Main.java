@@ -25,7 +25,6 @@
 package org.openjdk.jmh.validation;
 
 import joptsimple.*;
-import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.*;
