@@ -37,9 +37,15 @@ import org.openjdk.jmh.validation.ValidationTest;
 import java.io.PrintWriter;
 
 public class BlackholeSingleTest extends ValidationTest {
+    private final BlackholeTestMode mode;
+
+    public BlackholeSingleTest(BlackholeTestMode mode) {
+        this.mode = mode;
+    }
+
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
-        pw.println("--------- BLACKHOLE SINGLE INVOCATION TEST");
+        pw.println("--------- BLACKHOLE SINGLE INVOCATION TEST (" + blackholeModeString(mode) + ")");
         pw.println();
 
         org.openjdk.jmh.util.Utils.reflow(pw,
@@ -48,6 +54,8 @@ public class BlackholeSingleTest extends ValidationTest {
                         "should be the same for implicit and explicit cases, and comparable across all data types. ",
                 80, 2);
         pw.println();
+
+        blackholeModeMessage(pw, mode);
 
         String[] types = new String[]  {
                 "boolean", "byte",   "short",

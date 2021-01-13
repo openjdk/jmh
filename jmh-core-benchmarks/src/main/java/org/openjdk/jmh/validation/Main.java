@@ -154,8 +154,6 @@ public class Main {
                 throw new IllegalStateException();
         }
 
-        boolean testCompilerBlackhole = JDKVersion.parseMajor(System.getProperty("java.version")) >= 16;
-
         for (Test t : tests) {
             switch (t) {
                 case timing:
@@ -195,17 +193,23 @@ public class Main {
                     new BlackholeConsumeCPUTest().runWith(pw, opts);
                     break;
                 case blackhole_single:
-                    new BlackholeSingleTest().runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.normal);
+                    new BlackholeSingleTest(BlackholeTestMode.normal).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.compiler);
+                    new BlackholeSingleTest(BlackholeTestMode.compiler).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.full_dontinline);
+                    new BlackholeSingleTest(BlackholeTestMode.full_dontinline).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.full);
+                    new BlackholeSingleTest(BlackholeTestMode.full).runWith(pw, opts);
+                    setBlackholeOpts(BlackholeTestMode.normal);
                     break;
                 case blackhole_pipelined:
                     setBlackholeOpts(BlackholeTestMode.normal);
                     new BlackholePipelinedTest(false, BlackholeTestMode.normal).runWith(pw, opts);
                     new BlackholePipelinedTest(true, BlackholeTestMode.normal).runWith(pw, opts);
-                    if (testCompilerBlackhole) {
-                        setBlackholeOpts(BlackholeTestMode.compiler);
-                        new BlackholePipelinedTest(false, BlackholeTestMode.compiler).runWith(pw, opts);
-                        new BlackholePipelinedTest(true, BlackholeTestMode.compiler).runWith(pw, opts);
-                    }
+                    setBlackholeOpts(BlackholeTestMode.compiler);
+                    new BlackholePipelinedTest(false, BlackholeTestMode.compiler).runWith(pw, opts);
+                    new BlackholePipelinedTest(true, BlackholeTestMode.compiler).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.full_dontinline);
                     new BlackholePipelinedTest(false, BlackholeTestMode.full_dontinline).runWith(pw, opts);
                     new BlackholePipelinedTest(true, BlackholeTestMode.full_dontinline).runWith(pw, opts);
@@ -217,10 +221,8 @@ public class Main {
                 case blackhole_consec:
                     setBlackholeOpts(BlackholeTestMode.normal);
                     new BlackholeConsecutiveTest(BlackholeTestMode.normal).runWith(pw, opts);
-                    if (testCompilerBlackhole) {
-                        setBlackholeOpts(BlackholeTestMode.compiler);
-                        new BlackholeConsecutiveTest(BlackholeTestMode.compiler).runWith(pw, opts);
-                    }
+                    setBlackholeOpts(BlackholeTestMode.compiler);
+                    new BlackholeConsecutiveTest(BlackholeTestMode.compiler).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.full_dontinline);
                     new BlackholeConsecutiveTest(BlackholeTestMode.full_dontinline).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.full);
