@@ -227,7 +227,8 @@ public class Utils {
         // JDK 9+ has the module protections in place, which would print the warning
         // to the console if we try setAccessible(true) on inaccessible object.
         // JDK 16 would deny access by default, so we have no recourse at all.
-        // Try to check with JDK 9 canAccesss before doing this to avoid warnings.
+        // Try to check with JDK 9+ AccessibleObject.canAccess before doing this
+        // to avoid the confusing console warnings.
         try {
             Method canAccess = AccessibleObject.class.getDeclaredMethod("canAccess", Object.class);
             if (!(boolean) canAccess.invoke(o, holder)) {
@@ -237,7 +238,8 @@ public class Utils {
             // fall-through
         }
 
-        // Try to force our way through.
+        // JDK 8-: reflection checks are lax, this should succeed
+        // JDK 9+: canAccess passed, this should succeed
         o.setAccessible(true);
     }
 
