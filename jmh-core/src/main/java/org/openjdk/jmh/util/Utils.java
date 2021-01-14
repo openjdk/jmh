@@ -28,7 +28,9 @@ import sun.misc.Unsafe;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -221,6 +223,28 @@ public class Utils {
         return max;
     }
 
+    private static void setAccessible(Object holder, AccessibleObject o) throws IllegalAccessException {
+        // JDK 9+ has the module protections in place, which would print the warning
+        // to the console if we try setAccessible(true) on inaccessible object.
+        // JDK 16 would deny access by default, so we have no recourse at all.
+        // Try to check with JDK 9+ AccessibleObject.canAccess before doing this
+        // to avoid the confusing console warnings. Force the break in if user asks
+        // explicitly.
+
+        if (!Boolean.getBoolean("jmh.forceSetAccessible")) {
+            try {
+                Method canAccess = AccessibleObject.class.getDeclaredMethod("canAccess", Object.class);
+                if (!(boolean) canAccess.invoke(o, holder)) {
+                    throw new IllegalAccessException(o + " is not accessible");
+                }
+            } catch (NoSuchMethodException | InvocationTargetException e) {
+                // fall-through
+            }
+        }
+
+        o.setAccessible(true);
+    }
+
     public static Charset guessConsoleEncoding() {
         // The reason for this method to exist is simple: we need the proper platform encoding for output.
         // We cannot use Console class directly, because we also need the access to the raw byte stream,
@@ -232,13 +256,13 @@ public class Utils {
             Console console = System.console();
             if (console != null) {
                 Field f = Console.class.getDeclaredField("cs");
-                f.setAccessible(true);
+                setAccessible(console, f);
                 Object res = f.get(console);
                 if (res instanceof Charset) {
                     return (Charset) res;
                 }
                 Method m = Console.class.getDeclaredMethod("encoding");
-                m.setAccessible(true);
+                setAccessible(console, m);
                 res = m.invoke(null);
                 if (res instanceof String) {
                     return Charset.forName((String) res);
@@ -256,7 +280,7 @@ public class Utils {
             PrintStream out = System.out;
             if (out != null) {
                 Field f = PrintStream.class.getDeclaredField("charOut");
-                f.setAccessible(true);
+                setAccessible(out, f);
                 Object res = f.get(out);
                 if (res instanceof OutputStreamWriter) {
                     String encoding = ((OutputStreamWriter) res).getEncoding();
