@@ -228,18 +228,20 @@ public class Utils {
         // to the console if we try setAccessible(true) on inaccessible object.
         // JDK 16 would deny access by default, so we have no recourse at all.
         // Try to check with JDK 9+ AccessibleObject.canAccess before doing this
-        // to avoid the confusing console warnings.
-        try {
-            Method canAccess = AccessibleObject.class.getDeclaredMethod("canAccess", Object.class);
-            if (!(boolean) canAccess.invoke(o, holder)) {
-                throw new IllegalAccessException(o + " is not accessible");
+        // to avoid the confusing console warnings. Force the break in if user asks
+        // explicitly.
+
+        if (!Boolean.getBoolean("jmh.forceSetAccessible")) {
+            try {
+                Method canAccess = AccessibleObject.class.getDeclaredMethod("canAccess", Object.class);
+                if (!(boolean) canAccess.invoke(o, holder)) {
+                    throw new IllegalAccessException(o + " is not accessible");
+                }
+            } catch (NoSuchMethodException | InvocationTargetException e) {
+                // fall-through
             }
-        } catch (NoSuchMethodException | InvocationTargetException e) {
-            // fall-through
         }
 
-        // JDK 8-: reflection checks are lax, this should succeed
-        // JDK 9+: canAccess passed, this should succeed
         o.setAccessible(true);
     }
 
