@@ -478,23 +478,6 @@ public class Utils {
         }
     }
 
-    public static Collection<String> destroy(Process process) {
-        Collection<String> messages = new ArrayList<>();
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            process.destroy();
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                return Collections.emptyList();
-            }
-
-            messages.add(baos.toString());
-            return messages;
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     public static Collection<String> runWith(List<String> cmd) {
         Collection<String> messages = new ArrayList<>();
         try {

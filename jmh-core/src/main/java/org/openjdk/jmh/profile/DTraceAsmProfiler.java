@@ -87,9 +87,19 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
             throw new IllegalStateException("DTrace needs the forked VM PID, but it is not initialized");
         }
 
-        Collection<String> messages = Utils.destroy(dtraceProcess);
+        // We cannot use Process.destroy, because it closes the streams right away.
+        // Instead, deliver TERM by hand and wait for process to gracefully terminate.
+        Collection<String> messages = Utils.tryWith("sudo", "kill", "-TERM", Long.toString(pid));
         if (!messages.isEmpty()) {
             throw new IllegalStateException(messages.toString());
+        }
+
+        try {
+            // dtrace would exit with non-zero exit code due to TERM,
+            // so we cannot test for errcode == 0 on this path.
+            dtraceProcess.waitFor();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Interrupted while waiting for profiler to stop");
         }
 
         this.pid = String.valueOf(pid);
