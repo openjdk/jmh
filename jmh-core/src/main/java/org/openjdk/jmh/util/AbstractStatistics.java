@@ -91,9 +91,7 @@ public abstract class AbstractStatistics implements Statistics {
     @Override
     public int compareTo(Statistics other, double confidence) {
         if (isDifferent(other, confidence)) {
-            double t = getMean();
-            double o = other.getMean();
-            return (t > o) ? -1 : 1;
+            return Double.compare(getMean(), other.getMean());
         } else {
             return 0;
         }
