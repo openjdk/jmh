@@ -93,7 +93,7 @@ public abstract class AbstractStatistics implements Statistics {
         if (isDifferent(other, confidence)) {
             double t = getMean();
             double o = other.getMean();
-            return (t > o) ? -1 : 1;
+            return (t < o) ? -1 : 1;
         } else {
             return 0;
         }
