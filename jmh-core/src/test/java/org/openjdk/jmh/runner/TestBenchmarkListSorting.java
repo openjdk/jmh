@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2021, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,15 +31,12 @@ import org.openjdk.jmh.util.Optional;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestBenchmarkListEncoding {
+public class TestBenchmarkListSorting {
 
     private static BenchmarkListEntry stub(String userClassQName, String generatedClassQName, String method, Mode mode) {
         BenchmarkListEntry br = new BenchmarkListEntry(
@@ -71,50 +68,36 @@ public class TestBenchmarkListEncoding {
     }
 
     @Test
-    public void test_ASCII_UTF8() throws Exception {
-        testWith("ASCII", "UTF-8");
-    }
-
-    @Test
-    public void test_UTF8_ASCII() throws Exception {
-        testWith("UTF-8", "ASCII");
-    }
-
-    @Test
-    public void test_UTF8_UTF8() throws Exception {
-        testWith("UTF-8", "UTF-8");
-    }
-
-    @Test
-    public void test_ASCII_ASCII() throws Exception {
-        testWith("ASCII", "ASCII");
-    }
-
-    public void testWith(String src, String dst) throws IOException {
-        BenchmarkListEntry br = stub("something.Test",
-                "something.generated.Test",
-                "testКонкаррентХэшмап",
+    public void test() throws Exception {
+        BenchmarkListEntry br1 = stub("something.Test1",
+                "something.generated.Test1",
+                "something.generated.TestMethod",
+                Mode.AverageTime);
+        BenchmarkListEntry br2 = stub("something.Test2",
+                "something.generated.Test1",
+                "something.generated.TestMethod",
+                Mode.AverageTime);
+        BenchmarkListEntry br3 = stub("something.Test3",
+                "something.generated.Test1",
+                "something.generated.TestMethod",
+                Mode.AverageTime);
+        BenchmarkListEntry br4 = stub("something.Test4",
+                "something.generated.Test1",
+                "something.generated.TestMethod",
                 Mode.AverageTime);
 
-        resetCharset();
-        System.setProperty("file.encoding", src);
+        // Present to writer in reverse order
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        BenchmarkList.writeBenchmarkList(bos, Collections.singleton(br));
+        BenchmarkList.writeBenchmarkList(bos, Arrays.asList(br4, br2, br3, br1));
 
-        resetCharset();
-        System.setProperty("file.encoding", dst);
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
         List<BenchmarkListEntry> read = BenchmarkList.readBenchmarkList(bis);
-        assertEquals("something.Test.testКонкаррентХэшмап", read.get(0).getUsername());
+
+        // Assert we read these in proper order
+        assertEquals("something.Test1", read.get(0).getUserClassQName());
+        assertEquals("something.Test2", read.get(1).getUserClassQName());
+        assertEquals("something.Test3", read.get(2).getUserClassQName());
+        assertEquals("something.Test4", read.get(3).getUserClassQName());
     }
 
-    private void resetCharset() {
-        try {
-            Field f = Charset.class.getDeclaredField("defaultCharset");
-            f.setAccessible(true);
-            f.set(null, null);
-        } catch (Exception e) {
-            // okay then.
-        }
-    }
 }
