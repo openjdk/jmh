@@ -56,9 +56,9 @@ public class BenchmarkList extends AbstractResourceReader {
         return new BenchmarkList(null, null, strings);
     }
 
-    public static Collection<BenchmarkListEntry> readBenchmarkList(InputStream stream) throws IOException {
+    public static List<BenchmarkListEntry> readBenchmarkList(InputStream stream) throws IOException {
         try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-            Collection<BenchmarkListEntry> entries = new ArrayList<>();
+            List<BenchmarkListEntry> entries = new ArrayList<>();
             for (String line : FileUtils.readAllLines(reader)) {
                 BenchmarkListEntry ble = new BenchmarkListEntry(line);
                 entries.add(ble);
@@ -69,7 +69,9 @@ public class BenchmarkList extends AbstractResourceReader {
 
     public static void writeBenchmarkList(OutputStream stream, Collection<BenchmarkListEntry> entries) {
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8))) {
-            for (BenchmarkListEntry entry : entries) {
+            List<BenchmarkListEntry> sorted = new ArrayList<>(entries);
+            Collections.sort(sorted);
+            for (BenchmarkListEntry entry : sorted) {
                 writer.println(entry.toLine());
             }
         }
