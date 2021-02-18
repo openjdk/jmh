@@ -86,7 +86,7 @@ public class TestBenchmarkListSorting {
                 "something.generated.TestMethod",
                 Mode.AverageTime);
 
-        // Present to writer in reverse order
+        // Present to writer in mixed order
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         BenchmarkList.writeBenchmarkList(bos, Arrays.asList(br4, br2, br3, br1));
 
