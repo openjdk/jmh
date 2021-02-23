@@ -89,15 +89,22 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
         // We cannot use Process.destroy, because it closes the streams right away.
         // Instead, deliver TERM by hand and wait for process to gracefully terminate.
-        Collection<String> messages = Utils.tryWith("sudo", "kill", "-TERM", Long.toString(pid));
+        long dtracePid = Utils.getPid(dtraceProcess);
+        if (dtracePid == 0) {
+            throw new IllegalStateException("Cannot determine dtrace process PID");
+        }
+
+        Collection<String> messages = Utils.tryWith("sudo", "kill", "-TERM", Long.toString(dtracePid));
         if (!messages.isEmpty()) {
             throw new IllegalStateException(messages.toString());
         }
 
+        // Wait for dtrace to finish.
         try {
-            // dtrace would exit with non-zero exit code due to TERM,
-            // so we cannot test for errcode == 0 on this path.
-            dtraceProcess.waitFor();
+            int errcode = dtraceProcess.waitFor();
+            if (errcode != 0) {
+                throw new IllegalStateException("Non-zero error code from dtrace: " + errcode);
+            }
         } catch (InterruptedException e) {
             throw new IllegalStateException("Interrupted while waiting for profiler to stop");
         }

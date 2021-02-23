@@ -27,13 +27,24 @@ package org.openjdk.jmh.util;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 public class TestUtil {
 
     @Test
-    public void testPID() {
-        Assert.assertFalse(Utils.getPid() == 0);
+    public void testPID_Current() {
+        Assert.assertNotSame(0, Utils.getPid());
+    }
+
+    @Test
+    public void testPID_Other() throws IOException, InterruptedException {
+        if (!Utils.isWindows()) {
+            ProcessBuilder pb = new ProcessBuilder().command("sleep", "1");
+            Process p = pb.start();
+            Assert.assertNotSame(0, Utils.getPid(p));
+            p.waitFor();
+        }
     }
 
     @Test
