@@ -34,7 +34,7 @@ public class TestUtil {
 
     @Test
     public void testPID_Current() {
-        Assert.assertNotSame(0, Utils.getPid());
+        Assert.assertTrue(Utils.getPid() != 0);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class TestUtil {
         if (!Utils.isWindows()) {
             ProcessBuilder pb = new ProcessBuilder().command("sleep", "1");
             Process p = pb.start();
-            Assert.assertNotSame(0, Utils.getPid(p));
+            Assert.assertTrue(Utils.getPid(p) != 0);
             p.waitFor();
         }
     }
