@@ -457,7 +457,7 @@ public class Utils {
             // Fallthrough
         }
 
-        // Step 2. Try to hack into the JDK 8 UNIXProcess.
+        // Step 2. Try to hack into the JDK 8- UNIXProcess.
         try {
             Class<?> c = Class.forName("java.lang.UNIXProcess");
             Field f = c.getDeclaredField("pid");
@@ -467,7 +467,7 @@ public class Utils {
                 return (int) o;
             }
         } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-            // Fallthrough.
+            // Fallthrough
         }
 
         // Step 3. Try to hack into JDK 9+ ProcessImpl.
@@ -481,10 +481,10 @@ public class Utils {
                 return (int) o;
             }
         } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-            // Fallthrough.
+            // Fallthrough
         }
 
-        // No dice, return bad PID.
+        // No dice, return zero
         return 0;
     }
 
