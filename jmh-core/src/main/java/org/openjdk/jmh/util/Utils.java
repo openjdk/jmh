@@ -440,6 +440,54 @@ public class Utils {
         throw new IllegalStateException("Unsupported PID format: " + name);
     }
 
+    /**
+     * Gets the PID of the target process.
+     * @param process to poll
+     * @return PID, or zero if no PID is found
+     */
+    public static long getPid(Process process) {
+        // Step 1. Try Process.pid, available since Java 9.
+        try {
+            Method m = Process.class.getMethod("pid");
+            Object pid = m.invoke(process);
+            if (pid instanceof Long) {
+                return (long) pid;
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            // Fallthrough
+        }
+
+        // Step 2. Try to hack into the JDK 8- UNIXProcess.
+        try {
+            Class<?> c = Class.forName("java.lang.UNIXProcess");
+            Field f = c.getDeclaredField("pid");
+            setAccessible(process, f);
+            Object o = f.get(process);
+            if (o instanceof Integer) {
+                return (int) o;
+            }
+        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
+            // Fallthrough
+        }
+
+        // Step 3. Try to hack into JDK 9+ ProcessImpl.
+        // Renamed from UNIXProcess with JDK-8071481.
+        try {
+            Class<?> c = Class.forName("java.lang.ProcessImpl");
+            Field f = c.getDeclaredField("pid");
+            setAccessible(process, f);
+            Object o = f.get(process);
+            if (o instanceof Integer) {
+                return (int) o;
+            }
+        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
+            // Fallthrough
+        }
+
+        // No dice, return zero
+        return 0;
+    }
+
     public static Collection<String> tryWith(String... cmd) {
         Collection<String> messages = new ArrayList<>();
         try {
@@ -475,23 +523,6 @@ public class Utils {
             return new ProcessBuilder(cmd).start();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
-        }
-    }
-
-    public static Collection<String> destroy(Process process) {
-        Collection<String> messages = new ArrayList<>();
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            process.destroy();
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                return Collections.emptyList();
-            }
-
-            messages.add(baos.toString());
-            return messages;
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
         }
     }
 
