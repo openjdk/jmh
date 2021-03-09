@@ -182,11 +182,15 @@ public class JMHSample_25_API_GA {
 
             double thresh = Math.random() * totalScore;
             for (Chromosome c : list) {
-                if (thresh < 0) return c;
-                thresh =- c.score();
+                if (thresh >= 0) {
+                    thresh -= c.score();
+                } else {
+                    return c;
+                }
             }
 
-            throw new IllegalStateException("Can not choose");
+            // Return the last
+            return list.get(list.size() - 1);
         }
 
         public int size() {
