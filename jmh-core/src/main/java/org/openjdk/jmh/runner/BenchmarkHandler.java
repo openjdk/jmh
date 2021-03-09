@@ -53,47 +53,35 @@ class BenchmarkHandler {
      */
     private final ExecutorService executor;
 
-    // (Aleksey) Forgive me, Father, for I have sinned.
-    private final ThreadLocal<ThreadData> threadData;
+    private final ConcurrentMap<Thread, ThreadData> threadData;
+    private final BlockingQueue<ThreadParams> tps;
 
     private final OutputFormat out;
     private final List<InternalProfiler> profilers;
     private final List<InternalProfiler> profilersRev;
 
+    private final Class<?> clazz;
     private final Method method;
 
     public BenchmarkHandler(OutputFormat out, Options options, BenchmarkParams executionParams) {
         String target = executionParams.generatedBenchmark();
         int lastDot = target.lastIndexOf('.');
-        final Class<?> clazz = ClassUtils.loadClass(target.substring(0, lastDot));
+        clazz = ClassUtils.loadClass(target.substring(0, lastDot));
 
-        this.method = BenchmarkHandler.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
-        this.profilers = ProfilerFactory.getSupportedInternal(options.getProfilers());
-        this.profilersRev = new ArrayList<>(profilers);
+        method = BenchmarkHandler.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
+
+        profilers = ProfilerFactory.getSupportedInternal(options.getProfilers());
+        profilersRev = new ArrayList<>(profilers);
         Collections.reverse(profilersRev);
 
-        final BlockingQueue<ThreadParams> tps = new ArrayBlockingQueue<>(executionParams.getThreads());
+        tps = new ArrayBlockingQueue<>(executionParams.getThreads());
         tps.addAll(distributeThreads(executionParams.getThreads(), executionParams.getThreadGroups()));
 
-        this.threadData = new ThreadLocal<ThreadData>() {
-            @Override
-            protected ThreadData initialValue() {
-                try {
-                    Object o = clazz.getConstructor().newInstance();
-                    ThreadParams t = tps.poll();
-                    if (t == null) {
-                        throw new IllegalStateException("Cannot get another thread params");
-                    }
-                    return new ThreadData(o, t);
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-                }
-            }
-        };
+        threadData = new ConcurrentHashMap<>();
 
         this.out = out;
         try {
-            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
+            executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -280,6 +268,9 @@ class BenchmarkHandler {
      * Do required shutdown actions.
      */
     public void shutdown() {
+        // No transient data is shared between benchmarks, purge it.
+        threadData.clear();
+
         if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
             return;
         }
@@ -324,7 +315,7 @@ class BenchmarkHandler {
         // preparing the worker runnables
         BenchmarkTask[] runners = new BenchmarkTask[numThreads];
         for (int i = 0; i < runners.length; i++) {
-            runners[i] = new BenchmarkTask(control);
+            runners[i] = new BenchmarkTask(clazz, tps, control);
         }
 
         long waitDeadline = System.nanoTime() + benchmarkParams.getTimeout().convertTo(TimeUnit.NANOSECONDS);
@@ -436,9 +427,13 @@ class BenchmarkHandler {
      */
     class BenchmarkTask implements Callable<BenchmarkTaskResult> {
         private volatile Thread runner;
+        private final Class<?> clazz;
+        private final BlockingQueue<ThreadParams> tps;
         private final InfraControl control;
 
-        BenchmarkTask(InfraControl control) {
+        BenchmarkTask(Class<?> clazz, BlockingQueue<ThreadParams> tps, InfraControl control) {
+            this.clazz = clazz;
+            this.tps = tps;
             this.control = control;
         }
 
@@ -448,8 +443,25 @@ class BenchmarkHandler {
                 // bind the executor thread
                 runner = Thread.currentThread();
 
-                // go for the run
-                ThreadData td = threadData.get();
+                // poll the current data, or instantiate in this thread, if needed
+                ThreadData td = threadData.get(runner);
+                if (td == null) {
+                    try {
+                        Object o = clazz.getConstructor().newInstance();
+                        ThreadParams t = tps.poll();
+                        if (t == null) {
+                            throw new IllegalStateException("Cannot get another thread params");
+                        }
+                        td = new ThreadData(o, t);
+                        ThreadData exist = threadData.put(runner, td);
+                        if (exist != null) {
+                            throw new IllegalStateException("Duplicate thread data");
+                        }
+                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                        throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
+                    }
+                }
+
                 return (BenchmarkTaskResult) method.invoke(td.instance, control, td.params);
             } catch (Throwable e) {
                 // about to fail the iteration;
