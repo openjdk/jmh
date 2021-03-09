@@ -57,7 +57,7 @@ public class AbruptFailureTest {
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
+    public void invokeAPI() {
         long time1 = System.nanoTime();
         try {
             Options opt = new OptionsBuilder()
@@ -67,7 +67,7 @@ public class AbruptFailureTest {
             new Runner(opt).run();
 
             Assert.fail("Should have failed");
-        } catch (Throwable t) {
+        } catch (RunnerException e) {
             // expected
             long time2 = System.nanoTime();
             long delay = TimeUnit.NANOSECONDS.toSeconds(time2 - time1);
