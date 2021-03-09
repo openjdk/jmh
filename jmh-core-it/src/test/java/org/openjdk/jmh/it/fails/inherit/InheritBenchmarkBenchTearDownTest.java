@@ -58,7 +58,7 @@ public class InheritBenchmarkBenchTearDownTest extends InheritableBenchmarkTearD
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
+    public void invokeAPI() {
         try {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
@@ -67,7 +67,7 @@ public class InheritBenchmarkBenchTearDownTest extends InheritableBenchmarkTearD
             new Runner(opt).run();
 
             Assert.fail("Should have failed");
-        } catch (Throwable t) {
+        } catch (RunnerException e) {
             // expected
         }
     }

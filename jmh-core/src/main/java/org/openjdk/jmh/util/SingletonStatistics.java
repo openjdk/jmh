@@ -27,6 +27,7 @@ package org.openjdk.jmh.util;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Calculate statistics with just a single value.
@@ -98,6 +99,9 @@ public class SingletonStatistics extends AbstractStatistics {
 
         @Override
         public Map.Entry<Double, Long> next() {
+            if (entryReturned) {
+                throw new NoSuchElementException("No more elements.");
+            }
             entryReturned = true;
             return new AbstractMap.SimpleImmutableEntry<>(value, 1L);
         }

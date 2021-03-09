@@ -30,6 +30,7 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Calculate statistics over a list of doubles.
@@ -181,6 +182,9 @@ public class ListStatistics extends AbstractStatistics {
 
         @Override
         public Map.Entry<Double, Long> next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("No more elements.");
+            }
             return new AbstractMap.SimpleImmutableEntry<>(values[currentIndex++], 1L);
         }
 

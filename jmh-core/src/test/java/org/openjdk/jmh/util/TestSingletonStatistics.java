@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -258,7 +259,14 @@ public class TestSingletonStatistics {
         Map.Entry<Double, Long> entry = singIter.next();
         Assert.assertEquals(entry.getKey(), VALUE);
         Assert.assertEquals(entry.getValue().longValue(), 1L);
+
         Assert.assertFalse(singIter.hasNext());
+        try {
+            singIter.next();
+            Assert.fail("Expected NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            // expected
+        }
     }
 
 }
