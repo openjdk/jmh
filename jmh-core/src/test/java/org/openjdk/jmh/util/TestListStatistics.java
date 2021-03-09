@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -407,7 +408,14 @@ public class TestListStatistics {
             Assert.assertEquals(entry.getKey(), item);
             Assert.assertEquals(entry.getValue().longValue(), 1L);
         }
+
         Assert.assertFalse(listIter.hasNext());
+        try {
+            listIter.next();
+            Assert.fail("Expected NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            // expected
+        }
     }
 
 }
