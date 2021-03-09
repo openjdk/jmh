@@ -28,7 +28,9 @@ import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -394,7 +396,8 @@ public class TestMultisetStatistics {
     @Test
     public strictfp void testRawDataIterator_no_duplicates() {
         int itemCount = 0;
-        for (Map.Entry<Double, Long> entry : Utils.adaptForLoop(instance.getRawData())) {
+        Iterator<Map.Entry<Double, Long>> it = instance.getRawData();
+        for (Map.Entry<Double, Long> entry : Utils.adaptForLoop(it)) {
             Assert.assertEquals(entry.getValue().longValue(), 1L);
 
             // Check if key (the actual data) is in the VALUES collection,
@@ -413,6 +416,14 @@ public class TestMultisetStatistics {
             itemCount++;
         }
         Assert.assertEquals(itemCount, VALUES.length);
+
+        Assert.assertFalse(it.hasNext());
+        try {
+            it.next();
+            Assert.fail("Expected NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            // expected
+        }
     }
 
     /**
@@ -426,12 +437,21 @@ public class TestMultisetStatistics {
             s.addValue(c * 10, c);
         }
 
+        Iterator<Map.Entry<Double, Long>> it = s.getRawData();
         int itemCount = 0;
-        for (Map.Entry<Double, Long> entry : Utils.adaptForLoop(s.getRawData())) {
+        for (Map.Entry<Double, Long> entry : Utils.adaptForLoop(it)) {
             Assert.assertEquals(entry.getKey(), (double)(entry.getValue() * 10));
             itemCount++;
         }
         Assert.assertEquals(itemCount, 10);
+
+        Assert.assertFalse(it.hasNext());
+        try {
+            it.next();
+            Assert.fail("Expected NoSuchElementException");
+        } catch (NoSuchElementException e) {
+            // expected
+        }
     }
 
 }
