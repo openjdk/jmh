@@ -25,6 +25,7 @@
 package org.openjdk.jmh.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -72,7 +73,7 @@ public class ClassUtils {
                 return Class.forName(className);
             }
 
-            // load the class in a different classloader
+            // Load the class in a different classloader
             String classPathValue = System.getProperty("java.class.path");
             String[] classPath = classPathValue.split(File.pathSeparator);
             URL[] classPathUrl = new URL[classPath.length];
@@ -80,12 +81,15 @@ public class ClassUtils {
                 try {
                     classPathUrl[i] = new File(classPath[i]).toURI().toURL();
                 } catch (MalformedURLException ex) {
-                    throw new RuntimeException("Error parsing the value of property java.class.path: " + classPathValue, ex);
+                    throw new IllegalStateException("Error parsing the value of property java.class.path: " + classPathValue, ex);
                 }
             }
 
-            URLClassLoader loader = new URLClassLoader(classPathUrl);
-            return loader.loadClass(className);
+            try (URLClassLoader loader = new URLClassLoader(classPathUrl)) {
+                return loader.loadClass(className);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         } catch (ClassNotFoundException ex) {
             throw new IllegalArgumentException("Benchmark does not match a class", ex);
         }
