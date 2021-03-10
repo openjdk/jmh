@@ -53,47 +53,35 @@ class BenchmarkHandler {
      */
     private final ExecutorService executor;
 
-    // (Aleksey) Forgive me, Father, for I have sinned.
-    private final ThreadLocal<ThreadData> threadData;
+    private final ConcurrentMap<Thread, WorkerData> workerData;
+    private final BlockingQueue<ThreadParams> tps;
 
     private final OutputFormat out;
     private final List<InternalProfiler> profilers;
     private final List<InternalProfiler> profilersRev;
 
+    private final Class<?> clazz;
     private final Method method;
 
     public BenchmarkHandler(OutputFormat out, Options options, BenchmarkParams executionParams) {
         String target = executionParams.generatedBenchmark();
         int lastDot = target.lastIndexOf('.');
-        final Class<?> clazz = ClassUtils.loadClass(target.substring(0, lastDot));
+        clazz = ClassUtils.loadClass(target.substring(0, lastDot));
 
-        this.method = BenchmarkHandler.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
-        this.profilers = ProfilerFactory.getSupportedInternal(options.getProfilers());
-        this.profilersRev = new ArrayList<>(profilers);
+        method = BenchmarkHandler.findBenchmarkMethod(clazz, target.substring(lastDot + 1));
+
+        profilers = ProfilerFactory.getSupportedInternal(options.getProfilers());
+        profilersRev = new ArrayList<>(profilers);
         Collections.reverse(profilersRev);
 
-        final BlockingQueue<ThreadParams> tps = new ArrayBlockingQueue<>(executionParams.getThreads());
+        tps = new ArrayBlockingQueue<>(executionParams.getThreads());
         tps.addAll(distributeThreads(executionParams.getThreads(), executionParams.getThreadGroups()));
 
-        this.threadData = new ThreadLocal<ThreadData>() {
-            @Override
-            protected ThreadData initialValue() {
-                try {
-                    Object o = clazz.getConstructor().newInstance();
-                    ThreadParams t = tps.poll();
-                    if (t == null) {
-                        throw new IllegalStateException("Cannot get another thread params");
-                    }
-                    return new ThreadData(o, t);
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
-                }
-            }
-        };
+        workerData = new ConcurrentHashMap<>();
 
         this.out = out;
         try {
-            this.executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
+            executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -280,6 +268,9 @@ class BenchmarkHandler {
      * Do required shutdown actions.
      */
     public void shutdown() {
+        // No transient data is shared between benchmarks, purge it.
+        workerData.clear();
+
         if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
             return;
         }
@@ -431,6 +422,31 @@ class BenchmarkHandler {
         return result;
     }
 
+    private WorkerData newWorkerData(Thread worker) {
+        WorkerData wd = workerData.get(worker);
+        if (wd != null) {
+            return wd;
+        }
+
+        try {
+            Object o = clazz.getConstructor().newInstance();
+            ThreadParams t = tps.poll();
+            if (t == null) {
+                throw new IllegalStateException("Cannot get another thread params");
+            }
+
+            wd = new WorkerData(o, t);
+            WorkerData exist = workerData.put(worker, wd);
+            if (exist != null) {
+                throw new IllegalStateException("Duplicate thread data");
+            }
+
+            return wd;
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
+        }
+    }
+
     /**
      * Worker body.
      */
@@ -448,9 +464,10 @@ class BenchmarkHandler {
                 // bind the executor thread
                 runner = Thread.currentThread();
 
-                // go for the run
-                ThreadData td = threadData.get();
-                return (BenchmarkTaskResult) method.invoke(td.instance, control, td.params);
+                // poll the current data, or instantiate in this thread, if needed
+                WorkerData wd = newWorkerData(runner);
+
+                return (BenchmarkTaskResult) method.invoke(wd.instance, control, wd.params);
             } catch (Throwable e) {
                 // about to fail the iteration;
 
@@ -481,13 +498,14 @@ class BenchmarkHandler {
                 runner = null;
             }
         }
+
     }
 
     /**
      * Handles thread-local data for each worker that should not change
      * between the iterations.
      */
-    private static class ThreadData {
+    private static class WorkerData {
         /**
          * Synthetic benchmark instance, which holds the benchmark metadata.
          * Expected to be touched by a single thread only.
@@ -500,7 +518,7 @@ class BenchmarkHandler {
          */
         final ThreadParams params;
 
-        public ThreadData(Object instance, ThreadParams params) {
+        public WorkerData(Object instance, ThreadParams params) {
             this.instance = instance;
             this.params = params;
         }
