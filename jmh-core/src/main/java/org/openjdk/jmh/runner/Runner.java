@@ -185,39 +185,32 @@ public class Runner extends BaseRunner {
             out.println("# WARNING: JMH lock is ignored by user request, make sure no other JMH instances are running");
             return internalRun();
         }
-        FileChannel channel = null;
-        FileLock lock = null;
+
+        final String tailMsg = " the JMH lock (" + JMH_LOCK_FILE + "), exiting. Use -Djmh.ignoreLock=true to forcefully continue.";
+
+        File lockFile;
         try {
+            lockFile = new File(JMH_LOCK_FILE);
+            lockFile.createNewFile();
+
             // Make sure the lock file is world-writeable, otherwise the lock file created by current
             // user would not work for any other user, always failing the run.
-            File file = new File(JMH_LOCK_FILE);
-            file.createNewFile();
-            file.setWritable(true, false);
-
-            channel = new RandomAccessFile(file, "rw").getChannel();
-
-            try {
-                lock = channel.tryLock();
-            } catch (OverlappingFileLockException e) {
-                // fall-through
-            }
-
-            if (lock == null) {
-                throw new RunnerException("ERROR: Unable to acquire the JMH lock (" + JMH_LOCK_FILE + "): already taken by another JMH instance, exiting. Use -Djmh.ignoreLock=true to forcefully continue.");
-            }
-
-            return internalRun();
+            lockFile.setWritable(true, false);
         } catch (IOException e) {
-            throw new RunnerException("ERROR: Exception while trying to acquire the JMH lock (" + JMH_LOCK_FILE + "), exiting. Use -Djmh.ignoreLock=true to forcefully continue.", e);
-        } finally {
-            try {
-                if (lock != null) {
-                    lock.release();
-                }
-            } catch (IOException e) {
-                // do nothing
+            throw new RunnerException("ERROR: Unable to create" + tailMsg, e);
+        }
+
+        try (RandomAccessFile raf = new RandomAccessFile(lockFile, "rw");
+             FileLock lock = raf.getChannel().tryLock()) {
+            if (lock == null) {
+                // Lock acquisition failed, pretend this was the overlap.
+                throw new OverlappingFileLockException();
             }
-            FileUtils.safelyClose(channel);
+            return internalRun();
+        } catch (OverlappingFileLockException e) {
+            throw new RunnerException("ERROR: Another JMH instance might be running. Unable to acquire" + tailMsg);
+        } catch (IOException e) {
+            throw new RunnerException("ERROR: Unexpected exception while trying to acquire" + tailMsg, e);
         }
     }
 
