@@ -1022,7 +1022,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "long totalOps = opsPerInv;");
 
-            writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult((long)totalOps, (long)totalOps);");
+            writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(totalOps, totalOps);");
             if (isSingleMethod) {
                 writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
             } else {
