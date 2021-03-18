@@ -43,7 +43,7 @@ import org.openjdk.jmh.runner.options.WarmupMode;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 @State(Scope.Thread)
 public class NonForkedModesTest {

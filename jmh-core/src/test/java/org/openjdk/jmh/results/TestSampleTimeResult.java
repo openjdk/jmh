@@ -30,9 +30,11 @@ import org.openjdk.jmh.util.SampleBuffer;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TestSampleTimeResult {
+
+    private static final double ASSERT_ACCURACY = 0.0000001;
 
     @Test
     public void testIterationAggregator1() {
@@ -48,7 +50,7 @@ public class TestSampleTimeResult {
         SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(2.5, result.getScore());
+        assertEquals(2.5, result.getScore(), ASSERT_ACCURACY);
         assertEquals("us/op", result.getScoreUnit());
     }
 
@@ -66,7 +68,7 @@ public class TestSampleTimeResult {
         SampleTimeResult r2 = new SampleTimeResult(ResultRole.PRIMARY, "Test1", b2, TimeUnit.MICROSECONDS);
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(2.5, result.getScore());
+        assertEquals(2.5, result.getScore(), ASSERT_ACCURACY);
         assertEquals("us/op", result.getScoreUnit());
     }
 

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.it.control;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Control;

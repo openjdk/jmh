@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,6 +40,7 @@ import static org.junit.Assert.assertEquals;
 public class TestSingletonStatistics {
 
     private static final double VALUE = 42.73638635;
+    private static final double ASSERT_ACCURACY = 0.000000001;
 
     private static final ListStatistics listStats = new ListStatistics();
     private static final SingletonStatistics singStats = new SingletonStatistics(VALUE);
@@ -146,17 +147,17 @@ public class TestSingletonStatistics {
         SingletonStatistics s = new SingletonStatistics(42.0D);
 
         Assert.assertEquals(1, s.getN());
-        Assert.assertEquals(42.0D, s.getSum());
-        Assert.assertEquals(42.0D, s.getMin());
-        Assert.assertEquals(42.0D, s.getMax());
-        Assert.assertEquals(42.0D, s.getMean());
-        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5));
-        Assert.assertEquals(Double.NaN, s.getVariance());
-        Assert.assertEquals(Double.NaN, s.getStandardDeviation());
-        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0]);
-        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1]);
-        Assert.assertEquals(42.0D, s.getPercentile(0));
-        Assert.assertEquals(42.0D, s.getPercentile(100));
+        Assert.assertEquals(42.0D, s.getSum(), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getMin(), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getMax(), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getMean(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getVariance(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getStandardDeviation(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0], ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1], ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getPercentile(0), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getPercentile(100), ASSERT_ACCURACY);
     }
 
     @Test
@@ -257,7 +258,7 @@ public class TestSingletonStatistics {
         Iterator<Map.Entry<Double, Long>> singIter = singStats.getRawData();
         Assert.assertTrue(singIter.hasNext());
         Map.Entry<Double, Long> entry = singIter.next();
-        Assert.assertEquals(entry.getKey(), VALUE);
+        Assert.assertEquals(entry.getKey(), VALUE, ASSERT_ACCURACY);
         Assert.assertEquals(entry.getValue().longValue(), 1L);
 
         Assert.assertFalse(singIter.hasNext());
