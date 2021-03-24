@@ -29,9 +29,11 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TestSingleShotResult {
+
+    private static final double ASSERT_ACCURACY = 0.0000001;
 
     @Test
     public void testIterationAggregator1() {
@@ -39,7 +41,7 @@ public class TestSingleShotResult {
         SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(1.5, result.getScore());
+        assertEquals(1.5, result.getScore(), ASSERT_ACCURACY);
         assertEquals("us/op", result.getScoreUnit());
     }
 
@@ -49,7 +51,7 @@ public class TestSingleShotResult {
         SingleShotResult r2 = new SingleShotResult(ResultRole.PRIMARY, "Test1", 2000L, TimeUnit.MICROSECONDS);
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(1.5, result.getScore());
+        assertEquals(1.5, result.getScore(), ASSERT_ACCURACY);
         assertEquals("us/op", result.getScoreUnit());
     }
 

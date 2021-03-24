@@ -29,9 +29,11 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TestThroughputResult {
+
+    private static final double ASSERT_ACCURACY = 0.0000001;
 
     /**
      * Test of getScore method, of class ThroughputResult.
@@ -83,7 +85,7 @@ public class TestThroughputResult {
         ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000L, 10_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(150.0, result.getScore());
+        assertEquals(150.0, result.getScore(), ASSERT_ACCURACY);
         assertEquals("ops/ms", result.getScoreUnit());
     }
 
@@ -93,7 +95,7 @@ public class TestThroughputResult {
         ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000L, 20_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(100.0, result.getScore());
+        assertEquals(100.0, result.getScore(), ASSERT_ACCURACY);
         assertEquals("ops/ms", result.getScoreUnit());
     }
 
@@ -103,7 +105,7 @@ public class TestThroughputResult {
         ThroughputResult r2 = new ThroughputResult(ResultRole.PRIMARY, "test1", 2_000_000_000L, 20_000_000L, TimeUnit.MILLISECONDS);
         Result result = r1.getIterationAggregator().aggregate(Arrays.asList(r1, r2));
 
-        assertEquals(100_000_000.0, result.getScore());
+        assertEquals(100_000_000.0, result.getScore(), ASSERT_ACCURACY);
         assertEquals("ops/ms", result.getScoreUnit());
     }
 
@@ -114,7 +116,7 @@ public class TestThroughputResult {
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
-        assertEquals(300.0, result.getScore());
+        assertEquals(300.0, result.getScore(), ASSERT_ACCURACY);
     }
 
     @Test
@@ -124,7 +126,7 @@ public class TestThroughputResult {
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
-        assertEquals(200.0, result.getScore());
+        assertEquals(200.0, result.getScore(), ASSERT_ACCURACY);
     }
 
     @Test  // regression test, check for overflow
@@ -134,6 +136,6 @@ public class TestThroughputResult {
         Result result = r1.getThreadAggregator().aggregate(Arrays.asList(r1, r2));
 
         assertEquals("ops/ms", result.getScoreUnit());
-        assertEquals(200_000_000.0, result.getScore());
+        assertEquals(200_000_000.0, result.getScore(), ASSERT_ACCURACY);
     }
 }

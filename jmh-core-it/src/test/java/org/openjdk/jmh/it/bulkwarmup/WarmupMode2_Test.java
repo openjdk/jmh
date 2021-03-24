@@ -42,7 +42,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests if harness honors warmup command line settings like:

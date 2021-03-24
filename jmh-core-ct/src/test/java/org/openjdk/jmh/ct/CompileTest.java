@@ -24,7 +24,11 @@
  */
 package org.openjdk.jmh.ct;
 
-import junit.framework.Assert;
+import org.junit.Assert;
+import org.openjdk.jmh.ct.benchmark.PublicStaticBenchmarkTest;
+import org.openjdk.jmh.ct.benchmark.PublicSynchronizedStaticBenchmarkStateBenchmarkTest;
+import org.openjdk.jmh.ct.other.GenericReturnTest;
+import org.openjdk.jmh.ct.other.SwingTest;
 import org.openjdk.jmh.generators.asm.ASMGeneratorSource;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.GeneratorSource;
@@ -88,7 +92,7 @@ public class CompileTest {
         if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
             RFGeneratorSource source = new RFGeneratorSource();
             source.processClasses(klass);
-            return doTestOther(source, destination);
+            return doTestOther(klass, source, destination);
         } else if (GENERATOR_TYPE.equalsIgnoreCase("asm")) {
             ASMGeneratorSource source = new ASMGeneratorSource();
             String name = "/" + klass.getCanonicalName().replaceAll("\\.", "/") + ".class";
@@ -97,15 +101,44 @@ public class CompileTest {
             } catch (IOException e) {
                 throw new IllegalStateException(name, e);
             }
-            return doTestOther(source, destination);
+            return doTestOther(klass, source, destination);
         } else if (GENERATOR_TYPE.equalsIgnoreCase("annprocess")) {
             return doTestAnnprocess(klass, destination);
         } else
             throw new IllegalStateException("Unhandled compile test generator: " + GENERATOR_TYPE);
     }
 
+    private static Collection<String> javacOptions(boolean annProc, Class<?> klass) {
+        // These tests print warnings (as designed), so -Werror fails.
+        if (klass.equals(SwingTest.class)) {
+            if (annProc) {
+                return Collections.emptyList();
+            } else {
+                return Collections.singleton("-proc:none");
+            }
+        }
 
-    public static boolean doTestOther(GeneratorSource source, InMemoryGeneratorDestination destination) {
+        // These tests fail when generated code references the static target
+        // through the instance.
+        if (klass.equals(GenericReturnTest.class) ||
+            klass.equals(PublicStaticBenchmarkTest.class) ||
+            klass.equals(PublicSynchronizedStaticBenchmarkStateBenchmarkTest.class)) {
+            if (annProc) {
+                return Arrays.asList("-Xlint:all,-processing,-static", "-Werror");
+            } else {
+                return Arrays.asList("-proc:none", "-Xlint:all,-static", "-Werror");
+            }
+        }
+
+        // Regular tests should compile with full lint and Werror.
+        if (annProc) {
+            return Arrays.asList("-Xlint:all,-processing", "-Werror");
+        } else {
+            return Arrays.asList("-proc:none", "-Xlint:all", "-Werror");
+        }
+    }
+
+    public static boolean doTestOther(Class<?> klass, GeneratorSource source, InMemoryGeneratorDestination destination) {
         BenchmarkGenerator gen = new BenchmarkGenerator();
         gen.generate(source, destination);
         gen.complete(source, destination);
@@ -125,7 +158,7 @@ public class CompileTest {
             sources.add(new JavaSourceFromString(e.getKey(), e.getValue()));
         }
 
-        JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, Collections.singleton("-proc:none"), null, sources);
+        JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, javacOptions(false, klass), null, sources);
         boolean success = task.call();
 
         if (!success) {
@@ -158,7 +191,7 @@ public class CompileTest {
             String file = Utils.join(lines, "\n");
 
             Collection<JavaSourceFromString> sources = Collections.singleton(new JavaSourceFromString(shortName, file));
-            JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, null, null, sources);
+            JavaCompiler.CompilationTask task = javac.getTask(null, fm, diagnostics, javacOptions(true, klass), null, sources);
 
             boolean success = task.call();
 

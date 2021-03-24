@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.runner;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.infra.ThreadParams;
 

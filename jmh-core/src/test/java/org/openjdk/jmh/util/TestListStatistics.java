@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,6 +46,8 @@ public class TestListStatistics {
         15.78967174, 34.43339987, 65.40063304, 69.86288638, 22.55130769,
         36.99130073, 60.17648239, 33.1484382, 56.4605944, 93.67454206
     };
+
+    private static final double ASSERT_ACCURACY = 0.0000000001;
 
     private static final ListStatistics instance = new ListStatistics();
 
@@ -240,17 +242,17 @@ public class TestListStatistics {
         Statistics s = new ListStatistics();
 
         Assert.assertEquals(0, s.getN());
-        Assert.assertEquals(Double.NaN, s.getSum());
-        Assert.assertEquals(Double.NaN, s.getMin());
-        Assert.assertEquals(Double.NaN, s.getMax());
-        Assert.assertEquals(Double.NaN, s.getMean());
-        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5));
-        Assert.assertEquals(Double.NaN, s.getVariance());
-        Assert.assertEquals(Double.NaN, s.getStandardDeviation());
-        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0]);
-        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1]);
-        Assert.assertEquals(Double.NaN, s.getPercentile(0));
-        Assert.assertEquals(Double.NaN, s.getPercentile(100));
+        Assert.assertEquals(Double.NaN, s.getSum(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getMin(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getMax(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getMean(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getVariance(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getStandardDeviation(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0], ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1], ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getPercentile(0), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getPercentile(100), ASSERT_ACCURACY);
     }
 
     @Test
@@ -259,17 +261,17 @@ public class TestListStatistics {
         s.addValue(42.0D);
 
         Assert.assertEquals(1, s.getN());
-        Assert.assertEquals(42.0D, s.getSum());
-        Assert.assertEquals(42.0D, s.getMin());
-        Assert.assertEquals(42.0D, s.getMax());
-        Assert.assertEquals(42.0D, s.getMean());
-        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5));
-        Assert.assertEquals(Double.NaN, s.getVariance());
-        Assert.assertEquals(Double.NaN, s.getStandardDeviation());
-        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0]);
-        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1]);
-        Assert.assertEquals(42.0D, s.getPercentile(0));
-        Assert.assertEquals(42.0D, s.getPercentile(100));
+        Assert.assertEquals(42.0D, s.getSum(), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getMin(), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getMax(), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getMean(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getMeanErrorAt(0.5), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getVariance(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getStandardDeviation(), ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[0], ASSERT_ACCURACY);
+        Assert.assertEquals(Double.NaN, s.getConfidenceIntervalAt(0.50)[1], ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getPercentile(0), ASSERT_ACCURACY);
+        Assert.assertEquals(42.0D, s.getPercentile(100), ASSERT_ACCURACY);
     }
 
     @Test
@@ -405,8 +407,8 @@ public class TestListStatistics {
         for (double item : VALUES) {
             Assert.assertTrue(listIter.hasNext());
             Map.Entry<Double, Long> entry = listIter.next();
-            Assert.assertEquals(entry.getKey(), item);
-            Assert.assertEquals(entry.getValue().longValue(), 1L);
+            Assert.assertEquals(entry.getKey(), item, ASSERT_ACCURACY);
+            Assert.assertEquals(1L, entry.getValue().longValue());
         }
 
         Assert.assertFalse(listIter.hasNext());

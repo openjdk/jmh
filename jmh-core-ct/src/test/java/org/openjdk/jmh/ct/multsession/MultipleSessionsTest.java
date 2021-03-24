@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.ct.multsession;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.ct.InMemoryGeneratorDestination;
 import org.openjdk.jmh.generators.core.BenchmarkGenerator;

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.it.params;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;

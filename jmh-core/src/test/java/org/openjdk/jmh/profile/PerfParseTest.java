@@ -24,13 +24,15 @@
  */
 package org.openjdk.jmh.profile;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PerfParseTest {
+
+    private static final double ASSERT_ACCURACY = 0.0000001;
 
     @Test
     public void parsePerf_4_4() {
@@ -41,7 +43,7 @@ public class PerfParseTest {
 
         for (String line : lines) {
             LinuxPerfAsmProfiler.PerfLine perfLine = LinuxPerfAsmProfiler.parsePerfLine(line);
-            Assert.assertEquals(328650.667569D, perfLine.time());
+            Assert.assertEquals(328650.667569D, perfLine.time(), ASSERT_ACCURACY);
             Assert.assertEquals("instructions", perfLine.eventName());
             Assert.assertEquals(0x7f82b6a8beb4L, perfLine.addr());
             Assert.assertEquals("ConstantPoolCache::allocate", perfLine.symbol());
@@ -57,7 +59,7 @@ public class PerfParseTest {
 
         for (String line : lines) {
             LinuxPerfAsmProfiler.PerfLine perfLine = LinuxPerfAsmProfiler.parsePerfLine(line);
-            Assert.assertEquals(328650.667569D, perfLine.time());
+            Assert.assertEquals(328650.667569D, perfLine.time(), ASSERT_ACCURACY);
             Assert.assertEquals("instructions", perfLine.eventName());
             Assert.assertEquals(0x7f82b6a8beb4L, perfLine.addr());
             Assert.assertEquals("ConstantPoolCache::allocate(Thread* thr)", perfLine.symbol());
@@ -78,7 +80,7 @@ public class PerfParseTest {
         for (String line : lines) {
             LinuxPerfAsmProfiler.PerfLine perfLine = LinuxPerfAsmProfiler.parsePerfLine(line);
 
-            Assert.assertEquals(328650.667569D, perfLine.time());
+            Assert.assertEquals(328650.667569D, perfLine.time(), ASSERT_ACCURACY);
             Assert.assertEquals("instructions", perfLine.eventName());
             Assert.assertEquals(0x7f82b6a8beb4L, perfLine.addr());
             Assert.assertEquals("ConstantPoolCache::allocate", perfLine.symbol());

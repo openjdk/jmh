@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.results;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.util.SampleBuffer;
 
@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ResultAggregationTest {
 
+    private static final double ASSERT_ACCURACY = 0.0000001;
+
     @Test
     public void testThroughput() {
         IterationResult ir = new IterationResult(null, null, null);
@@ -40,8 +42,8 @@ public class ResultAggregationTest {
         ir.addResult(new ThroughputResult(ResultRole.PRIMARY, "", 10_000, 1, TimeUnit.NANOSECONDS));
         ir.addResult(new ThroughputResult(ResultRole.SECONDARY, "sec", 5_000, 1, TimeUnit.NANOSECONDS));
         ir.addResult(new ThroughputResult(ResultRole.SECONDARY, "sec", 5_000, 1, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(20_000.0, ir.getPrimaryResult().getScore());
-        Assert.assertEquals(10_000.0, ir.getSecondaryResults().get("sec").getScore());
+        Assert.assertEquals(20_000.0, ir.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(10_000.0, ir.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, ir.getPrimaryResult().getSampleCount());
         Assert.assertEquals(2, ir.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, ir.getRawPrimaryResults().size());
@@ -49,18 +51,18 @@ public class ResultAggregationTest {
 
         BenchmarkResult br = new BenchmarkResult(null, Arrays.asList(ir, ir));
         br.addBenchmarkResult(new ThroughputResult(ResultRole.SECONDARY, "bench", 3_000, 1, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(20_000.0, br.getPrimaryResult().getScore());
-        Assert.assertEquals(10_000.0, br.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(20_000.0, br.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(10_000.0, br.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, br.getPrimaryResult().getSampleCount());
         Assert.assertEquals(2, br.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(1, br.getSecondaryResults().get("bench").getSampleCount());
         Assert.assertEquals(2, br.getIterationResults().size());
 
         RunResult rr = new RunResult(null, Arrays.asList(br, br));
-        Assert.assertEquals(20_000.0, rr.getPrimaryResult().getScore());
-        Assert.assertEquals(10_000.0, rr.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(20_000.0, rr.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(10_000.0, rr.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(4, rr.getPrimaryResult().getSampleCount());
         Assert.assertEquals(4, rr.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, rr.getSecondaryResults().get("bench").getSampleCount());
@@ -74,8 +76,8 @@ public class ResultAggregationTest {
         ir.addResult(new AverageTimeResult(ResultRole.PRIMARY, "", 1, 10_000, TimeUnit.NANOSECONDS));
         ir.addResult(new AverageTimeResult(ResultRole.SECONDARY, "sec", 1, 5_000, TimeUnit.NANOSECONDS));
         ir.addResult(new AverageTimeResult(ResultRole.SECONDARY, "sec", 1, 5_000, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore());
+        Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, ir.getPrimaryResult().getSampleCount());
         Assert.assertEquals(2, ir.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, ir.getRawPrimaryResults().size());
@@ -83,18 +85,18 @@ public class ResultAggregationTest {
 
         BenchmarkResult br = new BenchmarkResult(null, Arrays.asList(ir, ir));
         br.addBenchmarkResult(new AverageTimeResult(ResultRole.SECONDARY, "bench", 1, 3_000, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, br.getPrimaryResult().getSampleCount());
         Assert.assertEquals(2, br.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(1, br.getSecondaryResults().get("bench").getSampleCount());
         Assert.assertEquals(2, br.getIterationResults().size());
 
         RunResult rr = new RunResult(null, Arrays.asList(br, br));
-        Assert.assertEquals(10_000.0, rr.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, rr.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(10_000.0, rr.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, rr.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(4, rr.getPrimaryResult().getSampleCount());
         Assert.assertEquals(4, rr.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, rr.getSecondaryResults().get("bench").getSampleCount());
@@ -117,8 +119,8 @@ public class ResultAggregationTest {
         ir.addResult(new SampleTimeResult(ResultRole.PRIMARY, "", sb10000, TimeUnit.NANOSECONDS));
         ir.addResult(new SampleTimeResult(ResultRole.SECONDARY, "sec", sb5000, TimeUnit.NANOSECONDS));
         ir.addResult(new SampleTimeResult(ResultRole.SECONDARY, "sec", sb5000, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore());
+        Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, ir.getRawPrimaryResults().size());
         Assert.assertEquals(2, ir.getRawSecondaryResults().get("sec").size());
         Assert.assertEquals(2, ir.getPrimaryResult().getSampleCount());
@@ -126,18 +128,18 @@ public class ResultAggregationTest {
 
         BenchmarkResult br = new BenchmarkResult(null, Arrays.asList(ir, ir));
         br.addBenchmarkResult(new SampleTimeResult(ResultRole.SECONDARY, "bench", sb3000, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(4, br.getPrimaryResult().getSampleCount());
         Assert.assertEquals(4, br.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(1, br.getSecondaryResults().get("bench").getSampleCount());
         Assert.assertEquals(2, br.getIterationResults().size());
 
         RunResult rr = new RunResult(null, Arrays.asList(br, br));
-        Assert.assertEquals(10_000.0, rr.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, rr.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(10_000.0, rr.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, rr.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(8, rr.getPrimaryResult().getSampleCount());
         Assert.assertEquals(8, rr.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, rr.getSecondaryResults().get("bench").getSampleCount());
@@ -151,8 +153,8 @@ public class ResultAggregationTest {
         ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10_000, TimeUnit.NANOSECONDS));
         ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5_000, TimeUnit.NANOSECONDS));
         ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5_000, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore());
+        Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, ir.getPrimaryResult().getSampleCount());
         Assert.assertEquals(2, ir.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, ir.getRawPrimaryResults().size());
@@ -160,18 +162,18 @@ public class ResultAggregationTest {
 
         BenchmarkResult br = new BenchmarkResult(null, Arrays.asList(ir, ir));
         br.addBenchmarkResult(new SingleShotResult(ResultRole.SECONDARY, "bench", 3_000, TimeUnit.NANOSECONDS));
-        Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, br.getPrimaryResult().getSampleCount());
         Assert.assertEquals(2, br.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(1, br.getSecondaryResults().get("bench").getSampleCount());
         Assert.assertEquals(2, br.getIterationResults().size());
 
         RunResult rr = new RunResult(null, Arrays.asList(br, br));
-        Assert.assertEquals(10_000.0, rr.getPrimaryResult().getScore());
-        Assert.assertEquals(5_000.0, rr.getSecondaryResults().get("sec").getScore());
-        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore());
+        Assert.assertEquals(10_000.0, rr.getPrimaryResult().getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(5_000.0, rr.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
+        Assert.assertEquals(3_000.0, rr.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(4, rr.getPrimaryResult().getSampleCount());
         Assert.assertEquals(4, rr.getSecondaryResults().get("sec").getSampleCount());
         Assert.assertEquals(2, rr.getSecondaryResults().get("bench").getSampleCount());

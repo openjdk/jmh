@@ -24,7 +24,7 @@
  */
 package org.openjdk.jmh.util.lines;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.openjdk.jmh.util.Optional;
