@@ -35,7 +35,6 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -53,17 +52,6 @@ public class Utils {
 
     private Utils() {
 
-    }
-
-    private static final ConcurrentMap<String, Pattern> PATTERNS = new ConcurrentHashMap<>();
-
-    public static Pattern lazyCompile(String pattern) {
-        Pattern patt = PATTERNS.get(pattern);
-        if (patt == null) {
-            patt = Pattern.compile(pattern);
-            PATTERNS.put(pattern, patt);
-        }
-        return patt;
     }
 
     public static <T extends Comparable<T>> T min(Collection<T> ts) {

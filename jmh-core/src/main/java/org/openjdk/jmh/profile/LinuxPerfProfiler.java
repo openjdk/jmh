@@ -141,6 +141,8 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
+        final Pattern hashLinePattern = Pattern.compile("(.*)#(.*)");
+
         try (FileReader fr = new FileReader(stdErr);
              BufferedReader reader = new BufferedReader(fr)) {
 
@@ -157,7 +159,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                     printing = true;
                 }
 
-                Matcher m = Pattern.compile("(.*)#(.*)").matcher(line);
+                Matcher m = hashLinePattern.matcher(line);
                 if (m.matches()) {
                     String pair = m.group(1).trim();
                     if (pair.contains(" cycles")) {

@@ -777,14 +777,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             Multimap<Long, String> writerToLines = new HashMultimap<>();
             long writerId = -1L;
 
-            Pattern pWriterThread = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
-            String line;
+            final Pattern writerThreadPattern = Pattern.compile("(.*)<writer thread='(.*)'>(.*)");
 
+            String line;
             while ((line = br.readLine()) != null) {
                 // Parse the writer threads IDs:
                 //    <writer thread='140703710570240'/>
                 if (line.contains("<writer thread=")) {
-                    Matcher m = pWriterThread.matcher(line);
+                    Matcher m = writerThreadPattern.matcher(line);
                     if (m.matches()) {
                         try {
                             writerId = Long.parseLong(m.group(2));
@@ -815,6 +815,29 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         IntervalMap<MethodDesc> javaMethods = new IntervalMap<>();
 
         Set<Interval> intervals = new HashSet<>();
+
+        // Parsing the interpreter/runtime stub:
+        // ----------------------------------------------------------------------
+        // invokehandle  233 invokehandle  [0x00007f631d023100, 0x00007f631d0233c0]  704 bytes
+        // StubRoutines::catch_exception [0x00007feb43fa7b27, 0x00007feb43fa7b46[ (31 bytes)
+
+        // JDK 13 adds another "-------" line after StubRoutines line, so we need to filter out
+        // mismatched lines that follow it. This is why regexp is anchored at the start of the line.
+        // Example:
+        //
+        // StubRoutines::updateBytesCRC32 [0x0000ffff6c819700, 0x0000ffff6c819870] (368 bytes)
+        // --------------------------------------------------------------------------------
+        //  0x0000ffff6c819700:   stp     x29, x30, [sp, #-16]!  <--- do not match this
+        //  0x0000ffff6c819704:   mov     x29, sp
+        //  0x0000ffff6c819708:   mvn     w0, w0
+        final Pattern interpreterStubPattern = Pattern.compile("^(\\S.*)( +)\\[(.+), (.+)[\\]\\[](.*)");
+
+        // <nmethod compile_id='481' compiler='C1' level='3' entry='0x00007f26f51fb640' size='1392'
+        //   address='0x00007f26f51fb4d0' relocation_offset='296' insts_offset='368' stub_offset='976'
+        //   scopes_data_offset='1152' scopes_pcs_offset='1208' dependencies_offset='1368' nul_chk_table_offset='1376'
+        //   method='java/lang/reflect/Constructor getParameterTypes ()[Ljava/lang/Class;' bytes='11'
+        //   count='258' iicount='258' stamp='8.590'/>
+        final Pattern nmethodPattern = Pattern.compile("(.*?)<nmethod (.*?)/>(.*?)");
 
         for (Collection<String> cs : splitAssembly(stdOut)) {
             String prevLine = "";
@@ -854,23 +877,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 }
 
                 if (prevLine.contains("--------") || line.contains("StubRoutines::")) {
-                    // Try parsing the interpreter/runtime stub:
-                    // ----------------------------------------------------------------------
-                    // invokehandle  233 invokehandle  [0x00007f631d023100, 0x00007f631d0233c0]  704 bytes
-                    // StubRoutines::catch_exception [0x00007feb43fa7b27, 0x00007feb43fa7b46[ (31 bytes)
-
-                    // JDK 13 adds another "-------" line after StubRoutines line, so we need to filter out
-                    // mismatched lines that follow it. This is why regexp is anchored at the start of the line.
-                    // Example:
-                    //
-                    // StubRoutines::updateBytesCRC32 [0x0000ffff6c819700, 0x0000ffff6c819870] (368 bytes)
-                    // --------------------------------------------------------------------------------
-                    //  0x0000ffff6c819700:   stp     x29, x30, [sp, #-16]!  <--- do not match this
-                    //  0x0000ffff6c819704:   mov     x29, sp
-                    //  0x0000ffff6c819708:   mvn     w0, w0
-
-                    Pattern pattern = Pattern.compile("^(\\S.*)( +)\\[(.+), (.+)[\\]\\[](.*)");
-                    Matcher matcher = pattern.matcher(line);
+                    Matcher matcher = interpreterStubPattern.matcher(line);
 
                     if (matcher.matches()) {
                         String name = matcher.group(1);
@@ -891,13 +898,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 }
 
                 if (line.contains("<nmethod")) {
-                    // <nmethod compile_id='481' compiler='C1' level='3' entry='0x00007f26f51fb640' size='1392'
-                    //   address='0x00007f26f51fb4d0' relocation_offset='296' insts_offset='368' stub_offset='976'
-                    //   scopes_data_offset='1152' scopes_pcs_offset='1208' dependencies_offset='1368' nul_chk_table_offset='1376'
-                    //   method='java/lang/reflect/Constructor getParameterTypes ()[Ljava/lang/Class;' bytes='11'
-                    //   count='258' iicount='258' stamp='8.590'/>
-
-                    Matcher matcher = Pattern.compile("(.*?)<nmethod (.*?)/>(.*?)").matcher(line);
+                    Matcher matcher = nmethodPattern.matcher(line);
                     if (matcher.matches()) {
                         String body = matcher.group(2);
                         body = body.replaceAll("='", "=");
