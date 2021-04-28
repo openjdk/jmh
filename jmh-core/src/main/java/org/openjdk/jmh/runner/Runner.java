@@ -885,7 +885,7 @@ public class Runner extends BaseRunner {
 
                     String rel = relPath.toString();
                     sb.append(rel.replace('\\', '/').replace(" ", "%20"));
-                    if (!cp.endsWith(".jar")) {
+                    if (Files.isDirectory(cpPath)) {
                         sb.append('/');
                     }
                     sb.append(" ");
