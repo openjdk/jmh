@@ -238,22 +238,34 @@ public class Utils {
         // We cannot use Console class directly, because we also need the access to the raw byte stream,
         // e.g. for pushing in a raw output from a forked VM invocation. Therefore, we are left with
         // reflectively poking out the Charset from Console, and use it for our own private output streams.
+        // Since JDK 17, there is Console.charset(), which we can use reflectively.
 
         // Try 1. Try to poke the System.console().
         try {
             Console console = System.console();
             if (console != null) {
-                Field f = Console.class.getDeclaredField("cs");
-                setAccessible(console, f);
-                Object res = f.get(console);
-                if (res instanceof Charset) {
-                    return (Charset) res;
+                {
+                    Method m = Console.class.getDeclaredMethod("charset");
+                    Object res = m.invoke(console);
+                    if (res instanceof Charset) {
+                        return (Charset) res;
+                    }
                 }
-                Method m = Console.class.getDeclaredMethod("encoding");
-                setAccessible(console, m);
-                res = m.invoke(null);
-                if (res instanceof String) {
-                    return Charset.forName((String) res);
+                {
+                    Field f = Console.class.getDeclaredField("cs");
+                    setAccessible(console, f);
+                    Object res = f.get(console);
+                    if (res instanceof Charset) {
+                        return (Charset) res;
+                    }
+                }
+                {
+                    Method m = Console.class.getDeclaredMethod("encoding");
+                    setAccessible(console, m);
+                    Object res = m.invoke(null);
+                    if (res instanceof String) {
+                        return Charset.forName((String) res);
+                    }
                 }
             }
         } catch (Exception e) {
