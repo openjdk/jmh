@@ -302,11 +302,14 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     dump(trialOutDir, "collapsed-%s.csv", "collapsed");
                     break;
                 case flamegraph:
+                    boolean svg = svgFlamegraphs(execute("version"));
+                    String ext = svg ? "svg" : "html";
+                    String type = svg ? "svg" : "flamegraph";
                     if (direction == Direction.both || direction == Direction.forward) {
-                        dump(trialOutDir, "flame-%s-forward.svg", "flamegraph");
+                        dump(trialOutDir, "flame-%s-forward." + ext, type);
                     }
                     if (direction == Direction.both || direction == Direction.reverse) {
-                        dump(trialOutDir, "flame-%s-reverse.svg", "flamegraph,reverse");
+                        dump(trialOutDir, "flame-%s-reverse." + ext, type + ",reverse");
                     }
                     break;
                 case tree:
@@ -338,6 +341,53 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             return result;
         } catch (IOException e) {
             return "N/A";
+        }
+    }
+
+    static boolean svgFlamegraphs(String ver) {
+        // The last SVG-enabled version is 1.8.4
+        // The first HTML-enabled version in 1.8.5
+
+        if (ver.startsWith("1")) {
+            String[] split = ver.split("\\.");
+            if (split.length < 2) {
+                // Um, pretend it is one of old 1.x
+                return true;
+            }
+
+            int minor;
+            try {
+                minor = Integer.parseInt(split[1]);
+            } catch (NumberFormatException e) {
+                // Pretend it is one of old 1.x
+                return true;
+            }
+
+            if (minor < 8) {
+                return true;
+            }
+
+            if (minor > 8) {
+                return false;
+            }
+
+            if (split.length < 3) {
+                // Pretend it is old 1.8
+                return true;
+            }
+
+            int patch;
+            try {
+                patch = Integer.parseInt(split[2]);
+            } catch (NumberFormatException e) {
+                // Pretend it is still one of old 1.8.x
+                return true;
+            }
+
+            return patch <= 4;
+        } else {
+            // Assume all other versions are HTML-enabled
+            return false;
         }
     }
 
