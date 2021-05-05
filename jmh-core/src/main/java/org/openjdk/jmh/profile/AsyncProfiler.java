@@ -302,14 +302,14 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     dump(trialOutDir, "collapsed-%s.csv", "collapsed");
                     break;
                 case flamegraph:
-                    boolean svg = svgFlamegraphs(execute("version"));
-                    String ext = svg ? "svg" : "html";
-                    String type = svg ? "svg" : "flamegraph";
+                    // The last SVG-enabled version is 1.x
+                    String ver = execute("version");
+                    String ext = ver.startsWith("1") ? "svg" : "html";
                     if (direction == Direction.both || direction == Direction.forward) {
-                        dump(trialOutDir, "flame-%s-forward." + ext, type);
+                        dump(trialOutDir, "flame-%s-forward." + ext, "flamegraph");
                     }
                     if (direction == Direction.both || direction == Direction.reverse) {
-                        dump(trialOutDir, "flame-%s-reverse." + ext, type + ",reverse");
+                        dump(trialOutDir, "flame-%s-reverse." + ext, "flamegraph,reverse");
                     }
                     break;
                 case tree:
@@ -341,15 +341,6 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             return result;
         } catch (IOException e) {
             return "N/A";
-        }
-    }
-
-    static boolean svgFlamegraphs(String ver) {
-        if (ver.startsWith("1")) {
-            // The last SVG-enabled version is 1.x
-            return true;
-        } else {
-            return false;
         }
     }
 
