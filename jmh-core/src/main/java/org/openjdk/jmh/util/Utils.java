@@ -241,35 +241,37 @@ public class Utils {
         // Since JDK 17, there is Console.charset(), which we can use reflectively.
 
         // Try 1. Try to poke the System.console().
-        try {
-            Console console = System.console();
-            if (console != null) {
-                {
-                    Method m = Console.class.getDeclaredMethod("charset");
-                    Object res = m.invoke(console);
-                    if (res instanceof Charset) {
-                        return (Charset) res;
-                    }
+        Console console = System.console();
+        if (console != null) {
+            try {
+                Method m = Console.class.getDeclaredMethod("charset");
+                Object res = m.invoke(console);
+                if (res instanceof Charset) {
+                    return (Charset) res;
                 }
-                {
-                    Field f = Console.class.getDeclaredField("cs");
-                    setAccessible(console, f);
-                    Object res = f.get(console);
-                    if (res instanceof Charset) {
-                        return (Charset) res;
-                    }
-                }
-                {
-                    Method m = Console.class.getDeclaredMethod("encoding");
-                    setAccessible(console, m);
-                    Object res = m.invoke(null);
-                    if (res instanceof String) {
-                        return Charset.forName((String) res);
-                    }
-                }
+            } catch (Exception e) {
+                // fall-through
             }
-        } catch (Exception e) {
-            // fall-through
+            try {
+                Field f = Console.class.getDeclaredField("cs");
+                setAccessible(console, f);
+                Object res = f.get(console);
+                if (res instanceof Charset) {
+                    return (Charset) res;
+                }
+            } catch (Exception e) {
+                // fall-through
+            }
+            try {
+                Method m = Console.class.getDeclaredMethod("encoding");
+                setAccessible(console, m);
+                Object res = m.invoke(null);
+                if (res instanceof String) {
+                    return Charset.forName((String) res);
+                }
+            } catch (Exception e) {
+                // fall-through
+            }
         }
 
         // Try 2. Try to poke stdout.
