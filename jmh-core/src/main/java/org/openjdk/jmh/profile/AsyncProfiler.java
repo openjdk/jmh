@@ -345,48 +345,10 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
     }
 
     static boolean svgFlamegraphs(String ver) {
-        // The last SVG-enabled version is 1.8.4
-        // The first HTML-enabled version in 1.8.5
-
         if (ver.startsWith("1")) {
-            String[] split = ver.split("\\.");
-            if (split.length < 2) {
-                // Um, pretend it is one of old 1.x
-                return true;
-            }
-
-            int minor;
-            try {
-                minor = Integer.parseInt(split[1]);
-            } catch (NumberFormatException e) {
-                // Pretend it is one of old 1.x
-                return true;
-            }
-
-            if (minor < 8) {
-                return true;
-            }
-
-            if (minor > 8) {
-                return false;
-            }
-
-            if (split.length < 3) {
-                // Pretend it is old 1.8
-                return true;
-            }
-
-            int patch;
-            try {
-                patch = Integer.parseInt(split[2]);
-            } catch (NumberFormatException e) {
-                // Pretend it is still one of old 1.8.x
-                return true;
-            }
-
-            return patch <= 4;
+            // The last SVG-enabled version is 1.x
+            return true;
         } else {
-            // Assume all other versions are HTML-enabled
             return false;
         }
     }

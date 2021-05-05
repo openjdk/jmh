@@ -37,9 +37,9 @@ public class AsyncProfilerTest {
         Assert.assertTrue(AsyncProfiler.svgFlamegraphs("1.8"));
         Assert.assertTrue(AsyncProfiler.svgFlamegraphs("1.8.rc1"));
         Assert.assertTrue(AsyncProfiler.svgFlamegraphs("1.8.4"));
+        Assert.assertTrue(AsyncProfiler.svgFlamegraphs("1.8.5"));
+        Assert.assertTrue(AsyncProfiler.svgFlamegraphs("1.9"));
 
-        Assert.assertFalse(AsyncProfiler.svgFlamegraphs("1.8.5"));
-        Assert.assertFalse(AsyncProfiler.svgFlamegraphs("1.9"));
         Assert.assertFalse(AsyncProfiler.svgFlamegraphs("2.0"));
         Assert.assertFalse(AsyncProfiler.svgFlamegraphs("2.1"));
         Assert.assertFalse(AsyncProfiler.svgFlamegraphs("3.0"));
