@@ -304,7 +304,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 case flamegraph:
                     // The last SVG-enabled version is 1.x
                     String ver = execute("version");
-                    String ext = ver.startsWith("1") ? "svg" : "html";
+                    String ext = ver.startsWith("1.") ? "svg" : "html";
                     if (direction == Direction.both || direction == Direction.forward) {
                         dump(trialOutDir, "flame-%s-forward." + ext, "flamegraph");
                     }
