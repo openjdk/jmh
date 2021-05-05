@@ -303,10 +303,10 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     break;
                 case flamegraph:
                     if (direction == Direction.both || direction == Direction.forward) {
-                        dump(trialOutDir, "flame-%s-forward.svg", "svg");
+                        dump(trialOutDir, "flame-%s-forward.svg", "flamegraph");
                     }
                     if (direction == Direction.both || direction == Direction.reverse) {
-                        dump(trialOutDir, "flame-%s-reverse.svg", "svg,reverse");
+                        dump(trialOutDir, "flame-%s-reverse.svg", "flamegraph,reverse");
                     }
                     break;
                 case tree:
