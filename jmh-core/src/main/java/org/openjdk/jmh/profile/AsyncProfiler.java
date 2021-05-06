@@ -302,11 +302,14 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     dump(trialOutDir, "collapsed-%s.csv", "collapsed");
                     break;
                 case flamegraph:
+                    // The last SVG-enabled version is 1.x
+                    String ver = execute("version");
+                    String ext = ver.startsWith("1.") ? "svg" : "html";
                     if (direction == Direction.both || direction == Direction.forward) {
-                        dump(trialOutDir, "flame-%s-forward.svg", "svg");
+                        dump(trialOutDir, "flame-%s-forward." + ext, "flamegraph");
                     }
                     if (direction == Direction.both || direction == Direction.reverse) {
-                        dump(trialOutDir, "flame-%s-reverse.svg", "svg,reverse");
+                        dump(trialOutDir, "flame-%s-reverse." + ext, "flamegraph,reverse");
                     }
                     break;
                 case tree:
