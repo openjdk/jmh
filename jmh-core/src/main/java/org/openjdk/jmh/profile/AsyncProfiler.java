@@ -275,7 +275,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         if (iterationParams.getType() == IterationType.WARMUP) {
             if (!warmupStarted) {
                 // Collect profiles during warmup to warmup the profiler itself.
-                start("");
+                start();
                 warmupStarted = true;
             }
         }
@@ -285,18 +285,18 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     // Discard samples collected during warmup...
                     execute("stop");
                 }
-                start("reset,");
+                start();
                 measurementStarted = true;
             }
         }
     }
 
-    private void start(String reset) {
+    private void start() {
         String fileConfig = "";
         if (output.contains(OutputType.jfr)) {
             File jfrFile = new File(trialOutDir, "profile.jfr");
             generated.add(jfrFile);
-            fileConfig = "," + reset + "file=" + jfrFile.getAbsolutePath();
+            fileConfig = ",file=" + jfrFile.getAbsolutePath();
         }
         execute("start," + profilerConfig + fileConfig);
     }
