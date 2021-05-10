@@ -87,6 +87,16 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
         } else {
             packageName = "";
         }
+
+        this.origQualifiedName = qualifiedName;
+        this.qualifiedName = qualifiedName.replace('$', '.');
+
+        dotIndex = qualifiedName.lastIndexOf(".");
+        if (dotIndex != -1) {
+            this.name = qualifiedName.substring(dotIndex + 1);
+        } else {
+            this.name = qualifiedName;
+        }
     }
 
     @Override

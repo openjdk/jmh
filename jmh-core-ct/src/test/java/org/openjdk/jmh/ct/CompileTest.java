@@ -88,7 +88,7 @@ public class CompileTest {
         }
     }
 
-    public static boolean doTest(Class<?> klass, InMemoryGeneratorDestination destination) {
+    private static boolean doTest(Class<?> klass, InMemoryGeneratorDestination destination) {
         if (GENERATOR_TYPE.equalsIgnoreCase("reflection")) {
             RFGeneratorSource source = new RFGeneratorSource();
             source.processClasses(klass);
