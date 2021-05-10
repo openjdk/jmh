@@ -23,35 +23,17 @@
  * questions.
  */
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.ct.CompileTest;
-import org.openjdk.jmh.ct.InMemoryGeneratorDestination;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class UnnamedPackageTest {
-
-    @State(Scope.Benchmark)
-    public static class S {
-        @Setup(Level.Trial)
-        public void setup(AtomicInteger v) {}
-    }
-
     @Benchmark
-    public void test(S s) {
-
+    public void test() {
     }
 
     @Test
     public void compileTest() {
-        InMemoryGeneratorDestination destination = new InMemoryGeneratorDestination();
-        boolean success = CompileTest.doTest(getClass(), destination);
-        if (success) {
-            Assert.fail("Should have failed.");
-        }
-        String error = destination.getErrors().get(0);
-        Assert.assertTrue(error, error.contains("Benchmark class should have package other than default."));
+        CompileTest.assertFail(getClass(), "Benchmark class should have package other than default.");
     }
 }
