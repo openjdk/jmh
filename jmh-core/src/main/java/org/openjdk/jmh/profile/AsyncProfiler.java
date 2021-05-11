@@ -41,13 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -83,7 +77,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
 
         OptionSpec<OutputType> optOutput = parser.accepts("output",
                 "Output format(s). Supported: " + EnumSet.allOf(OutputType.class) + ".")
-                .withRequiredArg().ofType(OutputType.class).withValuesSeparatedBy(",").describedAs("format+");
+                .withRequiredArg().ofType(OutputType.class).withValuesSeparatedBy(",").describedAs("format+").defaultsTo(OutputType.text);
 
         OptionSpec<Direction> optDirection = parser.accepts("direction",
                 "Direction(s) of flame graph. Supported: " + EnumSet.allOf(Direction.class) + ".")
@@ -103,6 +97,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         OptionSpec<String> optAlloc = parser.accepts("alloc",
                 "Enable allocation profiling. Optional argument (e.g. =512k) reduces sampling from the default of one-sample-per-TLAB. " + secondaryEventOk)
                 .withOptionalArg().ofType(String.class).describedAs("sample bytes");
+
         OptionSpec<String> optLock = parser.accepts("lock",
                 "Enable lock profiling. Optional argument (e.g. =1ms) limits capture based on lock duration. " + secondaryEventOk)
                 .withOptionalArg().ofType(String.class).describedAs("duration");
@@ -195,10 +190,8 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
 
         OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
 
-        StringBuilder profilerOptions = new StringBuilder();
-
         try {
-            ProfilerOptionsBuilder builder = new ProfilerOptionsBuilder(set, profilerOptions);
+            ProfilerOptionsBuilder builder = new ProfilerOptionsBuilder(set);
 
             if (!set.has(optDir)) {
                 outDir = new File(System.getProperty("user.dir"));
@@ -257,10 +250,13 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             }
             direction = optDirection.value(set);
 
+            output = optOutput.values(set);
+            builder.appendMulti(optOutput);
+
             // Secondary events are those that may be collected simultaneously with a primary event in a JFR profile.
             // To be used as such, we require they are specifed with the lock and alloc option, rather than event=lock,
             // event=alloc.
-            HashSet<String> secondaryEvents = new HashSet<>();
+            Set<String> secondaryEvents = new HashSet<>();
 
             if (set.has(optAlloc)) {
                 secondaryEvents.add("alloc");
@@ -273,10 +269,14 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             }
 
             if (set.has(optEvent)) {
+                String evName = set.valueOf(optEvent);
+                if (evName.contains(",")) {
+                    throw new ProfilerException("Event name should not contain commas: " + evName);
+                }
+                outputFilePrefix = evName;
                 builder.append(optEvent);
-                outputFilePrefix = set.valueOf(optEvent);
             } else {
-                if (secondaryEvents.size() == 0) {
+                if (secondaryEvents.isEmpty()) {
                     // Default to the cpu event if no events at all are selected.
                     builder.appendRaw("event=cpu");
                     outputFilePrefix = "cpu";
@@ -290,24 +290,16 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 }
             }
 
-            List<OutputType> output = new ArrayList<>(optOutput.values(set));
-            if (secondaryEvents.isEmpty()) {
-                if (output.isEmpty()) {
-                    output.add(OutputType.text);
-                }
-            } else {
+            if (!secondaryEvents.isEmpty()) {
                 if (isVersion1x) {
-                    throw new ProfilerException("Multiple event capture not supported on async-profiler 1.x");
+                    throw new ProfilerException("Secondary event capture not supported on async-profiler 1.x");
                 }
-                if (output.isEmpty()) {
-                    output.add(OutputType.jfr);
-                } else if (output.size() > 1 || output.get(0) != OutputType.jfr) {
-                    throw new ProfilerException("When multiple events are selected, only output=" + OutputType.jfr.name() + " is supported, found: " + output);
+                if (output.size() > 1 || output.get(0) != OutputType.jfr) {
+                    throw new ProfilerException("Secondary event capture is only supported with output=" + OutputType.jfr.name());
                 }
             }
-            builder.appendMulti(optOutput, output);
-            this.output = output;
-            profilerConfig = profilerOptions.toString();
+
+            profilerConfig = builder.profilerOptions();
         } catch (OptionException e) {
             throw new ProfilerException(e.getMessage());
         }
@@ -331,6 +323,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     // Discard samples collected during warmup...
                     execute("stop");
                 }
+                // ...and start collecting again.
                 start();
                 measurementStarted = true;
             }
@@ -338,11 +331,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
     }
 
     private void start() {
-        String fileConfig = "";
         if (output.contains(OutputType.jfr)) {
-            fileConfig = ",file=" + outputFile(trialOutDir, "%s.jfr").getAbsolutePath();
+            execute("start," + profilerConfig + ",file=" + outputFile("jfr-%s.jfr").getAbsolutePath());
+        } else {
+            execute("start," + profilerConfig);
         }
-        execute("start," + profilerConfig + fileConfig);
     }
 
     @Override
@@ -371,35 +364,36 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
     private TextResult stopAndDump() {
         execute("stop");
 
-        StringWriter outputWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(outputWriter);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
         for (OutputType outputType : output) {
             switch (outputType) {
                 case text:
-                    File textOutput = dump(trialOutDir, "summary-%s.txt", "summary,flat=" + flat + ",traces=" + traces);
+                    File out = outputFile("summary-%s.txt");
+                    dump(out, "summary,flat=" + flat + ",traces=" + traces);
                     try {
-                        for (String line : FileUtils.readAllLines(textOutput)) {
-                            printWriter.println(line);
+                        for (String line : FileUtils.readAllLines(out)) {
+                            pw.println(line);
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                     break;
                 case collapsed:
-                    dump(trialOutDir, "collapsed-%s.csv", "collapsed");
+                    dump(outputFile("collapsed-%s.csv"), "collapsed");
                     break;
                 case flamegraph:
                     // The last SVG-enabled version is 1.x
                     String ext = isVersion1x ? "svg" : "html";
                     if (direction == Direction.both || direction == Direction.forward) {
-                        dump(trialOutDir, "flame-%s-forward." + ext, "flamegraph");
+                        dump(outputFile("flame-%s-forward." + ext), "flamegraph");
                     }
                     if (direction == Direction.both || direction == Direction.reverse) {
-                        dump(trialOutDir, "flame-%s-reverse." + ext, "flamegraph,reverse");
+                        dump(outputFile("flame-%s-reverse." + ext), "flamegraph,reverse");
                     }
                     break;
                 case tree:
-                    dump(trialOutDir, "tree-%s.html", "tree");
+                    dump(outputFile("tree-%s.html"), "tree");
                     break;
                 case jfr:
                     // JFR is already dumped into file by async-profiler.
@@ -407,25 +401,23 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             }
         }
 
-        printWriter.println("Async profiler results:");
+        pw.println("Async profiler results:");
         for (File file : generated) {
-            printWriter.print("  ");
-            printWriter.println(file.getPath());
+            pw.print("  ");
+            pw.println(file.getPath());
         }
-        printWriter.flush();
-        printWriter.close();
+        pw.flush();
+        pw.close();
 
-        return new TextResult(outputWriter.toString(), "async");
+        return new TextResult(sw.toString(), "async");
     }
 
-    private File dump(File specificOutDir, String fileNameFormatString, String content) {
-        File output = outputFile(specificOutDir, fileNameFormatString);
-        execute(content + "," + profilerConfig + ",file=" + output.getAbsolutePath());
-        return output;
+    private void dump(File target, String command) {
+        execute(command + "," + profilerConfig + ",file=" + target.getAbsolutePath());
     }
 
-    private File outputFile(File specificOutDir, String fileNameFormatString) {
-        File output = new File(specificOutDir, String.format(fileNameFormatString, outputFilePrefix));
+    private File outputFile(String fileNameFormat) {
+        File output = new File(trialOutDir, String.format(fileNameFormat, outputFilePrefix));
         generated.add(output);
         return output;
     }
@@ -465,9 +457,9 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         private final OptionSet optionSet;
         private final StringBuilder profilerOptions;
 
-        ProfilerOptionsBuilder(OptionSet optionSet, StringBuilder profilerOptions) {
+        ProfilerOptionsBuilder(OptionSet optionSet) {
             this.optionSet = optionSet;
-            this.profilerOptions = profilerOptions;
+            this.profilerOptions = new StringBuilder();
         }
 
         <T> void appendIfExists(OptionSpec<T> option) {
@@ -507,16 +499,16 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         <T> void appendMulti(OptionSpec<T> option) {
             if (optionSet.has(option)) {
                 assert (option.options().size() == 1);
-                List<T> ts = optionSet.valuesOf(option);
-                appendMulti(option, ts);
+                String optionName = option.options().iterator().next();
+                for (T value : optionSet.valuesOf(option)) {
+                    separate();
+                    profilerOptions.append(optionName).append('=').append(value.toString());
+                }
             }
         }
 
-        private <T> void appendMulti(OptionSpec<T> option, List<T> ts) {
-            String optionName = option.options().iterator().next();
-            for (T value : ts) {
-                profilerOptions.append(',').append(optionName).append('=').append(value.toString());
-            }
+        public String profilerOptions() {
+            return profilerOptions.toString();
         }
     }
 
