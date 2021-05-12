@@ -46,9 +46,9 @@ class RFClassInfo implements ClassInfo {
     @Override
     public String getPackageName() {
         if (klass.getDeclaringClass() != null) {
-            return klass.getDeclaringClass().getPackage().getName();
+            return nameOf(klass.getDeclaringClass().getPackage());
         } else {
-            return klass.getPackage().getName();
+            return nameOf(klass.getPackage());
         }
     }
 
@@ -170,5 +170,9 @@ class RFClassInfo implements ClassInfo {
     @Override
     public String toString() {
         return getQualifiedName();
+    }
+
+    private String nameOf(Package pack) {
+        return pack == null ? "" : pack.getName();
     }
 }
