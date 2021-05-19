@@ -830,8 +830,12 @@ public class Runner extends BaseRunner {
     private List<String> getPrintPropertiesCommand(String jvm) {
         List<String> command = new ArrayList<>();
 
-        // use supplied jvm, if given
+        // use supplied jvm
         command.add(jvm);
+
+        // Avoid VM warnings interspersing with XML, eg "Duplicate cpuset controllers detected"
+        command.add("-XX:+IgnoreUnrecognizedVMOptions");
+        command.add("-Xlog:all=error");
 
         // assemble final process command
         addClasspath(command);
