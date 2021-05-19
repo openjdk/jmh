@@ -590,7 +590,22 @@ public class Utils {
 
             errDrainer.join();
             outDrainer.join();
-            out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
+            try {
+                out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
+            } catch (InvalidPropertiesFormatException ex) {
+                // Maybe some VM output has preceded the XML content?
+                String output = new String(baos.toByteArray(), Charset.defaultCharset());
+                int xmlStart = output.indexOf("<?xml");
+                if (xmlStart == -1) {
+                    String msg = "Unable to parse output of PrintPropertiesMain as XML. Return code " + err + ", content: " + System.lineSeparator() + output;
+                    InvalidPropertiesFormatException wrappedEx = new InvalidPropertiesFormatException(msg);
+                    wrappedEx.initCause(ex);
+                    throw wrappedEx;
+                } else {
+                    String trimmedOutput = output.substring(xmlStart);
+                    out.loadFromXML(new ByteArrayInputStream(trimmedOutput.getBytes(Charset.defaultCharset())));
+                }
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         } catch (InterruptedException ex) {
