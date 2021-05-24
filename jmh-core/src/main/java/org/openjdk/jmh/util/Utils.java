@@ -574,10 +574,9 @@ public class Utils {
 
     public static Properties readPropertiesFromCommand(List<String> cmd) {
         Properties out = new Properties();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             Process p = new ProcessBuilder(cmd).start();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             // drain streams, else we might lock up
             InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), System.err);
@@ -590,22 +589,12 @@ public class Utils {
 
             errDrainer.join();
             outDrainer.join();
-            try {
-                out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
-            } catch (InvalidPropertiesFormatException ex) {
-                // Maybe some VM output has preceded the XML content?
-                String output = new String(baos.toByteArray(), Charset.defaultCharset());
-                int xmlStart = output.indexOf("<?xml");
-                if (xmlStart == -1) {
-                    String msg = "Unable to parse output of PrintPropertiesMain as XML. Return code " + err + ", content: " + System.lineSeparator() + output;
-                    InvalidPropertiesFormatException wrappedEx = new InvalidPropertiesFormatException(msg);
-                    wrappedEx.initCause(ex);
-                    throw wrappedEx;
-                } else {
-                    String trimmedOutput = output.substring(xmlStart);
-                    out.loadFromXML(new ByteArrayInputStream(trimmedOutput.getBytes(Charset.defaultCharset())));
-                }
-            }
+            out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
+        } catch (InvalidPropertiesFormatException ex) {
+            // Maybe some VM output has preceded the XML content?
+            String output = new String(baos.toByteArray(), Utils.guessConsoleEncoding());
+            String msg = "Unable to parse output of PrintPropertiesMain as XML: " + System.lineSeparator() + output;
+            throw new RuntimeException(msg, ex);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         } catch (InterruptedException ex) {
