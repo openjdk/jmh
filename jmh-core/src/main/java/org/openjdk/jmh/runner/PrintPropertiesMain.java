@@ -26,6 +26,11 @@ package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.util.Utils;
 
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 /**
  * Main program entry point for exporting the system properties, used for detecting the VM version.
  */
@@ -35,10 +40,15 @@ class PrintPropertiesMain {
      * @param argv Command line arguments
      */
     public static void main(String[] argv) throws Exception {
-        Utils.getRecordedSystemProperties().storeToXML(
-                System.out,
-                "JMH properties export for target JVM",
-                "UTF-8");
+        if (argv.length != 1) {
+            throw new IllegalArgumentException("Usage: java " + PrintPropertiesMain.class.getName() + " <xml-output-file>");
+        }
+        try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(Paths.get(argv[0])))) {
+            Utils.getRecordedSystemProperties().storeToXML(
+                    os,
+                    "JMH properties export for target JVM",
+                    "UTF-8");
+        }
     }
 
 }

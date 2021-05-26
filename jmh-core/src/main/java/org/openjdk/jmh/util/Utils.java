@@ -575,26 +575,20 @@ public class Utils {
     public static Properties readPropertiesFromCommand(List<String> cmd) {
         Properties out = new Properties();
         try {
-            Process p = new ProcessBuilder(cmd).start();
+            File tempFile = FileUtils.tempFile("properties");
+            List<String> cmdWithFile = new ArrayList<>(cmd);
+            cmdWithFile.add(tempFile.getAbsolutePath());
+            Collection<String> errs = tryWith(cmdWithFile.toArray(new String[0]));
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), System.err);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
-
-            errDrainer.start();
-            outDrainer.start();
-
-            int err = p.waitFor();
-
-            errDrainer.join();
-            outDrainer.join();
-            out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
+            if (!errs.isEmpty()) {
+                throw new RuntimeException("Unable to extract forked JVM properties using: '" + join(cmd, " ") + "'; " + errs);
+            }
+            try (InputStream in = new BufferedInputStream(new FileInputStream(tempFile))) {
+                // This will automatically pick UTF-8 based on the encoding in the XML declaration.
+                out.loadFromXML(in);
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException(ex);
         }
         return out;
     }
