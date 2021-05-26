@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(1)
 @State(Scope.Thread)
-public class JvmOption {
+public class JvmOptionTest {
 
     @Param("")
     public String x;
