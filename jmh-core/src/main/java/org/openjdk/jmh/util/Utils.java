@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -574,31 +575,21 @@ public class Utils {
 
     public static Properties readPropertiesFromCommand(List<String> cmd) {
         Properties out = new Properties();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            Process p = new ProcessBuilder(cmd).start();
+            File tempFile = FileUtils.tempFile("properties");
+            List<String> cmdWithFile = new ArrayList<>(cmd);
+            cmdWithFile.add(tempFile.getAbsolutePath());
+            Collection<String> errs = tryWith(cmdWithFile.toArray(new String[0]));
 
-            // drain streams, else we might lock up
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), System.err);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
-
-            errDrainer.start();
-            outDrainer.start();
-
-            int err = p.waitFor();
-
-            errDrainer.join();
-            outDrainer.join();
-            out.loadFromXML(new ByteArrayInputStream(baos.toByteArray()));
-        } catch (InvalidPropertiesFormatException ex) {
-            // Maybe some VM output has preceded the XML content?
-            String output = new String(baos.toByteArray(), Utils.guessConsoleEncoding());
-            String msg = "Unable to parse output of PrintPropertiesMain as XML: " + System.lineSeparator() + output;
-            throw new RuntimeException(msg, ex);
+            if (!errs.isEmpty()) {
+                throw new RuntimeException("Unable to extract forked JVM properties using: '" + join(cmd, " ") + "'; " + errs);
+            }
+            try (InputStream in = new BufferedInputStream(new FileInputStream(tempFile))) {
+                // This will automatically pick UTF-8 based on the encoding in the XML declaration.
+                out.loadFromXML(in);
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException(ex);
         }
         return out;
     }
