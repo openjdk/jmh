@@ -516,14 +516,14 @@ public final class Blackhole extends BlackholeL4 {
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = new WeakReference<>(new Holder(obj));
+            this.obj1 = new WeakReference<>(new Box(obj));
             this.tlrMask = (tlrMask << 1) + 1;
         }
     }
 
-    private static class Holder {
+    private static class Box {
         public Object o;
-        public Holder(Object o) { this.o = o; }
+        public Box(Object o) { this.o = o; }
     }
 
     private static volatile long consumedCPU = System.nanoTime();
