@@ -225,8 +225,8 @@ public final class Blackhole extends BlackholeL4 {
      * regularly, but we also additionally protect with retaining the object on
      * weak reference (contrary to phantom-ref, publishing object still has to
      * happen, because reference users might need to discover the object). Some
-     * objects, for example inline types, resist to be put on weak references
-     * directly so we need to wrap them again.
+     * objects, for example inline types, resist to be referenced by weak references
+     * directly, so we need to wrap them with another reachable box.
      *
      * Observation (4) provides us with an opportunity to create a safety net in case
      * either (1), (2) or (3) fails. This is why Blackhole methods are prohibited from
