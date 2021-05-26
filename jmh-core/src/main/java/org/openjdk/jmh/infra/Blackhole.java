@@ -224,7 +224,9 @@ public final class Blackhole extends BlackholeL4 {
      * captured objects forever: this is normally achieved by calling evaporate()
      * regularly, but we also additionally protect with retaining the object on
      * weak reference (contrary to phantom-ref, publishing object still has to
-     * happen, because reference users might need to discover the object).
+     * happen, because reference users might need to discover the object). Some
+     * objects, for example inline types, resist to be referenced by weak references
+     * directly, so we need to wrap them with another reachable box.
      *
      * Observation (4) provides us with an opportunity to create a safety net in case
      * either (1), (2) or (3) fails. This is why Blackhole methods are prohibited from
@@ -514,9 +516,14 @@ public final class Blackhole extends BlackholeL4 {
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = new WeakReference<>(obj);
+            this.obj1 = new WeakReference<>(new Box(obj));
             this.tlrMask = (tlrMask << 1) + 1;
         }
+    }
+
+    private static class Box {
+        public Object o;
+        public Box(Object o) { this.o = o; }
     }
 
     private static volatile long consumedCPU = System.nanoTime();
