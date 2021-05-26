@@ -222,9 +222,7 @@ public final class Blackhole extends BlackholeL4 {
      * the condition to "false". We are warming up the slow-path in the beginning
      * to evade that effect. Some caution needs to be exercised not to retain the
      * captured objects forever: this is normally achieved by calling evaporate()
-     * regularly, but we also additionally protect with retaining the object on
-     * weak reference (contrary to phantom-ref, publishing object still has to
-     * happen, because reference users might need to discover the object).
+     * regularly.
      *
      * Observation (4) provides us with an opportunity to create a safety net in case
      * either (1), (2) or (3) fails. This is why Blackhole methods are prohibited from
@@ -514,7 +512,7 @@ public final class Blackhole extends BlackholeL4 {
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = new WeakReference<>(obj);
+            this.obj1 = obj;
             this.tlrMask = (tlrMask << 1) + 1;
         }
     }
