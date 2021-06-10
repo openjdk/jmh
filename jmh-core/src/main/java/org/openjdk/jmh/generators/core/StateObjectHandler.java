@@ -959,7 +959,7 @@ class StateObjectHandler {
             if (!sess.generatedStateOverrides.add(so.userType)) continue;
 
             {
-                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B1"));
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B1", so.userType));
 
                 pw.println("package " + so.packageName + ";");
 
@@ -973,7 +973,7 @@ class StateObjectHandler {
             }
 
             {
-                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B2"));
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B2", so.userType));
 
                 pw.println("package " + so.packageName + ";");
 
@@ -1011,7 +1011,7 @@ class StateObjectHandler {
             }
 
             {
-                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B3"));
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B3", so.userType));
 
                 pw.println("package " + so.packageName + ";");
                 pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
@@ -1023,7 +1023,7 @@ class StateObjectHandler {
             }
 
             {
-                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type));
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type, so.userType));
 
                 pw.println("package " + so.packageName + ";");
                 pw.println("public class " + so.type + " extends " + so.type + "_B3 {");

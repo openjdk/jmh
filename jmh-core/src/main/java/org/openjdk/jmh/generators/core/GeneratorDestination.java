@@ -58,10 +58,11 @@ public interface GeneratorDestination {
      * Callers are responsible for closing Writers.
      *
      * @param className class name
+     * @param originatingClassName class name causing the creation of this class
      * @return writer usable to write the resource
      * @throws IOException if something wacked happens
      */
-    Writer newClass(String className) throws IOException;
+    Writer newClass(String className, String originatingClassName) throws IOException;
 
     /**
      * Print the error.

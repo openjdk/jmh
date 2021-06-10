@@ -64,7 +64,7 @@ public class FileSystemDestination implements GeneratorDestination {
     }
 
     @Override
-    public Writer newClass(String className) throws IOException {
+    public Writer newClass(String className, String originatingClassName) throws IOException {
         String pathName = sourceDir.getAbsolutePath() + "/" + className.replaceAll("\\.", "/");
         File p = new File(pathName.substring(0, pathName.lastIndexOf("/")));
         if (!p.mkdirs() && !p.isDirectory()) {

@@ -28,8 +28,10 @@ import org.openjdk.jmh.generators.core.GeneratorDestination;
 import org.openjdk.jmh.generators.core.MetadataInfo;
 import org.openjdk.jmh.util.Utils;
 
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 import java.io.*;
@@ -53,8 +55,14 @@ public class APGeneratorDestinaton implements GeneratorDestination {
     }
 
     @Override
-    public Writer newClass(String className) throws IOException {
-        return processingEnv.getFiler().createSourceFile(className).openWriter();
+    public Writer newClass(String className, String originatingClassName) throws IOException {
+        Filer filer = processingEnv.getFiler();
+        if (originatingClassName != null) {
+            TypeElement originatingType = processingEnv.getElementUtils().getTypeElement(originatingClassName);
+            return filer.createSourceFile(className, originatingType).openWriter();
+        } else {
+            return filer.createSourceFile(className).openWriter();
+        }
     }
 
     @Override

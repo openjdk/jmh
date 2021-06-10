@@ -445,7 +445,7 @@ public class BenchmarkGenerator {
         states.bindMethods(classInfo, info.methodGroup);
 
         // Create file and open an outputstream
-        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedClassQName), false);
+        PrintWriter writer = new PrintWriter(destination.newClass(info.generatedClassQName, classInfo.getQualifiedName()), false);
 
         // Write package and imports
         writer.println("package " + info.generatedPackageName + ';');
