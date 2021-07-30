@@ -34,6 +34,7 @@ import org.openjdk.jmh.generators.core.BenchmarkGenerator;
 import org.openjdk.jmh.generators.core.GeneratorSource;
 import org.openjdk.jmh.generators.reflection.RFGeneratorSource;
 import org.openjdk.jmh.util.FileUtils;
+import org.openjdk.jmh.util.JDKVersion;
 import org.openjdk.jmh.util.Utils;
 
 import javax.tools.*;
@@ -109,33 +110,34 @@ public class CompileTest {
     }
 
     private static Collection<String> javacOptions(boolean annProc, Class<?> klass) {
+        Collection<String> result = new ArrayList<>();
+
+        if (!annProc) {
+            result.add("-proc:none");
+        }
+
         // These tests print warnings (as designed), so -Werror fails.
-        if (klass.equals(SwingTest.class)) {
-            if (annProc) {
-                return Collections.emptyList();
-            } else {
-                return Collections.singleton("-proc:none");
-            }
+        boolean noWerror = klass.equals(SwingTest.class);
+
+        if (!noWerror) {
+            result.add("-Werror");
         }
 
         // These tests fail when generated code references the static target
         // through the instance.
-        if (klass.equals(GenericReturnTest.class) ||
-            klass.equals(PublicStaticBenchmarkTest.class) ||
-            klass.equals(PublicSynchronizedStaticBenchmarkStateBenchmarkTest.class)) {
-            if (annProc) {
-                return Arrays.asList("-Xlint:all,-processing,-static", "-Werror");
-            } else {
-                return Arrays.asList("-proc:none", "-Xlint:all,-static", "-Werror");
-            }
-        }
+        boolean noStatic = klass.equals(GenericReturnTest.class) ||
+                klass.equals(PublicStaticBenchmarkTest.class) ||
+                klass.equals(PublicSynchronizedStaticBenchmarkStateBenchmarkTest.class);
 
-        // Regular tests should compile with full lint and Werror.
-        if (annProc) {
-            return Arrays.asList("-Xlint:all,-processing", "-Werror");
-        } else {
-            return Arrays.asList("-proc:none", "-Xlint:all", "-Werror");
-        }
+        // JDK 17 introduces a new warning about unnecessary strictfp use.
+        boolean noStrictFPChecks = JDKVersion.parseMajor(System.getProperty("java.version")) >= 17;
+
+        result.add("-Xlint:all" +
+                      (annProc ? ",-processing" : "") +
+                      (noStatic ? ",-static" : "") +
+                      (noStrictFPChecks ? ",-strictfp" : ""));
+
+        return result;
     }
 
     public static boolean doTestOther(Class<?> klass, GeneratorSource source, InMemoryGeneratorDestination destination) {
