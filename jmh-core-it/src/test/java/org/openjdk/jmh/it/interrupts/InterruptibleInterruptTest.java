@@ -42,8 +42,12 @@ import java.util.concurrent.TimeUnit;
 public class InterruptibleInterruptTest {
 
     @Benchmark
-    public void test() throws InterruptedException {
-        Thread.sleep(5_000);
+    public void test() {
+        try {
+            Thread.sleep(5_000);
+        } catch (InterruptedException e) {
+            // Harness delivered, just exit.
+        }
     }
 
     @Test
