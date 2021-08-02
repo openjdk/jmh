@@ -25,7 +25,7 @@
 package org.openjdk.jmh.runner;
 
 import org.openjdk.jmh.util.FileUtils;
-import org.openjdk.jmh.util.JDKVersion;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.*;
 import java.util.*;
@@ -237,28 +237,48 @@ public class CompilerHints extends AbstractResourceReader {
         }
     }
 
+    private static BlackholeMode blackholeMode;
+    private static BlackholeDetectMode blackholeDetectMode;
+
     private static BlackholeMode blackholeMode() {
+        if (blackholeMode != null) {
+            return blackholeMode;
+        }
+
         String prop = System.getProperty(BLACKHOLE_PROP_NAME);
         if (prop != null) {
             try {
-                return BlackholeMode.valueOf(prop);
+                blackholeMode = BlackholeMode.valueOf(prop);
+                blackholeDetectMode = BlackholeDetectMode.FORCED;
             } catch (IllegalArgumentException iae) {
                 throw new IllegalStateException("Unknown Blackhole mode: " + prop);
             }
+        } else if (compilerBlackholesAvailable()) {
+            blackholeMode = BlackholeMode.COMPILER;
+            blackholeDetectMode = BlackholeDetectMode.AUTO;
+        } else {
+            blackholeMode = BlackholeMode.FULL_DONTINLINE;
+            blackholeDetectMode = BlackholeDetectMode.FALLBACK;
         }
-        return BlackholeMode.FULL_DONTINLINE;
+
+        return blackholeMode;
+    }
+
+    private static BlackholeDetectMode blackholeDetectMode() {
+        blackholeMode();
+        return blackholeDetectMode;
     }
 
     public static void printBlackholeMode(PrintStream out) {
         BlackholeMode mode = blackholeMode();
-        out.print("# Blackhole mode: " + mode.desc());
+        out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeDetectMode().desc() + ")");
         out.println();
     }
 
     private enum BlackholeMode {
-        COMPILER(true, false, "compiler-assisted (EXPERIMENTAL, check generated code)"),
+        COMPILER(true, false, "compiler-assisted"),
         FULL_DONTINLINE(false, true, "full + dont-inline hint"),
-        FULL(false, false, "full (DIAGNOSTIC)"),
+        FULL(false, false, "full"),
         ;
 
         private final boolean shouldBlackhole;
@@ -280,6 +300,59 @@ public class CompilerHints extends AbstractResourceReader {
         }
 
         public String desc() { return desc; }
+    }
+
+    private enum BlackholeDetectMode {
+        FALLBACK("fallback"),
+        AUTO("auto-detected, use -D" + BLACKHOLE_PROP_NAME + " to override"),
+        FORCED("forced"),
+        ;
+
+        final String desc;
+
+        BlackholeDetectMode(String desc) {
+            this.desc = desc;
+        }
+
+        public String desc() {
+            return desc;
+        }
+    }
+
+    private static boolean compilerBlackholesAvailable() {
+        // Step 1. See if there were any error messages from CompilerOracle
+        {
+            List<String> cmd = new ArrayList<>();
+            cmd.add(Utils.getCurrentJvm());
+            cmd.add("-XX:+UnlockExperimentalVMOptions");
+            cmd.add("-XX:CompileCommand=quiet");
+            cmd.add("-XX:CompileCommand=blackhole,some/fake/Class.method");
+            cmd.add("-version");
+
+            Collection<String> log = Utils.runWith(cmd);
+            for (String l : log) {
+                if (l.contains("CompilerOracle")) return false;
+                if (l.contains("CompileCommand")) return false;
+            }
+        }
+
+        // Step 2. See that CompilerOracle accepted the command explicitly
+        {
+            List<String> cmd = new ArrayList<>();
+            cmd.add(Utils.getCurrentJvm());
+            cmd.add("-XX:+UnlockExperimentalVMOptions");
+            cmd.add("-XX:CompileCommand=blackhole,some/fake/Class.method");
+            cmd.add("-version");
+
+            Collection<String> log = Utils.runWith(cmd);
+            for (String l : log) {
+                if (l.contains("CompilerOracle")) return true;
+                if (l.contains("CompileCommand")) return true;
+            }
+        }
+
+        // Err on the side of the caution: compiler blackholes are not available.
+        return false;
     }
 
 }
