@@ -361,25 +361,30 @@ class BenchmarkHandler {
         control.awaitWarmdownReady();
 
         // Wait for the result, handling timeouts
+        int interrupts = 0;
         while (completed.size() < numThreads) {
             try {
                 long waitFor = Math.max(TimeUnit.MILLISECONDS.toNanos(100), waitDeadline - System.nanoTime());
                 Future<BenchmarkTaskResult> fr = srv.poll(waitFor, TimeUnit.NANOSECONDS);
                 if (fr == null) {
                     // We are in the timeout mode now, kick all the still running threads.
-                    out.print("(*interrupt*) ");
                     for (BenchmarkTask task : runners) {
                         Thread runner = task.runner;
                         if (runner != null) {
                             runner.interrupt();
                         }
                     }
+                    interrupts++;
                 } else {
                     completed.add(fr);
                 }
             } catch (InterruptedException ex) {
                 throw new BenchmarkException(ex);
             }
+        }
+
+        if (interrupts > 0) {
+            out.print("(benchmark timed out, interrupted " + interrupts + " times) ");
         }
 
         // Process the results: we get here after all worker threads have quit,
