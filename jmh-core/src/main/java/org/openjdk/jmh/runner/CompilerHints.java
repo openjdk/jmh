@@ -46,7 +46,8 @@ public class CompilerHints extends AbstractResourceReader {
 
     static final String XX_COMPILE_COMMAND_FILE = "-XX:CompileCommandFile=";
 
-    static final String BLACKHOLE_PROP_NAME = "jmh.blackhole.mode";
+    static final String BLACKHOLE_MODE_PROP_NAME = "jmh.blackhole.mode";
+    static final String BLACKHOLE_MODE_AUTODETECT_NAME = "jmh.blackhole.autoDetect";
 
     public static CompilerHints defaultList() {
         if (defaultList == null) {
@@ -245,22 +246,28 @@ public class CompilerHints extends AbstractResourceReader {
             return blackholeMode;
         }
 
-        String prop = System.getProperty(BLACKHOLE_PROP_NAME);
-        if (prop != null) {
+        String propMode = System.getProperty(BLACKHOLE_MODE_PROP_NAME);
+        if (propMode != null) {
             try {
-                blackholeMode = BlackholeMode.valueOf(prop);
+                blackholeMode = BlackholeMode.valueOf(propMode);
                 blackholeDetectMode = BlackholeDetectMode.FORCED;
+                return blackholeMode;
             } catch (IllegalArgumentException iae) {
-                throw new IllegalStateException("Unknown Blackhole mode: " + prop);
+                throw new IllegalStateException("Unknown Blackhole mode: " + propMode);
             }
-        } else if (compilerBlackholesAvailable()) {
-            blackholeMode = BlackholeMode.COMPILER;
-            blackholeDetectMode = BlackholeDetectMode.AUTO;
-        } else {
-            blackholeMode = BlackholeMode.FULL_DONTINLINE;
-            blackholeDetectMode = BlackholeDetectMode.FALLBACK;
         }
 
+        boolean propAutoMode = Boolean.getBoolean(BLACKHOLE_MODE_AUTODETECT_NAME);
+        if (propAutoMode) {
+            if (compilerBlackholesAvailable()) {
+                blackholeMode = BlackholeMode.COMPILER;
+                blackholeDetectMode = BlackholeDetectMode.AUTO;
+                return blackholeMode;
+            }
+        }
+
+        blackholeMode = BlackholeMode.FULL_DONTINLINE;
+        blackholeDetectMode = BlackholeDetectMode.FALLBACK;
         return blackholeMode;
     }
 
@@ -303,8 +310,8 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     private enum BlackholeDetectMode {
-        FALLBACK("fallback"),
-        AUTO("auto-detected, use -D" + BLACKHOLE_PROP_NAME + " to override"),
+        FALLBACK("fallback, use -D" + BLACKHOLE_MODE_PROP_NAME + " to force another mode"),
+        AUTO("auto-detected, use -D" + BLACKHOLE_MODE_AUTODETECT_NAME + "=false to disable"),
         FORCED("forced"),
         ;
 
