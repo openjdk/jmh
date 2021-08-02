@@ -246,19 +246,27 @@ public class CompilerHints extends AbstractResourceReader {
             return blackholeMode;
         }
 
+        // Forced mode takes precedence.
         String propMode = System.getProperty(BLACKHOLE_MODE_PROP_NAME);
         if (propMode != null) {
             try {
                 blackholeMode = BlackholeMode.valueOf(propMode);
                 blackholeDetectMode = BlackholeDetectMode.FORCED;
+
+                // Extra safety: If user requested compiler blackholes, check
+                // if they are available and fail otherwise.
+                if (blackholeMode.shouldBlackhole() && !compilerBlackholesAvailable()) {
+                    throw new IllegalStateException("Compiler Blackholes are not available in current VM");
+                }
+
                 return blackholeMode;
             } catch (IllegalArgumentException iae) {
                 throw new IllegalStateException("Unknown Blackhole mode: " + propMode);
             }
         }
 
-        boolean propAutoMode = Boolean.getBoolean(BLACKHOLE_MODE_AUTODETECT_NAME);
-        if (propAutoMode) {
+        // Try to autodetect blackhole mode
+        if (Boolean.getBoolean(BLACKHOLE_MODE_AUTODETECT_NAME)) {
             if (compilerBlackholesAvailable()) {
                 blackholeMode = BlackholeMode.COMPILER;
                 blackholeDetectMode = BlackholeDetectMode.AUTO;
@@ -266,6 +274,7 @@ public class CompilerHints extends AbstractResourceReader {
             }
         }
 
+        // No dice, fallback to older mode
         blackholeMode = BlackholeMode.FULL_DONTINLINE;
         blackholeDetectMode = BlackholeDetectMode.FALLBACK;
         return blackholeMode;
