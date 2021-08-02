@@ -595,10 +595,10 @@ public class BenchmarkGenerator {
 
             writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
-            writer.println(ident(4) + "control.preTearDown();");
-            writer.println(ident(3) + "} catch (InterruptedException ie) {");
-            writer.println(ident(4) + "control.preTearDownForce();");
+            writer.println(ident(3) + "} catch (Throwable e) {");
+            writer.println(ident(4) + "if (!(e instanceof InterruptedException)) throw e;");
             writer.println(ident(3) + "}");
+            writer.println(ident(3) + "control.preTearDown();");
 
             // iteration prolog
             iterationEpilog(writer, 3, method, states);
@@ -728,10 +728,10 @@ public class BenchmarkGenerator {
 
             writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
-            writer.println(ident(4) + "control.preTearDown();");
-            writer.println(ident(3) + "} catch (InterruptedException ie) {");
-            writer.println(ident(4) + "control.preTearDownForce();");
+            writer.println(ident(3) + "} catch (Throwable e) {");
+            writer.println(ident(4) + "if (!(e instanceof InterruptedException)) throw e;");
             writer.println(ident(3) + "}");
+            writer.println(ident(3) + "control.preTearDown();");
 
             iterationEpilog(writer, 3, method, states);
 
@@ -891,10 +891,10 @@ public class BenchmarkGenerator {
 
             writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
-            writer.println(ident(4) + "control.preTearDown();");
-            writer.println(ident(3) + "} catch (InterruptedException ie) {");
-            writer.println(ident(4) + "control.preTearDownForce();");
+            writer.println(ident(3) + "} catch (Throwable e) {");
+            writer.println(ident(4) + "if (!(e instanceof InterruptedException)) throw e;");
             writer.println(ident(3) + "}");
+            writer.println(ident(3) + "control.preTearDown();");
 
             iterationEpilog(writer, 3, method, states);
 
