@@ -266,7 +266,8 @@ public class CompilerHints extends AbstractResourceReader {
         }
 
         // Try to autodetect blackhole mode
-        if (Boolean.getBoolean(BLACKHOLE_MODE_AUTODETECT_NAME)) {
+        String autoDetectProp = System.getProperty(BLACKHOLE_MODE_AUTODETECT_NAME, "true");
+        if (Boolean.parseBoolean(autoDetectProp)) {
             if (compilerBlackholesAvailable()) {
                 blackholeMode = BlackholeMode.COMPILER;
                 blackholeDetectMode = BlackholeDetectMode.AUTO;
