@@ -46,8 +46,14 @@ public class CompilerHints extends AbstractResourceReader {
 
     static final String XX_COMPILE_COMMAND_FILE = "-XX:CompileCommandFile=";
 
-    static final String BLACKHOLE_MODE_PROP_NAME = "jmh.blackhole.mode";
-    static final String BLACKHOLE_MODE_AUTODETECT_NAME = "jmh.blackhole.autoDetect";
+    static final String BLACKHOLE_MODE_NAME       = "jmh.blackhole.mode";
+    static final String BLACKHOLE_AUTODETECT_NAME = "jmh.blackhole.autoDetect";
+    static final String BLACKHOLE_DEBUG_NAME      = "jmh.blackhole.debug";
+
+    static final boolean BLACKHOLE_MODE_AUTODETECT =
+            Boolean.parseBoolean(System.getProperty(BLACKHOLE_AUTODETECT_NAME, "true"));
+    static final boolean BLACKHOLE_MODE_DEBUG =
+            Boolean.parseBoolean(System.getProperty(BLACKHOLE_DEBUG_NAME, "false"));
 
     public static CompilerHints defaultList() {
         if (defaultList == null) {
@@ -239,7 +245,7 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     private static BlackholeMode blackholeMode;
-    private static BlackholeDetectMode blackholeDetectMode;
+    private static BlackholeSelect blackholeSelect;
 
     private static BlackholeMode blackholeMode() {
         if (blackholeMode != null) {
@@ -247,11 +253,11 @@ public class CompilerHints extends AbstractResourceReader {
         }
 
         // Forced mode takes precedence.
-        String propMode = System.getProperty(BLACKHOLE_MODE_PROP_NAME);
+        String propMode = System.getProperty(BLACKHOLE_MODE_NAME);
         if (propMode != null) {
             try {
                 blackholeMode = BlackholeMode.valueOf(propMode);
-                blackholeDetectMode = BlackholeDetectMode.FORCED;
+                blackholeSelect = BlackholeSelect.FORCED;
 
                 // Extra safety: If user requested compiler blackholes, check
                 // if they are available and fail otherwise.
@@ -266,29 +272,28 @@ public class CompilerHints extends AbstractResourceReader {
         }
 
         // Try to autodetect blackhole mode
-        String autoDetectProp = System.getProperty(BLACKHOLE_MODE_AUTODETECT_NAME, "true");
-        if (Boolean.parseBoolean(autoDetectProp)) {
+        if (BLACKHOLE_MODE_AUTODETECT) {
             if (compilerBlackholesAvailable()) {
                 blackholeMode = BlackholeMode.COMPILER;
-                blackholeDetectMode = BlackholeDetectMode.AUTO;
+                blackholeSelect = BlackholeSelect.AUTO;
                 return blackholeMode;
             }
         }
 
         // No dice, fallback to older mode
         blackholeMode = BlackholeMode.FULL_DONTINLINE;
-        blackholeDetectMode = BlackholeDetectMode.FALLBACK;
+        blackholeSelect = BlackholeSelect.FALLBACK;
         return blackholeMode;
     }
 
-    private static BlackholeDetectMode blackholeDetectMode() {
+    private static BlackholeSelect blackholeSelect() {
         blackholeMode();
-        return blackholeDetectMode;
+        return blackholeSelect;
     }
 
     public static void printBlackholeMode(PrintStream out) {
         BlackholeMode mode = blackholeMode();
-        out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeDetectMode().desc() + ")");
+        out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
         out.println();
     }
 
@@ -319,15 +324,15 @@ public class CompilerHints extends AbstractResourceReader {
         public String desc() { return desc; }
     }
 
-    private enum BlackholeDetectMode {
-        FALLBACK("fallback, use -D" + BLACKHOLE_MODE_PROP_NAME + " to force another mode"),
-        AUTO("auto-detected, use -D" + BLACKHOLE_MODE_AUTODETECT_NAME + "=false to disable"),
+    private enum BlackholeSelect {
+        FALLBACK("fallback, use -D" + BLACKHOLE_MODE_NAME + " to force another mode"),
+        AUTO("auto-detected, use -D" + BLACKHOLE_AUTODETECT_NAME + "=false to disable"),
         FORCED("forced"),
         ;
 
         final String desc;
 
-        BlackholeDetectMode(String desc) {
+        BlackholeSelect(String desc) {
             this.desc = desc;
         }
 
@@ -346,10 +351,15 @@ public class CompilerHints extends AbstractResourceReader {
             cmd.add("-XX:CompileCommand=blackhole,some/fake/Class.method");
             cmd.add("-version");
 
+            debug("Blackhole command errors test:");
+
             Collection<String> log = Utils.runWith(cmd);
             for (String l : log) {
-                if (l.contains("CompilerOracle")) return false;
-                if (l.contains("CompileCommand")) return false;
+                debug(l);
+                if (l.contains("CompilerOracle") || l.contains("CompileCommand")) {
+                    debug("Found the suspected error line, no compiler blackholes.");
+                    return false;
+                }
             }
         }
 
@@ -361,15 +371,27 @@ public class CompilerHints extends AbstractResourceReader {
             cmd.add("-XX:CompileCommand=blackhole,some/fake/Class.method");
             cmd.add("-version");
 
+            debug("Blackhole command acceptance test:");
+
             Collection<String> log = Utils.runWith(cmd);
             for (String l : log) {
-                if (l.contains("CompilerOracle")) return true;
-                if (l.contains("CompileCommand")) return true;
+                debug(l);
+                if (l.contains("CompilerOracle") || l.contains("CompileCommand")) {
+                    debug("Found the acceptance line, compiler blackholes are available.");
+                    return true;
+                }
             }
         }
 
         // Err on the side of the caution: compiler blackholes are not available.
+        debug("Compiler blackholes are not available.");
         return false;
+    }
+
+    private static void debug(String msg) {
+        if (BLACKHOLE_MODE_DEBUG) {
+            System.out.println(msg);
+        }
     }
 
     public static void printWarnings(PrintStream out) {
