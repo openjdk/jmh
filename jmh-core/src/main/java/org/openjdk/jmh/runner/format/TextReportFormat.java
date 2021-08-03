@@ -241,6 +241,8 @@ class TextReportFormat extends AbstractOutputFormat {
         out.println("Do not assume the numbers tell you what you want them to tell.");
         out.println();
 
+        CompilerHints.printWarnings(out);
+
         ResultFormatFactory.getInstance(ResultFormatType.TEXT, out).writeOut(runResults);
     }
 

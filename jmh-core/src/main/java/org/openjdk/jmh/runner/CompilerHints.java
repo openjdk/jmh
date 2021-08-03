@@ -371,4 +371,15 @@ public class CompilerHints extends AbstractResourceReader {
         return false;
     }
 
+    public static void printWarnings(PrintStream out) {
+        if (blackholeMode() == BlackholeMode.COMPILER) {
+            out.println("NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise");
+            out.println("extra caution when trusting the results, look into the generated code to check the benchmark still");
+            out.println("works, and factor in a small probability of new VM bugs. Additionally, while comparisons between");
+            out.println("different JVMs are already problematic, the performance difference caused by different Blackhole");
+            out.println("modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.");
+            out.println();
+        }
+    }
+
 }
