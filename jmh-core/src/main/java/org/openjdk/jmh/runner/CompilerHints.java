@@ -291,14 +291,8 @@ public class CompilerHints extends AbstractResourceReader {
         return blackholeSelect;
     }
 
-    public static void printBlackholeMode(PrintStream out) {
-        BlackholeMode mode = blackholeMode();
-        out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
-        out.println();
-    }
-
     private enum BlackholeMode {
-        COMPILER(true, false, "compiler-assisted"),
+        COMPILER(true, false, "compiler"),
         FULL_DONTINLINE(false, true, "full + dont-inline hint"),
         FULL(false, false, "full"),
         ;
@@ -392,6 +386,12 @@ public class CompilerHints extends AbstractResourceReader {
         if (BLACKHOLE_MODE_DEBUG) {
             System.out.println(msg);
         }
+    }
+
+    public static void printBlackhole(PrintStream out) {
+        BlackholeMode mode = blackholeMode();
+        out.print("# Blackhole: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
+        out.println();
     }
 
     public static void printWarnings(PrintStream out) {
