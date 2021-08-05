@@ -51,7 +51,7 @@ public class CompilerHints extends AbstractResourceReader {
     static final String BLACKHOLE_DEBUG_NAME      = "jmh.blackhole.debug";
 
     static final boolean BLACKHOLE_MODE_AUTODETECT =
-            Boolean.parseBoolean(System.getProperty(BLACKHOLE_AUTODETECT_NAME, "true"));
+            Boolean.parseBoolean(System.getProperty(BLACKHOLE_AUTODETECT_NAME, "false"));
     static final boolean BLACKHOLE_MODE_DEBUG =
             Boolean.parseBoolean(System.getProperty(BLACKHOLE_DEBUG_NAME, "false"));
 
@@ -271,18 +271,21 @@ public class CompilerHints extends AbstractResourceReader {
             }
         }
 
-        // Try to autodetect blackhole mode
+        // Try to autodetect blackhole mode, fail if not available
         if (BLACKHOLE_MODE_AUTODETECT) {
             if (compilerBlackholesAvailable()) {
                 blackholeMode = BlackholeMode.COMPILER;
                 blackholeSelect = BlackholeSelect.AUTO;
-                return blackholeMode;
+            } else {
+                blackholeMode = BlackholeMode.FULL_DONTINLINE;
+                blackholeSelect = BlackholeSelect.FALLBACK;
             }
+            return blackholeMode;
         }
 
-        // No dice, fallback to older mode
+        // Not forced, not auto-detected, default
         blackholeMode = BlackholeMode.FULL_DONTINLINE;
-        blackholeSelect = BlackholeSelect.FALLBACK;
+        blackholeSelect = BlackholeSelect.DEFAULT;
         return blackholeMode;
     }
 
@@ -319,8 +322,9 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     private enum BlackholeSelect {
-        FALLBACK("fallback, use -D" + BLACKHOLE_MODE_NAME + " to force another mode"),
-        AUTO("auto-detected, use -D" + BLACKHOLE_AUTODETECT_NAME + "=false to disable"),
+        DEFAULT("default, use -D" + BLACKHOLE_AUTODETECT_NAME + "=true to auto-detect"),
+        AUTO("auto-detected"),
+        FALLBACK("fallback, use -D" + BLACKHOLE_MODE_NAME + " to force"),
         FORCED("forced"),
         ;
 
@@ -390,7 +394,7 @@ public class CompilerHints extends AbstractResourceReader {
 
     public static void printBlackhole(PrintStream out) {
         BlackholeMode mode = blackholeMode();
-        out.print("# Blackhole: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
+        out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
         out.println();
     }
 
