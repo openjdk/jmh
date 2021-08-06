@@ -81,7 +81,7 @@ class TextReportFormat extends AbstractOutputFormat {
         println("# VM invoker: " + params.getJvm());
         println("# VM options: " + opts);
 
-        CompilerHints.printBlackholeMode(out);
+        CompilerHints.printBlackhole(out);
 
         IterationParams warmup = params.getWarmup();
         if (warmup.getCount() > 0) {
@@ -240,6 +240,8 @@ class TextReportFormat extends AbstractOutputFormat {
         out.println("the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.");
         out.println("Do not assume the numbers tell you what you want them to tell.");
         out.println();
+
+        CompilerHints.printWarnings(out);
 
         ResultFormatFactory.getInstance(ResultFormatType.TEXT, out).writeOut(runResults);
     }
