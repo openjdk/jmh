@@ -244,7 +244,7 @@ public class TestOptions {
             new CommandLineOptions("-t", "0");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '0' of option ['t']. The given value 0 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '0' of option t. The given value 0 should be positive", e.getMessage());
         }
     }
 
@@ -264,7 +264,7 @@ public class TestOptions {
             new CommandLineOptions("-t", "-1");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '-1' of option ['t']. The given value -1 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '-1' of option t. The given value -1 should be positive", e.getMessage());
         }
     }
 
@@ -274,7 +274,7 @@ public class TestOptions {
             new CommandLineOptions("-t", "-42");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '-42' of option ['t']. The given value -42 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '-42' of option t. The given value -42 should be positive", e.getMessage());
         }
     }
 
@@ -337,7 +337,7 @@ public class TestOptions {
             new CommandLineOptions("-tg", "-1,-2");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '-1' of option ['tg']. The given value -1 should be non-negative", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '-1' of option tg. The given value -1 should be non-negative", e.getMessage());
         }
     }
 
@@ -395,7 +395,7 @@ public class TestOptions {
             new CommandLineOptions("-wi", "-1");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '-1' of option ['wi']. The given value -1 should be non-negative", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '-1' of option wi. The given value -1 should be non-negative", e.getMessage());
         }
     }
 
@@ -439,7 +439,7 @@ public class TestOptions {
             new CommandLineOptions("-i", "0");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '0' of option ['i']. The given value 0 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '0' of option i. The given value 0 should be positive", e.getMessage());
         }
     }
 
@@ -515,7 +515,7 @@ public class TestOptions {
             new CommandLineOptions("-opi", "0");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '0' of option ['opi']. The given value 0 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '0' of option opi. The given value 0 should be positive", e.getMessage());
         }
     }
 
@@ -559,7 +559,7 @@ public class TestOptions {
             new CommandLineOptions("-f", "-1");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '-1' of option ['f']. The given value -1 should be non-negative", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '-1' of option f. The given value -1 should be non-negative", e.getMessage());
         }
     }
 
@@ -598,7 +598,7 @@ public class TestOptions {
             new CommandLineOptions("-wf", "-1");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '-1' of option ['wf']. The given value -1 should be non-negative", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '-1' of option wf. The given value -1 should be non-negative", e.getMessage());
         }
     }
 
@@ -678,7 +678,7 @@ public class TestOptions {
             new CommandLineOptions("-bs", "0");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '0' of option ['bs']. The given value 0 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '0' of option bs. The given value 0 should be positive", e.getMessage());
         }
     }
 
@@ -710,7 +710,7 @@ public class TestOptions {
             new CommandLineOptions("-wbs", "0");
             Assert.fail();
         } catch (CommandLineOptionException e) {
-            Assert.assertEquals("Cannot parse argument '0' of option ['wbs']. The given value 0 should be positive", e.getMessage());
+            Assert.assertEquals("Cannot parse argument '0' of option wbs. The given value 0 should be positive", e.getMessage());
         }
     }
 
