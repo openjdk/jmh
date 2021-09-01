@@ -66,7 +66,7 @@ public class IntegerValueConverter implements ValueConverter<Integer> {
     }
 
     @Override
-    public Class<Integer> valueType() {
+    public Class<? extends Integer> valueType() {
         return TO_INT_CONVERTER.valueType();
     }
 
