@@ -510,7 +510,8 @@ public class BenchmarkGenerator {
                 Field.class, BenchmarkParams.class, IterationParams.class,
                 Blackhole.class, Control.class,
                 ScalarResult.class, AggregationPolicy.class,
-                FailureAssistException.class
+                FailureAssistException.class,
+                NumericLiteralsParser.class
         };
 
         for (Class<?> c : imports) {

@@ -113,7 +113,6 @@ class StateObject {
     public String getParamAccessor(FieldInfo paramField) {
         String name = paramField.getName();
         String type = paramField.getType().getQualifiedName();
-
         if (type.equalsIgnoreCase("java.lang.String")) {
             return "control.getParam(\"" + name + "\")";
         }
@@ -121,25 +120,25 @@ class StateObject {
             return "Boolean.valueOf(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("byte") || type.equalsIgnoreCase("java.lang.Byte")) {
-            return "Byte.valueOf(control.getParam(\"" + name + "\"))";
+            return "NumericLiteralsParser.parseByte(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("char") || type.equalsIgnoreCase("java.lang.Character")) {
             return "(control.getParam(\"" + name + "\")).charAt(0)";
         }
         if (type.equalsIgnoreCase("short") || type.equalsIgnoreCase("java.lang.Short")) {
-            return "Short.valueOf(control.getParam(\"" + name + "\"))";
+            return "NumericLiteralsParser.parseShort(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("java.lang.Integer")) {
-            return "Integer.valueOf(control.getParam(\"" + name + "\"))";
+            return "NumericLiteralsParser.parseInt(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("float") || type.equalsIgnoreCase("java.lang.Float")) {
-            return "Float.valueOf(control.getParam(\"" + name + "\"))";
+            return "NumericLiteralsParser.parseFloat(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("long") || type.equalsIgnoreCase("java.lang.Long")) {
-            return "Long.valueOf(control.getParam(\"" + name + "\"))";
+            return "NumericLiteralsParser.parseLong(control.getParam(\"" + name + "\"))";
         }
         if (type.equalsIgnoreCase("double") || type.equalsIgnoreCase("java.lang.Double")) {
-            return "Double.valueOf(control.getParam(\"" + name + "\"))";
+            return "NumericLiteralsParser.parseDouble(control.getParam(\"" + name + "\"))";
         }
 
         // assume enum

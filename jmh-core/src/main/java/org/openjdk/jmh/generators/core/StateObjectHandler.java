@@ -473,31 +473,16 @@ class StateObjectHandler {
             return (val.equals("true") || val.equals("false"));
         }
         if (typeName.equals("byte") || typeName.equals("java.lang.Byte")) {
-            try {
-                Byte.parseByte(val);
-                return true;
-            } catch (NumberFormatException nfe) {
-                return false;
-            }
+            return NumericLiteralsParser.isValidLiteral(val, NumericLiteralsParser.Type.BYTE);
         }
         if (typeName.equals("char") || typeName.equals("java.lang.Character")) {
             return (val.length() == 1);
         }
         if (typeName.equals("short") || typeName.equals("java.lang.Short")) {
-            try {
-                Short.parseShort(val);
-                return true;
-            } catch (NumberFormatException nfe) {
-                return false;
-            }
+            return NumericLiteralsParser.isValidLiteral(val, NumericLiteralsParser.Type.SHORT);
         }
         if (typeName.equals("int") || typeName.equals("java.lang.Integer")) {
-            try {
-                Integer.parseInt(val);
-                return true;
-            } catch (NumberFormatException nfe) {
-                return false;
-            }
+            return NumericLiteralsParser.isValidLiteral(val, NumericLiteralsParser.Type.INT);
         }
         if (typeName.equals("float") || typeName.equals("java.lang.Float")) {
             try {
@@ -508,12 +493,7 @@ class StateObjectHandler {
             }
         }
         if (typeName.equals("long") || typeName.equals("java.lang.Long")) {
-            try {
-                Long.parseLong(val);
-                return true;
-            } catch (NumberFormatException nfe) {
-                return false;
-            }
+            return NumericLiteralsParser.isValidLiteral(val, NumericLiteralsParser.Type.LONG);
         }
         if (typeName.equals("double") || typeName.equals("java.lang.Double")) {
             try {
@@ -527,7 +507,7 @@ class StateObjectHandler {
     }
 
     private void checkHelpers(MethodInfo mi, Class<? extends Annotation> annClass) {
-        // OK to have these annotation for @State objects
+        // OK to have these annotations for @State objects
         if (BenchmarkGeneratorUtils.getAnnSuper(mi.getDeclaringClass(), State.class) == null) {
             if (!mi.getDeclaringClass().isAbstract()) {
                 throw new GenerationException(
