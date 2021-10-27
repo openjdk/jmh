@@ -531,7 +531,7 @@ class StateObjectHandler {
         if (BenchmarkGeneratorUtils.getAnnSuper(mi.getDeclaringClass(), State.class) == null) {
             if (!mi.getDeclaringClass().isAbstract()) {
                 throw new GenerationException(
-                        "@" + TearDown.class.getSimpleName() + " annotation is placed within " +
+                        "@" + annClass.getSimpleName() + " annotation is placed within " +
                                 "the class not having @" + State.class.getSimpleName() + " annotation. " +
                                 "This has no behavioral effect, and prohibited.",
                         mi);

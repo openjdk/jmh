@@ -75,7 +75,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
            Available versions are listed here:
                 http://kotlinlang.org/docs/reference/using-maven.html#plugin-and-versions
          -->
-        <kotlin.version>1.0.2</kotlin.version>
+        <kotlin.version>1.5.30</kotlin.version>
 
         <!--
             Select a JMH benchmark generator to use. Available options:

@@ -42,7 +42,7 @@ public class ThreadsValueConverter implements ValueConverter<Integer> {
     }
 
     @Override
-    public Class<Integer> valueType() {
+    public Class<? extends Integer> valueType() {
         return IntegerValueConverter.POSITIVE.valueType();
     }
 
