@@ -39,7 +39,33 @@ public class IntervalMap<T>  {
 
         @Override
         public int compareTo(Interval other) {
-            return (int)(this.from - other.from);
+            return Long.compare(from, other.from);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (int) (from ^ (from >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Interval other = (Interval) obj;
+            if (from != other.from) {
+                return false;
+            }
+            return true;
         }
     }
 
