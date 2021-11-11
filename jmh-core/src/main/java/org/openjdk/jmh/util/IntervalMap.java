@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,7 +29,47 @@ import java.util.TreeMap;
 
 public class IntervalMap<T>  {
 
-    final SortedMap<Long, T> from;
+    static final class Interval implements Comparable<Interval> {
+        final long from, to;
+
+        public Interval(long from, long to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        public int compareTo(Interval other) {
+            return Long.compare(from, other.from);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (int) (from ^ (from >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Interval other = (Interval) obj;
+            if (from != other.from) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    final SortedMap<Interval, T> from;
 
     public IntervalMap() {
         from = new TreeMap<>();
@@ -37,19 +77,25 @@ public class IntervalMap<T>  {
 
     public void add(T val, long from, long to) {
         // TODO: Check for intersections
-        this.from.put(from, val);
+        this.from.put(new Interval(from, to), val);
     }
 
     public T get(long k) {
-        T key = from.get(k);
+        Interval i = new Interval(k, k);
+        T key = from.get(i);
         if (key != null) {
             return key;
         }
-        SortedMap<Long, T> head = from.headMap(k);
+        SortedMap<Interval, T> head = from.headMap(i);
         if (head.isEmpty()) {
             return null;
         } else {
-            return from.get(head.lastKey());
+            Interval last = head.lastKey();
+            if (k >= last.from && k < last.to) {
+                return from.get(last);  // Interval from..to contains k
+            } else {
+                return null;
+            }
         }
     }
 
