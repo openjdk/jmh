@@ -258,8 +258,8 @@ public class BenchmarkGenerator {
                 if (fi.isStatic()) continue;
                 throw new GenerationException(
                         "Field \"" + fi.getName() + "\" is declared within " +
-                                "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                "This can result in unspecified behavior, and prohibited.", fi);
+                                "a class not having @" + State.class.getSimpleName() + " annotation. " +
+                                "This can result in unspecified behavior and is prohibited.", fi);
             }
         }
 
@@ -318,7 +318,7 @@ public class BenchmarkGenerator {
             if (m.getAnnotation(Group.class) != null && m.getAnnotation(Threads.class) != null) {
                 throw new GenerationException("@" + Threads.class.getSimpleName() + " annotation is placed within " +
                         "the benchmark method with @" + Group.class.getSimpleName() + " annotation. " +
-                        "This has ambiguous behavioral effect, and prohibited. " +
+                        "This has ambiguous behavioral effect and is prohibited. " +
                         "Did you mean @" + GroupThreads.class.getSimpleName() + " instead?",
                         m);
             }
