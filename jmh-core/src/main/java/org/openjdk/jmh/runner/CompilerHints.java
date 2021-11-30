@@ -51,7 +51,7 @@ public class CompilerHints extends AbstractResourceReader {
     static final String BLACKHOLE_DEBUG_NAME      = "jmh.blackhole.debug";
 
     static final boolean BLACKHOLE_MODE_AUTODETECT =
-            Boolean.parseBoolean(System.getProperty(BLACKHOLE_AUTODETECT_NAME, "false"));
+            Boolean.parseBoolean(System.getProperty(BLACKHOLE_AUTODETECT_NAME, "true"));
     static final boolean BLACKHOLE_MODE_DEBUG =
             Boolean.parseBoolean(System.getProperty(BLACKHOLE_DEBUG_NAME, "false"));
 
@@ -322,8 +322,8 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     private enum BlackholeSelect {
-        DEFAULT("default, use -D" + BLACKHOLE_AUTODETECT_NAME + "=true to auto-detect"),
-        AUTO("auto-detected"),
+        DEFAULT("default"),
+        AUTO("auto-detected, use -D" + BLACKHOLE_AUTODETECT_NAME + "=false to disable"),
         FALLBACK("fallback, use -D" + BLACKHOLE_MODE_NAME + " to force"),
         FORCED("forced"),
         ;
