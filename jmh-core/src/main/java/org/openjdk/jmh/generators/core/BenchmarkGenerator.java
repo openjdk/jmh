@@ -318,7 +318,7 @@ public class BenchmarkGenerator {
             if (m.getAnnotation(Group.class) != null && m.getAnnotation(Threads.class) != null) {
                 throw new GenerationException("@" + Threads.class.getSimpleName() + " annotation is placed within " +
                         "the benchmark method with @" + Group.class.getSimpleName() + " annotation. " +
-                        "This has ambiguous behavioral effect and is prohibited. " +
+                        "This is prohibited because it is ambiguous. " +
                         "Did you mean @" + GroupThreads.class.getSimpleName() + " instead?",
                         m);
             }
