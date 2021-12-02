@@ -533,7 +533,7 @@ class StateObjectHandler {
                 throw new GenerationException(
                         "@" + annClass.getSimpleName() + " annotation is placed within " +
                                 "a class not having @" + State.class.getSimpleName() + " annotation. " +
-                                "This has no behavioral effect and is prohibited.",
+                                "This is prohibited because it would have no effect.",
                         mi);
             }
         }
