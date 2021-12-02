@@ -259,7 +259,7 @@ public class BenchmarkGenerator {
                 throw new GenerationException(
                         "Field \"" + fi.getName() + "\" is declared within " +
                                 "a class not having @" + State.class.getSimpleName() + " annotation. " +
-                                "This can result in unspecified behavior and is prohibited.", fi);
+                                "This is prohibited because it can result in unspecified behavior.", fi);
             }
         }
 
