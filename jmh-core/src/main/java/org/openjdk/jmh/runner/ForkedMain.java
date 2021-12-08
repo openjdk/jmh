@@ -55,6 +55,9 @@ class ForkedMain {
         if (argv.length != 2) {
             throw new IllegalArgumentException("Expected two arguments for forked VM");
         } else {
+            // capture nakedErr early, so that hangup/shutdown threads could use it
+            nakedErr = System.err;
+
             // arm the hangup thread
             Runtime.getRuntime().addShutdownHook(new HangupThread());
 
@@ -75,7 +78,6 @@ class ForkedMain {
                 Options options = link.handshake();
 
                 // dump outputs into binary link
-                nakedErr = System.err;
                 System.setErr(link.getErrStream());
                 System.setOut(link.getOutStream());
 
