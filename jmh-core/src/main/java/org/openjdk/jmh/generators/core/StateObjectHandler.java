@@ -532,8 +532,8 @@ class StateObjectHandler {
             if (!mi.getDeclaringClass().isAbstract()) {
                 throw new GenerationException(
                         "@" + annClass.getSimpleName() + " annotation is placed within " +
-                                "the class not having @" + State.class.getSimpleName() + " annotation. " +
-                                "This has no behavioral effect, and prohibited.",
+                                "a class not having @" + State.class.getSimpleName() + " annotation. " +
+                                "This is prohibited because it would have no effect.",
                         mi);
             }
         }
