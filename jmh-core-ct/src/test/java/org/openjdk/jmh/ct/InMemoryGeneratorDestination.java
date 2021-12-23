@@ -59,7 +59,7 @@ public class InMemoryGeneratorDestination implements GeneratorDestination {
     }
 
     @Override
-    public Writer newClass(String className) throws IOException {
+    public Writer newClass(String className, String originatingClassName) throws IOException {
         StringWriter sw = new StringWriter();
         classBodies.put(className, sw);
         return new PrintWriter(sw, true);
