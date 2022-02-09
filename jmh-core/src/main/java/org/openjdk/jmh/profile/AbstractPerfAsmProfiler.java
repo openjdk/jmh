@@ -432,7 +432,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 }
 
                 printDottedLine(pw, "Hottest Region " + cnt);
-                pw.printf("%s, %s (%d bytes) %n%n", r.desc().source(), r.desc().name(), r.end - r.begin);
+                pw.printf("%s, %s %n%n", r.desc().source(), r.desc().name());
                 r.printCode(pw, events);
 
                 printDottedLine(pw);
@@ -470,7 +470,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     for (String event : evNames) {
                         printLine(pw, events, event, r.getEventCount(events, event));
                     }
-                    pw.printf("%" + lenSource + "s  %s (%d bytes) %n", r.desc().source(), r.desc().name(), r.end - r.begin);
+                    pw.printf("%" + lenSource + "s  %s %n", r.desc().source(), r.desc().name());
                 } else {
                     for (String event : evNames) {
                         other.add(event, r.getEventCount(events, event));
@@ -816,6 +816,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         Set<Interval> intervals = new HashSet<>();
 
+        CountingMap<String> methodVersions = new CountingMap<>();
+
         // Parsing the interpreter/runtime stub:
         // ----------------------------------------------------------------------
         // invokehandle  233 invokehandle  [0x00007f631d023100, 0x00007f631d0233c0]  704 bytes
@@ -919,8 +921,15 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         // Record the starting address for the method
                         long addr = parseAddress(map.get("entry"));
 
+                        MethodDesc desc = MethodDesc.javaMethod(
+                                map.get("method"),
+                                map.get("compiler"),
+                                map.get("level"),
+                                methodVersions.incrementAndGet(map.get("method")),
+                                map.get("compile_id"));
+
                         javaMethods.add(
-                                MethodDesc.javaMethod(map.get("method"), map.get("compiler"), map.get("level"), map.get("compile_id")),
+                                desc,
                                 addr,
                                 addr + Long.parseLong(map.get("size"))
                         );
@@ -1300,10 +1309,10 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             return new MethodDesc(name, "runtime stub");
         }
 
-        public static MethodDesc javaMethod(String name, String compiler, String level, String ver) {
+        public static MethodDesc javaMethod(String name, String compiler, String level, int ver, String compileId) {
             String methodName = name.replace("/", ".").replaceFirst(" ", "::").split(" ")[0];
             return new MethodDesc(
-                    methodName + ", version " + ver,
+                    methodName + ", version " + ver + ", compile id " + compileId,
                     (compiler != null ? compiler : "Unknown") + (level != null ? ", level " + level : "")
             );
         }
