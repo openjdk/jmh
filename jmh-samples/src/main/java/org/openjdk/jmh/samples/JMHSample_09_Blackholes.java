@@ -56,24 +56,31 @@ public class JMHSample_09_Blackholes {
     double x1 = Math.PI;
     double x2 = Math.PI * 2;
 
+    private double compute(double d) {
+        for (int c = 0; c < 10; c++) {
+            d = d * d / Math.PI;
+        }
+        return d;
+    }
+
     /*
-     * Baseline measurement: how much single Math.log costs.
+     * Baseline measurement: how much a single compute() costs.
      */
 
     @Benchmark
     public double baseline() {
-        return Math.log(x1);
+        return compute(x1);
     }
 
     /*
-     * While the Math.log(x2) computation is intact, Math.log(x1)
+     * While the compute(x2) computation is intact, compute(x1)
      * is redundant and optimized out.
      */
 
     @Benchmark
     public double measureWrong() {
-        Math.log(x1);
-        return Math.log(x2);
+        compute(x1);
+        return compute(x2);
     }
 
     /*
@@ -86,7 +93,7 @@ public class JMHSample_09_Blackholes {
 
     @Benchmark
     public double measureRight_1() {
-        return Math.log(x1) + Math.log(x2);
+        return compute(x1) + compute(x2);
     }
 
     /*
@@ -98,8 +105,8 @@ public class JMHSample_09_Blackholes {
 
     @Benchmark
     public void measureRight_2(Blackhole bh) {
-        bh.consume(Math.log(x1));
-        bh.consume(Math.log(x2));
+        bh.consume(compute(x1));
+        bh.consume(compute(x2));
     }
 
     /*

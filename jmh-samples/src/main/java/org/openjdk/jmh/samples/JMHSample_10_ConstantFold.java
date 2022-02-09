@@ -63,6 +63,13 @@ public class JMHSample_10_ConstantFold {
     // (While this is normally fine advice, it does not work in the context of measuring correctly.)
     private final double wrongX = Math.PI;
 
+    private double compute(double d) {
+        for (int c = 0; c < 10; c++) {
+            d = d * d / Math.PI;
+        }
+        return d;
+    }
+
     @Benchmark
     public double baseline() {
         // simply return the value, this is a baseline
@@ -72,19 +79,19 @@ public class JMHSample_10_ConstantFold {
     @Benchmark
     public double measureWrong_1() {
         // This is wrong: the source is predictable, and computation is foldable.
-        return Math.log(Math.PI);
+        return compute(Math.PI);
     }
 
     @Benchmark
     public double measureWrong_2() {
         // This is wrong: the source is predictable, and computation is foldable.
-        return Math.log(wrongX);
+        return compute(wrongX);
     }
 
     @Benchmark
     public double measureRight() {
         // This is correct: the source is not predictable.
-        return Math.log(x);
+        return compute(x);
     }
 
     /*
