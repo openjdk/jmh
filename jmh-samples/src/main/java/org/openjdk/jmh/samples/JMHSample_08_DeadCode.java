@@ -57,6 +57,13 @@ public class JMHSample_08_DeadCode {
 
     private double x = Math.PI;
 
+    private double compute(double d) {
+        for (int c = 0; c < 10; c++) {
+            d = d * d / Math.PI;
+        }
+        return d;
+    }
+
     @Benchmark
     public void baseline() {
         // do nothing, this is a baseline
@@ -65,13 +72,13 @@ public class JMHSample_08_DeadCode {
     @Benchmark
     public void measureWrong() {
         // This is wrong: result is not used and the entire computation is optimized away.
-        Math.log(x);
+        compute(x);
     }
 
     @Benchmark
     public double measureRight() {
         // This is correct: the result is being used.
-        return Math.log(x);
+        return compute(x);
     }
 
     /*
