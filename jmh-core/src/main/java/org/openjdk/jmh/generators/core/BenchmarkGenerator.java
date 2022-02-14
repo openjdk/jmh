@@ -1024,10 +1024,10 @@ public class BenchmarkGenerator {
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(totalOps, totalOps);");
             if (isSingleMethod) {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + method.getName() + "\", res.getTime(), totalOps, benchmarkParams.getTimeUnit()));");
             } else {
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
-                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.PRIMARY, \"" + methodGroup.getName() + "\", res.getTime(), totalOps, benchmarkParams.getTimeUnit()));");
+                writer.println(ident(3) + "results.add(new SingleShotResult(ResultRole.SECONDARY, \"" + method.getName() + "\", res.getTime(), totalOps, benchmarkParams.getTimeUnit()));");
             }
             addAuxCounters(writer, "SingleShotResult", states, method);
 

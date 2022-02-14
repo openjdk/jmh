@@ -149,10 +149,10 @@ public class ResultAggregationTest {
     @Test
     public void testSingleShot() {
         IterationResult ir = new IterationResult(null, null, null);
-        ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10_000, TimeUnit.NANOSECONDS));
-        ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10_000, TimeUnit.NANOSECONDS));
-        ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5_000, TimeUnit.NANOSECONDS));
-        ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5_000, TimeUnit.NANOSECONDS));
+        ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10_000, 1, TimeUnit.NANOSECONDS));
+        ir.addResult(new SingleShotResult(ResultRole.PRIMARY, "", 10_000, 1, TimeUnit.NANOSECONDS));
+        ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5_000, 1, TimeUnit.NANOSECONDS));
+        ir.addResult(new SingleShotResult(ResultRole.SECONDARY, "sec", 5_000, 1, TimeUnit.NANOSECONDS));
         Assert.assertEquals(10_000.0, ir.getPrimaryResult().getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(5_000.0, ir.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(2, ir.getPrimaryResult().getSampleCount());
@@ -161,7 +161,7 @@ public class ResultAggregationTest {
         Assert.assertEquals(2, ir.getRawSecondaryResults().get("sec").size());
 
         BenchmarkResult br = new BenchmarkResult(null, Arrays.asList(ir, ir));
-        br.addBenchmarkResult(new SingleShotResult(ResultRole.SECONDARY, "bench", 3_000, TimeUnit.NANOSECONDS));
+        br.addBenchmarkResult(new SingleShotResult(ResultRole.SECONDARY, "bench", 3_000, 1, TimeUnit.NANOSECONDS));
         Assert.assertEquals(10_000.0, br.getPrimaryResult().getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(5_000.0, br.getSecondaryResults().get("sec").getScore(), ASSERT_ACCURACY);
         Assert.assertEquals(3_000.0, br.getSecondaryResults().get("bench").getScore(), ASSERT_ACCURACY);
