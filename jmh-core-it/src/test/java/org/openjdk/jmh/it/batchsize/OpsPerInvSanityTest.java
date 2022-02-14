@@ -118,10 +118,8 @@ public class OpsPerInvSanityTest {
                 break;
             case AverageTime:
             case SampleTime:
-                expectedScore = 1.0 * realTime / (realOps * opsPerInv);
-                break;
             case SingleShotTime:
-                expectedScore = 1.0 * realTime / realOps;
+                expectedScore = 1.0 * realTime / (realOps * opsPerInv);
                 break;
             default:
                 expectedScore = Double.NaN;

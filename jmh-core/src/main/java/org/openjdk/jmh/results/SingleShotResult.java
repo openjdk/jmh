@@ -38,8 +38,13 @@ public class SingleShotResult extends Result<SingleShotResult> {
     private static final long serialVersionUID = -1251578870918524737L;
 
     public SingleShotResult(ResultRole role, String label, long duration, TimeUnit outputTimeUnit) {
+        // TODO: Transition interface, should be removed when we decide it is OK to break the publicly leaked API.
+        this(role, label, duration, 1, outputTimeUnit);
+    }
+
+    public SingleShotResult(ResultRole role, String label, long duration, long ops, TimeUnit outputTimeUnit) {
         this(role, label,
-                of(1.0D * duration / TimeUnit.NANOSECONDS.convert(1, outputTimeUnit)),
+                of(1.0D * duration / ops / TimeUnit.NANOSECONDS.convert(1, outputTimeUnit)),
                 TimeValue.tuToString(outputTimeUnit) + "/op");
     }
 
