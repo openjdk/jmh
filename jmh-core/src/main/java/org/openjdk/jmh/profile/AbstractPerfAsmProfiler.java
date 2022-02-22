@@ -76,6 +76,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private final boolean drawIntraJumps;
     private final boolean drawInterJumps;
 
+    private final ShowCounts showCounts;
+
+    public enum ShowCounts {
+        raw,
+        norm,
+        percent_total,
+    }
+
     protected AbstractPerfAsmProfiler(String initLine, String... events) throws ProfilerException {
         try {
             hsLog = FileUtils.weakTempFile("hslog");
@@ -193,6 +201,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         "Should perfasm draw jump arrows out of the region?")
                 .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(false);
 
+        OptionSpec<ShowCounts> optShowCounts = parser.accepts("showCounts",
+                        "How should perfasm show the event counts: " +
+                                ShowCounts.raw + " (unaltered), " +
+                                ShowCounts.norm + " (normalized similar to benchmark calls, similar to perfnorm), " +
+                                ShowCounts.percent_total + " (percent of total events).")
+                .withRequiredArg().ofType(ShowCounts.class).describedAs("type").defaultsTo(ShowCounts.percent_total);
+
         addMyOptions(parser);
 
         set = ProfilerUtils.parseInitLine(initLine, parser);
@@ -228,6 +243,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printCompilationInfo = set.valueOf(optPrintCompilationInfo);
             drawIntraJumps = set.valueOf(optDrawInterJumps);
             drawInterJumps = set.valueOf(optDrawIntraJumps);
+
+            showCounts = set.valueOf(optShowCounts);
         } catch (OptionException e) {
             throw new ProfilerException(e.getMessage());
         }
@@ -328,6 +345,9 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     protected abstract String perfBinaryExtension();
 
     private TextResult processAssembly(BenchmarkResult br) {
+        BenchmarkResultMetaData md = br.getMetadata();
+        long ops = md.getMeasurementOps();
+
         /**
          * 1. Parse binary events.
          */
@@ -402,7 +422,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * 4. Figure out code regions
          */
 
-        final List<Region> regions = makeRegions(assembly, events);
+        final List<Region> regions = makeRegions(assembly, events, ops);
 
         /**
          * 5. Figure out interesting regions, and print them out.
@@ -427,7 +447,21 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         for (Region r : regions) {
             if (r.getEventCount(events, mainEvent) > threshold) {
                 if (!headerPrinted) {
-                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n%n", regionRateThreshold * 100, mainEvent);
+                    pw.printf("Hottest code regions (>%.2f%% \"%s\" events):%n", regionRateThreshold * 100, mainEvent);
+                    switch (showCounts) {
+                        case raw:
+                            pw.println(" Unaltered event counts are printed.");
+                            break;
+                        case norm:
+                            pw.println(" Event counts are normalized per @Benchmark call, in perfnorm-like fashion.");
+                            break;
+                        case percent_total:
+                            pw.println(" Event counts are normalized to total event count.");
+                            break;
+                        default:
+                            throw new IllegalStateException("Unhandled enum: " + showCounts);
+                    }
+                    pw.println();
                     headerPrinted = true;
                 }
 
@@ -437,7 +471,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
                 printDottedLine(pw);
                 for (String event : evNames) {
-                    printLine(pw, events, event, r.getEventCount(events, event));
+                    printLine(pw, events, event, r.getEventCount(events, event), showCounts, ops);
                 }
                 pw.println("<total for region " + cnt + ">");
                 pw.println();
@@ -468,7 +502,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             for (Region r : regions) {
                 if (shown++ < regionShowTop) {
                     for (String event : evNames) {
-                        printLine(pw, events, event, r.getEventCount(events, event));
+                        printLine(pw, events, event, r.getEventCount(events, event), showCounts, ops);
                     }
                     pw.printf("%" + lenSource + "s  %s %n", r.desc().source(), r.desc().name());
                 } else {
@@ -483,14 +517,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             if (regions.size() - regionShowTop > 0) {
                 for (String event : evNames) {
-                    printLine(pw, events, event, other.count(event));
+                    printLine(pw, events, event, other.count(event), showCounts, ops);
                 }
                 pw.println("<...other " + (regions.size() - regionShowTop) + " warm regions...>");
             }
             printDottedLine(pw);
 
             for (String event : evNames) {
-                printLine(pw, events, event, total.count(event));
+                printLine(pw, events, event, total.count(event), showCounts, ops);
             }
             pw.println("<totals>");
             pw.println();
@@ -526,7 +560,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             for (MethodDesc m : top) {
                 if (shownMethods++ < regionShowTop) {
                     for (String event : evNames) {
-                        printLine(pw, events, event, methods.get(event).count(m));
+                        printLine(pw, events, event, methods.get(event).count(m), showCounts, ops);
                     }
                     pw.printf("%" + lenSource + "s  %s %n", m.source(), m.name());
                 } else {
@@ -541,14 +575,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             if (top.size() - regionShowTop > 0) {
                 for (String event : evNames) {
-                    printLine(pw, events, event, other.count(event));
+                    printLine(pw, events, event, other.count(event), showCounts, ops);
                 }
                 pw.println("<...other " + (top.size() - regionShowTop) + " warm methods...>");
             }
             printDottedLine(pw);
 
             for (String event : evNames) {
-                printLine(pw, events, event, total.count(event));
+                printLine(pw, events, event, total.count(event), showCounts, ops);
             }
             pw.println("<totals>");
             pw.println();
@@ -562,7 +596,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             for (String m : Multisets.sortedDesc(methodsByType.get(mainEvent))) {
                 for (String event : evNames) {
-                    printLine(pw, events, event, methodsByType.get(event).count(m));
+                    printLine(pw, events, event, methodsByType.get(event).count(m), showCounts, ops);
                 }
                 pw.printf("%" + lenSource + "s%n", m);
             }
@@ -570,7 +604,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printDottedLine(pw);
 
             for (String event : evNames) {
-                printLine(pw, events, event, methodsByType.get(event).size());
+                printLine(pw, events, event, methodsByType.get(event).size(), showCounts, ops);
             }
 
             pw.println("<totals>");
@@ -650,7 +684,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 for (ASMLine line : assembly.lines) {
                     for (String event : evNames) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                        printLine(pwAsm, events, event, count);
+                        printLine(pwAsm, events, event, count, showCounts, ops);
                     }
                     pwAsm.println(line.code);
                 }
@@ -666,9 +700,21 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         return new TextResult(sw.toString(), "asm");
     }
 
-    private static void printLine(PrintWriter pw, PerfEvents events, String event, long count) {
+    private static void printLine(PrintWriter pw, PerfEvents events, String event, long count, ShowCounts showCount, long ops) {
         if (count > 0) {
-            pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
+            switch (showCount) {
+                case raw:
+                    pw.printf("%7d  ", count);
+                    break;
+                case norm:
+                    pw.printf("%7.2f  ", 100.0 * count / ops);
+                    break;
+                case percent_total:
+                    pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
+                    break;
+                default:
+                    throw new IllegalStateException("Unhandled enum: " + showCount);
+            }
         } else {
             pw.printf("%9s", "");
         }
@@ -695,7 +741,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         pw.println();
     }
 
-    private List<Region> makeRegions(Assembly asms, PerfEvents events) {
+    private List<Region> makeRegions(Assembly asms, PerfEvents events, long ops) {
         List<String> strippedEvents = stripEventNames(requestedEventNames);
         List<Region> regions = new ArrayList<>();
 
@@ -715,7 +761,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 }
 
                 regions.add(new GeneratedRegion(strippedEvents, asms, desc, intv.src, intv.dst,
-                        regionLines, eventfulAddrs, regionTooBigThreshold, drawIntraJumps, drawInterJumps));
+                        regionLines, eventfulAddrs, regionTooBigThreshold,
+                        drawIntraJumps, drawInterJumps, showCounts, ops));
             } else {
                 // has no assembly, should be a native region
 
@@ -1145,10 +1192,13 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final int threshold;
         final boolean drawIntraJumps;
         final boolean drawInterJumps;
+        final ShowCounts showCounts;
+        final long ops;
 
         GeneratedRegion(Collection<String> tracedEvents, Assembly asms, MethodDesc desc, long begin, long end,
                         Collection<ASMLine> code, Set<Long> eventfulAddrs,
-                        int threshold, boolean drawIntraJumps, boolean drawInterJumps) {
+                        int threshold, boolean drawIntraJumps, boolean drawInterJumps, ShowCounts showCounts,
+                        long ops) {
             super(desc, begin, end, eventfulAddrs);
             this.tracedEvents = tracedEvents;
             this.asms = asms;
@@ -1156,6 +1206,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             this.threshold = threshold;
             this.drawIntraJumps = drawIntraJumps;
             this.drawInterJumps = drawInterJumps;
+            this.showCounts = showCounts;
+            this.ops = ops;
         }
 
         @Override
@@ -1194,7 +1246,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 for (ASMLine line : code) {
                     for (String event : tracedEvents) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                        printLine(pw, events, event, count);
+                        printLine(pw, events, event, count, showCounts, ops);
                     }
 
                     long addr;
