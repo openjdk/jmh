@@ -39,9 +39,9 @@ import java.util.*;
 
 public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
-    private final long sampleFrequency;
+    private final String sampleFrequency;
 
-    private OptionSpec<Long> optFrequency;
+    private OptionSpec<String> optFrequency;
 
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "cycles");
@@ -61,8 +61,9 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void addMyOptions(OptionParser parser) {
         optFrequency = parser.accepts("frequency",
-                "Sampling frequency. This is synonymous to perf record --freq #")
-                .withRequiredArg().ofType(Long.class).describedAs("freq").defaultsTo(1000L);
+                "Sampling frequency, synonymous to perf record --freq #; " +
+                        "use \"max\" for highest sampling rate possible on the system.")
+                .withRequiredArg().ofType(String.class).describedAs("freq").defaultsTo("1000");
     }
 
     @Override
