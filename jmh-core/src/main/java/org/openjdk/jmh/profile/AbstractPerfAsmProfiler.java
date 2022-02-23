@@ -78,7 +78,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
     private final ShowCounts showCounts;
 
-    public enum ShowCounts {
+    private enum ShowCounts {
         raw,
         norm,
         percent_total,
@@ -201,12 +201,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         "Should perfasm draw jump arrows out of the region?")
                 .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(false);
 
-        OptionSpec<ShowCounts> optShowCounts = parser.accepts("showCounts",
+        OptionSpec<String> optShowCounts = parser.accepts("showCounts",
                         "How should perfasm show the event counts: " +
                                 ShowCounts.raw + " (unaltered), " +
                                 ShowCounts.norm + " (normalized similar to benchmark calls, similar to perfnorm), " +
                                 ShowCounts.percent_total + " (percent of total events).")
-                .withRequiredArg().ofType(ShowCounts.class).describedAs("type").defaultsTo(ShowCounts.percent_total);
+                .withRequiredArg().ofType(String.class).describedAs("type").defaultsTo(ShowCounts.percent_total.toString());
 
         addMyOptions(parser);
 
@@ -244,8 +244,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             drawIntraJumps = set.valueOf(optDrawInterJumps);
             drawInterJumps = set.valueOf(optDrawIntraJumps);
 
-            showCounts = set.valueOf(optShowCounts);
-        } catch (OptionException e) {
+            showCounts = ShowCounts.valueOf(set.valueOf(optShowCounts));
+        } catch (OptionException | IllegalArgumentException e) {
             throw new ProfilerException(e.getMessage());
         }
     }
