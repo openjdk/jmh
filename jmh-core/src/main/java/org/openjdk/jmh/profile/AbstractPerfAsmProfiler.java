@@ -345,9 +345,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     protected abstract String perfBinaryExtension();
 
     private TextResult processAssembly(BenchmarkResult br) {
-        BenchmarkResultMetaData md = br.getMetadata();
-        long ops = md.getMeasurementOps();
-
         /**
          * 1. Parse binary events.
          */
@@ -418,11 +415,48 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             pw.println();
         }
 
+        PrintContext context;
+        {
+            BenchmarkResultMetaData md = br.getMetadata();
+            long ops = Math.max(1, md.getMeasurementOps());
+            int majorScale;
+            int minorScale;
+            switch (showCounts) {
+                case raw:
+                    majorScale = 0;
+                    minorScale = 0;
+                    for (long c : events.totalCounts.values()) {
+                        majorScale = Math.max(majorScale, (int)Math.ceil(Math.log10(c)));
+                    }
+                    break;
+                case norm:
+                    majorScale = 2;
+                    minorScale = 1;
+                    for (long c : events.totalCounts.values()) {
+                        double d = Math.log10(1D * c / ops);
+                        if (d < 0) {
+                            minorScale = Math.max(minorScale, (int)Math.ceil(-d));
+                        } else {
+                            majorScale = Math.max(majorScale, (int)Math.ceil(d));
+                        }
+                    }
+                    break;
+                case percent_total:
+                    majorScale = 3;
+                    minorScale = 2;
+                    break;
+                default:
+                    throw new IllegalStateException("Unhandled enum: " + showCounts);
+            }
+
+            context = new PrintContext(showCounts, ops, majorScale + minorScale + 2, minorScale);
+        }
+
         /**
          * 4. Figure out code regions
          */
 
-        final List<Region> regions = makeRegions(assembly, events, ops);
+        final List<Region> regions = makeRegions(assembly, events, context);
 
         /**
          * 5. Figure out interesting regions, and print them out.
@@ -456,7 +490,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                             pw.println(" Event counts are normalized per @Benchmark call.");
                             break;
                         case percent_total:
-                            pw.println(" Event counts are normalized to total event count.");
+                            pw.println(" Event counts are percents of total event count.");
                             break;
                         default:
                             throw new IllegalStateException("Unhandled enum: " + showCounts);
@@ -471,7 +505,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
                 printDottedLine(pw);
                 for (String event : evNames) {
-                    printLine(pw, events, event, r.getEventCount(events, event), showCounts, ops);
+                    printLine(pw, events, event, r.getEventCount(events, event), context);
                 }
                 pw.println("<total for region " + cnt + ">");
                 pw.println();
@@ -502,7 +536,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             for (Region r : regions) {
                 if (shown++ < regionShowTop) {
                     for (String event : evNames) {
-                        printLine(pw, events, event, r.getEventCount(events, event), showCounts, ops);
+                        printLine(pw, events, event, r.getEventCount(events, event), context);
                     }
                     pw.printf("%" + lenSource + "s  %s %n", r.desc().source(), r.desc().name());
                 } else {
@@ -517,14 +551,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             if (regions.size() - regionShowTop > 0) {
                 for (String event : evNames) {
-                    printLine(pw, events, event, other.count(event), showCounts, ops);
+                    printLine(pw, events, event, other.count(event), context);
                 }
                 pw.println("<...other " + (regions.size() - regionShowTop) + " warm regions...>");
             }
             printDottedLine(pw);
 
             for (String event : evNames) {
-                printLine(pw, events, event, total.count(event), showCounts, ops);
+                printLine(pw, events, event, total.count(event), context);
             }
             pw.println("<totals>");
             pw.println();
@@ -560,7 +594,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             for (MethodDesc m : top) {
                 if (shownMethods++ < regionShowTop) {
                     for (String event : evNames) {
-                        printLine(pw, events, event, methods.get(event).count(m), showCounts, ops);
+                        printLine(pw, events, event, methods.get(event).count(m), context);
                     }
                     pw.printf("%" + lenSource + "s  %s %n", m.source(), m.name());
                 } else {
@@ -575,14 +609,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             if (top.size() - regionShowTop > 0) {
                 for (String event : evNames) {
-                    printLine(pw, events, event, other.count(event), showCounts, ops);
+                    printLine(pw, events, event, other.count(event), context);
                 }
                 pw.println("<...other " + (top.size() - regionShowTop) + " warm methods...>");
             }
             printDottedLine(pw);
 
             for (String event : evNames) {
-                printLine(pw, events, event, total.count(event), showCounts, ops);
+                printLine(pw, events, event, total.count(event), context);
             }
             pw.println("<totals>");
             pw.println();
@@ -596,7 +630,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
             for (String m : Multisets.sortedDesc(methodsByType.get(mainEvent))) {
                 for (String event : evNames) {
-                    printLine(pw, events, event, methodsByType.get(event).count(m), showCounts, ops);
+                    printLine(pw, events, event, methodsByType.get(event).count(m), context);
                 }
                 pw.printf("%" + lenSource + "s%n", m);
             }
@@ -604,7 +638,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             printDottedLine(pw);
 
             for (String event : evNames) {
-                printLine(pw, events, event, methodsByType.get(event).size(), showCounts, ops);
+                printLine(pw, events, event, methodsByType.get(event).size(), context);
             }
 
             pw.println("<totals>");
@@ -684,7 +718,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 for (ASMLine line : assembly.lines) {
                     for (String event : evNames) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                        printLine(pwAsm, events, event, count, showCounts, ops);
+                        printLine(pwAsm, events, event, count, context);
                     }
                     pwAsm.println(line.code);
                 }
@@ -700,23 +734,23 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         return new TextResult(sw.toString(), "asm");
     }
 
-    private static void printLine(PrintWriter pw, PerfEvents events, String event, long count, ShowCounts showCount, long ops) {
+    private static void printLine(PrintWriter pw, PerfEvents events, String event, long count, PrintContext context) {
         if (count > 0) {
-            switch (showCount) {
+            switch (context.mode) {
                 case raw:
-                    pw.printf("%7d  ", count);
+                    pw.printf("%" + context.formatWidth + "d   ", count);
                     break;
                 case norm:
-                    pw.printf("%7.2f  ", 100.0 * count / ops);
+                    pw.printf("%" + context.formatWidth + "." + context.formatMinor + "f   ", 100.0 * count / context.ops);
                     break;
                 case percent_total:
-                    pw.printf("%6.2f%%  ", 100.0 * count / events.getTotalEvents(event));
+                    pw.printf("%" + context.formatWidth + "." + context.formatMinor + "f%%  ", 100.0 * count / events.getTotalEvents(event));
                     break;
                 default:
-                    throw new IllegalStateException("Unhandled enum: " + showCount);
+                    throw new IllegalStateException("Unhandled enum: " + context.mode);
             }
         } else {
-            pw.printf("%9s", "");
+            pw.printf("%" + context.formatWidth + "s   ", "");
         }
     }
 
@@ -741,7 +775,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         pw.println();
     }
 
-    private List<Region> makeRegions(Assembly asms, PerfEvents events, long ops) {
+    private List<Region> makeRegions(Assembly asms, PerfEvents events, PrintContext context) {
         List<String> strippedEvents = stripEventNames(requestedEventNames);
         List<Region> regions = new ArrayList<>();
 
@@ -762,7 +796,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
                 regions.add(new GeneratedRegion(strippedEvents, asms, desc, intv.src, intv.dst,
                         regionLines, eventfulAddrs, regionTooBigThreshold,
-                        drawIntraJumps, drawInterJumps, showCounts, ops));
+                        drawIntraJumps, drawInterJumps, context));
             } else {
                 // has no assembly, should be a native region
 
@@ -1192,13 +1226,12 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final int threshold;
         final boolean drawIntraJumps;
         final boolean drawInterJumps;
-        final ShowCounts showCounts;
-        final long ops;
+        final PrintContext context;
 
         GeneratedRegion(Collection<String> tracedEvents, Assembly asms, MethodDesc desc, long begin, long end,
                         Collection<ASMLine> code, Set<Long> eventfulAddrs,
-                        int threshold, boolean drawIntraJumps, boolean drawInterJumps, ShowCounts showCounts,
-                        long ops) {
+                        int threshold, boolean drawIntraJumps, boolean drawInterJumps,
+                        PrintContext context) {
             super(desc, begin, end, eventfulAddrs);
             this.tracedEvents = tracedEvents;
             this.asms = asms;
@@ -1206,8 +1239,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             this.threshold = threshold;
             this.drawIntraJumps = drawIntraJumps;
             this.drawInterJumps = drawInterJumps;
-            this.showCounts = showCounts;
-            this.ops = ops;
+            this.context = context;
         }
 
         @Override
@@ -1246,7 +1278,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 for (ASMLine line : code) {
                     for (String event : tracedEvents) {
                         long count = (line.addr != null) ? events.get(event).count(line.addr) : 0;
-                        printLine(pw, events, event, count, showCounts, ops);
+                        printLine(pw, events, event, count, context);
                     }
 
                     long addr;
@@ -1406,6 +1438,20 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     "name='" + name + '\'' +
                     ", source='" + source + '\'' +
                     '}';
+        }
+    }
+
+    private static class PrintContext {
+        private final ShowCounts mode;
+        private final long ops;
+        private final int formatWidth;
+        private final int formatMinor;
+
+        public PrintContext(ShowCounts mode, long ops, int formatWidth, int formatMinor) {
+            this.mode = mode;
+            this.ops = ops;
+            this.formatWidth = formatWidth;
+            this.formatMinor = formatMinor;
         }
     }
 
