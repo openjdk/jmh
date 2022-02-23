@@ -423,7 +423,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             int minorScale;
             switch (showCounts) {
                 case raw:
-                    majorScale = 0;
+                    majorScale = 1;
                     minorScale = 0;
                     for (long c : events.totalCounts.values()) {
                         majorScale = Math.max(majorScale, (int)Math.ceil(Math.log10(c)));
