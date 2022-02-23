@@ -204,7 +204,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         OptionSpec<String> optShowCounts = parser.accepts("showCounts",
                         "How should perfasm show the event counts: " +
                                 ShowCounts.raw + " (unaltered), " +
-                                ShowCounts.norm + " (normalized similar to benchmark calls, similar to perfnorm), " +
+                                ShowCounts.norm + " (normalized to @Benchmark calls), " +
                                 ShowCounts.percent_total + " (percent of total events).")
                 .withRequiredArg().ofType(String.class).describedAs("type").defaultsTo(ShowCounts.percent_total.toString());
 
@@ -453,7 +453,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                             pw.println(" Unaltered event counts are printed.");
                             break;
                         case norm:
-                            pw.println(" Event counts are normalized per @Benchmark call, in perfnorm-like fashion.");
+                            pw.println(" Event counts are normalized per @Benchmark call.");
                             break;
                         case percent_total:
                             pw.println(" Event counts are normalized to total event count.");
