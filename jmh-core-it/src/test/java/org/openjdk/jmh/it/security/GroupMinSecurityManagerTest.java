@@ -59,12 +59,12 @@ public class GroupMinSecurityManagerTest {
         Fixtures.work();
         URI policyFile = GroupMinSecurityManagerTest.class.getResource("/jmh-security-minimal.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
-        System.setSecurityManager(new SecurityManager());
+        SecurityManagerTestUtils.install();
     }
 
     @TearDown
     public void tearDown() {
-        System.setSecurityManager(null);
+        SecurityManagerTestUtils.remove();
     }
 
     @Benchmark
