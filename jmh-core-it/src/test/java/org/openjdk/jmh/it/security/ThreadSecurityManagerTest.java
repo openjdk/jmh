@@ -57,12 +57,12 @@ public class ThreadSecurityManagerTest {
         Fixtures.work();
         URI policyFile = ThreadSecurityManagerTest.class.getResource("/jmh-security.policy").toURI();
         Policy.setPolicy(Policy.getInstance("JavaPolicy", new URIParameter(policyFile)));
-        System.setSecurityManager(new SecurityManager());
+        SecurityManagerTestUtils.install();
     }
 
     @TearDown
     public void tearDown() {
-        System.setSecurityManager(null);
+        SecurityManagerTestUtils.remove();
     }
 
     @Benchmark
