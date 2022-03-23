@@ -369,7 +369,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             switch (outputType) {
                 case text:
                     File out = outputFile("summary-%s.txt");
-                    dump(out, "summary,flat=" + flat + ",traces=" + traces);
+                    if (isVersion1x) {
+                        dump(out, "summary,flat=" + flat + ",traces=" + traces);
+                    } else {
+                        dump(out, "flat=" + flat + ",traces=" + traces);
+                    }
                     try {
                         for (String line : FileUtils.readAllLines(out)) {
                             pw.println(line);
