@@ -251,7 +251,6 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             direction = optDirection.value(set);
 
             output = optOutput.values(set);
-            builder.appendMulti(optOutput);
 
             // Secondary events are those that may be collected simultaneously with a primary event in a JFR profile.
             // To be used as such, we require they are specifed with the lock and alloc option, rather than event=lock,
@@ -370,7 +369,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             switch (outputType) {
                 case text:
                     File out = outputFile("summary-%s.txt");
-                    dump(out, "summary,flat=" + flat + ",traces=" + traces);
+                    if (isVersion1x) {
+                        dump(out, "summary,flat=" + flat + ",traces=" + traces);
+                    } else {
+                        dump(out, "flat=" + flat + ",traces=" + traces);
+                    }
                     try {
                         for (String line : FileUtils.readAllLines(out)) {
                             pw.println(line);
