@@ -42,8 +42,8 @@ questions.
     </url>
 
     <scm>
-        <url>http://hg.openjdk.java.net/code-tools/jmh/</url>
-        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jmh/</connection>
+        <url>https://github.com/openjdk/jmh</url>
+        <connection>scm:git:https://github.com/openjdk/jmh.git</connection>
     </scm>
 
     <licenses>
