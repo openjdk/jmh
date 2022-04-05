@@ -39,20 +39,18 @@ import java.util.*;
  * Windows performance profiler based on "xperf" utility.
  * <p>
  * You must install {@code Windows Performance Toolkit}. Once installed, locate directory with {@code xperf.exe}
- * file and either add it to {@code PATH} environment variable, or set it to {@code jmh.perfasm.xperf.dir} system
- * property.
+ * file and either add it to {@code PATH} environment variable, or assign it to {@code xperf.dir} parameter.
  * <p>
  * This profiler counts only {@code SampledProfile} events. To achieve this, we set {@code xperf} providers to
  * {@code loader+proc_thread+profile}. You may optionally save {@code xperf} binary or parsed outputs using
- * {@code jmh.perfasm.savePerfBin} or {@code jmh.perfasm.savePerf} system properties respectively. If you do so and
- * want to log more events, you can use {@code jmh.perfasm.xperf.providers} system property to override providers.
+ * {@code savePerfBin} or {@code savePerf} parameters respectively. If you do so and
+ * want to log more events, you can use {@code xperf.providers} parameter to override providers.
  * However, you must specify {@code loader}, {@code proc_thread} and {@code profile} providers anyway. Otherwise
  * sample events will not be generated and profiler will show nothing.
  * <p>
  * By default JDK distributive do not have debug symbols. If you want to analyze JVM internals, you must build OpenJDK
  * on your own. Once built, go to {@code bin/server} directory and unpack {@code jvm.diz}. Now you have {@code jvm.pdb}
- * file with JVM debug symbols. Finally, you must set debug symbols directory to {@code jmh.perfasm.symbol.dir} system
- * property.
+ * file with JVM debug symbols. Finally, you must assign debug symbols directory to {@code symbol.dir} parameter.
  * <p>
  * This profiler behaves differently comparing to it's Linux counterpart {@link LinuxPerfAsmProfiler}. Linux profiler
  * employs {@code perf} utility which can be used to profile a single process. Therefore, Linux profiler wraps forked
@@ -68,7 +66,8 @@ import java.util.*;
  */
 public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
-    private static final String MSG_UNABLE_START = "Unable to start the profiler. Please try running JMH as Administrator.";
+    private static final String MSG_UNABLE_START = "Unable to start the profiler. Try running JMH as Administrator, " +
+            "and ensure that previous profiling session is stopped. Use 'xperf -stop' to stop the active profiling session.";
     private static final String MSG_UNABLE_STOP  = "Unable to stop the profiler. Please try running JMH as Administrator.";
 
     private final String xperfProviders;
