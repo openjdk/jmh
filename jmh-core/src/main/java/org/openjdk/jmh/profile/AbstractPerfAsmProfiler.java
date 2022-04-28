@@ -66,7 +66,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private final String saveLogTo;
     private final String saveLogToFile;
 
-    private final boolean printCompilationInfo;
     private final boolean intelSyntax;
 
     protected final TempFile hsLog;
@@ -184,11 +183,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 "Override the annotated Hotspot log filename.")
                 .withRequiredArg().ofType(String.class).describedAs("file");
 
-        OptionSpec<Boolean> optPrintCompilationInfo = parser.accepts("printCompilationInfo",
-                        "Print the collateral compilation information. Enabling this might corrupt the " +
-                        "assembly output, see https://bugs.openjdk.java.net/browse/CODETOOLS-7901102.")
-                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
-
         OptionSpec<Boolean> optIntelSyntax = parser.accepts("intelSyntax",
                         "Should perfasm use intel syntax?")
                 .withRequiredArg().ofType(Boolean.class).describedAs("boolean").defaultsTo(false);
@@ -240,7 +234,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
             saveLogToFile = set.valueOf(optSaveLogToFile);
 
             intelSyntax = set.valueOf(optIntelSyntax);
-            printCompilationInfo = set.valueOf(optPrintCompilationInfo);
             drawIntraJumps = set.valueOf(optDrawInterJumps);
             drawInterJumps = set.valueOf(optDrawIntraJumps);
 
@@ -271,11 +264,6 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 opts.add("-XX:+PrintSignatureHandlers");
                 opts.add("-XX:+PrintAdapterHandlers");
                 opts.add("-XX:+PrintStubCode");
-            }
-            if (printCompilationInfo) {
-                opts.add("-XX:+PrintCompilation");
-                opts.add("-XX:+PrintInlining");
-                opts.add("-XX:+TraceClassLoading");
             }
             if (intelSyntax) {
                 opts.add("-XX:PrintAssemblyOptions=intel");
