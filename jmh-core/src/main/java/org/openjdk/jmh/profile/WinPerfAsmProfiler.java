@@ -94,13 +94,17 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
         Collection<String> errsOn = Utils.tryWith(path, "-on", xperfProviders);
         if (!errsOn.isEmpty()) {
-            errsOn.add(MSG_UNABLE_START);
+            if (errsOn instanceof ArrayList) {
+                errsOn.add(MSG_UNABLE_START);
+            }
             throw new ProfilerException(errsOn.toString());
         }
 
         Collection<String> errsStop = Utils.tryWith(path, "-stop");
         if (!errsStop.isEmpty()) {
-            errsStop.add(MSG_UNABLE_STOP);
+            if (errsStop instanceof ArrayList) {
+                errsStop.add(MSG_UNABLE_STOP);
+            }
             throw new ProfilerException(errsStop.toString());
         }
     }
@@ -132,7 +136,9 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         Collection<String> errs = Utils.tryWith(path, "-on", xperfProviders);
 
         if (!errs.isEmpty()) {
-            errs.add(MSG_UNABLE_START);
+            if (errs instanceof ArrayList) {
+                errs.add(MSG_UNABLE_START);
+            }
             throw new IllegalStateException(errs.toString());
         }
     }
@@ -157,7 +163,9 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         Collection<String> errs = Utils.tryWith(path, "-d", perfBinData.getAbsolutePath());
 
         if (!errs.isEmpty()) {
-            errs.add(MSG_UNABLE_STOP);
+            if (errs instanceof ArrayList) {
+                errs.add(MSG_UNABLE_STOP);
+            }
             throw new IllegalStateException(errs.toString());
         }
 
