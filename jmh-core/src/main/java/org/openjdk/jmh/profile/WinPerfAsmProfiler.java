@@ -94,18 +94,12 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
         Collection<String> errsOn = Utils.tryWith(path, "-on", xperfProviders);
         if (!errsOn.isEmpty()) {
-            if (errsOn instanceof ArrayList) {
-                errsOn.add(MSG_UNABLE_START);
-            }
-            throw new ProfilerException(errsOn.toString());
+            throw new ProfilerException(MSG_UNABLE_START + ": " + errsOn);
         }
 
         Collection<String> errsStop = Utils.tryWith(path, "-stop");
         if (!errsStop.isEmpty()) {
-            if (errsStop instanceof ArrayList) {
-                errsStop.add(MSG_UNABLE_STOP);
-            }
-            throw new ProfilerException(errsStop.toString());
+            throw new ProfilerException(MSG_UNABLE_STOP + ": " + errsStop);
         }
     }
 
@@ -136,10 +130,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         Collection<String> errs = Utils.tryWith(path, "-on", xperfProviders);
 
         if (!errs.isEmpty()) {
-            if (errs instanceof ArrayList) {
-                errs.add(MSG_UNABLE_START);
-            }
-            throw new IllegalStateException(errs.toString());
+            throw new IllegalStateException(MSG_UNABLE_START + ": " + errs);
         }
     }
 
@@ -163,10 +154,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
         Collection<String> errs = Utils.tryWith(path, "-d", perfBinData.getAbsolutePath());
 
         if (!errs.isEmpty()) {
-            if (errs instanceof ArrayList) {
-                errs.add(MSG_UNABLE_STOP);
-            }
-            throw new IllegalStateException(errs.toString());
+            throw new IllegalStateException(MSG_UNABLE_STOP + ": " + errs);
         }
 
         // 2. Convert binary data to text form.
