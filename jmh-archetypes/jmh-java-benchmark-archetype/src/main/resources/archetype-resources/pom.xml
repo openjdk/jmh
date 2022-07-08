@@ -51,12 +51,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
             <artifactId>jmh-core</artifactId>
             <version>\${jmh.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-annprocess</artifactId>
-            <version>\${jmh.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <properties>
@@ -88,6 +82,13 @@ THE POSSIBILITY OF SUCH DAMAGE.
                     <compilerVersion>\${javac.target}</compilerVersion>
                     <source>\${javac.target}</source>
                     <target>\${javac.target}</target>
+                    <annotationProcessorPaths>
+                        <annotationProcessorPath>
+                            <groupId>org.openjdk.jmh</groupId>
+                            <artifactId>jmh-generator-annprocess</artifactId>
+                            <version>\${jmh.version}</version>
+                        </annotationProcessorPath>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
