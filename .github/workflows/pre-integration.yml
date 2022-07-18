@@ -1,8 +1,10 @@
 name: JMH Pre-Integration Tests
 
 on:
-  pull_request:
-    types: [opened, reopened, ready_for_review, synchronize]
+  push:
+    branches-ignore:
+      - master
+      - pr/*
   workflow_dispatch:
 
 concurrency:
