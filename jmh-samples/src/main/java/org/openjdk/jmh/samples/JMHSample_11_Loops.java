@@ -131,7 +131,7 @@ public class JMHSample_11_Loops {
      * well beyond what hardware can actually do.
      *
      * This happens because the loop is heavily unrolled/pipelined, and the operation
-     * to be measured is hoisted from the loop. Morale: don't overuse loops, rely on JMH
+     * to be measured is hoisted from the loop. Moral: don't overuse loops, rely on JMH
      * to get the measurement right.
      *
      * You can run this test:
