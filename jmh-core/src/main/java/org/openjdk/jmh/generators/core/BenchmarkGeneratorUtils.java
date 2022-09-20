@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -131,14 +131,6 @@ class BenchmarkGeneratorUtils {
     }
 
     public static Collection<MethodInfo> getAllMethods(ClassInfo ci) {
-        List<MethodInfo> ls = new ArrayList<>();
-        do {
-            ls.addAll(ci.getMethods());
-        } while ((ci = ci.getSuperClass()) != null);
-        return ls;
-    }
-
-    public static Collection<MethodInfo> getMethods(ClassInfo ci) {
         List<MethodInfo> ls = new ArrayList<>();
         do {
             ls.addAll(ci.getMethods());

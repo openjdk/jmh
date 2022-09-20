@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -128,7 +128,7 @@ class StateObjectHandler {
         }
 
         // validate rogue annotations on methods
-        for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(state)) {
+        for (MethodInfo mi : BenchmarkGeneratorUtils.getAllMethods(state)) {
             BenchmarkGeneratorUtils.checkAnnotations(mi);
         }
 
@@ -252,7 +252,7 @@ class StateObjectHandler {
             Set<ClassQName> nextSeen = new HashSet<>();
             nextSeen.addAll(alreadySeen);
             nextSeen.add(ci);
-            for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci.ci)) {
+            for (MethodInfo mi : BenchmarkGeneratorUtils.getAllMethods(ci.ci)) {
                 if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
                     validateNoCyclesStep(nextSeen, mi, false);
                 }
@@ -286,7 +286,7 @@ class StateObjectHandler {
      */
     private void resolveDependencies(MethodInfo method, ClassInfo pci, StateObject pso) {
 
-        for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(pci)) {
+        for (MethodInfo mi : BenchmarkGeneratorUtils.getAllMethods(pci)) {
             if (mi.getAnnotation(Setup.class) != null || mi.getAnnotation(TearDown.class) != null) {
                 for (ParameterInfo pi : mi.getParameters()) {
                     ClassInfo ci = pi.getType();
@@ -372,7 +372,7 @@ class StateObjectHandler {
         }
 
         // put the @State objects helper methods
-        for (MethodInfo mi : BenchmarkGeneratorUtils.getMethods(ci)) {
+        for (MethodInfo mi : BenchmarkGeneratorUtils.getAllMethods(ci)) {
             Setup setupAnn = mi.getAnnotation(Setup.class);
             if (setupAnn != null) {
                 checkHelpers(mi, Setup.class);
