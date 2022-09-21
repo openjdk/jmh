@@ -72,13 +72,11 @@ class MethodGroup implements Comparable<MethodGroup> {
 
     public void addMethod(MethodInfo method, int threads) {
         MethodInvocation mi = new MethodInvocation(method, threads);
-        if (methods.contains(mi)) {
+        if (!methods.add(mi)) {
             throw new GenerationException(
                     "@" + Benchmark.class.getSimpleName() + " method is duplicate with " +
                             mi.method.getQualifiedName() + ". JMH needs an uniquely named method, regardless of the arguments list. ",
                     method);
-        } else {
-            methods.add(mi);
         }
     }
 
