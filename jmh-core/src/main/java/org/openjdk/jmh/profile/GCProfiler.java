@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -202,6 +202,7 @@ public class GCProfiler implements InternalProfiler {
         private static final boolean CHURN_AVAILABLE;
         private static NotificationListener listener;
         private static Multiset<String> churn;
+        private static boolean started;
 
         static {
             ALLOC_AVAILABLE = tryInitAlloc();
@@ -239,7 +240,8 @@ public class GCProfiler implements InternalProfiler {
                         throw new UnsupportedOperationException("GarbageCollectorMXBean cannot notify");
                     }
                 }
-                newListener();
+                churn = new HashMultiset<>();
+                listener = newListener();
                 return true;
             } catch (Throwable e) {
                 System.out.println("Churn profiling is not available: " + e.getMessage());
@@ -257,7 +259,6 @@ public class GCProfiler implements InternalProfiler {
         }
 
         private static NotificationListener newListener() {
-            churn = new HashMultiset<>();
             try {
                 final Class<?> infoKlass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
                 final Field notifNameField = infoKlass.getField("GARBAGE_COLLECTION_NOTIFICATION");
@@ -304,10 +305,11 @@ public class GCProfiler implements InternalProfiler {
 
         public static synchronized void startChurnProfile() {
             if (!CHURN_AVAILABLE) return;
-            if (listener != null) {
+            if (started) {
                 throw new IllegalStateException("Churn profile already started");
             }
-            listener = newListener();
+            started = true;
+            churn = new HashMultiset<>();
             try {
                 for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
                     ((NotificationEmitter) bean).addNotificationListener(listener, null, null);
@@ -319,7 +321,7 @@ public class GCProfiler implements InternalProfiler {
 
         public static synchronized void finishChurnProfile() {
             if (!CHURN_AVAILABLE) return;
-            if (listener == null) {
+            if (!started) {
                 throw new IllegalStateException("Churn profile already stopped");
             }
 
@@ -337,7 +339,7 @@ public class GCProfiler implements InternalProfiler {
                     // Do nothing
                 }
             }
-            listener = null;
+            started = false;
         }
 
         public static synchronized Multiset<String> getChurn() {
