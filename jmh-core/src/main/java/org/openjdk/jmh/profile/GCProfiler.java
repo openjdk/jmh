@@ -309,7 +309,7 @@ public class GCProfiler implements InternalProfiler {
                 throw new IllegalStateException("Churn profile already started");
             }
             started = true;
-            churn = new HashMultiset<>();
+            churn.clear();
             try {
                 for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
                     ((NotificationEmitter) bean).addNotificationListener(listener, null, null);
