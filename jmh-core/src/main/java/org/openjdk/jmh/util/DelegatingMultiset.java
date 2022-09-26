@@ -109,8 +109,6 @@ public class DelegatingMultiset<T> implements Multiset<T>, Serializable {
     @Override
     public void clear() {
         size = 0;
-        if (map != null) {
-            map.clear();
-        }
+        map.clear();
     }
 }
