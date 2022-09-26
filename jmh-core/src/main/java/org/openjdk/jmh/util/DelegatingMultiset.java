@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -104,5 +104,11 @@ public class DelegatingMultiset<T> implements Multiset<T>, Serializable {
         int result = map.hashCode();
         result = 31 * result + (int) (size ^ (size >>> 32));
         return result;
+    }
+
+    @Override
+    public void clear() {
+        size = 0;
+        map.clear();
     }
 }
