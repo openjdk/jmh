@@ -129,8 +129,6 @@ If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/browse/
  * Component: tools
  * Sub-component: jmh
 
-If you don't have the access to JDK Bug System, submit the bug report at "Issues" here, and wait for maintainers to pick that up.
-
 ## Development
 
 JMH project accepts pull requests, like other OpenJDK projects.
