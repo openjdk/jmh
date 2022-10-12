@@ -51,8 +51,7 @@ public class JMHSample_39_MemoryAccess {
     public static final int N = 1_000_000;
 
     /*
-     * This example highlights the mistake of accidentally measuring memory access instead of processing time.
-     * It is a pitfall.
+     * This example highlights the pitfall of accidentally measuring memory access instead of processing time.
      *
      * An int array has got a different memory layout than an ArrayList of boxed ints.
      * This can lead to useless results because the memory access is completely different.
