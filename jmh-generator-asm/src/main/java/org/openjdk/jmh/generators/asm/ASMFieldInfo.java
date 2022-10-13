@@ -45,7 +45,7 @@ class ASMFieldInfo extends FieldVisitor implements FieldInfo {
     private final Map<String, AnnotationInvocationHandler> annotations;
 
     public ASMFieldInfo(FieldVisitor fieldVisitor, ASMClassInfo declaringClass, int access, String name, ClassInfo type) {
-        super(Opcodes.ASM4, fieldVisitor);
+        super(Opcodes.ASM5, fieldVisitor);
         this.declaringClass = declaringClass;
         this.access = access;
         this.name = name;
