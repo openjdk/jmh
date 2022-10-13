@@ -31,6 +31,6 @@ public class HashMultiset<T> extends DelegatingMultiset<T> implements Serializab
     private static final long serialVersionUID = 8149201968248505516L;
 
     public HashMultiset() {
-        super(new HashMap<T, Long>());
+        super(new HashMap<>());
     }
 }

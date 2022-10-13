@@ -267,28 +267,25 @@ public class GCProfiler implements InternalProfiler {
                 final Method getMemoryUsageBeforeGc = getGcInfo.getReturnType().getMethod("getMemoryUsageBeforeGc");
                 final Method getMemoryUsageAfterGc = getGcInfo.getReturnType().getMethod("getMemoryUsageAfterGc");
 
-                return new NotificationListener() {
-                    @Override
-                    public void handleNotification(Notification n, Object o) {
-                        try {
-                            if (n.getType().equals(notifNameField.get(null))) {
-                                Object info = infoMethod.invoke(null, n.getUserData());
-                                Object gcInfo = getGcInfo.invoke(info);
-                                Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
-                                Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
-                                for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
-                                    String name = entry.getKey();
-                                    MemoryUsage after = entry.getValue();
-                                    MemoryUsage before = mapBefore.get(name);
-                                    long c = before.getUsed() - after.getUsed();
-                                    if (c > 0) {
-                                        churn.add(name, c);
-                                    }
+                return (n, o) -> {
+                    try {
+                        if (n.getType().equals(notifNameField.get(null))) {
+                            Object info = infoMethod.invoke(null, n.getUserData());
+                            Object gcInfo = getGcInfo.invoke(info);
+                            Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
+                            Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
+                            for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
+                                String name = entry.getKey();
+                                MemoryUsage after = entry.getValue();
+                                MemoryUsage before = mapBefore.get(name);
+                                long c = before.getUsed() - after.getUsed();
+                                if (c > 0) {
+                                    churn.add(name, c);
                                 }
                             }
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            // Do nothing, counters would not get populated
                         }
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        // Do nothing, counters would not get populated
                     }
                 };
             } catch (Throwable e) {
@@ -343,7 +340,7 @@ public class GCProfiler implements InternalProfiler {
         }
 
         public static synchronized Multiset<String> getChurn() {
-            return (churn != null) ? churn : new HashMultiset<String>();
+            return (churn != null) ? churn : new HashMultiset<>();
         }
     }
 

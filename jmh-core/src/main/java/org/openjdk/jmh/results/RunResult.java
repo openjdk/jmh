@@ -90,11 +90,6 @@ public class RunResult implements Serializable {
         return params;
     }
 
-    public static final Comparator<RunResult> DEFAULT_SORT_COMPARATOR = new Comparator<RunResult>() {
-        @Override
-        public int compare(RunResult o1, RunResult o2) {
-            return o1.params.compareTo(o2.params);
-        }
-    };
+    public static final Comparator<RunResult> DEFAULT_SORT_COMPARATOR = Comparator.comparing(o -> o.params);
 
 }

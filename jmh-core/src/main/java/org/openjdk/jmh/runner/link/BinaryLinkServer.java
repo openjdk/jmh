@@ -103,7 +103,7 @@ public final class BinaryLinkServer {
 
         handler = new AtomicReference<>();
         metadata = new AtomicReference<>();
-        results = new AtomicReference<List<IterationResult>>(new ArrayList<IterationResult>());
+        results = new AtomicReference<>(new ArrayList<>());
         exception = new AtomicReference<>();
         plan = new AtomicReference<>();
     }
@@ -142,7 +142,7 @@ public final class BinaryLinkServer {
     }
 
     public List<IterationResult> getResults() {
-        List<IterationResult> res = results.getAndSet(new ArrayList<IterationResult>());
+        List<IterationResult> res = results.getAndSet(new ArrayList<>());
         if (res != null) {
             return res;
         } else {

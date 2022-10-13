@@ -453,13 +453,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         final String mainEvent = evNames.get(0);
 
-        Collections.sort(regions, new Comparator<Region>() {
-            @Override
-            public int compare(Region o1, Region o2) {
-                return Long.compare(o2.getEventCount(events, mainEvent),
-                                    o1.getEventCount(events, mainEvent));
-            }
-        });
+        regions.sort((o1, o2) -> Long.compare(o2.getEventCount(events, mainEvent),
+                      o1.getEventCount(events, mainEvent)));
 
         long threshold = (long) (regionRateThreshold * events.getTotalEvents(mainEvent));
 
@@ -556,8 +551,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         final Map<String, Multiset<MethodDesc>> methods = new HashMap<>();
 
         for (String event : evNames) {
-            methodsByType.put(event, new HashMultiset<String>());
-            methods.put(event, new HashMultiset<MethodDesc>());
+            methodsByType.put(event, new HashMultiset<>());
+            methods.put(event, new HashMultiset<>());
         }
 
         for (Region r : regions) {

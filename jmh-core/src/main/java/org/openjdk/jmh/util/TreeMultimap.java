@@ -32,6 +32,6 @@ public class TreeMultimap<K, V> extends DelegatingMultimap<K, V> implements Seri
     private static final long serialVersionUID = 1323519395777393861L;
 
     public TreeMultimap() {
-        super(new TreeMap<K, Collection<V>>());
+        super(new TreeMap<>());
     }
 }

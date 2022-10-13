@@ -195,7 +195,7 @@ public class WinPerfAsmProfiler extends AbstractPerfAsmProfiler {
             Multimap<MethodDesc, Long> methods = new HashMultimap<>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<>();
             for (String evName : requestedEventNames) {
-                events.put(evName, new TreeMultiset<Long>());
+                events.put(evName, new TreeMultiset<>());
             }
 
             String line;

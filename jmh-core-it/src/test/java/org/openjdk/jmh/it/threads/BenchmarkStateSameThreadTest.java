@@ -57,13 +57,13 @@ public class BenchmarkStateSameThreadTest {
     @State(Scope.Benchmark)
     public static class MyState {
 
-        private final Set<Thread> setupRunThread = Collections.synchronizedSet(new HashSet<Thread>());
-        private final Set<Thread> setupIterationThread = Collections.synchronizedSet(new HashSet<Thread>());
-        private final Set<Thread> setupInvocationThread = Collections.synchronizedSet(new HashSet<Thread>());
-        private final Set<Thread> teardownRunThread = Collections.synchronizedSet(new HashSet<Thread>());
-        private final Set<Thread> teardownIterationThread = Collections.synchronizedSet(new HashSet<Thread>());
-        private final Set<Thread> teardownInvocationThread = Collections.synchronizedSet(new HashSet<Thread>());
-        private final Set<Thread> testInvocationThread = Collections.synchronizedSet(new HashSet<Thread>());
+        private final Set<Thread> setupRunThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> setupIterationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> setupInvocationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> teardownRunThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> teardownIterationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> teardownInvocationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> testInvocationThread = Collections.synchronizedSet(new HashSet<>());
 
         @Setup(Level.Trial)
         public void setupRun() {

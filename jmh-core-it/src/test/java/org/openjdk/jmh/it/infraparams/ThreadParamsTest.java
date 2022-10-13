@@ -44,7 +44,7 @@ public class ThreadParamsTest {
 
     @Setup(Level.Iteration)
     public void setup() {
-        set = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<ThreadParams, Boolean>()));
+        set = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
     @TearDown(Level.Iteration)
