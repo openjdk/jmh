@@ -42,13 +42,13 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 1)
+@Measurement(iterations = 5, time = 1)
 @Fork(5)
 @State(Scope.Benchmark)
 public class JMHSample_39_MemoryAccess {
-    public static final int N = 1_000_000;
+    public static final int N = 200_000_000;
 
     /*
      * This example highlights the pitfall of accidentally measuring memory access instead of processing time.
@@ -60,9 +60,9 @@ public class JMHSample_39_MemoryAccess {
      * All the references point to the boxed ints which are usually spread all over the heap.
      * This leads to many cache misses with a big error:
      *
-     * Benchmark                               Mode  Cnt        Score      Error  Units
-     * JMHSample_39_MemoryAccess.sumArray      avgt   25        5.117 ±    0.039  ns/op
-     * JMHSample_39_MemoryAccess.sumArrayList  avgt   25  1587140.451 ± 2025.538  ns/op
+     * Benchmark                               Mode  Cnt    Score   Error  Units
+     * JMHSample_39_MemoryAccess.sumArray      avgt   25   50.393 ± 0.407  ms/op
+     * JMHSample_39_MemoryAccess.sumArrayList  avgt   25  299.868 ± 1.591  ms/op
      *
      * The Java Object Layout (JOL) is a tool with which the different memory layouts of arrays and ArrayLists can be
      * examined in more detail.
@@ -84,7 +84,7 @@ public class JMHSample_39_MemoryAccess {
     public long sumArray() {
         long sum = 0;
         for (int i = 0; i < N; i++) {
-            sum = intArray[i];
+            sum += intArray[i];
         }
         return sum;
     }
@@ -93,7 +93,7 @@ public class JMHSample_39_MemoryAccess {
     public long sumArrayList() {
         long sum = 0;
         for (int i = 0; i < N; i++) {
-            sum = intList.get(i);
+            sum += intList.get(i);
         }
         return sum;
     }
