@@ -71,8 +71,9 @@ public class GCProfiler implements InternalProfiler {
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iResult) {
-        VMSupport.finishChurnProfile();
         long afterTime = System.nanoTime();
+
+        VMSupport.finishChurnProfile();
 
         long gcTime = 0;
         long gcCount = 0;
