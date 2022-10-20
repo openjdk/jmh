@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Group)
 public class GroupBenchSharingTest {
 
-    final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
+    final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<>());
 
     @TearDown(Level.Trial)
     public void tearDown() {

@@ -42,7 +42,7 @@ class AnnotationInvocationHandler extends AnnotationVisitor implements Invocatio
     private final Multimap<String, Object> values;
 
     public AnnotationInvocationHandler(String className, AnnotationVisitor annotationVisitor) {
-        super(Opcodes.ASM4, annotationVisitor);
+        super(Opcodes.ASM5, annotationVisitor);
         this.className = className;
         this.values = new HashMultimap<>();
     }
@@ -211,7 +211,7 @@ class AnnotationInvocationHandler extends AnnotationVisitor implements Invocatio
 
     @Override
     public AnnotationVisitor visitArray(final String name) {
-        return new AnnotationVisitor(Opcodes.ASM4, super.visitArray(name)) {
+        return new AnnotationVisitor(Opcodes.ASM5, super.visitArray(name)) {
             @Override
             public void visitEnum(String n, String desc, String value) {
                 values.put(name, value);

@@ -141,7 +141,7 @@ public class StackProfiler implements InternalProfiler {
         public SamplingTask() {
             stacks = new EnumMap<>(Thread.State.class);
             for (Thread.State s : Thread.State.values()) {
-                stacks.put(s, new HashMultiset<StackRecord>());
+                stacks.put(s, new HashMultiset<>());
             }
             thread = new Thread(this);
             thread.setName("Sampling Thread");
@@ -279,7 +279,7 @@ public class StackProfiler implements InternalProfiler {
 
         public String getStack(final Map<Thread.State, Multiset<StackRecord>> stacks) {
             List<Thread.State> sortedStates = new ArrayList<>(stacks.keySet());
-            Collections.sort(sortedStates, new Comparator<Thread.State>() {
+            sortedStates.sort(new Comparator<Thread.State>() {
 
                 private long stateSize(Thread.State state) {
                     Multiset<StackRecord> set = stacks.get(state);
@@ -383,7 +383,7 @@ public class StackProfiler implements InternalProfiler {
             for (StackResult r : results) {
                 for (Map.Entry<Thread.State, Multiset<StackRecord>> entry : r.stacks.entrySet()) {
                     if (!sum.containsKey(entry.getKey())) {
-                        sum.put(entry.getKey(), new HashMultiset<StackRecord>());
+                        sum.put(entry.getKey(), new HashMultiset<>());
                     }
                     Multiset<StackRecord> sumSet = sum.get(entry.getKey());
                     for (StackRecord rec : entry.getValue().keys()) {
