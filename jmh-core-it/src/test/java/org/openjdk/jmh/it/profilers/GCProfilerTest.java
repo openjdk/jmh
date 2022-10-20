@@ -36,23 +36,20 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Tests allocation profiler.
- */
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Fork(1) // 0 to enable debugging
 public class GCProfilerTest {
 
     @Benchmark
     @Warmup(iterations = 0)
-    @Measurement(iterations = 20, time = 10, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 10, time = 10, timeUnit = TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
     public Object allocateObjectNoWarmup() {
         return new Object();
     }
 
     @Benchmark
-    @Warmup(iterations = 2)
+    @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
     @Measurement(iterations = 2, time = 2, timeUnit = TimeUnit.SECONDS)
     @BenchmarkMode(Mode.AverageTime)
     public Object allocateObject() {
@@ -68,7 +65,7 @@ public class GCProfilerTest {
     }
 
     @Benchmark
-    @Warmup(iterations = 2)
+    @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
     @Measurement(iterations = 1, time = 2, timeUnit = TimeUnit.SECONDS)
     @BenchmarkMode(Mode.SampleTime)
     public Object allocateObjectSampleTime() {
@@ -76,10 +73,37 @@ public class GCProfilerTest {
     }
 
     @Test
-    public void testAllocationProfiler() throws RunnerException {
+    public void testDefault() throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .addProfiler(GCProfiler.class)
+                .build();
+        new Runner(opts).run();
+    }
+
+    @Test
+    public void testAlloc() throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(GCProfiler.class, "alloc=true")
+                .build();
+        new Runner(opts).run();
+    }
+
+    @Test
+    public void testChurn() throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(GCProfiler.class, "churn=true;churnWait=1")
+                .build();
+        new Runner(opts).run();
+    }
+
+    @Test
+    public void testAll() throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(GCProfiler.class, "alloc=true;churn=true;churnWait=1")
                 .build();
         new Runner(opts).run();
     }

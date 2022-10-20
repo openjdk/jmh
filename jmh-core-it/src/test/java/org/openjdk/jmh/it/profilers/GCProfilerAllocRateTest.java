@@ -53,10 +53,24 @@ public class GCProfilerAllocRateTest {
     }
 
     @Test
-    public void test() throws RunnerException {
+    public void testDefault() throws RunnerException {
+        testWith("");
+    }
+
+    @Test
+    public void testAlloc() throws RunnerException {
+        testWith("alloc=true");
+    }
+
+    @Test
+    public void testAll() throws RunnerException {
+        testWith("alloc=true;churn=true");
+    }
+
+    private void testWith(String initLine) throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(GCProfiler.class)
+                .addProfiler(GCProfiler.class, initLine)
                 .build();
 
         RunResult rr = new Runner(opts).runSingle();
