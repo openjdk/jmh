@@ -124,26 +124,26 @@ If all these did not help, you are welcome to report the issue.
 
 ### Reporting Harness and Test Bugs
 
-If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/browse/CODETOOLS-7902762?jql=project%20%3D%20CODETOOLS%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20tools%20AND%20Subcomponent%20%3D%20jmh), please submit the bug there:
+If you have the access to [OpenJDK Bug System](https://bugs.openjdk.org/browse/CODETOOLS-7902762?jql=project%20%3D%20CODETOOLS%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20tools%20AND%20Subcomponent%20%3D%20jmh), please submit the bug there:
  * Project: CODETOOLS
  * Component: tools
  * Sub-component: jmh
 
-If you don't have the access to JDK Bug System, submit the bug report at "Issues" here, and wait for maintainers to pick that up.
+Alternatively, you can join the [JMH Mailing List](https://mail.openjdk.org/mailman/listinfo/jmh-dev) and report the bugs there.
 
 ## Development
 
 JMH project accepts pull requests, like other OpenJDK projects.
-If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](http://openjdk.java.net/contribute).
+If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](http://openjdk.org/contribute).
 Normally, you don't need to post patches anywhere else, or post to mailing lists, etc.
-If you do want to have a wider discussion about JMH, please refer to [jmh-dev](https://mail.openjdk.java.net/mailman/listinfo/jmh-dev).
+If you do want to have a wider discussion about JMH, please refer to [jmh-dev](https://mail.openjdk.org/mailman/listinfo/jmh-dev).
 
 Short instructions to build, test bleeding-edge JMH, and install its JAR to local Maven repo:
 
     $ mvn clean install
 
 If you already have the benchmark project, then it is enough to change JMH dependencies version
-to the latest `SNAPSHOT` version (look up the actual latest version in [root `pom.xml`](https://github.com/openjdk/jmh/blob/9f5b990334bbcb27856740d6330ba2d0c928d2f1/pom.xml#L33)). If not, create the JMH benchmark project and change the version there.
+to the latest `SNAPSHOT` version (look up the actual latest version in [root `pom.xml`](https://github.com/openjdk/jmh/blob/master/pom.xml)). If not, create the JMH benchmark project and change the version there.
 
 GitHub workflow "JMH Pre-Integration Tests" should pass on the changes. It would be triggered
 for PRs. You can also trigger it manually for your branch.
