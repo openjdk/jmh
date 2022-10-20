@@ -43,8 +43,8 @@ import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 5, time = 1)
-@Measurement(iterations = 5, time = 1)
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
 @State(Scope.Benchmark)
 public class JMHSample_39_MemoryAccess {
