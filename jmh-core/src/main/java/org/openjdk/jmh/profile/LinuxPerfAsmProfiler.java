@@ -228,7 +228,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             Multimap<MethodDesc, Long> methods = new HashMultimap<>();
             Map<String, Multiset<Long>> events = new LinkedHashMap<>();
             for (String evName : evNames) {
-                events.put(evName, new TreeMultiset<Long>());
+                events.put(evName, new TreeMultiset<>());
             }
 
             Double startTime = null;

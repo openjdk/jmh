@@ -33,12 +33,7 @@ import java.util.*;
 
 class StateObject {
 
-    public static final Comparator<StateObject> ID_COMPARATOR = new Comparator<StateObject>() {
-        @Override
-        public int compare(StateObject o1, StateObject o2) {
-            return o1.fieldIdentifier.compareTo(o2.fieldIdentifier);
-        }
-    };
+    public static final Comparator<StateObject> ID_COMPARATOR = Comparator.comparing(o -> o.fieldIdentifier);
 
     public final String packageName;
     public final String userType;

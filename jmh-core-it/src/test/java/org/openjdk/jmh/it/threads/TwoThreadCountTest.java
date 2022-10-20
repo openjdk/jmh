@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class TwoThreadCountTest {
 
-    private final Set<Thread> threads = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> threads = Collections.synchronizedSet(new HashSet<>());
 
     @TearDown(Level.Iteration)
     public void tearDown() {

@@ -47,7 +47,7 @@ public class IterationParamsTest {
 
     @Setup(Level.Iteration)
     public void setup() {
-        set = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<IterationParams, Boolean>()));
+        set = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
     @TearDown(Level.Iteration)
