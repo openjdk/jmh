@@ -57,12 +57,7 @@ public class APGeneratorSource implements GeneratorSource {
             return classInfos;
         }
 
-        Collection<TypeElement> discoveredClasses = new TreeSet<>(new Comparator<TypeElement>() {
-            @Override
-            public int compare(TypeElement o1, TypeElement o2) {
-                return o1.getQualifiedName().toString().compareTo(o2.getQualifiedName().toString());
-            }
-        });
+        Collection<TypeElement> discoveredClasses = new TreeSet<>(Comparator.comparing(o -> o.getQualifiedName().toString()));
 
         // Need to do a few rollovers to find all classes that have @Benchmark-annotated methods in their
         // subclasses. This is mostly due to some of the nested classes not discoverable at once,

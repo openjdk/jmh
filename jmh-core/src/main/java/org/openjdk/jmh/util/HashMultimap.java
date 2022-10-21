@@ -32,6 +32,6 @@ public class HashMultimap<K, V> extends DelegatingMultimap<K, V> implements Seri
     private static final long serialVersionUID = 2484428623123444998L;
 
     public HashMultimap() {
-        super(new HashMap<K, Collection<V>>());
+        super(new HashMap<>());
     }
 }

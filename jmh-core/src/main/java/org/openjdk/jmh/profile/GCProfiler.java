@@ -24,9 +24,14 @@
  */
 package org.openjdk.jmh.profile;
 
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
+import org.openjdk.jmh.runner.options.IntegerValueConverter;
 import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.Multiset;
 
@@ -48,14 +53,56 @@ public class GCProfiler implements InternalProfiler {
     private long beforeGCTime;
     private HotspotAllocationSnapshot beforeAllocated;
 
+    private boolean churnEnabled;
+    private boolean allocEnabled;
+    private long churnWait;
+
     @Override
     public String getDescription() {
         return "GC profiling via standard MBeans";
     }
 
+    public GCProfiler(String initLine) throws ProfilerException {
+        OptionParser parser = new OptionParser();
+        parser.formatHelpWith(new ProfilerOptionFormatter(PausesProfiler.class.getCanonicalName()));
+
+        OptionSpec<Boolean> optAllocEnable = parser.accepts("alloc", "Enable GC allocation measurement.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(true);
+
+        OptionSpec<Boolean> optChurnEnable = parser.accepts("churn", "Enable GC churn measurement.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(false);
+
+        OptionSpec<Integer> optChurnWait = parser.accepts("churnWait", "Time to wait for churn notifications to arrive.")
+                .withRequiredArg().withValuesConvertedBy(IntegerValueConverter.POSITIVE).describedAs("ms").defaultsTo(500);
+
+        OptionSet set = ProfilerUtils.parseInitLine(initLine, parser);
+
+        try {
+            churnWait = set.valueOf(optChurnWait);
+            churnEnabled = set.valueOf(optChurnEnable);
+            allocEnabled = set.valueOf(optAllocEnable);
+        } catch (OptionException e) {
+            throw new ProfilerException(e.getMessage());
+        }
+
+        if (churnEnabled) {
+            if (!VMSupport.tryInitChurn()) {
+                churnEnabled = false;
+            }
+        }
+
+        if (allocEnabled) {
+            if (!VMSupport.tryInitAlloc()) {
+                allocEnabled = false;
+            }
+        }
+    }
+
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        VMSupport.startChurnProfile();
+        if (churnEnabled) {
+            VMSupport.startChurnProfile();
+        }
 
         long gcTime = 0;
         long gcCount = 0;
@@ -65,46 +112,28 @@ public class GCProfiler implements InternalProfiler {
         }
         this.beforeGCCount = gcCount;
         this.beforeGCTime = gcTime;
-        this.beforeAllocated = VMSupport.getSnapshot();
+
+        if (allocEnabled) {
+            this.beforeAllocated = VMSupport.getSnapshot();
+        }
         this.beforeTime = System.nanoTime();
     }
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult iResult) {
-        VMSupport.finishChurnProfile();
         long afterTime = System.nanoTime();
+
+        if (churnEnabled) {
+            VMSupport.finishChurnProfile(churnWait);
+        }
+
+        List<ScalarResult> results = new ArrayList<>();
 
         long gcTime = 0;
         long gcCount = 0;
         for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
             gcCount += bean.getCollectionCount();
             gcTime += bean.getCollectionTime();
-        }
-
-        List<ScalarResult> results = new ArrayList<>();
-
-        if (beforeAllocated == HotspotAllocationSnapshot.EMPTY) {
-            // When allocation profiling fails, make sure it is distinguishable in report
-            results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
-                    Double.NaN,
-                    "MB/sec", AggregationPolicy.AVG));
-        } else {
-            HotspotAllocationSnapshot newSnapshot = VMSupport.getSnapshot();
-            long allocated = newSnapshot.subtract(beforeAllocated);
-            // When no allocations measured, we still need to report results to avoid user confusion
-            results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
-                            (afterTime != beforeTime) ?
-                                    1.0 * allocated / 1024 / 1024 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) :
-                                    Double.NaN,
-                            "MB/sec", AggregationPolicy.AVG));
-            if (allocated != 0) {
-                long allOps = iResult.getMetadata().getAllOps();
-                results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate.norm",
-                                (allOps != 0) ?
-                                        1.0 * allocated / allOps :
-                                        Double.NaN,
-                                "B/op", AggregationPolicy.AVG));
-            }
         }
 
         results.add(new ScalarResult(
@@ -121,27 +150,55 @@ public class GCProfiler implements InternalProfiler {
                     AggregationPolicy.SUM));
         }
 
-        Multiset<String> churn = VMSupport.getChurn();
-        for (String space : churn.keys()) {
-            double churnRate = (afterTime != beforeTime) ?
-                    1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) / 1024 / 1024 :
-                    Double.NaN;
+        if (allocEnabled) {
+            if (beforeAllocated != HotspotAllocationSnapshot.EMPTY) {
+                HotspotAllocationSnapshot newSnapshot = VMSupport.getSnapshot();
+                long allocated = newSnapshot.subtract(beforeAllocated);
+                // When no allocations measured, we still need to report results to avoid user confusion
+                results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
+                        (afterTime != beforeTime) ?
+                                1.0 * allocated / 1024 / 1024 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) :
+                                Double.NaN,
+                        "MB/sec", AggregationPolicy.AVG));
+                if (allocated != 0) {
+                    long allOps = iResult.getMetadata().getAllOps();
+                    results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate.norm",
+                            (allOps != 0) ?
+                                    1.0 * allocated / allOps :
+                                    Double.NaN,
+                            "B/op", AggregationPolicy.AVG));
+                }
+            } else {
+                // When allocation profiling fails, make sure it is distinguishable in report
+                results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
+                        Double.NaN,
+                        "MB/sec", AggregationPolicy.AVG));
+            }
+        }
 
-            double churnNorm = 1.0 * churn.count(space) / iResult.getMetadata().getAllOps();
+        if (churnEnabled) {
+            Multiset<String> churn = VMSupport.getChurn();
+            for (String space : churn.keys()) {
+                double churnRate = (afterTime != beforeTime) ?
+                        1.0 * churn.count(space) * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) / 1024 / 1024 :
+                        Double.NaN;
 
-            String spaceName = space.replaceAll(" ", "_");
+                double churnNorm = 1.0 * churn.count(space) / iResult.getMetadata().getAllOps();
 
-            results.add(new ScalarResult(
-                    Defaults.PREFIX + "gc.churn." + spaceName + "",
-                    churnRate,
-                    "MB/sec",
-                    AggregationPolicy.AVG));
+                String spaceName = space.replaceAll(" ", "_");
 
-            results.add(new ScalarResult(
-                    Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
-                    churnNorm,
-                    "B/op",
-                    AggregationPolicy.AVG));
+                results.add(new ScalarResult(
+                        Defaults.PREFIX + "gc.churn." + spaceName + "",
+                        churnRate,
+                        "MB/sec",
+                        AggregationPolicy.AVG));
+
+                results.add(new ScalarResult(
+                        Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
+                        churnNorm,
+                        "B/op",
+                        AggregationPolicy.AVG));
+            }
         }
 
         return results;
@@ -196,18 +253,10 @@ public class GCProfiler implements InternalProfiler {
      * Reflection to enable building against a standard JDK.
      */
     static class VMSupport {
-        private static final boolean ALLOC_AVAILABLE;
         private static ThreadMXBean ALLOC_MX_BEAN;
         private static Method ALLOC_MX_BEAN_GETTER;
-        private static final boolean CHURN_AVAILABLE;
-        private static NotificationListener listener;
-        private static Multiset<String> churn;
-        private static boolean started;
-
-        static {
-            ALLOC_AVAILABLE = tryInitAlloc();
-            CHURN_AVAILABLE = tryInitChurn();
-        }
+        private static NotificationListener LISTENER;
+        private static Multiset<String> CHURN;
 
         private static boolean tryInitAlloc() {
             try {
@@ -240,8 +289,8 @@ public class GCProfiler implements InternalProfiler {
                         throw new UnsupportedOperationException("GarbageCollectorMXBean cannot notify");
                     }
                 }
-                churn = new HashMultiset<>();
-                listener = newListener();
+                CHURN = new HashMultiset<>();
+                LISTENER = newListener();
                 return true;
             } catch (Throwable e) {
                 System.out.println("Churn profiling is not available: " + e.getMessage());
@@ -267,28 +316,25 @@ public class GCProfiler implements InternalProfiler {
                 final Method getMemoryUsageBeforeGc = getGcInfo.getReturnType().getMethod("getMemoryUsageBeforeGc");
                 final Method getMemoryUsageAfterGc = getGcInfo.getReturnType().getMethod("getMemoryUsageAfterGc");
 
-                return new NotificationListener() {
-                    @Override
-                    public void handleNotification(Notification n, Object o) {
-                        try {
-                            if (n.getType().equals(notifNameField.get(null))) {
-                                Object info = infoMethod.invoke(null, n.getUserData());
-                                Object gcInfo = getGcInfo.invoke(info);
-                                Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
-                                Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
-                                for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
-                                    String name = entry.getKey();
-                                    MemoryUsage after = entry.getValue();
-                                    MemoryUsage before = mapBefore.get(name);
-                                    long c = before.getUsed() - after.getUsed();
-                                    if (c > 0) {
-                                        churn.add(name, c);
-                                    }
+                return (n, o) -> {
+                    try {
+                        if (n.getType().equals(notifNameField.get(null))) {
+                            Object info = infoMethod.invoke(null, n.getUserData());
+                            Object gcInfo = getGcInfo.invoke(info);
+                            Map<String, MemoryUsage> mapBefore = (Map<String, MemoryUsage>) getMemoryUsageBeforeGc.invoke(gcInfo);
+                            Map<String, MemoryUsage> mapAfter = (Map<String, MemoryUsage>) getMemoryUsageAfterGc.invoke(gcInfo);
+                            for (Map.Entry<String, MemoryUsage> entry : mapAfter.entrySet()) {
+                                String name = entry.getKey();
+                                MemoryUsage after = entry.getValue();
+                                MemoryUsage before = mapBefore.get(name);
+                                long c = before.getUsed() - after.getUsed();
+                                if (c > 0) {
+                                    CHURN.add(name, c);
                                 }
                             }
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            // Do nothing, counters would not get populated
                         }
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        // Do nothing, counters would not get populated
                     }
                 };
             } catch (Throwable e) {
@@ -297,53 +343,41 @@ public class GCProfiler implements InternalProfiler {
         }
 
         public static HotspotAllocationSnapshot getSnapshot() {
-            if (!ALLOC_AVAILABLE) return HotspotAllocationSnapshot.EMPTY;
             long[] threadIds = ALLOC_MX_BEAN.getAllThreadIds();
             long[] allocatedBytes = getAllocatedBytes(threadIds);
             return new HotspotAllocationSnapshot(threadIds, allocatedBytes);
         }
 
         public static synchronized void startChurnProfile() {
-            if (!CHURN_AVAILABLE) return;
-            if (started) {
-                throw new IllegalStateException("Churn profile already started");
-            }
-            started = true;
-            churn.clear();
+            CHURN.clear();
             try {
                 for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-                    ((NotificationEmitter) bean).addNotificationListener(listener, null, null);
+                    ((NotificationEmitter) bean).addNotificationListener(LISTENER, null, null);
                 }
             } catch (Exception e) {
                 throw new IllegalStateException("Should not be here");
             }
         }
 
-        public static synchronized void finishChurnProfile() {
-            if (!CHURN_AVAILABLE) return;
-            if (!started) {
-                throw new IllegalStateException("Churn profile already stopped");
-            }
-
+        public static synchronized void finishChurnProfile(long churnWait) {
             // Notifications are asynchronous, need to wait a bit before deregistering the listener.
             try {
-                Thread.sleep(500);
+                Thread.sleep(churnWait);
             } catch (InterruptedException e) {
                 // do not care
             }
 
             for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
                 try {
-                    ((NotificationEmitter) bean).removeNotificationListener(listener);
+                    ((NotificationEmitter) bean).removeNotificationListener(LISTENER);
                 } catch (ListenerNotFoundException e) {
                     // Do nothing
                 }
             }
-            started = false;
         }
 
         public static synchronized Multiset<String> getChurn() {
-            return (churn != null) ? churn : new HashMultiset<String>();
+            return (CHURN != null) ? CHURN : new HashMultiset<>();
         }
     }
 

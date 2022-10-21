@@ -31,6 +31,6 @@ public class TreeMultiset<T extends Comparable<T>> extends DelegatingMultiset<T>
     private static final long serialVersionUID = 3571810468402616517L;
 
     public TreeMultiset() {
-        super(new TreeMap<T, Long>());
+        super(new TreeMap<>());
     }
 }

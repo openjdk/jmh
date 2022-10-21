@@ -41,18 +41,15 @@ public class ResultFormatFactory {
      * @return result format
      */
     public static ResultFormat getInstance(final ResultFormatType type, final String file) {
-        return new ResultFormat() {
-            @Override
-            public void writeOut(Collection<RunResult> results) {
-                try {
-                    PrintStream pw = new PrintStream(file, "UTF-8");
-                    ResultFormat rf = getInstance(type, pw);
-                    rf.writeOut(results);
-                    pw.flush();
-                    pw.close();
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
+        return results -> {
+            try {
+                PrintStream pw = new PrintStream(file, "UTF-8");
+                ResultFormat rf = getInstance(type, pw);
+                rf.writeOut(results);
+                pw.flush();
+                pw.close();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
         };
     }
