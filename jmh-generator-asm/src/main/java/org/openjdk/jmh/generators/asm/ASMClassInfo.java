@@ -62,7 +62,7 @@ class ASMClassInfo extends ClassVisitor implements ClassInfo {
     private String origQualifiedName;
 
     public ASMClassInfo(ClassInfoRepo classInfos) {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         this.classInfos = classInfos;
         this.methods = new ArrayList<>();
         this.constructors = new ArrayList<>();

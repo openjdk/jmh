@@ -78,9 +78,6 @@ questions.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <compilerVersion>1.7</compilerVersion>
-                    <source>1.7</source>
-                    <target>1.7</target>
                     <fork>true</fork>
                     <compilerArgs>
                         <arg>-proc:none</arg>

@@ -55,8 +55,8 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 public class Zero1ThreadCountTest {
 
-    private final Set<Thread> test1threads = Collections.synchronizedSet(new HashSet<Thread>());
-    private final Set<Thread> test2threads = Collections.synchronizedSet(new HashSet<Thread>());
+    private final Set<Thread> test1threads = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> test2threads = Collections.synchronizedSet(new HashSet<>());
 
     @TearDown
     public void check() {

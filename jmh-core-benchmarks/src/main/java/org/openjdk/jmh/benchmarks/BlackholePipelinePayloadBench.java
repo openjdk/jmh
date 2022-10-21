@@ -71,7 +71,7 @@ public class BlackholePipelinePayloadBench {
             longs[c] = c;
             doubles[c] = c;
             objects[c] = (double) c;
-            arrays[c] = new Double[]{Double.valueOf(c)};
+            arrays[c] = new Double[]{(double) c};
         }
     }
 

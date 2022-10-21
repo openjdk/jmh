@@ -53,7 +53,7 @@ public class GroupStateSharingTest {
 
     @State(Scope.Group)
     public static class MyState {
-        final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<Thread>());
+        final Set<Thread> visitors = Collections.synchronizedSet(new HashSet<>());
 
         @TearDown(Level.Trial)
         public void tearDown() {
