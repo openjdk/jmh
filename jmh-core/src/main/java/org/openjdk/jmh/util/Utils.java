@@ -602,12 +602,7 @@ public class Utils {
      * @return iterable for given iterator
      */
     public static <T> Iterable<T> adaptForLoop(final Iterator<T> it) {
-        return new Iterable<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return it;
-            }
-        };
+        return () -> it;
     }
 
 }

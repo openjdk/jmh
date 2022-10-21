@@ -33,7 +33,7 @@ public class HashsetMultimap<K, V> extends DelegatingMultimap<K, V> implements S
     private static final long serialVersionUID = -4236100656731956836L;
 
     public HashsetMultimap() {
-        super(new HashMap<K, Collection<V>>());
+        super(new HashMap<>());
     }
 
     @Override

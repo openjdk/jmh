@@ -44,16 +44,13 @@ public class ForkedStuckShutdownHookTest {
     @Setup
     public void setup() {
         Runtime.getRuntime().addShutdownHook(
-                new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            TimeUnit.DAYS.sleep(1);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                new Thread(() -> {
+                    try {
+                        TimeUnit.DAYS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                }
+                })
         );
     }
 

@@ -43,14 +43,11 @@ public class ForkedStuckThreadTest {
 
     @Setup
     public void setup() {
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    TimeUnit.DAYS.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        Thread t = new Thread(() -> {
+            try {
+                TimeUnit.DAYS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
         t.setDaemon(false);

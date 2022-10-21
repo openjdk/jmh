@@ -82,12 +82,9 @@ public final class BinaryLinkClient {
         this.outputFormat = (OutputFormat) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{OutputFormat.class},
-                new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        pushFrame(new OutputFormatFrame(ClassConventions.getMethodName(method), args));
-                        return null; // expect null
-                    }
+                (proxy, method, args) -> {
+                    pushFrame(new OutputFormatFrame(ClassConventions.getMethodName(method), args));
+                    return null; // expect null
                 }
         );
 

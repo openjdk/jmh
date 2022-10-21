@@ -50,7 +50,7 @@ class ASMMethodInfo extends MethodVisitor implements MethodInfo  {
     private final ClassInfoRepo repo;
 
     public ASMMethodInfo(MethodVisitor methodVisitor, ClassInfoRepo repo, ASMClassInfo declaringClass, int access, String name, String desc, String signature) {
-        super(Opcodes.ASM4, methodVisitor);
+        super(Opcodes.ASM5, methodVisitor);
         this.declaringClass = declaringClass;
         this.repo = repo;
         this.access = access;

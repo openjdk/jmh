@@ -47,7 +47,7 @@ public class BenchmarkParamsTest {
 
     @Setup(Level.Iteration)
     public void setup() {
-        set = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<BenchmarkParams, Boolean>()));
+        set = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
     @TearDown(Level.Iteration)
