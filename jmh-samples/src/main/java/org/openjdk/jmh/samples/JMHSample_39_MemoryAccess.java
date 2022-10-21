@@ -37,18 +37,19 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 5, time = 1)
-@Measurement(iterations = 5, time = 1)
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
 @State(Scope.Benchmark)
 public class JMHSample_39_MemoryAccess {
-    public static final int N = 200_000_000;
+    public static final int N = 20_000_000;
 
     /*
      * This example highlights the pitfall of accidentally measuring memory access instead of processing time.
@@ -60,9 +61,10 @@ public class JMHSample_39_MemoryAccess {
      * All the references point to the boxed ints which are usually spread all over the heap.
      * This leads to many cache misses with a big error:
      *
-     * Benchmark                               Mode  Cnt    Score   Error  Units
-     * JMHSample_39_MemoryAccess.sumArray      avgt   25   50.393 ± 0.407  ms/op
-     * JMHSample_39_MemoryAccess.sumArrayList  avgt   25  299.868 ± 1.591  ms/op
+     * Benchmark                                       Mode  Cnt    Score   Error  Units
+     * JMHSample_39_MemoryAccess.sumArray              avgt   25    4.887 ± 0.008  ms/op
+     * JMHSample_39_MemoryAccess.sumArrayList          avgt   25   35.765 ± 0.112  ms/op
+     * JMHSample_39_MemoryAccess.sumArrayListShuffled  avgt   25  169.301 ± 1.064  ms/op
      *
      * The Java Object Layout (JOL) is a tool with which the different memory layouts of arrays and ArrayLists can be
      * examined in more detail.
@@ -70,6 +72,7 @@ public class JMHSample_39_MemoryAccess {
 
     private int[] intArray = new int[N];
     private List<Integer> intList = new ArrayList<>(N);
+    private List<Integer> shuffledIntList = new ArrayList<>(N);
 
     @Setup
     public void setup() {
@@ -77,7 +80,9 @@ public class JMHSample_39_MemoryAccess {
         for (int i = 0; i < N; i++) {
             intArray[i] = random.nextInt();
             intList.add(intArray[i]);
+            shuffledIntList.add(intArray[i]);
         }
+        Collections.shuffle(shuffledIntList);
     }
 
     @Benchmark
@@ -94,6 +99,15 @@ public class JMHSample_39_MemoryAccess {
         long sum = 0;
         for (int i = 0; i < N; i++) {
             sum += intList.get(i);
+        }
+        return sum;
+    }
+
+    @Benchmark
+    public long sumArrayListShuffled() {
+        long sum = 0;
+        for (int i = 0; i < N; i++) {
+            sum += shuffledIntList.get(i);
         }
         return sum;
     }
