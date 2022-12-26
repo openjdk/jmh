@@ -155,3 +155,4 @@ These projects are supported by community, not by OpenJDK/JMH developers.
  - [IntelliJ IDEA JMH Plugin](https://github.com/artyushov/idea-jmh-plugin)
  - [Jenkins JMH Plugin](https://github.com/brianfromoregon/jmh-plugin)
  - [Teamcity JMH Plugin](https://github.com/presidentio/teamcity-plugin-jmh)
+ - [Sbt Plugin[(https://github.com/sbt/sbt-jmh)
