@@ -128,6 +128,10 @@ public class SafepointsProfiler implements ExternalProfiler {
     }
 
     static long parseNs(String str) {
+        return (long) (Double.parseDouble(str.replace(',', '.')));
+    }
+
+    static long parseSecToNs(String str) {
         return (long) (Double.parseDouble(str.replace(',', '.')) * TimeUnit.SECONDS.toNanos(1));
     }
 
@@ -212,6 +216,9 @@ public class SafepointsProfiler implements ExternalProfiler {
     private static final Pattern JDK_9_LINE =
             Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
 
+    private static final Pattern JDK_13_LINE =
+            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) Reaching safepoint: ([0-9\\.,]*) ns, (.*) Total: ([0-9\\.,]*) ns");
+
     /**
      * Parse the line into the triplet. This is tested with unit tests, make sure to
      * update those if changing this code.
@@ -222,8 +229,8 @@ public class SafepointsProfiler implements ExternalProfiler {
             if (m.matches()) {
                 return new ParsedData(
                         7,
-                        parseNs(m.group(1)),
-                        parseNs(m.group(3)),
+                        parseSecToNs(m.group(1)),
+                        parseSecToNs(m.group(3)),
                         NO_LONG_VALUE
                 );
             }
@@ -234,9 +241,9 @@ public class SafepointsProfiler implements ExternalProfiler {
             if (m.matches()) {
                 return new ParsedData(
                         8,
-                        parseNs(m.group(1)),
-                        parseNs(m.group(3)),
-                        parseNs(m.group(5))
+                        parseSecToNs(m.group(1)),
+                        parseSecToNs(m.group(3)),
+                        parseSecToNs(m.group(5))
                 );
             }
         }
@@ -246,9 +253,21 @@ public class SafepointsProfiler implements ExternalProfiler {
             if (m.matches()) {
                 return new ParsedData(
                         9,
-                        parseNs(m.group(1)),
-                        parseNs(m.group(4)),
-                        parseNs(m.group(6))
+                        parseSecToNs(m.group(1)),
+                        parseSecToNs(m.group(4)),
+                        parseSecToNs(m.group(6))
+                );
+            }
+        }
+
+        {
+            Matcher m = JDK_13_LINE.matcher(line);
+            if (m.matches()) {
+                return new ParsedData(
+                        13,
+                        parseSecToNs(m.group(1)),
+                        parseNs(m.group(6)),
+                        parseNs(m.group(4))
                 );
             }
         }
