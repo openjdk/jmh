@@ -55,7 +55,7 @@ questions.
        <get src="http://central.maven.org/maven2/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"
             dest="${joptsimple.jar}"
             verbose="true" usetimestamp="true" skipexisting="true"/>
-       <get src="http://central.maven.org/maven2/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar"
+       <get src="http://central.maven.org/maven2/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar"
             dest="${commonsmath.jar}"
             verbose="true" usetimestamp="true" skipexisting="true"/>
     </target>
