@@ -28,7 +28,6 @@ import joptsimple.*;
 import org.openjdk.jmh.runner.CompilerHints;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.*;
-import org.openjdk.jmh.util.JDKVersion;
 import org.openjdk.jmh.util.Utils;
 import org.openjdk.jmh.util.Version;
 import org.openjdk.jmh.validation.tests.*;
@@ -229,6 +228,10 @@ public class Main {
                     new BlackholeConsecutiveTest(BlackholeTestMode.full).runWith(pw, opts);
                     setBlackholeOpts(BlackholeTestMode.normal);
                     break;
+                case roundtrip_latency:
+                    new RoundTripLatencyTest(false).runWith(pw, opts);
+                    new RoundTripLatencyTest(true).runWith(pw, opts);
+                    break;
                 default:
                     throw new IllegalStateException();
             }
@@ -246,6 +249,7 @@ public class Main {
         blackhole_single,
         blackhole_pipelined,
         blackhole_consec,
+        roundtrip_latency,
     }
 
     public enum Mode {
