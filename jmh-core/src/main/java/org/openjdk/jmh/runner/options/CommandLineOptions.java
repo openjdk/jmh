@@ -454,7 +454,7 @@ public class CommandLineOptions implements Options {
     }
 
     public void showHelp() throws IOException {
-        parser.printHelpOn(System.err);
+        parser.printHelpOn(System.out);
     }
 
     public void listProfilers() {
