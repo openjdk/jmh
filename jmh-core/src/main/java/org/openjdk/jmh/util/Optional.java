@@ -26,6 +26,7 @@ package org.openjdk.jmh.util;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Option class
@@ -49,6 +50,10 @@ public class Optional<T> implements Serializable {
 
     public T orElse(T elseVal) {
         return (val == null) ? elseVal : val;
+    }
+
+    public T orElseGet(Supplier<T> alternativeSupplier) {
+        return val != null ? val : alternativeSupplier.get();
     }
 
     public Optional<T> orAnother(Optional<T> alternative) {

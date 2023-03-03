@@ -42,7 +42,6 @@ import org.openjdk.jmh.util.Optional;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
@@ -475,14 +474,11 @@ public class Runner extends BaseRunner {
                 benchmark.getJvmArgsPrepend().orElse(Collections.<String>emptyList())));
 
         // We want to be extra lazy when accessing ManagementFactory, because security manager
-        // may prevent us doing so. When JMH upgrades to Java 8, replaces this with proper Optional
-        // and lazy Supplier.
-        Optional<Collection<String>> jvmArgsMid = options.getJvmArgs().orAnother(benchmark.getJvmArgs());
-        if (jvmArgsMid.hasValue()) {
-            jvmArgs.addAll(jvmArgsMid.get());
-        } else {
-            jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
-        }
+        // may prevent us doing so.
+        jvmArgs.addAll(options.getJvmArgs().orElseGet(
+                () -> benchmark.getJvmArgs().orElseGet(
+                        () -> ManagementFactory.getRuntimeMXBean().getInputArguments())));
+
 
         jvmArgs.addAll(options.getJvmArgsAppend().orElse(
                 benchmark.getJvmArgsAppend().orElse(Collections.<String>emptyList())));
