@@ -49,6 +49,7 @@ public class CompilerHints extends AbstractResourceReader {
     static final String BLACKHOLE_MODE_NAME       = "jmh.blackhole.mode";
     static final String BLACKHOLE_AUTODETECT_NAME = "jmh.blackhole.autoDetect";
     static final String BLACKHOLE_DEBUG_NAME      = "jmh.blackhole.debug";
+    static final String COMPILER_HINTS_MODE       = "jmh.compilerhints.mode";
 
     static final boolean BLACKHOLE_MODE_AUTODETECT =
             Boolean.parseBoolean(System.getProperty(BLACKHOLE_AUTODETECT_NAME, "true"));
@@ -101,11 +102,50 @@ public class CompilerHints extends AbstractResourceReader {
         hints = Collections.unmodifiableSet(read());
     }
 
+    public enum CompilerHintsSelect {
+        FORCE_ON("Forced on"),
+        FORCE_OFF("Forced off"),
+        AUTO("Automatically selected");
+
+        private final String desc;
+
+        CompilerHintsSelect(String desc) {
+            this.desc = desc;
+        }
+
+        public String desc() {
+            return desc;
+        }
+    }
+
+    static Boolean compilerHintsEnabled;
+    static CompilerHintsSelect compilerHintsSelect;
+
+    public static CompilerHintsSelect compilerHintsSelect() {
+        compilerHintsEnabled();
+        return compilerHintsSelect;
+    }
+
     /**
      * FIXME (low priority): check if supplied JVM is hint compatible. This test is applied to the Runner VM,
      * not the Forked and may therefore be wrong if the forked VM is not the same JVM
      */
-    private static boolean isHintCompatibleVM() {
+    private static boolean compilerHintsEnabled() {
+        if (compilerHintsEnabled != null) {
+            return compilerHintsEnabled;
+        }
+        String propMode = System.getProperty(COMPILER_HINTS_MODE);
+        if (propMode != null) {
+            compilerHintsSelect = CompilerHintsSelect.valueOf(propMode);
+        } else {
+            compilerHintsSelect = CompilerHintsSelect.AUTO;
+        }
+        switch (compilerHintsSelect) {
+            case FORCE_ON:
+                return true;
+            case FORCE_OFF:
+                return false;
+        }
         String name = System.getProperty("java.vm.name");
         for (String vmName : HINT_COMPATIBLE_JVMS) {
             if (name.contains(vmName)) {
@@ -188,10 +228,12 @@ public class CompilerHints extends AbstractResourceReader {
      * @param command all -XX:CompileCommandLine args will be removed and a merged file will be set
      */
     public static void addCompilerHints(List<String> command) {
-        if (!isHintCompatibleVM()) {
-            System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
-                    + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
-                    + "\"), compilerHints are disabled.");
+        if (!compilerHintsEnabled()) {
+            if (compilerHintsSelect() == CompilerHintsSelect.AUTO) {
+                System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
+                        + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
+                        + "\"), compilerHints are disabled.");
+            }
             return;
         }
 
@@ -390,7 +432,9 @@ public class CompilerHints extends AbstractResourceReader {
         }
     }
 
-    public static void printBlackhole(PrintStream out) {
+    public static void printHints(PrintStream out) {
+        out.print("# Compiler hints: " + (compilerHintsEnabled() ? "enabled" : "disabled") + " (" + compilerHintsSelect().desc() + ")");
+        out.println();
         BlackholeMode mode = blackholeMode();
         out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
         out.println();
