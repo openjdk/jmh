@@ -84,14 +84,7 @@ public class JMHSample_40_InfraParamNormalization {
         bytes = new byte[size];
         Random random = new Random(1234);
         random.nextBytes(bytes);
-        try {
-            java.lang.reflect.Field field = BenchmarkParams.class.getSuperclass() // L4
-                    .getSuperclass() // L3
-                    .getSuperclass() // L2
-                    .getDeclaredField("opsPerInvocation");
-            field.setAccessible(true);
-            field.setInt(params, size);
-        } catch (Exception exc) { throw new RuntimeException("Could not set opsPerInvocation", exc);}
+        params.setOpsPerInvocation(size);
     }
 
     @Benchmark

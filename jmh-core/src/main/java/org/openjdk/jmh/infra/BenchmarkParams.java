@@ -192,7 +192,7 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
     protected final Mode mode;
     protected final WorkloadParams params;
     protected final TimeUnit timeUnit;
-    protected final int opsPerInvocation;
+    protected int opsPerInvocation;
     protected final String jvm;
     protected final Collection<String> jvmArgs;
     protected final String jdkVersion;
@@ -324,6 +324,14 @@ abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializab
      */
     public int getOpsPerInvocation() {
         return opsPerInvocation;
+    }
+
+    /**
+     * Sets operations per invocation.
+     * @param opsPerInvocation the number of operations per invocation
+     */
+    public void setOpsPerInvocation(int opsPerInvocation) {
+        this.opsPerInvocation = opsPerInvocation;
     }
 
     /**
