@@ -53,7 +53,7 @@ public class Optional<T> implements Serializable {
     }
 
     public T orElseGet(Supplier<T> alternativeSupplier) {
-        return val != null ? val : alternativeSupplier.get();
+        return (val == null) ? alternativeSupplier.get() : val;
     }
 
     public Optional<T> orAnother(Optional<T> alternative) {
