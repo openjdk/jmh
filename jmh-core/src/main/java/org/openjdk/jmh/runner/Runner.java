@@ -475,9 +475,10 @@ public class Runner extends BaseRunner {
 
         // We want to be extra lazy when accessing ManagementFactory, because security manager
         // may prevent us doing so.
-        jvmArgs.addAll(options.getJvmArgs().orElseGet(
-                () -> benchmark.getJvmArgs().orElseGet(
-                        () -> ManagementFactory.getRuntimeMXBean().getInputArguments())));
+        jvmArgs.addAll(options.getJvmArgs()
+                .orElseGet(() -> benchmark.getJvmArgs()
+                .orElseGet(() -> ManagementFactory.getRuntimeMXBean().getInputArguments())
+        ));
 
 
         jvmArgs.addAll(options.getJvmArgsAppend().orElse(
