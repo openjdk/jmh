@@ -620,9 +620,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     @Override
     public Optional<Collection<String>> getJvmArgs() {
         if (otherOptions != null) {
-            return jvmArgs.orAnother(otherOptions.getJvmArgs().orAnother(Optional.<Collection<String>>none()));
+            return jvmArgs.orAnother(otherOptions.getJvmArgs());
         } else {
-            return jvmArgs.orAnother(Optional.<Collection<String>>none());
+            return jvmArgs;
         }
     }
 
@@ -639,9 +639,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     @Override
     public Optional<Collection<String>> getJvmArgsAppend() {
         if (otherOptions != null) {
-            return jvmArgsAppend.orAnother(otherOptions.getJvmArgsAppend().orAnother(Optional.<Collection<String>>none()));
+            return jvmArgsAppend.orAnother(otherOptions.getJvmArgsAppend());
         } else {
-            return jvmArgsAppend.orAnother(Optional.<Collection<String>>none());
+            return jvmArgsAppend;
         }
     }
 
@@ -658,9 +658,9 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
     @Override
     public Optional<Collection<String>> getJvmArgsPrepend() {
         if (otherOptions != null) {
-            return jvmArgsPrepend.orAnother(otherOptions.getJvmArgsPrepend().orAnother(Optional.<Collection<String>>none()));
+            return jvmArgsPrepend.orAnother(otherOptions.getJvmArgsPrepend());
         } else {
-            return jvmArgsPrepend.orAnother(Optional.<Collection<String>>none());
+            return jvmArgsPrepend;
         }
     }
 
