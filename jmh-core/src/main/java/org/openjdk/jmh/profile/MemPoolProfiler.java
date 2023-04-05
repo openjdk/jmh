@@ -65,11 +65,11 @@ public class MemPoolProfiler implements InternalProfiler {
         p.stream().
             forEach( x -> {
               double currUsed = ((double) x.getPeakUsage().getUsed()) / bytesPerKb;
-              results.add(new ScalarResult(Defaults.PREFIX + x.getName() + ".used", currUsed, "kB", AggregationPolicy.MAX));
+              results.add(new ScalarResult("." + x.getName() + ".used", currUsed, "kB", AggregationPolicy.MAX));
             });
 
-        results.add(new ScalarResult(Defaults.PREFIX + "Total CodeHeap.used", codeHeapTotal, "kB", AggregationPolicy.MAX));
-        results.add(new ScalarResult(Defaults.PREFIX + "Total MemPools.used", totalUsed, "kB", AggregationPolicy.MAX));
+        results.add(new ScalarResult("." + "Total CodeHeap.used", codeHeapTotal, "kB", AggregationPolicy.MAX));
+        results.add(new ScalarResult("." + "Total MemPools.used", totalUsed, "kB", AggregationPolicy.MAX));
         return results;
     }
 
