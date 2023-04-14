@@ -35,8 +35,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class MemPoolProfiler implements InternalProfiler {
-
-    final double bytesPerKb = 1024.0;
+    static final double BYTES_PER_KIB = 1024D;
 
     @Override
     public String getDescription() {
@@ -45,32 +44,29 @@ public class MemPoolProfiler implements InternalProfiler {
 
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        List<MemoryPoolMXBean>	p = ManagementFactory.getMemoryPoolMXBeans();
-        p.stream().
-            forEach( x -> {
-               x.resetPeakUsage();
-            });
+        for (MemoryPoolMXBean b : ManagementFactory.getMemoryPoolMXBeans()) {
+            b.resetPeakUsage();
+        }
     }
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
         List<Result> results = new ArrayList<>();
-        List<MemoryPoolMXBean>	p = ManagementFactory.getMemoryPoolMXBeans();
 
-        double totalUsed = ((double) p.stream().mapToLong(x -> x.getPeakUsage().getUsed()).sum()) / bytesPerKb;
+        long sumCodeHeap = 0L;
+        long sum = 0L;
+        for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
+            long used = bean.getPeakUsage().getUsed();
+            if (bean.getName().contains("CodeHeap")) {
+                sumCodeHeap += used;
+            }
+            sum += used;
 
-        double codeHeapTotal = ((double) p.stream().
-                filter(x -> x.getName().contains("CodeHeap")).mapToLong(x -> x.getPeakUsage().getUsed()).sum()) / bytesPerKb;
+            results.add(new ScalarResult(Defaults.PREFIX + "mempool." + bean.getName() + ".used", used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+        }
 
-        p.stream().
-            forEach( x -> {
-              double currUsed = ((double) x.getPeakUsage().getUsed()) / bytesPerKb;
-              results.add(new ScalarResult("." + x.getName() + ".used", currUsed, "kB", AggregationPolicy.MAX));
-            });
-
-        results.add(new ScalarResult("." + "Total CodeHeap.used", codeHeapTotal, "kB", AggregationPolicy.MAX));
-        results.add(new ScalarResult("." + "Total MemPools.used", totalUsed, "kB", AggregationPolicy.MAX));
+        results.add(new ScalarResult(Defaults.PREFIX + "mempool.total.codeheap.used", sumCodeHeap / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+        results.add(new ScalarResult(Defaults.PREFIX + "mempool.total.used", sum / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         return results;
     }
-
 }
