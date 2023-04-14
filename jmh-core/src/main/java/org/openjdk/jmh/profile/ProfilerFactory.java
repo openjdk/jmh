@@ -173,6 +173,7 @@ public class ProfilerFactory {
         BUILT_IN.put("perf",     LinuxPerfProfiler.class);
         BUILT_IN.put("perfnorm", LinuxPerfNormProfiler.class);
         BUILT_IN.put("perfasm",  LinuxPerfAsmProfiler.class);
+        BUILT_IN.put("mempool",  MemPoolProfiler.class);
         BUILT_IN.put("xperfasm", WinPerfAsmProfiler.class);
         BUILT_IN.put("dtraceasm", DTraceAsmProfiler.class);
         BUILT_IN.put("pauses",   PausesProfiler.class);
