@@ -103,53 +103,74 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     public enum CompilerHintsSelect {
-        FORCE_ON("Forced on"),
-        FORCE_OFF("Forced off"),
-        AUTO("Automatically selected");
+        FORCE_ON("Forced on", false, true),
+        FORCE_OFF("Forced off", false, false),
+        AUTO_ON("Automatically enabled", true, true),
+        AUTO_OFF("Automatically disabled", true, false);
 
         private final String desc;
+        private final boolean auto;
+        private final boolean enabled;
 
-        CompilerHintsSelect(String desc) {
+        CompilerHintsSelect(String desc, boolean auto, boolean enabled) {
             this.desc = desc;
+            this.auto = auto;
+            this.enabled = enabled;
         }
 
         public String desc() {
             return desc;
         }
+
+        public boolean isAuto() {
+            return auto;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
     }
 
-    static Boolean compilerHintsEnabled;
     static CompilerHintsSelect compilerHintsSelect;
 
     public static CompilerHintsSelect compilerHintsSelect() {
-        compilerHintsEnabled();
+        if (compilerHintsSelect == null) {
+            compilerHintsSelect = checkCompilerHintsState();
+        }
         return compilerHintsSelect;
+    }
+
+    static void resetCompilerHintsSelect() {
+        // only used by tests
+        compilerHintsSelect = null;
+    }
+
+    private static boolean compilerHintsEnabled() {
+        return compilerHintsSelect().isEnabled();
     }
 
     /**
      * FIXME (low priority): check if supplied JVM is hint compatible. This test is applied to the Runner VM,
      * not the Forked and may therefore be wrong if the forked VM is not the same JVM
      */
-    private static boolean compilerHintsEnabled() {
-        if (compilerHintsEnabled != null) {
-            return compilerHintsEnabled;
-        }
+    private static CompilerHintsSelect checkCompilerHintsState() {
         String propMode = System.getProperty(COMPILER_HINTS_MODE);
         if (propMode != null) {
-            compilerHintsSelect = CompilerHintsSelect.valueOf(propMode);
-        } else {
-            compilerHintsSelect = CompilerHintsSelect.AUTO;
-        }
-        switch (compilerHintsSelect) {
-            case FORCE_ON:
-                return true;
-            case FORCE_OFF:
-                return false;
+            CompilerHintsSelect forced;
+            try {
+                forced = CompilerHintsSelect.valueOf(propMode);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(COMPILER_HINTS_MODE + " should be set to FORCE_ON or FORCE_OFF", e);
+            }
+            if (forced.isAuto()) {
+                throw new IllegalArgumentException(COMPILER_HINTS_MODE + " should be set to FORCE_ON or FORCE_OFF");
+            }
+            return forced;
         }
         String name = System.getProperty("java.vm.name");
         for (String vmName : HINT_COMPATIBLE_JVMS) {
             if (name.contains(vmName)) {
-                return true;
+                return CompilerHintsSelect.AUTO_ON;
             }
         }
         if (name.contains(JVM_ZING)) {
@@ -159,16 +180,16 @@ public class CompilerHints extends AbstractResourceReader {
                 // get the version digits
                 String[] versionDigits = version.substring(version.indexOf('_') + 1).split("\\.");
                 if (Integer.parseInt(versionDigits[0]) > 5) {
-                    return true;
+                    return CompilerHintsSelect.AUTO_ON;
                 } else if (Integer.parseInt(versionDigits[0]) == 5 && Integer.parseInt(versionDigits[1]) >= 10) {
-                    return true;
+                    return CompilerHintsSelect.AUTO_ON;
                 }
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 // unknown Zing version format
                 System.err.println("ERROR: Zing version format does not match 1.*.0-zing_*.*.*.*");
             }
         }
-        return false;
+        return CompilerHintsSelect.AUTO_OFF;
     }
 
     public Set<String> get() {
@@ -228,12 +249,12 @@ public class CompilerHints extends AbstractResourceReader {
      * @param command all -XX:CompileCommandLine args will be removed and a merged file will be set
      */
     public static void addCompilerHints(List<String> command) {
+        if (compilerHintsSelect() == CompilerHintsSelect.AUTO_OFF) {
+            System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
+                    + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
+                    + "\"), compiler hints are disabled.");
+        }
         if (!compilerHintsEnabled()) {
-            if (compilerHintsSelect() == CompilerHintsSelect.AUTO) {
-                System.err.println("WARNING: Not a HotSpot compiler command compatible VM (\""
-                        + System.getProperty("java.vm.name") + "-" + System.getProperty("java.version")
-                        + "\"), compilerHints are disabled.");
-            }
             return;
         }
 
@@ -433,8 +454,10 @@ public class CompilerHints extends AbstractResourceReader {
     }
 
     public static void printHints(PrintStream out) {
-        out.print("# Compiler hints: " + (compilerHintsEnabled() ? "enabled" : "disabled") + " (" + compilerHintsSelect().desc() + ")");
-        out.println();
+        if (!compilerHintsSelect().isAuto()) {
+            out.print("# Compiler hints: " + (compilerHintsEnabled() ? "enabled" : "disabled") + " (" + compilerHintsSelect().desc() + ")");
+            out.println();
+        }
         BlackholeMode mode = blackholeMode();
         out.print("# Blackhole mode: " + mode.desc() + " (" + blackholeSelect().desc() + ")");
         out.println();
