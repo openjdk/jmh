@@ -908,37 +908,23 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         for (Collection<String> cs : splitAssembly(stdOut)) {
             String prevLine = "";
             for (String line : cs) {
-                String trim = line.trim();
-
-                if (trim.isEmpty()) continue;
-                String[] elements = trim.split(" ");
+                List<Long> addrs = parseAddresses(line, true);
 
                 ASMLine asmLine = new ASMLine(line);
 
                 // Handle the most frequent case first.
-                if (elements.length > 0 && maybeAddress(elements[0])) {
-                    // Seems to be line with address.
-                    try {
-                        long addr = parseAddress(elements[0]);
-                        int idx = lines.size();
-                        addressMap.put(addr, idx);
+                if (addrs.size() > 0) {
+                    long startAddr = addrs.get(0);
+                    int idx = lines.size();
+                    addressMap.put(startAddr, idx);
 
-                        asmLine = new ASMLine(addr, line);
+                    asmLine = new ASMLine(startAddr, line);
 
-                        if (elements.length > 1 && (drawInterJumps || drawIntraJumps)) {
-                            for (int c = 1; c < elements.length; c++) {
-                                if (maybeAddress(elements[c])) {
-                                    try {
-                                        long target = parseAddress(elements[c]);
-                                        intervals.add(new Interval(addr, target));
-                                    } catch (NumberFormatException e) {
-                                        // Nope, not the address.
-                                    }
-                                }
-                            }
+                    if (addrs.size() > 1 && (drawInterJumps || drawIntraJumps)) {
+                        for (int c = 1; c < addrs.size(); c++) {
+                            long targetAddr = addrs.get(c);
+                            intervals.add(new Interval(startAddr, targetAddr));
                         }
-                    } catch (NumberFormatException e) {
-                        // Nope, not the address line.
                     }
                 }
 
@@ -947,12 +933,11 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
                     if (matcher.matches()) {
                         String name = matcher.group(1);
-                        String startS = matcher.group(3);
-                        String endS = matcher.group(4);
 
-                        if (maybeAddress(startS) && maybeAddress(endS)) {
-                            long startAddr = parseAddress(startS);
-                            long endAddr = parseAddress(endS);
+                        List<Long> stubAddrs = parseAddresses(line, false);
+                        if (stubAddrs.size() == 2) {
+                            long startAddr = stubAddrs.get(0);
+                            long endAddr = stubAddrs.get(1);
 
                             if (line.contains("StubRoutines::")) {
                                 stubs.add(MethodDesc.runtimeStub(name), startAddr, endAddr);
@@ -983,7 +968,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         }
 
                         // Record the starting address for the method
-                        long addr = parseAddress(map.get("entry"));
+                        List<Long> entryAddrs = parseAddresses(map.get("entry"), true);
+                        long addr = entryAddrs.get(0);
 
                         MethodDesc desc = MethodDesc.javaMethod(
                                 map.get("method"),
@@ -1014,20 +1000,45 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         return new Assembly(lines, addressMap, methodMap, intervals);
     }
 
-    private boolean maybeAddress(String str) {
-        return str.startsWith("0x") || str.endsWith("h");
-    }
+    private static final List<Long> EMPTY_LIST_LONGS = Collections.unmodifiableList(new ArrayList<>());
 
-    private long parseAddress(String address) {
-        if (address.startsWith("0x")) { // AT&T
-            return Long.parseLong(address.replace("0x", "").replace(":", ""), 16);
-        } else if (address.endsWith("h")) { // Intel
-            return Long.parseLong(address.replace("h", ""), 16);
-        } else {
-            throw new NumberFormatException("Address format not recognized: " + address);
+    private static final Pattern ADDR_LINE_SPLIT = Pattern.compile("\\W+");
+
+    static List<Long> parseAddresses(String line, boolean shouldStartWithAddr) {
+        line = line.trim();
+        if (line.isEmpty()) {
+            return EMPTY_LIST_LONGS;
         }
-    }
 
+        List<Long> addrs = new ArrayList<>();
+
+        String[] elements = ADDR_LINE_SPLIT.split(line);
+        for (int i = 0; i < elements.length; i++) {
+            String el = elements[i];
+
+            String str = null;
+            if (el.startsWith("0x")) {
+                // AT&T address format
+                str = el.replace("0x", "").replace(":", "");
+            } else if (el.endsWith("h")) {
+                // Intel address format
+                str = el.replace("h", "");
+            } else if (shouldStartWithAddr && (i == 0)) {
+                // First element is not address, the line is wrong
+                return EMPTY_LIST_LONGS;
+            }
+
+            if (str != null) {
+                try {
+                    addrs.add(Long.parseLong(str, 16));
+                } catch (NumberFormatException nfe) {
+                    // It looked like an address, but was not.
+                }
+            }
+        }
+
+        return Collections.unmodifiableList(addrs);
+    }
 
     protected static class PerfEvents {
         final Map<String, Multiset<Long>> events;
