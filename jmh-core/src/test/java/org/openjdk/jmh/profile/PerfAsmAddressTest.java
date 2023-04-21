@@ -71,22 +71,48 @@ public class PerfAsmAddressTest {
 
     @Test
     public void testNoPrefix() {
+        List<Long> empty = new ArrayList<>();
         for (String line : TESTS.keySet()) {
-            List<Long> actual = AbstractPerfAsmProfiler.parseAddresses(line, true);
             List<Long> expected = TESTS.get(line);
-            Assert.assertEquals(line, expected, actual);
+
+            String leadingSpace = "  " + line;
+            String trailingSpace = line + "  ";
+
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(line,            false, true));
+
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(leadingSpace,    false, true));
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(leadingSpace,     true, true));
+
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(trailingSpace,   false, true));
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(trailingSpace,    true, true));
         }
     }
 
     @Test
     public void testPrefix() {
+        List<Long> empty = new ArrayList<>();
         for (String line : TESTS.keySet()) {
-            String testLine = "something " + line;
-            Assert.assertEquals(new ArrayList<>(), AbstractPerfAsmProfiler.parseAddresses(testLine, true));
-
-            List<Long> actual = AbstractPerfAsmProfiler.parseAddresses(testLine, false);
             List<Long> expected = TESTS.get(line);
-            Assert.assertEquals(line, expected, actual);
+
+            String prefixedLine = "something " + line;
+            String prefixedLeadingLine = "  something " + line;
+            String prefixedTrailingLine = "something " + line + "  ";
+
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(prefixedLine,         false, true));
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(prefixedLeadingLine,  false, true));
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(prefixedTrailingLine, false, true));
+
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(prefixedLine,          true, true));
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(prefixedLeadingLine,   true, true));
+            Assert.assertEquals(line, empty,    AbstractPerfAsmProfiler.parseAddresses(prefixedTrailingLine,  true, true));
+
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(prefixedLine,         false, false));
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(prefixedLeadingLine,  false, false));
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(prefixedTrailingLine, false, false));
+
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(prefixedLine,          true, false));
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(prefixedLeadingLine,   true, false));
+            Assert.assertEquals(line, expected, AbstractPerfAsmProfiler.parseAddresses(prefixedTrailingLine,  true, false));
         }
     }
 

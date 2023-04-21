@@ -908,7 +908,14 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         for (Collection<String> cs : splitAssembly(stdOut)) {
             String prevLine = "";
             for (String line : cs) {
-                List<Long> addrs = parseAddresses(line, true);
+                String trim = line.trim();
+                if (trim.isEmpty()) {
+                    // Filter out empty lines for denser output, more efficient matching,
+                    // and trustworthy prevLine.
+                    continue;
+                }
+
+                List<Long> addrs = parseAddresses(trim, true, true);
 
                 ASMLine asmLine = new ASMLine(line);
 
@@ -934,7 +941,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     if (matcher.matches()) {
                         String name = matcher.group(1);
 
-                        List<Long> stubAddrs = parseAddresses(line, false);
+                        List<Long> stubAddrs = parseAddresses(trim, true, false);
                         if (stubAddrs.size() == 2) {
                             long startAddr = stubAddrs.get(0);
                             long endAddr = stubAddrs.get(1);
@@ -968,7 +975,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                         }
 
                         // Record the starting address for the method
-                        List<Long> entryAddrs = parseAddresses(map.get("entry"), true);
+                        List<Long> entryAddrs = parseAddresses(map.get("entry"), true, true);
                         long addr = entryAddrs.get(0);
 
                         MethodDesc desc = MethodDesc.javaMethod(
@@ -1004,10 +1011,9 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
     private static final Pattern ADDR_LINE_SPLIT = Pattern.compile("\\W+");
 
-    static List<Long> parseAddresses(String line, boolean shouldStartWithAddr) {
-        line = line.trim();
-        if (line.isEmpty()) {
-            return EMPTY_LIST_LONGS;
+    static List<Long> parseAddresses(String line, boolean alreadyTrimmed, boolean shouldStartWithAddr) {
+        if (!alreadyTrimmed) {
+            line = line.trim();
         }
 
         List<Long> addrs = new ArrayList<>();
