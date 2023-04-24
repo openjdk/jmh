@@ -81,7 +81,7 @@ class TextReportFormat extends AbstractOutputFormat {
         println("# VM invoker: " + params.getJvm());
         println("# VM options: " + opts);
 
-        CompilerHints.printBlackhole(out);
+        CompilerHints.printHints(out);
 
         IterationParams warmup = params.getWarmup();
         if (warmup.getCount() > 0) {
