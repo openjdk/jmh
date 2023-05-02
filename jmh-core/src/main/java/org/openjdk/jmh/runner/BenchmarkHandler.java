@@ -180,7 +180,7 @@ class BenchmarkHandler {
         CACHED_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newCachedThreadPool(new WorkerThreadFactory(prefix));
+                return Executors.newCachedThreadPool(WorkerThreadFactories.getPlatformWorkerFactory(prefix));
             }
         },
 
@@ -190,7 +190,17 @@ class BenchmarkHandler {
         FIXED_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newFixedThreadPool(maxThreads, new WorkerThreadFactory(prefix));
+                return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.getPlatformWorkerFactory(prefix));
+            }
+        },
+
+        /**
+         * Use FixedThreadPool with virtual threads
+         */
+        VIRTUAL_TPE {
+            @Override
+            ExecutorService createExecutor(int maxThreads, String prefix) {
+                return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.getVirtualWorkerFactory(prefix));
             }
         },
 
