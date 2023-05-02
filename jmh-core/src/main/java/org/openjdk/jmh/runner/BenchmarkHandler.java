@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -180,7 +180,7 @@ class BenchmarkHandler {
         CACHED_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newCachedThreadPool(WorkerThreadFactories.getPlatformWorkerFactory(prefix));
+                return Executors.newCachedThreadPool(WorkerThreadFactories.platformWorkerFactory(prefix));
             }
         },
 
@@ -190,7 +190,7 @@ class BenchmarkHandler {
         FIXED_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.getPlatformWorkerFactory(prefix));
+                return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.platformWorkerFactory(prefix));
             }
         },
 
@@ -200,7 +200,7 @@ class BenchmarkHandler {
         VIRTUAL_TPE {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.getVirtualWorkerFactory(prefix));
+                return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.virtualWorkerFactory(prefix));
             }
         },
 

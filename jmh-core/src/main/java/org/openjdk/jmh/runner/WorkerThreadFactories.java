@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,20 +26,19 @@ package org.openjdk.jmh.runner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class WorkerThreadFactories {
 
-    static class WorkerThreadFactory implements ThreadFactory {
+    static class PlatformThreadFactory implements ThreadFactory {
 
         private final AtomicInteger counter;
         private final String prefix;
         private final ThreadFactory factory;
 
-        public WorkerThreadFactory(String prefix) {
+        public PlatformThreadFactory(String prefix) {
             this.counter = new AtomicInteger();
             this.prefix = prefix;
             this.factory = Executors.defaultThreadFactory();
@@ -54,12 +53,12 @@ class WorkerThreadFactories {
         }
     }
 
-    static ThreadFactory getPlatformWorkerFactory(String prefix) {
-        return new WorkerThreadFactory(prefix);
+    static ThreadFactory platformWorkerFactory(String prefix) {
+        return new PlatformThreadFactory(prefix);
     }
 
-    static ThreadFactory getVirtualWorkerFactory(String prefix) {
-        // requires reflection to be compilable in pre JDK 21
+    static ThreadFactory virtualWorkerFactory(String prefix) {
+        // This API is only available in JDK 21+. Use reflection to make the code compilable with lower JDKs.
         try {
             Method m = Class.forName("java.lang.Thread").getMethod("ofVirtual");
             Object threadBuilder = m.invoke(null);
@@ -69,8 +68,8 @@ class WorkerThreadFactories {
             m = threadBuilderClazz.getMethod("factory");
             return (ThreadFactory) m.invoke(threadBuilder);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException |
-                 ClassNotFoundException  | NullPointerException e) {
-            throw new RuntimeException("Can't instantiate VirtualThreadFactory", e);
+                 ClassNotFoundException | NullPointerException e) {
+            throw new RuntimeException("Cannot instantiate VirtualThreadFactory", e);
         }
     }
 
