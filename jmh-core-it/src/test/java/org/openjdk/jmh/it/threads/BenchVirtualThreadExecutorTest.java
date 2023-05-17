@@ -53,13 +53,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Tests if harness executes setup, run, and tearDown in the same workers.
+ * Tests if harness executes setup, run, and tearDown in the virtual or platform threads.
  */
 @State(Scope.Benchmark)
-public class BenchExecutorTest {
+public class BenchVirtualThreadExecutorTest {
 
     @Param("false")
-    boolean expected;
+    boolean isVirtual;
 
     private final Set<Boolean> setupRunThread = Collections.synchronizedSet(new HashSet<>());
     private final Set<Boolean> setupIterationThread = Collections.synchronizedSet(new HashSet<>());
@@ -102,7 +102,7 @@ public class BenchExecutorTest {
     @TearDown(Level.Trial)
     public void teardownZZZ() { // should perform last
         Set<Boolean> expected = new HashSet<>();
-        expected.add(this.expected);
+        expected.add(this.isVirtual);
         Assert.assertEquals("test <: testInvocationThread", expected, testInvocationThread);
         Assert.assertEquals("test <: setupRun", expected, setupRunThread);
         Assert.assertEquals("test <: setupIterationThread", expected, setupIterationThread);
@@ -128,7 +128,7 @@ public class BenchExecutorTest {
         for (int c = 0; c < Fixtures.repetitionCount(); c++) {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
-                    .param("expected", "false")
+                    .param("isVirtual", "false")
                     .shouldFailOnError(true)
                     .build();
             new Runner(opt).run();
@@ -141,7 +141,7 @@ public class BenchExecutorTest {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
                     .jvmArgsAppend("-Djmh.executor=FIXED_TPE")
-                    .param("expected", "false")
+                    .param("isVirtual", "false")
                     .shouldFailOnError(true)
                     .build();
             new Runner(opt).run();
@@ -155,7 +155,7 @@ public class BenchExecutorTest {
                 Options opt = new OptionsBuilder()
                         .include(Fixtures.getTestMask(this.getClass()))
                         .jvmArgsAppend("-Djmh.executor=VIRTUAL_TPE")
-                        .param("expected", "true")
+                        .param("isVirtual", "true")
                         .shouldFailOnError(true)
                         .build();
                 new Runner(opt).run();
@@ -187,13 +187,12 @@ public class BenchExecutorTest {
         }
 
         public static boolean isVirtual(Thread t) {
-            if (IS_VIRTUAL != null) {
-                try {
-                    return (boolean) IS_VIRTUAL.invoke(t);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    return false;
-                }
-            } else {
+            if (!hasVirtualThreads()) {
+                return false;
+            }
+            try {
+                return (boolean) IS_VIRTUAL.invoke(t);
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 return false;
             }
         }
