@@ -32,6 +32,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -44,16 +45,39 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Tests if harness executes setup, run, and tearDown in the same workers.
+ * Also tests if all workers are platform or virtual threads.
  */
 @State(Scope.Benchmark)
 public class BenchmarkBenchSameThreadTest {
+
+    public enum ExecutorType {
+        CACHED_TPE, FIXED_TPE, VIRTUAL_TPE, FJP, CUSTOM
+
+    }
+
+    @Param("FIXED_TPE")
+    ExecutorType benchmarkExecutorType;
 
     private final Set<Thread> setupRunThread = Collections.synchronizedSet(new HashSet<>());
     private final Set<Thread> setupIterationThread = Collections.synchronizedSet(new HashSet<>());
@@ -96,12 +120,40 @@ public class BenchmarkBenchSameThreadTest {
     @TearDown(Level.Trial)
     public void teardownZZZ() { // should perform last
         Assert.assertFalse("Test sanity", testInvocationThread.isEmpty());
-        Assert.assertTrue("test <: setupRun", testInvocationThread.containsAll(setupRunThread));
-        Assert.assertTrue("test <: setupIteration", testInvocationThread.containsAll(setupIterationThread));
-        Assert.assertTrue("test <: setupInvocation", testInvocationThread.containsAll(setupInvocationThread));
-        Assert.assertTrue("test <: teardownRun", testInvocationThread.containsAll(teardownRunThread));
-        Assert.assertTrue("test <: teardownIteration", testInvocationThread.containsAll(teardownIterationThread));
-        Assert.assertTrue("test <: teardownInvocation", testInvocationThread.containsAll(teardownInvocationThread));
+        if(benchmarkExecutorType != ExecutorType.CACHED_TPE) { // CachedThreadPool doesn't guarantee same thread rule
+            Assert.assertTrue("test <: setupRun", testInvocationThread.containsAll(setupRunThread));
+            Assert.assertTrue("test <: setupIteration", testInvocationThread.containsAll(setupIterationThread));
+            Assert.assertTrue("test <: setupInvocation", testInvocationThread.containsAll(setupInvocationThread));
+            Assert.assertTrue("test <: teardownRun", testInvocationThread.containsAll(teardownRunThread));
+            Assert.assertTrue("test <: teardownIteration", testInvocationThread.containsAll(teardownIterationThread));
+            Assert.assertTrue("test <: teardownInvocation", testInvocationThread.containsAll(teardownInvocationThread));
+        }
+        if(benchmarkExecutorType == ExecutorType.VIRTUAL_TPE) {
+            Assert.assertTrue("setupRun thread kind", setupRunThread.stream().allMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("setupIteration thread kind", setupIterationThread.stream().allMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("setupInvocation thread kind", setupInvocationThread.stream().allMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("teardownRun thread kind", teardownRunThread.stream().allMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("teardownIteration thread kind", teardownIterationThread.stream().allMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("teardownInvocation thread kind", teardownInvocationThread.stream().allMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("testInvocation thread kind", testInvocationThread.stream().allMatch(VirtualAPI::isVirtual));
+        } else {
+            Assert.assertTrue("setupRun thread kind", setupRunThread.stream().noneMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("setupIteration thread kind", setupIterationThread.stream().noneMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("setupInvocation thread kind", setupInvocationThread.stream().noneMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("teardownRun thread kind", teardownRunThread.stream().noneMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("teardownIteration thread kind", teardownIterationThread.stream().noneMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("teardownInvocation thread kind", teardownInvocationThread.stream().noneMatch(VirtualAPI::isVirtual));
+            Assert.assertTrue("testInvocation thread kind", testInvocationThread.stream().noneMatch(VirtualAPI::isVirtual));
+        }
+        if(benchmarkExecutorType == ExecutorType.FJP) {
+            Assert.assertTrue("setupRun thread kind", setupRunThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+            Assert.assertTrue("setupIteration thread kind", setupIterationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+            Assert.assertTrue("setupInvocation thread kind", setupInvocationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+            Assert.assertTrue("teardownRun thread kind", teardownRunThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+            Assert.assertTrue("teardownIteration thread kind", teardownIterationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+            Assert.assertTrue("teardownInvocation thread kind", teardownInvocationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+            Assert.assertTrue("testInvocation thread kind", testInvocationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
+        }
     }
 
     @Benchmark
@@ -116,13 +168,200 @@ public class BenchmarkBenchSameThreadTest {
     }
 
     @Test
-    public void invokeAPI() throws RunnerException {
+    public void invokeAPI_default() throws RunnerException {
         for (int c = 0; c < Fixtures.repetitionCount(); c++) {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
                     .shouldFailOnError(true)
                     .build();
             new Runner(opt).run();
+        }
+    }
+
+    @Test
+    public void invokeAPI_fixed() throws RunnerException {
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .jvmArgsAppend("-Djmh.executor=FIXED_TPE")
+                    .param("benchmarkExecutorType", "FIXED_TPE")
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
+    }
+
+    @Test
+    public void invokeAPI_cached() throws RunnerException {
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .jvmArgsAppend("-Djmh.executor=CACHED_TPE")
+                    .param("benchmarkExecutorType", "CACHED_TPE")
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
+    }
+
+    @Test
+    public void invokeAPI_fjp() throws RunnerException {
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .jvmArgsAppend("-Djmh.executor=FJP")
+                    .param("benchmarkExecutorType", "FJP")
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
+    }
+
+    @Test
+    public void invokeAPI_custom() throws RunnerException {
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .jvmArgsAppend("-Djmh.executor=CUSTOM")
+                    .jvmArgsAppend("-Djmh.executor.class="+CustomExecutor.class.getName())
+                    .param("benchmarkExecutorType", "CUSTOM")
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
+    }
+
+    @Test
+    public void invokeAPI_virtual() throws RunnerException {
+        if(VirtualAPI.hasVirtualThreads()) {
+            for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+                Options opt = new OptionsBuilder()
+                        .include(Fixtures.getTestMask(this.getClass()))
+                        .jvmArgsAppend("-Djmh.executor=VIRTUAL_TPE")
+                        .param("benchmarkExecutorType", "VIRTUAL_TPE")
+                        .shouldFailOnError(true)
+                        .build();
+                new Runner(opt).run();
+            }
+        }
+    }
+
+    public static class VirtualAPI {
+        // provide access to new Threads API via reflection
+
+        private static final Method IS_VIRTUAL = getIsVirtual();
+
+        private static Method getIsVirtual() {
+            try {
+                Method m = Class.forName("java.lang.Thread").getMethod("isVirtual");
+                m.invoke(Thread.currentThread());
+                // isVirtual check is not enough, have to check running virtual thread
+                Method start = Class.forName("java.lang.Thread").getMethod("startVirtualThread", Runnable.class);
+                start.invoke(null, (Runnable) (() -> {}));
+                return m;
+            } catch (NoSuchMethodException | ClassNotFoundException | InvocationTargetException |
+                     IllegalAccessException e) {
+                return null;
+            }
+        }
+
+        public static boolean hasVirtualThreads() {
+            return IS_VIRTUAL != null;
+        }
+
+        public static boolean isVirtual(Thread t) {
+            if (!hasVirtualThreads()) {
+                return false;
+            }
+            try {
+                return (boolean) IS_VIRTUAL.invoke(t);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                return false;
+            }
+        }
+    }
+
+    static class CustomExecutor implements ExecutorService {
+        private final ExecutorService e;
+
+        public CustomExecutor(int maxThreads, String prefix) {
+            e = Executors.newFixedThreadPool(maxThreads, new CustomThreadFactory(prefix));
+        }
+
+        public void execute(Runnable command) {
+            e.execute(command);
+        }
+
+        public void shutdown() {
+            e.shutdown();
+        }
+
+        public List<Runnable> shutdownNow() {
+            return e.shutdownNow();
+        }
+
+        public boolean isShutdown() {
+            return e.isShutdown();
+        }
+
+        public boolean isTerminated() {
+            return e.isTerminated();
+        }
+
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            return e.awaitTermination(timeout, unit);
+        }
+
+        public Future<?> submit(Runnable task) {
+            return e.submit(task);
+        }
+
+        public <T> Future<T> submit(Callable<T> task) {
+            return e.submit(task);
+        }
+
+        public <T> Future<T> submit(Runnable task, T result) {
+            return e.submit(task, result);
+        }
+
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+            return e.invokeAll(tasks);
+        }
+
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+            return e.invokeAll(tasks, timeout, unit);
+        }
+
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+            return e.invokeAny(tasks);
+        }
+
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return e.invokeAny(tasks, timeout, unit);
+        }
+    }
+
+    static class CustomThreadFactory implements ThreadFactory {
+
+        private final AtomicInteger counter;
+        private final String prefix;
+
+        public CustomThreadFactory(String prefix) {
+            this.counter = new AtomicInteger();
+            this.prefix = prefix;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            CustomThread t = new CustomThread(r, prefix + "-jmh-worker-" + counter.incrementAndGet());
+            t.setDaemon(true);
+            return t;
+        }
+    }
+
+    static class CustomThread extends Thread {
+        public CustomThread(Runnable r, String name) {
+            super(r, name);
         }
     }
 
