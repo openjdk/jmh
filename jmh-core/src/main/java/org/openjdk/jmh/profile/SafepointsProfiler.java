@@ -170,6 +170,7 @@ public class SafepointsProfiler implements ExternalProfiler {
 
         @Override
         protected Collection<? extends Result> getDerivativeResults() {
+            // @formatter:off
             return Arrays.asList(
                 new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".avg",      statistics.getMean(),           "ms", AggregationPolicy.AVG),
                 new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".count",    statistics.getN(),              "#",  AggregationPolicy.SUM),
@@ -182,6 +183,7 @@ public class SafepointsProfiler implements ExternalProfiler {
                 new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.9999",  statistics.getPercentile(99.99),"ms", AggregationPolicy.AVG),
                 new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p1.00",    statistics.getMax(),            "ms", AggregationPolicy.MAX)
             );
+            // @formatter:on
         }
 
         /**

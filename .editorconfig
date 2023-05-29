@@ -1,0 +1,50 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+ij_any_blank_lines_after_class_header = 0
+ij_any_block_brace_style = end_of_line
+ij_any_do_while_brace_force = always
+ij_any_for_brace_force = always
+ij_any_if_brace_force = always
+ij_any_keep_blank_lines_in_code = 1
+ij_any_keep_blank_lines_in_declarations = 1
+ij_any_keep_simple_blocks_in_one_line = true
+ij_any_keep_simple_methods_in_one_line = true
+ij_any_keep_simple_classes_in_one_line = true
+ij_any_spaces_around_additive_operators = true
+ij_any_spaces_around_assignment_operators = true
+ij_any_spaces_around_bitwise_operators = true
+ij_any_spaces_around_equality_operators = true
+ij_any_spaces_around_lambda_arrow = true
+ij_any_spaces_around_logical_operators = true
+ij_any_spaces_around_multiplicative_operators = true
+ij_any_spaces_around_relational_operators = true
+ij_any_spaces_around_shift_operators = true
+ij_any_while_brace_force = always
+ij_formatter_off_tag = @formatter:off
+ij_formatter_on_tag = @formatter:on
+ij_formatter_tags_enabled = true
+
+[*.md]
+# Trailing whitespace is important in Markdown (they distinguish a new line from a new paragraph)
+trim_trailing_whitespace = false
+
+[*.java]
+# See LineLength in checkstyle.xml
+max_line_length = 120
+# Doc: https://youtrack.jetbrains.com/issue/IDEA-170643#focus=streamItem-27-3708697.0-0
+# $ means "static"
+ij_java_imports_layout = *, |, javax.**, java.**, |, $*
+ij_java_continuation_indent_size = 8
+ij_java_align_multiline_parameters = false
+ij_java_use_single_class_imports = true
+ij_java_wrap_long_lines = true
+ij_java_class_count_to_use_import_on_demand = 2147483647
+ij_java_names_count_to_use_import_on_demand = 2147483647
+ij_java_packages_to_use_import_on_demand = unset
+ij_java_doc_do_not_wrap_if_one_line = true
