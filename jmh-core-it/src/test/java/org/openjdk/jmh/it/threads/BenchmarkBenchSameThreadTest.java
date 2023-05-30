@@ -120,7 +120,8 @@ public class BenchmarkBenchSameThreadTest {
     @TearDown(Level.Trial)
     public void teardownZZZ() { // should perform last
         Assert.assertFalse("Test sanity", testInvocationThread.isEmpty());
-        if(benchmarkExecutorType != ExecutorType.CACHED_TPE) { // CachedThreadPool doesn't guarantee same thread rule
+        if (benchmarkExecutorType == ExecutorType.FIXED_TPE ||
+                benchmarkExecutorType == ExecutorType.VIRTUAL_TPE) { // only fixed and virtual guarantee same thread rule
             Assert.assertTrue("test <: setupRun", testInvocationThread.containsAll(setupRunThread));
             Assert.assertTrue("test <: setupIteration", testInvocationThread.containsAll(setupIterationThread));
             Assert.assertTrue("test <: setupInvocation", testInvocationThread.containsAll(setupInvocationThread));
@@ -128,7 +129,7 @@ public class BenchmarkBenchSameThreadTest {
             Assert.assertTrue("test <: teardownIteration", testInvocationThread.containsAll(teardownIterationThread));
             Assert.assertTrue("test <: teardownInvocation", testInvocationThread.containsAll(teardownInvocationThread));
         }
-        if(benchmarkExecutorType == ExecutorType.VIRTUAL_TPE) {
+        if (benchmarkExecutorType == ExecutorType.VIRTUAL_TPE) {
             Assert.assertTrue("setupRun thread kind", setupRunThread.stream().allMatch(VirtualAPI::isVirtual));
             Assert.assertTrue("setupIteration thread kind", setupIterationThread.stream().allMatch(VirtualAPI::isVirtual));
             Assert.assertTrue("setupInvocation thread kind", setupInvocationThread.stream().allMatch(VirtualAPI::isVirtual));
@@ -145,7 +146,7 @@ public class BenchmarkBenchSameThreadTest {
             Assert.assertTrue("teardownInvocation thread kind", teardownInvocationThread.stream().noneMatch(VirtualAPI::isVirtual));
             Assert.assertTrue("testInvocation thread kind", testInvocationThread.stream().noneMatch(VirtualAPI::isVirtual));
         }
-        if(benchmarkExecutorType == ExecutorType.FJP) {
+        if (benchmarkExecutorType == ExecutorType.FJP) {
             Assert.assertTrue("setupRun thread kind", setupRunThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
             Assert.assertTrue("setupIteration thread kind", setupIterationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
             Assert.assertTrue("setupInvocation thread kind", setupInvocationThread.stream().allMatch(t -> t instanceof ForkJoinWorkerThread));
@@ -218,12 +219,25 @@ public class BenchmarkBenchSameThreadTest {
     }
 
     @Test
+    public void invokeAPI_fjp_common() throws RunnerException {
+        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
+            Options opt = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .jvmArgsAppend("-Djmh.executor=FJP_COMMON")
+                    .param("benchmarkExecutorType", "FJP")
+                    .shouldFailOnError(true)
+                    .build();
+            new Runner(opt).run();
+        }
+    }
+
+    @Test
     public void invokeAPI_custom() throws RunnerException {
         for (int c = 0; c < Fixtures.repetitionCount(); c++) {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
                     .jvmArgsAppend("-Djmh.executor=CUSTOM")
-                    .jvmArgsAppend("-Djmh.executor.class="+CustomExecutor.class.getName())
+                    .jvmArgsAppend("-Djmh.executor.class=" + CustomExecutor.class.getName())
                     .param("benchmarkExecutorType", "CUSTOM")
                     .shouldFailOnError(true)
                     .build();

@@ -247,6 +247,7 @@ abstract class BaseRunner {
 
         long allWarmup = 0;
         long allMeasurement = 0;
+        boolean isFirstIteration = true;
 
         // warmup
         IterationParams wp = benchParams.getWarmup();
@@ -258,8 +259,9 @@ abstract class BaseRunner {
 
             out.iteration(benchParams, wp, i);
             boolean isLastIteration = (benchParams.getMeasurement().getCount() == 0);
-            IterationResult ir = handler.runIteration(benchParams, wp, isLastIteration);
+            IterationResult ir = handler.runIteration(benchParams, wp, isFirstIteration, isLastIteration);
             out.iterationResult(benchParams, wp, i, ir);
+            isFirstIteration = false;
 
             allWarmup += ir.getMetadata().getAllOps();
         }
@@ -278,8 +280,9 @@ abstract class BaseRunner {
             out.iteration(benchParams, mp, i);
 
             boolean isLastIteration = (i == mp.getCount());
-            IterationResult ir = handler.runIteration(benchParams, mp, isLastIteration);
+            IterationResult ir = handler.runIteration(benchParams, mp, isFirstIteration, isLastIteration);
             out.iterationResult(benchParams, mp, i, ir);
+            isFirstIteration = false;
 
             allMeasurement += ir.getMetadata().getAllOps();
 

@@ -55,6 +55,9 @@ class BenchmarkHandler {
 
     private final ConcurrentMap<Thread, WorkerData> workerData;
     private final BlockingQueue<ThreadParams> tps;
+    private final BlockingQueue<WorkerData> orphanedWokerData;
+
+    private final CyclicBarrier wdBarrier;
 
     private final OutputFormat out;
     private final List<InternalProfiler> profilers;
@@ -74,14 +77,18 @@ class BenchmarkHandler {
         profilersRev = new ArrayList<>(profilers);
         Collections.reverse(profilersRev);
 
-        tps = new ArrayBlockingQueue<>(executionParams.getThreads());
-        tps.addAll(distributeThreads(executionParams.getThreads(), executionParams.getThreadGroups()));
+        int threads = executionParams.getThreads();
+        wdBarrier = new CyclicBarrier(threads, this::adoptWorkerData);
+
+        orphanedWokerData = new ArrayBlockingQueue<>(threads);
+        tps = new ArrayBlockingQueue<>(threads);
+        tps.addAll(distributeThreads(threads, executionParams.getThreadGroups()));
 
         workerData = new ConcurrentHashMap<>();
 
         this.out = out;
         try {
-            executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
+            executor = EXECUTOR_TYPE.createExecutor(threads, executionParams.getBenchmark());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -308,7 +315,7 @@ class BenchmarkHandler {
      * @param last    Should this iteration considered to be the last
      * @return IterationResult
      */
-    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
+    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean first, boolean last) {
         int numThreads = benchmarkParams.getThreads();
         TimeValue runtime = params.getTime();
 
@@ -319,7 +326,7 @@ class BenchmarkHandler {
         List<Result> iterationResults = new ArrayList<>();
 
         InfraControl control = new InfraControl(benchmarkParams, params,
-                preSetupBarrier, preTearDownBarrier, last,
+                preSetupBarrier, preTearDownBarrier, first, last,
                 new Control());
 
         // preparing the worker runnables
@@ -437,12 +444,12 @@ class BenchmarkHandler {
         return result;
     }
 
-    private WorkerData newWorkerData(Thread worker) {
-        WorkerData wd = workerData.get(worker);
-        if (wd != null) {
-            return wd;
-        }
+    private void adoptWorkerData() {
+        orphanedWokerData.addAll(workerData.values());
+        workerData.clear();
+    }
 
+    private WorkerData newWorkerData(Thread worker) {
         try {
             Object o = clazz.getConstructor().newInstance();
             ThreadParams t = tps.poll();
@@ -450,7 +457,7 @@ class BenchmarkHandler {
                 throw new IllegalStateException("Cannot get another thread params");
             }
 
-            wd = new WorkerData(o, t);
+            WorkerData wd = new WorkerData(o, t);
             WorkerData exist = workerData.put(worker, wd);
             if (exist != null) {
                 throw new IllegalStateException("Duplicate thread data");
@@ -460,6 +467,26 @@ class BenchmarkHandler {
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException("Class " + clazz.getName() + " instantiation error ", e);
         }
+    }
+
+    private WorkerData findWorkerData(Thread worker) {
+        WorkerData wd = workerData.remove(worker);
+        try {
+            wdBarrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            throw new RuntimeException("Worker data barrier error ", e);
+        }
+        if (wd == null) {
+            wd = orphanedWokerData.poll();
+            if (wd == null) {
+                throw new IllegalStateException("Cannot get another thread working data");
+            }
+        }
+        WorkerData exist = workerData.put(worker, wd);
+        if (exist != null) {
+            throw new IllegalStateException("Duplicate thread data");
+        }
+        return wd;
     }
 
     /**
@@ -480,7 +507,7 @@ class BenchmarkHandler {
                 runner = Thread.currentThread();
 
                 // poll the current data, or instantiate in this thread, if needed
-                WorkerData wd = newWorkerData(runner);
+                WorkerData wd = control.isFirstIteration() ? newWorkerData(runner) : findWorkerData(runner);
 
                 return (BenchmarkTaskResult) method.invoke(wd.instance, control, wd.params);
             } catch (Throwable e) {
