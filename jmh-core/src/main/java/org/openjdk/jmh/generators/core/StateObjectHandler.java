@@ -966,8 +966,6 @@ class StateObjectHandler {
                 pw.println("import " + so.userType + ";");
 
                 pw.println("public class " + so.type + "_B1 extends " + so.userType + " {");
-                // The prefix for padding should be different from the one used in _B3 to avoid
-                // "hiding field of the same name in superclass" warning
                 Paddings.padding(pw, "b1_");
                 pw.println("}");
 
@@ -1017,8 +1015,6 @@ class StateObjectHandler {
 
                 pw.println("package " + so.packageName + ";");
                 pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
-                // The prefix for padding should be different from the one used in _B1 to avoid
-                // "hiding field of the same name in superclass" warning
                 Paddings.padding(pw, "b3_");
                 pw.println("}");
                 pw.println("");
