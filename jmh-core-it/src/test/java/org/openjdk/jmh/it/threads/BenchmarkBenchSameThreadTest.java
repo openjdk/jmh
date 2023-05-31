@@ -220,11 +220,13 @@ public class BenchmarkBenchSameThreadTest {
 
     @Test
     public void invokeAPI_fjp_common() throws RunnerException {
+        int cores = Runtime.getRuntime().availableProcessors();
         for (int c = 0; c < Fixtures.repetitionCount(); c++) {
             Options opt = new OptionsBuilder()
                     .include(Fixtures.getTestMask(this.getClass()))
                     .jvmArgsAppend("-Djmh.executor=FJP_COMMON")
                     .param("benchmarkExecutorType", "FJP")
+                    .threads(cores)
                     .shouldFailOnError(true)
                     .build();
             new Runner(opt).run();
