@@ -47,4 +47,13 @@ public class Fixtures {
         }
     }
 
+    public static boolean expectStableThreads() {
+        return isDefaultProfile();
+    }
+
+    public static boolean isDefaultProfile() {
+        String profile = System.getProperty("jmh.core.it.profile");
+        return profile.equals("default");
+    }
+
 }

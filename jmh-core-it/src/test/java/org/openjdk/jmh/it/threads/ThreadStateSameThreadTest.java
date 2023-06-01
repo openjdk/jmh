@@ -64,60 +64,44 @@ public class ThreadStateSameThreadTest {
 
         @Setup(Level.Trial)
         public void setupRun() {
-            if (setupRunThread == null) {
-                setupRunThread = Thread.currentThread();
-            }
-            Assert.assertEquals("setupRun", setupRunThread, Thread.currentThread());
+            setupRunThread = Thread.currentThread();
         }
 
         @Setup(Level.Iteration)
         public void setupIteration() {
-            if (setupIterationThread == null) {
-                setupIterationThread = Thread.currentThread();
-            }
-            Assert.assertEquals("setupIteration", setupIterationThread, Thread.currentThread());
+            setupIterationThread = Thread.currentThread();
         }
 
         @Setup(Level.Invocation)
         public void setupInvocation() {
-            if (setupInvocationThread == null) {
-                setupInvocationThread = Thread.currentThread();
-            }
-            Assert.assertEquals("setupInvocation", setupInvocationThread, Thread.currentThread());
+            setupInvocationThread = Thread.currentThread();
         }
 
         @TearDown(Level.Trial)
         public void tearDownRun() {
-            if (teardownRunThread == null) {
-                teardownRunThread = Thread.currentThread();
+            teardownRunThread = Thread.currentThread();
+
+            // Threads can change iteration to iteration
+            if (Fixtures.expectStableThreads()) {
+                Assert.assertEquals("test == setupRun",      testInvocationThread, setupRunThread);
+                Assert.assertEquals("test == teardownRun",   testInvocationThread, teardownRunThread);
             }
-            Assert.assertEquals("teardownRun", teardownRunThread, Thread.currentThread());
         }
 
         @TearDown(Level.Iteration)
         public void tearDownIteration() {
-            if (teardownIterationThread == null) {
-                teardownIterationThread = Thread.currentThread();
-            }
-            Assert.assertEquals("teardownIteration", teardownIterationThread, Thread.currentThread());
+            teardownIterationThread = Thread.currentThread();
+
+            // Within iteration, expect the same thread
+            Assert.assertEquals("test == setupIteration",     testInvocationThread, setupIterationThread);
+            Assert.assertEquals("test == teardownIteration",  testInvocationThread, teardownIterationThread);
+            Assert.assertEquals("test == setupInvocation",    testInvocationThread, setupInvocationThread);
+            Assert.assertEquals("test == teardownInvocation", testInvocationThread, teardownInvocationThread);
         }
 
         @TearDown(Level.Invocation)
         public void tearDownInvocation() {
-            if (teardownInvocationThread == null) {
-                teardownInvocationThread = Thread.currentThread();
-            }
-            Assert.assertEquals("tearDownInvocation", teardownInvocationThread, Thread.currentThread());
-        }
-
-        @TearDown(Level.Trial)
-        public void teardownZZZ() { // should perform last
-            Assert.assertEquals("test != setupRun", testInvocationThread, setupRunThread);
-            Assert.assertEquals("test != setupIteration", testInvocationThread, setupIterationThread);
-            Assert.assertEquals("test != setupInvocation", testInvocationThread, setupInvocationThread);
-            Assert.assertEquals("test != teardownRun", testInvocationThread, teardownRunThread);
-            Assert.assertEquals("test != teardownIteration", testInvocationThread, teardownIterationThread);
-            Assert.assertEquals("test != teardownInvocation", testInvocationThread, teardownInvocationThread);
+            teardownInvocationThread = Thread.currentThread();
         }
     }
 
@@ -128,10 +112,7 @@ public class ThreadStateSameThreadTest {
     @Fork(1)
     @Threads(4)
     public void test(MyState state) {
-        if (state.testInvocationThread == null) {
-            state.testInvocationThread = Thread.currentThread();
-        }
-        Assert.assertEquals("test", state.testInvocationThread, Thread.currentThread());
+        state.testInvocationThread = Thread.currentThread();
         Fixtures.work();
     }
 

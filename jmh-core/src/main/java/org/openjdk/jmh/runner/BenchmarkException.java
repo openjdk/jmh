@@ -40,7 +40,9 @@ public class BenchmarkException extends RuntimeException {
     public BenchmarkException(String msg, Collection<Throwable> errors) {
         super(msg);
         for (Throwable err : errors) {
-            addSuppressed(err);
+            if (err != null) {
+                addSuppressed(err);
+            }
         }
     }
 
