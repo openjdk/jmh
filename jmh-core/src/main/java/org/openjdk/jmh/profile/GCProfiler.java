@@ -378,10 +378,13 @@ public class GCProfiler implements InternalProfiler {
         }
 
         public static HotspotAllocationSnapshot getSnapshot() {
-            // Try the global getter first, if available.
+            // Try the global getter first, if available
             if (ALLOC_MX_BEAN_GETTER_GLOBAL != null) {
                 try {
                     long allocatedBytes = (long) ALLOC_MX_BEAN_GETTER_GLOBAL.invoke(ALLOC_MX_BEAN);
+                    if (allocatedBytes == -1L) {
+                        throw new IllegalStateException("getTotalThreadAllocatedBytes is disabled");
+                    }
                     return new GlobalHotspotAllocationSnapshot(allocatedBytes);
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     throw new IllegalStateException(e);
