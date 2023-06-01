@@ -55,7 +55,7 @@ class BenchmarkHandler {
 
     private final ConcurrentMap<Thread, WorkerData> workerData;
     private final BlockingQueue<ThreadParams> tps;
-    private final BlockingQueue<WorkerData> orphanedWokerData;
+    private final BlockingQueue<WorkerData> orphanedWorkerData;
 
     private final CyclicBarrier wdBarrier;
 
@@ -80,7 +80,7 @@ class BenchmarkHandler {
         int threads = executionParams.getThreads();
         wdBarrier = new CyclicBarrier(threads, this::adoptWorkerData);
 
-        orphanedWokerData = new ArrayBlockingQueue<>(threads);
+        orphanedWorkerData = new ArrayBlockingQueue<>(threads);
         tps = new ArrayBlockingQueue<>(threads);
         tps.addAll(distributeThreads(threads, executionParams.getThreadGroups()));
 
@@ -445,7 +445,7 @@ class BenchmarkHandler {
     }
 
     private void adoptWorkerData() {
-        orphanedWokerData.addAll(workerData.values());
+        orphanedWorkerData.addAll(workerData.values());
         workerData.clear();
     }
 
@@ -477,7 +477,7 @@ class BenchmarkHandler {
             throw new RuntimeException("Worker data barrier error ", e);
         }
         if (wd == null) {
-            wd = orphanedWokerData.poll();
+            wd = orphanedWorkerData.poll();
             if (wd == null) {
                 throw new IllegalStateException("Cannot get another thread working data");
             }

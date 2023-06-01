@@ -162,7 +162,7 @@ public class BenchmarkBenchSameThreadTest {
     @Warmup(iterations = 0)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Fork(1)
-    @Threads(16)
+    @Threads(4)
     public void test() {
         testInvocationThread.add(Thread.currentThread());
         Fixtures.work();
@@ -217,21 +217,6 @@ public class BenchmarkBenchSameThreadTest {
             new Runner(opt).run();
         }
     }
-
-//    @Test
-//    public void invokeAPI_fjp_common() throws RunnerException {
-//        int cores = Runtime.getRuntime().availableProcessors();
-//        for (int c = 0; c < Fixtures.repetitionCount(); c++) {
-//            Options opt = new OptionsBuilder()
-//                    .include(Fixtures.getTestMask(this.getClass()))
-//                    .jvmArgsAppend("-Djmh.executor=FJP_COMMON")
-//                    .param("benchmarkExecutorType", "FJP")
-//                    .threads(cores)
-//                    .shouldFailOnError(true)
-//                    .build();
-//            new Runner(opt).run();
-//        }
-//    }
 
     @Test
     public void invokeAPI_custom() throws RunnerException {
