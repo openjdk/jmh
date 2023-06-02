@@ -44,6 +44,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,43 +57,46 @@ public class ThreadStateSameThreadTest {
     @State(Scope.Thread)
     public static class MyState {
 
-        private Thread setupRunThread;
-        private Thread setupIterationThread;
-        private Thread setupInvocationThread;
-        private Thread teardownRunThread;
-        private Thread teardownIterationThread;
-        private Thread teardownInvocationThread;
-        private Thread testInvocationThread;
+        private final Set<Thread> setupRunThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> setupIterationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> setupInvocationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> teardownRunThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> teardownIterationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> teardownInvocationThread = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Thread> testInvocationThread = Collections.synchronizedSet(new HashSet<>());
 
         @Setup(Level.Trial)
         public void setupRun() {
-            setupRunThread = Thread.currentThread();
+            setupRunThread.add(Thread.currentThread());
         }
 
         @Setup(Level.Iteration)
         public void setupIteration() {
-            setupIterationThread = Thread.currentThread();
+            setupIterationThread.add(Thread.currentThread());
         }
 
         @Setup(Level.Invocation)
         public void setupInvocation() {
-            setupInvocationThread = Thread.currentThread();
+            setupInvocationThread.add(Thread.currentThread());
         }
 
         @TearDown(Level.Trial)
         public void tearDownRun() {
-            teardownRunThread = Thread.currentThread();
+            teardownRunThread.add(Thread.currentThread());
 
             // Threads can change iteration to iteration
             if (Fixtures.expectStableThreads()) {
                 Assert.assertEquals("test == setupRun",      testInvocationThread, setupRunThread);
                 Assert.assertEquals("test == teardownRun",   testInvocationThread, teardownRunThread);
+            } else {
+                Assert.assertTrue("test <: setupRun",           testInvocationThread.containsAll(setupRunThread));
+                Assert.assertTrue("test <: teardownRunThread",  testInvocationThread.containsAll(teardownRunThread));
             }
         }
 
         @TearDown(Level.Iteration)
         public void tearDownIteration() {
-            teardownIterationThread = Thread.currentThread();
+            teardownIterationThread.add(Thread.currentThread());
 
             // Within iteration, expect the same thread
             Assert.assertEquals("test == setupIteration",     testInvocationThread, setupIterationThread);
@@ -101,7 +107,7 @@ public class ThreadStateSameThreadTest {
 
         @TearDown(Level.Invocation)
         public void tearDownInvocation() {
-            teardownInvocationThread = Thread.currentThread();
+            teardownInvocationThread.add(Thread.currentThread());
         }
     }
 
@@ -112,7 +118,7 @@ public class ThreadStateSameThreadTest {
     @Fork(1)
     @Threads(4)
     public void test(MyState state) {
-        state.testInvocationThread = Thread.currentThread();
+        state.testInvocationThread.add(Thread.currentThread());
         Fixtures.work();
     }
 

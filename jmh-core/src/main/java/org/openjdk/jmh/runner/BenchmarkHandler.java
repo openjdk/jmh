@@ -201,7 +201,7 @@ class BenchmarkHandler {
             }
 
             @Override
-            boolean hasStableThreads() {
+            boolean stableThreads() {
                 return true;
             }
         },
@@ -217,7 +217,7 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use ForkJoinPool.
+         * Use ForkJoinPool
          */
         FJP {
             @Override
@@ -227,7 +227,7 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use ForkJoinPool.commonPool (JDK 8+)
+         * Use ForkJoinPool.commonPool
          */
         FJP_COMMON {
             @Override
@@ -237,13 +237,16 @@ class BenchmarkHandler {
             }
 
             @Override
-            boolean shutdownForbidden() {
-                // this is a system-wide executor, don't shutdown
-                return true;
+            boolean shutdownCapable() {
+                // This is a system-wide executor, do not shutdown.
+                return false;
             }
 
         },
 
+        /**
+         * Use custom executor
+         */
         CUSTOM {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
@@ -257,11 +260,17 @@ class BenchmarkHandler {
 
         abstract ExecutorService createExecutor(int maxThreads, String prefix) throws Exception;
 
-        boolean shutdownForbidden() {
-            return false;
+        /**
+         * @return Should we shutdown executor after use?
+         */
+        boolean shutdownCapable() {
+            return true;
         }
 
-        boolean hasStableThreads() { return false; }
+        /**
+         * @return Executor always reuses the same threads?
+         */
+        boolean stableThreads() { return false; }
     }
 
     protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
@@ -293,7 +302,7 @@ class BenchmarkHandler {
         // No transient data is shared between benchmarks, purge it.
         workerData.clear();
 
-        if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
+        if (!EXECUTOR_TYPE.shutdownCapable() || (executor == null)) {
             return;
         }
         while (true) {
@@ -475,7 +484,7 @@ class BenchmarkHandler {
         if (wd == null) {
             // Odd mode, no worker task recorded for the thread. Pull the worker data
             // from the unused queue. This can only happen with executors with unstable threads.
-            if (EXECUTOR_TYPE.hasStableThreads()) {
+            if (EXECUTOR_TYPE.stableThreads()) {
                 throw new IllegalStateException("Worker data assignment failed for executor with stable threads");
             }
 
