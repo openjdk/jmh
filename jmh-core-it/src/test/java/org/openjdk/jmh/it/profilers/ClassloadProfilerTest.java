@@ -75,7 +75,7 @@ public class ClassloadProfilerTest {
     }
 
     @Benchmark
-    public Class<?> allocClass() throws Exception {
+    public Class<?> work() throws Exception {
         Fixtures.work();
         ClassLoader loader = new MyClassLoader();
         return Class.forName("Dummy", true, loader);

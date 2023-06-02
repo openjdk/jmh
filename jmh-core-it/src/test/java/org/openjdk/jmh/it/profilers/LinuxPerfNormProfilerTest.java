@@ -27,6 +27,7 @@ package org.openjdk.jmh.it.profilers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.LinuxPerfNormProfiler;
 import org.openjdk.jmh.profile.ProfilerException;
@@ -46,13 +47,13 @@ import java.util.concurrent.TimeUnit;
 public class LinuxPerfNormProfilerTest {
 
     @Benchmark
-    public void empty() {
+    public void work() {
         somethingInTheMiddle();
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void somethingInTheMiddle() {
-        Fixtures.work();
+        Blackhole.consumeCPU(1);
     }
 
     @Test

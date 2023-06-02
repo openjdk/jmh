@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class MemPoolProfilerTest {
 
     @Benchmark
-    public void empty() {
+    public void work() {
         Fixtures.work();
     }
 

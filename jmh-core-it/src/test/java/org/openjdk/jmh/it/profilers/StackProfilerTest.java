@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class StackProfilerTest {
 
     @Benchmark
-    public void empty() {
+    public void work() {
         somethingInTheMiddle();
     }
 

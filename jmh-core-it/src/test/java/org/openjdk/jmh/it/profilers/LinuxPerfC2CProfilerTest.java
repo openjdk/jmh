@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class LinuxPerfC2CProfilerTest {
 
     @Benchmark
-    public void empty() {
+    public void work() {
         somethingInTheMiddle();
     }
 

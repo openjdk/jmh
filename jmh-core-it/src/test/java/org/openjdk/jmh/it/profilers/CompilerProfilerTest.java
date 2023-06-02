@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class CompilerProfilerTest {
 
     @Benchmark
-    public void empty() {
+    public void work() {
         Fixtures.work();
     }
 

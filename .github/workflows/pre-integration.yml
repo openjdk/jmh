@@ -30,6 +30,11 @@ jobs:
         distribution: zulu
         java-version: ${{ matrix.java }}
         cache: maven
+    - name: Set up perf (Linux)
+      run: |
+        sudo apt-get install linux-tools-common linux-tools-generic linux-tools-`uname -r` 
+        perf stat echo 1
+      if: (runner.os == 'Linux')
     - name: Run build with tests
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
       if: (runner.os == 'Linux') || (matrix.profile == 'default')

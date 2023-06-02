@@ -26,6 +26,7 @@ package org.openjdk.jmh.it.profilers;
 
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.LinuxPerfAsmProfiler;
 import org.openjdk.jmh.profile.ProfilerException;
@@ -46,13 +47,13 @@ import java.util.concurrent.TimeUnit;
 public class WinPerfAsmProfilerTest {
 
     @Benchmark
-    public void empty() {
+    public void work() {
         somethingInTheMiddle();
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void somethingInTheMiddle() {
-        Fixtures.work();
+        Blackhole.consumeCPU(1);
     }
 
     @Test
@@ -72,7 +73,7 @@ public class WinPerfAsmProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        String out = sr.get("asm").extendedInfo();
+        String out = sr.get("·asm").extendedInfo();
         if (!out.contains("somethingInTheMiddle")) {
             throw new IllegalStateException("Profile does not contain the required frame");
         }
