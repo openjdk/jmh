@@ -30,18 +30,31 @@ jobs:
         distribution: zulu
         java-version: ${{ matrix.java }}
         cache: maven
-    - name: Run build with tests
-      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os == 'Linux') || (matrix.profile == 'default')
-    - name: Run build with tests (FJP Common)
-      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os == 'Linux') && (matrix.profile == 'executor-fjp-common')
-    - name: Run build with tests (Custom)
-      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os == 'Linux') && (matrix.profile == 'executor-custom')
-    - name: Run build with tests (Virtual Executor)
-      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os == 'Linux') && (matrix.java == '21-ea') && (matrix.profile == 'executor-virtual-tpe')
+
     - name: Run build without tests
       run: mvn clean install -DskipTests -P ${{ matrix.profile }} -B --file pom.xml
       if: (runner.os != 'Linux') && (matrix.profile != 'default')
+
+    - name: Run build with tests
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: (matrix.profile == 'default')
+
+    - name: Run build with tests (Reflection)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: (runner.os == 'Linux') && (matrix.profile == 'reflection')
+
+    - name: Run build with tests (ASM)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: (runner.os == 'Linux') && (matrix.profile == 'asm')
+
+    - name: Run build with tests (FJP Executor)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: (runner.os == 'Linux') && (matrix.profile == 'executor-fjp-common')
+
+    - name: Run build with tests (Custom Executor)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: (runner.os == 'Linux') && (matrix.profile == 'executor-custom')
+
+    - name: Run build with tests (Virtual Executor)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
+      if: (runner.os == 'Linux') && (matrix.java == '21-ea') && (matrix.profile == 'executor-virtual-tpe')
