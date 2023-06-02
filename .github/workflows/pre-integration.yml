@@ -18,7 +18,7 @@ jobs:
       matrix:
         java: [8, 11, 17, 20, 21-ea]
         os: [ubuntu-22.04, windows-2022, macos-11]
-        profile: [default, reflection, asm, executor-virtual-tpe, executor-fjp-common, executor-custom]
+        profile: [default, reflection, asm, executor-virtual-tpe, executor-fjp, executor-custom]
       fail-fast: false
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}, ${{ matrix.profile }}
 
@@ -49,7 +49,7 @@ jobs:
 
     - name: Run build with tests (FJP Executor)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os == 'Linux') && (matrix.profile == 'executor-fjp-common')
+      if: (runner.os == 'Linux') && (matrix.profile == 'executor-fjp')
 
     - name: Run build with tests (Custom Executor)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
