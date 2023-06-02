@@ -33,7 +33,8 @@ jobs:
     - name: Set up perf (Linux)
       run: |
         sudo apt-get update
-        sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r` 
+        sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
+        echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
         perf stat echo 1
       if: (runner.os == 'Linux')
     - name: Run build with tests
