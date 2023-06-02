@@ -44,6 +44,11 @@ public final class LinuxPerfC2CProfiler implements ExternalProfiler {
     protected final TempFile perfBinData;
 
     public LinuxPerfC2CProfiler() throws ProfilerException {
+        Collection<String> failMsg = Utils.tryWith(PerfSupport.PERF_EXEC, "c2c", "record", "echo", "1");
+        if (!failMsg.isEmpty()) {
+            throw new ProfilerException(failMsg.toString());
+        }
+
         try {
             perfBinData = FileUtils.weakTempFile("perf-c2c-bin");
         } catch (IOException e) {
