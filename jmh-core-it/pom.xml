@@ -149,7 +149,7 @@ questions.
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <argLine>${jmh.testjvmargs} --enable-preview -Djmh.executor=VIRTUAL_TPE</argLine>
+                            <argLine>${jmh.testjvmargs} -Djmh.executor=VIRTUAL_TPE</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
