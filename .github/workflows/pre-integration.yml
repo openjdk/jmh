@@ -31,11 +31,7 @@ jobs:
         java-version: ${{ matrix.java }}
         cache: maven
 
-    - name: Run build without tests
-      run: mvn clean install -DskipTests -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os != 'Linux') && (matrix.profile != 'default')
-
-    - name: Run build with tests
+    - name: Run build with tests (Default)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
       if: (matrix.profile == 'default')
 
@@ -43,9 +39,17 @@ jobs:
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
       if: (runner.os == 'Linux') && (matrix.profile == 'reflection')
 
+    - name: Run build without tests (Reflection)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml -DskipTests
+      if: (runner.os != 'Linux') && (matrix.profile == 'reflection')
+
     - name: Run build with tests (ASM)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
       if: (runner.os == 'Linux') && (matrix.profile == 'asm')
+
+    - name: Run build without tests (ASM)
+      run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml -DskipTests
+      if: (runner.os != 'Linux') && (matrix.profile == 'asm')
 
     - name: Run build with tests (FJP Executor)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
