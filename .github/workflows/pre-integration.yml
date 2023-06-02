@@ -21,6 +21,7 @@ jobs:
         profile: [default, reflection, asm, executor-virtual-tpe, executor-fjp, executor-custom]
       fail-fast: false
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}, ${{ matrix.profile }}
+    timeout-minutes: 60
 
     steps:
     - uses: actions/checkout@v3
