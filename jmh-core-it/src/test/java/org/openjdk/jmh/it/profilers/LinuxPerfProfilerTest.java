@@ -62,7 +62,7 @@ public class LinuxPerfProfilerTest {
         try {
             new LinuxPerfProfiler("");
         } catch (ProfilerException e) {
-            // Not supported
+            System.out.println("Profiler is not supported or cannot be enabled, skipping test");
             return;
         }
 

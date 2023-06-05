@@ -61,7 +61,7 @@ public class WinPerfAsmProfilerTest {
         try {
             new WinPerfAsmProfiler("");
         } catch (ProfilerException e) {
-            // Not supported
+            System.out.println("Profiler is not supported or cannot be enabled, skipping test");
             return;
         }
 
