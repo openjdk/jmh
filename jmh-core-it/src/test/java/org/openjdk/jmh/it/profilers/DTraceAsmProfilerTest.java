@@ -72,7 +72,7 @@ public class DTraceAsmProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        String out = sr.get("·asm").extendedInfo();
+        String out = ProfilerTestUtils.checkedGet(sr, "·asm").extendedInfo();
         if (!out.contains("somethingInTheMiddle")) {
             throw new IllegalStateException("Profile does not contain the required frame");
         }

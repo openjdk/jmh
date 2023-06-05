@@ -91,7 +91,7 @@ public class ClassloadProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double classLoad = sr.get("·class.load.norm").getScore();
+        double classLoad = ProfilerTestUtils.checkedGet(sr, "·class.load.norm").getScore();
 
         // Allow 5% slack
         if (Math.abs(1 - classLoad) > 0.05) {

@@ -74,9 +74,9 @@ public class LinuxPerfProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double ipc = sr.get("·ipc").getScore();
-        double cpi = sr.get("·cpi").getScore();
-        String msg = sr.get("·perf").extendedInfo();
+        double ipc = ProfilerTestUtils.checkedGet(sr, "·ipc").getScore();
+        double cpi = ProfilerTestUtils.checkedGet(sr, "·cpi").getScore();
+        String msg = ProfilerTestUtils.checkedGet(sr, "·perf").extendedInfo();
 
         Assert.assertNotEquals(0, ipc);
         Assert.assertNotEquals(0, cpi);

@@ -61,12 +61,12 @@ public class SafepointsProfilerTest {
 
         Map<String, Result> sr = rr.getSecondaryResults();
 
-        double interval = sr.get("·safepoints.interval").getScore();
-        double pauseTotal = sr.get("·safepoints.pause").getScore();
-        double ttspTotal = sr.get("·safepoints.ttsp").getScore();
+        double interval = ProfilerTestUtils.checkedGet(sr, "·safepoints.interval").getScore();
+        double pauseTotal = ProfilerTestUtils.checkedGet(sr, "·safepoints.pause").getScore();
+        double ttspTotal = ProfilerTestUtils.checkedGet(sr, "·safepoints.ttsp").getScore();
 
-        double pauseCount = sr.get("·safepoints.pause.count").getScore();
-        double ttspCount = sr.get("·safepoints.ttsp.count").getScore();
+        double pauseCount = ProfilerTestUtils.checkedGet(sr, "·safepoints.pause.count").getScore();
+        double ttspCount = ProfilerTestUtils.checkedGet(sr, "·safepoints.ttsp.count").getScore();
 
         Assert.assertNotEquals(pauseTotal, 0);
         Assert.assertNotEquals(ttspTotal, 0);
@@ -98,8 +98,8 @@ public class SafepointsProfilerTest {
         double lastPause = 0;
         double lastTTSP = 0;
         for (String suff : new String[] {"0.00", "0.50", "0.90", "0.95", "0.99", "0.999", "0.9999", "1.00"}) {
-            double curPause = sr.get("·safepoints.pause.p" + suff).getScore();
-            double curTTSP = sr.get("·safepoints.ttsp.p" + suff).getScore();
+            double curPause = ProfilerTestUtils.checkedGet(sr, "·safepoints.pause.p" + suff).getScore();
+            double curTTSP = ProfilerTestUtils.checkedGet(sr, "·safepoints.ttsp.p" + suff).getScore();
             if (curPause < lastPause) {
                 throw new IllegalStateException("pause.p" + suff + " is not monotonic");
             }

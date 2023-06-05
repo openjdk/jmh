@@ -73,11 +73,11 @@ public class LinuxPerfNormProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double ipc = sr.get("IPC").getScore();
-        double cpi = sr.get("CPI").getScore();
-        double instructions = sr.get("instructions").getScore();
-        double cycles = sr.get("cycles").getScore();
-        double branches = sr.get("branches").getScore();
+        double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
+        double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
+        double instructions = ProfilerTestUtils.checkedGet(sr, "instructions").getScore();
+        double cycles = ProfilerTestUtils.checkedGet(sr, "cycles").getScore();
+        double branches = ProfilerTestUtils.checkedGet(sr, "branches").getScore();
 
         Assert.assertNotEquals(0, ipc);
         Assert.assertNotEquals(0, cpi);

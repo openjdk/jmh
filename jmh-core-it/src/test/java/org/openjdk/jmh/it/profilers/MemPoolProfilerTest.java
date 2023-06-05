@@ -60,9 +60,9 @@ public class MemPoolProfilerTest {
 
         Map<String, Result> sr = rr.getSecondaryResults();
 
-        double usedMetaspace = sr.get("·mempool.Metaspace.used").getScore();
-        double usedTotal = sr.get("·mempool.total.used").getScore();
-        double usedTotalCodeheap = sr.get("·mempool.total.codeheap.used").getScore();
+        double usedMetaspace = ProfilerTestUtils.checkedGet(sr, "·mempool.Metaspace.used").getScore();
+        double usedTotal = ProfilerTestUtils.checkedGet(sr, "·mempool.total.used").getScore();
+        double usedTotalCodeheap = ProfilerTestUtils.checkedGet(sr, "·mempool.total.codeheap.used").getScore();
 
         if (usedMetaspace == 0) {
             throw new IllegalStateException("Metaspace used is zero");

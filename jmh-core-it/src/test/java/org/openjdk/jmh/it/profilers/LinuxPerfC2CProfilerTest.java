@@ -72,7 +72,7 @@ public class LinuxPerfC2CProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        String text = sr.get("·perfc2c").extendedInfo();
+        String text = ProfilerTestUtils.checkedGet(sr, "·perfc2c").extendedInfo();
 
         Assert.assertNotNull(text);
     }
