@@ -24,19 +24,8 @@
  */
 package org.openjdk.jmh.it.profilers;
 
-import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.profile.DTraceAsmProfiler;
-import org.openjdk.jmh.profile.ProfilerException;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.RunResult;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
