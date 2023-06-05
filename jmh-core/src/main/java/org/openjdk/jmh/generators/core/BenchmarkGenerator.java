@@ -459,7 +459,7 @@ public class BenchmarkGenerator {
         writer.println();
 
         // generate padding
-        Paddings.padding(writer);
+        Paddings.padding(writer, "p");
 
         writer.println(ident(1) + "int startRndMask;");
         writer.println(ident(1) + "BenchmarkParams benchmarkParams;");

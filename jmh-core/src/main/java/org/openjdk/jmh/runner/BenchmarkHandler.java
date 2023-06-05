@@ -177,24 +177,14 @@ class BenchmarkHandler {
         return true;
     }
 
-    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("jmh.executor", ExecutorType.FIXED_TPE.name()));
+    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("jmh.executor", ExecutorType.PLATFORM.name()));
 
     private enum ExecutorType {
 
         /**
-         * Use Executors.newCachedThreadPool
+         * Use fixed thread pool with platform threads
          */
-        CACHED_TPE {
-            @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newCachedThreadPool(WorkerThreadFactories.platformWorkerFactory(prefix));
-            }
-        },
-
-        /**
-         * Use Executors.newFixedThreadPool
-         */
-        FIXED_TPE {
+        PLATFORM {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.platformWorkerFactory(prefix));
@@ -207,9 +197,9 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use FixedThreadPool with virtual threads
+         * Use fixed thread pool with virtual threads
          */
-        VIRTUAL_TPE {
+        VIRTUAL {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.virtualWorkerFactory(prefix));
@@ -227,24 +217,6 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use ForkJoinPool.commonPool
-         */
-        FJP_COMMON {
-            @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
-                Method m = Class.forName("java.util.concurrent.ForkJoinPool").getMethod("commonPool");
-                return (ExecutorService) m.invoke(null);
-            }
-
-            @Override
-            boolean shutdownCapable() {
-                // This is a system-wide executor, do not shutdown.
-                return false;
-            }
-
-        },
-
-        /**
          * Use custom executor
          */
         CUSTOM {
@@ -259,13 +231,6 @@ class BenchmarkHandler {
         ;
 
         abstract ExecutorService createExecutor(int maxThreads, String prefix) throws Exception;
-
-        /**
-         * @return Should we shutdown executor after use?
-         */
-        boolean shutdownCapable() {
-            return true;
-        }
 
         /**
          * @return Executor always reuses the same threads?
@@ -302,7 +267,7 @@ class BenchmarkHandler {
         // No transient data is shared between benchmarks, purge it.
         workerData.clear();
 
-        if (!EXECUTOR_TYPE.shutdownCapable() || (executor == null)) {
+        if (executor == null) {
             return;
         }
         while (true) {

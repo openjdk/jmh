@@ -966,7 +966,7 @@ class StateObjectHandler {
                 pw.println("import " + so.userType + ";");
 
                 pw.println("public class " + so.type + "_B1 extends " + so.userType + " {");
-                Paddings.padding(pw);
+                Paddings.padding(pw, "b1_");
                 pw.println("}");
 
                 pw.close();
@@ -1015,7 +1015,7 @@ class StateObjectHandler {
 
                 pw.println("package " + so.packageName + ";");
                 pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
-                Paddings.padding(pw);
+                Paddings.padding(pw, "b3_");
                 pw.println("}");
                 pw.println("");
 
