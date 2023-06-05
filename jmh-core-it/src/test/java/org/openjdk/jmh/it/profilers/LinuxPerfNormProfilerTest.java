@@ -73,14 +73,10 @@ public class LinuxPerfNormProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
-        double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
         double instructions = ProfilerTestUtils.checkedGet(sr, "instructions").getScore();
         double cycles = ProfilerTestUtils.checkedGet(sr, "cycles").getScore();
         double branches = ProfilerTestUtils.checkedGet(sr, "branches").getScore();
 
-        Assert.assertNotEquals(0, ipc);
-        Assert.assertNotEquals(0, cpi);
         Assert.assertNotEquals(0, instructions);
         Assert.assertNotEquals(0, cycles);
         Assert.assertNotEquals(0, branches);
@@ -88,6 +84,12 @@ public class LinuxPerfNormProfilerTest {
         if (branches > instructions) {
             throw new IllegalStateException(String.format("Branches (%.2f) larger than instructions (%.3f)", branches, instructions));
         }
+
+        double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
+        double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
+
+        Assert.assertNotEquals(0, ipc);
+        Assert.assertNotEquals(0, cpi);
     }
 
 }

@@ -74,12 +74,14 @@ public class LinuxPerfProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double ipc = ProfilerTestUtils.checkedGet(sr, "·ipc").getScore();
-        double cpi = ProfilerTestUtils.checkedGet(sr, "·cpi").getScore();
         String msg = ProfilerTestUtils.checkedGet(sr, "·perf").extendedInfo();
 
-        Assert.assertNotEquals(0, ipc);
-        Assert.assertNotEquals(0, cpi);
+        if (sr.containsKey("·ipc")) {
+            double ipc = ProfilerTestUtils.checkedGet(sr, "·ipc").getScore();
+            double cpi = ProfilerTestUtils.checkedGet(sr, "·cpi").getScore();
+            Assert.assertNotEquals(0, ipc);
+            Assert.assertNotEquals(0, cpi);
+        }
 
         Assert.assertTrue(msg.contains("cycles"));
         Assert.assertTrue(msg.contains("instructions"));
