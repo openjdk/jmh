@@ -25,6 +25,7 @@
 package org.openjdk.jmh.it.profilers;
 
 import org.junit.Test;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.DTraceAsmProfiler;
 import org.openjdk.jmh.profile.ProfilerException;
@@ -36,30 +37,29 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-public class DTraceAsmProfilerTest extends AbstractAsmProfilerTest {
+@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+@State(Scope.Thread)
+public abstract class AbstractAsmProfilerTest {
 
-    @Test
-    public void test() throws RunnerException {
-        try {
-            new DTraceAsmProfiler("");
-        } catch (ProfilerException e) {
-            System.out.println("Profiler is not supported or cannot be enabled, skipping test");
-            return;
-        }
+    private static final int SIZE = 10_000;
 
-        Options opts = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(DTraceAsmProfiler.class)
-                .build();
+    private byte[] src, dst;
 
-        RunResult rr = new Runner(opts).runSingle();
+    @Setup
+    public void setup() {
+        src = new byte[SIZE];
+        dst = new byte[SIZE];
+    }
 
-        Map<String, Result> sr = rr.getSecondaryResults();
-        String out = ProfilerTestUtils.checkedGet(sr, "·asm").extendedInfo();
-        if (!out.contains("StubRoutines::")) {
-            throw new IllegalStateException("Profile does not contain the required frame");
-        }
+    @Benchmark
+    public void work() {
+        // Call something that definitely results in calling a native stub.
+        // This should work on environments where hsdis is not available.
+        System.arraycopy(src, 0, dst, 0, SIZE);
     }
 
 }

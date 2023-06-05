@@ -25,10 +25,7 @@
 package org.openjdk.jmh.it.profilers;
 
 import org.junit.Test;
-import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.profile.LinuxPerfAsmProfiler;
 import org.openjdk.jmh.profile.ProfilerException;
 import org.openjdk.jmh.profile.WinPerfAsmProfiler;
 import org.openjdk.jmh.results.Result;
@@ -39,22 +36,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
-public class WinPerfAsmProfilerTest {
-
-    @Benchmark
-    public void work() {
-        somethingInTheMiddle();
-    }
-
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public void somethingInTheMiddle() {
-        Blackhole.consumeCPU(1);
-    }
+public class WinPerfAsmProfilerTest extends AbstractAsmProfilerTest {
 
     @Test
     public void test() throws RunnerException {
@@ -74,7 +57,7 @@ public class WinPerfAsmProfilerTest {
 
         Map<String, Result> sr = rr.getSecondaryResults();
         String out = ProfilerTestUtils.checkedGet(sr, "·asm").extendedInfo();
-        if (!out.contains("somethingInTheMiddle")) {
+        if (!out.contains("StubRoutines::")) {
             throw new IllegalStateException("Profile does not contain the required frame");
         }
     }
