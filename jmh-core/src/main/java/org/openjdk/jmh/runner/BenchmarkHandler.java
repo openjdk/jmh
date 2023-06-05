@@ -53,7 +53,10 @@ class BenchmarkHandler {
      */
     private final ExecutorService executor;
 
+    private final CyclicBarrier workerDataBarrier;
     private final ConcurrentMap<Thread, WorkerData> workerData;
+    private final BlockingQueue<WorkerData> unusedWorkerData;
+
     private final BlockingQueue<ThreadParams> tps;
 
     private final OutputFormat out;
@@ -74,14 +77,18 @@ class BenchmarkHandler {
         profilersRev = new ArrayList<>(profilers);
         Collections.reverse(profilersRev);
 
-        tps = new ArrayBlockingQueue<>(executionParams.getThreads());
-        tps.addAll(distributeThreads(executionParams.getThreads(), executionParams.getThreadGroups()));
+        int threads = executionParams.getThreads();
 
+        tps = new ArrayBlockingQueue<>(threads);
+        tps.addAll(distributeThreads(threads, executionParams.getThreadGroups()));
+
+        workerDataBarrier = new CyclicBarrier(threads, this::captureUnusedWorkerData);
         workerData = new ConcurrentHashMap<>();
+        unusedWorkerData = new ArrayBlockingQueue<>(threads);
 
         this.out = out;
         try {
-            executor = EXECUTOR_TYPE.createExecutor(executionParams.getThreads(), executionParams.getBenchmark());
+            executor = EXECUTOR_TYPE.createExecutor(threads, executionParams.getBenchmark());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -182,6 +189,11 @@ class BenchmarkHandler {
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.platformWorkerFactory(prefix));
             }
+
+            @Override
+            boolean stableThreads() {
+                return true;
+            }
         },
 
         /**
@@ -204,6 +216,9 @@ class BenchmarkHandler {
             }
         },
 
+        /**
+         * Use custom executor
+         */
         CUSTOM {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
@@ -216,6 +231,11 @@ class BenchmarkHandler {
         ;
 
         abstract ExecutorService createExecutor(int maxThreads, String prefix) throws Exception;
+
+        /**
+         * @return Executor always reuses the same threads?
+         */
+        boolean stableThreads() { return false; }
     }
 
     protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
@@ -271,10 +291,12 @@ class BenchmarkHandler {
      *
      * @param benchmarkParams Benchmark parameters
      * @param params  Iteration parameters
-     * @param last    Should this iteration considered to be the last
+     * @param isFirstIteration   Should this iteration considered to be the first
+     * @param isLastIteration    Should this iteration considered to be the last
      * @return IterationResult
      */
-    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params, boolean last) {
+    public IterationResult runIteration(BenchmarkParams benchmarkParams, IterationParams params,
+                                        boolean isFirstIteration, boolean isLastIteration) {
         int numThreads = benchmarkParams.getThreads();
         TimeValue runtime = params.getTime();
 
@@ -285,7 +307,8 @@ class BenchmarkHandler {
         List<Result> iterationResults = new ArrayList<>();
 
         InfraControl control = new InfraControl(benchmarkParams, params,
-                preSetupBarrier, preTearDownBarrier, last,
+                preSetupBarrier, preTearDownBarrier,
+                isFirstIteration, isLastIteration,
                 new Control());
 
         // preparing the worker runnables
@@ -376,8 +399,14 @@ class BenchmarkHandler {
                 allOps += btr.getAllOps();
                 measuredOps += btr.getMeasuredOps();
             } catch (ExecutionException ex) {
-                // unwrap: ExecutionException -> Throwable-wrapper -> InvocationTargetException
-                Throwable cause = ex.getCause().getCause().getCause();
+                // Unwrap at most three exceptions through benchmark-thrown exception:
+                //  ExecutionException -> Throwable-wrapper -> InvocationTargetException
+                //
+                // Infrastructural exceptions come with shorter causal chains.
+                Throwable cause = ex;
+                for (int c = 0; (c < 3) && (cause.getCause() != null); c++) {
+                    cause = cause.getCause();
+                }
 
                 // record exception, unless it is the assist exception
                 if (!(cause instanceof FailureAssistException)) {
@@ -403,12 +432,46 @@ class BenchmarkHandler {
         return result;
     }
 
-    private WorkerData newWorkerData(Thread worker) {
-        WorkerData wd = workerData.get(worker);
-        if (wd != null) {
-            return wd;
+
+    private WorkerData getWorkerData(Thread worker) {
+        // See if there is a good worker data for us already, use it.
+        WorkerData wd = workerData.remove(worker);
+
+        // Wait for all threads to roll to this synchronization point.
+        // If there is any thread without assignment, the barrier action
+        // would dump the unused worker data for claiming.
+        try {
+            workerDataBarrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            throw new IllegalStateException("Worker data barrier error ", e);
         }
 
+        if (wd == null) {
+            // Odd mode, no worker task recorded for the thread. Pull the worker data
+            // from the unused queue. This can only happen with executors with unstable threads.
+            if (EXECUTOR_TYPE.stableThreads()) {
+                throw new IllegalStateException("Worker data assignment failed for executor with stable threads");
+            }
+
+            wd = unusedWorkerData.poll();
+            if (wd == null) {
+                throw new IllegalStateException("Cannot get another thread working data");
+            }
+        }
+
+        WorkerData exist = workerData.put(worker, wd);
+        if (exist != null) {
+            throw new IllegalStateException("Duplicate thread data");
+        }
+        return wd;
+    }
+
+    private void captureUnusedWorkerData() {
+        unusedWorkerData.addAll(workerData.values());
+        workerData.clear();
+    }
+
+    private WorkerData newWorkerData(Thread worker) {
         try {
             Object o = clazz.getConstructor().newInstance();
             ThreadParams t = tps.poll();
@@ -416,7 +479,7 @@ class BenchmarkHandler {
                 throw new IllegalStateException("Cannot get another thread params");
             }
 
-            wd = new WorkerData(o, t);
+            WorkerData wd = new WorkerData(o, t);
             WorkerData exist = workerData.put(worker, wd);
             if (exist != null) {
                 throw new IllegalStateException("Duplicate thread data");
@@ -446,7 +509,7 @@ class BenchmarkHandler {
                 runner = Thread.currentThread();
 
                 // poll the current data, or instantiate in this thread, if needed
-                WorkerData wd = newWorkerData(runner);
+                WorkerData wd = control.firstIteration ? newWorkerData(runner) : getWorkerData(runner);
 
                 return (BenchmarkTaskResult) method.invoke(wd.instance, control, wd.params);
             } catch (Throwable e) {

@@ -60,7 +60,11 @@ public class Zero2ThreadCountTest {
 
     @TearDown
     public void check() {
-        Assert.assertEquals(1, test1threads.size());
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals(1, test1threads.size());
+        } else {
+            Assert.assertTrue(test1threads.size() >= 1);
+        }
         Assert.assertEquals(0, test2threads.size());
     }
 

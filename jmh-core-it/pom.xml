@@ -58,6 +58,8 @@ questions.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Integration tests are not measuring performance, OK to run them concurrently -->
+        <jmh.testjvmargs>-Djmh.ignoreLock=true -Xms256m -Xmx256m -Djmh.core.it.profile=${jmh.core.it.profile}</jmh.testjvmargs>
     </properties>
 
     <build>
@@ -66,8 +68,7 @@ questions.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- Integration tests are not measuring performance, OK to run them concurrently -->
-                    <argLine>-Djmh.ignoreLock=true -Xms256m -Xmx256m -Djmh.core.it.profile=${jmh.core.it.profile}</argLine>
+                    <argLine>${jmh.testjvmargs}</argLine>
                     <forkCount>1C</forkCount>
                     <!-- Integration tests sometimes set system properties, do not let them leak to other tests -->
                     <reuseForks>false</reuseForks>
@@ -120,6 +121,96 @@ questions.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>executor-virtual</id>
+            <properties>
+                <jmh.core.it.profile>executor-virtual</jmh.core.it.profile>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>${jmh.testjvmargs} -Djmh.executor=VIRTUAL</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>executor-fjp</id>
+            <properties>
+                <jmh.core.it.profile>executor-fjp</jmh.core.it.profile>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>${jmh.testjvmargs} -Djmh.executor=FJP</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>executor-custom</id>
+            <properties>
+                <jmh.core.it.profile>executor-custom</jmh.core.it.profile>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>${jmh.testjvmargs} -Djmh.executor=CUSTOM -Djmh.executor.class=org.openjdk.jmh.it.CustomExecutorService</argLine>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -44,6 +44,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,70 +55,57 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ThreadBenchSameThreadTest {
 
-    private Thread setupRunThread;
-    private Thread setupIterationThread;
-    private Thread setupInvocationThread;
-    private Thread teardownRunThread;
-    private Thread teardownIterationThread;
-    private Thread tearDownInvocationThread;
-    private Thread testInvocationThread;
+    private final Set<Thread> setupRunThread = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> setupIterationThread = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> setupInvocationThread = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> teardownRunThread = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> teardownIterationThread = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> teardownInvocationThread = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Thread> testInvocationThread = Collections.synchronizedSet(new HashSet<>());
 
     @Setup(Level.Trial)
     public void setupRun() {
-        if (setupRunThread == null) {
-            setupRunThread = Thread.currentThread();
-        }
-        Assert.assertEquals("setupRun", setupRunThread, Thread.currentThread());
+        setupRunThread.add(Thread.currentThread());
     }
 
     @Setup(Level.Iteration)
     public void setupIteration() {
-        if (setupIterationThread == null) {
-            setupIterationThread = Thread.currentThread();
-        }
-        Assert.assertEquals("setupIteration", setupIterationThread, Thread.currentThread());
+        setupIterationThread.add(Thread.currentThread());
     }
 
     @Setup(Level.Invocation)
     public void setupInvocation() {
-        if (setupInvocationThread == null) {
-            setupInvocationThread = Thread.currentThread();
-        }
-        Assert.assertEquals("setupInvocation", setupInvocationThread, Thread.currentThread());
+        setupInvocationThread.add(Thread.currentThread());
     }
 
     @TearDown(Level.Trial)
     public void tearDownRun() {
-        if (teardownRunThread == null) {
-            teardownRunThread = Thread.currentThread();
+        teardownRunThread.add(Thread.currentThread());
+
+        // Threads can change iteration to iteration
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals("test == setupRun",      testInvocationThread, setupRunThread);
+            Assert.assertEquals("test == teardownRun",   testInvocationThread, teardownRunThread);
+        } else {
+            Assert.assertTrue("test <: setupRun",           testInvocationThread.containsAll(setupRunThread));
+            Assert.assertTrue("test <: teardownRunThread",  testInvocationThread.containsAll(teardownRunThread));
         }
-        Assert.assertEquals("teardownRun", teardownRunThread, Thread.currentThread());
     }
 
     @TearDown(Level.Iteration)
     public void tearDownIteration() {
-        if (teardownIterationThread == null) {
-            teardownIterationThread = Thread.currentThread();
-        }
-        Assert.assertEquals("teardownIteration", teardownIterationThread, Thread.currentThread());
+        teardownIterationThread.add(Thread.currentThread());
+
+        // Within iteration, expect the same thread
+        Assert.assertEquals("test == setupIteration",     testInvocationThread, setupIterationThread);
+        Assert.assertEquals("test == teardownIteration",  testInvocationThread, teardownIterationThread);
+        Assert.assertEquals("test == setupInvocation",    testInvocationThread, setupInvocationThread);
+        Assert.assertEquals("test == teardownInvocation", testInvocationThread, teardownInvocationThread);
     }
 
     @TearDown(Level.Invocation)
     public void tearDownInvocation() {
-        if (tearDownInvocationThread == null) {
-            tearDownInvocationThread = Thread.currentThread();
-        }
-        Assert.assertEquals("tearDownInvocation", tearDownInvocationThread, Thread.currentThread());
-    }
-
-    @TearDown(Level.Trial)
-    public void teardownZZZ() { // should perform last
-        Assert.assertEquals("test != setupRun",           testInvocationThread, setupRunThread);
-        Assert.assertEquals("test != setupIteration",     testInvocationThread, setupIterationThread);
-        Assert.assertEquals("test != setupInvocation",    testInvocationThread, setupInvocationThread);
-        Assert.assertEquals("test != teardownRun",        testInvocationThread, teardownRunThread);
-        Assert.assertEquals("test != teardownIteration",  testInvocationThread, teardownIterationThread);
-        Assert.assertEquals("test != teardownInvocation", testInvocationThread, tearDownInvocationThread);
+        teardownInvocationThread.add(Thread.currentThread());
     }
 
     @Benchmark
@@ -125,10 +115,7 @@ public class ThreadBenchSameThreadTest {
     @Fork(1)
     @Threads(4)
     public void test() {
-        if (testInvocationThread == null) {
-            testInvocationThread = Thread.currentThread();
-        }
-        Assert.assertEquals("test", testInvocationThread, Thread.currentThread());
+        testInvocationThread.add(Thread.currentThread());
         Fixtures.work();
     }
 

@@ -56,7 +56,11 @@ public class GroupDefaultBenchSharingTest {
 
     @TearDown(Level.Trial)
     public void tearDown() {
-        Assert.assertEquals("All the threads have visited this state", 2, visitors.size());
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals(2, visitors.size());
+        } else {
+            Assert.assertTrue(visitors.size() >= 2);
+        }
     }
 
     @Benchmark

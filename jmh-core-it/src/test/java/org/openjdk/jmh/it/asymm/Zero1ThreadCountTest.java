@@ -26,17 +26,7 @@ package org.openjdk.jmh.it.asymm;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -61,7 +51,11 @@ public class Zero1ThreadCountTest {
     @TearDown
     public void check() {
         Assert.assertEquals(0, test1threads.size());
-        Assert.assertEquals(2, test2threads.size());
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals(2, test2threads.size());
+        } else {
+            Assert.assertTrue(test2threads.size() >= 2);
+        }
     }
 
     @Benchmark

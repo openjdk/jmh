@@ -56,7 +56,11 @@ public class TwoThreadCountTest {
 
     @TearDown(Level.Iteration)
     public void tearDown() {
-        Assert.assertEquals("amount of threads should be 2", threads.size(), 2);
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals(2, threads.size());
+        } else {
+            Assert.assertTrue(threads.size() >= 2);
+        }
     }
 
     @Benchmark
