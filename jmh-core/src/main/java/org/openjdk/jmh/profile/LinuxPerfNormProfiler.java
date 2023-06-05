@@ -133,6 +133,10 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 }
             }
         }
+
+        if (!useDefaultStats && supportedEvents.isEmpty()) {
+            throw new ProfilerException("No supported events.");
+        }
     }
 
     @Override
