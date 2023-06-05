@@ -170,24 +170,14 @@ class BenchmarkHandler {
         return true;
     }
 
-    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("jmh.executor", ExecutorType.FIXED_TPE.name()));
+    private static final ExecutorType EXECUTOR_TYPE = Enum.valueOf(ExecutorType.class, System.getProperty("jmh.executor", ExecutorType.PLATFORM.name()));
 
     private enum ExecutorType {
 
         /**
-         * Use Executors.newCachedThreadPool
+         * Use fixed thread pool with platform threads
          */
-        CACHED_TPE {
-            @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) {
-                return Executors.newCachedThreadPool(WorkerThreadFactories.platformWorkerFactory(prefix));
-            }
-        },
-
-        /**
-         * Use Executors.newFixedThreadPool
-         */
-        FIXED_TPE {
+        PLATFORM {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.platformWorkerFactory(prefix));
@@ -195,9 +185,9 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use FixedThreadPool with virtual threads
+         * Use fixed thread pool with virtual threads
          */
-        VIRTUAL_TPE {
+        VIRTUAL {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.virtualWorkerFactory(prefix));
@@ -205,33 +195,13 @@ class BenchmarkHandler {
         },
 
         /**
-         * Use ForkJoinPool.
+         * Use ForkJoinPool
          */
         FJP {
             @Override
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return new ForkJoinPool(maxThreads);
             }
-        },
-
-        /**
-         * Use ForkJoinPool.commonPool (JDK 8+)
-         */
-        FJP_COMMON {
-            @Override
-            ExecutorService createExecutor(int maxThreads, String prefix) throws Exception {
-                // (Aleksey):
-                // requires some of the reflection magic to untie from JDK 8 compile-time dependencies
-                Method m = Class.forName("java.util.concurrent.ForkJoinPool").getMethod("commonPool");
-                return (ExecutorService) m.invoke(null);
-            }
-
-            @Override
-            boolean shutdownForbidden() {
-                // this is a system-wide executor, don't shutdown
-                return true;
-            }
-
         },
 
         CUSTOM {
@@ -246,10 +216,6 @@ class BenchmarkHandler {
         ;
 
         abstract ExecutorService createExecutor(int maxThreads, String prefix) throws Exception;
-
-        boolean shutdownForbidden() {
-            return false;
-        }
     }
 
     protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
@@ -281,7 +247,7 @@ class BenchmarkHandler {
         // No transient data is shared between benchmarks, purge it.
         workerData.clear();
 
-        if (EXECUTOR_TYPE.shutdownForbidden() || (executor == null)) {
+        if (executor == null) {
             return;
         }
         while (true) {
