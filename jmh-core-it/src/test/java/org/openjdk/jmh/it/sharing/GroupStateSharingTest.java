@@ -57,7 +57,11 @@ public class GroupStateSharingTest {
 
         @TearDown(Level.Trial)
         public void tearDown() {
-            Assert.assertEquals("All the threads have visited this state", 4, visitors.size());
+            if (Fixtures.expectStableThreads()) {
+                Assert.assertEquals(4, visitors.size());
+            } else {
+                Assert.assertTrue(visitors.size() >= 4);
+            }
         }
     }
 

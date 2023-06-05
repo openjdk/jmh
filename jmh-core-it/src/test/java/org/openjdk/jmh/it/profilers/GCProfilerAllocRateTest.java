@@ -68,6 +68,12 @@ public class GCProfilerAllocRateTest {
     }
 
     private void testWith(String initLine) throws RunnerException {
+        if (!Fixtures.expectStableThreads()) {
+            // This test assumes threads survive until the end of run to get their
+            // allocation data.
+            return;
+        }
+
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .addProfiler(GCProfiler.class, initLine)

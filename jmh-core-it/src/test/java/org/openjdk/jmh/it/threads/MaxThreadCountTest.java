@@ -56,7 +56,11 @@ public class MaxThreadCountTest {
 
     @TearDown(Level.Iteration)
     public void tearDown() {
-        Assert.assertEquals("amount of threads should be Runtime.getRuntime().availableProcessors()", threads.size(), Runtime.getRuntime().availableProcessors());
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals(threads.size(), Runtime.getRuntime().availableProcessors());
+        } else {
+            Assert.assertTrue(threads.size() >= Runtime.getRuntime().availableProcessors());
+        }
     }
 
     @Benchmark

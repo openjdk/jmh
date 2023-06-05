@@ -25,34 +25,37 @@
 package org.openjdk.jmh.generators.core;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
 
 public class Paddings {
 
-    private static final List<String> PADDING_CACHE;
+    private static final Map<String, String> PADDING_CACHE =
+            Collections.synchronizedMap(new HashMap<>());
 
-    static {
-        PADDING_CACHE = new ArrayList<>();
+    private static String generate(String prefix) {
+        if (prefix.isEmpty()) {
+            throw new IllegalArgumentException("prefix must not be empty");
+        }
+        StringJoiner sj = new StringJoiner("");
         for (int p = 0; p < 16; p++) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("    ");
-            sb.append(String.format("byte p%03d", p * 16 + 0));
-            for (int q = 1; q < 16; q++) {
-                sb.append(String.format(", p%03d", p * 16 + q));
+            sj.add("    byte ");
+            for (int q = 0; q < 16; q++) {
+                if (q != 0) {
+                    sj.add(", ");
+                }
+                sj.add(prefix);
+                sj.add(String.format("%03d", p * 16 + q));
             }
-            sb.append(";");
-            PADDING_CACHE.add(sb.toString());
+            sj.add(";");
+            sj.add(System.lineSeparator());
         }
+        return sj.toString();
     }
 
-    public static void padding(List<String> lines) {
-        lines.addAll(PADDING_CACHE);
-    }
-
-    public static void padding(PrintWriter writer) {
-        for (String s : PADDING_CACHE) {
-            writer.println(s);
-        }
+    public static void padding(PrintWriter writer, String prefix) {
+        writer.print(PADDING_CACHE.computeIfAbsent(prefix, Paddings::generate));
     }
 }

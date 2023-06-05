@@ -27,6 +27,8 @@ package org.openjdk.jmh.infra;
 import org.openjdk.jmh.util.Utils;
 
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Random;
 
 /*
@@ -251,9 +253,15 @@ public final class Blackhole extends BlackholeL4 {
      * AND LOTS OF TIME OVER THAT. ADJUST YOUR PLANS ACCORDINGLY.
      */
 
-    private static final boolean COMPILER_BLACKHOLE = Boolean.getBoolean("compilerBlackholesEnabled");
+    private static final boolean COMPILER_BLACKHOLE;
 
     static {
+        COMPILER_BLACKHOLE = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return Boolean.getBoolean("compilerBlackholesEnabled");
+            }
+        });
+
         Utils.check(Blackhole.class, "b1", "b2");
         Utils.check(Blackhole.class, "bool1", "bool2");
         Utils.check(Blackhole.class, "c1", "c2");

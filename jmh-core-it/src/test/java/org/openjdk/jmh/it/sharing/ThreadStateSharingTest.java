@@ -56,7 +56,11 @@ public class ThreadStateSharingTest {
 
         @TearDown(Level.Trial)
         public void tearDown() {
-            Assert.assertEquals("Single thread has visited this state", 1, visitors.size());
+            if (Fixtures.expectStableThreads()) {
+                Assert.assertEquals(1, visitors.size());
+            } else {
+                Assert.assertTrue(visitors.size() >= 1);
+            }
         }
     }
 

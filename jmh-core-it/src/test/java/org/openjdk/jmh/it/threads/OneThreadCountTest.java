@@ -56,7 +56,11 @@ public class OneThreadCountTest {
 
     @TearDown(Level.Iteration)
     public void tearDown() {
-        Assert.assertEquals("amount of threads should be 1", threads.size(), 1);
+        if (Fixtures.expectStableThreads()) {
+            Assert.assertEquals(1, threads.size());
+        } else {
+            Assert.assertTrue(threads.size() >= 1);
+        }
     }
 
     @Benchmark

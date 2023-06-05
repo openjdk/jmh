@@ -24,11 +24,19 @@
  */
 package org.openjdk.jmh.it.security;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 public class SecurityManagerTestUtils {
 
     public static void install() {
         try {
-            System.setSecurityManager(new SecurityManager());
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
+                    System.setSecurityManager(new SecurityManager());
+                    return null;
+                }
+            });
         } catch (UnsupportedOperationException uoe) {
             // Probably modern JDK without SecurityManager support.
         }
@@ -36,7 +44,12 @@ public class SecurityManagerTestUtils {
 
     public static void remove() {
         try {
-            System.setSecurityManager(null);
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
+                    System.setSecurityManager(null);
+                    return null;
+                }
+            });
         } catch (UnsupportedOperationException uoe) {
             // Probably modern JDK without SecurityManager support.
         }

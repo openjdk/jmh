@@ -24,11 +24,27 @@
  */
 package org.openjdk.jmh.it;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
 
 public class Fixtures {
 
-    private static final int REPS = Integer.getInteger("jmh.it.reps", 1);
+    private static final int REPS;
+    private static final String PROFILE;
+
+    static {
+        REPS = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
+            public Integer run() {
+                return Integer.getInteger("jmh.it.reps", 1);
+            }
+        });
+        PROFILE = AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
+                return System.getProperty("jmh.core.it.profile");
+            }
+        });
+    }
 
     public static int repetitionCount() {
         return REPS;
@@ -45,6 +61,14 @@ public class Fixtures {
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static boolean expectStableThreads() {
+        return isDefaultProfile();
+    }
+
+    public static boolean isDefaultProfile() {
+        return PROFILE.equals("default");
     }
 
 }
