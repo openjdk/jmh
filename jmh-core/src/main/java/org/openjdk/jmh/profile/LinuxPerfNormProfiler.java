@@ -118,19 +118,22 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         Collection<String> incremental = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--interval-print", String.valueOf(incrementInterval), "echo", "1");
         isIncrementable = incremental.isEmpty();
 
+        Collection<String> candidateEvents = new ArrayList<>();
         if (userEvents != null) {
             for (String ev : userEvents) {
                 if (ev.trim().isEmpty()) continue;
-                supportedEvents.add(ev);
+                candidateEvents.add(ev);
             }
         }
 
         if (supportedEvents.isEmpty()) {
-            for (String ev : interestingEvents) {
-                Collection<String> res = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--event", ev, "echo", "1");
-                if (res.isEmpty()) {
-                    supportedEvents.add(ev);
-                }
+            candidateEvents.addAll(Arrays.asList(interestingEvents));
+        }
+
+        for (String ev : candidateEvents) {
+            Collection<String> res = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--event", ev, "echo", "1");
+            if (res.isEmpty()) {
+                supportedEvents.add(ev);
             }
         }
 
