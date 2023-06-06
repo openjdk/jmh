@@ -342,8 +342,14 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
 
                 // Also figure out IPC/CPI, if enough counters available:
                 {
-                    long cycles = events.count("cycles");
-                    long instructions = events.count("instructions");
+                    long c1 = events.count("cycles");
+                    long c2 = events.count("cycles:u");
+
+                    long i1 = events.count("instructions");
+                    long i2 = events.count("instructions:u");
+
+                    long cycles = (c1 != 0) ? c1 : c2;
+                    long instructions = (i1 != 0) ? i1 : i2;
                     if (cycles != 0 && instructions != 0) {
                         results.add(new PerfResult("CPI", "clks/insn", 1.0 * cycles / instructions));
                         results.add(new PerfResult("IPC", "insns/clk", 1.0 * instructions / cycles));
