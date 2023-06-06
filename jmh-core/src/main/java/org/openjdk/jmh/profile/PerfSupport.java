@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.profile;
 
+import java.util.Collection;
+
 class PerfSupport {
 
     static final String PERF_EXEC;
@@ -31,6 +33,15 @@ class PerfSupport {
     static {
         String perf = System.getenv("JMH_PERF");
         PERF_EXEC = (perf == null) ? "perf" : perf;
+    }
+
+    public static boolean containsUnsupported(Collection<String> msgs, String event) {
+        for (String m : msgs) {
+            if (m.contains(event) && m.contains("<not supported>")) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

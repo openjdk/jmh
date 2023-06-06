@@ -528,6 +528,10 @@ public class Utils {
         }
     }
 
+    public static Collection<String> runWith(String... cmds) {
+        return runWith(Arrays.asList(cmds));
+    }
+
     public static Collection<String> runWith(List<String> cmd) {
         Collection<String> messages = new ArrayList<>();
         try {

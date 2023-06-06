@@ -51,6 +51,11 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(failMsg.toString());
         }
 
+        Collection<String> passMsg = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--event", Utils.join(requestedEventNames, ","), "--log-fd", "2", "echo", "1");
+        if (PerfSupport.containsUnsupported(passMsg, "")) {
+            throw new ProfilerException("Unsupported events: " + passMsg);
+        }
+
         try {
             sampleFrequency = set.valueOf(optFrequency);
         } catch (OptionException e) {

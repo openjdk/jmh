@@ -133,7 +133,10 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         for (String ev : candidateEvents) {
             Collection<String> res = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--event", ev, "echo", "1");
             if (res.isEmpty()) {
-                supportedEvents.add(ev);
+                Collection<String> out = Utils.runWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--event", ev, "echo", "1");
+                if (!PerfSupport.containsUnsupported(out, ev)) {
+                    supportedEvents.add(ev);
+                }
             }
         }
 
