@@ -73,9 +73,9 @@ public class LinuxPerfNormProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double instructions = ProfilerTestUtils.checkedGet(sr, "instructions").getScore();
-        double cycles = ProfilerTestUtils.checkedGet(sr, "cycles").getScore();
-        double branches = ProfilerTestUtils.checkedGet(sr, "branches").getScore();
+        double instructions = ProfilerTestUtils.checkedGet(sr, "instructions", "instructions:u").getScore();
+        double cycles = ProfilerTestUtils.checkedGet(sr, "cycles", "cycles:u").getScore();
+        double branches = ProfilerTestUtils.checkedGet(sr, "branches", "branches:u").getScore();
 
         Assert.assertNotEquals(0, instructions);
         Assert.assertNotEquals(0, cycles);

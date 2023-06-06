@@ -26,24 +26,27 @@ package org.openjdk.jmh.it.profilers;
 
 import org.openjdk.jmh.results.Result;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class ProfilerTestUtils {
 
-    public static Result checkedGet(Map<String, Result> sr, String name) {
-        Result r = sr.get(name);
-        if (r != null) {
-            return r;
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (String k : sr.keySet()) {
-                sb.append(k);
-                sb.append(" = ");
-                sb.append(sr.get(k));
-                sb.append(System.lineSeparator());
+    public static Result checkedGet(Map<String, Result> sr, String... names) {
+        for (String name : names) {
+            Result r = sr.get(name);
+            if (r != null) {
+                return r;
             }
-            throw new IllegalStateException("Cannot find the result \"" + name + "\". Available entries: " + sb);
         }
+
+        StringBuilder sb = new StringBuilder();
+        for (String k : sr.keySet()) {
+            sb.append(k);
+            sb.append(" = ");
+            sb.append(sr.get(k));
+            sb.append(System.lineSeparator());
+        }
+        throw new IllegalStateException("Cannot find the result for " + Arrays.toString(names) + "\". Available entries: " + sb);
     }
 
 
