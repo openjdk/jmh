@@ -31,6 +31,7 @@ jobs:
         distribution: temurin
         java-version: ${{ matrix.java }}
         cache: maven
+        check-latest: true
 
     - name: Run build with tests (Default)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
