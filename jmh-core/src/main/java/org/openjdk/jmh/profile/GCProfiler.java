@@ -36,7 +36,6 @@ import org.openjdk.jmh.util.HashMultiset;
 import org.openjdk.jmh.util.Multiset;
 
 import javax.management.ListenerNotFoundException;
-import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import javax.management.openmbean.CompositeData;
@@ -151,9 +150,9 @@ public class GCProfiler implements InternalProfiler {
         }
 
         if (allocEnabled) {
-            if (beforeAllocated != HotspotAllocationSnapshot.EMPTY) {
+            if (beforeAllocated != null) {
                 HotspotAllocationSnapshot newSnapshot = VMSupport.getSnapshot();
-                long allocated = newSnapshot.subtract(beforeAllocated);
+                long allocated = newSnapshot.difference(beforeAllocated);
                 // When no allocations measured, we still need to report results to avoid user confusion
                 results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
                         (afterTime != beforeTime) ?
@@ -204,13 +203,40 @@ public class GCProfiler implements InternalProfiler {
         return results;
     }
 
-    static class HotspotAllocationSnapshot {
-        public final static HotspotAllocationSnapshot EMPTY = new HotspotAllocationSnapshot(new long[0], new long[0]);
+    interface HotspotAllocationSnapshot {
+        long difference(HotspotAllocationSnapshot before);
+    }
 
+    static class GlobalHotspotAllocationSnapshot implements HotspotAllocationSnapshot {
+        private final long allocatedBytes;
+
+        public GlobalHotspotAllocationSnapshot(long allocatedBytes) {
+            this.allocatedBytes = allocatedBytes;
+        }
+
+        @Override
+        public long difference(HotspotAllocationSnapshot before) {
+            if (!(before instanceof GlobalHotspotAllocationSnapshot)) {
+                throw new IllegalArgumentException();
+            }
+
+            GlobalHotspotAllocationSnapshot other = (GlobalHotspotAllocationSnapshot) before;
+
+            long beforeAllocs = other.allocatedBytes;
+            if (allocatedBytes >= beforeAllocs) {
+                return allocatedBytes - beforeAllocs;
+            } else {
+                // Do not allow negative values
+                return 0;
+            }
+        }
+    }
+
+    static class PerThreadHotspotAllocationSnapshot implements HotspotAllocationSnapshot {
         private final long[] threadIds;
         private final long[] allocatedBytes;
 
-        private HotspotAllocationSnapshot(long[] threadIds, long[] allocatedBytes) {
+        private PerThreadHotspotAllocationSnapshot(long[] threadIds, long[] allocatedBytes) {
             this.threadIds = threadIds;
             this.allocatedBytes = allocatedBytes;
         }
@@ -224,7 +250,13 @@ public class GCProfiler implements InternalProfiler {
          *
          * @return estimated number of allocated bytes between profiler calls
          */
-        public long subtract(HotspotAllocationSnapshot other) {
+        public long difference(HotspotAllocationSnapshot before) {
+            if (!(before instanceof PerThreadHotspotAllocationSnapshot)) {
+                throw new IllegalArgumentException();
+            }
+
+            PerThreadHotspotAllocationSnapshot other = (PerThreadHotspotAllocationSnapshot) before;
+
             HashMap<Long, Integer> prevIndex = new HashMap<>();
             for (int i = 0; i < other.threadIds.length; i++) {
                 long id = other.threadIds[i];
@@ -254,7 +286,8 @@ public class GCProfiler implements InternalProfiler {
      */
     static class VMSupport {
         private static ThreadMXBean ALLOC_MX_BEAN;
-        private static Method ALLOC_MX_BEAN_GETTER;
+        private static Method ALLOC_MX_BEAN_GETTER_PER_THREAD;
+        private static Method ALLOC_MX_BEAN_GETTER_GLOBAL;
         private static NotificationListener LISTENER;
         private static Multiset<String> CHURN;
 
@@ -272,9 +305,19 @@ public class GCProfiler implements InternalProfiler {
                 }
 
                 ALLOC_MX_BEAN = bean;
-                ALLOC_MX_BEAN_GETTER = internalIntf.getMethod("getThreadAllocatedBytes", long[].class);
-                getAllocatedBytes(bean.getAllThreadIds());
 
+                // See if global getter is available in this JVM
+                try {
+                    ALLOC_MX_BEAN_GETTER_GLOBAL = internalIntf.getMethod("getTotalThreadAllocatedBytes");
+                    getSnapshot();
+                    return true;
+                } catch (Exception e) {
+                    // Fall through
+                }
+
+                // See if per-thread getter is available in this JVM
+                ALLOC_MX_BEAN_GETTER_PER_THREAD = internalIntf.getMethod("getThreadAllocatedBytes", long[].class);
+                getSnapshot();
                 return true;
             } catch (Throwable e) {
                 System.out.println("Allocation profiling is not available: " + e.getMessage());
@@ -297,14 +340,6 @@ public class GCProfiler implements InternalProfiler {
             }
 
             return false;
-        }
-
-        private static long[] getAllocatedBytes(long[] threadIds) {
-            try {
-                return (long[]) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, (Object) threadIds);
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new IllegalStateException(e);
-            }
         }
 
         private static NotificationListener newListener() {
@@ -343,9 +378,27 @@ public class GCProfiler implements InternalProfiler {
         }
 
         public static HotspotAllocationSnapshot getSnapshot() {
+            // Try the global getter first, if available
+            if (ALLOC_MX_BEAN_GETTER_GLOBAL != null) {
+                try {
+                    long allocatedBytes = (long) ALLOC_MX_BEAN_GETTER_GLOBAL.invoke(ALLOC_MX_BEAN);
+                    if (allocatedBytes == -1L) {
+                        throw new IllegalStateException("getTotalThreadAllocatedBytes is disabled");
+                    }
+                    return new GlobalHotspotAllocationSnapshot(allocatedBytes);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
+            // Fall back to per-thread getter
             long[] threadIds = ALLOC_MX_BEAN.getAllThreadIds();
-            long[] allocatedBytes = getAllocatedBytes(threadIds);
-            return new HotspotAllocationSnapshot(threadIds, allocatedBytes);
+            try {
+                long[] allocatedBytes = (long[]) ALLOC_MX_BEAN_GETTER_PER_THREAD.invoke(ALLOC_MX_BEAN, (Object) threadIds);
+                return new PerThreadHotspotAllocationSnapshot(threadIds, allocatedBytes);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         public static synchronized void startChurnProfile() {
