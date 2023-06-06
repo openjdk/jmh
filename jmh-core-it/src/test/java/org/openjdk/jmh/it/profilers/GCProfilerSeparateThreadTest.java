@@ -67,7 +67,7 @@ public class GCProfilerSeparateThreadTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double allocRateNormB = sr.get("·gc.alloc.rate.norm").getScore();
+        double allocRateNormB = ProfilerTestUtils.checkedGet(sr, "·gc.alloc.rate.norm").getScore();
 
         String msg = "Reported by profiler: " + allocRateNormB + ", target: " + SIZE;
 
