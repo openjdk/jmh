@@ -69,14 +69,28 @@ public class GCProfilerSeparateThreadTest {
         Map<String, Result> sr = rr.getSecondaryResults();
         double allocRateNormB = sr.get("·gc.alloc.rate.norm").getScore();
 
-        boolean globalProfiler = JDKVersion.parseMajor(System.getProperty("java.version")) >= 21;
         String msg = "Reported by profiler: " + allocRateNormB + ", target: " + SIZE;
 
         // Allow 1% slack
-        if (globalProfiler && (Math.abs(1 - allocRateNormB / SIZE) > 0.01)) {
+        if (accurateProfiler() && (Math.abs(1 - allocRateNormB / SIZE) > 0.01)) {
             Assert.fail("Allocation rate failure. Reported by profiler: " + allocRateNormB + ", target: " + SIZE);
-        } else {
-            System.out.println(msg);
         }
+
+        System.out.println(msg);
+    }
+
+    private boolean accurateProfiler() {
+        // Change to this version-sensing code after JDK 21 releases:
+        // return JDKVersion.parseMajor(System.getProperty("java.version")) >= 21;
+
+        // Try to sense the existence of the accurate method:
+        try {
+            Class.forName("com.sun.management.ThreadMXBean").getMethod("getTotalThreadAllocatedBytes");
+            return true;
+        } catch (Exception e) {
+            // Fall through
+        }
+
+        return false;
     }
 }
