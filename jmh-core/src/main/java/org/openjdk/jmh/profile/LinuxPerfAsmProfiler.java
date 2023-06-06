@@ -53,7 +53,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(failMsg.toString());
         }
 
-        Collection<String> passMsg = Utils.tryWith(senseCmd);
+        Collection<String> passMsg = Utils.runWith(senseCmd);
         for (String ev : requestedEventNames) {
             if (PerfSupport.containsUnsupported(passMsg, ev)) {
                 throw new ProfilerException("Unsupported event: " + ev);
