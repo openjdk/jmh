@@ -24,73 +24,67 @@
  */
 package org.openjdk.jmh.it.profilers;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.profile.GCProfiler;
+import org.openjdk.jmh.profile.CompilerProfiler;
+import org.openjdk.jmh.profile.MemPoolProfiler;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.util.JDKVersion;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgs = {"-Xms1g", "-Xmx1g", "-XX:+UseParallelGC"})
-@BenchmarkMode(Mode.Throughput)
-@OutputTimeUnit(TimeUnit.SECONDS)
-public class GCProfilerSeparateThreadTest {
-
-    static final int SIZE = 1_000_000;
+@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+public class MemPoolProfilerTest {
 
     @Benchmark
-    public void separateAlloc(Blackhole bh) throws InterruptedException {
-        Thread t = new Thread(() -> bh.consume(new byte[SIZE]));
-        t.start();
-        t.join();
+    public void work() {
+        Fixtures.work();
     }
 
     @Test
-    public void testDefault() throws RunnerException {
+    public void test() throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(GCProfiler.class)
+                .addProfiler(MemPoolProfiler.class)
                 .build();
 
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double allocRateNormB = ProfilerTestUtils.checkedGet(sr, "·gc.alloc.rate.norm").getScore();
 
-        String msg = "Reported by profiler: " + allocRateNormB + ", target: " + SIZE;
+        double usedMetaspace = ProfilerTestUtils.checkedGet(sr, "·mempool.Metaspace.used").getScore();
+        double usedTotal = ProfilerTestUtils.checkedGet(sr, "·mempool.total.used").getScore();
+        double usedTotalCodeheap = ProfilerTestUtils.checkedGet(sr, "·mempool.total.codeheap.used").getScore();
 
-        // Allow 1% slack
-        if (accurateProfiler() && (Math.abs(1 - allocRateNormB / SIZE) > 0.01)) {
-            Assert.fail("Allocation rate failure. Reported by profiler: " + allocRateNormB + ", target: " + SIZE);
+        if (usedMetaspace == 0) {
+            throw new IllegalStateException("Metaspace used is zero");
         }
 
-        System.out.println(msg);
-    }
-
-    private boolean accurateProfiler() {
-        // Change to this version-sensing code after JDK 21 releases:
-        // return JDKVersion.parseMajor(System.getProperty("java.version")) >= 21;
-
-        // Try to sense the existence of the accurate method:
-        try {
-            Class.forName("com.sun.management.ThreadMXBean").getMethod("getTotalThreadAllocatedBytes");
-            return true;
-        } catch (Exception e) {
-            // Fall through
+        if (usedTotal == 0) {
+            throw new IllegalStateException("Total used is zero");
         }
 
-        return false;
+        if (usedTotalCodeheap == 0) {
+            throw new IllegalStateException("Total codeheap used is zero");
+        }
+
+        if (usedMetaspace > usedTotal) {
+            throw new IllegalStateException("Metaspace size is larger than total size. " +
+                    "Total: " + usedTotal + ", Metaspace: " + usedMetaspace);
+        }
+
+        if (usedTotalCodeheap > usedTotal) {
+            throw new IllegalStateException("Codeheap size is larger than total size. " +
+                    "Total: " + usedTotal + ", Codeheap: " + usedTotalCodeheap);
+        }
     }
+
 }

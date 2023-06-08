@@ -57,7 +57,7 @@ public class MemPoolProfiler implements InternalProfiler {
         long sum = 0L;
         for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
             long used = bean.getPeakUsage().getUsed();
-            if (bean.getName().contains("CodeHeap")) {
+            if (bean.getName().contains("CodeHeap") || bean.getName().contains("Code Cache")) {
                 sumCodeHeap += used;
             }
             sum += used;

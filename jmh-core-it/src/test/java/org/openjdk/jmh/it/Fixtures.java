@@ -71,4 +71,7 @@ public class Fixtures {
         return PROFILE.equals("default");
     }
 
+    public static boolean isVirtualExecutor() {
+        return PROFILE.contains("executor-virtual");
+    }
 }

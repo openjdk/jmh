@@ -94,7 +94,7 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
             throw new IllegalStateException("Cannot determine dtrace process PID");
         }
 
-        Collection<String> messages = Utils.tryWith("sudo", "kill", "-TERM", Long.toString(dtracePid));
+        Collection<String> messages = Utils.tryWith("sudo", "-n", "kill", "-TERM", Long.toString(dtracePid));
         if (!messages.isEmpty()) {
             throw new IllegalStateException(messages.toString());
         }

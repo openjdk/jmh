@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Red Hat, Inc. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,8 +27,10 @@ package org.openjdk.jmh.it.profilers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.it.Fixtures;
-import org.openjdk.jmh.profile.GCProfiler;
+import org.openjdk.jmh.profile.LinuxPerfNormProfiler;
+import org.openjdk.jmh.profile.ProfilerException;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
@@ -36,63 +38,58 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@BenchmarkMode(Mode.Throughput)
-@OutputTimeUnit(TimeUnit.SECONDS)
-public class GCProfilerAllocRateTest {
+public class LinuxPerfNormProfilerTest {
 
     @Benchmark
-    public Object allocate() {
-        return new byte[1000];
+    public void work() {
+        somethingInTheMiddle();
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    public void somethingInTheMiddle() {
+        Blackhole.consumeCPU(1);
     }
 
     @Test
-    public void testDefault() throws RunnerException {
-        testWith("");
-    }
-
-    @Test
-    public void testAlloc() throws RunnerException {
-        testWith("alloc=true");
-    }
-
-    @Test
-    public void testAll() throws RunnerException {
-        testWith("alloc=true;churn=true");
-    }
-
-    private void testWith(String initLine) throws RunnerException {
-        if (!Fixtures.expectStableThreads()) {
-            // This test assumes threads survive until the end of run to get their
-            // allocation data.
+    public void test() throws RunnerException {
+        try {
+            new LinuxPerfNormProfiler("");
+        } catch (ProfilerException e) {
+            System.out.println("Profiler is not supported or cannot be enabled, skipping test");
             return;
         }
 
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(GCProfiler.class, initLine)
+                .addProfiler(LinuxPerfNormProfiler.class)
                 .build();
 
         RunResult rr = new Runner(opts).runSingle();
 
-        double opsPerSec = rr.getPrimaryResult().getScore();
-
         Map<String, Result> sr = rr.getSecondaryResults();
-        double allocRateMB = ProfilerTestUtils.checkedGet(sr, "·gc.alloc.rate").getScore();
-        double allocRateNormB = ProfilerTestUtils.checkedGet(sr, "·gc.alloc.rate.norm").getScore();
-        double allocRatePrimaryMB = opsPerSec * allocRateNormB / 1024 / 1024;
+        double instructions = ProfilerTestUtils.checkedGet(sr, "instructions", "instructions:u").getScore();
+        double cycles = ProfilerTestUtils.checkedGet(sr, "cycles", "cycles:u").getScore();
+        double branches = ProfilerTestUtils.checkedGet(sr, "branches", "branches:u").getScore();
 
-        // Allow 20% slack
-        if (Math.abs(1 - allocRatePrimaryMB / allocRateMB) > 0.2) {
-            Assert.fail("Allocation rates disagree. " +
-                    "Reported by profiler: " + allocRateMB +
-                    ", computed from primary score: " + allocRatePrimaryMB);
+        Assert.assertNotEquals(0, instructions);
+        Assert.assertNotEquals(0, cycles);
+        Assert.assertNotEquals(0, branches);
+
+        if (branches > instructions) {
+            throw new IllegalStateException(String.format("Branches (%.2f) larger than instructions (%.3f)", branches, instructions));
         }
+
+        double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
+        double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
+
+        Assert.assertNotEquals(0, ipc);
+        Assert.assertNotEquals(0, cpi);
     }
+
 }
