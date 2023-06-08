@@ -49,6 +49,7 @@ public class InfraControl extends InfraControlL4 {
         Utils.check(InfraControl.class, "preSetup", "preTearDown");
         Utils.check(InfraControl.class, "firstIteration");
         Utils.check(InfraControl.class, "lastIteration");
+        Utils.check(InfraControl.class, "shouldYield");
         Utils.check(InfraControl.class, "warmupVisited", "warmdownVisited");
         Utils.check(InfraControl.class, "warmupShouldWait", "warmdownShouldWait");
         Utils.check(InfraControl.class, "warmupDone", "warmdownDone");
@@ -59,8 +60,9 @@ public class InfraControl extends InfraControlL4 {
     public InfraControl(BenchmarkParams benchmarkParams, IterationParams iterationParams,
                         CountDownLatch preSetup, CountDownLatch preTearDown,
                         boolean firstIteration, boolean lastIteration,
+                        boolean shouldYield,
                         Control notifyControl) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, notifyControl);
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, shouldYield, notifyControl);
     }
 
     /**
@@ -165,6 +167,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
     public final CountDownLatch preTearDown;
     public final boolean firstIteration;
     public final boolean lastIteration;
+    public final boolean shouldYield;
 
     public final AtomicInteger warmupVisited, warmdownVisited;
     public volatile boolean warmupShouldWait, warmdownShouldWait;
@@ -180,6 +183,7 @@ abstract class InfraControlL2 extends InfraControlL1 {
     public InfraControlL2(BenchmarkParams benchmarkParams, IterationParams iterationParams,
                           CountDownLatch preSetup, CountDownLatch preTearDown,
                           boolean firstIteration, boolean lastIteration,
+                          boolean shouldYield,
                           Control notifyControl) {
         warmupVisited = new AtomicInteger();
         warmdownVisited = new AtomicInteger();
@@ -199,6 +203,8 @@ abstract class InfraControlL2 extends InfraControlL1 {
         this.preTearDown = preTearDown;
         this.firstIteration = firstIteration;
         this.lastIteration = lastIteration;
+        this.shouldYield = shouldYield;
+
         this.benchmarkParams = benchmarkParams;
         this.iterationParams = iterationParams;
     }
@@ -281,8 +287,9 @@ abstract class InfraControlL3 extends InfraControlL2 {
     public InfraControlL3(BenchmarkParams benchmarkParams, IterationParams iterationParams,
                           CountDownLatch preSetup, CountDownLatch preTearDown,
                           boolean firstIteration, boolean lastIteration,
+                          boolean shouldYield,
                           Control notifyControl) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, notifyControl);
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, shouldYield, notifyControl);
     }
 }
 
@@ -292,8 +299,9 @@ abstract class InfraControlL4 extends InfraControlL3 {
     public InfraControlL4(BenchmarkParams benchmarkParams, IterationParams iterationParams,
                           CountDownLatch preSetup, CountDownLatch preTearDown,
                           boolean firstIteration, boolean lastIteration,
+                          boolean shouldYield,
                           Control notifyControl) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, notifyControl);
+        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, shouldYield, notifyControl);
     }
 }
 

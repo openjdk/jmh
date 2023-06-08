@@ -568,6 +568,7 @@ public class BenchmarkGenerator {
             writer.println(ident(4) + emitCall(method, states) + ';');
             invocationEpilog(writer, 4, method, states, false);
 
+            writer.println(ident(4) + "if (control.shouldYield) Thread.yield();");
             writer.println(ident(4) + "res.allOps++;");
             writer.println(ident(3) + "}");
             writer.println();
@@ -593,6 +594,7 @@ public class BenchmarkGenerator {
             writer.println(ident(5) + emitCall(method, states) + ';');
             invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(5) + "if (control.shouldYield) Thread.yield();");
             writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
             writer.println(ident(3) + "} catch (Throwable e) {");
@@ -702,6 +704,7 @@ public class BenchmarkGenerator {
             writer.println(ident(4) + emitCall(method, states) + ';');
             invocationEpilog(writer, 4, method, states, false);
 
+            writer.println(ident(4) + "if (control.shouldYield) Thread.yield();");
             writer.println(ident(4) + "res.allOps++;");
             writer.println(ident(3) + "}");
             writer.println();
@@ -726,6 +729,7 @@ public class BenchmarkGenerator {
             writer.println(ident(5) + emitCall(method, states) + ';');
             invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(5) + "if (control.shouldYield) Thread.yield();");
             writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
             writer.println(ident(3) + "} catch (Throwable e) {");
@@ -860,6 +864,7 @@ public class BenchmarkGenerator {
             writer.println(ident(4) + emitCall(method, states) + ';');
             invocationEpilog(writer, 4, method, states, false);
 
+            writer.println(ident(4) + "if (control.shouldYield) Thread.yield();");
             writer.println(ident(4) + "res.allOps++;");
             writer.println(ident(3) + "}");
             writer.println();
@@ -889,6 +894,7 @@ public class BenchmarkGenerator {
             writer.println(ident(5) + emitCall(method, states) + ';');
             invocationEpilog(writer, 5, method, states, false);
 
+            writer.println(ident(5) + "if (control.shouldYield) Thread.yield();");
             writer.println(ident(5) + "res.allOps++;");
             writer.println(ident(4) + "}");
             writer.println(ident(3) + "} catch (Throwable e) {");
