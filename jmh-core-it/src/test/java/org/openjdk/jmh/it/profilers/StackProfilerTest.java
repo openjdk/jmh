@@ -56,6 +56,11 @@ public class StackProfilerTest {
 
     @Test
     public void test() throws RunnerException {
+        if (Fixtures.isVirtualExecutor()) {
+            System.out.println("Stack profiler is not reliable with virtual threads");
+            return;
+        }
+
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .addProfiler(StackProfiler.class, "lines=10")
