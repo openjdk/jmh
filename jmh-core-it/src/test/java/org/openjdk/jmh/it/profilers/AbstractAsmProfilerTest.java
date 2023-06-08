@@ -25,6 +25,7 @@
 package org.openjdk.jmh.it.profilers;
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.util.JDKVersion;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +50,21 @@ public abstract class AbstractAsmProfilerTest {
         // Call something that definitely results in calling a native stub.
         // This should work on environments where hsdis is not available.
         System.arraycopy(src, 0, dst, 0, SIZE);
+    }
+
+    public static boolean checkDisassembly(String out) {
+        if (JDKVersion.parseMajor(System.getProperty("java.version")) >= 17) {
+            // Should always print, since abstract assembler is available
+            return out.contains("StubRoutines::");
+        } else {
+            if (out.contains("StubRoutines::")) {
+                // hsdis is enabled, good
+                return true;
+            } else {
+                // hsdis is not enabled, okay
+                return out.contains("<no assembly is recorded, native region>");
+            }
+        }
     }
 
 }

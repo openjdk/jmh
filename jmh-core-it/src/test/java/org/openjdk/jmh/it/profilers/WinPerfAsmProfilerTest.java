@@ -57,7 +57,7 @@ public class WinPerfAsmProfilerTest extends AbstractAsmProfilerTest {
 
         Map<String, Result> sr = rr.getSecondaryResults();
         String out = ProfilerTestUtils.checkedGet(sr, "·asm").extendedInfo();
-        if (!out.contains("StubRoutines::")) {
+        if (!checkDisassembly(out)) {
             throw new IllegalStateException("Profile does not contain the required frame: " + out);
         }
     }
