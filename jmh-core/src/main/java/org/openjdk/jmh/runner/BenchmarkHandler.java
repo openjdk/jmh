@@ -206,7 +206,9 @@ class BenchmarkHandler {
             }
 
             @Override
-            boolean shouldYield() { return true; }
+            boolean shouldYield() {
+                return true;
+            }
         },
 
         /**
