@@ -64,7 +64,7 @@ public class StackProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        String out = ProfilerTestUtils.checkedGet(sr, "·out").extendedInfo();
+        String out = ProfilerTestUtils.checkedGet(sr, "·stack").extendedInfo();
         if (!out.contains(StackProfilerTest.class.getCanonicalName() + ".somethingInTheMiddle")) {
             throw new IllegalStateException("Profile does not contain the required frame: " + out);
         }
