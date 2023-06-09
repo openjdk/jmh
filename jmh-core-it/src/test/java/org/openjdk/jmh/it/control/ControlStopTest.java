@@ -43,7 +43,7 @@ public class ControlStopTest {
     @Group("pingpong")
     public void ping(Control cnt) {
         while (!cnt.stopMeasurement) {
-            // this body is intentionally left blank
+            Thread.yield();
         }
     }
 
@@ -51,7 +51,7 @@ public class ControlStopTest {
     @Group("pingpong")
     public void pong(Control cnt) {
         while (!cnt.stopMeasurement) {
-            // this body is intentionally left blank
+            Thread.yield();
         }
     }
 

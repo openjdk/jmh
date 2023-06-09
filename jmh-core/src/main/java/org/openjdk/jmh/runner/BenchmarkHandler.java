@@ -204,6 +204,11 @@ class BenchmarkHandler {
             ExecutorService createExecutor(int maxThreads, String prefix) {
                 return Executors.newFixedThreadPool(maxThreads, WorkerThreadFactories.virtualWorkerFactory(prefix));
             }
+
+            @Override
+            boolean shouldYield() {
+                return true;
+            }
         },
 
         /**
@@ -236,6 +241,11 @@ class BenchmarkHandler {
          * @return Executor always reuses the same threads?
          */
         boolean stableThreads() { return false; }
+
+        /**
+         * @return Executing threads should yield occasionally to guarantee progress?
+         */
+        boolean shouldYield() { return false; }
     }
 
     protected void startProfilers(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
@@ -309,6 +319,7 @@ class BenchmarkHandler {
         InfraControl control = new InfraControl(benchmarkParams, params,
                 preSetupBarrier, preTearDownBarrier,
                 isFirstIteration, isLastIteration,
+                EXECUTOR_TYPE.shouldYield(),
                 new Control());
 
         // preparing the worker runnables
