@@ -433,18 +433,19 @@ class BenchmarkHandler {
     }
 
 
-    private WorkerData getWorkerData(Thread worker) {
+    private WorkerData getWorkerData(Thread worker) throws Exception {
         // See if there is a good worker data for us already, use it.
         WorkerData wd = workerData.remove(worker);
 
         // Wait for all threads to roll to this synchronization point.
         // If there is any thread without assignment, the barrier action
         // would dump the unused worker data for claiming.
-        try {
-            workerDataBarrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            throw new IllegalStateException("Worker data barrier error ", e);
-        }
+        //
+        // In face of interruptions, the barrier can either throw the interrupted
+        // exception if this thread caughts it and breaks the barrier,
+        // or broken barrier exception if other threads were waiting on this
+        // barrier. Bubble up both exceptions, and let the caller handle.
+        workerDataBarrier.await();
 
         if (wd == null) {
             // Odd mode, no worker task recorded for the thread. Pull the worker data
