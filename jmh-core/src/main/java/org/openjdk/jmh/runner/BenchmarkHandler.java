@@ -515,6 +515,12 @@ class BenchmarkHandler {
                 // bind the executor thread
                 runner = Thread.currentThread();
 
+                // Clear the interruption status for the thread before going into the infra.
+                // Normally, the interrupts would be cleared at the end of benchmark, but
+                // there is a tiny window when harness could deliver another interrupt after
+                // we left.
+                boolean unused = Thread.interrupted();
+
                 // poll the current data, or instantiate in this thread, if needed
                 WorkerData wd = control.firstIteration ? newWorkerData(runner) : getWorkerData(runner);
 
@@ -545,13 +551,13 @@ class BenchmarkHandler {
 
                 throw new Exception(e); // wrapping Throwable
             } finally {
+                // unbind the executor thread
+                runner = null;
+
                 // Clear the interruption status for the thread after leaving the benchmark method.
                 // If any InterruptedExceptions happened, they should have been handled by now.
                 // This prepares the runner thread for another iteration.
                 boolean unused = Thread.interrupted();
-
-                // unbind the executor thread
-                runner = null;
             }
         }
 
