@@ -395,6 +395,8 @@ class BenchmarkHandler {
 
         if (interrupts > 0) {
             out.print("(benchmark timed out, interrupted " + interrupts + " times) ");
+
+            // Roll over the workers
         }
 
         // Process the results: we get here after all worker threads have quit,
@@ -436,6 +438,8 @@ class BenchmarkHandler {
         // finished to capture the edge behaviors; or, on a failure path
         stopProfilers(benchmarkParams, params, result);
 
+        // clear thread interruption status when
+
         if (!errors.isEmpty()) {
             throw new BenchmarkException("Benchmark error during the run", errors);
         }
@@ -453,7 +457,7 @@ class BenchmarkHandler {
         // would dump the unused worker data for claiming.
         //
         // In face of interruptions, the barrier can either throw the interrupted
-        // exception if this thread caughts it and breaks the barrier,
+        // exception if this thread caught it and breaks the barrier,
         // or broken barrier exception if other threads were waiting on this
         // barrier. Bubble up both exceptions, and let the caller handle.
         workerDataBarrier.await();
@@ -550,6 +554,11 @@ class BenchmarkHandler {
 
                 throw new Exception(e); // wrapping Throwable
             } finally {
+                // Clear the interruption status for the thread after leaving the benchmark
+                // methods. If any InterruptedExceptions happened, they should have been handled
+                // by now. This prepares the runner thread for another iteration.
+                boolean unused = Thread.interrupted();
+
                 // unbind the executor thread
                 runner = null;
             }
