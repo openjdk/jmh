@@ -451,11 +451,6 @@ class BenchmarkHandler {
         // Wait for all threads to roll to this synchronization point.
         // If there is any thread without assignment, the barrier action
         // would dump the unused worker data for claiming.
-        //
-        // In face of interruptions, the barrier can either throw the interrupted
-        // exception if this thread caughts it and breaks the barrier,
-        // or broken barrier exception if other threads were waiting on this
-        // barrier. Bubble up both exceptions, and let the caller handle.
         workerDataBarrier.await();
 
         if (wd == null) {
@@ -520,6 +515,12 @@ class BenchmarkHandler {
                 // bind the executor thread
                 runner = Thread.currentThread();
 
+                // Clear the interruption status for the thread before going into the infra.
+                // Normally, the interrupts would be cleared at the end of benchmark, but
+                // there is a tiny window when harness could deliver another interrupt after
+                // we left.
+                boolean unused = Thread.interrupted();
+
                 // poll the current data, or instantiate in this thread, if needed
                 WorkerData wd = control.firstIteration ? newWorkerData(runner) : getWorkerData(runner);
 
@@ -552,6 +553,11 @@ class BenchmarkHandler {
             } finally {
                 // unbind the executor thread
                 runner = null;
+
+                // Clear the interruption status for the thread after leaving the benchmark method.
+                // If any InterruptedExceptions happened, they should have been handled by now.
+                // This prepares the runner thread for another iteration.
+                boolean unused = Thread.interrupted();
             }
         }
 
