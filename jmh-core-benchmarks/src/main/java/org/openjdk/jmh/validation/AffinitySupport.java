@@ -87,7 +87,9 @@ public class AffinitySupport {
 
             // Need to rename the file to the proper name, otherwise JNA would not discover it
             File proper = new File(bootLibraryPath + '/' + System.mapLibraryName("jnidispatch"));
-            file.renameTo(proper);
+            if (!file.renameTo(proper)) {
+                throw new IllegalStateException("Failed to rename " + file + " to " + proper);
+            }
 
             return Arrays.asList(
                     "-Djna.nounpack=true",    // Should not unpack itself, but use predefined path
