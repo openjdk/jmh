@@ -68,12 +68,12 @@ public class SafepointsProfilerTest {
         double pauseCount = ProfilerTestUtils.checkedGet(sr, "·safepoints.pause.count").getScore();
         double ttspCount = ProfilerTestUtils.checkedGet(sr, "·safepoints.ttsp.count").getScore();
 
-        Assert.assertNotEquals(pauseTotal, 0);
-        Assert.assertNotEquals(ttspTotal, 0);
+        Assert.assertNotEquals(0D, pauseTotal, 0D);
+        Assert.assertNotEquals(0D, ttspTotal, 0D);
 
-        Assert.assertNotEquals(pauseCount, 0);
-        Assert.assertNotEquals(ttspCount, 0);
-        Assert.assertEquals(ttspCount, pauseCount, 0);
+        Assert.assertNotEquals(0D, pauseCount, 0D);
+        Assert.assertNotEquals(0D, ttspCount, 0D);
+        Assert.assertEquals(ttspCount, pauseCount, 0D);
 
         if (interval < 3000) {
             throw new IllegalStateException("Interval time is too low. " +

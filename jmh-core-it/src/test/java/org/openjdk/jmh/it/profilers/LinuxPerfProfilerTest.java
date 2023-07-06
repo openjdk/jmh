@@ -79,8 +79,8 @@ public class LinuxPerfProfilerTest {
         if (sr.containsKey("·ipc")) {
             double ipc = ProfilerTestUtils.checkedGet(sr, "·ipc").getScore();
             double cpi = ProfilerTestUtils.checkedGet(sr, "·cpi").getScore();
-            Assert.assertNotEquals(0, ipc);
-            Assert.assertNotEquals(0, cpi);
+            Assert.assertNotEquals(0D, ipc, 0D);
+            Assert.assertNotEquals(0D, cpi, 0D);
         }
 
         Assert.assertTrue(msg.contains("cycles"));
