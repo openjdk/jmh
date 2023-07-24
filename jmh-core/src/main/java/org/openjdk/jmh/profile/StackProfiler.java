@@ -252,7 +252,7 @@ public class StackProfiler implements InternalProfiler {
         private final int topStacks;
 
         public StackResult(Map<Thread.State, Multiset<StackRecord>> stacks, int topStacks) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "stack", of(Double.NaN), "---", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, "stack", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.stacks = stacks;
             this.topStacks = topStacks;
         }

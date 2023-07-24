@@ -115,7 +115,7 @@ public class SafepointsProfiler implements ExternalProfiler {
 
         Collection<Result> results = new ArrayList<>();
 
-        results.add(new ScalarResult(Defaults.PREFIX + "safepoints.interval",
+        results.add(new ScalarResult("safepoints.interval",
                 measuredTimeMs, "ms", AggregationPolicy.SUM));
 
         results.add(new SafepointProfilerResult("pause", pauseBuff));
@@ -153,7 +153,7 @@ public class SafepointsProfiler implements ExternalProfiler {
         private final SampleBuffer buffer;
 
         public SafepointProfilerResult(String suffix, SampleBuffer buffer) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "safepoints." + suffix, buffer.getStatistics(1D / 1_000_000), "ms", AggregationPolicy.SUM);
+            super(ResultRole.SECONDARY, "safepoints." + suffix, buffer.getStatistics(1D / 1_000_000), "ms", AggregationPolicy.SUM);
             this.suffix = suffix;
             this.buffer = buffer;
         }
@@ -171,16 +171,16 @@ public class SafepointsProfiler implements ExternalProfiler {
         @Override
         protected Collection<? extends Result> getDerivativeResults() {
             return Arrays.asList(
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".avg",      statistics.getMean(),           "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".count",    statistics.getN(),              "#",  AggregationPolicy.SUM),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.00",    statistics.getMin(),            "ms", AggregationPolicy.MIN),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.50",    statistics.getPercentile(50),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.90",    statistics.getPercentile(90),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.95",    statistics.getPercentile(95),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.99",    statistics.getPercentile(99),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.999",   statistics.getPercentile(99.9), "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p0.9999",  statistics.getPercentile(99.99),"ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "safepoints." + suffix + ".p1.00",    statistics.getMax(),            "ms", AggregationPolicy.MAX)
+                new ScalarDerivativeResult("safepoints." + suffix + ".avg",      statistics.getMean(),           "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".count",    statistics.getN(),              "#",  AggregationPolicy.SUM),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.00",    statistics.getMin(),            "ms", AggregationPolicy.MIN),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.50",    statistics.getPercentile(50),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.90",    statistics.getPercentile(90),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.95",    statistics.getPercentile(95),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.99",    statistics.getPercentile(99),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.999",   statistics.getPercentile(99.9), "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p0.9999",  statistics.getPercentile(99.99),"ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("safepoints." + suffix + ".p1.00",    statistics.getMax(),            "ms", AggregationPolicy.MAX)
             );
         }
 

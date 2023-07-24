@@ -66,8 +66,8 @@ public class CompilerProfiler implements InternalProfiler {
         try {
             long curTime = comp.getTotalCompilationTime();
             return Arrays.asList(
-                new ScalarResult(Defaults.PREFIX + "compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
-                new ScalarResult(Defaults.PREFIX + "compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
+                new ScalarResult("compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
+                new ScalarResult("compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
             );
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();

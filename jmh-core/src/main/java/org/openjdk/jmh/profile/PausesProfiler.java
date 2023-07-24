@@ -159,7 +159,7 @@ public class PausesProfiler implements InternalProfiler {
         private final SampleBuffer buffer;
 
         public PausesProfilerResult(SampleBuffer buffer) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "pauses", buffer.getStatistics(1D / 1_000_000), "ms", AggregationPolicy.SUM);
+            super(ResultRole.SECONDARY, "pauses", buffer.getStatistics(1D / 1_000_000), "ms", AggregationPolicy.SUM);
             this.buffer = buffer;
         }
 
@@ -176,16 +176,16 @@ public class PausesProfiler implements InternalProfiler {
         @Override
         protected Collection<? extends Result> getDerivativeResults() {
             return Arrays.asList(
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.avg",      statistics.getMean(),           "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.count",    statistics.getN(),              "#",  AggregationPolicy.SUM),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.00",    statistics.getMin(),            "ms", AggregationPolicy.MIN),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.50",    statistics.getPercentile(50),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.90",    statistics.getPercentile(90),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.95",    statistics.getPercentile(95),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.99",    statistics.getPercentile(99),   "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.999",   statistics.getPercentile(99.9), "ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p0.9999",  statistics.getPercentile(99.99),"ms", AggregationPolicy.AVG),
-                new ScalarDerivativeResult(Defaults.PREFIX + "pauses.p1.00",    statistics.getMax(),            "ms", AggregationPolicy.MAX)
+                new ScalarDerivativeResult("pauses.avg",      statistics.getMean(),           "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.count",    statistics.getN(),              "#",  AggregationPolicy.SUM),
+                new ScalarDerivativeResult("pauses.p0.00",    statistics.getMin(),            "ms", AggregationPolicy.MIN),
+                new ScalarDerivativeResult("pauses.p0.50",    statistics.getPercentile(50),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.p0.90",    statistics.getPercentile(90),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.p0.95",    statistics.getPercentile(95),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.p0.99",    statistics.getPercentile(99),   "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.p0.999",   statistics.getPercentile(99.9), "ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.p0.9999",  statistics.getPercentile(99.99),"ms", AggregationPolicy.AVG),
+                new ScalarDerivativeResult("pauses.p1.00",    statistics.getMax(),            "ms", AggregationPolicy.MAX)
             );
         }
 

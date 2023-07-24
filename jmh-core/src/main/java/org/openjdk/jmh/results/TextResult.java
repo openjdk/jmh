@@ -31,7 +31,7 @@ public class TextResult extends Result<TextResult> {
     final String label;
 
     public TextResult(String output, String label) {
-        super(ResultRole.SECONDARY, Defaults.PREFIX + label, of(Double.NaN), "---", AggregationPolicy.AVG);
+        super(ResultRole.SECONDARY, label, of(Double.NaN), "---", AggregationPolicy.AVG);
         this.output = output;
         this.label = label;
     }
