@@ -64,15 +64,16 @@ public class SampleTimeResult extends Result<SampleTimeResult> {
 
     @Override
     protected Collection<? extends Result> getDerivativeResults() {
+        String s = role.isPrimary() ? "" : (label + ":");
         return Arrays.asList(
-                new ScalarDerivativeResult(label + ":" + "p0.00",   statistics.getPercentile(0),        getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p0.50",   statistics.getPercentile(50),       getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p0.90",   statistics.getPercentile(90),       getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p0.95",   statistics.getPercentile(95),       getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p0.99",   statistics.getPercentile(99),       getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p0.999",  statistics.getPercentile(99.9),     getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p0.9999", statistics.getPercentile(99.99),    getScoreUnit(), AggregationPolicy.AVG),
-                new ScalarDerivativeResult(label + ":" + "p1.00",   statistics.getPercentile(100),      getScoreUnit(), AggregationPolicy.AVG)
+                new ScalarDerivativeResult(s + "p0.00",   statistics.getPercentile(0),        getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p0.50",   statistics.getPercentile(50),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p0.90",   statistics.getPercentile(90),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p0.95",   statistics.getPercentile(95),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p0.99",   statistics.getPercentile(99),       getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p0.999",  statistics.getPercentile(99.9),     getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p0.9999", statistics.getPercentile(99.99),    getScoreUnit(), AggregationPolicy.AVG),
+                new ScalarDerivativeResult(s + "p1.00",   statistics.getPercentile(100),      getScoreUnit(), AggregationPolicy.AVG)
         );
     }
 
