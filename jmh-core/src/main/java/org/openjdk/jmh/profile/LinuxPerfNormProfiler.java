@@ -60,9 +60,8 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
     private final int delayMs;
     private final int lengthMs;
     private final boolean useDefaultStats;
-    private final long highPassFilter;
     private final int incrementInterval;
-    private final boolean isIncrementable;
+    private final boolean doFilter;
 
     private final Collection<String> supportedEvents = new ArrayList<>();
 
@@ -87,9 +86,9 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                         "Lower values may improve accuracy, while increasing the profiling overhead.")
                 .withRequiredArg().ofType(Integer.class).describedAs("ms").defaultsTo(100);
 
-        OptionSpec<Long> optHighPassFilter = parser.accepts("highPassFilter",
-                        "Ignore event increments larger that this.")
-                .withRequiredArg().ofType(Long.class).describedAs("#").defaultsTo(100_000_000_000L);
+        OptionSpec<Boolean> optFilter = parser.accepts("filter",
+                        "Filter problematic samples from infrastructure and perf itself.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool").defaultsTo(true);
 
         OptionSpec<Boolean> optDefaultStat = parser.accepts("useDefaultStat",
                         "Use \"perf stat -d -d -d\" instead of explicit counter list.")
@@ -103,7 +102,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
             delayMs = set.valueOf(optDelay);
             lengthMs = set.valueOf(optLength);
             incrementInterval = set.valueOf(optIncrementInterval);
-            highPassFilter = set.valueOf(optHighPassFilter);
+            doFilter = set.valueOf(optFilter);
             useDefaultStats = set.valueOf(optDefaultStat);
             userEvents = set.valuesOf(optEvents);
         } catch (OptionException e) {
@@ -116,7 +115,9 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         }
 
         Collection<String> incremental = Utils.tryWith(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--interval-print", String.valueOf(incrementInterval), "echo", "1");
-        isIncrementable = incremental.isEmpty();
+        if (!incremental.isEmpty()) {
+            throw new ProfilerException("\\\"perf\\\" is too old, needs incremental mode (-I).");
+        }
 
         Collection<String> candidateEvents = new ArrayList<>();
         if (userEvents != null) {
@@ -126,7 +127,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
             }
         }
 
-        if (supportedEvents.isEmpty()) {
+        if (candidateEvents.isEmpty()) {
             candidateEvents.addAll(Arrays.asList(interestingEvents));
         }
 
@@ -154,9 +155,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         } else {
             cmd.addAll(Arrays.asList(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--field-separator", ",", "--event", Utils.join(supportedEvents, ",")));
         }
-        if (isIncrementable) {
-            cmd.addAll(Arrays.asList("-I", String.valueOf(incrementInterval)));
-        }
+        cmd.addAll(Arrays.asList("-I", String.valueOf(incrementInterval)));
         return cmd;
     }
 
@@ -190,8 +189,17 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
         return "Linux perf statistics, normalized by operation count";
     }
 
+    private static class EventRecord {
+        final double time;
+        final double value;
+        public EventRecord(double time, double value) {
+            this.time = time;
+            this.value = value;
+        }
+    }
+
     private Collection<? extends Result> process(BenchmarkResult br, File stdOut, File stdErr) {
-        Multiset<String> events = new HashMultiset<>();
+        Multimap<String, EventRecord> eventRecords = new HashMultimap<>();
 
         try (FileReader fr = new FileReader(stdErr);
              BufferedReader reader = new BufferedReader(fr)) {
@@ -211,159 +219,136 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
             }
 
             double readFrom = skipMs / 1000D;
-            double softTo = (skipMs + lenMs) / 1000D;
             double readTo = (skipMs + lenMs + incrementInterval) / 1000D;
 
             NumberFormat nf = NumberFormat.getInstance();
 
             String line;
 
-            nextline:
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("#")) continue;
 
-                if (isIncrementable) {
-                    String[] split = line.split(",");
+                String[] split = line.split(",");
 
-                    String time;
-                    String count;
-                    String event;
+                String time;
+                String count;
+                String event;
 
-                    if (split.length == 3) {
-                        // perf 3.13: time,count,event
-                        time  = split[0].trim();
-                        count = split[1].trim();
-                        event = split[2].trim();
-                    } else if (split.length >= 4) {
-                        // perf >3.13: time,count,<other>,event,<others>
-                        time  = split[0].trim();
-                        count = split[1].trim();
-                        event = split[3].trim();
-                    } else {
-                        // Malformed line, ignore
-                        continue nextline;
-                    }
-
-                    double multiplier = 1D;
-                    try {
-                        double timeSec = nf.parse(time).doubleValue();
-                        if (timeSec < readFrom) {
-                            // warmup, ignore
-                            continue nextline;
-                        }
-                        if (timeSec > readTo) {
-                            // post-run, ignore
-                            continue nextline;
-                        }
-
-                        // Handle partial events:
-                        double intervalSec = incrementInterval / 1000D;
-                        if (timeSec - intervalSec < readFrom) {
-                            // Event _starts_ before the measurement window
-                            //     .............[============|============
-                            //               readFrom     timeSec
-                            //           [<----------------->|  // event
-                            //             incrementInterval
-                            //
-                            // Only count the tail after readFrom:
-
-                            multiplier = (timeSec - readFrom) / intervalSec;
-                        }
-                        if (timeSec > softTo) {
-                            // Event is past the measurement window
-                            //    =============].............|............
-                            //               softTo       timeSec
-                            //           [<----------------->|  // event
-                            //             incrementInterval
-                            //
-                            // Only count the head before softTo:
-                            multiplier = 1 - (timeSec - softTo) / intervalSec;
-                        }
-
-                        // Defensive, keep multiplier in bounds:
-                        multiplier = Math.max(1D, Math.min(0D, multiplier));
-                    } catch (ParseException e) {
-                        // don't care then, continue
-                        continue nextline;
-                    }
-
-                    try {
-                        long lValue = nf.parse(count).longValue();
-                        if (lValue > highPassFilter) {
-                            // anomalous value, pretend we did not see it
-                            continue nextline;
-                        }
-                        events.add(event, (long) (lValue * multiplier));
-                    } catch (ParseException e) {
-                        // do nothing, continue
-                        continue nextline;
-
-                    }
+                if (split.length == 3) {
+                    // perf 3.13: time,count,event
+                    time = split[0].trim();
+                    count = split[1].trim();
+                    event = split[2].trim();
+                } else if (split.length >= 4) {
+                    // perf >3.13: time,count,<other>,event,<others>
+                    time = split[0].trim();
+                    count = split[1].trim();
+                    event = split[3].trim();
                 } else {
-                    int idx = line.lastIndexOf(",");
-
                     // Malformed line, ignore
-                    if (idx == -1) continue nextline;
-
-                    String count = line.substring(0, idx).trim();
-                    String event = line.substring(idx + 1).trim();
-
-                    try {
-                        long lValue = nf.parse(count).longValue();
-                        events.add(event, lValue);
-                    } catch (ParseException e) {
-                        // do nothing, continue
-                        continue nextline;
-                    }
+                    continue;
                 }
 
+                double timeSec = 0D;
+                try {
+                    timeSec = nf.parse(time).doubleValue();
+                } catch (ParseException e) {
+                    continue;
+                }
+
+                if (timeSec < readFrom || timeSec > readTo) {
+                    // Outside measurement window, ignore
+                    continue;
+                }
+
+                long lValue = 0L;
+                try {
+                    lValue = nf.parse(count).longValue();
+                } catch (ParseException e) {
+                    continue;
+                }
+
+                eventRecords.put(event, new EventRecord(timeSec, lValue));
             }
 
-            if (!isIncrementable) {
-                System.out.println();
-                System.out.println();
-                System.out.println("WARNING: Your system uses old \"perf\", which cannot print data incrementally (-I).\n" +
-                        "Therefore, perf performance data includes benchmark warmup.");
-            }
+            Map<String, Double> finalThroughputs = new HashMap<>();
+            for (String key : eventRecords.keys()) {
+                List<EventRecord> countedEvents = new ArrayList<>(eventRecords.get(key));
 
-            long totalOpts;
+                // If needed and possible, filter out a few head and tail iterations.
+                // Head iteration potentially contains the infrastructure startup.
+                // That iteration would only be handled for getting time, not the counter itself.
+                // Trailing iterations come with both infrastructure rampdown, and the final
+                // profiler output on shutdown. Sometimes these manifest as two separate iterations.
+                final int filteredCount = countedEvents.size() - 2;
+                if (doFilter && filteredCount > 0) {
+                    countedEvents = countedEvents.subList(0, filteredCount);
+                }
+
+                double s = 0;
+                double minTime = Double.MAX_VALUE;
+                double maxTime = Double.MIN_VALUE;
+
+                for (int i = 0; i < countedEvents.size(); i++) {
+                    EventRecord v = countedEvents.get(i);
+                    if (i != 0) {
+                        // Do not count the first event in the series, since time interval
+                        // does not actually include it.
+                        s += v.value;
+                    }
+                    minTime = Math.min(minTime, v.time);
+                    maxTime = Math.max(maxTime, v.time);
+                }
+                double thr = s / (maxTime - minTime);
+                finalThroughputs.put(key, thr);
+            }
 
             BenchmarkResultMetaData md = br.getMetadata();
-            if (md != null) {
-                if (isIncrementable) {
-                    totalOpts = md.getMeasurementOps();
-                } else {
-                    totalOpts = md.getWarmupOps() + md.getMeasurementOps();
-                }
-                Collection<Result> results = new ArrayList<>();
-                for (String key : events.keys()) {
-                    results.add(new PerfResult(key, "#/op", events.count(key) * 1.0 / totalOpts));
-                }
-
-                // Also figure out IPC/CPI, if enough counters available:
-                {
-                    long c1 = events.count("cycles");
-                    long c2 = events.count("cycles:u");
-
-                    long i1 = events.count("instructions");
-                    long i2 = events.count("instructions:u");
-
-                    long cycles = (c1 != 0) ? c1 : c2;
-                    long instructions = (i1 != 0) ? i1 : i2;
-                    if (cycles != 0 && instructions != 0) {
-                        results.add(new PerfResult("CPI", "clks/insn", 1.0 * cycles / instructions));
-                        results.add(new PerfResult("IPC", "insns/clk", 1.0 * instructions / cycles));
-                    }
-                }
-
-                return results;
-            } else {
-                return Collections.singleton(new PerfResult("N/A", "", Double.NaN));
+            if (md == null) {
+                return emptyResults();
             }
 
+            long timeMs = md.getStopTime() - md.getMeasurementTime();
+            if (timeMs == 0) {
+                return emptyResults();
+
+            }
+            double opsThroughput = 1000D * md.getMeasurementOps() / timeMs;
+            if (opsThroughput == 0) {
+                return emptyResults();
+            }
+
+            Collection<Result> results = new ArrayList<>();
+            for (String key : finalThroughputs.keySet()) {
+                results.add(new PerfResult(key, "#/op", finalThroughputs.get(key) / opsThroughput));
+            }
+
+            // Also figure out IPC/CPI, if enough counters available:
+            {
+                Double c1 = finalThroughputs.get("cycles");
+                Double c2 = finalThroughputs.get("cycles:u");
+
+                Double i1 = finalThroughputs.get("instructions");
+                Double i2 = finalThroughputs.get("instructions:u");
+
+                Double cycles = (c1 != null) ? c1 : c2;
+                Double instructions = (i1 != null) ? i1 : i2;
+
+                if (cycles != null && instructions != null &&
+                       cycles != 0 && instructions != 0) {
+                    results.add(new PerfResult("CPI", "clks/insn", cycles / instructions));
+                    results.add(new PerfResult("IPC", "insns/clk", instructions / cycles));
+                }
+            }
+
+            return results;
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private static Set<PerfResult> emptyResults() {
+        return Collections.singleton(new PerfResult("N/A", "", Double.NaN));
     }
 
     static class PerfResult extends ScalarResult {
