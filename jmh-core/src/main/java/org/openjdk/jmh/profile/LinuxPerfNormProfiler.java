@@ -286,7 +286,7 @@ public class LinuxPerfNormProfiler implements ExternalProfiler {
                 }
 
                 double s = 0;
-                double minTime = Double.MIN_VALUE;
+                double minTime = Double.MAX_VALUE;
                 double maxTime = Double.MIN_VALUE;
 
                 for (int i = 0; i < countedEvents.size(); i++) {
