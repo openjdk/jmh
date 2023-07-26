@@ -25,7 +25,7 @@
 package org.openjdk.jmh.validation.tests;
 
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.benchmarks.ScoreStabilityBench;
+import org.openjdk.jmh.benchmarks.BurstStabilityBench;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
@@ -37,10 +37,10 @@ import org.openjdk.jmh.validation.ValidationTest;
 
 import java.io.PrintWriter;
 
-public class ScoreStabilityTest extends ValidationTest {
+public class BurstStabilityTest extends ValidationTest {
     @Override
     public void runWith(PrintWriter pw, Options parent) throws RunnerException {
-        pw.println("--------- SCORE STABILITY TEST");
+        pw.println("--------- BURST STABILITY TEST");
         pw.println();
 
         org.openjdk.jmh.util.Utils.reflow(pw,
@@ -74,7 +74,7 @@ public class ScoreStabilityTest extends ValidationTest {
                 Options opts = new OptionsBuilder()
                         .parent(parent)
                         .mode(m)
-                        .include(ScoreStabilityBench.class.getCanonicalName())
+                        .include(BurstStabilityBench.class.getCanonicalName())
                         .verbosity(VerboseMode.SILENT)
                         .param("delay", String.valueOf(delay))
                         .build();

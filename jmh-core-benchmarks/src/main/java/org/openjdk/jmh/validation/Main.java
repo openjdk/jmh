@@ -158,8 +158,26 @@ public class Main {
                 case timing:
                     new TimingMeasurementsTest().runWith(pw, opts);
                     break;
-                case stability:
-                    new ScoreStabilityTest().runWith(pw, opts);
+                case long_stability:
+                    switch (mode) {
+                        case flash:
+                            new LongStabilityTest(3).runWith(pw, opts);
+                            break;
+                        case quick:
+                            new LongStabilityTest(5).runWith(pw, opts);
+                            break;
+                        case normal:
+                            new LongStabilityTest(18).runWith(pw, opts);
+                            break;
+                        case longer:
+                            new LongStabilityTest(60).runWith(pw, opts);
+                            break;
+                        default:
+                            throw new IllegalStateException();
+                    }
+                    break;
+                case burst_stability:
+                    new BurstStabilityTest().runWith(pw, opts);
                     break;
                 case compiler_hints:
                     new CompilerHintsTest().runWith(pw, opts);
@@ -242,7 +260,8 @@ public class Main {
         timing,
         compiler_hints,
         thermal,
-        stability,
+        long_stability,
+        burst_stability,
         thread_scale,
         helpers,
         blackhole_cpu,
