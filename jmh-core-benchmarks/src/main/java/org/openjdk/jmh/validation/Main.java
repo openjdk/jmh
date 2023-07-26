@@ -179,6 +179,9 @@ public class Main {
                 case burst_stability:
                     new BurstStabilityTest().runWith(pw, opts);
                     break;
+                case core_stability:
+                    new CoreStabilityTest().runWith(pw, opts);
+                    break;
                 case compiler_hints:
                     new CompilerHintsTest().runWith(pw, opts);
                     break;
@@ -262,6 +265,7 @@ public class Main {
         thermal,
         long_stability,
         burst_stability,
+        core_stability,
         thread_scale,
         helpers,
         blackhole_cpu,
