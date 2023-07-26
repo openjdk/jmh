@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,21 +29,11 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.SingleShotTime)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 50)
-@Measurement(iterations = 50)
+@BenchmarkMode(Mode.Throughput)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @Threads(1)
 @State(Scope.Thread)
-public class ScoreStabilityBench {
-
-    @Param("10")
-    private int delay;
-
-    @Setup(Level.Iteration)
-    public void sleep() throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(delay);
-    }
+public class LongStabilityBench {
 
     @Benchmark
     public void test() {
