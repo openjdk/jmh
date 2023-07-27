@@ -62,11 +62,11 @@ public class MemPoolProfiler implements InternalProfiler {
             }
             sum += used;
 
-            results.add(new ScalarResult(Defaults.PREFIX + "mempool." + bean.getName() + ".used", used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+            results.add(new ScalarResult("mempool." + bean.getName() + ".used", used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         }
 
-        results.add(new ScalarResult(Defaults.PREFIX + "mempool.total.codeheap.used", sumCodeHeap / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
-        results.add(new ScalarResult(Defaults.PREFIX + "mempool.total.used", sum / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+        results.add(new ScalarResult("mempool.total.codeheap.used", sumCodeHeap / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+        results.add(new ScalarResult("mempool.total.used", sum / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         return results;
     }
 }

@@ -79,8 +79,8 @@ public class ClassloaderProfiler implements InternalProfiler {
         try {
             long loadedClassCount = cl.getTotalLoadedClassCount();
             long loaded = loadedClassCount - loadedClasses;
-            results.add(new ScalarResult(Defaults.PREFIX + "class.load", loaded / time, "classes/sec", AggregationPolicy.AVG));
-            results.add(new ScalarResult(Defaults.PREFIX + "class.load.norm", 1.0 * loaded / allOps, "classes/op", AggregationPolicy.AVG));
+            results.add(new ScalarResult("class.load", loaded / time, "classes/sec", AggregationPolicy.AVG));
+            results.add(new ScalarResult("class.load.norm", 1.0 * loaded / allOps, "classes/op", AggregationPolicy.AVG));
         } catch (UnsupportedOperationException e) {
             // do nothing
         }
@@ -88,8 +88,8 @@ public class ClassloaderProfiler implements InternalProfiler {
         try {
             long unloadedClassCount = cl.getUnloadedClassCount();
             long unloaded = unloadedClassCount - unloadedClasses;
-            results.add(new ScalarResult(Defaults.PREFIX + "class.unload", unloaded / time, "classes/sec", AggregationPolicy.AVG));
-            results.add(new ScalarResult(Defaults.PREFIX + "class.unload.norm", 1.0 * unloaded / allOps, "classes/op", AggregationPolicy.AVG));
+            results.add(new ScalarResult("class.unload", unloaded / time, "classes/sec", AggregationPolicy.AVG));
+            results.add(new ScalarResult("class.unload.norm", 1.0 * unloaded / allOps, "classes/op", AggregationPolicy.AVG));
 
         } catch (UnsupportedOperationException e) {
             // do nothing

@@ -84,8 +84,8 @@ public class GCProfilerAllocRateTest {
         double opsPerSec = rr.getPrimaryResult().getScore();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double allocRateMB = ProfilerTestUtils.checkedGet(sr, "·gc.alloc.rate").getScore();
-        double allocRateNormB = ProfilerTestUtils.checkedGet(sr, "·gc.alloc.rate.norm").getScore();
+        double allocRateMB = ProfilerTestUtils.checkedGet(sr, "gc.alloc.rate").getScore();
+        double allocRateNormB = ProfilerTestUtils.checkedGet(sr, "gc.alloc.rate.norm").getScore();
         double allocRatePrimaryMB = opsPerSec * allocRateNormB / 1024 / 1024;
 
         // Allow 20% slack

@@ -206,7 +206,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         private final long instructions;
 
         public PerfResult(String output, long cycles, long instructions) {
-            super(ResultRole.SECONDARY, Defaults.PREFIX + "perf", of(Double.NaN), "---", AggregationPolicy.AVG);
+            super(ResultRole.SECONDARY, "perf", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.output = output;
             this.cycles = cycles;
             this.instructions = instructions;
@@ -226,8 +226,8 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         protected Collection<? extends Result> getDerivativeResults() {
             List<Result> res = new ArrayList<>();
             if (cycles != 0 && instructions != 0) {
-                res.add(new ScalarDerivativeResult(Defaults.PREFIX + "ipc", 1.0 * instructions / cycles, "insns/clk", AggregationPolicy.AVG));
-                res.add(new ScalarDerivativeResult(Defaults.PREFIX + "cpi", 1.0 * cycles / instructions, "clks/insn", AggregationPolicy.AVG));
+                res.add(new ScalarDerivativeResult("ipc", 1.0 * instructions / cycles, "insns/clk", AggregationPolicy.AVG));
+                res.add(new ScalarDerivativeResult("cpi", 1.0 * cycles / instructions, "clks/insn", AggregationPolicy.AVG));
             }
             return res;
         }

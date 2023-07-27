@@ -74,11 +74,11 @@ public class LinuxPerfProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        String msg = ProfilerTestUtils.checkedGet(sr, "·perf").extendedInfo();
+        String msg = ProfilerTestUtils.checkedGet(sr, "perf").extendedInfo();
 
-        if (sr.containsKey("·ipc")) {
-            double ipc = ProfilerTestUtils.checkedGet(sr, "·ipc").getScore();
-            double cpi = ProfilerTestUtils.checkedGet(sr, "·cpi").getScore();
+        if (sr.containsKey("ipc")) {
+            double ipc = ProfilerTestUtils.checkedGet(sr, "ipc").getScore();
+            double cpi = ProfilerTestUtils.checkedGet(sr, "cpi").getScore();
             Assert.assertNotEquals(0D, ipc, 0D);
             Assert.assertNotEquals(0D, cpi, 0D);
         }

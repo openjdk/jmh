@@ -58,8 +58,8 @@ public class CompilerProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double timeTotal = ProfilerTestUtils.checkedGet(sr, "·compiler.time.total").getScore();
-        double timeProfiled = ProfilerTestUtils.checkedGet(sr, "·compiler.time.profiled").getScore();
+        double timeTotal = ProfilerTestUtils.checkedGet(sr, "compiler.time.total").getScore();
+        double timeProfiled = ProfilerTestUtils.checkedGet(sr, "compiler.time.profiled").getScore();
 
         if (timeProfiled > timeTotal) {
             throw new IllegalStateException("Profiled time is larger than total time. " +

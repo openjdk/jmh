@@ -136,14 +136,14 @@ public class GCProfiler implements InternalProfiler {
         }
 
         results.add(new ScalarResult(
-                Defaults.PREFIX + "gc.count",
+                "gc.count",
                 gcCount - beforeGCCount,
                 "counts",
                 AggregationPolicy.SUM));
 
         if (gcCount != beforeGCCount || gcTime != beforeGCTime) {
             results.add(new ScalarResult(
-                    Defaults.PREFIX + "gc.time",
+                    "gc.time",
                     gcTime - beforeGCTime,
                     "ms",
                     AggregationPolicy.SUM));
@@ -154,14 +154,14 @@ public class GCProfiler implements InternalProfiler {
                 HotspotAllocationSnapshot newSnapshot = VMSupport.getSnapshot();
                 long allocated = newSnapshot.difference(beforeAllocated);
                 // When no allocations measured, we still need to report results to avoid user confusion
-                results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
+                results.add(new ScalarResult("gc.alloc.rate",
                         (afterTime != beforeTime) ?
                                 1.0 * allocated / 1024 / 1024 * TimeUnit.SECONDS.toNanos(1) / (afterTime - beforeTime) :
                                 Double.NaN,
                         "MB/sec", AggregationPolicy.AVG));
                 if (allocated != 0) {
                     long allOps = iResult.getMetadata().getAllOps();
-                    results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate.norm",
+                    results.add(new ScalarResult("gc.alloc.rate.norm",
                             (allOps != 0) ?
                                     1.0 * allocated / allOps :
                                     Double.NaN,
@@ -169,7 +169,7 @@ public class GCProfiler implements InternalProfiler {
                 }
             } else {
                 // When allocation profiling fails, make sure it is distinguishable in report
-                results.add(new ScalarResult(Defaults.PREFIX + "gc.alloc.rate",
+                results.add(new ScalarResult("gc.alloc.rate",
                         Double.NaN,
                         "MB/sec", AggregationPolicy.AVG));
             }
@@ -187,13 +187,13 @@ public class GCProfiler implements InternalProfiler {
                 String spaceName = space.replaceAll(" ", "_");
 
                 results.add(new ScalarResult(
-                        Defaults.PREFIX + "gc.churn." + spaceName + "",
+                        "gc.churn." + spaceName + "",
                         churnRate,
                         "MB/sec",
                         AggregationPolicy.AVG));
 
                 results.add(new ScalarResult(
-                        Defaults.PREFIX + "gc.churn." + spaceName + ".norm",
+                        "gc.churn." + spaceName + ".norm",
                         churnNorm,
                         "B/op",
                         AggregationPolicy.AVG));

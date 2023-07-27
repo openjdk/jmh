@@ -97,22 +97,22 @@ public class JMHSample_37_CacheAccess {
         pulling n-th element from each of the inner array induces more cache misses, when matrix is large.
         -prof perfnorm conveniently highlights that, with >2 cache misses per one benchmark op:
 
-        Benchmark                                                 Mode  Cnt   Score    Error  Units
-        JMHSample_37_MatrixCopy.colFirst                          avgt   25   5.306 ±  0.020  ns/op
-        JMHSample_37_MatrixCopy.colFirst:·CPI                     avgt    5   0.621 ±  0.011   #/op
-        JMHSample_37_MatrixCopy.colFirst:·L1-dcache-load-misses   avgt    5   2.177 ±  0.044   #/op <-- OOPS
-        JMHSample_37_MatrixCopy.colFirst:·L1-dcache-loads         avgt    5  14.804 ±  0.261   #/op
-        JMHSample_37_MatrixCopy.colFirst:·LLC-loads               avgt    5   2.165 ±  0.091   #/op
-        JMHSample_37_MatrixCopy.colFirst:·cycles                  avgt    5  22.272 ±  0.372   #/op
-        JMHSample_37_MatrixCopy.colFirst:·instructions            avgt    5  35.888 ±  1.215   #/op
+        Benchmark                                                Mode  Cnt   Score    Error  Units
+        JMHSample_37_MatrixCopy.colFirst                         avgt   25   5.306 ±  0.020  ns/op
+        JMHSample_37_MatrixCopy.colFirst:CPI                     avgt    5   0.621 ±  0.011   #/op
+        JMHSample_37_MatrixCopy.colFirst:L1-dcache-load-misses   avgt    5   2.177 ±  0.044   #/op <-- OOPS
+        JMHSample_37_MatrixCopy.colFirst:L1-dcache-loads         avgt    5  14.804 ±  0.261   #/op
+        JMHSample_37_MatrixCopy.colFirst:LLC-loads               avgt    5   2.165 ±  0.091   #/op
+        JMHSample_37_MatrixCopy.colFirst:cycles                  avgt    5  22.272 ±  0.372   #/op
+        JMHSample_37_MatrixCopy.colFirst:instructions            avgt    5  35.888 ±  1.215   #/op
 
-        JMHSample_37_MatrixCopy.rowFirst                          avgt   25   2.662 ±  0.003  ns/op
-        JMHSample_37_MatrixCopy.rowFirst:·CPI                     avgt    5   0.312 ±  0.003   #/op
-        JMHSample_37_MatrixCopy.rowFirst:·L1-dcache-load-misses   avgt    5   0.066 ±  0.001   #/op
-        JMHSample_37_MatrixCopy.rowFirst:·L1-dcache-loads         avgt    5  14.570 ±  0.400   #/op
-        JMHSample_37_MatrixCopy.rowFirst:·LLC-loads               avgt    5   0.002 ±  0.001   #/op
-        JMHSample_37_MatrixCopy.rowFirst:·cycles                  avgt    5  11.046 ±  0.343   #/op
-        JMHSample_37_MatrixCopy.rowFirst:·instructions            avgt    5  35.416 ±  1.248   #/op
+        JMHSample_37_MatrixCopy.rowFirst                         avgt   25   2.662 ±  0.003  ns/op
+        JMHSample_37_MatrixCopy.rowFirst:CPI                     avgt    5   0.312 ±  0.003   #/op
+        JMHSample_37_MatrixCopy.rowFirst:L1-dcache-load-misses   avgt    5   0.066 ±  0.001   #/op
+        JMHSample_37_MatrixCopy.rowFirst:L1-dcache-loads         avgt    5  14.570 ±  0.400   #/op
+        JMHSample_37_MatrixCopy.rowFirst:LLC-loads               avgt    5   0.002 ±  0.001   #/op
+        JMHSample_37_MatrixCopy.rowFirst:cycles                  avgt    5  11.046 ±  0.343   #/op
+        JMHSample_37_MatrixCopy.rowFirst:instructions            avgt    5  35.416 ±  1.248   #/op
 
         So, when comparing two different benchmarks, you have to follow up if the difference is caused
         by the memory locality issues.

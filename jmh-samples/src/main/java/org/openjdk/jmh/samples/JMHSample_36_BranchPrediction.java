@@ -108,20 +108,20 @@ public class JMHSample_36_BranchPrediction {
         case. -prof perfnorm conveniently highlights that, with larger "branch-misses", and larger "CPI"
         for "unsorted" case:
 
-        Benchmark                                                       Mode  Cnt   Score    Error  Units
-        JMHSample_36_BranchPrediction.sorted                            avgt   25   2.160 ±  0.049  ns/op
-        JMHSample_36_BranchPrediction.sorted:·CPI                       avgt    5   0.286 ±  0.025   #/op
-        JMHSample_36_BranchPrediction.sorted:·branch-misses             avgt    5  ≈ 10⁻⁴            #/op
-        JMHSample_36_BranchPrediction.sorted:·branches                  avgt    5   7.606 ±  1.742   #/op
-        JMHSample_36_BranchPrediction.sorted:·cycles                    avgt    5   8.998 ±  1.081   #/op
-        JMHSample_36_BranchPrediction.sorted:·instructions              avgt    5  31.442 ±  4.899   #/op
+        Benchmark                                                      Mode  Cnt   Score    Error  Units
+        JMHSample_36_BranchPrediction.sorted                           avgt   25   2.160 ±  0.049  ns/op
+        JMHSample_36_BranchPrediction.sorted:CPI                       avgt    5   0.286 ±  0.025   #/op
+        JMHSample_36_BranchPrediction.sorted:branch-misses             avgt    5  ≈ 10⁻⁴            #/op
+        JMHSample_36_BranchPrediction.sorted:branches                  avgt    5   7.606 ±  1.742   #/op
+        JMHSample_36_BranchPrediction.sorted:cycles                    avgt    5   8.998 ±  1.081   #/op
+        JMHSample_36_BranchPrediction.sorted:instructions              avgt    5  31.442 ±  4.899   #/op
 
-        JMHSample_36_BranchPrediction.unsorted                          avgt   25   5.943 ±  0.018  ns/op
-        JMHSample_36_BranchPrediction.unsorted:·CPI                     avgt    5   0.775 ±  0.052   #/op
-        JMHSample_36_BranchPrediction.unsorted:·branch-misses           avgt    5   0.529 ±  0.026   #/op  <--- OOPS
-        JMHSample_36_BranchPrediction.unsorted:·branches                avgt    5   7.841 ±  0.046   #/op
-        JMHSample_36_BranchPrediction.unsorted:·cycles                  avgt    5  24.793 ±  0.434   #/op
-        JMHSample_36_BranchPrediction.unsorted:·instructions            avgt    5  31.994 ±  2.342   #/op
+        JMHSample_36_BranchPrediction.unsorted                         avgt   25   5.943 ±  0.018  ns/op
+        JMHSample_36_BranchPrediction.unsorted:CPI                     avgt    5   0.775 ±  0.052   #/op
+        JMHSample_36_BranchPrediction.unsorted:branch-misses           avgt    5   0.529 ±  0.026   #/op  <--- OOPS
+        JMHSample_36_BranchPrediction.unsorted:branches                avgt    5   7.841 ±  0.046   #/op
+        JMHSample_36_BranchPrediction.unsorted:cycles                  avgt    5  24.793 ±  0.434   #/op
+        JMHSample_36_BranchPrediction.unsorted:instructions            avgt    5  31.994 ±  2.342   #/op
 
         It is an open question if you want to measure only one of these tests. In many cases, you have to measure
         both to get the proper best-case and worst-case estimate!
