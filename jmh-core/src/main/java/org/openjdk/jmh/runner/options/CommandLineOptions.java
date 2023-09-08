@@ -131,7 +131,7 @@ public class CommandLineOptions implements Options {
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         OptionSpec<Integer> optThreads = parser.accepts("t", "Number of worker threads to run with. 'max' means the " +
-                "maximum number of hardware threads available on the machine, figured out by JMH itself. " +
+                "maximum number of hardware threads available on the machine, figured out by JMH itself. 'half_max' means 'max/2'" +
                 "(default: " + Defaults.THREADS + ")")
                 .withRequiredArg().withValuesConvertedBy(ThreadsValueConverter.INSTANCE).describedAs("int");
 

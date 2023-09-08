@@ -390,15 +390,18 @@ public class Runner extends BaseRunner {
                 benchmark.getThreads().orElse(
                         Defaults.THREADS));
 
-        if (threads == Threads.MAX) {
+        if (threads == Threads.MAX || threads == Threads.HALF_MAX) {
             if (cpuCount == 0) {
                 out.print("# Detecting actual CPU count: ");
                 cpuCount = Utils.figureOutHotCPUs();
                 out.println(cpuCount + " detected");
             }
-            threads = cpuCount;
+            if (threads == Threads.HALF_MAX) {
+                threads = Math.max(1, cpuCount / 2);
+            } else {
+                threads = cpuCount;
+            }
         }
-
         threads = Utils.roundUp(threads, Utils.sum(threadGroups));
 
         boolean synchIterations = (benchmark.getMode() != Mode.SingleShotTime) &&
