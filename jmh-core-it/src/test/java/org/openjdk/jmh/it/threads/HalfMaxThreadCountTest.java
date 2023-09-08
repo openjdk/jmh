@@ -47,9 +47,9 @@ public class HalfMaxThreadCountTest {
     @TearDown(Level.Iteration)
     public void tearDown() {
         if (Fixtures.expectStableThreads()) {
-            Assert.assertEquals(threads.size(), Runtime.getRuntime().availableProcessors() / 2);
+            Assert.assertEquals(threads.size(), (1 + Runtime.getRuntime().availableProcessors()) / 2);
         } else {
-            Assert.assertTrue(threads.size() >= Runtime.getRuntime().availableProcessors() / 2);
+            Assert.assertTrue(threads.size() >= (1 + Runtime.getRuntime().availableProcessors()) / 2);
         }
     }
 
