@@ -397,7 +397,7 @@ public class Runner extends BaseRunner {
                 out.println(cpuCount + " detected");
             }
             if (threads == Threads.HALF_MAX) {
-                threads = Math.max(1, cpuCount / 2);
+                threads = (cpuCount + 1) / 2;
             } else {
                 threads = cpuCount;
             }
