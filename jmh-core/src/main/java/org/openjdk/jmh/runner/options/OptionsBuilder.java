@@ -272,7 +272,7 @@ public class OptionsBuilder implements Options, ChainedOptionsBuilder {
 
     @Override
     public ChainedOptionsBuilder threads(int count) {
-        if (count != Threads.MAX) {
+        if (count != Threads.MAX && count != Threads.HALF_MAX) {
             checkGreaterOrEqual(count, 1, "Threads");
         }
         this.threads = Optional.of(count);

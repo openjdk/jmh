@@ -50,6 +50,12 @@ public @interface Threads {
     int MAX = -1;
 
     /**
+     * The magic value for MAX/2 threads.
+     * This means Runtime.getRuntime().availableProcessors()/2 threads.
+     */
+    int HALF_MAX = -2;
+
+    /**
      * @return Number of threads; use Threads.MAX to run with all available threads.
      */
     int value();

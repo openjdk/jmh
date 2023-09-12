@@ -239,6 +239,13 @@ public class TestOptions {
     }
 
     @Test
+    public void testThreads_HalfMax() throws Exception {
+        CommandLineOptions cmdLine = new CommandLineOptions("-t", "halfmax");
+        Options builder = new OptionsBuilder().threads(Threads.HALF_MAX).build();
+        Assert.assertEquals(builder.getThreads(), cmdLine.getThreads());
+    }
+
+    @Test
     public void testThreads_Zero() {
         try {
             new CommandLineOptions("-t", "0");

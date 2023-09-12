@@ -37,6 +37,8 @@ public class ThreadsValueConverter implements ValueConverter<Integer> {
     public Integer convert(String value) {
         if (value.equalsIgnoreCase("max")) {
             return Threads.MAX;
+        } else if (value.equalsIgnoreCase("halfmax")) {
+            return Threads.HALF_MAX;
         }
         return IntegerValueConverter.POSITIVE.convert(value);
     }
