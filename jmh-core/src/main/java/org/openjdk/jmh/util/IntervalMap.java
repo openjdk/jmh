@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.util;
 
+import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -97,6 +98,10 @@ public class IntervalMap<T>  {
                 return null;
             }
         }
+    }
+
+    public Collection<T> allValues() {
+        return from.values();
     }
 
     public void merge(IntervalMap<T> other) {
