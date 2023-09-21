@@ -55,24 +55,33 @@ import java.util.concurrent.TimeUnit;
  */
 public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
+    private final boolean useSudo;
     private final long sampleFrequency;
     private volatile String pid;
     private volatile Process dtraceProcess;
+
     private OptionSpec<Long> optFrequency;
+    private OptionSpec<Boolean> optSudo;
 
     public DTraceAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "sampled_pc");
 
-        // Check DTrace availability
-        Collection<String> messages = Utils.tryWith("sudo", "-n", "dtrace", "-V");
-        if (!messages.isEmpty()) {
-            throw new ProfilerException(messages.toString());
-        }
-
         try {
             sampleFrequency = set.valueOf(optFrequency);
+            useSudo = set.valueOf(optSudo);
         } catch (OptionException e) {
             throw new ProfilerException(e.getMessage());
+        }
+
+        // Check DTrace availability
+        Collection<String> messages;
+        if (useSudo) {
+            messages = Utils.tryWith("sudo", "-n", "dtrace", "-V");
+        } else {
+            messages = Utils.tryWith("dtrace", "-V");
+        }
+        if (!messages.isEmpty()) {
+            throw new ProfilerException(messages.toString());
         }
     }
 
@@ -115,9 +124,12 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        dtraceProcess = Utils.runAsync("sudo", "-n", "dtrace", "-n", "profile-" + sampleFrequency +
-                        " /arg1/ { printf(\"%d 0x%lx %d\", pid, arg1, timestamp); ufunc(arg1)}", "-o",
-                perfBinData.getAbsolutePath());
+        String dtraceLine = "profile-" + sampleFrequency + " /arg1/ { printf(\"%d 0x%lx %d\", pid, arg1, timestamp); ufunc(arg1)}";
+        if (useSudo) {
+            dtraceProcess = Utils.runAsync("sudo", "-n", "dtrace", "-n", dtraceLine, "-o", perfBinData.getAbsolutePath());
+        } else {
+            dtraceProcess = Utils.runAsync("dtrace", "-n", dtraceLine, "-o", perfBinData.getAbsolutePath());
+        }
         return Collections.emptyList();
     }
 
@@ -131,6 +143,9 @@ public class DTraceAsmProfiler extends AbstractPerfAsmProfiler {
         optFrequency = parser.accepts("frequency",
                 "Sampling frequency. This is synonymous to profile-#")
                 .withRequiredArg().ofType(Long.class).describedAs("freq").defaultsTo(1001L);
+
+        optSudo = parser.accepts("sudo", "Use sudo to access dtrace.")
+                .withRequiredArg().ofType(Boolean.class).defaultsTo(true);
     }
 
     @Override
