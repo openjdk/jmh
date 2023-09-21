@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [8, 11, 17, 21, 22-ea]
+        java: [8, 11, 17, 21]
         os: [ubuntu-22.04, windows-2022, macos-11]
         profile: [default, reflection, asm, executor-virtual, executor-fjp, executor-custom]
       fail-fast: false
@@ -70,4 +70,4 @@ jobs:
 
     - name: Run build with tests (Virtual Executor)
       run: mvn clean install -P ${{ matrix.profile }} -B --file pom.xml
-      if: (runner.os == 'Linux') && (matrix.java == '21-ea') && (matrix.profile == 'executor-virtual')
+      if: (runner.os == 'Linux') && (matrix.java == '21') && (matrix.profile == 'executor-virtual')
