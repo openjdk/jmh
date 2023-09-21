@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [8, 11, 17, 20, 21-ea]
+        java: [8, 11, 17, 21, 22-ea]
         os: [ubuntu-22.04, windows-2022, macos-11]
         profile: [default, reflection, asm, executor-virtual, executor-fjp, executor-custom]
       fail-fast: false
