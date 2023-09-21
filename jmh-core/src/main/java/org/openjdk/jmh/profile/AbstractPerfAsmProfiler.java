@@ -906,7 +906,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         // Decoding VtableStub itbl[0]@281473229238259 [0x0000ffff7ff1d210, 0x0000ffff7ff1d29c] (140 bytes)
         //
         // Decoding RuntimeStub - _complete_monitor_locking_Java 0x0000ffff8bf20f90 [0x0000ffff8bf21000, 0x0000ffff8bf21080] (128 bytes)
-        final Pattern runtimeStubPattern = Pattern.compile("Decoding (.+?) \\[(.+), (.+)\\] \\([0-9]+ bytes\\)");
+        final Pattern runtimeStubPattern = Pattern.compile("Decoding (.+?) \\[(.+), (.+)\\](.*)");
 
         // <nmethod compile_id='481' compiler='C1' level='3' entry='0x00007f26f51fb640' size='1392'
         //   address='0x00007f26f51fb4d0' relocation_offset='296' insts_offset='368' stub_offset='976'
