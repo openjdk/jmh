@@ -263,6 +263,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                 opts.add("-XX:+PrintNativeNMethods");
                 opts.add("-XX:+PrintSignatureHandlers");
                 opts.add("-XX:+PrintAdapterHandlers");
+                opts.add("-XX:+PrintMethodHandleStubs");
                 opts.add("-XX:+PrintStubCode");
             }
             if (intelSyntax) {
@@ -346,7 +347,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * 2. Read out PrintAssembly output
          */
 
-        Assembly assembly = readAssembly(hsLog.file());
+        Assembly assembly = readAssembly();
         if (assembly.size() > 0) {
             pw.printf("PrintAssembly processed: %d total address lines.%n", assembly.size());
         } else if (skipAssembly) {
@@ -835,8 +836,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    private Collection<Collection<String>> splitAssembly(File stdOut) {
-        try (FileReader in = new FileReader(stdOut);
+    private Collection<Collection<String>> splitAssembly() {
+        try (FileReader in = new FileReader(hsLog.file());
              BufferedReader br = new BufferedReader(in)) {
             Multimap<Long, String> writerToLines = new HashMultimap<>();
             long writerId = -1L;
@@ -871,7 +872,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         }
     }
 
-    private Assembly readAssembly(File stdOut) {
+    Assembly readAssembly() {
         List<ASMLine> lines = new ArrayList<>();
         SortedMap<Long, Integer> addressMap = new TreeMap<>();
 
@@ -898,6 +899,15 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         //  0x0000ffff6c819708:   mvn     w0, w0
         final Pattern interpreterStubPattern = Pattern.compile("^(\\S.*)( +)\\[(.+), (.+)[\\]\\[](.*)");
 
+        // Parsing runtime stubs. These come in different shapes and sizes:
+        //
+        // Decoding ExceptionBlob 0x0000ffff7ff1bb10 [0x0000ffff7ff1bb80, 0x0000ffff7ff1bbd0] (80 bytes)
+        //
+        // Decoding VtableStub itbl[0]@281473229238259 [0x0000ffff7ff1d210, 0x0000ffff7ff1d29c] (140 bytes)
+        //
+        // Decoding RuntimeStub - _complete_monitor_locking_Java 0x0000ffff8bf20f90 [0x0000ffff8bf21000, 0x0000ffff8bf21080] (128 bytes)
+        final Pattern runtimeStubPattern = Pattern.compile("Decoding (.+?) \\[(.+), (.+)\\](.*)");
+
         // <nmethod compile_id='481' compiler='C1' level='3' entry='0x00007f26f51fb640' size='1392'
         //   address='0x00007f26f51fb4d0' relocation_offset='296' insts_offset='368' stub_offset='976'
         //   scopes_data_offset='1152' scopes_pcs_offset='1208' dependencies_offset='1368' nul_chk_table_offset='1376'
@@ -905,7 +915,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
         //   count='258' iicount='258' stamp='8.590'/>
         final Pattern nmethodPattern = Pattern.compile("(.*?)<nmethod (.*?)/>(.*?)");
 
-        for (Collection<String> cs : splitAssembly(stdOut)) {
+        for (Collection<String> cs : splitAssembly()) {
             String prevLine = "";
             for (String line : cs) {
                 String trim = line.trim();
@@ -955,6 +965,22 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
                     }
                 }
 
+                if (line.contains("Decoding")) {
+                    Matcher matcher = runtimeStubPattern.matcher(line);
+                    if (matcher.matches()) {
+                        String name = matcher.group(1);
+                        if (name.startsWith("RuntimeStub - ")) {
+                            name = name.substring("RuntimeStub - ".length());
+                        }
+                        Long startAddr = parseOneAddress(matcher.group(2));
+                        Long endAddr = parseOneAddress(matcher.group(3));
+
+                        if (startAddr != null && endAddr != null) {
+                            stubs.add(MethodDesc.runtimeStub(name), startAddr, endAddr);
+                        }
+                    }
+                }
+
                 if (line.contains("<nmethod")) {
                     Matcher matcher = nmethodPattern.matcher(line);
                     if (matcher.matches()) {
@@ -980,7 +1006,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
                         MethodDesc desc = MethodDesc.javaMethod(
                                 map.get("method"),
-                                map.get("compiler"),
+                                (map.get("compiler") != null) ? map.get("compiler").toUpperCase() : null,
                                 map.get("level"),
                                 methodVersions.incrementAndGet(map.get("method")),
                                 map.get("compile_id"));
@@ -1010,6 +1036,15 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private static final List<Long> EMPTY_LIST_LONGS = Collections.unmodifiableList(new ArrayList<>());
 
     private static final Pattern ADDR_LINE_SPLIT = Pattern.compile("\\W+");
+
+    static Long parseOneAddress(String src) {
+        List<Long> addrs = parseAddresses(src, true, true);
+        if (addrs.size() == 1) {
+            return addrs.get(0);
+        } else {
+            return null;
+        }
+    }
 
     static List<Long> parseAddresses(String line, boolean alreadyTrimmed, boolean shouldStartWithAddr) {
         if (!alreadyTrimmed) {
@@ -1434,10 +1469,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
 
         @Override
         public String toString() {
-            return "MethodDesc{" +
-                    "name='" + name + '\'' +
-                    ", source='" + source + '\'' +
-                    '}';
+            return source + ": " + name;
         }
     }
 

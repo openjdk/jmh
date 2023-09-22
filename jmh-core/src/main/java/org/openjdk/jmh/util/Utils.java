@@ -393,6 +393,14 @@ public class Utils {
         return System.getProperty("os.name").contains("indows");
     }
 
+    public static boolean isLinux() {
+        return System.getProperty("os.name").contains("Linux");
+    }
+
+    public static boolean isMacos() {
+        return System.getProperty("os.name").contains("Mac");
+    }
+
     public static String getCurrentJvm() {
         return System.getProperty("java.home") +
                 File.separator +
