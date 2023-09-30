@@ -26,7 +26,7 @@ to work through the [JMH Samples](https://github.com/openjdk/jmh/tree/master/jmh
 ### Preferred Usage: Command Line
 
 **Step 1. Setting up the benchmarking project.** The following command will generate the new JMH-driven
-project in `test` folder:
+project in `test` folder (do not try to run the command within an already existing maven project):
 
     $ mvn archetype:generate \
       -DinteractiveMode=false \
