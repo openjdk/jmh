@@ -28,11 +28,14 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
 
+import java.lang.management.BufferPoolMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MemPoolProfiler implements InternalProfiler {
     static final double BYTES_PER_KIB = 1024D;
@@ -67,6 +70,20 @@ public class MemPoolProfiler implements InternalProfiler {
 
         results.add(new ScalarResult("mempool.total.codeheap.used", sumCodeHeap / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         results.add(new ScalarResult("mempool.total.used", sum / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+
+        results.addAll(
+                ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)
+                        .stream()
+                        .flatMap(bean -> Stream.of(
+                                new ScalarResult(String.format("mempool.%s.totalCapacity", bean.getName()),
+                                        bean.getTotalCapacity() / BYTES_PER_KIB,
+                                        "KiB",
+                                        AggregationPolicy.MAX),
+                                new ScalarResult(String.format("mempool.%s.memoryUsed", bean.getName()),
+                                        bean.getMemoryUsed() / BYTES_PER_KIB,
+                                        "KiB",
+                                        AggregationPolicy.MAX)))
+                        .collect(Collectors.toList()));
         return results;
     }
 }
