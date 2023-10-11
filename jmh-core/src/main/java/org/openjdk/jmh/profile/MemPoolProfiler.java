@@ -67,14 +67,13 @@ public class MemPoolProfiler implements InternalProfiler {
         }
 
         for (BufferPoolMXBean bean : ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)) {
-            final long used = bean.getMemoryUsed();
+            long used = bean.getMemoryUsed();
             sum += used;
-            results.add(new ScalarResult(String.format("mempool.%s.used", bean.getName()), used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+            results.add(new ScalarResult("mempool." + bean.getName() + ".used", used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         }
 
         results.add(new ScalarResult("mempool.total.codeheap.used", sumCodeHeap / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         results.add(new ScalarResult("mempool.total.used", sum / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
-
         return results;
     }
 }
