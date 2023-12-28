@@ -148,6 +148,8 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
             long cycles = 0;
             long insns = 0;
+            double joulesCpu = Double.NaN;
+            double joulesRam = Double.NaN;
 
             boolean printing = false;
             String line;
@@ -177,6 +179,21 @@ public class LinuxPerfProfiler implements ExternalProfiler {
                         }
                     }
                 }
+
+                if (line.contains("power/energy-cores/")) {
+                    try {
+                        joulesCpu = NumberFormat.getInstance().parse(line.trim().split(" ")[0]).doubleValue();
+                    } catch (ParseException e) {
+                        // do nothing, processing code will handle
+                    }
+                }
+                if (line.contains("power/energy-ram/")) {
+                    try {
+                        joulesRam = NumberFormat.getInstance().parse(line.trim().split(" ")[0]).doubleValue();
+                    } catch (ParseException e) {
+                        // do nothing, processing code will handle
+                    }
+                }
             }
 
             if (!isDelayed) {
@@ -191,7 +208,9 @@ public class LinuxPerfProfiler implements ExternalProfiler {
             return new PerfResult(
                     sw.toString(),
                     cycles,
-                    insns
+                    insns,
+                    joulesCpu,
+                    joulesRam
             );
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -204,12 +223,16 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         private final String output;
         private final long cycles;
         private final long instructions;
+        private final double joulesCpu;
+        private final double joulesRam;
 
-        public PerfResult(String output, long cycles, long instructions) {
+        public PerfResult(String output, long cycles, long instructions, double joulesCpu, double joulesRam) {
             super(ResultRole.SECONDARY, "perf", of(Double.NaN), "---", AggregationPolicy.AVG);
             this.output = output;
             this.cycles = cycles;
             this.instructions = instructions;
+            this.joulesCpu = joulesCpu;
+            this.joulesRam = joulesRam;
         }
 
         @Override
@@ -224,20 +247,42 @@ public class LinuxPerfProfiler implements ExternalProfiler {
 
         @Override
         protected Collection<? extends Result> getDerivativeResults() {
-            List<Result> res = new ArrayList<>();
+            List<Result<?>> res = new ArrayList<>(4);
+
             if (cycles != 0 && instructions != 0) {
                 res.add(new ScalarDerivativeResult("ipc", 1.0 * instructions / cycles, "insns/clk", AggregationPolicy.AVG));
                 res.add(new ScalarDerivativeResult("cpi", 1.0 * cycles / instructions, "clks/insn", AggregationPolicy.AVG));
+
             }
+
+            if(!Double.isNaN(joulesCpu)) {
+                res.add(new ScalarDerivativeResult("power/energy-cores/", joulesCpu, "Joules", AggregationPolicy.AVG));
+            }
+            if(!Double.isNaN(joulesRam)) {
+                res.add(new ScalarDerivativeResult("power/energy-ram/", joulesRam, "Joules", AggregationPolicy.AVG));
+            }
+
             return res;
         }
 
         @Override
         public String toString() {
             if (cycles != 0 && instructions != 0) {
-                return String.format("%s IPC, %s CPI",
+                StringBuilder str = new StringBuilder();
+
+                str.append(String.format("%s IPC, %s CPI",
                         ScoreFormatter.format(1.0 * instructions / cycles),
-                        ScoreFormatter.format(1.0 * cycles / instructions));
+                        ScoreFormatter.format(1.0 * cycles / instructions)));
+
+
+                if(!Double.isNaN(joulesCpu)) {
+                    str.append(String.format(", %s CPU Joules", ScoreFormatter.format(joulesCpu)));
+                }
+                if(!Double.isNaN(joulesRam)) {
+                    str.append(String.format(", %s RAM Joules", ScoreFormatter.format(joulesRam)));
+                }
+
+                return str.toString();
             } else {
                 return "N/A";
             }
@@ -255,13 +300,18 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         public PerfResult aggregate(Collection<PerfResult> results) {
             long cycles = 0;
             long instructions = 0;
-            String output = "";
+            double joulesCpu = 0.0;
+            double joulesRam = 0.0;
+            StringBuilder output = new StringBuilder();
             for (PerfResult r : results) {
                 cycles += r.cycles;
                 instructions += r.instructions;
-                output += r.output;
+                joulesCpu += r.joulesCpu;
+                joulesRam += r.joulesRam;
+
+                output.append(r.output);
             }
-            return new PerfResult(output, cycles, instructions);
+            return new PerfResult(output.toString(), cycles, instructions, joulesCpu, joulesRam);
         }
     }
 
