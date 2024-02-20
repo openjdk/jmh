@@ -93,7 +93,7 @@ public class AsyncProfilerForkTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("flamegraph");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-flamegraph")).getFiles();
-        Assert.assertEquals(5, files.size());
+        Assert.assertEquals(6, files.size());
         for (File file : files) {
             Assert.assertTrue(file.length() > 10);
         }
