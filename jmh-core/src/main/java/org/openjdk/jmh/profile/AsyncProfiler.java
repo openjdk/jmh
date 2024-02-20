@@ -42,6 +42,9 @@ import org.openjdk.jmh.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -564,7 +567,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         String originalName = original.getPath();
         int extIndex = originalName.lastIndexOf('.');
         File newFile = new File(originalName.substring(0, extIndex) + "." + pid + originalName.substring(extIndex));
-        original.renameTo(newFile);
+        try {
+            Files.copy(original.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         return newFile;
     }
 

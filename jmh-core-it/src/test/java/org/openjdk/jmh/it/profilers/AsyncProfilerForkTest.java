@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -68,7 +68,7 @@ public class AsyncProfilerForkTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("text");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-summary")).getFiles();
-        Assert.assertEquals(2, files.size());
+        Assert.assertEquals(3, files.size());
         for (File file : files) {
             Assert.assertTrue(file.length() > 10);
         }
@@ -82,7 +82,7 @@ public class AsyncProfilerForkTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("collapsed");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-collapsed")).getFiles();
-        Assert.assertEquals(2, files.size());
+        Assert.assertEquals(3, files.size());
         for (File file : files) {
             Assert.assertTrue(file.length() > 10);
         }
@@ -93,7 +93,7 @@ public class AsyncProfilerForkTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("flamegraph");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-flamegraph")).getFiles();
-        Assert.assertEquals(4, files.size());
+        Assert.assertEquals(5, files.size());
         for (File file : files) {
             Assert.assertTrue(file.length() > 10);
         }
@@ -103,7 +103,7 @@ public class AsyncProfilerForkTest extends AbstractHotspotProfilerTest {
     public void jfr() throws RunnerException {
         Map<String, Result> sr = run("jfr");
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-jfr")).getFiles();
-        Assert.assertEquals(2, files.size());
+        Assert.assertEquals(3, files.size());
         for (File file : files) {
             Assert.assertTrue(file.length() > 10);
         }
