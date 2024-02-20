@@ -41,7 +41,6 @@ jobs:
 
     - name: Build with tests (Default)
       run: mvn clean install -B --file pom.xml
-      continue-on-error: true
 
     - name: Build with tests (Reflection)
       run: mvn clean install -P reflection -B --file pom.xml
