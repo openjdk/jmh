@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -556,7 +557,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             FileResult result = (FileResult) br.getSecondaryResults().remove(label);
             if (result != null) {
                 moved.add(new FileResult(result.getLabel(), result.files.stream()
-                        .map(f -> addDiscriminator(f, pid))
+                        .flatMap(f -> Stream.of(f, addDiscriminator(f, pid)))
                         .collect(Collectors.toList())));
             }
         }
