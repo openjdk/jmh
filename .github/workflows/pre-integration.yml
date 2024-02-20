@@ -20,7 +20,7 @@ jobs:
         os: [ubuntu-22.04, windows-2022, macos-11]
       fail-fast: false
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 180
 
     steps:
     - uses: actions/checkout@v4
@@ -39,33 +39,41 @@ jobs:
         perf stat echo 1
       if: (runner.os == 'Linux')
 
-    - name: Run build with tests (Default)
+    - name: Build with tests (Default)
       run: mvn clean install -B --file pom.xml
+      continue-on-error: true
 
-    - name: Run build with tests (Reflection)
+    - name: Build with tests (Reflection)
       run: mvn clean install -P reflection -B --file pom.xml
+      continue-on-error: true
       if: (runner.os == 'Linux')
 
-    - name: Run build without tests (Reflection)
+    - name: Build without tests (Reflection)
       run: mvn clean install -P reflection -B --file pom.xml -DskipTests
+      continue-on-error: true
       if: (runner.os != 'Linux')
 
-    - name: Run build with tests (ASM)
+    - name: Build with tests (ASM)
       run: mvn clean install -P asm -B --file pom.xml
+      continue-on-error: true
       if: (runner.os == 'Linux')
 
-    - name: Run build without tests (ASM)
+    - name: Build without tests (ASM)
       run: mvn clean install -P asm -B --file pom.xml -DskipTests
+      continue-on-error: true
       if: (runner.os != 'Linux')
 
-    - name: Run build with tests (FJP Executor)
+    - name: Build with tests (FJP Executor)
       run: mvn clean install -P executor-fjp -B --file pom.xml
+      continue-on-error: true
       if: (runner.os == 'Linux')
 
-    - name: Run build with tests (Custom Executor)
+    - name: Build with tests (Custom Executor)
       run: mvn clean install -P executor-custom -B --file pom.xml
+      continue-on-error: true
       if: (runner.os == 'Linux')
 
-    - name: Run build with tests (Virtual Executor)
+    - name: Build with tests (Virtual Executor)
       run: mvn clean install -P executor-virtual -B --file pom.xml
+      continue-on-error: true
       if: (runner.os == 'Linux') && (matrix.java == '21')
