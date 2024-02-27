@@ -66,7 +66,7 @@ public class AsyncProfilerTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("text");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-summary")).getFiles();
-        Assert.assertEquals(1, files.size());
+        Assert.assertEquals(2, files.size());
         File single = files.iterator().next();
         Assert.assertTrue(single.length() > 10);
 
@@ -79,7 +79,7 @@ public class AsyncProfilerTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("collapsed");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-collapsed")).getFiles();
-        Assert.assertEquals(1, files.size());
+        Assert.assertEquals(2, files.size());
         File single = files.iterator().next();
         Assert.assertTrue(single.length() > 10);
     }
@@ -89,7 +89,7 @@ public class AsyncProfilerTest extends AbstractHotspotProfilerTest {
         Map<String, Result> sr = run("flamegraph");
 
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-flamegraph")).getFiles();
-        Assert.assertEquals(2, files.size());
+        Assert.assertEquals(4, files.size());
         for (File file : files) {
             Assert.assertTrue(file.length() > 10);
         }
@@ -99,7 +99,7 @@ public class AsyncProfilerTest extends AbstractHotspotProfilerTest {
     public void jfr() throws RunnerException {
         Map<String, Result> sr = run("jfr");
         Collection<? extends File> files = ((AsyncProfiler.FileResult) sr.get("async-jfr")).getFiles();
-        Assert.assertEquals(1, files.size());
+        Assert.assertEquals(2, files.size());
         File single = files.iterator().next();
         Assert.assertTrue(single.length() > 10);
     }
