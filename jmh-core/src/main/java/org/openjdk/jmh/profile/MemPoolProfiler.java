@@ -28,6 +28,7 @@ import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
 
+import java.lang.management.BufferPoolMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -62,6 +63,12 @@ public class MemPoolProfiler implements InternalProfiler {
             }
             sum += used;
 
+            results.add(new ScalarResult("mempool." + bean.getName() + ".used", used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
+        }
+
+        for (BufferPoolMXBean bean : ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)) {
+            long used = bean.getMemoryUsed();
+            sum += used;
             results.add(new ScalarResult("mempool." + bean.getName() + ".used", used / BYTES_PER_KIB, "KiB", AggregationPolicy.MAX));
         }
 

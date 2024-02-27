@@ -25,8 +25,7 @@ to work through the [JMH Samples](https://github.com/openjdk/jmh/tree/master/jmh
 
 ### Preferred Usage: Command Line
 
-**Step 1. Setting up the benchmarking project.** The following command will generate the new JMH-driven
-project in `test` folder:
+**Step 1. Setting up the benchmarking project.** The following command will generate the new JMH-driven project in new `test` folder. Note that current and target folder should not already contain any Maven project for this to work reliably.
 
     $ mvn archetype:generate \
       -DinteractiveMode=false \
