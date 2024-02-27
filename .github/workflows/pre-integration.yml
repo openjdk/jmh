@@ -38,6 +38,11 @@ jobs:
         echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
         perf stat echo 1
       if: (runner.os == 'Linux')
+    - name: Set up async-profiler (Linux)
+      run: |
+        curl -L https://github.com/async-profiler/async-profiler/releases/download/v3.0/async-profiler-3.0-linux-x64.tar.gz | tar xzf -
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/async-profiler-3.0-linux-x64/lib/" >> $GITHUB_ENV
+      if: (runner.os == 'Linux')
 
     - name: Build with tests (Default)
       run: mvn clean install -B --file pom.xml
