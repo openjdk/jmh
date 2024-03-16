@@ -1,0 +1,149 @@
+402129330;1000000;0x0;;;120029 214575
+403129785;1000000;0x103d5e809;0x103d5e809;libjvm.dylib;0 0
+404129342;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;177215 238426
+407130268;1000000;0x7ff8174e25f3;__fcntl;dyld;0 0
+414129588;1000000;0x7ff81752f049;dyld3::MachOFile::forEachSection(void (dyld3::MachOFile::SectionInfo const&, bool, bool&) block_pointer) const;dyld;2162351 1609379
+415134072;1000000;0x7ff8175311f3;dyld3::MachOFile::inCodeSection(unsigned int) const;dyld;2772387 1153827
+416131810;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;199731 273077
+417131140;1000000;0x7ff817549e5b;mprotect;dyld;163948 396064
+419129416;1000000;0x7ff8174a8bbe;attachCategories(objc_class*, locstamped_category_t const*, unsigned int, int);libobjc.A.dylib;2170358 1741367
+420129208;1000000;0x7ff818d1eac5;-[_NSThreadData init];Foundation;1717396 1880602
+421135264;1000000;0x7ff8176e66e5;arc4random_buf;libsystem_c.dylib;47537 78516
+423131000;1000000;0x102783f61;JLI_List_new;libjli.dylib;626378 1085929
+426130020;1000000;0x7ff817800af3;stat$INODE64;libsystem_kernel.dylib;6562 71207
+427130556;1000000;0x7ff8174e0d1b;strcmp;dyld;55647 194820
+429130072;1000000;0x7ff8174e25f3;__fcntl;dyld;0 0
+439131832;1000000;0x7ff817530f72;dyld3::MachOFile::trieWalk(Diagnostics&, unsigned char const*, unsigned char const*, char const*);dyld;5661582 2275797
+442131057;1000000;0x7ff8174fa2a6;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;0 0
+444128910;1000000;0x7ff8174fa2c7;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;4 1721
+445129222;1000000;0x7ff8174fa2c7;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;26650 25943
+448129323;1000000;0x7ff8174fa2a6;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;159886 84446
+449133614;1000000;0x7ff81753f515;invocation function for block in dyld3::MachOAnalyzer::forEachRebaseLocation_Opcodes(Diagnostics&, void (unsigned long long, bool&) block_pointer) const;dyld;35722 23030
+451129346;1000000;0x7ff8174fa2a6;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;96298 48827
+454129451;1000000;0x7ff8174fa2a6;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;14435 20138
+455129774;1000000;0x7ff8174fa2a6;invocation function for block in dyld4::Loader::applyFixupsGeneric(Diagnostics&, dyld4::RuntimeState&, unsigned long long, dyld3::Array<void const*> const&, dyld3::Array<void const*> const&, bool, dyld3::Array<dyld4::Loader::MissingFlatLazySymbol> const&) const;dyld;0 0
+457129153;1000000;0x103a79e3b;AllocateHeap(unsigned long, MEMFLAGS, AllocFailStrategy::AllocFailEnum);libjvm.dylib;16 3297
+461128903;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;5203 8146
+467128922;1000000;0x7ff81768876f;nanov2_malloc_zero_on_alloc;libsystem_malloc.dylib;993 7724
+472141371;1000000;0x103c1d421;__cxx_global_var_init.22;libjvm.dylib;1237 7005
+477130061;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;384 2519
+483129724;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;3420 20590
+485143678;1000000;0x103d58051;__cxx_global_var_init.106;libjvm.dylib;0 0
+487129004;1000000;0x103d7b0f1;__cxx_global_var_init.14;libjvm.dylib;9825 20990
+488128667;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;6750 12412
+492130008;1000000;0x103df9e31;__cxx_global_var_init.22;libjvm.dylib;0 0
+496128915;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;538 2449
+502128824;1000000;0x103f05000;_GLOBAL__sub_I_jvmciCodeInstaller.cpp;libjvm.dylib;2697 8269
+505128973;1000000;0x103fffbe1;__cxx_global_var_init.37;libjvm.dylib;1237 3712
+507129242;1000000;0x10402f0c1;__cxx_global_var_init.30;libjvm.dylib;3685 23676
+514151791;1000000;0x104167461;__cxx_global_var_init.5;libjvm.dylib;1237 5665
+515129410;1000000;0x10443cb11;ReservedSpace::ReservedSpace();libjvm.dylib;3308 11147
+517134308;1000000;0x10418e9e1;__cxx_global_var_init.23;libjvm.dylib;0 0
+520130602;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;2592 12993
+528128972;1000000;0x1042690e1;__cxx_global_var_init.4;libjvm.dylib;0 0
+533129008;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;384 1758
+537129195;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;1362 6045
+540129069;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;1620 3552
+547131454;1000000;0x1044a38b1;__cxx_global_var_init.10;libjvm.dylib;3879 20260
+548131898;1000000;0x1044a9871;__cxx_global_var_init.22;libjvm.dylib;0 0
+549129100;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;2596 12735
+550129478;1000000;0x1041df9d1;ostream_init();libjvm.dylib;324 9411
+553129015;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;3841 3361
+555128765;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;11523 9079
+557129132;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;15364 18071
+558129153;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;0 0
+559129395;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;19205 14985
+561128969;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;26118 17290
+562128926;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;20395 14924
+563165173;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;24584 19616
+564128891;1000000;0x7ff817534971;dyld3::MachOLoaded::findClosestSymbol(unsigned long long, char const**, unsigned long long*) const;dyld;73752 56437
+566129428;1000000;0x7ff8177ffd7f;fstat$INODE64;libsystem_kernel.dylib;30850 46790
+568129257;1000000;0x7ff8174e25f3;__fcntl;dyld;0 0
+577129258;1000000;0x1041dcffd;outputStream::print_cr(char const*, ...);libjvm.dylib;1817 13187
+581129686;1000000;0x7ff817868f41;_platform_strlen;libsystem_platform.dylib;32963 74512
+582129805;1000000;0x7ff8177fffd7;close;libsystem_kernel.dylib;36850 123161
+583129026;1000000;0x103cedffc;JMXStartRemoteDCmd::JMXStartRemoteDCmd(outputStream*, bool);libjvm.dylib;28940 79223
+585129139;1000000;0x7ff8174e25f3;__fcntl;dyld;0 0
+592130341;1000000;0x10283a881;JDK_Canonicalize;libjava.dylib;1146 23835
+596129635;1000000;0x1040d7d81;MacroAssembler::decrementl(RegisterImpl*, int);libjvm.dylib;35 8883
+599129881;1000000;0x104359ffb;StubGenerator::generate_call_stub(unsigned char*&);libjvm.dylib;2525 48261
+600129745;1000000;0x103a949e7;Assembler::locate_operand(unsigned char*, Assembler::WhichOperand);libjvm.dylib;21340 151701
+604130490;1000000;0x7ff8177ff45b;_kernelrpc_mach_vm_map_trap;libsystem_kernel.dylib;127085 247972
+606130173;1000000;0x7ff817868e8a;_platform_bzero$VARIANT$Haswell;libsystem_platform.dylib;79765 159451
+607129520;1000000;0x7ff81768873b;nanov2_malloc_zero_on_alloc;libsystem_malloc.dylib;9521 37709
+609129817;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;23 5313
+612130019;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;9119 11698
+616147030;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;0 0
+617129880;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;6599 6362
+620129017;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;5495 4088
+624129275;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;18789 14694
+625129015;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;15394 13418
+626129644;1000000;0x103d20421;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;22786 20310
+628129355;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;16844 17045
+631129079;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;3867 7478
+633128986;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;4400 8341
+635129273;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;4643 6864
+639129164;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;17828 9265
+641129043;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;16840 11475
+642128909;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;0 0
+645129131;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;7473 10150
+660129160;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;27844 21450
+667129056;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;1642 5803
+670129666;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;323 2212
+673129967;1000000;0x103d2041d;SharedDataRelocator::do_bit(unsigned long);libjvm.dylib;0 0
+681129462;1000000;0x7ff8178000b3;__mmap;libsystem_kernel.dylib;12166 99334
+685128865;1000000;0x7ff817868e6b;_platform_bzero$VARIANT$Haswell;libsystem_platform.dylib;454 9248
+693129361;1000000;0x103e0da59;PatchEmbeddedPointers::do_bit(unsigned long);libjvm.dylib;12430 16408
+695129070;1000000;0x103e0da59;PatchEmbeddedPointers::do_bit(unsigned long);libjvm.dylib;16478 25130
+697129104;1000000;0x104278c71;RegisterSaver::save_live_registers(MacroAssembler*, int, int*, bool);libjvm.dylib;0 0
+698128981;1000000;0x7ff817715d47;_qsort;libsystem_c.dylib;76801 41342
+700129262;1000000;0x104395664;void CompactHashtable<Symbol*, RunTimeSharedClassInfo const*, &RunTimeSharedClassInfo const* read_value_from_compact_hashtable<RunTimeSharedClassInfo const*>(unsigned char*, unsigned int), &RunTimeSharedClassInfo::EQUALS(RunTimeSharedClassInfo const*, Symbol*, int)>::iterate<ArchivedMirrorPatcher>(RunTimeSharedClassInfo const**) const;libjvm.dylib;133180 125165
+702129294;1000000;0x103c75f68;ConstantPool::restore_unshareable_info(JavaThread*);libjvm.dylib;180594 296012
+703140396;1000000;0x104384991;ObjectLocker::ObjectLocker(Handle, JavaThread*);libjvm.dylib;1 598
+704129278;1000000;0x1043a9001;TemplateTable::initialize();libjvm.dylib;10546 22268
+706129075;1000000;0x103a943d5;Assembler::emit_compressed_disp_byte(int&);libjvm.dylib;122289 125957
+707129023;1000000;0x1043bc286;TemplateTable::_return(TosState);libjvm.dylib;331087 249950
+709129326;1000000;0x113a1508c;0x113a1508c;;355085 411527
+710129540;1000000;0x113a1509a;0x113a1509a;;41837 77172
+712130400;1000000;0x113a1508f;0x113a1508f;;53764 151143
+713144186;1000000;0x103e3ed21;InterpreterRuntime::resolve_from_cache(JavaThread*, Bytecodes::Code);libjvm.dylib;20 3044
+715129449;1000000;0x103ef4b91;JVM_IsCDSDumpingEnabled;libjvm.dylib;370929 552681
+716147216;1000000;0x103eb1fe1;jni_GetStringUTFChars;libjvm.dylib;0 0
+717129167;1000000;0x103e23e69;InstanceKlass::find_local_field(Symbol*, Symbol*, fieldDescriptor*) const;libjvm.dylib;207068 281551
+719129408;1000000;0x1041a42c3;NativeLookup::pure_jni_name(methodHandle const&);libjvm.dylib;190351 272023
+719129586;1000000;0x7ff81783bd5f;pthread_mutex_trylock;libsystem_pthread.dylib;11211 78309
+720129779;1000000;0x7ff817800af3;stat$INODE64;libsystem_kernel.dylib;130526 283328
+722129355;1000000;0x7ff8178a7195;__CFStringHash;CoreFoundation;143117 144375
+723129903;1000000;0x7ff817800007;__open_nocancel;libsystem_kernel.dylib;1482175 1670334
+724129318;1000000;0x7ff8178398e4;_pthread_mutex_firstfit_lock_slow;libsystem_pthread.dylib;466320 246505
+727129261;1000000;0x7ff8174e2a07;__kdebug_trace64;dyld;1899423 2184178
+731129608;1000000;0x7ff817868f01;_platform_strlen;libsystem_platform.dylib;156799 235074
+733128909;1000000;0x7ff817801893;__psynch_mutexwait;libsystem_kernel.dylib;207 3733
+733129082;1000000;0x103bd5531;ciEnv::ciEnv(Arena*);libjvm.dylib;1028 4848
+733129827;1000000;0x104188be8;JVM_RegisterMethodHandleMethods;libjvm.dylib;368599 533067
+734129276;1000000;0x103ac965d;Assembler::mov_literal64(RegisterImpl*, long, RelocationHolder const&);libjvm.dylib;370157 329823
+734129407;1000000;0x104028c00;Klass::append_to_sibling_list();libjvm.dylib;94434 161162
+735129125;1000000;0x1043eadfd;TypeOopPtr::TypeOopPtr(Type::TYPES, TypePtr::PTR, ciKlass*, bool, ciObject*, int, int, TypePtr const*, int);libjvm.dylib;33862 66051
+735129396;1000000;0x104190d84;ModuleEntryTable::load_archived_entries(ClassLoaderData*, Array<ModuleEntry*>*);libjvm.dylib;2083911 2782035
+737129264;1000000;0x10437f47a;SymbolTable::lookup_shared(char const*, int, unsigned int);libjvm.dylib;242944 482168
+740129118;1000000;0x103ce7737;State::DFA(int, Node const*);libjvm.dylib;8988 32260
+740129186;1000000;0x103b75001;LinearScan::resolve_data_flow();libjvm.dylib;0 0
+741128993;1000000;0x1027fd4f6;ImageFileReader::find_location_index(char const*, unsigned long long*) const;libjimage.dylib;17 1980
+741129293;1000000;0x103b41301;LIR_Assembler::mem2reg(LIR_OprDesc*, LIR_OprDesc*, BasicType, LIR_PatchCode, CodeEmitInfo*, bool, bool);libjvm.dylib;0 0
+742128998;1000000;0x103cac01b;State::_sub_Op_AddP(Node const*);libjvm.dylib;0 0
+742129549;1000000;0x103b1a007;GraphBuilder::access_field(Bytecodes::Code);libjvm.dylib;52534 198642
+742129659;1000000;0x7ff817868a1e;_platform_memmove$VARIANT$Haswell;libsystem_platform.dylib;164940 297481
+744129095;1000000;0x1039a1111;indOffset8Oper::base_position() const;libjvm.dylib;17549 55252
+744129825;1000000;0x103b73a20;LinearScan::build_intervals();libjvm.dylib;463596 631301
+746129308;1000000;0x1042172f1;PhaseChaitin::elide_copy(Node*, int, Block*, Node_List*, Node_List*, bool);libjvm.dylib;12161 20003
+746131753;1000000;0x113a2448b;0x113a2448b;;7621517 3218787
+747129682;1000000;0x1041c3821;oopDesc::address_field_put(int, unsigned char*);libjvm.dylib;2616577 1189859
+747129834;1000000;0x1040cf7d7;MacroAssembler::as_Address(AddressLiteral);libjvm.dylib;203736 295385
+748128911;1000000;0x103961b51;jmpConNode::size(PhaseRegAlloc*) const;libjvm.dylib;544 6365
+749129651;1000000;0x104260e81;OptoRuntime::multianewarray2_Type();libjvm.dylib;1102612 1492553
+750129984;1000000;0x103e16a80;PhaseChaitin::build_ifg_physical(ResourceArea*);libjvm.dylib;3736276 3463584
+769129725;1000000;0x0;;;0 0
+769130128;1000000;0x0;;;0 0
+770131426;1000000;0x0;;;0 0
+771130351;1000000;0x0;;;0 0
+772130138;1000000;0x0;;;0 0

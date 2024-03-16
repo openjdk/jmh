@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<trace-toc>
+    <run number="1">
+        <info>
+            <target>
+                <device uuid="BCE206B0-3F83-5DE9-BB78-63C7A32DDE1A" model="MacBook Pro" name="Filipp’s MacBook Pro" os-version="13.5.1 (22G90)" platform="macOS"/>
+                <process arguments="Test" return-exit-status="0" name="java" pid="11061" termination-reason="exit(0)"/>
+            </target>
+            <summary>
+                <start-date>2023-08-27T14:49:40.479+02:00</start-date>
+                <end-date>2023-08-27T14:49:41.248+02:00</end-date>
+                <duration>0.769474</duration>
+                <end-reason>Target app exited</end-reason>
+                <instruments-version>14.3.1 (14E300c)</instruments-version>
+                <template-name>LoadsTemplate</template-name>
+                <recording-mode>Deferred</recording-mode>
+                <time-limit>12 hours</time-limit>
+                <intruments-recording-settings>
+                    <instrument name="CPU Counters">
+                        <array>
+                            <dictionary>
+                                <key name="Counters">
+                                    <value>CPU Name: Intel Kaby Lake</value>
+                                    <value>Sample every 0 occurrences of (null)</value>
+                                    <value>User callstacks</value>
+                                </key>
+                            </dictionary>
+                        </array>
+                    </instrument>
+                </intruments-recording-settings>
+            </summary>
+        </info>
+        <processes>
+            <process name="kernel" path="kernel" pid="0"/>
+            <process name="java" path="/Users/fzhinkin/.sdkman/candidates/java/current/bin/java" pid="11061"/>
+        </processes>
+        <data>
+            <table codes="&quot;0x07,0x00&quot; &quot;0x1f,0x05&quot; &quot;0x1f,0x07&quot; &quot;0x1f,0x08&quot;" schema="kdebug" callstack="user" target="SINGLE"/>
+            <table pmc-events="&quot;L1D_CACHE_MISS_LD&quot; &quot;MEM_LOAD_RETIRED.L1_HIT&quot;" schema="counters-profile" pmi-threshold="1000000" needs-kernel-callstack="0" trigger="pmi" target-pid="SINGLE" pmi-event="&quot;MEM_INST_RETIRED.ALL_LOADS&quot;"/>
+            <table schema="tick" frequency="10"/>
+            <table target="SINGLE" schema="kdebug-strings" codes="&quot;0x1f,0x05&quot; &quot;0x1f,0x07&quot; &quot;0x1f,0x08&quot;"/>
+            <table schema="tick" frequency="1"/>
+            <table codes="&quot;0x1,0x40,0x20&quot;" pmc-events="&quot;L1D_CACHE_MISS_LD&quot; &quot;MEM_LOAD_RETIRED.L1_HIT&quot;" schema="kdebug-counters-with-kdebug-sample" target="SINGLE"/>
+            <table target="SINGLE" pmc-events="&quot;L1D_CACHE_MISS_LD&quot; &quot;MEM_LOAD_RETIRED.L1_HIT&quot;" pmi-event="&quot;MEM_INST_RETIRED.ALL_LOADS&quot;" schema="kdebug-counters-with-pmi-sample" callstack="user" pmi-threshold="1000000"/>
+            <table schema="dyld-library-load" target-pid="SINGLE"/>
+            <table schema="developer-thread-name-update"/>
+        </data>
+        <tracks/>
+    </run>
+</trace-toc>
