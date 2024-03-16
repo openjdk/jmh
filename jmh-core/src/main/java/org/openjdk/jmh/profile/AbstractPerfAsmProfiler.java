@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -59,8 +59,8 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
     private final String savePerfOutputToFile;
 
     private final boolean savePerfBin;
-    private final String savePerfBinTo;
-    private final String savePerfBinFile;
+    protected final String savePerfBinTo;
+    protected final String savePerfBinFile;
 
     private final boolean saveLog;
     private final String saveLogTo;
@@ -332,6 +332,24 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
      * @return Extension.
      */
     protected abstract String perfBinaryExtension();
+
+    /**
+     * Copy perf binary output file generated for a benchmark run.
+     *
+     * @param runParams BenchmarkParams for a run perf results were generated for.
+     * @param logger Logger to print debug messages.
+     */
+    protected void savePerfBinaryOutput(BenchmarkParams runParams, PrintWriter logger) {
+        String target = (savePerfBinFile == null) ?
+                savePerfBinTo + "/" + runParams.id() + perfBinaryExtension() :
+                savePerfBinFile;
+        try {
+            FileUtils.copy(perfBinData.getAbsolutePath(), target);
+            logger.println("Perf binary output saved to " + target);
+        } catch (IOException e) {
+            logger.println("Unable to save perf binary output to " + target);
+        }
+    }
 
     private TextResult processAssembly(BenchmarkResult br) {
         /**
@@ -679,15 +697,7 @@ public abstract class AbstractPerfAsmProfiler implements ExternalProfiler {
          * Print binary perf output, if needed:
          */
         if (savePerfBin) {
-            String target = (savePerfBinFile == null) ?
-                savePerfBinTo + "/" + br.getParams().id() + perfBinaryExtension() :
-                savePerfBinFile;
-            try {
-                FileUtils.copy(perfBinData.getAbsolutePath(), target);
-                pw.println("Perf binary output saved to " + target);
-            } catch (IOException e) {
-                pw.println("Unable to save perf binary output to " + target);
-            }
+            savePerfBinaryOutput(br.getParams(), pw);
         }
 
         /**
