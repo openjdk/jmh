@@ -74,7 +74,7 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
     private final boolean shouldFixStartTime;
     private final Path temporaryDirectory;
     private final String template;
-    private String instrument;
+    private final String instrument;
     private OptionSpec<String> templateOpt;
     private OptionSpec<String> instrumentOpt;
     private OptionSpec<Boolean> correctOpt;
@@ -95,6 +95,8 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
             template = set.valueOf(templateOpt);
             if (template == null) {
                 instrument = set.valueOf(instrumentOpt);
+            } else {
+                instrument = null;
             }
             shouldFixStartTime = set.valueOf(correctOpt);
             temporaryDirectory = XCTraceSupport.createTemporaryDirectoryName();
@@ -108,13 +110,21 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
         instrumentOpt = parser.accepts("instrument",
                         "Name of an Instruments instrument. " +
                                 "Use `xctrace list instruments` to view available instruments.")
-                .withOptionalArg().ofType(String.class).defaultsTo("Time Profiler");
+                .withOptionalArg()
+                .describedAs("string")
+                .ofType(String.class)
+                .defaultsTo("Time Profiler");
         templateOpt = parser.accepts("template",
                         "Path to or name of an Instruments template. " +
                                 "Use `xctrace list templates` to view available templates.")
-                .withOptionalArg().ofType(String.class);
+                .withOptionalArg()
+                .describedAs("string")
+                .ofType(String.class);
         correctOpt = parser.accepts("fixStartTime", "Fix the start time by the time it took to launch.")
-                .withRequiredArg().ofType(Boolean.class).defaultsTo(true);
+                .withRequiredArg()
+                .describedAs("bool")
+                .ofType(Boolean.class)
+                .defaultsTo(true);
     }
 
     @Override
