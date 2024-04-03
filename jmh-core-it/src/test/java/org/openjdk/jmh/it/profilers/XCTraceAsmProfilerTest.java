@@ -26,9 +26,7 @@ package org.openjdk.jmh.it.profilers;
 
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.ProfilerException;
 import org.openjdk.jmh.profile.XCTraceAsmProfiler;
@@ -43,8 +41,7 @@ import java.io.File;
 import java.util.Map;
 
 public class XCTraceAsmProfilerTest extends AbstractAsmProfilerTest {
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
     private static void skipIfProfilerNotSupport() {
         try {
@@ -110,13 +107,17 @@ public class XCTraceAsmProfilerTest extends AbstractAsmProfilerTest {
     @Test
     public void testSavePerfBinHandling() throws RunnerException {
         skipIfProfilerNotSupport();
-        File expectedFile = new File(temporaryFolder.getRoot(), "results.trace");
-        Options opts = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(XCTraceAsmProfiler.class,
-                        "savePerfBin=true;savePerfBinToFile=" + expectedFile.getAbsolutePath())
-                .build();
-        new Runner(opts).runSingle();
-        Assert.assertTrue("Results were not copied", expectedFile.isDirectory());
+        File expectedFile = new File(TMP_DIR, "results.trace");
+        try {
+            Options opts = new OptionsBuilder()
+                    .include(Fixtures.getTestMask(this.getClass()))
+                    .addProfiler(XCTraceAsmProfiler.class,
+                            "savePerfBin=true;savePerfBinToFile=" + expectedFile.getAbsolutePath())
+                    .build();
+            new Runner(opts).runSingle();
+            Assert.assertTrue("Results were not copied", expectedFile.isDirectory());
+        } finally {
+            expectedFile.delete();
+        }
     }
 }
