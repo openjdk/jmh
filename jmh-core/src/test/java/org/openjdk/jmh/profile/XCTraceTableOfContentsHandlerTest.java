@@ -54,9 +54,6 @@ public class XCTraceTableOfContentsHandlerTest extends XCTraceTestBase {
         assertEquals(XCTraceTableHandler.TriggerType.PMI, table.getTriggerType());
         assertEquals(1000000L, table.triggerThreshold());
         assertEquals("MEM_INST_RETIRED.ALL_LOADS", table.triggerEvent());
-        assertEquals(Arrays.asList(
-                "L1D_CACHE_MISS_LD", "MEM_LOAD_RETIRED.L1_HIT"
-        ), table.counters());
     }
 
     @Test
@@ -72,9 +69,6 @@ public class XCTraceTableOfContentsHandlerTest extends XCTraceTestBase {
         assertEquals(XCTraceTableHandler.TriggerType.TIME, table.getTriggerType());
         assertEquals(1000L, table.triggerThreshold());
         assertEquals("TIME_MICRO_SEC", table.triggerEvent());
-        assertEquals(Arrays.asList(
-                "INST_ALL", "CORE_ACTIVE_CYCLE", "INST_BRANCH"
-        ), table.counters());
     }
 
     @Test

@@ -30,7 +30,6 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Extracts information about xctrace result tables from trace file's table of contents.
@@ -43,17 +42,6 @@ class XCTraceTableOfContentsHandler extends XCTraceTableHandler {
     private final List<XCTraceTableDesc> supportedTables = new ArrayList<>();
 
     private long recordStartMs;
-
-    private static List<String> parseEvents(Attributes attributes) {
-        String events = attributes.getValue(XCTraceTableHandler.PMC_EVENTS);
-        // TODO: support names with whitespaces inside
-        return Arrays.stream(events.split(" ")).map(e -> {
-                    if (!e.startsWith("\"") && !e.endsWith("\"")) return e;
-                    if (e.startsWith("\"") && e.endsWith("\"")) return e.substring(1, e.length() - 1);
-                    throw new IllegalStateException("Can't parse pmc-events: " + events);
-                }).filter(e -> !e.isEmpty())
-                .collect(Collectors.toList());
-    }
 
     public List<XCTraceTableDesc> getSupportedTables() {
         return Collections.unmodifiableList(supportedTables);
@@ -116,7 +104,7 @@ class XCTraceTableOfContentsHandler extends XCTraceTableHandler {
         long threshold = Long.parseLong(Objects.requireNonNull(attributes.getValue(XCTraceTableHandler.PMI_THRESHOLD),
                 "Trigger threshold not found"));
         XCTraceTableDesc table = new XCTraceTableDesc(ProfilingTableType.COUNTERS_PROFILE, TriggerType.PMI,
-                parseEvents(attributes), pmiEvent, threshold);
+                pmiEvent, threshold);
         supportedTables.add(table);
     }
 
@@ -124,7 +112,7 @@ class XCTraceTableOfContentsHandler extends XCTraceTableHandler {
         long threshold = Long.parseLong(Objects.requireNonNull(attributes.getValue(XCTraceTableHandler.SAMPLE_RATE),
                 "Trigger threshold not found"));
         XCTraceTableDesc table = new XCTraceTableDesc(ProfilingTableType.COUNTERS_PROFILE, TriggerType.TIME,
-                parseEvents(attributes), XCTraceTableProfileHandler.XCTraceSample.TIME_SAMPLE_TRIGGER_NAME, threshold);
+                XCTraceTableProfileHandler.XCTraceSample.TIME_SAMPLE_TRIGGER_NAME, threshold);
         supportedTables.add(table);
     }
 }

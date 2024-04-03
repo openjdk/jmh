@@ -49,7 +49,6 @@ class XCTraceTableHandler extends DefaultHandler {
     static final String BACKTRACE = "backtrace";
     static final String BINARY = "binary";
     static final String SAMPLE_TIME = "sample-time";
-    static final String PMC_EVENTS = "pmc-events";
     static final String ADDRESS = "addr";
     static final String SCHEMA = "schema";
     static final String TABLE = "table";
@@ -122,21 +121,19 @@ class XCTraceTableHandler extends DefaultHandler {
 
         private final ProfilingTableType tableType;
         private final XCTraceTableHandler.TriggerType triggerType;
-        private final List<String> counters;
         private final String trigger;
         private final long threshold;
 
         XCTraceTableDesc(ProfilingTableType tableType, XCTraceTableHandler.TriggerType triggerType,
-                         List<String> counters, String trigger, long threshold) {
+                         String trigger, long threshold) {
             this.tableType = tableType;
             this.triggerType = triggerType;
-            this.counters = counters;
             this.trigger = trigger;
             this.threshold = threshold;
         }
 
         XCTraceTableDesc(ProfilingTableType tableType) {
-            this(tableType, XCTraceTableHandler.TriggerType.UNKNOWN, Collections.emptyList(), "", -1);
+            this(tableType, XCTraceTableHandler.TriggerType.UNKNOWN, "", -1);
         }
 
         public ProfilingTableType getTableType() {
@@ -145,10 +142,6 @@ class XCTraceTableHandler extends DefaultHandler {
 
         public XCTraceTableHandler.TriggerType getTriggerType() {
             return triggerType;
-        }
-
-        public List<String> counters() {
-            return counters;
         }
 
         public String triggerEvent() {

@@ -199,12 +199,6 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 pushCachedOrNew(attributes, id -> new Frame(id, parseName(attributes),
                         parseAddress(attributes) - 1L));
                 break;
-            case XCTraceTableHandler.PMC_EVENTS:
-                pushCachedOrNew(attributes, id -> {
-                    setNeedParseCharacters(true);
-                    return new ValueHolder<long[]>(id);
-                });
-                break;
         }
     }
 
@@ -245,10 +239,6 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 if (backtrace.value == null) {
                     backtrace.value = frame;
                 }
-                break;
-            case XCTraceTableHandler.PMC_EVENTS:
-                ValueHolder<long[]> events = popAndUpdateEvents();
-                currentSample.setPmcCounters(events.value);
                 break;
         }
         setNeedParseCharacters(false);
@@ -334,14 +324,6 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
 
         public long getWeight() {
             return weight;
-        }
-
-        public long[] getPmcCounters() {
-            return samples;
-        }
-
-        public void setPmcCounters(long[] samples) {
-            this.samples = samples;
         }
 
         public long getAddress() {
