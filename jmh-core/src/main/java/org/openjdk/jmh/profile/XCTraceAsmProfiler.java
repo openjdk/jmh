@@ -77,6 +77,7 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
     private final Path temporaryDirectory;
     private final String template;
     private final String instrument;
+    private final String xctracePath;
     private OptionSpec<String> templateOpt;
     private OptionSpec<String> instrumentOpt;
     private OptionSpec<Boolean> correctOpt;
@@ -88,7 +89,7 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
     public XCTraceAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "sampled_pc");
-        XCTraceSupport.checkXCTraceWorks();
+        xctracePath = XCTraceSupport.getXCTracePath();
         try {
             // OptionParser::mutuallyExclusive doesn't work well, so we have to verify mutual exclusiveness here.
             if (set.hasArgument(templateOpt) && set.hasArgument(instrumentOpt)) {
@@ -132,7 +133,8 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     protected void parseEvents() {
         Path profile = XCTraceSupport.findTraceFile(temporaryDirectory);
-        XCTraceSupport.exportTableOfContents(profile.toAbsolutePath().toString(), perfParsedData.getAbsolutePath());
+        XCTraceSupport.exportTableOfContents(xctracePath, profile.toAbsolutePath().toString(),
+                perfParsedData.getAbsolutePath());
         XCTraceTableOfContentsHandler handler = new XCTraceTableOfContentsHandler();
         handler.parse(perfParsedData.file());
         recordStartMs = handler.getRecordStartMs();
@@ -150,7 +152,8 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
                     "schemas: " + supportedSchemas);
         }
         resultsTable = tables.get(0).getTableType();
-        XCTraceSupport.exportTable(profile.toAbsolutePath().toString(), perfParsedData.getAbsolutePath(), resultsTable);
+        XCTraceSupport.exportTable(xctracePath, profile.toAbsolutePath().toString(), perfParsedData.getAbsolutePath(),
+                resultsTable);
     }
 
     @Override
@@ -247,7 +250,8 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
-        return XCTraceSupport.recordCommandPrefix(temporaryDirectory.toAbsolutePath().toString(), instrument, template);
+        return XCTraceSupport.recordCommandPrefix(xctracePath, temporaryDirectory.toAbsolutePath().toString(),
+                instrument, template);
     }
 
     @Override

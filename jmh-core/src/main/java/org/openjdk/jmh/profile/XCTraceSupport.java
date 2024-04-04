@@ -26,6 +26,7 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.util.Utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -37,9 +38,10 @@ final class XCTraceSupport {
     private XCTraceSupport() {
     }
 
-    static void exportTable(String runFile, String outputFile, XCTraceTableHandler.ProfilingTableType table) {
+    static void exportTable(String xctracePath, String runFile, String outputFile,
+                            XCTraceTableHandler.ProfilingTableType table) {
         Collection<String> out = Utils.tryWith(
-                "xctrace", "export",
+                xctracePath, "export",
                 "--input", runFile,
                 "--output", outputFile,
                 "--xpath",
@@ -50,9 +52,9 @@ final class XCTraceSupport {
         }
     }
 
-    static void exportTableOfContents(String runFile, String outputFile) {
+    static void exportTableOfContents(String xctracePath, String runFile, String outputFile) {
         Collection<String> out = Utils.tryWith(
-                "xctrace", "export",
+                xctracePath, "export",
                 "--input", runFile,
                 "--output", outputFile,
                 "--toc"
@@ -62,12 +64,13 @@ final class XCTraceSupport {
         }
     }
 
-    static Collection<String> recordCommandPrefix(String runFile, String instrument, String template) {
+    static Collection<String> recordCommandPrefix(String xctracePath, String runFile, String instrument,
+                                                  String template) {
         if ((instrument == null) == (template == null)) {
             throw new IllegalArgumentException("Either template, or instrument expected.");
         }
         List<String> args = new ArrayList<>(10);
-        Collections.addAll(args, "xctrace", "record");
+        Collections.addAll(args, xctracePath, "record");
         if (instrument != null) {
             Collections.addAll(args, "--instrument", instrument);
         } else {
@@ -77,11 +80,29 @@ final class XCTraceSupport {
         return args;
     }
 
-    static void checkXCTraceWorks() throws ProfilerException {
-        Collection<String> out = Utils.tryWith("xctrace", "version");
+    /**
+     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist.
+     *
+     * xctrace is expected to be at $(xcode-select -p)/usr/bin/xctrace
+     */
+    static String getXCTracePath() throws ProfilerException {
+        Collection<String> out = Utils.tryWith("xcode-select", "-p");
         if (!out.isEmpty()) {
-            throw new ProfilerException(out.toString());
+            throw new ProfilerException("\"xcode-select -p\" failed: " + out);
         }
+        out = Utils.runWith("xcode-select", "-p");
+        String devPath = out.stream().flatMap(l -> Arrays.stream(l.split("\n"))).findFirst().orElseThrow(
+                () -> new ProfilerException("\"xcode-select -p\" output is empty"));
+        File xctrace = Paths.get(devPath, "usr", "bin", "xctrace").toFile();
+        String xctracePath = xctrace.getAbsolutePath();
+        if (!xctrace.exists()) {
+            throw new ProfilerException("xctrace was not found at " + xctracePath);
+        }
+        out = Utils.tryWith(xctracePath, "version");
+        if (!out.isEmpty()) {
+            throw new ProfilerException("\"xctrace version\" failed: " + out);
+        }
+        return xctrace.getAbsolutePath();
     }
 
     static Path findTraceFile(Path parent) {

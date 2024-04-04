@@ -36,19 +36,30 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 public class XCTraceAsmProfilerTest extends AbstractAsmProfilerTest {
     private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
-    private static void skipIfProfilerNotSupport() {
-        try {
-            new XCTraceAsmProfiler("");
-        } catch (ProfilerException e) {
-            Assume.assumeTrue("Profiler is not supported or cannot be enabled, skipping test", false);
+    private static boolean xctraceExists() {
+        Collection<String> out = Utils.tryWith("xcode-select", "-p");
+        if (!out.isEmpty()) {
+            return false;
         }
+        Optional<String> path = Utils.runWith("xcode-select", "-p").stream()
+                .flatMap(line -> Arrays.stream(line.split("\n")))
+                .findFirst();
+        return path.map(p -> new File(p, "usr/bin/xctrace").exists()).orElse(false);
+    }
+
+    private static void skipIfProfilerNotSupport() {
+        Assume.assumeTrue(xctraceExists());
     }
 
     private void checkProfiling(int numForks) throws RunnerException {
@@ -119,5 +130,11 @@ public class XCTraceAsmProfilerTest extends AbstractAsmProfilerTest {
         } finally {
             expectedFile.delete();
         }
+    }
+
+    @Test
+    public void testConstructorThrowsWhenXCTraceDoesNotExist() {
+        Assume.assumeFalse(xctraceExists());
+        Assert.assertThrows(ProfilerException.class, () -> new XCTraceAsmProfiler(""));
     }
 }
