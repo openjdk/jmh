@@ -39,6 +39,8 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * macOS permasm profiler based on xctrace utility shipped with Xcode Instruments.
@@ -136,11 +138,16 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
         recordStartMs = handler.getRecordStartMs();
         List<XCTraceTableHandler.XCTraceTableDesc> tables = handler.getSupportedTables();
         if (tables.isEmpty()) {
-            throw new IllegalStateException("Profiling results does not contain table supported by this profiler.");
+            throw new IllegalStateException("Profiling results does not contain tables supported by this profiler.");
         }
         if (tables.size() != 1) {
+            String supportedSchemas = Stream.of(XCTraceTableHandler.ProfilingTableType.values())
+                    .map(t -> t.tableName)
+                    .sorted()
+                    .collect(Collectors.joining(", "));
             throw new IllegalStateException("There are multiple supported tables in output, " +
-                    "please specify which one to use using \"table\" option");
+                    "please make sure a template you chose produces only a single table with one of the following " +
+                    "schemas: " + supportedSchemas);
         }
         resultsTable = tables.get(0).getTableType();
         XCTraceSupport.exportTable(profile.toAbsolutePath().toString(), perfParsedData.getAbsolutePath(), resultsTable);
