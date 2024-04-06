@@ -64,20 +64,14 @@ final class XCTraceSupport {
         }
     }
 
-    static Collection<String> recordCommandPrefix(String xctracePath, String runFile, String instrument,
-                                                  String template) {
-        if ((instrument == null) == (template == null)) {
-            throw new IllegalArgumentException("Either template, or instrument expected.");
-        }
-        List<String> args = new ArrayList<>(10);
-        Collections.addAll(args, xctracePath, "record");
-        if (instrument != null) {
-            Collections.addAll(args, "--instrument", instrument);
-        } else {
-            Collections.addAll(args, "--template", template);
-        }
-        Collections.addAll(args, "--output", runFile, "--target-stdout", "-", "--launch", "--");
-        return args;
+    static Collection<String> recordCommandPrefix(String xctracePath, String runFile, String template) {
+        return Arrays.asList(
+                xctracePath, "record",
+                "--template", template,
+                "--output", runFile,
+                "--target-stdout", "-",
+                "--launch", "--"
+        );
     }
 
     /**

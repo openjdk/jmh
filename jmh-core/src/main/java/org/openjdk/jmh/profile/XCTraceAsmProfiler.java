@@ -76,10 +76,8 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
     private final boolean shouldFixStartTime;
     private final Path temporaryDirectory;
     private final String template;
-    private final String instrument;
     private final String xctracePath;
     private OptionSpec<String> templateOpt;
-    private OptionSpec<String> instrumentOpt;
     private OptionSpec<Boolean> correctOpt;
     private XCTraceTableHandler.ProfilingTableType resultsTable;
 
@@ -91,16 +89,7 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
         super(initLine, "sampled_pc");
         xctracePath = XCTraceSupport.getXCTracePath();
         try {
-            // OptionParser::mutuallyExclusive doesn't work well, so we have to verify mutual exclusiveness here.
-            if (set.hasArgument(templateOpt) && set.hasArgument(instrumentOpt)) {
-                throw new ProfilerException("'template' and 'instrument' options are mutually exclusive");
-            }
             template = set.valueOf(templateOpt);
-            if (template == null) {
-                instrument = set.valueOf(instrumentOpt);
-            } else {
-                instrument = null;
-            }
             shouldFixStartTime = set.valueOf(correctOpt);
             temporaryDirectory = XCTraceSupport.createTemporaryDirectoryName();
         } catch (OptionException e) {
@@ -110,19 +99,13 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
 
     @Override
     protected void addMyOptions(OptionParser parser) {
-        instrumentOpt = parser.accepts("instrument",
-                        "Name of an Instruments instrument. " +
-                                "Use `xctrace list instruments` to view available instruments.")
-                .withOptionalArg()
-                .describedAs("string")
-                .ofType(String.class)
-                .defaultsTo("Time Profiler");
         templateOpt = parser.accepts("template",
                         "Path to or name of an Instruments template. " +
                                 "Use `xctrace list templates` to view available templates.")
-                .withOptionalArg()
+                .withRequiredArg()
                 .describedAs("string")
-                .ofType(String.class);
+                .ofType(String.class)
+                .defaultsTo("Time Profiler");
         correctOpt = parser.accepts("fixStartTime", "Fix the start time by the time it took to launch.")
                 .withRequiredArg()
                 .describedAs("bool")
@@ -250,7 +233,7 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
     @Override
     public Collection<String> addJVMInvokeOptions(BenchmarkParams params) {
         return XCTraceSupport.recordCommandPrefix(xctracePath, temporaryDirectory.toAbsolutePath().toString(),
-                instrument, template);
+                template);
     }
 
     @Override

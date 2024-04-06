@@ -110,12 +110,6 @@ public class XCTraceAsmProfilerTest extends AbstractAsmProfilerTest {
     }
 
     @Test
-    public void testConflictingArguments() {
-        skipIfProfilerNotSupport();
-        Assert.assertThrows(ProfilerException.class, () -> new XCTraceAsmProfiler("template=t;instrument=i"));
-    }
-
-    @Test
     public void testSavePerfBinHandling() throws RunnerException {
         skipIfProfilerNotSupport();
         File expectedFile = new File(TMP_DIR, "results.trace");
