@@ -111,6 +111,9 @@ questions.
                             <mapping>
                                 <java>PHP</java>
                             </mapping>
+                            <excludes>
+                                <exclude>src/test/resources/org.openjdk.jmh.profile.xctrace/*</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>

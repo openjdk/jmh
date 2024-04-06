@@ -46,7 +46,12 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
 
     @Test
     public void parseCpuProfile() throws Exception {
-        verifyProfile(XCTraceTableHandler.ProfilingTableType.CPU_PROFILE, "cpu-profile");
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.CPU_PROFILE, "cpu-profile", true);
+    }
+
+    @Test
+    public void parseCpuProfileXcode14_0_1() throws Exception {
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.CPU_PROFILE, "cpu-profile.xcode14.0.1", false);
     }
 
     @Test
@@ -58,20 +63,26 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
 
     @Test
     public void parseCountersProfile() throws Exception {
-        verifyProfile(XCTraceTableHandler.ProfilingTableType.COUNTERS_PROFILE, "counters-profile");
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.COUNTERS_PROFILE, "counters-profile", true);
     }
 
     @Test
     public void parseCountersTimeProfile() throws Exception {
-        verifyProfile(XCTraceTableHandler.ProfilingTableType.COUNTERS_PROFILE, "counters-time-profile");
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.COUNTERS_PROFILE, "counters-time-profile", true);
     }
 
     @Test
     public void parseTimeProfile() throws Exception {
-        verifyProfile(XCTraceTableHandler.ProfilingTableType.TIME_PROFILE, "time-profile");
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.TIME_PROFILE, "time-profile", true);
     }
 
-    private void verifyProfile(XCTraceTableHandler.ProfilingTableType tableType, String profileName) throws Exception {
+    @Test
+    public void parseTimeProfileXcode12_5() throws Exception {
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.TIME_PROFILE, "time-profile.xcode12.5", false);
+    }
+
+    private void verifyProfile(XCTraceTableHandler.ProfilingTableType tableType, String profileName,
+                               boolean fixAddress) throws Exception {
         List<XCTraceTableProfileHandler.XCTraceSample> samples = new ArrayList<>();
         XCTraceTableProfileHandler handler = new XCTraceTableProfileHandler(tableType, samples::add);
         factory.newSAXParser().parse(openResource(profileName + ".xml"), handler);
@@ -79,17 +90,20 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
         List<Object[]> expectedRows = readExpectedData(profileName + ".csv");
         assertEquals(expectedRows.size(), samples.size());
         for (int idx = 0; idx < expectedRows.size(); idx++) {
-            assertRowEquals(idx, expectedRows.get(idx), samples.get(idx));
+            assertRowEquals(idx, expectedRows.get(idx), samples.get(idx), fixAddress);
         }
     }
 
-    private void assertRowEquals(int rowIndex, Object[] expectedRow, XCTraceTableProfileHandler.XCTraceSample actualRow) {
+    private void assertRowEquals(int rowIndex, Object[] expectedRow, XCTraceTableProfileHandler.XCTraceSample actualRow,
+                                 boolean fixAddress) {
         assertEquals("Timestamp for row " + rowIndex,
                 ((Long) expectedRow[0]).longValue(), actualRow.getTimeFromStartNs());
         assertEquals("Weight for row " + rowIndex,
                 ((Long) expectedRow[1]).longValue(), actualRow.getWeight());
         long expectedAddress = (Long) expectedRow[2];
-        if (expectedAddress > 0) expectedAddress--;
+        // latest xctrace versions contain well-formatted backtraces,
+        // but addresses there are always one byte past an actual IP
+        if (expectedAddress > 0 && fixAddress) expectedAddress--;
         assertEquals("Address for row " + rowIndex,
                 expectedAddress, actualRow.getAddress());
         assertEquals("Symbol for row " + rowIndex,
