@@ -31,8 +31,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Base class for SAX handlers responsible for xctrace exported table parsing.
@@ -59,6 +57,7 @@ class XCTraceTableHandler extends DefaultHandler {
     static final String REF = "ref";
     static final String ID = "id";
     static final String TRIGGER = "trigger";
+    static final String FMT = "fmt";
 
     private final StringBuilder builder = new StringBuilder();
     private boolean isNeedToParseCharacters = false;

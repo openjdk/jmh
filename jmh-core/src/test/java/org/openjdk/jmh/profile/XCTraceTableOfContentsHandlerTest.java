@@ -26,7 +26,6 @@ package org.openjdk.jmh.profile;
 
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;

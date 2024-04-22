@@ -81,9 +81,8 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
     private OptionSpec<Boolean> correctOpt;
     private XCTraceTableHandler.ProfilingTableType resultsTable;
 
-
-    private long recordStartMs = 0;
-    private long forkStartTimeMs = 0;
+    private long recordStartMs;
+    private long forkStartTimeMs;
 
     public XCTraceAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "sampled_pc");
@@ -106,6 +105,7 @@ public class XCTraceAsmProfiler extends AbstractPerfAsmProfiler {
                 .describedAs("string")
                 .ofType(String.class)
                 .defaultsTo("Time Profiler");
+
         correctOpt = parser.accepts("fixStartTime", "Fix the start time by the time it took to launch.")
                 .withRequiredArg()
                 .describedAs("bool")

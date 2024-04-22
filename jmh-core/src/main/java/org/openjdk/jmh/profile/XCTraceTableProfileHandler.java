@@ -56,6 +56,8 @@ import java.util.function.Function;
  * a corresponding "id" attribute of the original element) instead of placing a copy.
  */
 final class XCTraceTableProfileHandler extends XCTraceTableHandler {
+    private static final long UNKNOWN_ADDRESS = -1L;
+
     private final ProfilingTableType tableType;
 
     // Cache of previously parsed elements to use in place of ref-elements.
@@ -67,13 +69,13 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
 
     private final Consumer<XCTraceSample> callback;
 
-    private XCTraceSample currentSample = null;
+    private XCTraceSample currentSample;
 
     /**
      * Constructs the handler.
      *
      * @param tableType The type of the table that needs to be pared (used for validation only).
-     * @param onSample A callback that will be invoked on a sample once it parsed.
+     * @param onSample  A callback that will be invoked on a sample once it parsed.
      */
     public XCTraceTableProfileHandler(ProfilingTableType tableType, Consumer<XCTraceSample> onSample) {
         this.tableType = tableType;
@@ -90,7 +92,9 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
 
     private static long parseAddress(Attributes attributes) {
         String val = attributes.getValue(XCTraceTableHandler.ADDRESS);
-        if (!val.startsWith("0x")) throw new IllegalStateException("Unexpected address format: " + val);
+        if (!val.startsWith("0x")) {
+            throw new IllegalStateException("Unexpected address format: " + val);
+        }
         try {
             return Long.parseUnsignedLong(val.substring(2), 16);
         } catch (Exception e) {
@@ -107,9 +111,9 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
     }
 
     private <T extends TraceElement> void cache(T e) {
-        TraceElement old = entriesCache.put(e.id, e);
+        TraceElement old = entriesCache.put(e.getId(), e);
         if (old != null) {
-            throw new IllegalStateException("Duplicate entry for key " + e.id + ". New value: "
+            throw new IllegalStateException("Duplicate entry for key " + e.getId() + ". New value: "
                     + e + ", old value: " + old);
         }
     }
@@ -149,24 +153,25 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
     private LongHolder popAndUpdateLongHolder() {
         LongHolder value = pop();
         if (isNeedToParseCharacters()) {
-            value.value = Long.parseLong(getCharacters());
+            value.setValue(Long.parseLong(getCharacters()));
         }
         return value;
     }
 
     private static Frame tryParseLegacyBacktrace(Attributes attributes) {
-        String fmt = attributes.getValue("fmt");
+        String fmt = attributes.getValue(XCTraceTableHandler.FMT);
         if (fmt == null) {
             return null;
         }
 
         String nameOrAddr = fmt.split("←")[0].trim();
-        Frame frame = new Frame(-1 /* fake frame */, nameOrAddr, -1 /* need to parse nested text-addresses */);
+        Frame frame = new Frame(-1 /* fake frame */, nameOrAddr,
+                UNKNOWN_ADDRESS /* need to parse nested text-addresses */);
         // Legacy backtraces missing info about a library a symbol belongs to. But if a symbol's name is known,
         // then it's definitely not JIT-compiled code. In that case [unknown] binary name is used to improve profiling
         // results.
         if (!nameOrAddr.startsWith("0x")) {
-            frame.binary = "[unknown]";
+            frame.setBinary("[unknown]");
         }
         return frame;
     }
@@ -196,14 +201,14 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 });
                 break;
             case XCTraceTableHandler.BACKTRACE:
-                // Starting from version ~14.3 backtraces contains all required details and saved as a sequnces
+                // Starting from version ~14.3 backtraces contains all required details and saved as a sequence
                 // of <frame> elements.
-                // For older versions, there are no frames. Instead, backtraces have "fmt" attribute which containes
+                // For older versions, there are no frames. Instead, backtraces have "fmt" attribute which contains
                 // the name of the symbol on the top of the call stack. Addresses are stored in a few nested
                 // <text-addresses> elements.
                 pushCachedOrNew(attributes, id -> {
                     ValueHolder<Frame> holder = new ValueHolder<Frame>(id);
-                    holder.value = tryParseLegacyBacktrace(attributes);
+                    holder.setValue(tryParseLegacyBacktrace(attributes));
                     return holder;
                 });
                 break;
@@ -232,7 +237,7 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 break;
             case XCTraceTableHandler.SAMPLE_TIME: {
                 LongHolder value = popAndUpdateLongHolder();
-                currentSample.setTime(value.value);
+                currentSample.setTime(value.getValue());
                 break;
             }
             case XCTraceTableHandler.CYCLE_WEIGHT:
@@ -240,36 +245,36 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
             case XCTraceTableHandler.PMC_EVENT:
                 // in practice, a sample's row will contain only one of these
                 LongHolder value = popAndUpdateLongHolder();
-                currentSample.setWeight(value.value);
+                currentSample.setWeight(value.getValue());
                 break;
             case XCTraceTableHandler.BACKTRACE:
-                Frame topFrame = this.<ValueHolder<Frame>>pop().value;
-                currentSample.setTopFrame(topFrame.address, topFrame.name, topFrame.binary);
+                Frame topFrame = this.<ValueHolder<Frame>>pop().getValue();
+                currentSample.setTopFrame(topFrame.getAddress(), topFrame.getName(), topFrame.getBinary());
                 break;
             case XCTraceTableHandler.BINARY:
                 ValueHolder<String> bin = pop();
-                this.<Frame>peek().binary = bin.value;
+                this.<Frame>peek().setBinary(bin.getValue());
                 break;
             case XCTraceTableHandler.FRAME:
                 Frame frame = pop();
                 ValueHolder<Frame> backtrace = peek();
                 // we only need a top frame
-                if (backtrace.value == null) {
-                    backtrace.value = frame;
+                if (backtrace.getValue() == null) {
+                    backtrace.setValue(frame);
                 }
                 break;
             case XCTraceTableHandler.TEXT_ADDRESSES: {
                 LongHolder addresses = pop();
                 if (isNeedToParseCharacters()) {
                     // peek only the first address as we're not interested in the whole backtrace
-                    addresses.value = Arrays.stream(getCharacters().split(" "))
-                            .mapToLong(Long::parseUnsignedLong).findFirst().orElse(-1);
+                    addresses.setValue(Arrays.stream(getCharacters().split(" "))
+                            .mapToLong(Long::parseUnsignedLong).findFirst().orElse(UNKNOWN_ADDRESS));
                 }
                 ValueHolder<Frame> bt = peek();
-                // For legacy backtraces, the address is initially -1. It is then updated by the top-most address
-                // extracted from text-addresses elements.
-                if (bt.value.address == -1 && addresses.value != -1) {
-                    bt.value.address = addresses.value;
+                // For legacy backtraces, the address is initially UNKNOWN_ADDRESS.
+                // It is then updated by the top-most address extracted from text-addresses elements.
+                if (bt.getValue().getAddress() == UNKNOWN_ADDRESS && addresses.getValue() != UNKNOWN_ADDRESS) {
+                    bt.getValue().setAddress(addresses.getValue());
                 }
                 break;
             }
@@ -285,15 +290,19 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
     }
 
     private static abstract class TraceElement {
-        public final long id;
+        private final long id;
 
         public TraceElement(long id) {
             this.id = id;
         }
+
+        public long getId() {
+            return id;
+        }
     }
 
     private static final class ValueHolder<T> extends TraceElement {
-        public T value;
+        private T value;
 
         ValueHolder(long id, T value) {
             super(id);
@@ -303,38 +312,74 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
         ValueHolder(long id) {
             this(id, null);
         }
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
     }
 
     private static final class LongHolder extends TraceElement {
-        public long value = 0;
+        private long value;
 
         public LongHolder(long id) {
             super(id);
         }
+
+        public long getValue() {
+            return value;
+        }
+
+        public void setValue(long value) {
+            this.value = value;
+        }
     }
 
     private static final class Frame extends TraceElement {
-        public final String name;
+        private final String name;
 
-        public long address;
+        private long address;
 
-        public String binary = null;
+        private String binary;
 
         public Frame(long id, String name, long address) {
             super(id);
             this.name = name;
             this.address = address;
         }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getAddress() {
+            return address;
+        }
+
+        public void setAddress(long address) {
+            this.address = address;
+        }
+
+        public String getBinary() {
+            return binary;
+        }
+
+        public void setBinary(String binary) {
+            this.binary = binary;
+        }
     }
 
     static class XCTraceSample {
         public static final String TIME_SAMPLE_TRIGGER_NAME = "TIME_MICRO_SEC";
 
-        private long timeFromStartNs = 0;
-        private long weight = 0;
-        private String symbol = null;
-        private long address = 0;
-        private String binary = null;
+        private long timeFromStartNs;
+        private long weight;
+        private String symbol;
+        private long address;
+        private String binary;
 
         public void setTopFrame(long address, String symbol, String binary) {
             this.address = address;
