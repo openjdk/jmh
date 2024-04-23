@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -176,6 +176,7 @@ public class ProfilerFactory {
         BUILT_IN.put("mempool",  MemPoolProfiler.class);
         BUILT_IN.put("xperfasm", WinPerfAsmProfiler.class);
         BUILT_IN.put("dtraceasm", DTraceAsmProfiler.class);
+        BUILT_IN.put("xctraceasm", XCTraceAsmProfiler.class);
         BUILT_IN.put("pauses",   PausesProfiler.class);
         BUILT_IN.put("safepoints", SafepointsProfiler.class);
         BUILT_IN.put("perfc2c",  LinuxPerfC2CProfiler.class);
