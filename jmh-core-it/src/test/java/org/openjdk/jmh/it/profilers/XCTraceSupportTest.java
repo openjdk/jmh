@@ -30,12 +30,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.openjdk.jmh.profile.ProfilerException;
+import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 public class XCTraceSupportTest {
@@ -45,6 +49,11 @@ public class XCTraceSupportTest {
     private static void runOnlyOnMac() {
         Assume.assumeTrue("Make sense only on MacOS",
                 System.getProperty("os.name").toLowerCase().contains("mac"));
+    }
+
+    private static void runOnlyIfXCodeInstalled() {
+        Collection<String> out = Utils.tryWith("xcode-select", "-p");
+        Assume.assumeTrue("xcode-select failed: " + out, out.isEmpty());
     }
 
     private static class KpepParser {
@@ -121,5 +130,26 @@ public class XCTraceSupportTest {
         Files.write(tempFile.toPath(), bytes);
 
         checkKpepParsingFailed(tempFile);
+    }
+
+    @Test
+    public void testInstrumentsPackage() throws Exception {
+        runOnlyOnMac();
+        runOnlyIfXCodeInstalled();
+
+        Class<?> xctraceSupport = Class.forName("org.openjdk.jmh.profile.XCTraceSupport");
+        Method buildPkg = xctraceSupport.getDeclaredMethod("buildInstrumentsPMCSamplingPackage",
+                File.class, long.class, List.class);
+        buildPkg.setAccessible(true);
+
+        List<String> events = new ArrayList<>();
+        if (System.getProperty("os.arch").equals("aarch64")) {
+            events.add("Instructions");
+        } else {
+            events.add("INST_ALL");
+        }
+        File generatedPackage = new File(temporaryFolder.newFolder(), "test.pkg");
+        buildPkg.invoke(null, generatedPackage, 100L, events);
+        Assert.assertTrue(generatedPackage.exists());
     }
 }

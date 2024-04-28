@@ -29,12 +29,12 @@ import org.openjdk.jmh.util.Utils;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -91,22 +91,14 @@ final class XCTraceSupport {
 
     /**
      * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist..
-     *
+     * <p>
      * xctrace is expected to be at $(xcode-select -p)/usr/bin/xctrace
      */
     static String getXCTracePath() throws ProfilerException {
         return getXCTracePath(ANY_VERSION);
     }
 
-    /**
-     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist
-     * or its version is below {@code minVersion}.
-     *
-     * xctrace is expected to be at {@code $(xcode-select -p)/usr/bin/xctrace}
-     *
-     * @param minVersion a minimum required major xctrace version, like {@code 13}. Use {@code 0} to allow any version.
-     */
-    static String getXCTracePath(int minVersion) throws ProfilerException {
+    static Path getXCodeDevToolsPath() throws ProfilerException {
         Collection<String> out = Utils.tryWith("xcode-select", "-p");
         if (!out.isEmpty()) {
             throw new ProfilerException("\"xcode-select -p\" failed: " + out);
@@ -114,7 +106,19 @@ final class XCTraceSupport {
         out = Utils.runWith("xcode-select", "-p");
         String devPath = out.stream().flatMap(l -> Arrays.stream(l.split("\n"))).findFirst().orElseThrow(
                 () -> new ProfilerException("\"xcode-select -p\" output is empty"));
-        File xctrace = Paths.get(devPath, "usr", "bin", "xctrace").toFile();
+        return Paths.get(devPath);
+    }
+
+    /**
+     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist
+     * or its version is below {@code minVersion}.
+     * <p>
+     * xctrace is expected to be at {@code $(xcode-select -p)/usr/bin/xctrace}
+     *
+     * @param minVersion a minimum required major xctrace version, like {@code 13}. Use {@code 0} to allow any version.
+     */
+    static String getXCTracePath(int minVersion) throws ProfilerException {
+        File xctrace = getXCodeDevToolsPath().resolve(Paths.get("usr", "bin", "xctrace")).toFile();
         String xctracePath = xctrace.getAbsolutePath();
         if (!xctrace.exists()) {
             throw new ProfilerException("xctrace was not found at " + xctracePath);
@@ -214,8 +218,61 @@ final class XCTraceSupport {
     }
 
     /**
-     * Returns a string uniquely identified current CPU.
+     * Builds a "CPU Counters" based Instruments package that'll sample {@code pmcEvents}
+     * at {@code samplingRateMillis} rate. The package building is performed by {@code instrumentbuilder} tool
+     * bundled with Xcode.
      *
+     * @param dstPath a path where a generated package needs to be saved.
+     * @param samplingRateMillis the rate at which PMC needs to be sampled, it should be greater than zero.
+     * @param pmcEvents the list of PMC to sample, it should be non-empty.
+     */
+    static void buildInstrumentsPMCSamplingPackage(File dstPath, long samplingRateMillis, Collection<String> pmcEvents)
+            throws ProfilerException {
+        if (samplingRateMillis <= 0) {
+            throw new IllegalArgumentException(
+                    "Sampling rate must be a positive integer, but it is " + samplingRateMillis);
+        }
+        if (pmcEvents.isEmpty()) {
+            throw new IllegalArgumentException("PMC events list must contain at least one event");
+        }
+        InputStream templateStream = XCTraceSupport.class.getResourceAsStream("/xctracenorm.instrpkg");
+        String template = new BufferedReader(new InputStreamReader(templateStream))
+                .lines()
+                .collect(Collectors.joining("\n"));
+
+        template = template.replace("SAMPLING_RATE_MICROS",
+                        Long.toString(TimeUnit.MILLISECONDS.toMicros(samplingRateMillis)))
+                .replace("PMC_EVENTS_LIST",
+                        pmcEvents.stream().map(event -> String.format("<string>%s</string>", event))
+                                .collect(Collectors.joining()));
+
+        String instrBuilderPath = getXCodeDevToolsPath().resolve(
+                Paths.get("usr", "bin", "instrumentbuilder")).toString();
+
+        File instrpkg;
+        try {
+            instrpkg = FileUtils.tempFile(".instrpkg");
+            Files.write(instrpkg.toPath(), template.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new ProfilerException(e);
+        }
+        Collection<String> output = Utils.runWith(
+                instrBuilderPath,
+                "-o", dstPath.getAbsolutePath(), // output file
+                "-i", instrpkg.getAbsolutePath(), // input package file
+                "-l", "CPU Counters" // packages to link with
+        );
+        output.stream()
+                .filter(line -> line.contains("Package distribution file created at"))
+                .findFirst()
+                .orElseThrow(() -> new ProfilerException("Can't create an Instruments package:\n"
+                        + String.join("\n", output)));
+        instrpkg.delete();
+    }
+
+    /**
+     * Returns a string uniquely identified current CPU.
+     * <p>
      * The string has a following format: {@code <hw.cputype>_<hw.cpusubtype>_<hw.cpufamily>}, where
      * each field corresponds to a same titled sysctl property encoded in hexadecimal format.
      */
@@ -247,7 +304,7 @@ final class XCTraceSupport {
 
     /**
      * Returns a database file with PMU description for a current CPU.
-     *
+     * <p>
      * Usually, such a file has a path like {@code /usr/share/kpep/cpu_100000c_2_8765edea.plist} where
      * the filename part between {@code "cpu_"} and {@code ".plist"} could be obtained from
      * {@link XCTraceSupport#getCpuIdString()}.
