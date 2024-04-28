@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class XCTraceSupport {
+    private static final int ANY_VERSION = 0;
+
     private XCTraceSupport() {
     }
 
@@ -75,11 +77,23 @@ final class XCTraceSupport {
     }
 
     /**
-     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist.
+     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist..
      *
      * xctrace is expected to be at $(xcode-select -p)/usr/bin/xctrace
      */
     static String getXCTracePath() throws ProfilerException {
+        return getXCTracePath(ANY_VERSION);
+    }
+
+    /**
+     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist
+     * or its version is below {@code minVersion}.
+     *
+     * xctrace is expected to be at {@code $(xcode-select -p)/usr/bin/xctrace}
+     *
+     * @param minVersion a minimum required major xctrace version, like {@code 13}. Use {@code 0} to allow any version.
+     */
+    static String getXCTracePath(int minVersion) throws ProfilerException {
         Collection<String> out = Utils.tryWith("xcode-select", "-p");
         if (!out.isEmpty()) {
             throw new ProfilerException("\"xcode-select -p\" failed: " + out);
@@ -92,11 +106,25 @@ final class XCTraceSupport {
         if (!xctrace.exists()) {
             throw new ProfilerException("xctrace was not found at " + xctracePath);
         }
-        out = Utils.tryWith(xctracePath, "version");
-        if (!out.isEmpty()) {
-            throw new ProfilerException("\"xctrace version\" failed: " + out);
-        }
+        Collection<String> versionOut = Utils.runWith(xctracePath, "version");
+        String versionString = versionOut.stream().flatMap(l -> Arrays.stream(l.split("\n")))
+                .filter(l -> l.contains("xctrace version"))
+                .findFirst()
+                .orElseThrow(() -> new ProfilerException("\"xctrace version\" failed: " + versionOut));
+
+        checkVersion(versionString, minVersion);
+
         return xctrace.getAbsolutePath();
+    }
+
+    private static void checkVersion(String versionString, int minVersion) throws ProfilerException {
+        String extractedVersion = versionString.split("xctrace version ")[1].split(" ")[0];
+        int majorVersion = Integer.parseInt(extractedVersion.split("\\.")[0]);
+
+        if (majorVersion < minVersion) {
+            throw new ProfilerException(
+                    "xctrace version (" + versionString + ") is too low (required at least " + minVersion + ").");
+        }
     }
 
     static Path findTraceFile(Path parent) {
