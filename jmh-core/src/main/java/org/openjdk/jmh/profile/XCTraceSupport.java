@@ -26,16 +26,29 @@ package org.openjdk.jmh.profile;
 
 import org.openjdk.jmh.util.Utils;
 
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class XCTraceSupport {
     private static final int ANY_VERSION = 0;
+    private static final String HW_FAMILY_PREFIX = "hw.cpufamily: ";
+    private static final String HW_TYPE_PREFIX = "hw.cputype: ";
+    private static final String HW_SUBTYPE_PREFIX = "hw.cpusubtype: ";
+    private static final String KPEP_DIR_PATH = "/usr/share/kpep";
+    private static final String CPU_CYCLES_ARM64 = "Cycles";
+    private static final String INSTRUCTIONS_ARM64 = "Instructions";
+    private static final String CPU_CYCLES_X86_64 = "CORE_ACTIVE_CYCLE";
+    private static final String INSTRUCTIONS_X86_64 = "INST_ALL";
 
     private XCTraceSupport() {
     }
@@ -198,5 +211,267 @@ final class XCTraceSupport {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    /**
+     * Returns a string uniquely identified current CPU.
+     *
+     * The string has a following format: {@code <hw.cputype>_<hw.cpusubtype>_<hw.cpufamily>}, where
+     * each field corresponds to a same titled sysctl property encoded in hexadecimal format.
+     */
+    static String getCpuIdString() throws ProfilerException {
+        List<String> sysctlOut = Utils.runWith("sysctl", "hw")
+                .stream()
+                .flatMap(line -> Stream.of(line.split("\n")))
+                .collect(Collectors.toList());
+        int family = -1;
+        int type = -1;
+        int subtype = -1;
+        for (String prop : sysctlOut) {
+            if (prop.startsWith(HW_FAMILY_PREFIX)) {
+                family = Integer.parseInt(prop.substring(HW_FAMILY_PREFIX.length()));
+            } else if (prop.startsWith(HW_TYPE_PREFIX)) {
+                type = Integer.parseInt(prop.substring(HW_TYPE_PREFIX.length()));
+            } else if (prop.startsWith(HW_SUBTYPE_PREFIX)) {
+                subtype = Integer.parseInt(prop.substring(HW_SUBTYPE_PREFIX.length()));
+            }
+        }
+        if (type == -1) throw new ProfilerException("hw.cputype variable was not found");
+        if (subtype == -1) throw new ProfilerException("hw.cpusubtype variable was not found");
+        if (family == -1) throw new ProfilerException("hw.cpufamily variable was not found");
+        return String.format("%s_%s_%s",
+                Integer.toUnsignedString(type, 16),
+                Integer.toUnsignedString(subtype, 16),
+                Integer.toUnsignedString(family, 16));
+    }
+
+    /**
+     * Returns a database file with PMU description for a current CPU.
+     *
+     * Usually, such a file has a path like {@code /usr/share/kpep/cpu_100000c_2_8765edea.plist} where
+     * the filename part between {@code "cpu_"} and {@code ".plist"} could be obtained from
+     * {@link XCTraceSupport#getCpuIdString()}.
+     */
+    static File getKpepFilePath() throws ProfilerException {
+        return new File(KPEP_DIR_PATH, "cpu_" + getCpuIdString() + ".plist");
+    }
+
+    /**
+     * Parses a given KPEP database file. These files are property list (plist) files located in {@code /usr/share/kpep}
+     * and containing information about CPU's performance monitoring unit. Information includes some PMU properties
+     * like a number of fixed and configurable counters, but mainly, in contains PMU events description.
+     * <p/>
+     * While the database itself contains a few entries about a CPU, one has to query sysctl to get enough info to
+     * correctly identify the CPU and then use that info to pick up a proper KPEP file. All required machinery is
+     * already implemented in {@link XCTraceSupport#getCpuIdString()}.
+     * You can use {@link  XCTraceSupport#getKpepFilePath()} to get a full path to what should be a file corresponding
+     * to current CPU.
+     *
+     * @param kpepFile a file with performance monitoring counters database.
+     */
+    static PerfEvents parseKpepFile(File kpepFile) throws ProfilerException {
+        Path tempFile = null;
+        try {
+            tempFile = Files.createTempFile("", ".xml");
+            // Convert a KPEP plist file to XML.
+            // Newer plutil versions allow extracting data by path (like xpath) into a textual form directly,
+            // but we can't rely on this functionality as it was added in later MacOS versions.
+            Collection<String> out = Utils.tryWith("plutil",
+                    "-convert", "xml1",
+                    "-o", tempFile.toString(),
+                    kpepFile.getAbsolutePath());
+            if (!out.isEmpty()) {
+                throw new ProfilerException("Failed to parse a kpep file: " + kpepFile.getAbsolutePath() +
+                        ". Output: " + out);
+            }
+            return parseKpepXmlFile(tempFile.toFile());
+        } catch (IOException e) {
+            throw new ProfilerException("Failed to parse a kpep file: " + kpepFile.getAbsolutePath(), e);
+        } finally {
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    static PerfEvents parseKpepXmlFile(File kpepXmlFile) throws ProfilerException {
+        Map<String, String> aliases = new HashMap<>();
+        Map<String, PerfEventInfo> description = new HashMap<>();
+        long[] masks = new long[] { 0, 0 };
+        String[] architecture = new String[] { "unknown" };
+        parseKpepXmlFileLines(kpepXmlFile, fields -> {
+            if (fields.length == 0) return;
+            switch (fields[0]) {
+                case "alias": // alias description, ["alias", <alias name>, <aliased event>]
+                    if (fields.length == 3) {
+                        aliases.put(fields[1], fields[2]);
+                    }
+                    break;
+                case "event": // PMU event info, ["event", <event name>, <is fixed>, <mask>, <description>]
+                    if (fields.length >= 4) {
+                        String name = fields[1];
+                        boolean isFixed = !fields[2].isEmpty();
+                        long mask = isFixed ? masks[0] : masks[1];
+                        if (!fields[3].isEmpty()) {
+                            mask = Long.parseLong(fields[3]);
+                        }
+                        String desc = fields.length > 4 ? fields[4] : "No description";
+                        description.put(name, new PerfEventInfo(name, mask, isFixed, desc));
+                    }
+                    break;
+                case "architecture": // CPU architecture, ["architecture", <arm64|x86_64>]
+                    architecture[0] = fields[1];
+                    break;
+                case "fixed_counters": // Fixed PMU counters bitmask, ["fixed_counters", <mask>]
+                    masks[0] = Long.parseLong(fields[1]);
+                    break;
+                case "config_counters": // Configurable PMU counters bitmask, ["config_counters", <mask>]
+                    masks[1] = Long.parseLong(fields[1]);
+                    break;
+            }
+        });
+
+        // To simplify counters configuration, let's add our own linux-perf-flavored aliases
+            // to cycles and instructions counters.
+            // Depending on architecture, these are tracked by different PMU events.
+            switch (architecture[0]) {
+                case "arm64":
+                    aliases.put(PerfEvents.CPU_CYCLES_META_EVENT, CPU_CYCLES_ARM64);
+                    aliases.put(PerfEvents.INSTRUCTIONS_META_EVENT, INSTRUCTIONS_ARM64);
+                    break;
+                case "x86_64":
+                    aliases.put(PerfEvents.CPU_CYCLES_META_EVENT, CPU_CYCLES_X86_64);
+                    aliases.put(PerfEvents.INSTRUCTIONS_META_EVENT, INSTRUCTIONS_X86_64);
+                    break;
+                default:
+                    throw new ProfilerException("Unknown architecture: " + architecture[0]);
+            }
+
+            return new PerfEvents(architecture[0], masks[0], masks[1], aliases, description);
+
+    }
+
+    // Extracts data we're interested in from KPEP plist's XML representation.
+    private static void parseKpepXmlFileLines(File xmlFile, Consumer<String[]> callback) throws ProfilerException {
+        Source kpepXml = new StreamSource(xmlFile);
+        Source aliasesXslt = new StreamSource(XCTraceSupport.class.getResourceAsStream("/kpep.plist.xslt"));
+
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        StreamResult aliasesParsed = new StreamResult(new ByteArrayOutputStream());
+        try {
+            transformerFactory.newTransformer(aliasesXslt).transform(kpepXml, aliasesParsed);
+        } catch (TransformerException e) {
+            throw new ProfilerException("Failed to transform Kpep XML file", e);
+        }
+        String aliasesText = aliasesParsed.getOutputStream().toString();
+
+        for (String line : aliasesText.split("\n")) {
+            // We're using '::' as a separator in case some textual fields contain tabs or other punctuation
+            if (!line.contains("::")) {
+                continue;
+            }
+            callback.accept(line.trim().split("::"));
+        }
+    }
+
+    static class PerfEventInfo {
+        private final String name;
+        private final long counterMask;
+        private final boolean isFixed;
+        private final String description;
+
+        public PerfEventInfo(String name, long counterMask, boolean isFixed, String description) {
+            this.name = name;
+            this.counterMask = counterMask;
+            this.isFixed = isFixed;
+            this.description = description;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getCounterMask() {
+            return counterMask;
+        }
+
+        public boolean isFixed() {
+            return isFixed;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
+    static class PerfEvents {
+        static final String INSTRUCTIONS_META_EVENT = "instructions";
+        static final String CPU_CYCLES_META_EVENT = "cycles";
+
+        private final Map<String, String> eventAliases;
+        private final Map<String, PerfEventInfo> supportedEvents;
+        private final long fixedCountersMask;
+        private final long configurableCountersMask;
+        private final String architecture;
+
+        public PerfEvents(String architecture, long fixedCountersMask, long configurableCountersMask,
+                          Map<String, String> eventAliases, Map<String, PerfEventInfo> supportedEvents) {
+            this.eventAliases = eventAliases;
+            this.supportedEvents = supportedEvents;
+            this.fixedCountersMask = fixedCountersMask;
+            this.configurableCountersMask = configurableCountersMask;
+            this.architecture = architecture;
+        }
+
+        int getMaxCounters() {
+            return Long.bitCount(fixedCountersMask | configurableCountersMask);
+        }
+
+        long getFixedCountersMask() {
+            return fixedCountersMask;
+        }
+
+        long getConfigurableCountersMask() {
+            return configurableCountersMask;
+        }
+
+        String getArchitecture() {
+            return architecture;
+        }
+
+        Set<String> getAliases() {
+            return Collections.unmodifiableSet(eventAliases.keySet());
+        }
+
+        Set<String> getAllAliasedEvents(String event) {
+            Set<String> aliases = new HashSet<>();
+            while (event != null) {
+                String alias = eventAliases.get(event);
+                if (alias != null) {
+                    aliases.add(alias);
+                }
+                event = alias;
+            }
+            return aliases;
+        }
+
+        String getAlias(String event) {
+            return eventAliases.get(event);
+        }
+
+        boolean isSupportedEvent(String event) {
+            return supportedEvents.containsKey(event);
+        }
+
+        Collection<PerfEventInfo> getAllEvents() {
+            return Collections.unmodifiableCollection(supportedEvents.values());
+        }
+
+        PerfEventInfo getEvent(String name) {
+            return supportedEvents.get(name);
+        }
     }
 }

@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>internal</key>
+        <false/>
+        <key>name</key>
+        <string>a16</string>
+        <key>system</key>
+        <dict>
+            <key>cpu</key>
+            <dict>
+                <key>aliases</key>
+                <dict>
+                    <key>Cycles</key>
+                    <string>FIXED_CYCLES</string>
+                    <key>Instructions</key>
+                    <string>FIXED_INSTRUCTIONS</string>
+                </dict>
+                <key>architecture</key>
+                <string>arm64</string>
+                <key>config_counters</key>
+                <integer>1020</integer>
+                <key>events</key>
+                <dict>
+                    <key>ATOMIC_OR_EXCLUSIVE_FAIL</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Atomic or exclusive instruction failed (due to contention)</string>
+                        <key>number</key>
+                        <integer>1460</integer>
+                    </dict>
+                    <key>ATOMIC_OR_EXCLUSIVE_SUCC</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Atomic or exclusive instruction successfully completed</string>
+                        <key>number</key>
+                        <integer>1459</integer>
+                    </dict>
+                    <key>BRANCH_CALL_INDIR_MISPRED_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired indirect call instructions mispredicted</string>
+                        <key>number</key>
+                        <integer>202</integer>
+                    </dict>
+                    <key>BRANCH_COND_MISPRED_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired conditional branch instructions that mispredicted</string>
+                        <key>number</key>
+                        <integer>197</integer>
+                    </dict>
+                    <key>BRANCH_INDIR_MISPRED_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired indirect branch instructions including calls and returns that mispredicted</string>
+                        <key>number</key>
+                        <integer>198</integer>
+                    </dict>
+                    <key>BRANCH_MISPRED_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired branch instructions including calls and returns that mispredicted</string>
+                        <key>number</key>
+                        <integer>203</integer>
+                    </dict>
+                    <key>BRANCH_RET_INDIR_MISPRED_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired return instructions that mispredicted</string>
+                        <key>number</key>
+                        <integer>200</integer>
+                    </dict>
+                    <key>CORE_ACTIVE_CYCLE</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Cycles while the core was active</string>
+                        <key>number</key>
+                        <integer>2</integer>
+                    </dict>
+                    <key>FETCH_RESTART</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Fetch Unit internal restarts for any reason. Does not include branch mispredicts</string>
+                        <key>number</key>
+                        <integer>478</integer>
+                    </dict>
+                    <key>FIXED_CYCLES</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>1</integer>
+                        <key>fixed_counter</key>
+                        <integer>0</integer>
+                    </dict>
+                    <key>FIXED_INSTRUCTIONS</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>2</integer>
+                        <key>fallback</key>
+                        <string>INST_ALL</string>
+                        <key>fixed_counter</key>
+                        <integer>1</integer>
+                    </dict>
+                    <key>FLUSH_RESTART_OTHER_NONSPEC</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Pipeline flush and restarts that were not due to branch mispredictions or memory order violations</string>
+                        <key>number</key>
+                        <integer>132</integer>
+                    </dict>
+                    <key>INST_ALL</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>128</integer>
+                        <key>description</key>
+                        <string>All retired instructions</string>
+                        <key>number</key>
+                        <integer>140</integer>
+                    </dict>
+                    <key>INST_BARRIER</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired data barrier instructions</string>
+                        <key>number</key>
+                        <integer>156</integer>
+                    </dict>
+                    <key>INST_BRANCH</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired branch instructions including calls and returns</string>
+                        <key>number</key>
+                        <integer>141</integer>
+                    </dict>
+                    <key>INST_BRANCH_CALL</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired subroutine call instructions</string>
+                        <key>number</key>
+                        <integer>142</integer>
+                    </dict>
+                    <key>INST_BRANCH_COND</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired conditional branch instructions (counts only B.cond)</string>
+                        <key>number</key>
+                        <integer>148</integer>
+                    </dict>
+                    <key>INST_BRANCH_INDIR</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired indirect branch instructions including indirect calls</string>
+                        <key>number</key>
+                        <integer>147</integer>
+                    </dict>
+                    <key>INST_BRANCH_RET</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired subroutine return instructions</string>
+                        <key>number</key>
+                        <integer>143</integer>
+                    </dict>
+                    <key>INST_BRANCH_TAKEN</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired taken branch instructions</string>
+                        <key>number</key>
+                        <integer>144</integer>
+                    </dict>
+                    <key>INST_INT_ALU</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>128</integer>
+                        <key>description</key>
+                        <string>Retired non-branch and non-load/store Integer Unit instructions</string>
+                        <key>number</key>
+                        <integer>151</integer>
+                    </dict>
+                    <key>INST_INT_LD</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired load Integer Unit instructions</string>
+                        <key>number</key>
+                        <integer>149</integer>
+                    </dict>
+                    <key>INST_INT_ST</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>128</integer>
+                        <key>description</key>
+                        <string>Retired store Integer Unit instructions</string>
+                        <key>number</key>
+                        <integer>150</integer>
+                    </dict>
+                    <key>INST_LDST</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>128</integer>
+                        <key>description</key>
+                        <string>Retired load and store instructions</string>
+                        <key>number</key>
+                        <integer>155</integer>
+                    </dict>
+                    <key>INST_SIMD_ALU</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>128</integer>
+                        <key>description</key>
+                        <string>Retired non-load/store Advanced SIMD and FP Unit instructions</string>
+                        <key>number</key>
+                        <integer>154</integer>
+                    </dict>
+                    <key>INST_SIMD_LD</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired load Advanced SIMD and FP Unit instructions</string>
+                        <key>number</key>
+                        <integer>152</integer>
+                    </dict>
+                    <key>INST_SIMD_ST</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired store Advanced SIMD and FP Unit instructions</string>
+                        <key>number</key>
+                        <integer>153</integer>
+                    </dict>
+                    <key>INTERRUPT_PENDING</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Cycles while an interrupt was pending because it was masked</string>
+                        <key>number</key>
+                        <integer>620</integer>
+                    </dict>
+                    <key>L1D_CACHE_MISS_LD</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Loads that missed the L1 Data Cache</string>
+                        <key>number</key>
+                        <integer>1443</integer>
+                    </dict>
+                    <key>L1D_CACHE_MISS_LD_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired loads that missed in the L1 Data Cache</string>
+                        <key>number</key>
+                        <integer>191</integer>
+                    </dict>
+                    <key>L1D_CACHE_MISS_ST</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Stores that missed the L1 Data Cache</string>
+                        <key>number</key>
+                        <integer>1442</integer>
+                    </dict>
+                    <key>L1D_CACHE_MISS_ST_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired stores that missed in the L1 Data Cache</string>
+                        <key>number</key>
+                        <integer>192</integer>
+                    </dict>
+                    <key>L1D_CACHE_WRITEBACK</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Dirty cache lines written back from the L1D Cache toward the Shared L2 Cache</string>
+                        <key>number</key>
+                        <integer>1448</integer>
+                    </dict>
+                    <key>L1D_TLB_ACCESS</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Load and store accesses to the L1 Data TLB</string>
+                        <key>number</key>
+                        <integer>1440</integer>
+                    </dict>
+                    <key>L1D_TLB_FILL</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Translations filled into the L1 Data TLB</string>
+                        <key>number</key>
+                        <integer>1029</integer>
+                    </dict>
+                    <key>L1D_TLB_MISS</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Load and store accesses that missed the L1 Data TLB</string>
+                        <key>number</key>
+                        <integer>1441</integer>
+                    </dict>
+                    <key>L1D_TLB_MISS_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired loads and stores that missed in the L1 Data TLB</string>
+                        <key>number</key>
+                        <integer>193</integer>
+                    </dict>
+                    <key>L1I_CACHE_MISS_DEMAND</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Demand fetch misses that require a new cache line fill of the L1 Instruction Cache</string>
+                        <key>number</key>
+                        <integer>475</integer>
+                    </dict>
+                    <key>L1I_TLB_FILL</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Translations filled into the L1 Instruction TLB</string>
+                        <key>number</key>
+                        <integer>1028</integer>
+                    </dict>
+                    <key>L1I_TLB_MISS_DEMAND</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Demand instruction fetches that missed in the L1 Instruction TLB</string>
+                        <key>number</key>
+                        <integer>468</integer>
+                    </dict>
+                    <key>L2_TLB_MISS_DATA</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Loads and stores that missed in the L2 TLB</string>
+                        <key>number</key>
+                        <integer>1035</integer>
+                    </dict>
+                    <key>L2_TLB_MISS_INSTRUCTION</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Instruction fetches that missed in the L2 TLB</string>
+                        <key>number</key>
+                        <integer>1034</integer>
+                    </dict>
+                    <key>LDST_X64_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Load and store uops that crossed a 64B boundary</string>
+                        <key>number</key>
+                        <integer>1457</integer>
+                    </dict>
+                    <key>LDST_XPG_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Load and store uops that crossed a 16KiB page boundary</string>
+                        <key>number</key>
+                        <integer>1458</integer>
+                    </dict>
+                    <key>LD_NT_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Load uops that executed with non-temporal hint</string>
+                        <key>number</key>
+                        <integer>1510</integer>
+                    </dict>
+                    <key>LD_UNIT_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Uops that flowed through the Load Unit</string>
+                        <key>number</key>
+                        <integer>1446</integer>
+                    </dict>
+                    <key>MAP_DISPATCH_BUBBLE</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Bubble detected in dispatch stage</string>
+                        <key>number</key>
+                        <integer>470</integer>
+                    </dict>
+                    <key>MAP_INT_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Mapped Integer Unit uops</string>
+                        <key>number</key>
+                        <integer>636</integer>
+                    </dict>
+                    <key>MAP_LDST_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Mapped Load and Store Unit uops, including GPR to vector register converts</string>
+                        <key>number</key>
+                        <integer>637</integer>
+                    </dict>
+                    <key>MAP_REWIND</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Cycles while the Map Unit was blocked while rewinding due to flush and restart</string>
+                        <key>number</key>
+                        <integer>629</integer>
+                    </dict>
+                    <key>MAP_SIMD_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Mapped Advanced SIMD and FP Unit uops</string>
+                        <key>number</key>
+                        <integer>638</integer>
+                    </dict>
+                    <key>MAP_STALL</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Cycles while the Map Unit was stalled for any reason</string>
+                        <key>number</key>
+                        <integer>630</integer>
+                    </dict>
+                    <key>MAP_STALL_DISPATCH</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Cycles while the Map Unit was stalled because of Dispatch back pressure</string>
+                        <key>number</key>
+                        <integer>624</integer>
+                    </dict>
+                    <key>MAP_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Mapped uops</string>
+                        <key>number</key>
+                        <integer>617</integer>
+                    </dict>
+                    <key>MMU_TABLE_WALK_DATA</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Table walk memory requests on behalf of data accesses</string>
+                        <key>number</key>
+                        <integer>1032</integer>
+                    </dict>
+                    <key>MMU_TABLE_WALK_INSTRUCTION</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Table walk memory requests on behalf of instruction fetches</string>
+                        <key>number</key>
+                        <integer>1031</integer>
+                    </dict>
+                    <key>MMU_VIRTUAL_MEMORY_FAULT_NONSPEC</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Memory accesses that reached retirement that triggered any of the MMU virtual memory faults</string>
+                        <key>number</key>
+                        <integer>1037</integer>
+                    </dict>
+                    <key>RETIRE_UOP</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>128</integer>
+                        <key>description</key>
+                        <string>All retired uops</string>
+                        <key>number</key>
+                        <integer>1</integer>
+                    </dict>
+                    <key>ST_MEMORY_ORDER_VIOLATION_NONSPEC</key>
+                    <dict>
+                        <key>counters_mask</key>
+                        <integer>224</integer>
+                        <key>description</key>
+                        <string>Retired stores that triggered memory order violations</string>
+                        <key>number</key>
+                        <integer>196</integer>
+                    </dict>
+                    <key>ST_NT_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Store uops that executed with non-temporal hint</string>
+                        <key>number</key>
+                        <integer>1509</integer>
+                    </dict>
+                    <key>ST_UNIT_UOP</key>
+                    <dict>
+                        <key>description</key>
+                        <string>Uops that flowed through the Store Unit</string>
+                        <key>number</key>
+                        <integer>1447</integer>
+                    </dict>
+                </dict>
+                <key>fixed_counters</key>
+                <integer>3</integer>
+                <key>marketing_name</key>
+                <string>Apple A16</string>
+                <key>power_counters</key>
+                <integer>224</integer>
+            </dict>
+        </dict>
+        <key>version</key>
+        <array>
+            <integer>1</integer>
+            <integer>0</integer>
+        </array>
+    </dict>
+</plist>
