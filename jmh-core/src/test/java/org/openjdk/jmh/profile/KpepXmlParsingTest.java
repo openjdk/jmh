@@ -34,8 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class KpepXmlParsingTest {
     @Rule
@@ -71,9 +69,6 @@ public class KpepXmlParsingTest {
         Assert.assertEquals(0x7L, db.getFixedCountersMask());
         Assert.assertEquals(0x78L, db.getConfigurableCountersMask());
 
-        Assert.assertEquals("INST_ALL", db.getAlias(XCTraceSupport.PerfEvents.INSTRUCTIONS_META_EVENT));
-        Assert.assertEquals("CORE_ACTIVE_CYCLE", db.getAlias(XCTraceSupport.PerfEvents.CPU_CYCLES_META_EVENT));
-
         Assert.assertEquals(298, db.getAllEvents().size());
 
         checkEvent(db, "CPU_CLK_UNHALTED.THREAD", true, 2L,
@@ -83,13 +78,11 @@ public class KpepXmlParsingTest {
         checkEvent(db, "INST_RETIRED.PREC_DIST", false, 16L,
                 "Precise instruction retired event with HW to reduce effect of PEBS shadow in IP distribution");
 
-        Assert.assertNull(db.getEvent(XCTraceSupport.PerfEvents.INSTRUCTIONS_META_EVENT));
-        Assert.assertEquals(new HashSet<>(Arrays.asList("INST_ALL", "INST_RETIRED.ANY")),
-                db.getAllAliasedEvents(XCTraceSupport.PerfEvents.INSTRUCTIONS_META_EVENT));
+        Assert.assertNull(db.getEvent("INST_ALL"));
+        Assert.assertEquals("INST_RETIRED.ANY", db.getAlias("INST_ALL"));
 
-        Assert.assertNull(db.getEvent(XCTraceSupport.PerfEvents.CPU_CYCLES_META_EVENT));
-        Assert.assertEquals(new HashSet<>(Arrays.asList("CORE_ACTIVE_CYCLE", "CPU_CLK_UNHALTED.THREAD")),
-                db.getAllAliasedEvents(XCTraceSupport.PerfEvents.CPU_CYCLES_META_EVENT));
+        Assert.assertNull(db.getEvent("CORE_ACTIVE_CYCLE"));
+        Assert.assertEquals("CPU_CLK_UNHALTED.THREAD", db.getAlias("CORE_ACTIVE_CYCLE"));
     }
 
     @Test
@@ -102,9 +95,6 @@ public class KpepXmlParsingTest {
         Assert.assertEquals(0x3L, db.getFixedCountersMask());
         Assert.assertEquals(0x3FCL, db.getConfigurableCountersMask());
 
-        Assert.assertEquals("Instructions", db.getAlias(XCTraceSupport.PerfEvents.INSTRUCTIONS_META_EVENT));
-        Assert.assertEquals("Cycles", db.getAlias(XCTraceSupport.PerfEvents.CPU_CYCLES_META_EVENT));
-
         Assert.assertEquals(61, db.getAllEvents().size());
 
         checkEvent(db, "FIXED_CYCLES", true, 1L, "No description");
@@ -113,13 +103,10 @@ public class KpepXmlParsingTest {
         checkEvent(db, "INST_BRANCH_COND", false, 224L,
                 "Retired conditional branch instructions (counts only B.cond)");
 
+        Assert.assertNull(db.getEvent("Instructions"));
+        Assert.assertEquals("FIXED_INSTRUCTIONS", db.getAlias("Instructions"));
 
-        Assert.assertNull(db.getEvent(XCTraceSupport.PerfEvents.INSTRUCTIONS_META_EVENT));
-        Assert.assertEquals(new HashSet<>(Arrays.asList("Instructions", "FIXED_INSTRUCTIONS")),
-                db.getAllAliasedEvents(XCTraceSupport.PerfEvents.INSTRUCTIONS_META_EVENT));
-
-        Assert.assertNull(db.getEvent(XCTraceSupport.PerfEvents.CPU_CYCLES_META_EVENT));
-        Assert.assertEquals(new HashSet<>(Arrays.asList("Cycles", "FIXED_CYCLES")),
-                db.getAllAliasedEvents(XCTraceSupport.PerfEvents.CPU_CYCLES_META_EVENT));
+        Assert.assertNull(db.getEvent("Cycles"));
+        Assert.assertEquals("FIXED_CYCLES", db.getAlias("Cycles"));
     }
 }

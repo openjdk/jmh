@@ -45,10 +45,6 @@ final class XCTraceSupport {
     private static final String HW_TYPE_PREFIX = "hw.cputype: ";
     private static final String HW_SUBTYPE_PREFIX = "hw.cpusubtype: ";
     private static final String KPEP_DIR_PATH = "/usr/share/kpep";
-    private static final String CPU_CYCLES_ARM64 = "Cycles";
-    private static final String INSTRUCTIONS_ARM64 = "Instructions";
-    private static final String CPU_CYCLES_X86_64 = "CORE_ACTIVE_CYCLE";
-    private static final String INSTRUCTIONS_X86_64 = "INST_ALL";
 
     private XCTraceSupport() {
     }
@@ -391,24 +387,7 @@ final class XCTraceSupport {
             }
         });
 
-        // To simplify counters configuration, let's add our own linux-perf-flavored aliases
-            // to cycles and instructions counters.
-            // Depending on architecture, these are tracked by different PMU events.
-            switch (architecture[0]) {
-                case "arm64":
-                    aliases.put(PerfEvents.CPU_CYCLES_META_EVENT, CPU_CYCLES_ARM64);
-                    aliases.put(PerfEvents.INSTRUCTIONS_META_EVENT, INSTRUCTIONS_ARM64);
-                    break;
-                case "x86_64":
-                    aliases.put(PerfEvents.CPU_CYCLES_META_EVENT, CPU_CYCLES_X86_64);
-                    aliases.put(PerfEvents.INSTRUCTIONS_META_EVENT, INSTRUCTIONS_X86_64);
-                    break;
-                default:
-                    throw new ProfilerException("Unknown architecture: " + architecture[0]);
-            }
-
-            return new PerfEvents(architecture[0], masks[0], masks[1], aliases, description);
-
+        return new PerfEvents(architecture[0], masks[0], masks[1], aliases, description);
     }
 
     // Extracts data we're interested in from KPEP plist's XML representation.
@@ -465,8 +444,10 @@ final class XCTraceSupport {
     }
 
     static class PerfEvents {
-        static final String INSTRUCTIONS_META_EVENT = "instructions";
-        static final String CPU_CYCLES_META_EVENT = "cycles";
+        public static final String CPU_CYCLES_ARM64 = "Cycles";
+        public static final String INSTRUCTIONS_ARM64 = "Instructions";
+        public static final String CPU_CYCLES_X86_64 = "CORE_ACTIVE_CYCLE";
+        public static final String INSTRUCTIONS_X86_64 = "INST_ALL";
 
         private final Map<String, String> eventAliases;
         private final Map<String, PerfEventInfo> supportedEvents;
