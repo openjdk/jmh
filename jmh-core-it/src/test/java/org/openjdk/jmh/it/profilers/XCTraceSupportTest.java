@@ -26,10 +26,9 @@ package org.openjdk.jmh.it.profilers;
 
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.openjdk.jmh.profile.ProfilerException;
+import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
@@ -37,14 +36,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class XCTraceSupportTest {
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
     private static void runOnlyOnMac() {
         Assume.assumeTrue("Make sense only on MacOS",
@@ -111,25 +106,33 @@ public class XCTraceSupportTest {
     public void testIllFormattedKpepParsing() throws Exception {
         runOnlyOnMac();
 
-        File tempFile = temporaryFolder.newFile();
-        // plutil converts text file to xml, so that would result
-        // in a successfully generated xml document with a wrong schema
-        Files.write(tempFile.toPath(), "123".getBytes(StandardCharsets.UTF_8));
+        File tempFile = FileUtils.tempFile(".plist");
+        try {
+            // plutil converts text file to xml, so that would result
+            // in a successfully generated xml document with a wrong schema
+            Files.write(tempFile.toPath(), "123".getBytes(StandardCharsets.UTF_8));
 
-        checkKpepParsingFailed(tempFile);
+            checkKpepParsingFailed(tempFile);
+        } finally {
+            tempFile.delete();
+        }
     }
 
     @Test
     public void testInvalidKpepParsing() throws Exception {
         runOnlyOnMac();
 
-        File tempFile = temporaryFolder.newFile();
-        // Generate a file that is not a valid plist file
-        byte[] bytes = new byte[1024];
-        new Random().nextBytes(bytes);
-        Files.write(tempFile.toPath(), bytes);
+        File tempFile = FileUtils.tempFile(".plist");
+        try {
+            // Generate a file that is not a valid plist file
+            byte[] bytes = new byte[1024];
+            new Random().nextBytes(bytes);
+            Files.write(tempFile.toPath(), bytes);
 
-        checkKpepParsingFailed(tempFile);
+            checkKpepParsingFailed(tempFile);
+        } finally {
+            tempFile.delete();
+        }
     }
 
     @Test
@@ -139,7 +142,7 @@ public class XCTraceSupportTest {
 
         Class<?> xctraceSupport = Class.forName("org.openjdk.jmh.profile.XCTraceSupport");
         Method buildPkg = xctraceSupport.getDeclaredMethod("buildInstrumentsPMCSamplingPackage",
-                File.class, long.class, List.class);
+                File.class, long.class, Collection.class);
         buildPkg.setAccessible(true);
 
         List<String> events = new ArrayList<>();
@@ -148,8 +151,12 @@ public class XCTraceSupportTest {
         } else {
             events.add("INST_ALL");
         }
-        File generatedPackage = new File(temporaryFolder.newFolder(), "test.pkg");
-        buildPkg.invoke(null, generatedPackage, 100L, events);
-        Assert.assertTrue(generatedPackage.exists());
+        File generatedPackage = new File(TMP_DIR, UUID.randomUUID() + ".pkg");
+        try {
+            buildPkg.invoke(null, generatedPackage, 100L, events);
+            Assert.assertTrue(generatedPackage.exists());
+        } finally {
+            generatedPackage.delete();
+        }
     }
 }

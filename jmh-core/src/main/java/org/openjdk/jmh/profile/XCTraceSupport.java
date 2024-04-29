@@ -24,15 +24,19 @@
  */
 package org.openjdk.jmh.profile;
 
+import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.Utils;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -45,6 +49,7 @@ final class XCTraceSupport {
     private static final String HW_TYPE_PREFIX = "hw.cputype: ";
     private static final String HW_SUBTYPE_PREFIX = "hw.cpusubtype: ";
     private static final String KPEP_DIR_PATH = "/usr/share/kpep";
+    public static final String INSTRUMENTS_PACKAGE_TEMPLATE = "/xctracenorm.instrpkg";
 
     private XCTraceSupport() {
     }
@@ -79,6 +84,18 @@ final class XCTraceSupport {
         return Arrays.asList(
                 xctracePath, "record",
                 "--template", template,
+                "--output", runFile,
+                "--target-stdout", "-",
+                "--launch", "--"
+        );
+    }
+
+    static Collection<String> recordWithPackageCommandPrefix(String xctracePath, String runFile, File pkg,
+                                                             String instrument) {
+        return Arrays.asList(
+                xctracePath, "record",
+                "--package", pkg.getAbsolutePath(),
+                "--instrument", instrument,
                 "--output", runFile,
                 "--target-stdout", "-",
                 "--launch", "--"
@@ -214,13 +231,41 @@ final class XCTraceSupport {
     }
 
     /**
+     * Generates a string uniquely identifying the Instruments package.
+     */
+    static String generateInstrumentsPackageDigest(int samplingRateMsec, Collection<String> pmuEvents) {
+        MessageDigest md;
+        try {
+            // MD5 is one of the algorithms that have to be supported,
+            // and its digest is the shortest one (16 bytes), which might be handy for file names.
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("MD5 not implemented", e);
+        }
+        InputStream templateStream = XCTraceSupport.class.getResourceAsStream(INSTRUMENTS_PACKAGE_TEMPLATE);
+        byte[] buffer = new byte[1024];
+        int bytesRead = -1;
+        try {
+            while ((bytesRead = templateStream.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read instruments package template", e);
+        }
+        md.update(Integer.toString(samplingRateMsec).getBytes(StandardCharsets.UTF_8));
+        pmuEvents.stream().sorted().forEachOrdered(event -> md.update(event.getBytes(StandardCharsets.UTF_8)));
+        // poor man's byte[] to hexadecimal string conversion
+        return new BigInteger(md.digest()).toString(16);
+    }
+
+    /**
      * Builds a "CPU Counters" based Instruments package that'll sample {@code pmcEvents}
      * at {@code samplingRateMillis} rate. The package building is performed by {@code instrumentbuilder} tool
      * bundled with Xcode.
      *
-     * @param dstPath a path where a generated package needs to be saved.
+     * @param dstPath            a path where a generated package needs to be saved.
      * @param samplingRateMillis the rate at which PMC needs to be sampled, it should be greater than zero.
-     * @param pmcEvents the list of PMC to sample, it should be non-empty.
+     * @param pmcEvents          the list of PMC to sample, it should be non-empty.
      */
     static void buildInstrumentsPMCSamplingPackage(File dstPath, long samplingRateMillis, Collection<String> pmcEvents)
             throws ProfilerException {
@@ -231,7 +276,7 @@ final class XCTraceSupport {
         if (pmcEvents.isEmpty()) {
             throw new IllegalArgumentException("PMC events list must contain at least one event");
         }
-        InputStream templateStream = XCTraceSupport.class.getResourceAsStream("/xctracenorm.instrpkg");
+        InputStream templateStream = XCTraceSupport.class.getResourceAsStream(INSTRUMENTS_PACKAGE_TEMPLATE);
         String template = new BufferedReader(new InputStreamReader(templateStream))
                 .lines()
                 .collect(Collectors.joining("\n"));
@@ -353,8 +398,8 @@ final class XCTraceSupport {
     static PerfEvents parseKpepXmlFile(File kpepXmlFile) throws ProfilerException {
         Map<String, String> aliases = new HashMap<>();
         Map<String, PerfEventInfo> description = new HashMap<>();
-        long[] masks = new long[] { 0, 0 };
-        String[] architecture = new String[] { "unknown" };
+        long[] masks = new long[]{0, 0};
+        String[] architecture = new String[]{"unknown"};
         parseKpepXmlFileLines(kpepXmlFile, fields -> {
             if (fields.length == 0) return;
             switch (fields[0]) {
@@ -386,6 +431,10 @@ final class XCTraceSupport {
                     break;
             }
         });
+
+        if (architecture[0].equals("unknown")) {
+            throw new ProfilerException("Kpep file was not parsed correctly: CPU architecture info is missing.");
+        }
 
         return new PerfEvents(architecture[0], masks[0], masks[1], aliases, description);
     }
