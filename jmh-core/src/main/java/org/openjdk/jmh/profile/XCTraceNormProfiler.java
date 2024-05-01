@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // TODO: add doc
 public class XCTraceNormProfiler implements ExternalProfiler {
@@ -70,7 +71,7 @@ public class XCTraceNormProfiler implements ExternalProfiler {
     private final long delayMs;
     private final long lengthMs;
     private final boolean shouldFixStartTime;
-    private final Set<String> pmuEvents;
+    private final List<String> pmuEvents;
     private final int samplingRateMsec;
     private final File samplingPackage;
     private final XCTraceSupport.PerfEvents perfEvents;
@@ -102,6 +103,9 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         OptionSpec<Boolean> correctOpt = parser.accepts("fixStartTime",
                         "Fix the start time by the time it took to launch.")
                 .withRequiredArg().ofType(Boolean.class).defaultsTo(true);
+        OptionSpec<Boolean> validateEventsOpt = parser.accepts("validateEvents",
+                "Check if selected PMU events could be used simultaneously.")
+                .withRequiredArg().ofType(Boolean.class).defaultsTo(true);
 
         OptionSet options = ProfilerUtils.parseInitLine(initLine, parser);
 
@@ -130,12 +134,15 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         if (options.hasArgument(templateOpt)) {
             xctracePath = XCTraceSupport.getXCTracePath(XCTRACE_VERSION_WITH_COUNTERS_PROFILE_TABLE);
             tracingTemplate = options.valueOf(templateOpt);
-            pmuEvents = Collections.emptySet();
+            pmuEvents = Collections.emptyList();
             samplingPackage = null;
         } else {
             xctracePath = XCTraceSupport.getXCTracePath(XCTRACE_VERSION_WITH_INSTRUMENT_OPTIONS);
             tracingTemplate = null;
-            Set<String> userEvents = getSupportedEvents(options.valuesOf(eventsOpt), perfEvents);
+            List<String> userEvents = getSupportedEvents(options.valuesOf(eventsOpt), perfEvents);
+            if (options.valueOf(validateEventsOpt)) {
+                checkEventsCouldBeScheduled(userEvents, perfEvents);
+            }
             if (userEvents.isEmpty()) {
                 throw new ProfilerException("No supported events.");
             }
@@ -177,10 +184,10 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         throw new ProfilerException(helpMessage.toString());
     }
 
-    private static Set<String> getSupportedEvents(List<String> userEvents, XCTraceSupport.PerfEvents perfEvents)
-            throws ProfilerException {
-        Set<String> supportedEvents = new HashSet<>();
+    private static List<String> getSupportedEvents(List<String> userEvents, XCTraceSupport.PerfEvents perfEvents) {
+        Set<String> supportedEvents = new LinkedHashSet<>();
 
+        // Filter out unsupported events and map aliases back to regular events
         for (String event : userEvents) {
             if (perfEvents.isSupportedEvent(event)) {
                 supportedEvents.add(event);
@@ -193,12 +200,56 @@ public class XCTraceNormProfiler implements ExternalProfiler {
             }
         }
 
-        if (supportedEvents.size() > perfEvents.getMaxCounters()) {
-            throw new ProfilerException("Profiler supports only " + perfEvents.getMaxCounters() + " counters, " +
-                    "but " + supportedEvents.size() + " PMU events were specified: " + supportedEvents);
-        }
+        return new ArrayList<>(supportedEvents);
+    }
 
-        return supportedEvents;
+    /**
+     * Checks if selected events could be simultaneously scheduled for counting.
+     * <p/>
+     * Unlike, Linux perf_events, Instruments and xctrace do not support events multiplexing.
+     * Xctrace will crash if a user specified more events than counters available on CPU,
+     * or some events are constrained with respect to counters they could be scheduled to
+     * and corresponding counters are unavailable.
+     * <p/>
+     * This functions attempts to check if all selected events could
+     * (at least theoretically) be scheduled simultaneously.
+     */
+    private static void checkEventsCouldBeScheduled(List<String> events, XCTraceSupport.PerfEvents perfEvents)
+            throws ProfilerException {
+        if (events.size() > perfEvents.getMaxCounters()) {
+            throw new ProfilerException("Profiler supports only " + perfEvents.getMaxCounters() + " counters, " +
+                    "but " + events.size() + " PMU events were specified: " + events);
+        }
+        // In general, testing if all events could be scheduled on CPU counter w.r.t. counters constrains
+        // is equivalent to finding a maximum matching in a bipartite graph (where one set of nodes are events
+        // and another set of nodes are counters; and there's an edge
+        // if an event could be scheduled to one of the counters).
+        // It's unclear how xctrace/Instruments (or, apparently, kperfdata framework) check these constraints,
+        // but it seems like instead of finding a maximum bipartite matching, we can greatly assign events to
+        // counters starting from more constrained events (events that could be scheduled on a smaller counters subset)
+        // until either all events assigned, or an event that could not be assigned is found.
+        // Such an approach should work as long as there are no events having overlapping counters constants of the
+        // same size (like, event A could be scheduled on counter {1, 2, 3}, event B on {2, 3, 4}
+        // and event C on {3, 4, 5}). Luckily, there are no such events in /usr/share/kpep.
+        // And, well, perf_events is doing something similar when scheduling events.
+        long availableCountersMask = perfEvents.getConfigurableCountersMask() | perfEvents.getFixedCountersMask();
+        List<XCTraceSupport.PerfEventInfo> eventsInfo = events.stream()
+                .map(perfEvents::getEvent)
+                // Sort by the number of set bits in the mask to process more constrained events first
+                .sorted(Comparator.comparingInt(evt -> Long.bitCount(evt.getCounterMask())))
+                .collect(Collectors.toList());
+        for (XCTraceSupport.PerfEventInfo event : eventsInfo) {
+            long eventMask = event.getCounterMask();
+            if ((availableCountersMask & eventMask) == 0) {
+                throw new ProfilerException("Event " + event.getName() + " could not be used with other selected " +
+                        "events due to performance counters constraints. Consider configuring a template using the " +
+                        "Instruments app to check which events could be used simultaneously.");
+            }
+            // Extract a mask with a single PMC ...
+            long counterMask = Long.lowestOneBit(availableCountersMask & eventMask);
+            // ... and claim that counter by clearing the corresponding bit in the mask
+            availableCountersMask = availableCountersMask & ~counterMask;
+        }
     }
 
     /**
@@ -239,7 +290,7 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         // ... and if it was generated successfully, let's rename it.
         if (!tempPkgFile.renameTo(pkg)) {
             throw new ProfilerException("Failed to rename a package file from " + tempPkgFile.getAbsolutePath() +
-                " to " + pkg.getAbsolutePath());
+                    " to " + pkg.getAbsolutePath());
         }
         return pkg;
     }
