@@ -434,38 +434,46 @@ public class XCTraceNormProfiler implements ExternalProfiler {
 
     private void computeAggregatesAppleSiliconArm64(Collection<Result<?>> results, AggregatedEvents aggregator) {
         computeCpiAndIpc(results, aggregator, INSTRUCTIONS_EVENT_NAMES_ARM64, CYCLES_EVENT_NAMES_ARM64);
-        // TODO: support other ratios described in the opt guide
+        computeAppleSiliconArm64InstDensityMetrics(results, aggregator);
     }
 
     private static void computeCpiAndIpc(Collection<Result<?>> results, AggregatedEvents aggregator,
                                          String[] instructionEventNames, String[] cyclesEventNames) {
-        double cycles = 0.0;
-        String cyclesName = null;
-        for (String evt : cyclesEventNames) {
-            Double c = aggregator.getCountOrNull(evt);
-            if (c != null) {
-                cyclesName = evt;
-                cycles = c;
-                break;
-            }
+        CounterValue cycles = aggregator.getAnyOfOrNull(cyclesEventNames);
+        if (cycles == null || cycles.getValue() == 0D) {
+            return;
         }
 
-        double insts = 0.0;
-        String instsName = null;
-        for (String evt : instructionEventNames) {
-            Double c = aggregator.getCountOrNull(evt);
-            if (c != null) {
-                instsName = evt;
-                insts = c;
-                break;
-            }
+        CounterValue insts = aggregator.getAnyOfOrNull(instructionEventNames);
+        if (insts == null || cycles.getValue() == 0D) {
+            return;
         }
 
-        if (instsName != null && cyclesName != null && insts != 0.0 && cycles != 0.0) {
-            results.add(new ScalarResult("CPI", cycles / insts,
-                    cyclesName + "/" + instsName, AggregationPolicy.AVG));
-            results.add(new ScalarResult("IPC", insts / cycles,
-                    instsName + "/" + cyclesName, AggregationPolicy.AVG));
+        results.add(new ScalarResult("CPI", cycles.getValue() / insts.getValue(),
+                cycles.getName() + "/" + insts.getName(), AggregationPolicy.AVG));
+        results.add(new ScalarResult("IPC", insts.getValue() / cycles.getValue(),
+                insts.getName() + "/" + cycles.getName(), AggregationPolicy.AVG));
+    }
+
+    // Compute instructions density metrics (defined in Apple Silicon CPU Optimization Guide,
+    // https://developer.apple.com/documentation/apple-silicon/cpu-optimization-guide).
+    private static void computeAppleSiliconArm64InstDensityMetrics(Collection<Result<?>> results, AggregatedEvents aggregator) {
+        // Try to use INST_ALL first, as it seems to be a more canonical event name
+        CounterValue insts = aggregator.getAnyOfOrNull("INST_ALL");
+        if (insts == null && (insts = aggregator.getAnyOfOrNull(INSTRUCTIONS_EVENT_NAMES_ARM64)) == null) {
+            return;
+        }
+        for (String eventName : aggregator.eventNames) {
+            if (!eventName.startsWith("INST_") || eventName.equals("INST_ALL")) {
+                continue;
+            }
+            Double value = aggregator.getCountOrNull(eventName);
+            if (value == null || value == 0D) {
+                continue;
+            }
+
+            results.add(new ScalarResult(eventName + " density (of instructions)", value / insts.getValue(),
+                    eventName + "/" + insts.getName(), AggregationPolicy.AVG));
         }
     }
 
@@ -520,10 +528,38 @@ public class XCTraceNormProfiler implements ExternalProfiler {
             }
         }
 
+        CounterValue getAnyOfOrNull(String... keys) {
+            for (String key : keys) {
+                Double value = getCountOrNull(key);
+                if (value != null) {
+                    return new CounterValue(key, value);
+                }
+            }
+            return null;
+        }
+
         Double getCountOrNull(String event) {
             int idx = eventNames.indexOf(event);
             if (idx == -1) return null;
             return eventValues[idx];
+        }
+    }
+
+    private static class CounterValue {
+        private final String name;
+        private final double value;
+
+        public CounterValue(String name, double value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public double getValue() {
+            return value;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 }
