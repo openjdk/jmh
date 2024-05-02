@@ -119,6 +119,12 @@
                     <xsl:with-param name="key">description</xsl:with-param>
                     <xsl:with-param name="skipKey">true</xsl:with-param>
                 </xsl:apply-templates>
+                <xsl:text>::</xsl:text>
+                <!-- fallback event for a fixed counter -->
+                <xsl:apply-templates select="following-sibling::dict[1]/string">
+                    <xsl:with-param name="key">fallback</xsl:with-param>
+                    <xsl:with-param name="skipKey">true</xsl:with-param>
+                </xsl:apply-templates>
                 <xsl:text>&#xa;</xsl:text>
             </xsl:for-each>
         </xsl:if>

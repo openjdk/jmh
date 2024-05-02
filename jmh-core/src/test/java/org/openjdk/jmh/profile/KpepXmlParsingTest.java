@@ -49,7 +49,7 @@ public class KpepXmlParsingTest {
     }
 
     private void checkEvent(XCTraceSupport.PerfEvents db, String name, boolean isFixed, long mask,
-                            String description) {
+                            String description, String fallback) {
         XCTraceSupport.PerfEventInfo event = db.getEvent(name);
 
         Assert.assertNotNull("Event not found: " + name, event);
@@ -57,6 +57,7 @@ public class KpepXmlParsingTest {
         Assert.assertEquals("isFixed not matched for event " + name, isFixed, event.isFixed());
         Assert.assertEquals("counterMask not matched for event " + name, mask, event.getCounterMask());
         Assert.assertEquals("description not matched for event " + name, description, event.getDescription());
+        Assert.assertEquals("fallback not matched for event " + name, fallback, event.getFallbackEvent());
     }
 
     @Test
@@ -69,20 +70,24 @@ public class KpepXmlParsingTest {
         Assert.assertEquals(0x7L, db.getFixedCountersMask());
         Assert.assertEquals(0x78L, db.getConfigurableCountersMask());
 
-        Assert.assertEquals(298, db.getAllEvents().size());
+        Assert.assertEquals(305, db.getAllEvents().size());
 
         checkEvent(db, "CPU_CLK_UNHALTED.THREAD", true, 2L,
-                "Core cycles when the core is not in halt state.");
+                "Core cycles when the core is not in halt state.",
+                "CPU_CLK_UNHALTED.THREAD_P");
         checkEvent(db, "CPU_CLK_UNHALTED.THREAD_P", false, 120L,
-                "Thread cycles when thread is not in halt state");
+                "Thread cycles when thread is not in halt state", null);
         checkEvent(db, "INST_RETIRED.PREC_DIST", false, 16L,
-                "Precise instruction retired event with HW to reduce effect of PEBS shadow in IP distribution");
+                "Precise instruction retired event with HW to reduce effect of PEBS shadow in IP distribution",
+                null);
 
-        Assert.assertNull(db.getEvent("INST_ALL"));
-        Assert.assertEquals("INST_RETIRED.ANY", db.getAlias("INST_ALL"));
+        XCTraceSupport.PerfEventInfo instAll = db.getEvent("INST_ALL");
+        Assert.assertNotNull(instAll);
+        Assert.assertEquals("INST_RETIRED.ANY", instAll.getName());
 
-        Assert.assertNull(db.getEvent("CORE_ACTIVE_CYCLE"));
-        Assert.assertEquals("CPU_CLK_UNHALTED.THREAD", db.getAlias("CORE_ACTIVE_CYCLE"));
+        XCTraceSupport.PerfEventInfo coreCycles = db.getEvent("CORE_ACTIVE_CYCLE");
+        Assert.assertNotNull(coreCycles);
+        Assert.assertEquals("CPU_CLK_UNHALTED.THREAD", coreCycles.getName());
     }
 
     @Test
@@ -95,18 +100,21 @@ public class KpepXmlParsingTest {
         Assert.assertEquals(0x3L, db.getFixedCountersMask());
         Assert.assertEquals(0x3FCL, db.getConfigurableCountersMask());
 
-        Assert.assertEquals(61, db.getAllEvents().size());
+        Assert.assertEquals(63, db.getAllEvents().size());
 
-        checkEvent(db, "FIXED_CYCLES", true, 1L, "No description");
+        checkEvent(db, "FIXED_CYCLES", true, 1L, "No description", null);
+        checkEvent(db, "FIXED_INSTRUCTIONS", true, 2L, "No description", "INST_ALL");
         checkEvent(db, "L1D_CACHE_MISS_ST", false, 1020L,
-                "Stores that missed the L1 Data Cache");
+                "Stores that missed the L1 Data Cache", null);
         checkEvent(db, "INST_BRANCH_COND", false, 224L,
-                "Retired conditional branch instructions (counts only B.cond)");
+                "Retired conditional branch instructions (counts only B.cond)", null);
 
-        Assert.assertNull(db.getEvent("Instructions"));
-        Assert.assertEquals("FIXED_INSTRUCTIONS", db.getAlias("Instructions"));
+        XCTraceSupport.PerfEventInfo instr = db.getEvent("Instructions");
+        Assert.assertNotNull(instr);
+        Assert.assertEquals("FIXED_INSTRUCTIONS", instr.getName());
 
-        Assert.assertNull(db.getEvent("Cycles"));
-        Assert.assertEquals("FIXED_CYCLES", db.getAlias("Cycles"));
+        XCTraceSupport.PerfEventInfo cycles = db.getEvent("Cycles");
+        Assert.assertNotNull(cycles);
+        Assert.assertEquals("FIXED_CYCLES", cycles.getName());
     }
 }

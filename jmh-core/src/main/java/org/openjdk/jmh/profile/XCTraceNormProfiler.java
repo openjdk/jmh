@@ -104,7 +104,7 @@ public class XCTraceNormProfiler implements ExternalProfiler {
                         "Fix the start time by the time it took to launch.")
                 .withRequiredArg().ofType(Boolean.class).defaultsTo(true);
         OptionSpec<Boolean> validateEventsOpt = parser.accepts("validateEvents",
-                "Check if selected PMU events could be used simultaneously.")
+                        "Check if selected PMU events could be used simultaneously.")
                 .withRequiredArg().ofType(Boolean.class).defaultsTo(true);
 
         OptionSet options = ProfilerUtils.parseInitLine(initLine, parser);
@@ -159,13 +159,9 @@ public class XCTraceNormProfiler implements ExternalProfiler {
     }
 
     private static OptionSpec<String> setArchSpecificDefaultValues(ArgumentAcceptingOptionSpec<String> events) {
-        if (System.getProperty("os.arch").equals("aarch64")) {
-            return events.defaultsTo(XCTraceSupport.PerfEvents.CPU_CYCLES_ARM64,
-                    XCTraceSupport.PerfEvents.INSTRUCTIONS_ARM64);
-        } else {
-            return events.defaultsTo(XCTraceSupport.PerfEvents.CPU_CYCLES_X86_64,
-                    XCTraceSupport.PerfEvents.INSTRUCTIONS_X86_64);
-        }
+        // TODO: rename constants
+        return events.defaultsTo(XCTraceSupport.PerfEvents.CPU_CYCLES,
+                XCTraceSupport.PerfEvents.INSTRUCTIONS);
     }
 
     private static void dumpSupportedEvents(
@@ -176,7 +172,7 @@ public class XCTraceNormProfiler implements ExternalProfiler {
                 .append("):\n");
         perfEvents.getAliases().stream().sorted().forEachOrdered(alias ->
                 helpMessage.append(alias).append("\tAlias to ")
-                        .append(perfEvents.getAlias(alias)).append('\n'));
+                        .append(perfEvents.getEvent(alias).getName()).append('\n'));
         perfEvents.getAllEvents().stream()
                 .sorted(Comparator.comparing(XCTraceSupport.PerfEventInfo::getName))
                 .forEachOrdered(event -> helpMessage.append(event.getName()).append('\t')
@@ -191,12 +187,6 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         for (String event : userEvents) {
             if (perfEvents.isSupportedEvent(event)) {
                 supportedEvents.add(event);
-                continue;
-            }
-
-            String alias = perfEvents.getAlias(event);
-            if (alias != null && perfEvents.isSupportedEvent(alias)) {
-                supportedEvents.add(alias);
             }
         }
 

@@ -408,18 +408,18 @@ final class XCTraceSupport {
                         aliases.put(fields[1], fields[2]);
                     }
                     break;
-                case "event": // PMU event info, ["event", <event name>, <is fixed>, <mask>, <description>]
-                    if (fields.length >= 4) {
-                        String name = fields[1];
-                        boolean isFixed = !fields[2].isEmpty();
-                        long mask = isFixed ? masks[0] : masks[1];
-                        if (!fields[3].isEmpty()) {
-                            mask = Long.parseLong(fields[3]);
-                        }
-                        String desc = fields.length > 4 ? fields[4] : "No description";
-                        description.put(name, new PerfEventInfo(name, mask, isFixed, desc));
+                case "event": { // PMU event info, ["event", <event name>, <is fixed>, <mask>, <description>, <fallback>]
+                    String name = fields[1];
+                    boolean isFixed = fields.length > 2 && !fields[2].isEmpty();
+                    long mask = isFixed ? masks[0] : masks[1];
+                    if (fields.length > 3 && !fields[3].isEmpty()) {
+                        mask = Long.parseLong(fields[3]);
                     }
+                    String desc = fields.length > 4 && !fields[4].isEmpty() ? fields[4] : "No description";
+                    String fallback = fields.length > 5 ? fields[5] : null;
+                    description.put(name, new PerfEventInfo(name, mask, isFixed, desc, fallback));
                     break;
+                }
                 case "architecture": // CPU architecture, ["architecture", <arm64|x86_64>]
                     architecture[0] = fields[1];
                     break;
@@ -435,6 +435,10 @@ final class XCTraceSupport {
         if (architecture[0].equals("unknown")) {
             throw new ProfilerException("Kpep file was not parsed correctly: CPU architecture info is missing.");
         }
+
+        aliases.forEach((k, v) -> {
+            description.put(k, description.get(v));
+        });
 
         return new PerfEvents(architecture[0], masks[0], masks[1], aliases, description);
     }
@@ -468,11 +472,14 @@ final class XCTraceSupport {
         private final boolean isFixed;
         private final String description;
 
-        public PerfEventInfo(String name, long counterMask, boolean isFixed, String description) {
+        private final String fallbackEvent;
+
+        public PerfEventInfo(String name, long counterMask, boolean isFixed, String description, String fallback) {
             this.name = name;
             this.counterMask = counterMask;
             this.isFixed = isFixed;
             this.description = description;
+            fallbackEvent = fallback;
         }
 
         public String getName() {
@@ -490,13 +497,15 @@ final class XCTraceSupport {
         public String getDescription() {
             return description;
         }
+
+        public String getFallbackEvent() {
+            return fallbackEvent;
+        }
     }
 
     static class PerfEvents {
-        public static final String CPU_CYCLES_ARM64 = "Cycles";
-        public static final String INSTRUCTIONS_ARM64 = "Instructions";
-        public static final String CPU_CYCLES_X86_64 = "CORE_ACTIVE_CYCLE";
-        public static final String INSTRUCTIONS_X86_64 = "INST_ALL";
+        public static final String CPU_CYCLES = "CORE_ACTIVE_CYCLE";
+        public static final String INSTRUCTIONS = "INST_ALL";
 
         private final Map<String, String> eventAliases;
         private final Map<String, PerfEventInfo> supportedEvents;
@@ -533,25 +542,10 @@ final class XCTraceSupport {
             return Collections.unmodifiableSet(eventAliases.keySet());
         }
 
-        Set<String> getAllAliasedEvents(String event) {
-            Set<String> aliases = new HashSet<>();
-            while (event != null) {
-                String alias = eventAliases.get(event);
-                if (alias != null) {
-                    aliases.add(alias);
-                }
-                event = alias;
-            }
-            return aliases;
-        }
-
-        String getAlias(String event) {
-            return eventAliases.get(event);
-        }
-
         boolean isSupportedEvent(String event) {
             return supportedEvents.containsKey(event);
         }
+
 
         Collection<PerfEventInfo> getAllEvents() {
             return Collections.unmodifiableCollection(supportedEvents.values());
