@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 // TODO: add doc
@@ -139,7 +140,7 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         } else {
             xctracePath = XCTraceSupport.getXCTracePath(XCTRACE_VERSION_WITH_INSTRUMENT_OPTIONS);
             tracingTemplate = null;
-            List<String> userEvents = getSupportedEvents(options.valuesOf(eventsOpt), perfEvents);
+            List<String> userEvents = extractSupportedEvents(options.valuesOf(eventsOpt), perfEvents);
             if (options.valueOf(validateEventsOpt)) {
                 checkEventsCouldBeScheduled(userEvents, perfEvents);
             }
@@ -159,9 +160,7 @@ public class XCTraceNormProfiler implements ExternalProfiler {
     }
 
     private static OptionSpec<String> setArchSpecificDefaultValues(ArgumentAcceptingOptionSpec<String> events) {
-        // TODO: rename constants
-        return events.defaultsTo(XCTraceSupport.PerfEvents.CPU_CYCLES,
-                XCTraceSupport.PerfEvents.INSTRUCTIONS);
+        return events.defaultsTo(XCTraceSupport.PerfEvents.CPU_CYCLES, XCTraceSupport.PerfEvents.INSTRUCTIONS);
     }
 
     private static void dumpSupportedEvents(
@@ -180,17 +179,55 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         throw new ProfilerException(helpMessage.toString());
     }
 
-    private static List<String> getSupportedEvents(List<String> userEvents, XCTraceSupport.PerfEvents perfEvents) {
-        Set<String> supportedEvents = new LinkedHashSet<>();
+    /**
+     * Filter out all unsupported events {@code userEvents} and maps names of what remains, if needed.
+     * <p/>
+     * With unsupported events, everything is straightforward: such events should be filtered out.
+     * However, things are a bit convoluted when it comes to supported events.
+     * An event might be a regular event, or an alias to a regular event.
+     * A regular event may also have an associated fallback event.
+     * <p/>
+     * Aliases provides a name consistent across all supported CPUs (like {@code INST_ALL}) and simply
+     * refer to one of other events.
+     * A regular event may not be supported, and in that case it has an associated fallback event.
+     * <p/>
+     * The mapping is performed in the following way: try to use aliases when they are specified;
+     * ensure that among multiple events that at the end refers to the same supported event only one is used;
+     * remove all duplicated events; rely on fallbacks when needed.
+     *
+     */
+    private static List<String> extractSupportedEvents(List<String> userEvents, XCTraceSupport.PerfEvents perfEvents) {
+        List<String> supportedEvents = new ArrayList<>();
+        Set<String> underlyingEvents = new HashSet<>();
 
-        // Filter out unsupported events and map aliases back to regular events
-        for (String event : userEvents) {
-            if (perfEvents.isSupportedEvent(event)) {
-                supportedEvents.add(event);
+        // Filter out unsupported events
+        for (String eventName : userEvents) {
+            XCTraceSupport.PerfEventInfo event = perfEvents.getEvent(eventName);
+            if (event == null) {
+                // Event not found in the database
+                continue;
+            }
+
+            boolean isAlias = !event.getName().equals(eventName);
+            // For some reason, fixed counters sampling does not work on Intel-based devices.
+            // Instead, Instruments app uses a fallback event (which is always a configurable event).
+            if (event.isFixed() && perfEvents.getArchitecture().equals("x86_64")) {
+                if (event.getFallbackEvent() == null) {
+                    // There's no fallback event, looks like an error, let's skip it.
+                    continue;
+                }
+                event = perfEvents.getEvent(event.getFallbackEvent());
+            }
+            if (underlyingEvents.add(event.getName())) {
+                // Prefer aliases over resolved event names as xctrace/Instruments
+                // can handle them correctly on its own.
+                // But for regular events, use final resolved even name to overcome the issue
+                // will fixed counter on Intel-based devices.
+                supportedEvents.add(isAlias ? eventName : event.getName());
             }
         }
 
-        return new ArrayList<>(supportedEvents);
+        return supportedEvents;
     }
 
     /**
@@ -201,15 +238,11 @@ public class XCTraceNormProfiler implements ExternalProfiler {
      * or some events are constrained with respect to counters they could be scheduled to
      * and corresponding counters are unavailable.
      * <p/>
-     * This functions attempts to check if all selected events could
+     * This function attempts to check if all selected events could
      * (at least theoretically) be scheduled simultaneously.
      */
     private static void checkEventsCouldBeScheduled(List<String> events, XCTraceSupport.PerfEvents perfEvents)
             throws ProfilerException {
-        if (events.size() > perfEvents.getMaxCounters()) {
-            throw new ProfilerException("Profiler supports only " + perfEvents.getMaxCounters() + " counters, " +
-                    "but " + events.size() + " PMU events were specified: " + events);
-        }
         // In general, testing if all events could be scheduled on CPU counter w.r.t. counters constrains
         // is equivalent to finding a maximum matching in a bipartite graph (where one set of nodes are events
         // and another set of nodes are counters; and there's an edge
@@ -223,16 +256,30 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         // and event C on {3, 4, 5}). Luckily, there are no such events in /usr/share/kpep.
         // And, well, perf_events is doing something similar when scheduling events.
         long availableCountersMask = perfEvents.getConfigurableCountersMask() | perfEvents.getFixedCountersMask();
-        List<XCTraceSupport.PerfEventInfo> eventsInfo = events.stream()
-                .map(perfEvents::getEvent)
+        List<Map.Entry<String, XCTraceSupport.PerfEventInfo>> eventsInfo = events.stream()
+                .collect(Collectors.toMap(Function.identity(), event -> {
+                    XCTraceSupport.PerfEventInfo eventInfo = perfEvents.getEvent(event);
+                    if (eventInfo.isFixed() && perfEvents.getArchitecture().equals("x86_64")) {
+                        // Fixed counters don't work on Intel-based hosts, use a fallback event instead.
+                        return perfEvents.getEvent(eventInfo.getFallbackEvent());
+                    }
+                    return eventInfo;
+                }))
+                .entrySet()
+                .stream()
                 // Sort by the number of set bits in the mask to process more constrained events first
-                .sorted(Comparator.comparingInt(evt -> Long.bitCount(evt.getCounterMask())))
+                .sorted(Comparator.comparingInt(evt -> Long.bitCount(evt.getValue().getCounterMask())))
                 .collect(Collectors.toList());
-        for (XCTraceSupport.PerfEventInfo event : eventsInfo) {
+
+        for (Map.Entry<String, XCTraceSupport.PerfEventInfo> eventInfo : eventsInfo) {
+            String requestedName = eventInfo.getKey();
+            XCTraceSupport.PerfEventInfo event = eventInfo.getValue();
+
             long eventMask = event.getCounterMask();
             if ((availableCountersMask & eventMask) == 0) {
-                throw new ProfilerException("Event " + event.getName() + " could not be used with other selected " +
-                        "events due to performance counters constraints. Consider configuring a template using the " +
+                throw new ProfilerException("Event " + requestedName + " (" + event.getName() +
+                        ") could not be used with other selected events due to performance counters constraints. " +
+                        "Consider configuring a template using the " +
                         "Instruments app to check which events could be used simultaneously.");
             }
             // Extract a mask with a single PMC ...

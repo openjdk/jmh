@@ -39,10 +39,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,6 +91,14 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
 
     private static void skipIfProfilerNotSupport() {
         Assume.assumeTrue(xctraceExists());
+    }
+
+    private static void runOnIntelOnly() {
+        Assume.assumeTrue(System.getProperty("os.arch").equals("x86_64"));
+    }
+
+    private static void runOnArm64Only() {
+        Assume.assumeTrue(System.getProperty("os.arch").equals("aarch64"));
     }
 
     private static void skipIfRunningInsideVirtualMachine() {
@@ -179,13 +185,47 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
     public void testSpecifyTooManyEvents() {
         skipIfProfilerNotSupport();
         skipIfRunningInsideVirtualMachine();
-        String[] lines  = Assert.assertThrows(ProfilerException.class,
+        String[] lines = Assert.assertThrows(ProfilerException.class,
                 () -> new XCTraceNormProfiler("listEvents=true")).getMessage().split("\n");
         String eventsList = Stream.of(lines).skip(1).map(l -> l.split("\t")[0]).limit(32)
                 .collect(Collectors.joining(","));
         ProfilerException e = Assert.assertThrows(ProfilerException.class,
                 () -> new XCTraceNormProfiler("events=" + eventsList));
-        Assert.assertTrue(e.getMessage().contains("Profiler supports only "));
+        Assert.assertTrue(e.getMessage().contains(
+                "could not be used with other selected events due to performance counters constraints"));
+    }
+
+    @Test
+    public void testDuplicateEventsFiltrationOnIntel() throws Exception {
+        skipIfProfilerNotSupport();
+        skipIfRunningInsideVirtualMachine();
+        runOnIntelOnly();
+
+        checkEventsDeduplication("CORE_ACTIVE_CYCLE",
+                "Cycles", "CORE_ACTIVE_CYCLE", "FIXED_CYCLES", "CPU_CLK_UNHALTED.THREAD",
+                "CPU_CLK_UNHALTED.THREAD_P", "Cycles", "CORE_ACTIVE_CYCLE");
+    }
+
+    @Test
+    public void testDuplicateEventsFiltrationOnMacos() throws Exception {
+        skipIfProfilerNotSupport();
+        skipIfRunningInsideVirtualMachine();
+        runOnArm64Only();
+
+        checkEventsDeduplication("Cycles",
+                "Cycles", "FIXED_CYCLES", "CPU_CLK_UNHALTED.THREAD", "CPU_CLK_UNHALTED.THREAD_P", "Cycles");
+    }
+
+    private void checkEventsDeduplication(String expectedEvent, String... allEvents) throws RunnerException {
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(XCTraceNormProfiler.class, "events=" + String.join(",", allEvents))
+                .forks(1)
+                .build();
+
+        RunResult rr = new Runner(opts).runSingle();
+        Assert.assertEquals(1, rr.getSecondaryResults().size());
+        Assert.assertTrue(rr.getSecondaryResults().containsKey(expectedEvent));
     }
 
     @Test
