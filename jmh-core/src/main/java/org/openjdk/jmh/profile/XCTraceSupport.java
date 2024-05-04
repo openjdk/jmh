@@ -358,7 +358,7 @@ final class XCTraceSupport {
      * Parses a given KPEP database file. These files are property list (plist) files located in {@code /usr/share/kpep}
      * and containing information about CPU's performance monitoring unit. Information includes some PMU properties
      * like a number of fixed and configurable counters, but mainly, in contains PMU events description.
-     * <p/>
+     * <p>
      * While the database itself contains a few entries about a CPU, one has to query sysctl to get enough info to
      * correctly identify the CPU and then use that info to pick up a proper KPEP file. All required machinery is
      * already implemented in {@link XCTraceSupport#getCpuIdString()}.
@@ -379,12 +379,12 @@ final class XCTraceSupport {
                     "-o", tempFile.toString(),
                     kpepFile.getAbsolutePath());
             if (!out.isEmpty()) {
-                throw new ProfilerException("Failed to parse a kpep file: " + kpepFile.getAbsolutePath() +
+                throw new ProfilerException("Failed to parse a KPEP file: " + kpepFile.getAbsolutePath() +
                         ". Output: " + out);
             }
             return parseKpepXmlFile(tempFile.toFile());
         } catch (IOException e) {
-            throw new ProfilerException("Failed to parse a kpep file: " + kpepFile.getAbsolutePath(), e);
+            throw new ProfilerException("Failed to parse a KPEP file: " + kpepFile.getAbsolutePath(), e);
         } finally {
             if (tempFile != null) {
                 try {
@@ -395,6 +395,9 @@ final class XCTraceSupport {
         }
     }
 
+    /**
+     * Parses a KPEP database from XML format.
+     */
     static PerfEvents parseKpepXmlFile(File kpepXmlFile) throws ProfilerException {
         Map<String, String> aliases = new HashMap<>();
         Map<String, PerfEventInfo> description = new HashMap<>();
@@ -433,17 +436,14 @@ final class XCTraceSupport {
         });
 
         if (architecture[0].equals("unknown")) {
-            throw new ProfilerException("Kpep file was not parsed correctly: CPU architecture info is missing.");
+            throw new ProfilerException("KPEP file was not parsed correctly: CPU architecture info is missing.");
         }
 
-        aliases.forEach((k, v) -> {
-            description.put(k, description.get(v));
-        });
+        aliases.forEach((k, v) -> description.put(k, description.get(v)));
 
-        return new PerfEvents(architecture[0], masks[0], masks[1], aliases, description);
+        return new PerfEvents(CpuArch.fromString(architecture[0]), masks[0], masks[1], aliases, description);
     }
 
-    // Extracts data we're interested in from KPEP plist's XML representation.
     private static void parseKpepXmlFileLines(File xmlFile, Consumer<String[]> callback) throws ProfilerException {
         Source kpepXml = new StreamSource(xmlFile);
         Source aliasesXslt = new StreamSource(XCTraceSupport.class.getResourceAsStream("/kpep.plist.xslt"));
@@ -453,7 +453,7 @@ final class XCTraceSupport {
         try {
             transformerFactory.newTransformer(aliasesXslt).transform(kpepXml, aliasesParsed);
         } catch (TransformerException e) {
-            throw new ProfilerException("Failed to transform Kpep XML file", e);
+            throw new ProfilerException("Failed to transform KPEP XML file", e);
         }
         String aliasesText = aliasesParsed.getOutputStream().toString();
 
@@ -463,6 +463,25 @@ final class XCTraceSupport {
                 continue;
             }
             callback.accept(line.trim().split("::"));
+        }
+    }
+
+    enum CpuArch {
+        AARCH64,
+        X86_64,
+        UNKNOWN;
+
+        static CpuArch fromString(String arch) {
+            switch (arch) {
+                case "aarch64":
+                case "arm64":
+                    return AARCH64;
+                case "amd64":
+                case "x86_64":
+                    return X86_64;
+                default:
+                    return UNKNOWN;
+            }
         }
     }
 
@@ -504,16 +523,13 @@ final class XCTraceSupport {
     }
 
     static class PerfEvents {
-        public static final String CPU_CYCLES = "CORE_ACTIVE_CYCLE";
-        public static final String INSTRUCTIONS = "INST_ALL";
-
         private final Map<String, String> eventAliases;
         private final Map<String, PerfEventInfo> supportedEvents;
         private final long fixedCountersMask;
         private final long configurableCountersMask;
-        private final String architecture;
+        private final CpuArch architecture;
 
-        public PerfEvents(String architecture, long fixedCountersMask, long configurableCountersMask,
+        public PerfEvents(CpuArch architecture, long fixedCountersMask, long configurableCountersMask,
                           Map<String, String> eventAliases, Map<String, PerfEventInfo> supportedEvents) {
             this.eventAliases = eventAliases;
             this.supportedEvents = supportedEvents;
@@ -534,18 +550,13 @@ final class XCTraceSupport {
             return configurableCountersMask;
         }
 
-        String getArchitecture() {
+        CpuArch getArchitecture() {
             return architecture;
         }
 
         Set<String> getAliases() {
             return Collections.unmodifiableSet(eventAliases.keySet());
         }
-
-        boolean isSupportedEvent(String event) {
-            return supportedEvents.containsKey(event);
-        }
-
 
         Collection<PerfEventInfo> getAllEvents() {
             return Collections.unmodifiableCollection(supportedEvents.values());

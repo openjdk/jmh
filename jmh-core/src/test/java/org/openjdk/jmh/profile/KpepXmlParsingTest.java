@@ -65,7 +65,7 @@ public class KpepXmlParsingTest {
         XCTraceSupport.PerfEvents db = XCTraceSupport.parseKpepXmlFile(
                 copyResourceToFile("/org.openjdk.jmh.profile.xctrace/haswell.xml"));
 
-        Assert.assertEquals("x86_64", db.getArchitecture());
+        Assert.assertEquals(XCTraceSupport.CpuArch.X86_64, db.getArchitecture());
         Assert.assertEquals(7 /* 3 fixed, 4 configurable */, db.getMaxCounters());
         Assert.assertEquals(0x7L, db.getFixedCountersMask());
         Assert.assertEquals(0x78L, db.getConfigurableCountersMask());
@@ -95,7 +95,7 @@ public class KpepXmlParsingTest {
         XCTraceSupport.PerfEvents db = XCTraceSupport.parseKpepXmlFile(
                 copyResourceToFile("/org.openjdk.jmh.profile.xctrace/a16.xml"));
 
-        Assert.assertEquals("arm64", db.getArchitecture());
+        Assert.assertEquals(XCTraceSupport.CpuArch.AARCH64, db.getArchitecture());
         Assert.assertEquals(10 /* 2 fixed, 8 configurable */, db.getMaxCounters());
         Assert.assertEquals(0x3L, db.getFixedCountersMask());
         Assert.assertEquals(0x3FCL, db.getConfigurableCountersMask());

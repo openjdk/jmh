@@ -39,7 +39,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,15 +118,23 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
                 "FIXED_INSTRUCTIONS", "INST_ALL", "INST_RETIRED.ANY", "INST_RETIRED.ANY_P");
         double cycles = checkedGetAny(sr, "Cycles", "FIXED_CYCLES",
                 "CORE_ACTIVE_CYCLE", "CPU_CLK_UNHALTED.THREAD", "CPU_CLK_UNHALTED.THREAD_P");
+        double branches = checkedGetAny(sr, "INST_BRANCH", "BR_INST_RETIRED.ALL_BRANCHES",
+                "BR_INST_RETIRED.ALL_BRANCHES_PEBS");
+        double missedBranches = checkedGetAny(sr, "BRANCH_MISPRED_NONSPEC", "BR_MISP_RETIRED.ALL_BRANCHES",
+                "BR_MISP_RETIRED.ALL_BRANCHES_PS");
 
         Assert.assertNotEquals(0D, instructions, 0D);
         Assert.assertNotEquals(0D, cycles, 0D);
+        Assert.assertNotEquals(0D, branches, 0D);
+        Assert.assertNotEquals(0D, branches, 0D);
 
         double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
         double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
+        double branchMissRatio = ProfilerTestUtils.checkedGet(sr, "Branch miss ratio").getScore();
 
         Assert.assertNotEquals(0D, ipc, 0D);
         Assert.assertNotEquals(0D, cpi, 0D);
+        Assert.assertNotEquals(0D, branchMissRatio, 0D);
     }
 
     @Test
