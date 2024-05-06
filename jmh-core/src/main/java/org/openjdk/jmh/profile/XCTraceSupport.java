@@ -48,7 +48,7 @@ final class XCTraceSupport {
     private static final String HW_FAMILY_PREFIX = "hw.cpufamily: ";
     private static final String HW_TYPE_PREFIX = "hw.cputype: ";
     private static final String HW_SUBTYPE_PREFIX = "hw.cpusubtype: ";
-    private static final String KPEP_DIR_PATH = "/usr/share/kpep";
+    private static final String[] KPEP_DIRS = new String[]{"/usr/local/share/kpep", "/usr/share/kpep"};
     public static final String INSTRUMENTS_PACKAGE_TEMPLATE = "/xctracenorm.instrpkg";
 
     private XCTraceSupport() {
@@ -349,15 +349,28 @@ final class XCTraceSupport {
      * Usually, such a file has a path like {@code /usr/share/kpep/cpu_100000c_2_8765edea.plist} where
      * the filename part between {@code "cpu_"} and {@code ".plist"} could be obtained from
      * {@link XCTraceSupport#getCpuIdString()}.
+     * <p>
+     * Function searches for a database file in all known KPEP files locations ({@code /usr/local/share/kpep},
+     * {@code /usr/share/kpep}) and throws {@link ProfilerException} if there's not such a file.
      */
     static File getKpepFilePath() throws ProfilerException {
-        return new File(KPEP_DIR_PATH, "cpu_" + getCpuIdString() + ".plist");
+        String fileName = "cpu_" + getCpuIdString() + ".plist";
+        for (String kpepDir : KPEP_DIRS) {
+            File kpepFile = new File(kpepDir, fileName);
+            if (kpepFile.exists()) {
+                return kpepFile;
+            }
+        }
+        throw new ProfilerException("KPEP database file does not exist: file " + fileName + " was not found in " +
+                String.join(", ", KPEP_DIRS) + ". Most likely, it means current CPU is either virtualized " +
+                "(we're running inside a VM), or not supported yet by the macOS (less likely).");
     }
 
     /**
-     * Parses a given KPEP database file. These files are property list (plist) files located in {@code /usr/share/kpep}
-     * and containing information about CPU's performance monitoring unit. Information includes some PMU properties
-     * like a number of fixed and configurable counters, but mainly, in contains PMU events description.
+     * Parses a given KPEP database file. These files are property list (plist) files located in either
+     * {@code /usr/local/share/kpep} or {@code /usr/share/kpep} and containing information about CPU's performance
+     * monitoring unit. Information includes some PMU properties like a number of fixed and configurable counters,
+     * but mainly, in contains PMU events description.
      * <p>
      * While the database itself contains a few entries about a CPU, one has to query sysctl to get enough info to
      * correctly identify the CPU and then use that info to pick up a proper KPEP file. All required machinery is

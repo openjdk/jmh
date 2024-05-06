@@ -158,11 +158,6 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         OptionSet options = ProfilerUtils.parseInitLine(initLine, parser);
 
         File kpepFile = XCTraceSupport.getKpepFilePath();
-        if (!kpepFile.exists()) {
-            throw new ProfilerException("KPEP database file does not exist: " + kpepFile.getAbsolutePath() +
-                    ". Most likely, it means current CPU is either virtualized (we're running inside a VM), or " +
-                    "not supported yet by the macOs (less likely).");
-        }
         perfEvents = XCTraceSupport.parseKpepFile(kpepFile);
 
         if (options.valueOf(printAvailableEventsOpt)) {
