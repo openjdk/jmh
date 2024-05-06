@@ -167,7 +167,6 @@ public class XCTraceNormProfiler implements ExternalProfiler {
         delayMs = options.valueOf(optDelay);
         lengthMs = options.valueOf(optLength);
         shouldFixStartTime = options.valueOf(correctOpt);
-        samplingRateMsec = options.valueOf(samplingRateOpt);
 
         if (options.hasArgument(templateOpt) && options.hasArgument(eventsOpt)) {
             throw new ProfilerException(
@@ -179,7 +178,12 @@ public class XCTraceNormProfiler implements ExternalProfiler {
             tracingTemplate = options.valueOf(templateOpt);
             pmuEvents = Collections.emptyList();
             samplingPackage = null;
+            samplingRateMsec = 0;
         } else {
+            samplingRateMsec = options.valueOf(samplingRateOpt);
+            if (samplingRateMsec <= 0) {
+                throw new ProfilerException("Sampling rate must be positive, was: " + samplingRateMsec);
+            }
             xctracePath = XCTraceSupport.getXCTracePath(XCTRACE_VERSION_WITH_INSTRUMENT_OPTIONS);
             tracingTemplate = null;
             List<String> userEvents = extractSupportedEvents(options.valuesOf(eventsOpt), perfEvents);

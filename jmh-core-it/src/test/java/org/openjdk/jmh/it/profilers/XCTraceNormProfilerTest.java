@@ -241,6 +241,27 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
         Assert.assertThrows(ProfilerException.class, () -> new XCTraceNormProfiler(""));
     }
 
+    @Test
+    public void testCustomSamplingRate() throws RunnerException {
+        skipIfProfilerNotSupport();
+        skipIfRunningInsideVirtualMachine();
+
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(XCTraceNormProfiler.class, "samplingRate=20")
+                .forks(1)
+                .build();
+
+        RunResult rr = new Runner(opts).runSingle();
+        Result result = ProfilerTestUtils.checkedGet(rr.getSecondaryResults(), "INST_ALL");
+        Assert.assertTrue(result.getScore() > 0.0D);
+    }
+
+    @Test
+    public void testInvalidSamplingRate() {
+        Assert.assertThrows(ProfilerException.class, () -> new XCTraceNormProfiler("samplingRate=-1"));
+    }
+
     private static double checkedGetAny(Map<String, Result> results, String... keys) {
         for (String key : keys) {
             Result value = results.get(key);

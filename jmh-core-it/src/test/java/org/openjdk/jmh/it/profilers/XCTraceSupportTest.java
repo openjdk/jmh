@@ -145,15 +145,9 @@ public class XCTraceSupportTest {
                 File.class, long.class, Collection.class);
         buildPkg.setAccessible(true);
 
-        List<String> events = new ArrayList<>();
-        if (System.getProperty("os.arch").equals("aarch64")) {
-            events.add("Instructions");
-        } else {
-            events.add("INST_ALL");
-        }
         File generatedPackage = new File(TMP_DIR, UUID.randomUUID() + ".pkg");
         try {
-            buildPkg.invoke(null, generatedPackage, 100L, events);
+            buildPkg.invoke(null, generatedPackage, 100L, Arrays.asList("INST_ALL", "CORE_ACTIVE_CYCLE"));
             Assert.assertTrue(generatedPackage.exists());
         } finally {
             generatedPackage.delete();
