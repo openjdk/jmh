@@ -31,6 +31,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Base class for SAX handlers responsible for xctrace exported table parsing.
@@ -40,6 +44,7 @@ class XCTraceTableHandler extends DefaultHandler {
     static final String CYCLE_WEIGHT = "cycle-weight";
     static final String WEIGHT = "weight";
     static final String PMC_EVENT = "pmc-event";
+    static final String PMC_EVENTS = "pmc-events";
     static final String PMI_EVENT = "pmi-event";
     static final String PMI_THRESHOLD = "pmi-threshold";
     static final String SAMPLE_RATE = "sample-rate-micro-seconds";
@@ -123,17 +128,19 @@ class XCTraceTableHandler extends DefaultHandler {
         private final XCTraceTableHandler.TriggerType triggerType;
         private final String trigger;
         private final long threshold;
+        private final List<String> pmcEvents;
 
         XCTraceTableDesc(ProfilingTableType tableType, XCTraceTableHandler.TriggerType triggerType,
-                         String trigger, long threshold) {
+                         String trigger, long threshold, Collection<String> pmcEvents) {
             this.tableType = tableType;
             this.triggerType = triggerType;
             this.trigger = trigger;
             this.threshold = threshold;
+            this.pmcEvents = Collections.unmodifiableList(new ArrayList<>(pmcEvents));
         }
 
         XCTraceTableDesc(ProfilingTableType tableType) {
-            this(tableType, XCTraceTableHandler.TriggerType.UNKNOWN, "", -1);
+            this(tableType, XCTraceTableHandler.TriggerType.UNKNOWN, "", -1, Collections.emptyList());
         }
 
         public ProfilingTableType getTableType() {
@@ -150,6 +157,10 @@ class XCTraceTableHandler extends DefaultHandler {
 
         public long triggerThreshold() {
             return threshold;
+        }
+
+        public List<String> getPmcEvents() {
+            return pmcEvents;
         }
     }
 }

@@ -110,5 +110,7 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
                 expectedRow[3], actualRow.getSymbol());
         assertEquals("Library for row " + rowIndex,
                 expectedRow[4], actualRow.getBinary());
+        assertArrayEquals("PMC values for row " + rowIndex,
+                (long[]) expectedRow[5], actualRow.getPmcValues());
     }
 }

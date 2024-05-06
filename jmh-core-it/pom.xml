@@ -67,13 +67,43 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>${jmh.testjvmargs}</argLine>
-                    <forkCount>1C</forkCount>
-                    <!-- Integration tests sometimes set system properties, do not let them leak to other tests -->
-                    <reuseForks>false</reuseForks>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>${jmh.testjvmargs}</argLine>
+                            <forkCount>1C</forkCount>
+                            <!-- Integration tests sometimes set system properties, do not let them leak to other tests -->
+                            <reuseForks>false</reuseForks>
+                            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                            <excludes>
+                                <!-- xctrace tests interfere with each other when executed concurrently -->
+                                <exclude>**/profilers/XCTrace*ProfilerTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- execution that, unlike default-tests, runs all tests serially -->
+                        <id>serial-tests</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>${jmh.testjvmargs}</argLine>
+                            <forkCount>1</forkCount>
+                            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                            <includes>
+                                <!-- xctrace tests interfere with each other when executed concurrently -->
+                                <include>**/profilers/XCTrace*ProfilerTest.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

@@ -177,6 +177,7 @@ public class ProfilerFactory {
         BUILT_IN.put("xperfasm", WinPerfAsmProfiler.class);
         BUILT_IN.put("dtraceasm", DTraceAsmProfiler.class);
         BUILT_IN.put("xctraceasm", XCTraceAsmProfiler.class);
+        BUILT_IN.put("xctracenorm", XCTraceNormProfiler.class);
         BUILT_IN.put("pauses",   PausesProfiler.class);
         BUILT_IN.put("safepoints", SafepointsProfiler.class);
         BUILT_IN.put("perfc2c",  LinuxPerfC2CProfiler.class);
