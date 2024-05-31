@@ -92,7 +92,7 @@ public class LinuxPerfProfiler implements ExternalProfiler {
             delay = delayMs;
         }
 
-        List<String> invokeOptions = new ArrayList<>(Arrays.asList(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2", "--detailed", "--detailed", "--detailed"));
+        List<String> invokeOptions = new ArrayList<>(Arrays.asList(PerfSupport.PERF_EXEC, "stat", "--log-fd", "2"));
 
         if (isDelayed) {
             invokeOptions.add("--delay");
@@ -101,6 +101,8 @@ public class LinuxPerfProfiler implements ExternalProfiler {
         if (!events.isEmpty()) {
             invokeOptions.add("-e");
             invokeOptions.add(Utils.join(events, ","));
+        } else {
+            invokeOptions.addAll(Arrays.asList("--detailed", "--detailed", "--detailed"));
         }
 
         return invokeOptions;
