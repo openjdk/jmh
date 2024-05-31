@@ -36,6 +36,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
@@ -46,7 +47,13 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "cycles");
 
-        String[] senseCmd = { PerfSupport.PERF_EXEC, "stat", "--event", Utils.join(requestedEventNames, ","), "--log-fd", "2", "echo", "1" };
+        List<String> senseEventNames = requestedEventNames.stream()
+            .map(s -> s.split(":"))
+            .filter(s -> s.length > 0)
+            .map(s -> s[0])
+            .collect(Collectors.toList());
+
+        String[] senseCmd = { PerfSupport.PERF_EXEC, "stat", "--event", Utils.join(senseEventNames, ","), "--log-fd", "2", "echo", "1" };
 
         Collection<String> failMsg = Utils.tryWith(senseCmd);
         if (!failMsg.isEmpty()) {
