@@ -36,7 +36,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 
@@ -54,10 +53,21 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(failMsg.toString());
         }
 
-        Collection<String> passMsg = Utils.runWith(senseCmd);
         for (String ev : requestedEventNames) {
-            if (PerfSupport.containsUnsupported(passMsg, ev)) {
-                throw new ProfilerException("Unsupported event: " + ev);
+            String reportCmd = String.format("perf report -q --stdio | grep %s | wc -l", ev);
+            String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
+            Collection<String> output = Utils.runWith(tunnelCmd);
+            if (output.isEmpty()) {
+                throw new ProfilerException("No events recorded for " + ev);
+            }
+
+            try {
+                final int count = Integer.parseInt(output.iterator().next());
+                if (count == 0) {
+                    throw new ProfilerException("Unsupported event: " + ev);
+                }
+            } catch (NumberFormatException e) {
+                throw new ProfilerException("Perf event count not a number for event " + ev + ": " + output);
             }
         }
 
