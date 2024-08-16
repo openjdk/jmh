@@ -53,13 +53,6 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(failMsg.toString());
         }
 
-//        Collection<String> passMsg = Utils.runWith(senseCmd);
-//        for (String m : passMsg) {
-//            if (m.contains("[ perf record: Captured and wrote 0.000 MB (null) ]")) {
-//                throw new ProfilerException("Unsupported events: " + requestedEventNames);
-//            }
-//        }
-
         for (String ev : requestedEventNames) {
             String reportCmd = String.format("perf report -i perf-record-validate.data --stdio | grep %s | wc -l", ev);
             String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
