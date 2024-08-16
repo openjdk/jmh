@@ -60,30 +60,6 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             }
         }
 
-//        for (String ev : requestedEventNames) {
-//            if (PerfSupport.containsUnsupported(passMsg, ev)) {
-//                throw new ProfilerException("Unsupported event: " + ev);
-//            }
-//        }
-
-//        for (String ev : requestedEventNames) {
-//            String reportCmd = String.format("perf report -q --stdio | grep %s | wc -l", ev);
-//            String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
-//            Collection<String> output = Utils.runWith(tunnelCmd);
-//            if (output.isEmpty()) {
-//                throw new ProfilerException("No events recorded for " + ev);
-//            }
-//
-//            try {
-//                final int count = Integer.parseInt(output.iterator().next());
-//                if (count == 0) {
-//                    throw new ProfilerException("Unsupported event: " + ev);
-//                }
-//            } catch (NumberFormatException e) {
-//                throw new ProfilerException("Perf event count not a number for event " + ev + ": " + output);
-//            }
-//        }
-
         try {
             sampleFrequency = set.valueOf(optFrequency);
         } catch (OptionException e) {
