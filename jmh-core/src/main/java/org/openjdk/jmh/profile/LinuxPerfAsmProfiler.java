@@ -61,7 +61,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
 //        }
 
         for (String ev : requestedEventNames) {
-            String reportCmd = String.format("perf report -q -i perf-record-validate.data --stdio | grep %s | wc -l", ev);
+            String reportCmd = String.format("perf report -i perf-record-validate.data --stdio | grep %s | wc -l", ev);
             String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
             Collection<String> output = Utils.runWith(tunnelCmd);
             if (output.isEmpty()) {
