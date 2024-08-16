@@ -46,7 +46,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "cycles");
 
-        String[] senseCmd = { PerfSupport.PERF_EXEC, "record", "--event", Utils.join(requestedEventNames, ","), "echo", "1" };
+        String[] senseCmd = { PerfSupport.PERF_EXEC, "record", "--event", Utils.join(requestedEventNames, ","), "--output", "perf-record-validate.data", "echo", "1" };
 
         Collection<String> failMsg = Utils.tryWith(senseCmd);
         if (!failMsg.isEmpty()) {
