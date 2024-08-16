@@ -69,7 +69,7 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             }
 
             try {
-                final int count = Integer.parseInt(output.iterator().next());
+                final int count = Integer.parseInt(output.iterator().next().trim());
                 if (count == 0) {
                     throw new ProfilerException("Unsupported event: " + ev);
                 }
