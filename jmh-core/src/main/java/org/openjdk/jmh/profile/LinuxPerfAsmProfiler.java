@@ -53,22 +53,20 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
             throw new ProfilerException(failMsg.toString());
         }
 
-        for (String ev : requestedEventNames) {
-            String reportCmd = String.format("perf report -i perf-record-validate.data --stdio | grep %s | wc -l", ev);
-            String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
-            Collection<String> output = Utils.runWith(tunnelCmd);
-            if (output.isEmpty()) {
-                throw new ProfilerException("No events recorded for " + ev);
-            }
+        String reportCmd = String.format("perf report -i perf-record-validate.data --stdio | grep -E '%s' | wc -l", Utils.join(requestedEventNames, "|"));
+        String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
+        Collection<String> output = Utils.runWith(tunnelCmd);
+        if (output.isEmpty()) {
+            throw new ProfilerException("No events recorded for " + requestedEventNames);
+        }
 
-            try {
-                final int count = Integer.parseInt(output.iterator().next().trim());
-                if (count == 0) {
-                    throw new ProfilerException("Unsupported event: " + ev);
-                }
-            } catch (NumberFormatException e) {
-                throw new ProfilerException("Perf event count not a number for event " + ev + ": " + output);
+        try {
+            final int count = Integer.parseInt(output.iterator().next().trim());
+            if (count != requestedEventNames.size()) {
+                throw new ProfilerException("One or several events unsupported: " + requestedEventNames);
             }
+        } catch (NumberFormatException e) {
+            throw new ProfilerException("Perf event count not a number for one of events " + requestedEventNames + ": " + output);
         }
 
         try {
