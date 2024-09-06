@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         java: [8, 11, 17, 21]
-        os: [ubuntu-22.04, windows-2022, macos-11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
     timeout-minutes: 180
