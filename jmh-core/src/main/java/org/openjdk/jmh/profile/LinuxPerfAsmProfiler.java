@@ -46,15 +46,15 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "cycles");
 
-        String[] senseCmd = { PerfSupport.PERF_EXEC, "record", "--event", Utils.join(requestedEventNames, ","), "--output", "perf-record-validate.data", "echo", "1" };
+        String[] senseCmd = { PerfSupport.PERF_EXEC, "record", "--event", Utils.join(requestedEventNames, ","), "-o", "-", "true"};
 
         Collection<String> failMsg = Utils.tryWith(senseCmd);
         if (!failMsg.isEmpty()) {
             throw new ProfilerException(failMsg.toString());
         }
 
-        String reportCmd = String.format("perf report -i perf-record-validate.data --stdio | grep -E '%s' | wc -l", Utils.join(requestedEventNames, "|"));
-        String[] tunnelCmd = { "/bin/sh", "-c", reportCmd };
+        String statsCmd = String.format("%s | %s report -i - --stats | grep -E '%s' | sort | uniq | wc -l", String.join(" ", senseCmd), PerfSupport.PERF_EXEC, Utils.join(requestedEventNames, "|"));
+        String[] tunnelCmd = { "/bin/sh", "-c", statsCmd };
         Collection<String> output = Utils.runWith(tunnelCmd);
         if (output.isEmpty()) {
             throw new ProfilerException("No events recorded for " + requestedEventNames);
