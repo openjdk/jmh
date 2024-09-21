@@ -36,12 +36,11 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.util.FileUtils;
 import org.openjdk.jmh.util.Utils;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
     private static boolean xctraceExists() {
@@ -72,7 +71,7 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
                     .split("version ")[1]
                     .split(" ")[0]
                     .split("\\.")[0]);
-            return version >= 14;
+            return version >= 13;
         } catch (NumberFormatException e) {
             return false;
         }
@@ -90,14 +89,6 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
 
     private static void skipIfProfilerNotSupport() {
         Assume.assumeTrue(xctraceExists());
-    }
-
-    private static void runOnIntelOnly() {
-        Assume.assumeTrue(System.getProperty("os.arch").equals("x86_64"));
-    }
-
-    private static void runOnArm64Only() {
-        Assume.assumeTrue(System.getProperty("os.arch").equals("aarch64"));
     }
 
     private static void skipIfRunningInsideVirtualMachine() {
@@ -126,7 +117,7 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
         Assert.assertNotEquals(0D, instructions, 0D);
         Assert.assertNotEquals(0D, cycles, 0D);
         Assert.assertNotEquals(0D, branches, 0D);
-        Assert.assertNotEquals(0D, branches, 0D);
+        Assert.assertNotEquals(0D, missedBranches, 0D);
 
         double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
         double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
@@ -146,6 +137,56 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
     }
 
     @Test
+    public void testFailWithNonExistentTemplate() {
+        skipIfProfilerNotSupport();
+
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(XCTraceNormProfiler.class, "template=NON_EXISTENT_TEMPLATE")
+                .forks(1)
+                .build();
+        Assert.assertThrows("No results returned", RunnerException.class, () -> new Runner(opts).runSingle());
+    }
+
+    @Test
+    public void testUnsupportedTemplate() {
+        skipIfProfilerNotSupport();
+        skipIfRunningInsideVirtualMachine();
+
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(XCTraceNormProfiler.class, "template=CPU Profiler")
+                .forks(1)
+                .build();
+        Assert.assertThrows("Table \"counters-profile\" was not found in the trace results.",
+                IllegalStateException.class, () -> new Runner(opts).runSingle());
+    }
+
+    @Test
+    public void testUseCustomTemplate() throws Exception {
+        skipIfProfilerNotSupport();
+        skipIfRunningInsideVirtualMachine();
+
+        RunResult result;
+        File templateFile = FileUtils.extractFromResource("/XCTraceNormTestTemplate.xml");
+        Options opts = new OptionsBuilder()
+                .include(Fixtures.getTestMask(this.getClass()))
+                .addProfiler(XCTraceNormProfiler.class, "template=" + templateFile.getAbsolutePath())
+                .forks(1)
+                .build();
+        try {
+            result = new Runner(opts).runSingle();
+        } finally {
+            templateFile.delete();
+        }
+
+        Map<String, Result> sr = result.getSecondaryResults();
+        double instructions = checkedGetAny(sr, "Instructions",
+                "FIXED_INSTRUCTIONS", "INST_ALL", "INST_RETIRED.ANY", "INST_RETIRED.ANY_P");
+        Assert.assertNotEquals(0D, instructions, 0D);
+    }
+
+    @Test
     public void testMultipleForks() throws Exception {
         skipIfProfilerNotSupport();
         skipIfRunningInsideVirtualMachine();
@@ -154,112 +195,9 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
     }
 
     @Test
-    public void testSpecifyTemplateAndEventsSimultaneously() {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-
-        ProfilerException e = Assert.assertThrows(ProfilerException.class,
-                () -> new XCTraceNormProfiler("events=A,B;template=CPU Counters"));
-        Assert.assertTrue(e.getMessage().contains(
-                "Please use either \"template\", or \"events\" option, but not both simultaneously."));
-    }
-
-    @Test
-    public void testSpecifyOnlyUnavailableEvents() {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-
-        ProfilerException e = Assert.assertThrows(ProfilerException.class,
-                () -> new XCTraceNormProfiler("events=A,B"));
-        Assert.assertTrue(e.getMessage().contains("No supported events."));
-    }
-
-    @Test
-    public void testListAvailableEvents() {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-
-        ProfilerException e = Assert.assertThrows(ProfilerException.class,
-                () -> new XCTraceNormProfiler("listEvents=true"));
-        String message = e.getMessage();
-        Assert.assertTrue("Message should list PMU events: " + message,
-                message.contains("Supported PMU events "));
-        String[] lines = message.split("\n");
-        Assert.assertTrue("Message it too short: " + message, lines.length > 1);
-    }
-
-    @Test
-    public void testSpecifyTooManyEvents() {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-        String[] lines = Assert.assertThrows(ProfilerException.class,
-                () -> new XCTraceNormProfiler("listEvents=true")).getMessage().split("\n");
-        String eventsList = Stream.of(lines).skip(1).map(l -> l.split("\t")[0]).limit(32)
-                .collect(Collectors.joining(","));
-        ProfilerException e = Assert.assertThrows(ProfilerException.class,
-                () -> new XCTraceNormProfiler("events=" + eventsList));
-        Assert.assertTrue(e.getMessage().contains(
-                "could not be used with other selected events due to performance counters constraints"));
-    }
-
-    @Test
-    public void testDuplicateEventsFiltrationOnIntel() throws Exception {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-        runOnIntelOnly();
-
-        checkEventsDeduplication("CORE_ACTIVE_CYCLE",
-                "Cycles", "CORE_ACTIVE_CYCLE", "FIXED_CYCLES", "CPU_CLK_UNHALTED.THREAD",
-                "CPU_CLK_UNHALTED.THREAD_P", "Cycles", "CORE_ACTIVE_CYCLE");
-    }
-
-    @Test
-    public void testDuplicateEventsFiltrationOnMacos() throws Exception {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-        runOnArm64Only();
-
-        checkEventsDeduplication("Cycles",
-                "Cycles", "FIXED_CYCLES", "CPU_CLK_UNHALTED.THREAD", "CPU_CLK_UNHALTED.THREAD_P", "Cycles");
-    }
-
-    private void checkEventsDeduplication(String expectedEvent, String... allEvents) throws RunnerException {
-        Options opts = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(XCTraceNormProfiler.class, "events=" + String.join(",", allEvents))
-                .forks(1)
-                .build();
-
-        RunResult rr = new Runner(opts).runSingle();
-        Assert.assertEquals(1, rr.getSecondaryResults().size());
-        Assert.assertTrue(rr.getSecondaryResults().containsKey(expectedEvent));
-    }
-
-    @Test
     public void testConstructorThrowsWhenXCTraceDoesNotExist() {
         Assume.assumeFalse(xctraceExists());
         Assert.assertThrows(ProfilerException.class, () -> new XCTraceNormProfiler(""));
-    }
-
-    @Test
-    public void testCustomSamplingRate() throws RunnerException {
-        skipIfProfilerNotSupport();
-        skipIfRunningInsideVirtualMachine();
-
-        Options opts = new OptionsBuilder()
-                .include(Fixtures.getTestMask(this.getClass()))
-                .addProfiler(XCTraceNormProfiler.class, "samplingRate=20")
-                .forks(1)
-                .build();
-
-        RunResult rr = new Runner(opts).runSingle();
-        Result result = ProfilerTestUtils.checkedGet(rr.getSecondaryResults(), "INST_ALL");
-        Assert.assertTrue(result.getScore() > 0.0D);
-    }
-
-    @Test
-    public void testInvalidSamplingRate() {
-        Assert.assertThrows(ProfilerException.class, () -> new XCTraceNormProfiler("samplingRate=-1"));
     }
 
     private static double checkedGetAny(Map<String, Result> results, String... keys) {
