@@ -79,7 +79,7 @@ final class XCTraceSupport {
     }
 
     /**
-     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist..
+     * Returns absolute path to xctrace executable or throws ProfilerException if it does not exist.
      * <p>
      * xctrace is expected to be at $(xcode-select -p)/usr/bin/xctrace
      */

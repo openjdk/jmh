@@ -37,7 +37,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * macOS permnorm profiler based on xctrace utility shipped with Xcode Instruments.
+ * macOS perfnorm profiler based on xctrace utility shipped with Xcode Instruments.
  * <p>
  * The profiling process consists of several steps:
  * 1) launching a program that needs to be profiled using `xctrace record` command; in case of success,
