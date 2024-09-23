@@ -168,7 +168,7 @@ public class XCTraceNormProfilerTest extends AbstractAsmProfilerTest {
         skipIfRunningInsideVirtualMachine();
 
         RunResult result;
-        File templateFile = FileUtils.extractFromResource("/XCTraceNormTestTemplate.xml");
+        File templateFile = FileUtils.extractFromResource("/default.instruments.template.xml");
         Options opts = new OptionsBuilder()
                 .include(Fixtures.getTestMask(this.getClass()))
                 .addProfiler(XCTraceNormProfiler.class, "template=" + templateFile.getAbsolutePath())

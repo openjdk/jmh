@@ -122,9 +122,6 @@ questions.
                             <mapping>
                                 <java>PHP</java>
                             </mapping>
-                            <excludes>
-                                <exclude>src/test/resources/XCTraceNormTestTemplate.xml</exclude>
-                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
