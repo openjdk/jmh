@@ -272,22 +272,23 @@ public class XCTraceNormProfiler implements ExternalProfiler {
 
         if (cycles != null && cycles.getValue() != 0D && insts != null && insts.getValue() != 0D) {
             results.add(new ScalarResult("CPI", cycles.getValue() / insts.getValue(),
-                    cycles.getName() + "/" + insts.getName(), AggregationPolicy.AVG));
+                    "clks/insn", AggregationPolicy.AVG));
             results.add(new ScalarResult("IPC", insts.getValue() / cycles.getValue(),
-                    insts.getName() + "/" + cycles.getName(), AggregationPolicy.AVG));
+                    "insns/clk", AggregationPolicy.AVG));
         }
 
         CounterValue branches = aggregator.getAnyOfOrNull(BRANCH_EVENT_NAMES);
         CounterValue missedBranches = aggregator.getAnyOfOrNull(BRANCH_MISS_EVENT_NAMES);
         if (branches != null && branches.getValue() != 0D && missedBranches != null) {
             results.add(new ScalarResult("Branch miss ratio", missedBranches.getValue() / branches.getValue(),
-                    missedBranches.getName() + "/" + branches.getName(), AggregationPolicy.AVG));
+                    "miss/brs", AggregationPolicy.AVG));
         }
     }
 
     // Compute instructions density metrics (defined in Apple Silicon CPU Optimization Guide,
     // https://developer.apple.com/documentation/apple-silicon/cpu-optimization-guide).
-    private static void computeAppleSiliconArm64InstDensityMetrics(Collection<Result<?>> results, AggregatedEvents aggregator) {
+    private static void computeAppleSiliconArm64InstDensityMetrics(Collection<Result<?>> results,
+                                                                   AggregatedEvents aggregator) {
         CounterValue insts = aggregator.getAnyOfOrNull(INSTRUCTIONS_EVENT_NAMES);
         if (insts == null) {
             return;
@@ -301,8 +302,8 @@ public class XCTraceNormProfiler implements ExternalProfiler {
                 continue;
             }
 
-            results.add(new ScalarResult(eventName + " density (of instructions)", value / insts.getValue(),
-                    eventName + "/" + insts.getName(), AggregationPolicy.AVG));
+            results.add(new ScalarResult(eventName + " density (of insns)", value / insts.getValue(),
+                    "#/insn", AggregationPolicy.AVG));
         }
     }
 
