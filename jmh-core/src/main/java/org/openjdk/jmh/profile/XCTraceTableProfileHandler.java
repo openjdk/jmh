@@ -222,6 +222,12 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 pushCachedOrNew(attributes, id -> new Frame(id, parseName(attributes),
                         parseAddress(attributes) - 1L));
                 break;
+            case XCTraceTableHandler.PMC_EVENTS:
+                pushCachedOrNew(attributes, id -> {
+                    setNeedParseCharacters(true);
+                    return new ValueHolder<long[]>(id);
+                });
+                break;
         }
     }
 
@@ -278,7 +284,14 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 }
                 break;
             }
-
+            case XCTraceTableHandler.PMC_EVENTS:
+                ValueHolder<long[]> events = pop();
+                if (isNeedToParseCharacters()) {
+                    events.setValue(Arrays.stream(getCharacters().split(" "))
+                            .mapToLong(Long::parseLong).toArray());
+                }
+                currentSample.setPmcValues(events.getValue());
+                break;
         }
         setNeedParseCharacters(false);
     }
@@ -374,12 +387,14 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
 
     static class XCTraceSample {
         public static final String TIME_SAMPLE_TRIGGER_NAME = "TIME_MICRO_SEC";
+        private static final long[] EMPTY_ARRAY = new long[0];
 
         private long timeFromStartNs;
         private long weight;
         private String symbol;
         private long address;
         private String binary;
+        private long[] pmcValues = EMPTY_ARRAY;
 
         public void setTopFrame(long address, String symbol, String binary) {
             this.address = address;
@@ -413,6 +428,14 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
 
         public String getSymbol() {
             return symbol;
+        }
+
+        public long[] getPmcValues() {
+            return pmcValues;
+        }
+
+        public void setPmcValues(long[] values) {
+            pmcValues = values;
         }
     }
 }
