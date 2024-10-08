@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<trace-toc>
+    <run number="1">
+        <info>
+            <target>
+                <device uuid="BCE206B0-3F83-5DE9-BB78-63C7A32DDE1A" model="MacBook Pro" name="Filipp’s MacBook Pro" os-version="13.5.1 (22G90)" platform="macOS"/>
+                <process arguments="Test" return-exit-status="0" name="java" pid="12946" termination-reason="exit(0)"/>
+            </target>
+            <summary>
+                <start-date>2023-08-27T19:45:02.632+02:00</start-date>
+                <end-date>2023-08-27T19:45:03.437+02:00</end-date>
+                <duration>0.805257</duration>
+                <end-reason>Target app exited</end-reason>
+                <instruments-version>14.3.1 (14E300c)</instruments-version>
+                <template-name>Prof</template-name>
+                <recording-mode>Deferred</recording-mode>
+                <time-limit>12 hours</time-limit>
+            </summary>
+        </info>
+        <processes>
+            <process name="java" path="/Users/fzhinkin/.sdkman/candidates/java/current/bin/java" pid="12946"/>
+            <process name="kernel" path="kernel" pid="0"/>
+        </processes>
+        <data>
+            <table target-pid="SINGLE" schema="potential-hangs" hangs-threshold="250"/>
+            <table callstack="user" pmc-events="" pmi-event="&quot;CORE_ACTIVE_CYCLE&quot;" schema="kdebug-counters-with-pmi-sample" target="SINGLE" pmi-threshold="1000000"/>
+            <table codes="&quot;0x07,0x00&quot;" schema="kdebug" target="SINGLE"/>
+            <table codes="&quot;0x07,0x00&quot; &quot;0x1f,0x05&quot; &quot;0x1f,0x07&quot; &quot;0x1f,0x08&quot;" schema="kdebug" callstack="user" target="SINGLE"/>
+            <table schema="developer-thread-name-update"/>
+            <table target="SINGLE" schema="kdebug" codes="&quot;33,0x11&quot;"/>
+            <table codes="&quot;0x1,0x40,0x20&quot;" pmc-events="&quot;CORE_ACTIVE_CYCLE&quot;" schema="kdebug-counters-with-kdebug-sample" target="SINGLE"/>
+            <table codes="&quot;0x2b,0x87&quot;" schema="kdebug" target="SINGLE"/>
+            <table codes="&quot;0x2d,*&quot;" schema="kdebug" target="SINGLE" callstack="user"/>
+            <table schema="life-cycle-period" target-pid="SINGLE"/>
+            <table codes="&quot;0x1,0x25&quot;" schema="kdebug" target="SINGLE"/>
+            <table codes="&quot;0x1f,0x7&quot;" schema="kdebug" target="SINGLE"/>
+            <table codes="&quot;0x2b,0xd8&quot;" schema="kdebug" target="SINGLE"/>
+            <table codes="&quot;0x2b,0xdc&quot;" schema="kdebug" target="SINGLE"/>
+            <table codes="&quot;0x31,0xca&quot;" schema="kdebug" target="SINGLE"/>
+            <table schema="dyld-library-load" target-pid="SINGLE"/>
+            <table target="SINGLE" schema="kdebug-strings" codes="&quot;0x1f,0x05&quot; &quot;0x1f,0x07&quot; &quot;0x1f,0x08&quot;"/>
+            <table target-pid="SINGLE" high-frequency-sampling="0" schema="cpu-profile" needs-kernel-callstack="0"/>
+            <table schema="tick" frequency="1"/>
+            <table schema="tick" frequency="10"/>
+        </data>
+        <tracks/>
+    </run>
+</trace-toc>

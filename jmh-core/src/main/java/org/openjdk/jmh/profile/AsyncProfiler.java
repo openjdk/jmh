@@ -30,18 +30,31 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.results.AggregationPolicy;
+import org.openjdk.jmh.results.Aggregator;
 import org.openjdk.jmh.results.BenchmarkResult;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
+import org.openjdk.jmh.results.ResultRole;
 import org.openjdk.jmh.results.TextResult;
 import org.openjdk.jmh.runner.IterationType;
 import org.openjdk.jmh.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.*;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -68,7 +81,6 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
     private boolean warmupStarted;
     private boolean measurementStarted;
     private int measurementIterationCount;
-    private final LinkedHashSet<File> generated = new LinkedHashSet<>();
 
     public AsyncProfiler(String initLine) throws ProfilerException {
         OptionParser parser = new OptionParser();
@@ -331,7 +343,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
 
     private void start() {
         if (output.contains(OutputType.jfr)) {
-            execute("start," + profilerConfig + ",file=" + outputFile("jfr-%s.jfr").getAbsolutePath());
+            execute("start," + profilerConfig + ",file=" + jfrOutputFile().getAbsolutePath());
         } else {
             execute("start," + profilerConfig);
         }
@@ -343,7 +355,7 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         if (iterationParams.getType() == IterationType.MEASUREMENT) {
             measurementIterationCount += 1;
             if (measurementIterationCount == iterationParams.getCount()) {
-                return Collections.singletonList(stopAndDump());
+                return stopAndDump();
             }
         }
 
@@ -360,11 +372,10 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         }
     }
 
-    private TextResult stopAndDump() {
+    private List<Result<?>> stopAndDump() {
         execute("stop");
 
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+        List<Result<?>> results = new ArrayList<>();
         for (OutputType outputType : output) {
             switch (outputType) {
                 case text:
@@ -375,54 +386,60 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                         dump(out, "flat=" + flat + ",traces=" + traces);
                     }
                     try {
+                        StringBuilder text = new StringBuilder();
                         for (String line : FileUtils.readAllLines(out)) {
-                            pw.println(line);
+                            text.append(line).append(System.lineSeparator());
                         }
+                        results.add(new TextResult(text.toString(), "async-text"));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+                    results.add(new FileResult("async-summary", Collections.singletonList(out)));
                     break;
                 case collapsed:
-                    dump(outputFile("collapsed-%s.csv"), "collapsed");
+                    File collapsedFile = outputFile("collapsed-%s.csv");
+                    dump(collapsedFile, "collapsed");
+                    results.add(new FileResult("async-collapsed", Collections.singletonList(collapsedFile)));
                     break;
                 case flamegraph:
                     // The last SVG-enabled version is 1.x
                     String ext = isVersion1x ? "svg" : "html";
                     if (direction == Direction.both || direction == Direction.forward) {
-                        dump(outputFile("flame-%s-forward." + ext), "flamegraph");
+                        File flameForward = outputFile("flame-%s-forward." + ext);
+                        dump(flameForward, "flamegraph");
+                        results.add(new FileResult("async-flamegraph", Collections.singletonList(flameForward)));
                     }
                     if (direction == Direction.both || direction == Direction.reverse) {
-                        dump(outputFile("flame-%s-reverse." + ext), "flamegraph,reverse");
+                        File flameReverse = outputFile("flame-%s-reverse." + ext);
+                        dump(flameReverse, "flamegraph,reverse");
+                        results.add(new FileResult("async-flamegraph", Collections.singletonList(flameReverse)));
                     }
                     break;
                 case tree:
-                    dump(outputFile("tree-%s.html"), "tree");
+                    File treeFile = outputFile("tree-%s.html");
+                    dump(treeFile, "tree");
+                    results.add(new FileResult("async-tree", Collections.singletonList(treeFile)));
                     break;
                 case jfr:
                     // JFR is already dumped into file by async-profiler.
+                    results.add(new FileResult("async-jfr", Collections.singletonList(jfrOutputFile())));
                     break;
             }
         }
 
-        pw.println("Async profiler results:");
-        for (File file : generated) {
-            pw.print("  ");
-            pw.println(file.getPath());
-        }
-        pw.flush();
-        pw.close();
-
-        return new TextResult(sw.toString(), "async");
+        return results;
     }
 
     private void dump(File target, String command) {
         execute(command + "," + profilerConfig + ",file=" + target.getAbsolutePath());
     }
 
+    private File jfrOutputFile() {
+        return outputFile("jfr-%s.jfr");
+    }
+
     private File outputFile(String fileNameFormat) {
-        File output = new File(trialOutDir, String.format(fileNameFormat, outputFilePrefix));
-        generated.add(output);
-        return output;
+        return new File(trialOutDir, String.format(fileNameFormat, outputFilePrefix));
     }
 
     private String execute(String command) {
@@ -535,7 +552,28 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
 
     @Override
     public Collection<? extends Result> afterTrial(BenchmarkResult br, long pid, File stdOut, File stdErr) {
-        return Collections.emptyList();
+        List<FileResult> moved = new ArrayList<>();
+        for (String label : Arrays.asList("async-summary", "async-collapsed", "async-flamegraph", "async-tree", "async-jfr")) {
+            FileResult result = (FileResult) br.getSecondaryResults().remove(label);
+            if (result != null) {
+                moved.add(new FileResult(result.getLabel(), result.files.stream()
+                        .flatMap(f -> Stream.of(f, addDiscriminator(f, pid)))
+                        .collect(Collectors.toList())));
+            }
+        }
+        return moved;
+    }
+
+    private File addDiscriminator(File original, long pid) {
+        String originalName = original.getPath();
+        int extIndex = originalName.lastIndexOf('.');
+        File newFile = new File(originalName.substring(0, extIndex) + "." + pid + originalName.substring(extIndex));
+        try {
+            Files.copy(original.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return newFile;
     }
 
     @Override
@@ -621,5 +659,52 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
         private native long getSamples();
 
         private native void filterThread0(Thread thread, boolean enable);
+    }
+
+    public final static class FileResult extends Result<FileResult> {
+        private final List<File> files;
+
+        FileResult(String label, List<File> files) {
+            super(ResultRole.SECONDARY, label, of(Double.NaN), "---", AggregationPolicy.AVG);
+            this.files = files;
+        }
+
+        @Override
+        protected Aggregator<FileResult> getThreadAggregator() {
+            return new FileAggregator();
+        }
+
+        @Override
+        protected Aggregator<FileResult> getIterationAggregator() {
+            return new FileAggregator();
+        }
+
+        public Collection<? extends File> getFiles() {
+            return files;
+        }
+
+        @Override
+        public String toString() {
+            return "Files: " + files;
+        }
+
+        @Override
+        public String extendedInfo() {
+            StringBuilder builder = new StringBuilder("Async profiler results:").append(System.lineSeparator());
+            for (File file : files) {
+                builder.append("  ").append(file.getPath()).append(System.lineSeparator());
+            }
+            return builder.toString();
+        }
+
+        private static class FileAggregator implements Aggregator<FileResult> {
+            @Override
+            public FileResult aggregate(Collection<FileResult> results) {
+                return new FileResult(results.iterator().next().getLabel(), results.stream()
+                        .flatMap(r -> r.files.stream())
+                        .distinct()
+                        .collect(Collectors.toList()));
+            }
+        }
     }
 }

@@ -67,4 +67,8 @@ public abstract class AbstractAsmProfilerTest {
         }
     }
 
+    public static boolean someEventsCaptured(String out) {
+        return !out.contains("The perf event count is suspiciously low (0).");
+    }
+
 }
