@@ -46,18 +46,27 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
     public LinuxPerfAsmProfiler(String initLine) throws ProfilerException {
         super(initLine, "cycles");
 
-        String[] senseCmd = { PerfSupport.PERF_EXEC, "stat", "--event", Utils.join(requestedEventNames, ","), "--log-fd", "2", "echo", "1" };
+        String[] senseCmd = { PerfSupport.PERF_EXEC, "record", "-q", "--event", Utils.join(requestedEventNames, ","), "-o", "-", "true"};
 
         Collection<String> failMsg = Utils.tryWith(senseCmd);
         if (!failMsg.isEmpty()) {
             throw new ProfilerException(failMsg.toString());
         }
 
-        Collection<String> passMsg = Utils.runWith(senseCmd);
-        for (String ev : requestedEventNames) {
-            if (PerfSupport.containsUnsupported(passMsg, ev)) {
-                throw new ProfilerException("Unsupported event: " + ev);
+        String statsCmd = String.format("%s | %s report -i - --stats | grep -E '%s' | sort | uniq | wc -l", String.join(" ", senseCmd), PerfSupport.PERF_EXEC, Utils.join(requestedEventNames, "|"));
+        String[] tunnelCmd = { "/bin/sh", "-c", statsCmd };
+        Collection<String> output = Utils.runWith(tunnelCmd);
+        if (output.isEmpty()) {
+            throw new ProfilerException("No events recorded for " + requestedEventNames);
+        }
+
+        try {
+            final int count = Integer.parseInt(output.iterator().next().trim());
+            if (count != requestedEventNames.size()) {
+                throw new ProfilerException("One or several events unsupported: " + requestedEventNames);
             }
+        } catch (NumberFormatException e) {
+            throw new ProfilerException("Perf event count not a number for one of events " + requestedEventNames + ": " + output);
         }
 
         try {
