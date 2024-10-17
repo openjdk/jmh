@@ -33,11 +33,16 @@ import org.openjdk.jmh.util.ScoreFormatter;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class TextResultFormat implements ResultFormat {
     private static final String MODE_COLUMN_NAME = "Mode";
@@ -47,6 +52,94 @@ class TextResultFormat implements ResultFormat {
     private static final String UNITS_COLUMN_NAME = "Units";
     private static final String BENCHMARK_COLUMN_NAME = "Benchmark";
     private static final int PADDING = 2;
+
+    enum ResultAggregationMode {
+        BENCHMARK {
+            @Override
+            Object toKey(Line line, Collection<String> parameterNames) {
+                return line.parent.getParams().getBenchmark();
+            }
+        },
+        METRIC {
+            @Override
+            Object toKey(Line line, Collection<String> parameterNames) {
+                // This was the case only for VERY short runs, where secondary results
+                // provider (perfnorm) didn't catch the metric for some of the runs.
+                // At that moment there was key-value result accounting instead of
+                // current iteration, so most likely this case will never happen.
+                if (line.result == null) {
+                    return "<missing>";
+                }
+
+                return line.result.getRole().isPrimary() ? "__primary__" : line.result.getLabel();
+            }
+        },
+        PARAMETER {
+            @Override
+            Object toKey(Line line, Collection<String> parameterNames) {
+                List<String> values = new ArrayList<>();
+                for (String name : parameterNames) {
+                    values.add(line.parent.getParams().getParam(name));
+                }
+                return values;
+            }
+        };
+
+        abstract Object toKey(Line line, Collection<String> parameterNames);
+
+        public static ResultAggregationMode recognize(String mode) {
+            if (mode == null) {
+                return null;
+            }
+
+            switch (mode.trim().toLowerCase()) {
+                case "benchmark":
+                    return BENCHMARK;
+                case "metric":
+                    return METRIC;
+                case "parameter":
+                    return PARAMETER;
+                default:
+                    Logger.getLogger(ResultAggregationMode.class.getName()).log(
+                            Level.SEVERE,
+                            "Unknown aggregation mode `" + mode + "`, please check your jmh.text.aggregation input"
+                    );
+                    return null;
+            }
+        }
+
+        public static Collection<ResultAggregationMode> resolve() {
+            String request = System.getProperty("jmh.text.aggregation");
+
+            if (request == null) {
+                return Collections.emptyList();
+            }
+
+            List<ResultAggregationMode> modes = new ArrayList<>();
+            for (String entry : request.split(",")) {
+                ResultAggregationMode recognized = recognize(entry);
+
+                if (recognized != null) {
+                    modes.add(recognized);
+                }
+            }
+
+            return new LinkedHashSet<>(modes);
+        }
+    }
+
+    private static int resolveSpacing() {
+        String encoded = System.getProperty("jmh.text.spacing", "0");
+        try {
+            return Integer.parseInt(encoded);
+        } catch (NumberFormatException e) {
+            Logger.getLogger(TextResultFormat.class.getName()).log(Level.SEVERE, "Unable to decode spacing from " + encoded + ", using default 0", e);
+            return 0;
+        }
+    }
+
+    private static final Collection<ResultAggregationMode> AGGREGATION_MODES = ResultAggregationMode.resolve();
+    private static final int SPACING = resolveSpacing();
 
     private final PrintStream out;
 
@@ -99,10 +192,46 @@ class TextResultFormat implements ResultFormat {
         out.printf("%" + lengths.unit + "s", UNITS_COLUMN_NAME);
         out.println();
 
-        printSection(lines, params, lengths);
+        List<List<Line>> sections = Collections.singletonList(lines);
+        for (ResultAggregationMode mode : AGGREGATION_MODES) {
+            List<List<Line>> replacement = new ArrayList<>();
+            for (List<Line> section : sections) {
+                Map<Object, List<Line>> split = new LinkedHashMap<>();
+                for (Line line : section) {
+                    Object key = mode.toKey(line, params);
+                    if (!split.containsKey(key)) {
+                        split.put(key, new ArrayList<>());
+                    }
+                    split.get(key).add(line);
+                }
+
+                replacement.addAll(split.values());
+            }
+
+            sections = replacement;
+        }
+
+        printSections(sections, params, lengths);
+
+        out.println();
+        out.println("You can organize this output by Djmh.text.spacing=<int> and -Djmh.aggregation=<metric|parameter|benchmark>[,<metric|parameter|benchmark>...] properties");
+        out.println("For example, -Djmh.text.spacing=1 -Djmh.text.aggregation=metric,parameter will list results partitioned by metric name and then parameter combination");
+    }
+
+    private void emitSpacing() {
+        for (int i = 0; i < SPACING; i++) {
+            out.println();
+        }
+    }
+
+    private void printSections(List<List<Line>> sections, Collection<String> parameters, Lengths lengths) {
+        for (List<Line> section : sections) {
+            printSection(section, parameters, lengths);
+        }
     }
 
     private void printSection(List<Line> sections, Collection<String> parameters, Lengths lengths) {
+        emitSpacing();
         for (Line line : sections) {
             printLine(line, parameters, lengths);
         }
@@ -119,7 +248,9 @@ class TextResultFormat implements ResultFormat {
         out.printf("%" + lengths.mode + "s", line.parent.getParams().getMode().shortLabel());
 
         // This was the case only for VERY short runs, where secondary results
-        // provider (perfnorm) didn't catch the metric for some of the runs
+        // provider (perfnorm) didn't catch the metric for some of the runs.
+        // At that moment there was key-value result accounting instead of
+        // current iteration, so most likely this case will never happen.
         if (line.result == null) {
             out.println("<missing>");
             return;
@@ -152,7 +283,7 @@ class TextResultFormat implements ResultFormat {
         private int score = SCORE_COLUMN_NAME.length();
         private int error = ERROR_COLUMN_NAME.length();
         private int unit = UNITS_COLUMN_NAME.length();
-        private final Map<String, Integer> parameters = new HashMap<>();
+        private Map<String, Integer> parameters = new HashMap<>();
 
         public static Lengths create(Collection<RunResult> results) {
             Lengths instance = new Lengths();
