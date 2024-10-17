@@ -34,6 +34,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -70,8 +71,19 @@ class TextResultFormat implements ResultFormat {
                 .pad(PADDING);
 
         SortedSet<String> params = new TreeSet<>();
+        List<Line> lines = new ArrayList<>();
         for (RunResult runResult : runResults) {
             params.addAll(runResult.getParams().getParamsKeys());
+
+            String benchmark = benchPrefixes.get(runResult.getParams().getBenchmark());
+            lines.add(new Line(benchmark, runResult.getPrimaryResult(), runResult));
+        }
+
+        for (RunResult runResult : runResults) {
+            String benchmark = benchPrefixes.get(runResult.getParams().getBenchmark());
+            for (Map.Entry<String, Result> child : runResult.getSecondaryResults().entrySet()) {
+                lines.add(new Line(benchmark + ":" + child.getKey(), child.getValue(), runResult));
+            }
         }
 
         out.printf("%-" + lengths.benchmark + "s", BENCHMARK_COLUMN_NAME);
@@ -87,72 +99,50 @@ class TextResultFormat implements ResultFormat {
         out.printf("%" + lengths.unit + "s", UNITS_COLUMN_NAME);
         out.println();
 
-        for (RunResult res : runResults) {
-            {
-                out.printf("%-" + lengths.benchmark + "s", benchPrefixes.get(res.getParams().getBenchmark()));
+        printSection(lines, params, lengths);
+    }
 
-                for (String k : params) {
-                    String v = res.getParams().getParam(k);
-                    out.printf("%" + lengths.ofParameter(k) + "s", (v == null) ? "N/A" : v);
-                }
-
-                Result pRes = res.getPrimaryResult();
-                out.printf("%" + lengths.mode + "s", res.getParams().getMode().shortLabel());
-
-                if (pRes.getSampleCount() > 1) {
-                    out.printf("%" + lengths.samples + "d", pRes.getSampleCount());
-                } else {
-                    out.printf("%" + lengths.samples + "s", "");
-                }
-
-                out.print(ScoreFormatter.format(lengths.score, pRes.getScore()));
-
-                if (!Double.isNaN(pRes.getScoreError()) && !ScoreFormatter.isApproximate(pRes.getScore())) {
-                    out.print(" \u00B1");
-                    out.print(ScoreFormatter.formatError(lengths.error, pRes.getScoreError()));
-                } else {
-                    out.print("  ");
-                    out.printf("%" + lengths.error + "s", "");
-                }
-
-                out.printf("%" + lengths.unit + "s", pRes.getScoreUnit());
-                out.println();
-            }
-
-            for (Map.Entry<String, Result> e : res.getSecondaryResults().entrySet()) {
-                String label = e.getKey();
-                Result subRes = e.getValue();
-
-                out.printf("%-" + lengths.benchmark + "s",
-                        benchPrefixes.get(res.getParams().getBenchmark() + ":" + label));
-
-                for (String k : params) {
-                    String v = res.getParams().getParam(k);
-                    out.printf("%" + lengths.ofParameter(k) + "s", (v == null) ? "N/A" : v);
-                }
-
-                out.printf("%" + lengths.mode + "s", res.getParams().getMode().shortLabel());
-
-                if (subRes.getSampleCount() > 1) {
-                    out.printf("%" + lengths.samples + "d", subRes.getSampleCount());
-                } else {
-                    out.printf("%" + lengths.samples + "s", "");
-                }
-
-                out.print(ScoreFormatter.format(lengths.score, subRes.getScore()));
-
-                if (!Double.isNaN(subRes.getScoreError()) && !ScoreFormatter.isApproximate(subRes.getScore())) {
-                    out.print(" \u00B1");
-                    out.print(ScoreFormatter.formatError(lengths.error, subRes.getScoreError()));
-                } else {
-                    out.print("  ");
-                    out.printf("%" + lengths.error + "s", "");
-                }
-
-                out.printf("%" + lengths.unit + "s", subRes.getScoreUnit());
-                out.println();
-            }
+    private void printSection(List<Line> sections, Collection<String> parameters, Lengths lengths) {
+        for (Line line : sections) {
+            printLine(line, parameters, lengths);
         }
+    }
+
+    private void printLine(Line line, Collection<String> parameters, Lengths lengths) {
+        out.printf("%-" + lengths.benchmark + "s", line.label);
+
+        for (String key : parameters) {
+            String v = line.parent.getParams().getParam(key);
+            out.printf("%" + lengths.ofParameter(key) + "s", (v == null) ? "N/A" : v);
+        }
+
+        out.printf("%" + lengths.mode + "s", line.parent.getParams().getMode().shortLabel());
+
+        // This was the case only for VERY short runs, where secondary results
+        // provider (perfnorm) didn't catch the metric for some of the runs
+        if (line.result == null) {
+            out.println("<missing>");
+            return;
+        }
+
+        if (line.result.getSampleCount() > 1) {
+            out.printf("%" + lengths.samples + "d", line.result.getSampleCount());
+        } else {
+            out.printf("%" + lengths.samples + "s", "");
+        }
+
+        out.print(ScoreFormatter.format(lengths.score, line.result.getScore()));
+
+        if (!Double.isNaN(line.result.getScoreError()) && !ScoreFormatter.isApproximate(line.result.getScore())) {
+            out.print(" \u00B1");
+            out.print(ScoreFormatter.formatError(lengths.error, line.result.getScoreError()));
+        } else {
+            out.print("  ");
+            out.printf("%" + lengths.score + "s", "");
+        }
+
+        out.printf("%" + lengths.unit + "s", line.result.getScoreUnit());
+        out.println();
     }
 
     private static class Lengths {
@@ -227,6 +217,18 @@ class TextResultFormat implements ResultFormat {
 
         public int ofParameter(String parameter) {
             return parameters.get(parameter);
+        }
+    }
+
+    private static class Line {
+        private final String label;
+        private final Result<?> result;
+        private final RunResult parent;
+
+        public Line(String label, Result<?> result, RunResult parent) {
+            this.label = label;
+            this.result = result;
+            this.parent = parent;
         }
     }
 }
