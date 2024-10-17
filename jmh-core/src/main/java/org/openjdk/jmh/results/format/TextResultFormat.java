@@ -39,6 +39,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 class TextResultFormat implements ResultFormat {
+    private static final String MODE_COLUMN_NAME = "Mode";
+    private static final String COUNT_COLUMN_NAME = "Cnt";
+    private static final String SCORE_COLUMN_NAME = "Score";
+    private static final String ERROR_COLUMN_NAME = "Error";
+    private static final String UNITS_COLUMN_NAME = "Units";
+    private static final String BENCHMARK_COLUMN_NAME = "Benchmark";
+    private static final int PADDING = 2;
+
     private final PrintStream out;
 
     public TextResultFormat(PrintStream out) {
@@ -47,8 +55,6 @@ class TextResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Collection<RunResult> runResults) {
-        final int COLUMN_PAD = 2;
-
         Collection<String> benchNames = new ArrayList<>();
         for (RunResult runResult : runResults) {
             benchNames.add(runResult.getParams().getBenchmark());
@@ -59,98 +65,57 @@ class TextResultFormat implements ResultFormat {
 
         Map<String, String> benchPrefixes = ClassUtils.denseClassNames(benchNames);
 
-        // determine name column length
-        int nameLen = "Benchmark".length();
-        for (String prefix : benchPrefixes.values()) {
-            nameLen = Math.max(nameLen, prefix.length());
-        }
+        Lengths lengths = Lengths.create(runResults)
+                .update(benchPrefixes.values())
+                .pad(PADDING);
 
-        // determine param lengths
-        Map<String, Integer> paramLengths = new HashMap<>();
         SortedSet<String> params = new TreeSet<>();
         for (RunResult runResult : runResults) {
-            BenchmarkParams bp = runResult.getParams();
-            for (String k : bp.getParamsKeys()) {
-                params.add(k);
-                Integer len = paramLengths.get(k);
-                if (len == null) {
-                    len = ("(" + k + ")").length() + COLUMN_PAD;
-                }
-                paramLengths.put(k, Math.max(len, bp.getParam(k).length() + COLUMN_PAD));
-            }
+            params.addAll(runResult.getParams().getParamsKeys());
         }
 
-        // determine column lengths for other columns
-        int modeLen     = "Mode".length();
-        int samplesLen  = "Cnt".length();
-        int scoreLen    = "Score".length();
-        int scoreErrLen = "Error".length();
-        int unitLen     = "Units".length();
-
-        for (RunResult res : runResults) {
-            Result primRes = res.getPrimaryResult();
-
-            modeLen     = Math.max(modeLen,     res.getParams().getMode().shortLabel().length());
-            samplesLen  = Math.max(samplesLen,  String.format("%d",   primRes.getSampleCount()).length());
-            scoreLen    = Math.max(scoreLen,    ScoreFormatter.format(primRes.getScore()).length());
-            scoreErrLen = Math.max(scoreErrLen, ScoreFormatter.format(primRes.getScoreError()).length());
-            unitLen     = Math.max(unitLen,     primRes.getScoreUnit().length());
-
-            for (Result subRes : res.getSecondaryResults().values()) {
-                samplesLen  = Math.max(samplesLen,  String.format("%d",   subRes.getSampleCount()).length());
-                scoreLen    = Math.max(scoreLen,    ScoreFormatter.format(subRes.getScore()).length());
-                scoreErrLen = Math.max(scoreErrLen, ScoreFormatter.format(subRes.getScoreError()).length());
-                unitLen     = Math.max(unitLen,     subRes.getScoreUnit().length());
-            }
-        }
-        modeLen     += COLUMN_PAD;
-        samplesLen  += COLUMN_PAD;
-        scoreLen    += COLUMN_PAD;
-        scoreErrLen += COLUMN_PAD - 1; // digest a single character for +- separator
-        unitLen     += COLUMN_PAD;
-
-        out.printf("%-" + nameLen + "s", "Benchmark");
+        out.printf("%-" + lengths.benchmark + "s", BENCHMARK_COLUMN_NAME);
         for (String k : params) {
-            out.printf("%" + paramLengths.get(k) + "s", "(" + k + ")");
+            out.printf("%" + lengths.ofParameter(k) + "s", "(" + k + ")");
         }
 
-        out.printf("%" + modeLen + "s",     "Mode");
-        out.printf("%" + samplesLen + "s",  "Cnt");
-        out.printf("%" + scoreLen + "s",    "Score");
+        out.printf("%" + lengths.mode + "s", MODE_COLUMN_NAME);
+        out.printf("%" + lengths.samples + "s", COUNT_COLUMN_NAME);
+        out.printf("%" + lengths.score + "s", SCORE_COLUMN_NAME);
         out.print("  ");
-        out.printf("%" + scoreErrLen + "s", "Error");
-        out.printf("%" + unitLen + "s",     "Units");
+        out.printf("%" + lengths.error + "s", ERROR_COLUMN_NAME);
+        out.printf("%" + lengths.unit + "s", UNITS_COLUMN_NAME);
         out.println();
 
         for (RunResult res : runResults) {
             {
-                out.printf("%-" + nameLen + "s", benchPrefixes.get(res.getParams().getBenchmark()));
+                out.printf("%-" + lengths.benchmark + "s", benchPrefixes.get(res.getParams().getBenchmark()));
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v);
+                    out.printf("%" + lengths.ofParameter(k) + "s", (v == null) ? "N/A" : v);
                 }
 
                 Result pRes = res.getPrimaryResult();
-                out.printf("%" + modeLen + "s", res.getParams().getMode().shortLabel());
+                out.printf("%" + lengths.mode + "s", res.getParams().getMode().shortLabel());
 
                 if (pRes.getSampleCount() > 1) {
-                    out.printf("%" + samplesLen + "d", pRes.getSampleCount());
+                    out.printf("%" + lengths.samples + "d", pRes.getSampleCount());
                 } else {
-                    out.printf("%" + samplesLen + "s", "");
+                    out.printf("%" + lengths.samples + "s", "");
                 }
 
-                out.print(ScoreFormatter.format(scoreLen, pRes.getScore()));
+                out.print(ScoreFormatter.format(lengths.score, pRes.getScore()));
 
                 if (!Double.isNaN(pRes.getScoreError()) && !ScoreFormatter.isApproximate(pRes.getScore())) {
                     out.print(" \u00B1");
-                    out.print(ScoreFormatter.formatError(scoreErrLen, pRes.getScoreError()));
+                    out.print(ScoreFormatter.formatError(lengths.error, pRes.getScoreError()));
                 } else {
                     out.print("  ");
-                    out.printf("%" + scoreErrLen + "s", "");
+                    out.printf("%" + lengths.error + "s", "");
                 }
 
-                out.printf("%" + unitLen + "s", pRes.getScoreUnit());
+                out.printf("%" + lengths.unit + "s", pRes.getScoreUnit());
                 out.println();
             }
 
@@ -158,36 +123,110 @@ class TextResultFormat implements ResultFormat {
                 String label = e.getKey();
                 Result subRes = e.getValue();
 
-                out.printf("%-" + nameLen + "s",
+                out.printf("%-" + lengths.benchmark + "s",
                         benchPrefixes.get(res.getParams().getBenchmark() + ":" + label));
 
                 for (String k : params) {
                     String v = res.getParams().getParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v);
+                    out.printf("%" + lengths.ofParameter(k) + "s", (v == null) ? "N/A" : v);
                 }
 
-                out.printf("%" + modeLen + "s", res.getParams().getMode().shortLabel());
+                out.printf("%" + lengths.mode + "s", res.getParams().getMode().shortLabel());
 
                 if (subRes.getSampleCount() > 1) {
-                    out.printf("%" + samplesLen + "d", subRes.getSampleCount());
+                    out.printf("%" + lengths.samples + "d", subRes.getSampleCount());
                 } else {
-                    out.printf("%" + samplesLen + "s", "");
+                    out.printf("%" + lengths.samples + "s", "");
                 }
 
-                out.print(ScoreFormatter.format(scoreLen, subRes.getScore()));
+                out.print(ScoreFormatter.format(lengths.score, subRes.getScore()));
 
                 if (!Double.isNaN(subRes.getScoreError()) && !ScoreFormatter.isApproximate(subRes.getScore())) {
                     out.print(" \u00B1");
-                    out.print(ScoreFormatter.formatError(scoreErrLen, subRes.getScoreError()));
+                    out.print(ScoreFormatter.formatError(lengths.error, subRes.getScoreError()));
                 } else {
                     out.print("  ");
-                    out.printf("%" + scoreErrLen + "s", "");
+                    out.printf("%" + lengths.error + "s", "");
                 }
 
-                out.printf("%" + unitLen + "s", subRes.getScoreUnit());
+                out.printf("%" + lengths.unit + "s", subRes.getScoreUnit());
                 out.println();
             }
         }
+    }
 
+    private static class Lengths {
+        private int benchmark = BENCHMARK_COLUMN_NAME.length();
+        private int mode = MODE_COLUMN_NAME.length();
+        private int samples = COUNT_COLUMN_NAME.length();
+        private int score = SCORE_COLUMN_NAME.length();
+        private int error = ERROR_COLUMN_NAME.length();
+        private int unit = UNITS_COLUMN_NAME.length();
+        private final Map<String, Integer> parameters = new HashMap<>();
+
+        public static Lengths create(Collection<RunResult> results) {
+            Lengths instance = new Lengths();
+            for (RunResult result : results) {
+                instance.update(result);
+            }
+            return instance;
+        }
+
+        public Lengths update(Collection<String> names) {
+            for (String name : names) {
+                benchmark = Math.max(benchmark, name.length());
+            }
+
+            return this;
+        }
+
+        public Lengths update(RunResult result) {
+            mode = Math.max(mode, result.getParams().getMode().shortLabel().length());
+            update(result.getPrimaryResult());
+
+            for (Result<?> child : result.getSecondaryResults().values()) {
+                update(child);
+            }
+
+            BenchmarkParams benchmarkParameters = result.getParams();
+            for (String key : benchmarkParameters.getParamsKeys()) {
+                Integer current = this.parameters.get(key);
+
+                if (current == null) {
+                    current = key.length() + 2; // accounting for parentheses
+                }
+
+                this.parameters.put(key, Math.max(current, benchmarkParameters.getParam(key).length()));
+            }
+
+            return this;
+        }
+
+        public Lengths update(Result<?> result) {
+            samples = Math.max(samples, String.format("%d", result.getSampleCount()).length());
+            score = Math.max(score, ScoreFormatter.format(result.getScore()).length());
+            error = Math.max(error, ScoreFormatter.format(result.getScoreError()).length());
+            unit = Math.max(unit, result.getScoreUnit().length());
+
+            return this;
+        }
+
+        public Lengths pad(int padding) {
+            mode += padding;
+            samples += padding;
+            score += padding;
+            error += padding - 1; // digest a single character for +- separator
+            unit += padding;
+
+            for (String parameter : parameters.keySet()) {
+                parameters.put(parameter, parameters.get(parameter) + padding);
+            }
+
+            return this;
+        }
+
+        public int ofParameter(String parameter) {
+            return parameters.get(parameter);
+        }
     }
 }

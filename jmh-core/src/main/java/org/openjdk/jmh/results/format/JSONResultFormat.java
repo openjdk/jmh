@@ -234,7 +234,7 @@ class JSONResultFormat implements ResultFormat {
     }
 
     private String emit(double d) {
-        if (d != d)
+        if (Double.isNaN(d))
             return "\"NaN\"";
         if (d == Double.NEGATIVE_INFINITY)
             return "\"-INF\"";
