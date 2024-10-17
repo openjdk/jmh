@@ -33,12 +33,114 @@ import org.openjdk.jmh.util.ScoreFormatter;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class TextResultFormat implements ResultFormat {
+    private static final String MODE_COLUMN_NAME = "Mode";
+    private static final String COUNT_COLUMN_NAME = "Cnt";
+    private static final String SCORE_COLUMN_NAME = "Score";
+    private static final String ERROR_COLUMN_NAME = "Error";
+    private static final String UNITS_COLUMN_NAME = "Units";
+    private static final String BENCHMARK_COLUMN_NAME = "Benchmark";
+    private static final int PADDING = 2;
+
+    enum ResultAggregationMode {
+        BENCHMARK {
+            @Override
+            Object toKey(Line line, Collection<String> parameterNames) {
+                return line.parent.getParams().getBenchmark();
+            }
+        },
+        METRIC {
+            @Override
+            Object toKey(Line line, Collection<String> parameterNames) {
+                // This was the case only for VERY short runs, where secondary results
+                // provider (perfnorm) didn't catch the metric for some of the runs.
+                // At that moment there was key-value result accounting instead of
+                // current iteration, so most likely this case will never happen.
+                if (line.result == null) {
+                    return "<missing>";
+                }
+
+                return line.result.getRole().isPrimary() ? "__primary__" : line.result.getLabel();
+            }
+        },
+        PARAMETER {
+            @Override
+            Object toKey(Line line, Collection<String> parameterNames) {
+                List<String> values = new ArrayList<>();
+                for (String name : parameterNames) {
+                    values.add(line.parent.getParams().getParam(name));
+                }
+                return values;
+            }
+        };
+
+        abstract Object toKey(Line line, Collection<String> parameterNames);
+
+        public static ResultAggregationMode recognize(String mode) {
+            if (mode == null) {
+                return null;
+            }
+
+            switch (mode.trim().toLowerCase()) {
+                case "benchmark":
+                    return BENCHMARK;
+                case "metric":
+                    return METRIC;
+                case "parameter":
+                    return PARAMETER;
+                default:
+                    Logger.getLogger(ResultAggregationMode.class.getName()).log(
+                            Level.SEVERE,
+                            "Unknown aggregation mode `" + mode + "`, please check your jmh.text.aggregation input"
+                    );
+                    return null;
+            }
+        }
+
+        public static Collection<ResultAggregationMode> resolve() {
+            String request = System.getProperty("jmh.text.aggregation");
+
+            if (request == null) {
+                return Collections.emptyList();
+            }
+
+            List<ResultAggregationMode> modes = new ArrayList<>();
+            for (String entry : request.split(",")) {
+                ResultAggregationMode recognized = recognize(entry);
+
+                if (recognized != null) {
+                    modes.add(recognized);
+                }
+            }
+
+            return new LinkedHashSet<>(modes);
+        }
+    }
+
+    private static int resolveSpacing() {
+        String encoded = System.getProperty("jmh.text.spacing", "0");
+        try {
+            return Integer.parseInt(encoded);
+        } catch (NumberFormatException e) {
+            Logger.getLogger(TextResultFormat.class.getName()).log(Level.SEVERE, "Unable to decode spacing from " + encoded + ", using default 0", e);
+            return 0;
+        }
+    }
+
+    private static final Collection<ResultAggregationMode> AGGREGATION_MODES = ResultAggregationMode.resolve();
+    private static final int SPACING = resolveSpacing();
+
     private final PrintStream out;
 
     public TextResultFormat(PrintStream out) {
@@ -47,8 +149,6 @@ class TextResultFormat implements ResultFormat {
 
     @Override
     public void writeOut(Collection<RunResult> runResults) {
-        final int COLUMN_PAD = 2;
-
         Collection<String> benchNames = new ArrayList<>();
         for (RunResult runResult : runResults) {
             benchNames.add(runResult.getParams().getBenchmark());
@@ -59,135 +159,207 @@ class TextResultFormat implements ResultFormat {
 
         Map<String, String> benchPrefixes = ClassUtils.denseClassNames(benchNames);
 
-        // determine name column length
-        int nameLen = "Benchmark".length();
-        for (String prefix : benchPrefixes.values()) {
-            nameLen = Math.max(nameLen, prefix.length());
-        }
+        Lengths lengths = Lengths.create(runResults)
+                .update(benchPrefixes.values())
+                .pad(PADDING);
 
-        // determine param lengths
-        Map<String, Integer> paramLengths = new HashMap<>();
         SortedSet<String> params = new TreeSet<>();
+        List<Line> lines = new ArrayList<>();
         for (RunResult runResult : runResults) {
-            BenchmarkParams bp = runResult.getParams();
-            for (String k : bp.getParamsKeys()) {
-                params.add(k);
-                Integer len = paramLengths.get(k);
-                if (len == null) {
-                    len = ("(" + k + ")").length() + COLUMN_PAD;
-                }
-                paramLengths.put(k, Math.max(len, bp.getParam(k).length() + COLUMN_PAD));
+            params.addAll(runResult.getParams().getParamsKeys());
+
+            String benchmark = benchPrefixes.get(runResult.getParams().getBenchmark());
+            lines.add(new Line(benchmark, runResult.getPrimaryResult(), runResult));
+        }
+
+        for (RunResult runResult : runResults) {
+            String benchmark = benchPrefixes.get(runResult.getParams().getBenchmark());
+            for (Map.Entry<String, Result> child : runResult.getSecondaryResults().entrySet()) {
+                lines.add(new Line(benchmark + ":" + child.getKey(), child.getValue(), runResult));
             }
         }
 
-        // determine column lengths for other columns
-        int modeLen     = "Mode".length();
-        int samplesLen  = "Cnt".length();
-        int scoreLen    = "Score".length();
-        int scoreErrLen = "Error".length();
-        int unitLen     = "Units".length();
-
-        for (RunResult res : runResults) {
-            Result primRes = res.getPrimaryResult();
-
-            modeLen     = Math.max(modeLen,     res.getParams().getMode().shortLabel().length());
-            samplesLen  = Math.max(samplesLen,  String.format("%d",   primRes.getSampleCount()).length());
-            scoreLen    = Math.max(scoreLen,    ScoreFormatter.format(primRes.getScore()).length());
-            scoreErrLen = Math.max(scoreErrLen, ScoreFormatter.format(primRes.getScoreError()).length());
-            unitLen     = Math.max(unitLen,     primRes.getScoreUnit().length());
-
-            for (Result subRes : res.getSecondaryResults().values()) {
-                samplesLen  = Math.max(samplesLen,  String.format("%d",   subRes.getSampleCount()).length());
-                scoreLen    = Math.max(scoreLen,    ScoreFormatter.format(subRes.getScore()).length());
-                scoreErrLen = Math.max(scoreErrLen, ScoreFormatter.format(subRes.getScoreError()).length());
-                unitLen     = Math.max(unitLen,     subRes.getScoreUnit().length());
-            }
-        }
-        modeLen     += COLUMN_PAD;
-        samplesLen  += COLUMN_PAD;
-        scoreLen    += COLUMN_PAD;
-        scoreErrLen += COLUMN_PAD - 1; // digest a single character for +- separator
-        unitLen     += COLUMN_PAD;
-
-        out.printf("%-" + nameLen + "s", "Benchmark");
+        out.printf("%-" + lengths.benchmark + "s", BENCHMARK_COLUMN_NAME);
         for (String k : params) {
-            out.printf("%" + paramLengths.get(k) + "s", "(" + k + ")");
+            out.printf("%" + lengths.ofParameter(k) + "s", "(" + k + ")");
         }
 
-        out.printf("%" + modeLen + "s",     "Mode");
-        out.printf("%" + samplesLen + "s",  "Cnt");
-        out.printf("%" + scoreLen + "s",    "Score");
+        out.printf("%" + lengths.mode + "s", MODE_COLUMN_NAME);
+        out.printf("%" + lengths.samples + "s", COUNT_COLUMN_NAME);
+        out.printf("%" + lengths.score + "s", SCORE_COLUMN_NAME);
         out.print("  ");
-        out.printf("%" + scoreErrLen + "s", "Error");
-        out.printf("%" + unitLen + "s",     "Units");
+        out.printf("%" + lengths.error + "s", ERROR_COLUMN_NAME);
+        out.printf("%" + lengths.unit + "s", UNITS_COLUMN_NAME);
         out.println();
 
-        for (RunResult res : runResults) {
-            {
-                out.printf("%-" + nameLen + "s", benchPrefixes.get(res.getParams().getBenchmark()));
-
-                for (String k : params) {
-                    String v = res.getParams().getParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v);
+        List<List<Line>> sections = Collections.singletonList(lines);
+        for (ResultAggregationMode mode : AGGREGATION_MODES) {
+            List<List<Line>> replacement = new ArrayList<>();
+            for (List<Line> section : sections) {
+                Map<Object, List<Line>> split = new LinkedHashMap<>();
+                for (Line line : section) {
+                    Object key = mode.toKey(line, params);
+                    if (!split.containsKey(key)) {
+                        split.put(key, new ArrayList<>());
+                    }
+                    split.get(key).add(line);
                 }
 
-                Result pRes = res.getPrimaryResult();
-                out.printf("%" + modeLen + "s", res.getParams().getMode().shortLabel());
-
-                if (pRes.getSampleCount() > 1) {
-                    out.printf("%" + samplesLen + "d", pRes.getSampleCount());
-                } else {
-                    out.printf("%" + samplesLen + "s", "");
-                }
-
-                out.print(ScoreFormatter.format(scoreLen, pRes.getScore()));
-
-                if (!Double.isNaN(pRes.getScoreError()) && !ScoreFormatter.isApproximate(pRes.getScore())) {
-                    out.print(" \u00B1");
-                    out.print(ScoreFormatter.formatError(scoreErrLen, pRes.getScoreError()));
-                } else {
-                    out.print("  ");
-                    out.printf("%" + scoreErrLen + "s", "");
-                }
-
-                out.printf("%" + unitLen + "s", pRes.getScoreUnit());
-                out.println();
+                replacement.addAll(split.values());
             }
 
-            for (Map.Entry<String, Result> e : res.getSecondaryResults().entrySet()) {
-                String label = e.getKey();
-                Result subRes = e.getValue();
-
-                out.printf("%-" + nameLen + "s",
-                        benchPrefixes.get(res.getParams().getBenchmark() + ":" + label));
-
-                for (String k : params) {
-                    String v = res.getParams().getParam(k);
-                    out.printf("%" + paramLengths.get(k) + "s", (v == null) ? "N/A" : v);
-                }
-
-                out.printf("%" + modeLen + "s", res.getParams().getMode().shortLabel());
-
-                if (subRes.getSampleCount() > 1) {
-                    out.printf("%" + samplesLen + "d", subRes.getSampleCount());
-                } else {
-                    out.printf("%" + samplesLen + "s", "");
-                }
-
-                out.print(ScoreFormatter.format(scoreLen, subRes.getScore()));
-
-                if (!Double.isNaN(subRes.getScoreError()) && !ScoreFormatter.isApproximate(subRes.getScore())) {
-                    out.print(" \u00B1");
-                    out.print(ScoreFormatter.formatError(scoreErrLen, subRes.getScoreError()));
-                } else {
-                    out.print("  ");
-                    out.printf("%" + scoreErrLen + "s", "");
-                }
-
-                out.printf("%" + unitLen + "s", subRes.getScoreUnit());
-                out.println();
-            }
+            sections = replacement;
         }
 
+        printSections(sections, params, lengths);
+
+        out.println();
+        out.println("You can organize this output by Djmh.text.spacing=<int> and -Djmh.aggregation=<metric|parameter|benchmark>[,<metric|parameter|benchmark>...] properties");
+        out.println("For example, -Djmh.text.spacing=1 -Djmh.text.aggregation=metric,parameter will list results partitioned by metric name and then parameter combination");
+    }
+
+    private void emitSpacing() {
+        for (int i = 0; i < SPACING; i++) {
+            out.println();
+        }
+    }
+
+    private void printSections(List<List<Line>> sections, Collection<String> parameters, Lengths lengths) {
+        for (List<Line> section : sections) {
+            printSection(section, parameters, lengths);
+        }
+    }
+
+    private void printSection(List<Line> sections, Collection<String> parameters, Lengths lengths) {
+        emitSpacing();
+        for (Line line : sections) {
+            printLine(line, parameters, lengths);
+        }
+    }
+
+    private void printLine(Line line, Collection<String> parameters, Lengths lengths) {
+        out.printf("%-" + lengths.benchmark + "s", line.label);
+
+        for (String key : parameters) {
+            String v = line.parent.getParams().getParam(key);
+            out.printf("%" + lengths.ofParameter(key) + "s", (v == null) ? "N/A" : v);
+        }
+
+        out.printf("%" + lengths.mode + "s", line.parent.getParams().getMode().shortLabel());
+
+        // This was the case only for VERY short runs, where secondary results
+        // provider (perfnorm) didn't catch the metric for some of the runs.
+        // At that moment there was key-value result accounting instead of
+        // current iteration, so most likely this case will never happen.
+        if (line.result == null) {
+            out.println("<missing>");
+            return;
+        }
+
+        if (line.result.getSampleCount() > 1) {
+            out.printf("%" + lengths.samples + "d", line.result.getSampleCount());
+        } else {
+            out.printf("%" + lengths.samples + "s", "");
+        }
+
+        out.print(ScoreFormatter.format(lengths.score, line.result.getScore()));
+
+        if (!Double.isNaN(line.result.getScoreError()) && !ScoreFormatter.isApproximate(line.result.getScore())) {
+            out.print(" \u00B1");
+            out.print(ScoreFormatter.formatError(lengths.error, line.result.getScoreError()));
+        } else {
+            out.print("  ");
+            out.printf("%" + lengths.score + "s", "");
+        }
+
+        out.printf("%" + lengths.unit + "s", line.result.getScoreUnit());
+        out.println();
+    }
+
+    private static class Lengths {
+        private int benchmark = BENCHMARK_COLUMN_NAME.length();
+        private int mode = MODE_COLUMN_NAME.length();
+        private int samples = COUNT_COLUMN_NAME.length();
+        private int score = SCORE_COLUMN_NAME.length();
+        private int error = ERROR_COLUMN_NAME.length();
+        private int unit = UNITS_COLUMN_NAME.length();
+        private Map<String, Integer> parameters = new HashMap<>();
+
+        public static Lengths create(Collection<RunResult> results) {
+            Lengths instance = new Lengths();
+            for (RunResult result : results) {
+                instance.update(result);
+            }
+            return instance;
+        }
+
+        public Lengths update(Collection<String> names) {
+            for (String name : names) {
+                benchmark = Math.max(benchmark, name.length());
+            }
+
+            return this;
+        }
+
+        public Lengths update(RunResult result) {
+            mode = Math.max(mode, result.getParams().getMode().shortLabel().length());
+            update(result.getPrimaryResult());
+
+            for (Result<?> child : result.getSecondaryResults().values()) {
+                update(child);
+            }
+
+            BenchmarkParams benchmarkParameters = result.getParams();
+            for (String key : benchmarkParameters.getParamsKeys()) {
+                Integer current = this.parameters.get(key);
+
+                if (current == null) {
+                    current = key.length() + 2; // accounting for parentheses
+                }
+
+                this.parameters.put(key, Math.max(current, benchmarkParameters.getParam(key).length()));
+            }
+
+            return this;
+        }
+
+        public Lengths update(Result<?> result) {
+            samples = Math.max(samples, String.format("%d", result.getSampleCount()).length());
+            score = Math.max(score, ScoreFormatter.format(result.getScore()).length());
+            error = Math.max(error, ScoreFormatter.format(result.getScoreError()).length());
+            unit = Math.max(unit, result.getScoreUnit().length());
+
+            return this;
+        }
+
+        public Lengths pad(int padding) {
+            mode += padding;
+            samples += padding;
+            score += padding;
+            error += padding - 1; // digest a single character for +- separator
+            unit += padding;
+
+            for (String parameter : parameters.keySet()) {
+                parameters.put(parameter, parameters.get(parameter) + padding);
+            }
+
+            return this;
+        }
+
+        public int ofParameter(String parameter) {
+            return parameters.get(parameter);
+        }
+    }
+
+    private static class Line {
+        private final String label;
+        private final Result<?> result;
+        private final RunResult parent;
+
+        public Line(String label, Result<?> result, RunResult parent) {
+            this.label = label;
+            this.result = result;
+            this.parent = parent;
+        }
     }
 }
