@@ -35,11 +35,7 @@ import java.util.Random;
     See the rationale for BlackholeL1..BlackholeL4 classes below.
  */
 
-abstract class BlackholeL0 {
-    private int markerBegin;
-}
-
-abstract class BlackholeL1 extends BlackholeL0 {
+abstract class BlackholeL1 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -141,10 +137,6 @@ abstract class BlackholeL3 extends BlackholeL2 {
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 }
 
-abstract class BlackholeL4 extends BlackholeL3 {
-    private int markerEnd;
-}
-
 /**
  * Black Hole.
  *
@@ -152,7 +144,7 @@ abstract class BlackholeL4 extends BlackholeL3 {
  * value is actually used afterwards. This can save from the dead-code elimination
  * of the computations resulting in the given values.</p>
  */
-public final class Blackhole extends BlackholeL4 {
+public final class Blackhole extends BlackholeL3 {
 
     /*
      * IMPLEMENTATION NOTES:
@@ -261,16 +253,6 @@ public final class Blackhole extends BlackholeL4 {
                 return Boolean.getBoolean("compilerBlackholesEnabled");
             }
         });
-
-        Utils.check(Blackhole.class, "b1", "b2");
-        Utils.check(Blackhole.class, "bool1", "bool2");
-        Utils.check(Blackhole.class, "c1", "c2");
-        Utils.check(Blackhole.class, "s1", "s2");
-        Utils.check(Blackhole.class, "i1", "i2");
-        Utils.check(Blackhole.class, "l1", "l2");
-        Utils.check(Blackhole.class, "f1", "f2");
-        Utils.check(Blackhole.class, "d1", "d2");
-        Utils.check(Blackhole.class, "obj1");
     }
 
     public Blackhole(String challengeResponse) {

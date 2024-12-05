@@ -30,23 +30,10 @@ import org.openjdk.jmh.util.Utils;
  * Control object, used to communicate significant information from JMH to the benchmark.
  * WARNING: The API for this class is considered unstable, and can be changed without notice.
  */
-public final class Control extends ControlL4 {
-
-    /**
-     * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
-     * @see org.openjdk.jmh.infra.Blackhole description for the rationale
-     */
-    static {
-        Utils.check(Control.class, "startMeasurement", "stopMeasurement");
-    }
-
+public final class Control extends ControlL3 {
 }
 
-abstract class ControlL0 {
-    private int markerBegin;
-}
-
-abstract class ControlL1 extends ControlL0 {
+abstract class ControlL1 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -97,8 +84,3 @@ abstract class ControlL3 extends ControlL2 {
     private boolean q161, q162, q163, q164, q165, q166, q167, q168;
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 }
-
-abstract class ControlL4 extends ControlL3 {
-    private int markerEnd;
-}
-

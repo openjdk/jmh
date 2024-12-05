@@ -50,21 +50,8 @@ import java.util.concurrent.TimeUnit;
  *     info about the benchmark</li>
  * </ol>
  */
-public class BenchmarkParams extends BenchmarkParamsL4 {
+public class BenchmarkParams extends BenchmarkParamsL3 {
     private static final long serialVersionUID = -1068219503090299117L;
-
-    /**
-     * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
-     * @see org.openjdk.jmh.infra.Blackhole description for the rationale
-     */
-    static {
-        Utils.check(BenchmarkParams.class, "benchmark", "generatedTarget", "synchIterations");
-        Utils.check(BenchmarkParams.class, "threads", "threadGroups", "forks", "warmupForks");
-        Utils.check(BenchmarkParams.class, "warmup", "measurement");
-        Utils.check(BenchmarkParams.class, "mode", "params");
-        Utils.check(BenchmarkParams.class, "timeUnit", "opsPerInvocation");
-        Utils.check(BenchmarkParams.class, "jvm", "jvmArgs");
-    }
 
     public BenchmarkParams(String benchmark, String generatedTarget, boolean synchIterations,
                            int threads, int[] threadGroups, Collection<String> threadGroupLabels,
@@ -75,31 +62,6 @@ public class BenchmarkParams extends BenchmarkParamsL4 {
                            String jvm, Collection<String> jvmArgs,
                            String jdkVersion, String vmName, String vmVersion, String jmhVersion,
                            TimeValue timeout) {
-        super(benchmark, generatedTarget, synchIterations,
-                threads, threadGroups, threadGroupLabels,
-                forks, warmupForks,
-                warmup, measurement,
-                mode, params,
-                timeUnit, opsPerInvocation,
-                jvm, jvmArgs,
-                jdkVersion, vmName, vmVersion, jmhVersion,
-                timeout);
-    }
-}
-
-abstract class BenchmarkParamsL4 extends BenchmarkParamsL3 {
-    private static final long serialVersionUID = -2409216922027695385L;
-
-    private int markerEnd;
-    public BenchmarkParamsL4(String benchmark, String generatedTarget, boolean synchIterations,
-                             int threads, int[] threadGroups, Collection<String> threadGroupLabels,
-                             int forks, int warmupForks,
-                             IterationParams warmup, IterationParams measurement,
-                             Mode mode, WorkloadParams params,
-                             TimeUnit timeUnit, int opsPerInvocation,
-                             String jvm, Collection<String> jvmArgs,
-                             String jdkVersion, String vmName, String vmVersion, String jmhVersion,
-                             TimeValue timeout) {
         super(benchmark, generatedTarget, synchIterations,
                 threads, threadGroups, threadGroupLabels,
                 forks, warmupForks,
@@ -153,7 +115,7 @@ abstract class BenchmarkParamsL3 extends BenchmarkParamsL2 {
     }
 }
 
-abstract class BenchmarkParamsL1 extends BenchmarkParamsL0 {
+abstract class BenchmarkParamsL1 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -172,11 +134,7 @@ abstract class BenchmarkParamsL1 extends BenchmarkParamsL0 {
     private boolean p171, p172, p173, p174, p175, p176, p177, p178;
 }
 
-abstract class BenchmarkParamsL0 {
-    private int markerBegin;
-}
-
-abstract class BenchmarkParamsL2 extends BenchmarkParamsL1 implements Serializable, Comparable<BenchmarkParams> {
+abstract class BenchmarkParamsL2 implements Serializable, Comparable<BenchmarkParams> {
     private static final long serialVersionUID = -1068219503090299117L;
 
     protected final String benchmark;

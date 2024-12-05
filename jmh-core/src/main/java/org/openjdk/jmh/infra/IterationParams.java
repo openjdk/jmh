@@ -45,27 +45,13 @@ import java.util.Objects;
  *     info about the benchmark</li>
  * </ol>
  */
-public final class IterationParams extends IterationParamsL4 {
+public final class IterationParams extends IterationParamsL3 {
     private static final long serialVersionUID = -8111111319033802892L;
-
-    static {
-        Utils.check(IterationParams.class, "type", "count", "timeValue", "batchSize");
-    }
 
     public IterationParams(IterationType type, int count, TimeValue time, int batchSize) {
         super(type, count, time, batchSize);
     }
 }
-
-abstract class IterationParamsL4 extends IterationParamsL3 {
-    private static final long serialVersionUID = 9079354621906758255L;
-
-    private int markerEnd;
-    public IterationParamsL4(IterationType type, int count, TimeValue time, int batchSize) {
-        super(type, count, time, batchSize);
-    }
-}
-
 abstract class IterationParamsL3 extends IterationParamsL2 {
     private static final long serialVersionUID = 3907464940104879178L;
 

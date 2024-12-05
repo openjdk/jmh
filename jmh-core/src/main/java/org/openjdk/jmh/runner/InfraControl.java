@@ -37,25 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The InfraControl logic class.
  * This is the rendezvous class for benchmark handler and JMH.
  */
-public class InfraControl extends InfraControlL4 {
-
-    /**
-     * Do the class hierarchy trick to evade false sharing, and check if it's working in runtime.
-     * @see org.openjdk.jmh.infra.Blackhole description for the rationale
-     */
-    static {
-        Utils.check(InfraControl.class, "isDone", "isFailing");
-        Utils.check(InfraControl.class, "volatileSpoiler");
-        Utils.check(InfraControl.class, "preSetup", "preTearDown");
-        Utils.check(InfraControl.class, "firstIteration");
-        Utils.check(InfraControl.class, "lastIteration");
-        Utils.check(InfraControl.class, "shouldYield");
-        Utils.check(InfraControl.class, "warmupVisited", "warmdownVisited");
-        Utils.check(InfraControl.class, "warmupShouldWait", "warmdownShouldWait");
-        Utils.check(InfraControl.class, "warmupDone", "warmdownDone");
-        Utils.check(InfraControl.class, "benchmarkParams", "iterationParams");
-        Utils.check(InfraControl.class, "shouldSynchIterations", "threads");
-    }
+public class InfraControl extends InfraControlL3 {
 
     public InfraControl(BenchmarkParams benchmarkParams, IterationParams iterationParams,
                         CountDownLatch preSetup, CountDownLatch preTearDown,
@@ -125,11 +107,7 @@ public class InfraControl extends InfraControlL4 {
 
 }
 
-abstract class InfraControlL0 {
-    private int markerBegin;
-}
-
-abstract class InfraControlL1 extends InfraControlL0 {
+abstract class InfraControlL1 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -292,16 +270,3 @@ abstract class InfraControlL3 extends InfraControlL2 {
         super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, shouldYield, notifyControl);
     }
 }
-
-abstract class InfraControlL4 extends InfraControlL3 {
-    private int markerEnd;
-
-    public InfraControlL4(BenchmarkParams benchmarkParams, IterationParams iterationParams,
-                          CountDownLatch preSetup, CountDownLatch preTearDown,
-                          boolean firstIteration, boolean lastIteration,
-                          boolean shouldYield,
-                          Control notifyControl) {
-        super(benchmarkParams, iterationParams, preSetup, preTearDown, firstIteration, lastIteration, shouldYield, notifyControl);
-    }
-}
-
