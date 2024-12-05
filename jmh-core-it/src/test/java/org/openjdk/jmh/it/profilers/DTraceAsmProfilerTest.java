@@ -24,6 +24,7 @@
  */
 package org.openjdk.jmh.it.profilers;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.it.Fixtures;
 import org.openjdk.jmh.profile.DTraceAsmProfiler;
@@ -37,6 +38,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Map;
 
+// DTraceAsm profiler is aging, and would be replaced by XCTraceAsm profiler.
+// This test is not very reliable and therefore disabled.
+@Ignore
 public class DTraceAsmProfilerTest extends AbstractAsmProfilerTest {
 
     @Test
