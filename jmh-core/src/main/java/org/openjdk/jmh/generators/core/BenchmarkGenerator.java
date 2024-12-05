@@ -460,6 +460,9 @@ public class BenchmarkGenerator {
 
         // generate padding
         Paddings.padding(writer, "p");
+        writer.println();
+        writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
+        writer.println();
 
         writer.println(ident(1) + "int startRndMask;");
         writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
@@ -640,7 +643,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
-        writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
+        writer.println(ident(3) + "throw new IllegalStateException();");
         writer.println(ident(1) + "}");
 
         writer.println();
@@ -774,7 +777,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
-        writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
+        writer.println(ident(3) + "throw new IllegalStateException();");
         writer.println(ident(1) + "}");
 
         writer.println();
@@ -822,12 +825,12 @@ public class BenchmarkGenerator {
         writer.println(ident(2) + "this.threadParams    = threadParams;");
         writer.println(ident(2) + "this.notifyControl   = control.notifyControl;");
         writer.println(ident(2) + "if (this.blackhole == null) {");
-        writer.println(ident(3) + "this.blackhole = new Blackhole(\"Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.\");");
+        writer.println(ident(3) + "this.blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
         writer.println(ident(2) + "}");
     }
 
     private void methodEpilog(PrintWriter writer) {
-        writer.println(ident(3) + "this.blackhole.evaporate(\"Yes, I am Stephen Hawking, and know a thing or two about black holes.\");");
+        writer.println(ident(3) + "this.blackhole.evaporate(BLACKHOLE_CHALLENGE);");
     }
 
     private String prefix(String argList) {
@@ -933,7 +936,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
-        writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
+        writer.println(ident(3) + "throw new IllegalStateException();");
         writer.println(ident(1) + "}");
 
         writer.println();
@@ -1042,7 +1045,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "return results;");
             writer.println(ident(2) + "} else");
         }
-        writer.println(ident(3) + "throw new IllegalStateException(\"Harness failed to distribute threads among groups properly\");");
+        writer.println(ident(3) + "throw new IllegalStateException();");
         writer.println(ident(1) + "}");
 
         writer.println();
