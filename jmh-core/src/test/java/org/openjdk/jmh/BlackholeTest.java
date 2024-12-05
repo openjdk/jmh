@@ -54,7 +54,7 @@ public class BlackholeTest {
         }
 
         try {
-            new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
+            new Blackhole("Should not be calling this.");
         } catch (Throwable e) {
             Assert.fail("Failed unexpectedly");
         }
