@@ -112,7 +112,10 @@ public class CompileTest {
     private static Collection<String> javacOptions(boolean annProc, Class<?> klass) {
         Collection<String> result = new ArrayList<>();
 
-        if (!annProc) {
+        if (annProc) {
+            result.add("-processor");
+            result.add("org.openjdk.jmh.generators.BenchmarkProcessor");
+        } else {
             result.add("-proc:none");
         }
 

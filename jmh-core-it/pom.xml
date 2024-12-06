@@ -151,6 +151,25 @@ questions.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>test-compile</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>testCompile</goal>
+                                </goals>
+                                <configuration>
+                                    <!--
+                                      Support for CustomTest: we want the JMH's processor to fire first, and then
+                                      see if it claims all JMH annotations, and nothing else.
+                                    -->
+                                    <annotationProcessors>
+                                        <annotationProcessor>org.openjdk.jmh.generators.BenchmarkProcessor</annotationProcessor>
+                                        <annotationProcessor>org.openjdk.jmh.it.annsteal.CustomBenchmarkProcessor</annotationProcessor>
+                                    </annotationProcessors>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
