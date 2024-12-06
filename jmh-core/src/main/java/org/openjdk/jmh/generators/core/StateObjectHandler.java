@@ -962,9 +962,6 @@ class StateObjectHandler {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B1", so.userType));
 
                 pw.println("package " + so.packageName + ";");
-
-                pw.println("import " + so.userType + ";");
-
                 pw.println("public class " + so.type + "_B1 extends " + so.userType + " {");
                 Paddings.padding(pw, "b1_");
                 pw.println("}");
@@ -976,9 +973,7 @@ class StateObjectHandler {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B2", so.userType));
 
                 pw.println("package " + so.packageName + ";");
-
                 pw.println("import " + AtomicIntegerFieldUpdater.class.getCanonicalName() + ";");
-
                 pw.println("public class " + so.type + "_B2 extends " + so.type + "_B1 {");
 
                 for (Level level : Level.values()) {
@@ -1011,22 +1006,11 @@ class StateObjectHandler {
             }
 
             {
-                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B3", so.userType));
-
-                pw.println("package " + so.packageName + ";");
-                pw.println("public class " + so.type + "_B3 extends " + so.type + "_B2 {");
-                Paddings.padding(pw, "b3_");
-                pw.println("}");
-                pw.println("");
-
-                pw.close();
-            }
-
-            {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type, so.userType));
 
                 pw.println("package " + so.packageName + ";");
-                pw.println("public class " + so.type + " extends " + so.type + "_B3 {");
+                pw.println("public class " + so.type + " extends " + so.type + "_B2 {");
+                Paddings.padding(pw, "b3_");
                 pw.println("}");
                 pw.println("");
 

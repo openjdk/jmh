@@ -293,7 +293,7 @@ public final class Blackhole extends BlackholeL4 {
          * directly though.
          */
 
-        if (!challengeResponse.equals("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.")) {
+        if (!challengeResponse.equals("Should not be calling this.")) {
             throw new IllegalStateException("Blackholes should not be instantiated directly.");
         }
     }
@@ -307,8 +307,8 @@ public final class Blackhole extends BlackholeL4 {
      * @param challengeResponse arbitrary string
      */
     public void evaporate(String challengeResponse) {
-        if (!challengeResponse.equals("Yes, I am Stephen Hawking, and know a thing or two about black holes.")) {
-            throw new IllegalStateException("Who are you?");
+        if (!challengeResponse.equals("Should not be calling this.")) {
+            throw new IllegalStateException("Evaporate should not be called directly.");
         }
         obj1 = null;
     }
