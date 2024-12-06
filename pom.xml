@@ -176,6 +176,9 @@ questions.
                         <compilerVersion>1.8</compilerVersion>
                         <source>1.8</source>
                         <target>1.8</target>
+                        <annotationProcessors>
+                            <annotationProcessor>org.openjdk.jmh.generators.BenchmarkProcessor</annotationProcessor>
+                        </annotationProcessors>
                     </configuration>
                 </plugin>
                 <plugin>
