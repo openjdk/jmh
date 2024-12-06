@@ -33,19 +33,11 @@ import org.openjdk.jmh.util.Utils;
  * not limited to the number of threads, thread indicies, group information, etc. Some
  * of that info duplicates what is available in {@link org.openjdk.jmh.infra.BenchmarkParams}.</p>
  */
-public final class ThreadParams extends ThreadParamsL4 {
+public final class ThreadParams extends ThreadParamsL3 {
     public ThreadParams(int threadIdx, int threadCount, int groupIdx, int groupCount, int subgroupIdx, int subgroupCount,
                         int groupThreadIdx, int groupThreadCount, int subgroupThreadIdx, int subgroupThreadCount) {
         super(threadIdx, threadCount, groupIdx, groupCount, subgroupIdx, subgroupCount,
                 groupThreadIdx, groupThreadCount, subgroupThreadIdx, subgroupThreadCount);
-    }
-
-    static {
-        Utils.check(ThreadParams.class, "threadIdx", "threadCount");
-        Utils.check(ThreadParams.class, "groupIdx", "groupCount");
-        Utils.check(ThreadParams.class, "subgroupIdx", "subgroupCount");
-        Utils.check(ThreadParams.class, "groupThreadIdx", "groupThreadCount");
-        Utils.check(ThreadParams.class, "subgroupThreadIdx", "subgroupThreadCount");
     }
 
     /**
@@ -200,11 +192,7 @@ public final class ThreadParams extends ThreadParamsL4 {
 
 }
 
-abstract class ThreadParamsL0 {
-    private int markerBegin;
-}
-
-abstract class ThreadParamsL1 extends ThreadParamsL0 {
+abstract class ThreadParamsL1 {
     private boolean p001, p002, p003, p004, p005, p006, p007, p008;
     private boolean p011, p012, p013, p014, p015, p016, p017, p018;
     private boolean p021, p022, p023, p024, p025, p026, p027, p028;
@@ -264,16 +252,6 @@ abstract class ThreadParamsL3 extends ThreadParamsL2 {
     private boolean q171, q172, q173, q174, q175, q176, q177, q178;
 
     public ThreadParamsL3(int threadIdx, int threadCount, int groupIdx, int groupCount, int subgroupIdx, int subgroupCount,
-                          int groupThreadIdx, int groupThreadCount, int subgroupThreadIdx, int subgroupThreadCount) {
-        super(threadIdx, threadCount, groupIdx, groupCount, subgroupIdx, subgroupCount,
-                groupThreadIdx, groupThreadCount, subgroupThreadIdx, subgroupThreadCount);
-    }
-}
-
-abstract class ThreadParamsL4 extends ThreadParamsL3 {
-    private int markerEnd;
-
-    public ThreadParamsL4(int threadIdx, int threadCount, int groupIdx, int groupCount, int subgroupIdx, int subgroupCount,
                           int groupThreadIdx, int groupThreadCount, int subgroupThreadIdx, int subgroupThreadCount) {
         super(threadIdx, threadCount, groupIdx, groupCount, subgroupIdx, subgroupCount,
                 groupThreadIdx, groupThreadCount, subgroupThreadIdx, subgroupThreadCount);

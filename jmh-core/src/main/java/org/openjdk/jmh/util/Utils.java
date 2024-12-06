@@ -38,18 +38,6 @@ import java.util.concurrent.*;
 
 public class Utils {
 
-    private static final Unsafe U;
-
-    static {
-        try {
-            Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafe.setAccessible(true);
-            U = (Unsafe) unsafe.get(null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     private Utils() {
 
     }
@@ -358,35 +346,6 @@ public class Utils {
         public void run() {
             while (!Thread.interrupted()); // burn;
         }
-    }
-
-    public static void check(Class<?> klass, String... fieldNames) {
-        for (String fieldName : fieldNames) {
-            check(klass, fieldName);
-        }
-    }
-
-    public static void check(Class<?> klass, String fieldName) {
-        final long requiredGap = 128;
-        long markerBegin = getOffset(klass, "markerBegin");
-        long markerEnd = getOffset(klass, "markerEnd");
-        long off = getOffset(klass, fieldName);
-        if (markerEnd - off < requiredGap || off - markerBegin < requiredGap) {
-            throw new IllegalStateException("Consistency check failed for " + fieldName + ", off = " + off + ", markerBegin = " + markerBegin + ", markerEnd = " + markerEnd);
-        }
-    }
-
-    public static long getOffset(Class<?> klass, String fieldName) {
-        do {
-            try {
-                Field f = klass.getDeclaredField(fieldName);
-                return U.objectFieldOffset(f);
-            } catch (NoSuchFieldException e) {
-                // whatever, will try superclass
-            }
-            klass = klass.getSuperclass();
-        } while (klass != null);
-        throw new IllegalStateException("Can't find field \"" + fieldName + "\"");
     }
 
     public static boolean isWindows() {
