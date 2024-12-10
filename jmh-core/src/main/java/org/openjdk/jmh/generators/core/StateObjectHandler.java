@@ -954,9 +954,21 @@ class StateObjectHandler {
     }
 
     public void writeStateOverrides(BenchmarkGeneratorSession sess, GeneratorDestination dst) throws IOException {
-
         for (StateObject so : cons(stateObjects)) {
             if (!sess.generatedStateOverrides.add(so.userType)) continue;
+
+            if (so.scope == Scope.Thread) {
+                // Thread states carry no additional fluff. Generate a simple stub and continue.
+                PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type, so.userType));
+
+                pw.println("package " + so.packageName + ";");
+                pw.println("public class " + so.type + " extends " + so.userType + " {");
+                Paddings.padding(pw, "b_");
+                pw.println("}");
+
+                pw.close();
+                continue;
+            }
 
             {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type + "_B1", so.userType));
@@ -977,6 +989,7 @@ class StateObjectHandler {
                 pw.println("public class " + so.type + "_B2 extends " + so.type + "_B1 {");
 
                 for (Level level : Level.values()) {
+                    pw.println("    public volatile boolean ready" + level + ";");
                     pw.println("    public volatile int setup" + level + "Mutex;");
                     pw.println("    public volatile int tear" + level + "Mutex;");
                     pw.println("    public final static AtomicIntegerFieldUpdater<" + so.type + "_B2> setup" + level + "MutexUpdater = " +
@@ -984,20 +997,6 @@ class StateObjectHandler {
                     pw.println("    public final static AtomicIntegerFieldUpdater<" + so.type + "_B2> tear" + level + "MutexUpdater = " +
                             "AtomicIntegerFieldUpdater.newUpdater(" + so.type + "_B2.class, \"tear" + level + "Mutex\");");
                     pw.println("");
-                }
-
-                switch (so.scope) {
-                    case Benchmark:
-                    case Group:
-                        for (Level level : Level.values()) {
-                            pw.println("    public volatile boolean ready" + level + ";");
-                        }
-                        break;
-                    case Thread:
-                        // these flags are redundant for single thread
-                        break;
-                    default:
-                        throw new IllegalStateException("Unknown state scope: " + so.scope);
                 }
 
                 pw.println("}");
