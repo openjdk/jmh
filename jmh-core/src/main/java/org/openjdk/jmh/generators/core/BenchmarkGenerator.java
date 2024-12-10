@@ -457,30 +457,14 @@ public class BenchmarkGenerator {
         writer.println("public final class " + info.generatedClassName + " {");
         writer.println();
 
-        // generate padding
+        // Generate padding
         Paddings.padding(writer, "p");
         writer.println();
-        writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
-        writer.println();
 
-        // Shared fields and their initializations.
-        writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
-        writer.println(ident(1) + "IterationParams iterationParams;");
-        writer.println(ident(1) + "ThreadParams threadParams;");
-        writer.println(ident(1) + "Blackhole blackhole;");
-        writer.println(ident(1) + "Control notifyControl;");
-        writer.println();
-        writer.println(ident(1) + "void init(InfraControl control, ThreadParams tp) {");
-        writer.println(ident(2) + "benchmarkParams = control.benchmarkParams;");
-        writer.println(ident(2) + "iterationParams = control.iterationParams;");
-        writer.println(ident(2) + "notifyControl = control.notifyControl;");
-        writer.println(ident(2) + "threadParams = tp;");
-        writer.println(ident(2) + "if (blackhole == null) {");
-        writer.println(ident(3) + "blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
-        writer.println(ident(2) + "}");
-        writer.println(ident(1) + "}");
+        // Write shared fields and their initializations
+        generateSharedFields(writer);
 
-        // write all methods
+        // Write all methods
         for (Mode benchmarkKind : Mode.values()) {
             if (benchmarkKind == Mode.All) continue;
             generateMethod(benchmarkKind, writer, info.methodGroup, states);
@@ -522,6 +506,26 @@ public class BenchmarkGenerator {
             writer.println("import " + c.getName() + ';');
         }
         writer.println();
+    }
+
+    private void generateSharedFields(PrintWriter writer) {
+        writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
+        writer.println();
+        writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
+        writer.println(ident(1) + "IterationParams iterationParams;");
+        writer.println(ident(1) + "ThreadParams threadParams;");
+        writer.println(ident(1) + "Blackhole blackhole;");
+        writer.println(ident(1) + "Control notifyControl;");
+        writer.println();
+        writer.println(ident(1) + "void init(InfraControl control, ThreadParams tp) {");
+        writer.println(ident(2) + "benchmarkParams = control.benchmarkParams;");
+        writer.println(ident(2) + "iterationParams = control.iterationParams;");
+        writer.println(ident(2) + "notifyControl = control.notifyControl;");
+        writer.println(ident(2) + "threadParams = tp;");
+        writer.println(ident(2) + "if (blackhole == null) {");
+        writer.println(ident(3) + "blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
+        writer.println(ident(2) + "}");
+        writer.println(ident(1) + "}");
     }
 
     /**
