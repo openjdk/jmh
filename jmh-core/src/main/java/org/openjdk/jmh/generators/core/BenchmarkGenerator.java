@@ -37,7 +37,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Benchmark generator.
@@ -511,19 +510,12 @@ public class BenchmarkGenerator {
 
     private void generateImport(PrintWriter writer) {
         Class<?>[] imports = new Class<?>[]{
-                List.class, AtomicInteger.class,
-                Collection.class, ArrayList.class,
-                TimeUnit.class, CompilerControl.class,
-                InfraControl.class, ThreadParams.class,
-                BenchmarkTaskResult.class,
+                InfraControl.class, BenchmarkParams.class, IterationParams.class, ThreadParams.class,
+                Blackhole.class, Control.class, BenchmarkTaskResult.class, RawResults.class, ResultRole.class,
+                SampleBuffer.class, Field.class, FailureAssistException.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
-                SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
-                Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
-                BenchmarkMode.class, RawResults.class, ResultRole.class,
-                Field.class, BenchmarkParams.class, IterationParams.class,
-                Blackhole.class, Control.class,
-                ScalarResult.class, AggregationPolicy.class,
-                FailureAssistException.class
+                SampleTimeResult.class, SingleShotResult.class,
+                ScalarResult.class, AggregationPolicy.class
         };
 
         for (Class<?> c : imports) {

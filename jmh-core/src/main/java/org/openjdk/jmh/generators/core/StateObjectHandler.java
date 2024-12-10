@@ -709,7 +709,7 @@ class StateObjectHandler {
                 result.add("    while (" + so.type + ".tear" + helperLevel + "MutexUpdater.get(" + so.localIdentifier + ") == 1) {");
 
                 if (helperLevel == Level.Trial) {
-                    result.add("        TimeUnit.MILLISECONDS.sleep(" + so.localIdentifier + "_backoff);");
+                    result.add("        Thread.sleep(" + so.localIdentifier + "_backoff);");
                     result.add("        " + so.localIdentifier + "_backoff = Math.max(1024, " + so.localIdentifier + "_backoff * 2);");
                 }
 
