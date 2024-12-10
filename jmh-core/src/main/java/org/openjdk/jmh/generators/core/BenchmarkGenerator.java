@@ -37,7 +37,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Benchmark generator.
@@ -458,20 +457,14 @@ public class BenchmarkGenerator {
         writer.println("public final class " + info.generatedClassName + " {");
         writer.println();
 
-        // generate padding
+        // Generate padding
         Paddings.padding(writer, "p");
         writer.println();
-        writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
-        writer.println();
 
-        writer.println(ident(1) + "int startRndMask;");
-        writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
-        writer.println(ident(1) + "IterationParams iterationParams;");
-        writer.println(ident(1) + "ThreadParams threadParams;");
-        writer.println(ident(1) + "Blackhole blackhole;");
-        writer.println(ident(1) + "Control notifyControl;");
+        // Write shared fields and their initializations
+        generateSharedFields(writer);
 
-        // write all methods
+        // Write all methods
         for (Mode benchmarkKind : Mode.values()) {
             if (benchmarkKind == Mode.All) continue;
             generateMethod(benchmarkKind, writer, info.methodGroup, states);
@@ -501,25 +494,38 @@ public class BenchmarkGenerator {
 
     private void generateImport(PrintWriter writer) {
         Class<?>[] imports = new Class<?>[]{
-                List.class, AtomicInteger.class,
-                Collection.class, ArrayList.class,
-                TimeUnit.class, CompilerControl.class,
-                InfraControl.class, ThreadParams.class,
-                BenchmarkTaskResult.class,
+                InfraControl.class, BenchmarkParams.class, IterationParams.class, ThreadParams.class,
+                Blackhole.class, Control.class, BenchmarkTaskResult.class, RawResults.class, ResultRole.class,
+                SampleBuffer.class, Field.class, FailureAssistException.class,
                 Result.class, ThroughputResult.class, AverageTimeResult.class,
-                SampleTimeResult.class, SingleShotResult.class, SampleBuffer.class,
-                Mode.class, Fork.class, Measurement.class, Threads.class, Warmup.class,
-                BenchmarkMode.class, RawResults.class, ResultRole.class,
-                Field.class, BenchmarkParams.class, IterationParams.class,
-                Blackhole.class, Control.class,
-                ScalarResult.class, AggregationPolicy.class,
-                FailureAssistException.class
+                SampleTimeResult.class, SingleShotResult.class,
+                ScalarResult.class, AggregationPolicy.class
         };
 
         for (Class<?> c : imports) {
             writer.println("import " + c.getName() + ';');
         }
         writer.println();
+    }
+
+    private void generateSharedFields(PrintWriter writer) {
+        writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
+        writer.println();
+        writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
+        writer.println(ident(1) + "IterationParams iterationParams;");
+        writer.println(ident(1) + "ThreadParams threadParams;");
+        writer.println(ident(1) + "Blackhole blackhole;");
+        writer.println(ident(1) + "Control notifyControl;");
+        writer.println();
+        writer.println(ident(1) + "void init(InfraControl control, ThreadParams tp) {");
+        writer.println(ident(2) + "benchmarkParams = control.benchmarkParams;");
+        writer.println(ident(2) + "iterationParams = control.iterationParams;");
+        writer.println(ident(2) + "notifyControl = control.notifyControl;");
+        writer.println(ident(2) + "threadParams = tp;");
+        writer.println(ident(2) + "if (blackhole == null) {");
+        writer.println(ident(3) + "blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
+        writer.println(ident(2) + "}");
+        writer.println(ident(1) + "}");
     }
 
     /**
@@ -809,28 +815,21 @@ public class BenchmarkGenerator {
     }
 
     private String getStubArgs() {
-        return "control, res, benchmarkParams, iterationParams, threadParams, blackhole, notifyControl, startRndMask";
+        return "control, res, benchmarkParams, iterationParams, threadParams, blackhole, notifyControl";
     }
 
     private String getStubTypeArgs() {
         return "InfraControl control, RawResults result, " +
                 "BenchmarkParams benchmarkParams, IterationParams iterationParams, ThreadParams threadParams, " +
-                "Blackhole blackhole, Control notifyControl, int startRndMask";
+                "Blackhole blackhole, Control notifyControl";
     }
 
     private void methodProlog(PrintWriter writer) {
-        // do nothing
-        writer.println(ident(2) + "this.benchmarkParams = control.benchmarkParams;");
-        writer.println(ident(2) + "this.iterationParams = control.iterationParams;");
-        writer.println(ident(2) + "this.threadParams    = threadParams;");
-        writer.println(ident(2) + "this.notifyControl   = control.notifyControl;");
-        writer.println(ident(2) + "if (this.blackhole == null) {");
-        writer.println(ident(3) + "this.blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
-        writer.println(ident(2) + "}");
+        writer.println(ident(2) + "init(control, threadParams);");
     }
 
     private void methodEpilog(PrintWriter writer) {
-        writer.println(ident(3) + "this.blackhole.evaporate(BLACKHOLE_CHALLENGE);");
+        writer.println(ident(3) + "blackhole.evaporate(BLACKHOLE_CHALLENGE);");
     }
 
     private String prefix(String argList) {
@@ -876,7 +875,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "notifyControl.startMeasurement = true;");
 
             // measurement loop call
-            writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
+            writer.println(ident(3) + "int targetSamples = control.getDurationMs() * 20;");
             writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
             writer.println(ident(3) + "int opsPerInv = benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
@@ -952,7 +951,7 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
-            writer.println(ident(2) + "int rndMask = startRndMask;");
+            writer.println(ident(2) + "int rndMask = 0;");
             writer.println(ident(2) + "long time = 0;");
             writer.println(ident(2) + "int currentStride = 0;");
             writer.println(ident(2) + "do {");
@@ -967,7 +966,7 @@ public class BenchmarkGenerator {
 
             writer.println(ident(3) + "for (int b = 0; b < batchSize; b++) {");
             writer.println(ident(4) + "if (control.volatileSpoiler) return;");
-            writer.println(ident(4) + "" + emitCall(method, states) + ';');
+            writer.println(ident(4) + emitCall(method, states) + ';');
             writer.println(ident(3) + "}");
 
             writer.println(ident(3) + "if (sample) {");
@@ -983,7 +982,6 @@ public class BenchmarkGenerator {
 
             writer.println(ident(3) + "operations++;");
             writer.println(ident(2) + "} while(!control.isDone);");
-            writer.println(ident(2) + "startRndMask = Math.max(startRndMask, rndMask);");
 
             writer.println(ident(2) + "result.realTime = realTime;");
             writer.println(ident(2) + "result.measuredOps = operations;");
