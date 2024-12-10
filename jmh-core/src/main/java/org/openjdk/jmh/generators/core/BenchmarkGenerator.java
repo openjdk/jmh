@@ -474,8 +474,8 @@ public class BenchmarkGenerator {
         writer.println(ident(1) + "void init(InfraControl control, ThreadParams tp) {");
         writer.println(ident(2) + "benchmarkParams = control.benchmarkParams;");
         writer.println(ident(2) + "iterationParams = control.iterationParams;");
-        writer.println(ident(2) + "threadParams    = tp;");
-        writer.println(ident(2) + "notifyControl   = control.notifyControl;");
+        writer.println(ident(2) + "notifyControl = control.notifyControl;");
+        writer.println(ident(2) + "threadParams = tp;");
         writer.println(ident(2) + "if (blackhole == null) {");
         writer.println(ident(3) + "blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
         writer.println(ident(2) + "}");
