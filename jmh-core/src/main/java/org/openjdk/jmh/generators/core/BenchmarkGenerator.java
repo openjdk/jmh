@@ -464,7 +464,6 @@ public class BenchmarkGenerator {
         writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
         writer.println();
 
-        writer.println(ident(1) + "int startRndMask;");
         writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
         writer.println(ident(1) + "IterationParams iterationParams;");
         writer.println(ident(1) + "ThreadParams threadParams;");
@@ -809,13 +808,13 @@ public class BenchmarkGenerator {
     }
 
     private String getStubArgs() {
-        return "control, res, benchmarkParams, iterationParams, threadParams, blackhole, notifyControl, startRndMask";
+        return "control, res, benchmarkParams, iterationParams, threadParams, blackhole, notifyControl";
     }
 
     private String getStubTypeArgs() {
         return "InfraControl control, RawResults result, " +
                 "BenchmarkParams benchmarkParams, IterationParams iterationParams, ThreadParams threadParams, " +
-                "Blackhole blackhole, Control notifyControl, int startRndMask";
+                "Blackhole blackhole, Control notifyControl";
     }
 
     private void methodProlog(PrintWriter writer) {
@@ -876,7 +875,7 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "notifyControl.startMeasurement = true;");
 
             // measurement loop call
-            writer.println(ident(3) + "int targetSamples = (int) (control.getDuration(TimeUnit.MILLISECONDS) * 20); // at max, 20 timestamps per millisecond");
+            writer.println(ident(3) + "int targetSamples = control.getDurationMs() * 20;");
             writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
             writer.println(ident(3) + "int opsPerInv = benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
@@ -952,7 +951,7 @@ public class BenchmarkGenerator {
             writer.println(ident(2) + "long realTime = 0;");
             writer.println(ident(2) + "long operations = 0;");
             writer.println(ident(2) + "int rnd = (int)System.nanoTime();");
-            writer.println(ident(2) + "int rndMask = startRndMask;");
+            writer.println(ident(2) + "int rndMask = 0;");
             writer.println(ident(2) + "long time = 0;");
             writer.println(ident(2) + "int currentStride = 0;");
             writer.println(ident(2) + "do {");
@@ -967,7 +966,7 @@ public class BenchmarkGenerator {
 
             writer.println(ident(3) + "for (int b = 0; b < batchSize; b++) {");
             writer.println(ident(4) + "if (control.volatileSpoiler) return;");
-            writer.println(ident(4) + "" + emitCall(method, states) + ';');
+            writer.println(ident(4) + emitCall(method, states) + ';');
             writer.println(ident(3) + "}");
 
             writer.println(ident(3) + "if (sample) {");
@@ -983,7 +982,6 @@ public class BenchmarkGenerator {
 
             writer.println(ident(3) + "operations++;");
             writer.println(ident(2) + "} while(!control.isDone);");
-            writer.println(ident(2) + "startRndMask = Math.max(startRndMask, rndMask);");
 
             writer.println(ident(2) + "result.realTime = realTime;");
             writer.println(ident(2) + "result.measuredOps = operations;");

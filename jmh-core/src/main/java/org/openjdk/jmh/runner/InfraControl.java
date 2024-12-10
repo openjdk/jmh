@@ -50,15 +50,20 @@ public class InfraControl extends InfraControlL3 {
     /**
      * @return requested loop duration in milliseconds.
      */
-    public long getDuration() {
-        return getDuration(TimeUnit.MILLISECONDS);
+    public int getDurationMs() {
+        long ms = getDurationMs(TimeUnit.MILLISECONDS);
+        int ims = (int) ms;
+        if (ms != ims) {
+            throw new IllegalStateException("Integer truncation problem");
+        }
+        return ims;
     }
 
     /**
      * @param unit timeunit to use
      * @return requested loop duration in the requested unit.
      */
-    public long getDuration(TimeUnit unit) {
+    public long getDurationMs(TimeUnit unit) {
         return iterationParams.getTime().convertTo(unit);
     }
 
