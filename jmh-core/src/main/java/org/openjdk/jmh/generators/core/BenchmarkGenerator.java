@@ -464,11 +464,22 @@ public class BenchmarkGenerator {
         writer.println(ident(1) + "static final String BLACKHOLE_CHALLENGE = \"Should not be calling this.\";");
         writer.println();
 
+        // Shared fields and their initializations.
         writer.println(ident(1) + "BenchmarkParams benchmarkParams;");
         writer.println(ident(1) + "IterationParams iterationParams;");
         writer.println(ident(1) + "ThreadParams threadParams;");
         writer.println(ident(1) + "Blackhole blackhole;");
         writer.println(ident(1) + "Control notifyControl;");
+        writer.println();
+        writer.println(ident(1) + "void init(InfraControl control, ThreadParams tp) {");
+        writer.println(ident(2) + "benchmarkParams = control.benchmarkParams;");
+        writer.println(ident(2) + "iterationParams = control.iterationParams;");
+        writer.println(ident(2) + "threadParams    = tp;");
+        writer.println(ident(2) + "notifyControl   = control.notifyControl;");
+        writer.println(ident(2) + "if (blackhole == null) {");
+        writer.println(ident(3) + "blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
+        writer.println(ident(2) + "}");
+        writer.println(ident(1) + "}");
 
         // write all methods
         for (Mode benchmarkKind : Mode.values()) {
@@ -818,18 +829,11 @@ public class BenchmarkGenerator {
     }
 
     private void methodProlog(PrintWriter writer) {
-        // do nothing
-        writer.println(ident(2) + "this.benchmarkParams = control.benchmarkParams;");
-        writer.println(ident(2) + "this.iterationParams = control.iterationParams;");
-        writer.println(ident(2) + "this.threadParams    = threadParams;");
-        writer.println(ident(2) + "this.notifyControl   = control.notifyControl;");
-        writer.println(ident(2) + "if (this.blackhole == null) {");
-        writer.println(ident(3) + "this.blackhole = new Blackhole(BLACKHOLE_CHALLENGE);");
-        writer.println(ident(2) + "}");
+        writer.println(ident(2) + "init(control, threadParams);");
     }
 
     private void methodEpilog(PrintWriter writer) {
-        writer.println(ident(3) + "this.blackhole.evaporate(BLACKHOLE_CHALLENGE);");
+        writer.println(ident(3) + "blackhole.evaporate(BLACKHOLE_CHALLENGE);");
     }
 
     private String prefix(String argList) {
