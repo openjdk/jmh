@@ -30,14 +30,16 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
+
+@BenchmarkMode(Mode.Throughput)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class JMHSample_03_States {
 
     /*
@@ -57,19 +59,19 @@ public class JMHSample_03_States {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-        volatile double x = Math.PI;
+        int x;
     }
 
     @State(Scope.Thread)
     public static class ThreadState {
-        volatile double x = Math.PI;
+        int x;
     }
 
     /*
      * Benchmark methods can reference the states, and JMH will inject the
      * appropriate states while calling these methods. You can have no states at
      * all, or have only one state, or have multiple states referenced. This
-     * makes building multi-threaded benchmark a breeze.
+     * simplifies building multithreaded benchmarks.
      *
      * For this exercise, we have two methods.
      */
@@ -79,7 +81,7 @@ public class JMHSample_03_States {
         // All benchmark threads will call in this method.
         //
         // However, since ThreadState is the Scope.Thread, each thread
-        // will have it's own copy of the state, and this benchmark
+        // will have its own copy of the state, and this benchmark
         // will measure unshared case.
         state.x++;
     }

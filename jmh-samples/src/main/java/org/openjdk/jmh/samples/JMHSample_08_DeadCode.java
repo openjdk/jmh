@@ -55,18 +55,18 @@ public class JMHSample_08_DeadCode {
      * are implicitly consumed by Blackholes, see JMHSample_09_Blackholes).
      */
 
-    private double x = Math.PI;
+    int x;
 
-    private double compute(double d) {
+    private int compute(int d) {
         for (int c = 0; c < 10; c++) {
-            d = d * d / Math.PI;
+            d = d * d / 42;
         }
         return d;
     }
 
     @Benchmark
     public void baseline() {
-        // do nothing, this is a baseline
+        // Do nothing, this is a baseline
     }
 
     @Benchmark
@@ -76,7 +76,7 @@ public class JMHSample_08_DeadCode {
     }
 
     @Benchmark
-    public double measureRight() {
+    public int measureRight() {
         // This is correct: the result is being used.
         return compute(x);
     }

@@ -319,9 +319,9 @@ public class JMHSample_25_API_GA {
             final double MUTATE_PROB = 0.5;
             if (Math.random() < MUTATE_PROB) {
                 if (Math.random() < 0.5) {
-                    return v / (Math.random() * 2);
+                    return v / (Math.random() * 3);
                 } else {
-                    return v * (Math.random() * 2);
+                    return v * (Math.random() * 3);
                 }
             } else {
                 return v;

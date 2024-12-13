@@ -69,11 +69,11 @@ public class JMHSample_24_Inheritance {
     @State(Scope.Thread)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public static abstract class AbstractBenchmark {
-        int x;
+        double x;
 
         @Setup
         public void setup() {
-            x = 42;
+            x = Math.PI;
         }
 
         @Benchmark

@@ -53,12 +53,12 @@ public class JMHSample_09_Blackholes {
      * code less readable with explicit Blackholes!
      */
 
-    double x1 = Math.PI;
-    double x2 = Math.PI * 2;
+    int x1;
+    int x2;
 
-    private double compute(double d) {
+    private int compute(int d) {
         for (int c = 0; c < 10; c++) {
-            d = d * d / Math.PI;
+            d = d * d / 42;
         }
         return d;
     }
@@ -68,7 +68,7 @@ public class JMHSample_09_Blackholes {
      */
 
     @Benchmark
-    public double baseline() {
+    public int baseline() {
         return compute(x1);
     }
 
@@ -78,7 +78,7 @@ public class JMHSample_09_Blackholes {
      */
 
     @Benchmark
-    public double measureWrong() {
+    public int measureWrong() {
         compute(x1);
         return compute(x2);
     }
@@ -92,7 +92,7 @@ public class JMHSample_09_Blackholes {
      */
 
     @Benchmark
-    public double measureRight_1() {
+    public int measureRight_1() {
         return compute(x1) + compute(x2);
     }
 

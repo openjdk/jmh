@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 public class JMHSample_20_Annotations {
 
-    double x1 = Math.PI;
+    int x;
 
     /*
      * In addition to all the command line options usable at run time,
@@ -68,8 +68,8 @@ public class JMHSample_20_Annotations {
     @Benchmark
     @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-    public double measure() {
-        return Math.log(x1);
+    public void measure() {
+        x++;
     }
 
     /*

@@ -24,8 +24,6 @@
  */
 package org.openjdk.jmh.util;
 
-import sun.misc.Unsafe;
-
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.AccessibleObject;
