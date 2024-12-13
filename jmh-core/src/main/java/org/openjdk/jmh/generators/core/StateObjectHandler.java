@@ -962,7 +962,7 @@ class StateObjectHandler {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type, so.userType));
 
                 pw.println("package " + so.packageName + ";");
-                pw.println("public class " + so.type + " extends " + so.userType + " {");
+                pw.println("public final class " + so.type + " extends " + so.userType + " {");
                 Paddings.padding(pw, "b_");
                 pw.println("}");
 
@@ -1008,7 +1008,7 @@ class StateObjectHandler {
                 PrintWriter pw = new PrintWriter(dst.newClass(so.packageName + "." + so.type, so.userType));
 
                 pw.println("package " + so.packageName + ";");
-                pw.println("public class " + so.type + " extends " + so.type + "_B2 {");
+                pw.println("public final class " + so.type + " extends " + so.type + "_B2 {");
                 Paddings.padding(pw, "b3_");
                 pw.println("}");
                 pw.println("");

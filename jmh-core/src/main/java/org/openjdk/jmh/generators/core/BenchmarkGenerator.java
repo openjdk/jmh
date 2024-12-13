@@ -582,15 +582,12 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "}");
             writer.println();
 
-            // control objects get a special treatment
-            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
-
             // measurement loop call
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX +
                     "(" + getStubArgs() + prefix(states.getArgList(method)) + ");");
-
-            // control objects get a special treatment
             writer.println(ident(3) + "notifyControl.stopMeasurement = true;");
+            writer.println();
 
             // synchronize iterations epilog: announce ready
             writer.println(ident(3) + "control.announceWarmdownReady();");
@@ -718,14 +715,11 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "}");
             writer.println();
 
-            // control objects get a special treatment
-            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
-
             // measurement loop call
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(" + getStubArgs() + prefix(states.getArgList(method)) + ");");
-
-            // control objects get a special treatment
             writer.println(ident(3) + "notifyControl.stopMeasurement = true;");
+            writer.println();
 
             // synchronize iterations epilog: announce ready
             writer.println(ident(3) + "control.announceWarmdownReady();");
@@ -871,19 +865,18 @@ public class BenchmarkGenerator {
             writer.println(ident(3) + "}");
             writer.println();
 
-            // control objects get a special treatment
-            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
-
-            // measurement loop call
             writer.println(ident(3) + "int targetSamples = control.getDurationMs() * 20;");
             writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
             writer.println(ident(3) + "int opsPerInv = benchmarkParams.getOpsPerInvocation();");
             writer.println(ident(3) + "SampleBuffer buffer = new SampleBuffer();");
+            writer.println();
+
+            // measurement loop call
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(" +
                     getStubArgs() + ", buffer, targetSamples, opsPerInv, batchSize" + prefix(states.getArgList(method)) + ");");
-
-            // control objects get a special treatment
             writer.println(ident(3) + "notifyControl.stopMeasurement = true;");
+            writer.println();
 
             // synchronize iterations epilog: announce ready
             writer.println(ident(3) + "control.announceWarmdownReady();");
@@ -1006,14 +999,15 @@ public class BenchmarkGenerator {
 
             iterationProlog(writer, 3, method, states);
 
-            // control objects get a special treatment
-            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
-
-            // measurement loop call
             writer.println(ident(3) + "RawResults res = new RawResults();");
             writer.println(ident(3) + "int batchSize = iterationParams.getBatchSize();");
+            writer.println();
+
+            // measurement loop call
+            writer.println(ident(3) + "notifyControl.startMeasurement = true;");
             writer.println(ident(3) + method.getName() + "_" + benchmarkKind.shortLabel() + JMH_STUB_SUFFIX + "(" +
                     getStubArgs() + ", batchSize" + prefix(states.getArgList(method)) + ");");
+            writer.println();
 
             writer.println(ident(3) + "control.preTearDown();");
 
@@ -1026,8 +1020,7 @@ public class BenchmarkGenerator {
              *   one "op".
              */
 
-            writer.println(ident(3) + "int opsPerInv = control.benchmarkParams.getOpsPerInvocation();");
-            writer.println(ident(3) + "long totalOps = opsPerInv;");
+            writer.println(ident(3) + "long totalOps = benchmarkParams.getOpsPerInvocation();");
 
             writer.println(ident(3) + "BenchmarkTaskResult results = new BenchmarkTaskResult(totalOps, totalOps);");
             if (isSingleMethod) {
@@ -1100,12 +1093,9 @@ public class BenchmarkGenerator {
         writer.println(ident(prefix) + "control.preSetup();");
 
         for (String s : states.getIterationSetups(method)) writer.println(ident(prefix) + s);
-        writer.println();
-
-        // reset @AuxCounters
         for (String s : states.getAuxResets(method)) writer.println(ident(prefix) + s);
-        writer.println();
 
+        writer.println();
     }
 
     private void iterationEpilog(PrintWriter writer, int prefix, MethodInfo method, StateObjectHandler states) {
