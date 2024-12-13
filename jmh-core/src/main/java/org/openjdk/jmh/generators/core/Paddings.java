@@ -32,6 +32,10 @@ import java.util.StringJoiner;
 
 public class Paddings {
 
+    // This class is responsible for padding in generated code.
+    // If padding needs to be adjusted, also change the manual paddings
+    // in infra classes like Blackhole and various *Params.
+
     private static final Map<String, String> PADDING_CACHE =
             Collections.synchronizedMap(new HashMap<>());
 
