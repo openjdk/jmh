@@ -55,41 +55,41 @@ public class JMHSample_10_ConstantFold {
      * values, and follow the rules to prevent DCE.
      */
 
-    // IDEs will say "Oh, you can convert this field to local variable". Don't. Trust. Them.
+    // IDEs will say "Look, this field could be final". Don't. Trust. Them.
     // (While this is normally fine advice, it does not work in the context of measuring correctly.)
-    private double x = Math.PI;
+    private int x = 42;
 
-    // IDEs will probably also say "Look, it could be final". Don't. Trust. Them. Either.
+    // IDEs will say "Oh, you can convert this field to local variable". Don't. Trust. Them. Either.
     // (While this is normally fine advice, it does not work in the context of measuring correctly.)
-    private final double wrongX = Math.PI;
+    private final int wrongX = 42;
 
-    private double compute(double d) {
+    private int compute(int d) {
         for (int c = 0; c < 10; c++) {
-            d = d * d / Math.PI;
+            d = d * d / 42;
         }
         return d;
     }
 
     @Benchmark
-    public double baseline() {
+    public int baseline() {
         // simply return the value, this is a baseline
-        return Math.PI;
+        return 42;
     }
 
     @Benchmark
-    public double measureWrong_1() {
+    public int measureWrong_1() {
         // This is wrong: the source is predictable, and computation is foldable.
-        return compute(Math.PI);
+        return compute(42);
     }
 
     @Benchmark
-    public double measureWrong_2() {
+    public int measureWrong_2() {
         // This is wrong: the source is predictable, and computation is foldable.
         return compute(wrongX);
     }
 
     @Benchmark
-    public double measureRight() {
+    public int measureRight() {
         // This is correct: the source is not predictable.
         return compute(x);
     }

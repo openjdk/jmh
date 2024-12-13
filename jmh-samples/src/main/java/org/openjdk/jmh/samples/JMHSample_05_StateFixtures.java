@@ -36,10 +36,14 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
+
+@BenchmarkMode(Mode.Throughput)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
 public class JMHSample_05_StateFixtures {
 
-    double x;
+    int x;
 
     /*
      * Since @State objects are kept around during the lifetime of the
@@ -66,7 +70,7 @@ public class JMHSample_05_StateFixtures {
 
     @Setup
     public void prepare() {
-        x = Math.PI;
+        x = 1;
     }
 
     /*
@@ -75,7 +79,7 @@ public class JMHSample_05_StateFixtures {
 
     @TearDown
     public void check() {
-        assert x > Math.PI : "Nothing changed?";
+        assert x > 1 : "Nothing changed?";
     }
 
     /*
@@ -97,7 +101,7 @@ public class JMHSample_05_StateFixtures {
 
     @Benchmark
     public void measureWrong() {
-        double x = 0;
+        int x = 0;
         x++;
     }
 

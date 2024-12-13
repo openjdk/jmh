@@ -76,9 +76,9 @@ public class JMHSample_28_BlackholeHelpers {
     private Worker workerRight;
     private Worker workerWrong;
 
-    private double compute(double d) {
+    private int compute(int d) {
         for (int c = 0; c < 10; c++) {
-            d = d * d / Math.PI;
+            d = d * d / 42;
         }
         return d;
     }
@@ -86,7 +86,7 @@ public class JMHSample_28_BlackholeHelpers {
     @Setup
     public void setup(final Blackhole bh) {
         workerBaseline = new Worker() {
-            double x;
+            int x;
 
             @Override
             public void work() {
@@ -95,7 +95,7 @@ public class JMHSample_28_BlackholeHelpers {
         };
 
         workerWrong = new Worker() {
-            double x;
+            int x;
 
             @Override
             public void work() {
@@ -104,7 +104,7 @@ public class JMHSample_28_BlackholeHelpers {
         };
 
         workerRight = new Worker() {
-            double x;
+            int x;
 
             @Override
             public void work() {

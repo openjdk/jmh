@@ -44,6 +44,7 @@ import java.util.concurrent.*;
  * which should not count as payload (e.g. sleep for some time to emulate
  * think time)
  */
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class JMHSample_07_FixtureLevelInvocation {
 
@@ -77,7 +78,6 @@ public class JMHSample_07_FixtureLevelInvocation {
         public void down() {
             service.shutdown();
         }
-
     }
 
     /*
@@ -101,14 +101,12 @@ public class JMHSample_07_FixtureLevelInvocation {
      */
 
     @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public double measureHot(NormalState e, final Scratch s) throws ExecutionException, InterruptedException {
+    public int measureHot(NormalState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public double measureCold(LaggingState e, final Scratch s) throws ExecutionException, InterruptedException {
+    public int measureCold(LaggingState e, final Scratch s) throws ExecutionException, InterruptedException {
         return e.service.submit(new Task(s)).get();
     }
 
@@ -118,14 +116,13 @@ public class JMHSample_07_FixtureLevelInvocation {
 
     @State(Scope.Thread)
     public static class Scratch {
-        private double p;
-        public double doWork() {
-            p = Math.log(p);
-            return p;
+        private int p;
+        public int doWork() {
+            return p++;
         }
     }
 
-    public static class Task implements Callable<Double> {
+    public static class Task implements Callable<Integer> {
         private Scratch s;
 
         public Task(Scratch s) {
@@ -133,7 +130,7 @@ public class JMHSample_07_FixtureLevelInvocation {
         }
 
         @Override
-        public Double call() {
+        public Integer call() {
             return s.doWork();
         }
     }

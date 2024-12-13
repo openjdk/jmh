@@ -36,10 +36,14 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
+
+@BenchmarkMode(Mode.Throughput)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
 public class JMHSample_06_FixtureLevel {
 
-    double x;
+    int x;
 
     /*
      * Fixture methods have different levels to control when they should be run.
@@ -56,7 +60,7 @@ public class JMHSample_06_FixtureLevel {
 
     @TearDown(Level.Iteration)
     public void check() {
-        assert x > Math.PI : "Nothing changed?";
+        assert x > 1 : "Nothing changed?";
     }
 
     @Benchmark
@@ -66,7 +70,7 @@ public class JMHSample_06_FixtureLevel {
 
     @Benchmark
     public void measureWrong() {
-        double x = 0;
+        int x = 0;
         x++;
     }
 

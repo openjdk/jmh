@@ -30,13 +30,13 @@
  */
 package org.openjdk.jmh.samples;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+import java.util.concurrent.TimeUnit;
 
 /*
  * Fortunately, in many cases you just need a single state object.
@@ -45,10 +45,12 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
  * Java program does.
  */
 
+@BenchmarkMode(Mode.Throughput)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
 public class JMHSample_04_DefaultState {
 
-    double x = Math.PI;
+    int x;
 
     @Benchmark
     public void measure() {
