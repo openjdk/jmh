@@ -44,18 +44,34 @@ public class Paddings {
             throw new IllegalArgumentException("prefix must not be empty");
         }
         StringJoiner sj = new StringJoiner("");
-        for (int p = 0; p < 16; p++) {
-            sj.add("    byte ");
-            for (int q = 0; q < 16; q++) {
-                if (q != 0) {
-                    sj.add(", ");
-                }
-                sj.add(prefix);
-                sj.add(String.format("%03d", p * 16 + q));
+        sj.add("    byte ");
+        for (int q = 0; q < 16; q++) {
+            if (q != 0) {
+                sj.add(", ");
             }
-            sj.add(";");
-            sj.add(System.lineSeparator());
+            sj.add(prefix);
+            sj.add(String.format("%02x", q));
         }
+        sj.add(";");
+        sj.add(System.lineSeparator());
+
+        // 30 longs = 240 bytes
+        for (int q = 0; q < 30; q++) {
+            if (q % 16 == 0) {
+                if (q > 0) {
+                    sj.add(";");
+                    sj.add(System.lineSeparator());
+                }
+                sj.add("    long ");
+            } else {
+                sj.add(", ");
+            }
+            sj.add(prefix);
+            sj.add(String.format("%02x", 16 + q));
+        }
+        sj.add(";");
+        sj.add(System.lineSeparator());
+
         return sj.toString();
     }
 
