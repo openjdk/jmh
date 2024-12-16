@@ -30,13 +30,16 @@ import org.openjdk.jmh.results.*;
 
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 public class CompilerProfiler implements InternalProfiler {
 
-    private long startCompTime;
+    private static final int UNDEFINED = -1;
+
+    private long warmupStartTime = UNDEFINED;
+    private long measurementStartTime = UNDEFINED;
 
     @Override
     public String getDescription() {
@@ -54,7 +57,20 @@ public class CompilerProfiler implements InternalProfiler {
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
-            startCompTime = comp.getTotalCompilationTime();
+            switch (iterationParams.getType()) {
+                case WARMUP: {
+                    if (warmupStartTime == UNDEFINED) {
+                        warmupStartTime = comp.getTotalCompilationTime();
+                    }
+                    break;
+                }
+                case MEASUREMENT: {
+                    if (measurementStartTime == UNDEFINED) {
+                        measurementStartTime = comp.getTotalCompilationTime();
+                    }
+                    break;
+                }
+            }
         } catch (UnsupportedOperationException e) {
             // do nothing
         }
@@ -65,10 +81,15 @@ public class CompilerProfiler implements InternalProfiler {
         CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
             long curTime = comp.getTotalCompilationTime();
-            return Arrays.asList(
-                new ScalarResult("compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
-                new ScalarResult("compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
-            );
+            Collection<ScalarResult> res = new ArrayList<>();
+            res.add(new ScalarResult("compiler.time.total", curTime, "ms", AggregationPolicy.MAX));
+            if (measurementStartTime != UNDEFINED) {
+                if (warmupStartTime != UNDEFINED) {
+                    res.add(new ScalarResult("compiler.time.warmup", measurementStartTime - warmupStartTime, "ms", AggregationPolicy.SUM));
+                }
+                res.add(new ScalarResult("compiler.time.measure", curTime - measurementStartTime, "ms", AggregationPolicy.SUM));
+            }
+            return res;
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();
         }
