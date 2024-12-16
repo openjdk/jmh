@@ -60,9 +60,9 @@ public class CompilerProfilerTest {
         Map<String, Result> sr = rr.getSecondaryResults();
         double timeTotal = ProfilerTestUtils.checkedGet(sr, "compiler.time.total").getScore();
         double timeWarmup = ProfilerTestUtils.checkedGet(sr, "compiler.time.warmup").getScore();
-        double timeMeasurement = ProfilerTestUtils.checkedGet(sr, "compiler.time.measure").getScore();
+        double timeMeasurement = ProfilerTestUtils.checkedGet(sr, "compiler.time.measurement").getScore();
 
-        String details = "Total: " + timeTotal + ", Warmup: " + timeWarmup + ", Measure: " + timeMeasurement;
+        String details = "Total: " + timeTotal + ", Warmup: " + timeWarmup + ", Measurement: " + timeMeasurement;
 
         if (timeTotal < timeWarmup + timeMeasurement) {
             throw new IllegalStateException("Warmup+measure should be less than total. " + details);
