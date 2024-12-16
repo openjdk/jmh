@@ -50,7 +50,7 @@ public class GCProfilerTest {
 
     @Benchmark
     @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
-    @Measurement(iterations = 2, time = 2, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
     @BenchmarkMode(Mode.AverageTime)
     public Object allocateObject() {
         return new Object();
@@ -66,7 +66,7 @@ public class GCProfilerTest {
 
     @Benchmark
     @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
-    @Measurement(iterations = 1, time = 2, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
     @BenchmarkMode(Mode.SampleTime)
     public Object allocateObjectSampleTime() {
         return new Object();
