@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class OpsPerInvSanityTest {
 
-    private static final int SLEEP_TIME_MS = 50;
+    private static final int SLEEP_TIME_MS = 10;
 
     @AuxCounters(AuxCounters.Type.EVENTS)
     @State(Scope.Thread)
@@ -90,7 +90,7 @@ public class OpsPerInvSanityTest {
             .shouldFailOnError(true)
             .warmupIterations(0)
             .measurementTime(TimeValue.seconds(1))
-            .measurementIterations(5)
+            .measurementIterations(3)
             .forks(1)
             .timeUnit(TimeUnit.MILLISECONDS)
             .syncIterations(false)

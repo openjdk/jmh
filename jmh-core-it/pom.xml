@@ -76,7 +76,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>${jmh.testjvmargs}</argLine>
-                            <forkCount>1C</forkCount>
+                            <!-- Integration tests run with sleeps as payloads, we can execute them with larger parallelism -->
+                            <forkCount>1.5C</forkCount>
                             <!-- Integration tests sometimes set system properties, do not let them leak to other tests -->
                             <reuseForks>false</reuseForks>
                             <redirectTestOutputToFile>true</redirectTestOutputToFile>

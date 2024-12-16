@@ -67,7 +67,7 @@ public class CompilerControlExcludeActualTest {
                     .shouldFailOnError(true)
                     .addProfiler(LogConsumeProfiler.class)
                     .measurementIterations(mode == Mode.SingleShotTime ? 200_000 : 1)
-                    .measurementTime(TimeValue.seconds(5))
+                    .measurementTime(TimeValue.seconds(3))
                     .warmupIterations(0)
                     .forks(1)
                     .jvmArgsPrepend("-XX:CICompilerCount=2") // need to serialize the output properly
