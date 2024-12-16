@@ -45,7 +45,7 @@ public class CompilerProfilerTest {
 
     @Benchmark
     public void work() {
-        Fixtures.work();
+        Fixtures.busyWork();
     }
 
     @Test

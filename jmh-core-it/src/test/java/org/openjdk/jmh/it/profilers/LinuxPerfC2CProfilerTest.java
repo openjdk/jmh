@@ -52,7 +52,7 @@ public class LinuxPerfC2CProfilerTest {
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void somethingInTheMiddle() {
-        Fixtures.work();
+        Fixtures.busyWork();
     }
 
     @Test

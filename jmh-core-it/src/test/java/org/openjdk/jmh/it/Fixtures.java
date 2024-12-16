@@ -24,6 +24,8 @@
  */
 package org.openjdk.jmh.it;
 
+import org.openjdk.jmh.infra.Blackhole;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,7 @@ public class Fixtures {
 
     private static final int REPS;
     private static final String PROFILE;
+    private static final int WORK_TIME_MS;
 
     static {
         REPS = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
@@ -44,6 +47,11 @@ public class Fixtures {
                 return System.getProperty("jmh.core.it.profile");
             }
         });
+        WORK_TIME_MS = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
+            public Integer run() {
+                return Integer.getInteger("jmh.core.it.workTime", 10);
+            }
+        });
     }
 
     public static int repetitionCount() {
@@ -54,13 +62,27 @@ public class Fixtures {
         return klass.getCanonicalName();
     }
 
+    /**
+     * Perform some work, without any guarantees that method would be hot.
+     * Use this method as the courtesy for other parallel-running tests.
+     */
     public static void work() {
-        // courtesy for parallel-running tests
         try {
-            TimeUnit.MILLISECONDS.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(WORK_TIME_MS);
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Perform some busy work, hopefully triggering CPU use and compilations.
+     */
+    public static void busyWork() {
+        long endTime = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(WORK_TIME_MS);
+        while (System.nanoTime() < endTime) {
+            Blackhole.consumeCPU(10);
+        }
+        Thread.yield();
     }
 
     public static boolean expectStableThreads() {
