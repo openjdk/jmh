@@ -171,7 +171,7 @@ public final class BinaryLinkClient {
 
     public Options handshake() throws IOException, ClassNotFoundException {
         synchronized (lock) {
-            pushFrame(new HandshakeInitFrame());
+            pushFrame(new HandshakeInitFrame(Utils.getPid()));
 
             Object reply = readFrame();
             if (reply instanceof HandshakeResponseFrame) {
