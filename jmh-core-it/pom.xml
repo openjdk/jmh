@@ -76,14 +76,16 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>${jmh.testjvmargs}</argLine>
-                            <!-- Integration tests run with sleeps as payloads, we can execute them with larger parallelism -->
+                            <!-- Integration tests run with sleeps as payloads, we can execute them with larger parallelism. -->
                             <forkCount>1.5C</forkCount>
                             <!-- Integration tests sometimes set system properties, do not let them leak to other tests -->
                             <reuseForks>false</reuseForks>
                             <redirectTestOutputToFile>true</redirectTestOutputToFile>
                             <excludes>
-                                <!-- xctrace tests interfere with each other when executed concurrently -->
-                                <exclude>**/profilers/XCTrace*ProfilerTest.java</exclude>
+                                <!-- These tests interfere with each other when executed concurrently -->
+                                <exclude>**/batchsize/*</exclude>
+                                <exclude>**/ccontrol/*</exclude>
+                                <exclude>**/profilers/*</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -97,10 +99,13 @@ questions.
                         <configuration>
                             <argLine>${jmh.testjvmargs}</argLine>
                             <forkCount>1</forkCount>
+                            <reuseForks>false</reuseForks>
                             <redirectTestOutputToFile>true</redirectTestOutputToFile>
                             <includes>
-                                <!-- xctrace tests interfere with each other when executed concurrently -->
-                                <include>**/profilers/XCTrace*ProfilerTest.java</include>
+                                <!-- These tests interfere with each other when executed concurrently -->
+                                <include>**/batchsize/*</include>
+                                <include>**/ccontrol/*</include>
+                                <include>**/profilers/*</include>
                             </includes>
                         </configuration>
                     </execution>
