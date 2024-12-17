@@ -46,7 +46,7 @@ public class JavaFlightRecorderProfilerTest {
 
     @Benchmark
     public void work() {
-        Fixtures.work();
+        Fixtures.busyWork();
     }
 
     @Test

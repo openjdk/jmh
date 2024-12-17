@@ -51,7 +51,7 @@ public class StackProfilerTest {
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void somethingInTheMiddle() {
-        Fixtures.work();
+        Fixtures.busyWork();
     }
 
     @Test
