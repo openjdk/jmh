@@ -26,11 +26,13 @@ package org.openjdk.jmh.util;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.security.AccessControlException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -388,23 +390,61 @@ public class Utils {
      * @return PID.
      */
     public static long getPid() {
-        final String DELIM = "@";
+        // Step 1. Try public ProcessHandle.current().pid(), available since JDK 9.
+        // We need to use Reflection here to work well with JDK 8.
+        try {
+            Class<?> clProcHandle = Class.forName("java.lang.ProcessHandle");
+            Method mCurrent = clProcHandle.getMethod("current");
+            Method mPid = clProcHandle.getMethod("pid");
+            Object objProcHandle = mCurrent.invoke(null);
+            Object pid = mPid.invoke(objProcHandle);
+            if (pid instanceof Long) {
+                return (long) pid;
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException |
+                 AccessControlException | InvocationTargetException |
+                 IllegalAccessException e) {
+            // Fallthrough.
+        }
 
-        String name = ManagementFactory.getRuntimeMXBean().getName();
+        RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
 
-        if (name != null) {
-            int idx = name.indexOf(DELIM);
+        // Step 2. This is probably JDK 8. Try to call an internal method without
+        // going to fallback.
+        try {
+            Field fJvm = bean.getClass().getDeclaredField("jvm");
+            fJvm.setAccessible(true);
+            Object objMgmt = fJvm.get(bean);
+            Method mPid = objMgmt.getClass().getDeclaredMethod("getProcessId");
+            mPid.setAccessible(true);
+            Object pid = mPid.invoke(objMgmt);
+            if (pid instanceof Integer) {
+                return (int) pid;
+            }
+        } catch (NoSuchMethodException | AccessControlException |
+                 InvocationTargetException | IllegalAccessException |
+                 NoSuchFieldException e) {
+            // Fallthrough.
+        }
 
-            if (idx != -1) {
-                String str = name.substring(0, name.indexOf(DELIM));
-                try {
-                    return Long.parseLong(str);
-                } catch (NumberFormatException nfe) {
-                    throw new IllegalStateException("Process PID is not a number: " + str);
+        // Step 3. Fallback to public API. This potentially resolves hostnames,
+        // and thus can be slower than first two steps.
+        {
+            final String DELIM = "@";
+            String name = bean.getName();
+            if (name != null) {
+                int idx = name.indexOf(DELIM);
+                if (idx != -1) {
+                    String str = name.substring(0, name.indexOf(DELIM));
+                    try {
+                        return Long.parseLong(str);
+                    } catch (NumberFormatException nfe) {
+                        throw new IllegalStateException("Process PID is not a number: " + str);
+                    }
                 }
             }
+            throw new IllegalStateException("Unsupported PID format: " + name);
         }
-        throw new IllegalStateException("Unsupported PID format: " + name);
     }
 
     /**
