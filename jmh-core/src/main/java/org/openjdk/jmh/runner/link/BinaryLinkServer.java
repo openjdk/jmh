@@ -200,6 +200,10 @@ public final class BinaryLinkServer {
         return Integer.getInteger("jmh.link.port", 0);
     }
 
+    public void setClientPid(long pid) {
+        clientPid = pid;
+    }
+
     public long getClientPid() {
         return clientPid;
     }
@@ -351,7 +355,6 @@ public final class BinaryLinkServer {
         }
 
         private void handleHandshake(HandshakeInitFrame obj) throws IOException {
-            clientPid = obj.getPid();
             oos.writeObject(new HandshakeResponseFrame(opts));
             oos.flush();
         }

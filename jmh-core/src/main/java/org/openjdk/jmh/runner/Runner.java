@@ -719,6 +719,7 @@ public class Runner extends BaseRunner {
              FileOutputStream fosOut = new FileOutputStream(stdOut)) {
             ProcessBuilder pb = new ProcessBuilder(commandString);
             Process p = pb.start();
+            reader.setClientPid(Utils.getPid(p));
 
             // drain streams, else we might lock up
             InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), fosErr);
