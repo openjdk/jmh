@@ -27,16 +27,21 @@ package org.openjdk.jmh.profile;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.results.*;
+import org.openjdk.jmh.runner.IterationType;
 
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 public class CompilerProfiler implements InternalProfiler {
+    private static final int UNDEFINED = -1;
 
-    private long startCompTime;
+    private final CompilationMXBean bean;
+
+    private long prevTime = UNDEFINED;
+    private long warmupTime = UNDEFINED;
 
     @Override
     public String getDescription() {
@@ -44,17 +49,20 @@ public class CompilerProfiler implements InternalProfiler {
     }
 
     public CompilerProfiler() throws ProfilerException {
-        CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
-        if (!comp.isCompilationTimeMonitoringSupported()) {
+        bean = ManagementFactory.getCompilationMXBean();
+        if (!bean.isCompilationTimeMonitoringSupported()) {
             throw new ProfilerException("The MXBean is available, but compilation time monitoring is disabled.");
         }
     }
 
     @Override
     public void beforeIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams) {
-        CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
-            startCompTime = comp.getTotalCompilationTime();
+            if (prevTime == UNDEFINED) {
+                long curTime = bean.getTotalCompilationTime();
+                prevTime = curTime;
+                warmupTime = curTime;
+            }
         } catch (UnsupportedOperationException e) {
             // do nothing
         }
@@ -62,13 +70,23 @@ public class CompilerProfiler implements InternalProfiler {
 
     @Override
     public Collection<? extends Result> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams, IterationResult result) {
-        CompilationMXBean comp = ManagementFactory.getCompilationMXBean();
         try {
-            long curTime = comp.getTotalCompilationTime();
-            return Arrays.asList(
-                new ScalarResult("compiler.time.profiled", curTime - startCompTime, "ms", AggregationPolicy.SUM),
-                new ScalarResult("compiler.time.total", curTime, "ms", AggregationPolicy.MAX)
-            );
+            long curTime = bean.getTotalCompilationTime();
+            long delta = curTime - prevTime;
+            prevTime = curTime;
+
+            if (iterationParams.getType() == IterationType.MEASUREMENT) {
+                Collection<ScalarResult> res = new ArrayList<>();
+                if (warmupTime != UNDEFINED) {
+                    res.add(new ScalarResult("compiler.time.warmup", curTime - warmupTime, "ms", AggregationPolicy.SUM));
+                    warmupTime = UNDEFINED;
+                }
+                res.add(new ScalarResult("compiler.time.measurement", delta, "ms", AggregationPolicy.SUM));
+                res.add(new ScalarResult("compiler.time.total", curTime, "ms", AggregationPolicy.MAX));
+                return res;
+            } else {
+                return Collections.emptyList();
+            }
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();
         }

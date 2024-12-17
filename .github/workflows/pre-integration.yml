@@ -18,8 +18,30 @@ jobs:
       matrix:
         java: [8, 11, 17, 21]
         os: [ubuntu-latest, windows-latest, macos-latest]
+        mode: [default, reflection, asm, executor-fjp, executor-custom]
+        exclude:
+          - os: windows-latest
+            mode: reflection
+          - os: windows-latest
+            mode: asm
+          - os: windows-latest
+            mode: executor-fjp
+          - os: windows-latest
+            mode: executor-custom
+          - os: macos-latest
+            mode: reflection
+          - os: macos-latest
+            mode: asm
+          - os: macos-latest
+            mode: executor-fjp
+          - os: macos-latest
+            mode: executor-custom
+        include:
+          - os: ubuntu-latest
+            java: 21
+            mode: executor-virtual
       fail-fast: false
-    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}, ${{ matrix.mode }}
     timeout-minutes: 180
 
     steps:
@@ -31,6 +53,7 @@ jobs:
         java-version: ${{ matrix.java }}
         cache: maven
         check-latest: true
+
     - name: Set up perf (Linux)
       run: |
         sudo apt-get update
@@ -38,39 +61,45 @@ jobs:
         echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
         perf stat echo 1
       if: (runner.os == 'Linux')
+
     - name: Set up async-profiler (Linux)
       run: |
         curl -L https://github.com/async-profiler/async-profiler/releases/download/v3.0/async-profiler-3.0-linux-x64.tar.gz | tar xzf -
         echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/async-profiler-3.0-linux-x64/lib/" >> $GITHUB_ENV
       if: (runner.os == 'Linux')
 
-    - name: Build with tests (Default)
-      run: mvn clean install -B --file pom.xml
-
-    - name: Build with tests (Reflection)
-      run: mvn clean install -P reflection -B --file pom.xml
-      if: (runner.os == 'Linux')
+    - name: Build without tests (Default)
+      run: mvn clean install -B --file pom.xml  -DskipTests
+      if: (matrix.mode == 'default')
 
     - name: Build without tests (Reflection)
       run: mvn clean install -P reflection -B --file pom.xml -DskipTests
-      if: (runner.os != 'Linux')
-
-    - name: Build with tests (ASM)
-      run: mvn clean install -P asm -B --file pom.xml
-      if: (runner.os == 'Linux')
+      if: (matrix.mode == 'default')
 
     - name: Build without tests (ASM)
       run: mvn clean install -P asm -B --file pom.xml -DskipTests
-      if: (runner.os != 'Linux')
+      if: (matrix.mode == 'default')
+
+    - name: Build with tests (Default)
+      run: mvn clean install -B --file pom.xml
+      if: (matrix.mode == 'default')
+
+    - name: Build with tests (Reflection)
+      run: mvn clean install -P reflection -B --file pom.xml
+      if: (matrix.mode == 'reflection')
+
+    - name: Build with tests (ASM)
+      run: mvn clean install -P asm -B --file pom.xml
+      if: (matrix.mode == 'asm')
 
     - name: Build with tests (FJP Executor)
       run: mvn clean install -P executor-fjp -B --file pom.xml
-      if: (runner.os == 'Linux')
+      if: (matrix.mode == 'executor-fjp')
 
     - name: Build with tests (Custom Executor)
       run: mvn clean install -P executor-custom -B --file pom.xml
-      if: (runner.os == 'Linux')
+      if: (matrix.mode == 'executor-custom')
 
     - name: Build with tests (Virtual Executor)
       run: mvn clean install -P executor-virtual -B --file pom.xml
-      if: (runner.os == 'Linux') && (matrix.java == '21')
+      if: (matrix.mode == 'executor-virtual')

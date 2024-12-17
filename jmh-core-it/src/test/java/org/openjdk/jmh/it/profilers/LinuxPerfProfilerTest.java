@@ -49,12 +49,7 @@ public class LinuxPerfProfilerTest {
 
     @Benchmark
     public void work() {
-        somethingInTheMiddle();
-    }
-
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public void somethingInTheMiddle() {
-        Blackhole.consumeCPU(1);
+        Fixtures.busyWork();
     }
 
     @Test

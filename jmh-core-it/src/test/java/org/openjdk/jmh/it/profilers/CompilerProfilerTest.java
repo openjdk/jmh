@@ -45,7 +45,7 @@ public class CompilerProfilerTest {
 
     @Benchmark
     public void work() {
-        Fixtures.work();
+        Fixtures.busyWork();
     }
 
     @Test
@@ -59,19 +59,21 @@ public class CompilerProfilerTest {
 
         Map<String, Result> sr = rr.getSecondaryResults();
         double timeTotal = ProfilerTestUtils.checkedGet(sr, "compiler.time.total").getScore();
-        double timeProfiled = ProfilerTestUtils.checkedGet(sr, "compiler.time.profiled").getScore();
+        double timeWarmup = ProfilerTestUtils.checkedGet(sr, "compiler.time.warmup").getScore();
+        double timeMeasurement = ProfilerTestUtils.checkedGet(sr, "compiler.time.measurement").getScore();
 
-        if (timeProfiled > timeTotal) {
-            throw new IllegalStateException("Profiled time is larger than total time. " +
-                    "Total: " + timeTotal + ", Profiled: " + timeProfiled);
-        }
+        String details = "Total: " + timeTotal + ", Warmup: " + timeWarmup + ", Measurement: " + timeMeasurement;
 
-        if (timeProfiled <= 0) {
-            throw new IllegalStateException("Should have profiled time: " + timeProfiled);
+        if (timeTotal < timeWarmup + timeMeasurement) {
+            throw new IllegalStateException("Warmup+measure should be less than total. " + details);
         }
 
         if (timeTotal <= 0) {
-            throw new IllegalStateException("Should have total time: " + timeTotal);
+            throw new IllegalStateException("Should have total time." + details);
+        }
+
+        if (timeWarmup + timeMeasurement <= 0) {
+            throw new IllegalStateException("Should have warmup+measure time." + details);
         }
     }
 
