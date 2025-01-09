@@ -80,6 +80,7 @@ public class CompilerHints extends AbstractResourceReader {
                 if (bhMode.shouldNotInline()) {
                     hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.consumeFull");
                 }
+                hints.add("dontinline,org/openjdk/jmh/infra/Blackhole.clearBox");
                 hints.addAll(defaultHints);
                 hintsFile = FileUtils.createTempFileWithLines("compilecommand", hints);
             } catch (IOException e) {
