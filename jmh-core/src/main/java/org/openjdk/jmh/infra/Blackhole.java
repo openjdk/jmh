@@ -399,8 +399,23 @@ public final class Blackhole extends BlackholeL2 {
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
             // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = new WeakReference<>(obj);
+            this.obj1 = new BoxedWeakRef(obj);
             this.tlrMask = (tlrMask << 1) + 1;
+        }
+    }
+
+    // Some objects, notably inline types in Valhalla, resist being referenced
+    // directly from a weak ref. For this reason, we wrap the object in the box
+    // first.
+    private static class BoxedWeakRef extends WeakReference<Object> {
+        public BoxedWeakRef(Object referent) {
+            super(new Box(referent));
+        }
+        private static class Box {
+            public Object o;
+            public Box(Object o) {
+                this.o = o;
+            }
         }
     }
 
