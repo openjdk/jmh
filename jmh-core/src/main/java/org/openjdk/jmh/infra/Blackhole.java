@@ -24,7 +24,6 @@
  */
 package org.openjdk.jmh.infra;
 
-import java.lang.ref.WeakReference;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Random;
@@ -109,11 +108,16 @@ public final class Blackhole extends BlackholeL2 {
      * with infinitesimal probability. Then again, smart compilers may skip from
      * generating the slow path, and apply the previous logic to constant-fold
      * the condition to "false". We are warming up the slow-path in the beginning
-     * to evade that effect. Some caution needs to be exercised not to retain the
-     * captured objects forever: this is normally achieved by calling evaporate()
-     * regularly, but we also additionally protect with retaining the object on
-     * weak reference (contrary to phantom-ref, publishing object still has to
-     * happen, because reference users might need to discover the object).
+     * to evade that effect.
+     *
+     * Some caution needs to be exercised not to retain the captured objects forever.
+     * We achieve this by providing the box and two aliases to that box. Storing through
+     * one alias and immediately clearing through another alias allows to both avoid
+     * dead-code elimination, and never retain the object, as long as alias analysis
+     * cannot prove we are dealing with the same box. This is achieved by reading aliases
+     * from volatile fields, which forces most compilers to assume the value is not stable,
+     * and using the non-inlined clearBox() method, which forces compilers to do aggressive
+     * inter-procedural optimizations to figure out aliasing.
      *
      * Observation (4) provides us with an opportunity to create a safety net in case
      * either (1), (2) or (3) fails. This is why Blackhole methods are prohibited from
@@ -187,7 +191,9 @@ public final class Blackhole extends BlackholeL2 {
         if (!challengeResponse.equals("Should not be calling this.")) {
             throw new IllegalStateException("Evaporate should not be called directly.");
         }
-        obj1 = null;
+        // The boxes should actually be always empty. Clear them out just in case.
+        box1.o = null;
+        box2.o = null;
     }
 
     /**
@@ -398,10 +404,15 @@ public final class Blackhole extends BlackholeL2 {
         int tlrMask = this.tlrMask; // volatile read
         int tlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((tlr & tlrMask) == 0) {
-            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT
-            this.obj1 = new WeakReference<>(obj);
+            // SHOULD ALMOST NEVER HAPPEN IN MEASUREMENT.
+            this.box1.o = obj;
+            clearBox();
             this.tlrMask = (tlrMask << 1) + 1;
         }
+    }
+
+    private void clearBox() {
+        this.box2.o = null;
     }
 
     private static volatile long consumedCPU = System.nanoTime();
@@ -474,7 +485,8 @@ abstract class BlackholeL2 extends BlackholeL1 {
     public long l2;
     public float f2;
     public double d2;
-    public volatile Object obj1;
+    public volatile Box box1;
+    public volatile Box box2;
     public volatile BlackholeL2 nullBait = null;
     public int tlr;
     public volatile int tlrMask;
@@ -483,7 +495,8 @@ abstract class BlackholeL2 extends BlackholeL1 {
         Random r = new Random(System.nanoTime());
         tlr = r.nextInt();
         tlrMask = 1;
-        obj1 = new Object();
+        box1 = new Box();
+        box2 = box1;
 
         b1 = (byte) r.nextInt(); b2 = (byte) (b1 + 1);
         bool1 = r.nextBoolean(); bool2 = !bool1;
@@ -518,6 +531,10 @@ abstract class BlackholeL2 extends BlackholeL1 {
         if (d1 == d2) {
             throw new IllegalStateException("double tombstones are equal");
         }
+    }
+
+    protected static class Box {
+        public Object o;
     }
 }
 
