@@ -121,7 +121,7 @@ public class JMHSample_35_Profilers {
          * You can run this test:
          *
          * a) Via the command line:
-         *    $ mvn clean install
+         *    $ ./mvnw clean install
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Maps -prof stack
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Maps -prof gc
          *
@@ -265,7 +265,7 @@ public class JMHSample_35_Profilers {
          * You can run this test:
          *
          * a) Via the command line:
-         *    $ mvn clean install
+         *    $ ./mvnw clean install
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Classy -prof cl
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Classy -prof comp
          *
@@ -348,7 +348,7 @@ public class JMHSample_35_Profilers {
          * You can run this test:
          *
          * a) Via the command line:
-         *    $ mvn clean install
+         *    $ ./mvnw clean install
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perf     -f 1 (Linux)
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perfnorm -f 3 (Linux)
          *    $ java -jar target/benchmarks.jar JMHSample_35.*Atomic -prof perfasm  -f 1 (Linux)

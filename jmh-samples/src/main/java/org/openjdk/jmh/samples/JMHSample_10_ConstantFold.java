@@ -103,7 +103,7 @@ public class JMHSample_10_ConstantFold {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_10 -i 5 -f 1
      *    (we requested single fork; there are also other options, see -h)
      *

@@ -80,7 +80,7 @@ public class JMHSample_01_HelloWorld {
      * down to several cycles per call.
      *
      * a) Via command-line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_01
      *
      * JMH generates self-contained JARs, bundling JMH together with it.

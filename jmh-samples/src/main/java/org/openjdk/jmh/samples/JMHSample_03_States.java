@@ -106,7 +106,7 @@ public class JMHSample_03_States {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_03 -t 4 -f 1
      *    (we requested 4 threads, single fork; there are also other options, see -h)
      *

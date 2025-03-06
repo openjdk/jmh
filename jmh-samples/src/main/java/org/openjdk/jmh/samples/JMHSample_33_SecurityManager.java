@@ -116,7 +116,7 @@ public class JMHSample_33_SecurityManager {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_33 -f 1
      *    (we requested 5 warmup iterations, 5 forks; there are also other options, see -h))
      *

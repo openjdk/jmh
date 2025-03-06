@@ -151,7 +151,7 @@ public class JMHSample_29_StatesDAG {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_29
      *
      * b) Via the Java API:

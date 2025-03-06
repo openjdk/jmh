@@ -118,7 +118,7 @@ public class JMHSample_39_MemoryAccess {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_39
      *
      * b) Via the Java API:

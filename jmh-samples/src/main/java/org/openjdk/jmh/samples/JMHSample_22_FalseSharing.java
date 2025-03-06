@@ -248,7 +248,7 @@ public class JMHSample_22_FalseSharing {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_22 -t $CPU
      *
      * b) Via the Java API:

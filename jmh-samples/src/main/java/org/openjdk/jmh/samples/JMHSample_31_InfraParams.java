@@ -119,7 +119,7 @@ public class JMHSample_31_InfraParams {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_31 -t 4 -f 5
      *    (we requested 4 threads, and 5 forks; there are also other options, see -h)
      *

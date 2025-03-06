@@ -114,7 +114,7 @@ public class JMHSample_05_StateFixtures {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -ea -jar target/benchmarks.jar JMHSample_05 -f 1
      *    (we requested single fork; there are also other options, see -h)
      *

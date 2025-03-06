@@ -124,7 +124,7 @@ public class JMHSample_37_CacheAccess {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_37
      *
      * b) Via the Java API:

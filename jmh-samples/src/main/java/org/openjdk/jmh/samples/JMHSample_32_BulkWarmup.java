@@ -128,7 +128,7 @@ public class JMHSample_32_BulkWarmup {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_32 -f 1 -wm BULK
      *    (we requested a single fork, and bulk warmup mode; there are also other options, see -h)
      *

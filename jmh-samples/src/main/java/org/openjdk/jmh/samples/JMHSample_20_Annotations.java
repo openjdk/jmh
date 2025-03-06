@@ -81,7 +81,7 @@ public class JMHSample_20_Annotations {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_20
      *
      * b) Via the Java API:

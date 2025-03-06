@@ -81,7 +81,7 @@ public class JMHSample_27_Params {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_27
      *
      *    You can juggle parameters through the command line, e.g. with "-p arg=41,42"

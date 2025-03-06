@@ -139,7 +139,7 @@ If you do want to have a wider discussion about JMH, please refer to [jmh-dev](h
 
 Short instructions to build, test bleeding-edge JMH, and install its JAR to local Maven repo:
 
-    $ mvn clean install
+    $ ./mvnw clean install
 
 If you already have the benchmark project, then it is enough to change JMH dependencies version
 to the latest `SNAPSHOT` version (look up the actual latest version in [root `pom.xml`](https://github.com/openjdk/jmh/blob/master/pom.xml)). If not, create the JMH benchmark project and change the version there.

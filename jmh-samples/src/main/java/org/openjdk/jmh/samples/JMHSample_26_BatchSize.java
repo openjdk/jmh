@@ -121,7 +121,7 @@ public class JMHSample_26_BatchSize {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_26 -f 1
      *
      * b) Via the Java API:

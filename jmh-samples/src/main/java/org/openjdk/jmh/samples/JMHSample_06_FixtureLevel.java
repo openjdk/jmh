@@ -85,7 +85,7 @@ public class JMHSample_06_FixtureLevel {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -ea -jar target/benchmarks.jar JMHSample_06 -f 1
      *    (we requested single fork; there are also other options, see -h)
      *

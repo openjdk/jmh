@@ -123,7 +123,7 @@ public class JMHSample_16_CompilerControl {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_16 -wi 0 -i 3 -f 1
      *    (we requested no warmup iterations, 3 iterations, single fork; there are also other options, see -h)
      *

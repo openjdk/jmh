@@ -166,7 +166,7 @@ public class JMHSample_12_Forking {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_12
      *
      * b) Via the Java API:

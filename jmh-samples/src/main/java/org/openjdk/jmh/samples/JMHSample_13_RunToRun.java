@@ -107,7 +107,7 @@ public class JMHSample_13_RunToRun {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_13 -wi 0 -i 3
      *    (we requested no warmup, 3 measurement iterations; there are also other options, see -h)
      *
