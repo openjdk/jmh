@@ -107,11 +107,7 @@ final class XCTraceSupport {
      * @param minVersion a minimum required major xctrace version, like {@code 13}. Use {@code 0} to allow any version.
      */
     static String getXCTracePath(int minVersion) throws ProfilerException {
-        File xctrace = getXCodeDevToolsPath().resolve(Paths.get("usr", "bin", "xctrace")).toFile();
-        String xctracePath = xctrace.getAbsolutePath();
-        if (!xctrace.exists()) {
-            throw new ProfilerException("xctrace was not found at " + xctracePath);
-        }
+        final String xctracePath = resolveXCTracePath();
         Collection<String> versionOut = Utils.runWith(xctracePath, "version");
         String versionString = versionOut.stream().flatMap(l -> Arrays.stream(l.split("\n")))
                 .filter(l -> l.contains("xctrace version"))
@@ -120,7 +116,25 @@ final class XCTraceSupport {
 
         checkVersion(versionString, minVersion);
 
-        return xctrace.getAbsolutePath();
+        return xctracePath;
+    }
+
+    private static String resolveXCTracePath() throws ProfilerException {
+        final Path relativeXCTracePath = Paths.get("usr", "bin", "xctrace");
+        File xctrace = getXCodeDevToolsPath().resolve(relativeXCTracePath).toFile();
+        if (xctrace.exists()) {
+            return xctrace.getAbsolutePath();
+        }
+
+        final String sdkroot = System.getenv().get("SDKROOT");
+        if (sdkroot != null) {
+            xctrace = Paths.get(sdkroot).resolve(relativeXCTracePath).toFile();
+            if (xctrace.exists()) {
+                return xctrace.getAbsolutePath();
+            }
+        }
+
+        throw new ProfilerException("xctrace was not found at " + xctrace.getAbsolutePath());
     }
 
     private static void checkVersion(String versionString, int minVersion) throws ProfilerException {
