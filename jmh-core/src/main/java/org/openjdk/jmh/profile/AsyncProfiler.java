@@ -58,7 +58,7 @@ import java.util.stream.Stream;
 
 
 /**
- * A profiler based on <a href="https://github.com/jvm-profiling-tools/async-profiler/">async-profiler</a>.
+ * A profiler based on <a href="https://github.com/async-profiler/async-profiler">async-profiler</a>.
  *
  * @author Jason Zaugg
  */
