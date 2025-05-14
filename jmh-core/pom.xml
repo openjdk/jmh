@@ -200,7 +200,7 @@ questions.
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
-                    <includeFilterFile>src/main/resources/findbugs.xml</includeFilterFile>
+                    <includeFilterFile>src/test/resources/findbugs.xml</includeFilterFile>
                 </configuration>
             </plugin>
 
@@ -209,7 +209,7 @@ questions.
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <consoleOutput>false</consoleOutput>
-                    <configLocation>${project.basedir}/src/main/resources/checkstyle.xml</configLocation>
+                    <configLocation>${project.basedir}/src/test/resources/checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
 
