@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2014, 2025, Oracle America, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,7 @@ public class JMHSample_11_Loops {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_11 -f 1
      *    (we requested single fork; there are also other options, see -h)
      *

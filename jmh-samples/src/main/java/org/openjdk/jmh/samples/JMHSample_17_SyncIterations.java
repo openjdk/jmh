@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2014, 2025, Oracle America, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ public class JMHSample_17_SyncIterations {
      * You can run this test with:
      *
      * a) Via the command line:
-     *    $ mvn clean install
+     *    $ ./mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_17 \
      *        -w 1s -r 1s -f 1 -t ${CPU*16} -si {true|false}
      *    (we requested shorter warmup/measurement iterations, single fork,
