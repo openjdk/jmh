@@ -383,7 +383,7 @@ public class Runner extends BaseRunner {
         return new Action(newBenchmarkParams(br, mode), mode);
     }
 
-    private BenchmarkParams newBenchmarkParams(BenchmarkListEntry benchmark, ActionMode mode) {
+    protected BenchmarkParams newBenchmarkParams(BenchmarkListEntry benchmark, ActionMode mode) {
         int[] threadGroups = options.getThreadGroups().orElse(benchmark.getThreadGroups());
 
         int threads = options.getThreads().orElse(
