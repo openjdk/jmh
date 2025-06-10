@@ -33,7 +33,6 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -42,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @State(Scope.Thread)
-public class StackTraceInThrowableTest {
+public class StackTraceInThrowableTest implements RunnerFactory {
 
     @Benchmark
     @BenchmarkMode(Mode.All)
@@ -60,7 +59,7 @@ public class StackTraceInThrowableTest {
                 .shouldFailOnError(true)
                 .jvmArgs("-XX:-StackTraceInThrowable")
                 .build();
-        new Runner(opts).run();
+        createRunner(opts).run();
     }
 
 }
