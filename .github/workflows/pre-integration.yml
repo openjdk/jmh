@@ -64,8 +64,8 @@ jobs:
 
     - name: Set up async-profiler (Linux)
       run: |
-        curl -L https://github.com/async-profiler/async-profiler/releases/download/v3.0/async-profiler-3.0-linux-x64.tar.gz | tar xzf -
-        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/async-profiler-3.0-linux-x64/lib/" >> $GITHUB_ENV
+        curl -L https://github.com/async-profiler/async-profiler/releases/download/v4.0/async-profiler-4.0-linux-x64.tar.gz | tar xzf -
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/async-profiler-4.0-linux-x64/lib/" >> $GITHUB_ENV
       if: (runner.os == 'Linux')
 
     - name: Build without tests (Default)
