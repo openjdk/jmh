@@ -110,8 +110,12 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 "Enable allocation profiling. Optional argument (e.g. =512k) reduces sampling from the default of one-sample-per-TLAB. " + secondaryEventOk)
                 .withOptionalArg().ofType(String.class).describedAs("sample bytes");
 
+        OptionSpec<String> optNativeMem = parser.accepts("nativemem",
+                "Enable native memory profiling. Optional argument (e.g. =2m) specifies allocation sampling rate. " + secondaryEventOk)
+                .withOptionalArg().ofType(String.class).describedAs("sample bytes");
+
         OptionSpec<String> optLock = parser.accepts("lock",
-                "Enable lock profiling. Optional argument (e.g. =1ms) limits capture based on lock duration. " + secondaryEventOk)
+                "Enable lock profiling. Optional argument (e.g. =1ms) specifies lock duration threshold. " + secondaryEventOk)
                 .withOptionalArg().ofType(String.class).describedAs("duration");
 
         OptionSpec<String> optDir = parser.accepts("dir",
@@ -144,12 +148,20 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 "Simple class names instead of FQN.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
+        OptionSpec<Boolean> optNorm = parser.accepts("norm",
+                "Normalize names of hidden classes.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool");
+
         OptionSpec<Boolean> optSig = parser.accepts("sig",
                 "Print method signatures.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Boolean> optAnn = parser.accepts("ann",
                 "Annotate Java method names.")
+                .withRequiredArg().ofType(Boolean.class).describedAs("bool");
+
+        OptionSpec<Boolean> optLib = parser.accepts("lib",
+                "Prepend library names.")
                 .withRequiredArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<String> optInclude = parser.accepts("include",
@@ -166,15 +178,15 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                 .withRequiredArg().ofType(String.class).describedAs("command");
 
         OptionSpec<String> optTitle = parser.accepts("title",
-                "SVG title.")
+                "Flame graph title.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<Long> optWidth = parser.accepts("width",
-                "SVG width.")
+                "Flame graph width.")
                 .withRequiredArg().ofType(Long.class).describedAs("pixels");
 
-        OptionSpec<Long> optMinWidth = parser.accepts("minwidth", "Skip frames smaller than px")
-                .withRequiredArg().ofType(Long.class).describedAs("pixels");
+        OptionSpec<Double> optMinWidth = parser.accepts("minwidth", "Skip frames smaller than x%")
+                .withRequiredArg().ofType(Double.class).describedAs("percent");
 
         OptionSpec<Boolean> optAllKernel = parser.accepts("allkernel",
                 "Only include kernel-mode events.")
@@ -215,8 +227,10 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             builder.appendIfExists(optJstackDepth);
             builder.appendIfTrue(optThreads);
             builder.appendIfTrue(optSimple);
+            builder.appendIfTrue(optNorm);
             builder.appendIfTrue(optSig);
             builder.appendIfTrue(optAnn);
+            builder.appendIfTrue(optLib);
             builder.appendIfExists(optFrameBuf);
             if (optFilter.value(set)) {
                 builder.appendRaw("filter");
@@ -272,6 +286,11 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
             if (set.has(optAlloc)) {
                 secondaryEvents.add("alloc");
                 builder.append(optAlloc);
+            }
+
+            if (set.has(optNativeMem)) {
+                secondaryEvents.add("nativemem");
+                builder.append(optNativeMem);
             }
 
             if (set.has(optLock)) {
@@ -396,11 +415,6 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                     }
                     results.add(new FileResult("async-summary", Collections.singletonList(out)));
                     break;
-                case collapsed:
-                    File collapsedFile = outputFile("collapsed-%s.csv");
-                    dump(collapsedFile, "collapsed");
-                    results.add(new FileResult("async-collapsed", Collections.singletonList(collapsedFile)));
-                    break;
                 case flamegraph:
                     // The last SVG-enabled version is 1.x
                     String ext = isVersion1x ? "svg" : "html";
@@ -415,14 +429,14 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
                         results.add(new FileResult("async-flamegraph", Collections.singletonList(flameReverse)));
                     }
                     break;
-                case tree:
-                    File treeFile = outputFile("tree-%s.html");
-                    dump(treeFile, "tree");
-                    results.add(new FileResult("async-tree", Collections.singletonList(treeFile)));
-                    break;
                 case jfr:
                     // JFR is already dumped into file by async-profiler.
                     results.add(new FileResult("async-jfr", Collections.singletonList(jfrOutputFile())));
+                    break;
+                default:
+                    File outFile = outputFile(outputType.name() + "-%s." + outputType.ext());
+                    dump(outFile, outputType.name());
+                    results.add(new FileResult("async-" + outputType.name(), Collections.singletonList(outFile)));
                     break;
             }
         }
@@ -455,16 +469,30 @@ public final class AsyncProfiler implements ExternalProfiler, InternalProfiler {
 
     public enum CStackMode {
         fp,
+        dwarf,
         lbr,
+        vm,
+        vmx,
         no
     }
 
     public enum OutputType {
-        text,
-        collapsed,
-        flamegraph,
-        tree,
-        jfr
+        text("txt"),
+        collapsed("csv"),
+        flamegraph("html"),
+        tree("html"),
+        jfr("jfr"),
+        otlp("pb");
+
+        private final String ext;
+
+        OutputType(String ext) {
+            this.ext = ext;
+        }
+
+        public String ext() {
+            return ext;
+        }
     }
 
     public enum Direction {
