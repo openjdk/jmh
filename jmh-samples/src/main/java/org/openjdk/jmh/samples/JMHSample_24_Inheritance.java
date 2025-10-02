@@ -114,7 +114,7 @@ public class JMHSample_24_Inheritance {
      * of Math.log, Math.sin, and Math.cos, accordingly.
      *
      * a) Via the command line:
-     *    $ ./mvnw clean install
+     *    $ sh mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_24
      *
      * b) Via the Java API:

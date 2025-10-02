@@ -70,45 +70,45 @@ jobs:
 
     - name: Build without tests (Default)
       shell: bash
-      run: ./mvnw clean install -B --file pom.xml  -DskipTests
+      run: sh mvnw clean install -B --file pom.xml  -DskipTests
       if: (matrix.mode == 'default')
 
     - name: Build without tests (Reflection)
       shell: bash
-      run: ./mvnw clean install -P reflection -B --file pom.xml -DskipTests
+      run: sh mvnw clean install -P reflection -B --file pom.xml -DskipTests
       if: (matrix.mode == 'default')
 
     - name: Build without tests (ASM)
       shell: bash
-      run: ./mvnw clean install -P asm -B --file pom.xml -DskipTests
+      run: sh mvnw clean install -P asm -B --file pom.xml -DskipTests
       if: (matrix.mode == 'default')
 
     - name: Build with tests (Default)
       shell: bash
-      run: ./mvnw clean install -B --file pom.xml
+      run: sh mvnw clean install -B --file pom.xml
       if: (matrix.mode == 'default')
 
     - name: Build with tests (Reflection)
       shell: bash
-      run: ./mvnw clean install -P reflection -B --file pom.xml
+      run: sh mvnw clean install -P reflection -B --file pom.xml
       if: (matrix.mode == 'reflection')
 
     - name: Build with tests (ASM)
       shell: bash
-      run: ./mvnw clean install -P asm -B --file pom.xml
+      run: sh mvnw clean install -P asm -B --file pom.xml
       if: (matrix.mode == 'asm')
 
     - name: Build with tests (FJP Executor)
       shell: bash
-      run: ./mvnw clean install -P executor-fjp -B --file pom.xml
+      run: sh mvnw clean install -P executor-fjp -B --file pom.xml
       if: (matrix.mode == 'executor-fjp')
 
     - name: Build with tests (Custom Executor)
       shell: bash
-      run: ./mvnw clean install -P executor-custom -B --file pom.xml
+      run: sh mvnw clean install -P executor-custom -B --file pom.xml
       if: (matrix.mode == 'executor-custom')
 
     - name: Build with tests (Virtual Executor)
       shell: bash
-      run: ./mvnw clean install -P executor-virtual -B --file pom.xml
+      run: sh mvnw clean install -P executor-virtual -B --file pom.xml
       if: (matrix.mode == 'executor-virtual')

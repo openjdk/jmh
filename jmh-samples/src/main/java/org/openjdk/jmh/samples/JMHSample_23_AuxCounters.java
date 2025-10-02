@@ -112,7 +112,7 @@ public class JMHSample_23_AuxCounters {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ ./mvnw clean install
+     *    $ sh mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_23
      *
      * b) Via the Java API:

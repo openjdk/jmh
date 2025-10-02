@@ -183,7 +183,7 @@ public class JMHSample_34_SafeLooping {
      * You can run this test:
      *
      * a) Via the command line:
-     *    $ ./mvnw clean install
+     *    $ sh mvnw clean install
      *    $ java -jar target/benchmarks.jar JMHSample_34
      *
      * b) Via the Java API:
