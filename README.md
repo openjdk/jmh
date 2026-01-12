@@ -31,6 +31,7 @@ to work through the [JMH Samples](https://github.com/openjdk/jmh/tree/master/jmh
       -DinteractiveMode=false \
       -DarchetypeGroupId=org.openjdk.jmh \
       -DarchetypeArtifactId=jmh-java-benchmark-archetype \
+      -DarchetypeVersion=1.37 \
       -DgroupId=org.sample \
       -DartifactId=test \
       -Dversion=1.0
