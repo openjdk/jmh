@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class JMHSample_05_StateFixtures {
 
-    int x;
+    long x;
 
     /*
      * Since @State objects are kept around during the lifetime of the
