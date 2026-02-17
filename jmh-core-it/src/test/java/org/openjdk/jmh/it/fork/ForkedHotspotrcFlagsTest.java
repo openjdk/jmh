@@ -87,12 +87,12 @@ public class ForkedHotspotrcFlagsTest {
         List<String> command = new ArrayList<>();
         command.add(jvm);
         command.add("-XX:Flags=" + flagsFile.getAbsolutePath());
-        
+
         // make sure these flags are not clobbered
         command.add("-XX:+TieredCompilation");
         command.add("-XX:-AlwaysPreTouch");
         command.add("-DHandles.Weird.Props=yes");
-        
+
         command.add("-cp");
         command.add(classpath);
         command.add(InnerRunner.class.getName());
