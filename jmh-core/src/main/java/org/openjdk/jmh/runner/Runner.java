@@ -480,7 +480,7 @@ public class Runner extends BaseRunner {
         // may prevent us doing so.
         jvmArgs.addAll(options.getJvmArgs()
                 .orElseGet(() -> benchmark.getJvmArgs()
-                .orElseGet(() -> ManagementFactory.getRuntimeMXBean().getInputArguments())
+                .orElseGet(() -> normalizeInputArguments(ManagementFactory.getRuntimeMXBean().getInputArguments()))
         ));
 
 
@@ -924,6 +924,31 @@ public class Runner extends BaseRunner {
                 command.add(cpProp);
             }
         }
+    }
+
+    /**
+     * Normalizes JVM input arguments obtained from
+     * {@link ManagementFactory#getRuntimeMXBean()}.
+     * Flags originating from .hotspotrc or -XX:Flags=file appear without
+     * the -XX: prefix (e.g. "+UseG1GC" instead of "-XX:+UseG1GC", or
+     * "MaxHeapSize=512m" instead of "-XX:MaxHeapSize=512m").
+     * This method re-adds the prefix so the forked JVM can parse them.
+     */
+    static List<String> normalizeInputArguments(List<String> args) {
+        List<String> result = new ArrayList<>(args.size());
+        for (String arg : args) {
+            if (!arg.startsWith("-")) {
+                result.add("-XX:" + arg);
+            } else if (arg.length() > 1
+                    && Character.isUpperCase(arg.charAt(1))
+                    && !arg.startsWith("-X")
+                    && !arg.startsWith("-D")) {
+                result.add("-XX:" + arg);
+            } else {
+                result.add(arg);
+            }
+        }
+        return result;
     }
 
 }
