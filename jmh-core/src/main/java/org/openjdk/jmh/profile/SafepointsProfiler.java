@@ -219,6 +219,9 @@ public class SafepointsProfiler implements ExternalProfiler {
     private static final Pattern JDK_13_LINE =
             Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) Reaching safepoint: ([0-9\\.,]*) ns, (.*) Total: ([0-9\\.,]*) ns");
 
+    private static final Pattern JDK_25_LINE =
+            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) Reaching safepoint: ([0-9\\.,]*) ns, (.*) Total: ([0-9\\.,]*) ns,(.*)");
+
     /**
      * Parse the line into the triplet. This is tested with unit tests, make sure to
      * update those if changing this code.
@@ -265,6 +268,18 @@ public class SafepointsProfiler implements ExternalProfiler {
             if (m.matches()) {
                 return new ParsedData(
                         13,
+                        parseSecToNs(m.group(1)),
+                        parseNs(m.group(6)),
+                        parseNs(m.group(4))
+                );
+            }
+        }
+
+        {
+            Matcher m = JDK_25_LINE.matcher(line);
+            if (m.matches()) {
+                return new ParsedData(
+                        25,
                         parseSecToNs(m.group(1)),
                         parseNs(m.group(6)),
                         parseNs(m.group(4))
