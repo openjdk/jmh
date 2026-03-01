@@ -50,7 +50,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-
 public class GCProfiler implements InternalProfiler {
     private long beforeTime;
     private long beforeGCCount;
