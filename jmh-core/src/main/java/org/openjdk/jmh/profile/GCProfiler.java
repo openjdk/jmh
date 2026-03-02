@@ -107,12 +107,14 @@ public class GCProfiler implements InternalProfiler {
         gcCpuTimeSupported = getTotalGcCpuTime() > -1;
     }
 
+    private MethodHandle getTotalGcCpuTimeHandle = null;
     private long getTotalGcCpuTime() {
         try {
-            MethodHandles.Lookup lookup = MethodHandles.lookup();
-            MethodType methodType = MethodType.methodType(long.class);
-            MethodHandle methodHandle = lookup.findVirtual(MemoryMXBean.class, "getTotalGcCpuTime", methodType);
-            return (long) methodHandle.invokeExact(memoryBean);
+            if (getTotalGcCpuTimeHandle == null) {
+                getTotalGcCpuTimeHandle = MethodHandles.lookup()
+                    .findVirtual(MemoryMXBean.class, "getTotalGcCpuTime", MethodType.methodType(long.class));
+            }
+            return getTotalGcCpuTimeHandle != null ? (long) getTotalGcCpuTimeHandle.invokeExact(memoryBean) : -1;
         }
         catch (Throwable e) {
             return -1;
