@@ -30,7 +30,6 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -41,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tests if harness had indeed executed different tests in different JVMs.
  */
 @BenchmarkMode(Mode.SingleShotTime)
-public class SingleShotTest {
+public class SingleShotTest implements RunnerFactory {
 
     private static final AtomicInteger test1executed = new AtomicInteger();
     private static final AtomicInteger test2executed = new AtomicInteger();
@@ -69,7 +68,7 @@ public class SingleShotTest {
                 .shouldFailOnError(true)
                 .forks(1)
                 .build();
-        new Runner(opt).run();
+        createRunner(opt).run();
     }
 
     @Test
@@ -79,7 +78,7 @@ public class SingleShotTest {
                 .shouldFailOnError(true)
                 .forks(2)
                 .build();
-        new Runner(opt).run();
+        createRunner(opt).run();
     }
 
 }
