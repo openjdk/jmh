@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -39,6 +39,10 @@ import javax.management.ListenerNotFoundException;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import javax.management.openmbean.CompositeData;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.management.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -50,11 +54,15 @@ public class GCProfiler implements InternalProfiler {
     private long beforeTime;
     private long beforeGCCount;
     private long beforeGCTime;
+    private long beforeGcCpuTime;
     private HotspotAllocationSnapshot beforeAllocated;
 
     private boolean churnEnabled;
     private boolean allocEnabled;
     private long churnWait;
+    private boolean gcCpuTimeSupported;
+
+    static final MemoryMXBean memoryBean = ManagementFactory.getPlatformMXBean(MemoryMXBean.class);
 
     @Override
     public String getDescription() {
@@ -95,6 +103,22 @@ public class GCProfiler implements InternalProfiler {
                 allocEnabled = false;
             }
         }
+
+        gcCpuTimeSupported = getTotalGcCpuTime() > -1;
+    }
+
+    private MethodHandle getTotalGcCpuTimeHandle = null;
+    private long getTotalGcCpuTime() {
+        try {
+            if (getTotalGcCpuTimeHandle == null) {
+                getTotalGcCpuTimeHandle = MethodHandles.lookup()
+                    .findVirtual(MemoryMXBean.class, "getTotalGcCpuTime", MethodType.methodType(long.class));
+            }
+            return getTotalGcCpuTimeHandle != null ? (long) getTotalGcCpuTimeHandle.invokeExact(memoryBean) : -1;
+        }
+        catch (Throwable e) {
+            return -1;
+        }
     }
 
     @Override
@@ -116,6 +140,10 @@ public class GCProfiler implements InternalProfiler {
             this.beforeAllocated = VMSupport.getSnapshot();
         }
         this.beforeTime = System.nanoTime();
+
+        if (gcCpuTimeSupported) {
+            this.beforeGcCpuTime = getTotalGcCpuTime();
+        }
     }
 
     @Override
@@ -147,6 +175,14 @@ public class GCProfiler implements InternalProfiler {
                     gcTime - beforeGCTime,
                     "ms",
                     AggregationPolicy.SUM));
+        }
+
+        if (gcCpuTimeSupported) {
+            results.add(new ScalarResult(
+                "gc.cpuTime",
+                (getTotalGcCpuTime() - beforeGcCpuTime) / 1_000_000,
+                "ms",
+                AggregationPolicy.SUM));
         }
 
         if (allocEnabled) {
