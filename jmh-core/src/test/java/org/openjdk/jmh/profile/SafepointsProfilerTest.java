@@ -99,4 +99,35 @@ public class SafepointsProfilerTest {
         Assert.assertEquals(        51_600L, data.ttspTime);
     }
 
+    @Test
+    public void parseJDK17() {
+        SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
+                "[2.153s][info][safepoint] Safepoint \"ICBufferFull\", Time since last: 202293883 ns, Reaching safepoint: 2070 ns, Cleanup: 88040 ns, At safepoint: 1110 ns, Total: 91220 ns");
+        Assert.assertNotNull(data);
+        Assert.assertEquals(2_153_000_000L, data.timestamp);
+        Assert.assertEquals(        91_220L, data.stopTime);
+        Assert.assertEquals(         2_070L, data.ttspTime);
+    }
+
+    @Test
+    public void parseJDK21() {
+        SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
+                "[2.336s][info][safepoint] Safepoint \"ICBufferFull\", Time since last: 197008615 ns, Reaching safepoint: 3740 ns, Cleanup: 103391 ns, At safepoint: 360 ns, Leaving safepoint: 1650 ns, Total: 109141 ns");
+        Assert.assertNotNull(data);
+        Assert.assertEquals( 2_336_000_000L, data.timestamp);
+        Assert.assertEquals(        109_141L, data.stopTime);
+        Assert.assertEquals(          3_740L, data.ttspTime);
+
+    }
+
+    @Test
+    public void parseJDK25() {
+        SafepointsProfiler.ParsedData data = SafepointsProfiler.parse(
+                "[2.756s][info][safepoint] Safepoint \"G1CollectForAllocation\", Time since last: 195656816 ns, Reaching safepoint: 3690 ns, At safepoint: 3314127 ns, Leaving safepoint: 4800 ns, Total: 3322617 ns, Threads: 0 runnable, 27 total");
+        Assert.assertNotNull(data);
+        Assert.assertEquals(2_756_000_000L, data.timestamp);
+        Assert.assertEquals(     3_322_617L, data.stopTime);
+        Assert.assertEquals(         3_690L, data.ttspTime);
+    }
+
 }
