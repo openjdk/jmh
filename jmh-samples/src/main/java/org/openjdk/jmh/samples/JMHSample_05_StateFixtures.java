@@ -101,7 +101,7 @@ public class JMHSample_05_StateFixtures {
 
     @Benchmark
     public void measureWrong() {
-        int x = 0;
+        long x = 0;
         x++;
     }
 

@@ -70,7 +70,7 @@ public class JMHSample_06_FixtureLevel {
 
     @Benchmark
     public void measureWrong() {
-        int x = 0;
+        long x = 0;
         x++;
     }
 
