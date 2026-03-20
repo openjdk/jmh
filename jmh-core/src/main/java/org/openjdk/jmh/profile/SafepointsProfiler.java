@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2020, Red Hat Inc.
+ * Copyright (c) 2016, 2026, Red Hat Inc.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -217,7 +217,7 @@ public class SafepointsProfiler implements ExternalProfiler {
             Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) stopped: ([0-9\\.,]*) seconds, (.*) took: ([0-9\\.,]*) seconds");
 
     private static final Pattern JDK_13_LINE =
-            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) Reaching safepoint: ([0-9\\.,]*) ns, (.*) Total: ([0-9\\.,]*) ns");
+            Pattern.compile("\\[([0-9\\.,]*)s\\]\\[info\\]\\[safepoint( *)\\] (.*) Reaching safepoint: ([0-9\\.,]*) ns, (.*) Total: ([0-9\\.,]*) ns(.*)");
 
     /**
      * Parse the line into the triplet. This is tested with unit tests, make sure to
