@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class JMHSample_06_FixtureLevel {
 
-    int x;
+    long x;
 
     /*
      * Fixture methods have different levels to control when they should be run.
@@ -70,7 +70,7 @@ public class JMHSample_06_FixtureLevel {
 
     @Benchmark
     public void measureWrong() {
-        int x = 0;
+        long x = 0;
         x++;
     }
 
