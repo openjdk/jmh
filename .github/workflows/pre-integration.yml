@@ -57,7 +57,12 @@ jobs:
     - name: Set up perf (Linux)
       run: |
         sudo apt-get update
-        sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
+        sudo apt-get install -y linux-tools-generic linux-tools-`uname -r`
+        # Very crude workaround for perf missing in 6.14 packages.
+        # Yank this once GHA upgrades to 6.17+.
+        sudo ln -s \
+          /usr/lib/linux-tools/`ls /usr/lib/linux-tools/ | grep generic`/perf \
+          /usr/lib/linux-tools/`uname -r`/perf
         echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
         perf stat echo 1
       if: (runner.os == 'Linux')
