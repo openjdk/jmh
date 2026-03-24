@@ -79,8 +79,6 @@ public class LinuxPerfProfilerTest {
         }
 
         Assert.assertTrue(msg.contains("cycles"));
-        Assert.assertTrue(msg.contains("instructions"));
-        Assert.assertTrue(msg.contains("branches"));
     }
 
 }

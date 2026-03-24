@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [8, 11, 17, 21]
+        java: [8, 11, 17, 21, 25]
         os: [ubuntu-latest, windows-latest, macos-latest]
         mode: [default, reflection, asm, executor-fjp, executor-custom]
         exclude:
@@ -57,12 +57,7 @@ jobs:
     - name: Set up perf (Linux)
       run: |
         sudo apt-get update
-        sudo apt-get install -y linux-tools-generic linux-tools-`uname -r`
-        # Very crude workaround for perf missing in 6.14 packages.
-        # Yank this once GHA upgrades to 6.17+.
-        sudo ln -s \
-          /usr/lib/linux-tools/`ls /usr/lib/linux-tools/ | grep generic`/perf \
-          /usr/lib/linux-tools/`uname -r`/perf
+        sudo apt-get install -y linux-tools-`uname -r`
         echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
         perf stat echo 1
       if: (runner.os == 'Linux')
