@@ -150,6 +150,13 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
         return res;
     }
 
+    private <T extends TraceElement> T tryPeek() {
+        if (entriesStack.isEmpty()) {
+            return null;
+        }
+        return peek();
+    }
+
     private LongHolder popAndUpdateLongHolder() {
         LongHolder value = pop();
         if (isNeedToParseCharacters()) {
@@ -212,6 +219,9 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                     return holder;
                 });
                 break;
+            case XCTraceTableHandler.TAGGED_BACKTRACE:
+                pushCachedOrNew(attributes, id -> new ValueHolder<Frame>(id));
+                break;
             case XCTraceTableHandler.BINARY:
                 pushCachedOrNew(attributes, id -> new ValueHolder<>(id, parseName(attributes)));
                 break;
@@ -253,10 +263,25 @@ final class XCTraceTableProfileHandler extends XCTraceTableHandler {
                 LongHolder value = popAndUpdateLongHolder();
                 currentSample.setWeight(value.getValue());
                 break;
-            case XCTraceTableHandler.BACKTRACE:
+            case XCTraceTableHandler.BACKTRACE: {
+                Frame topFrame = this.<ValueHolder<Frame>>pop().getValue();
+                // Backtrace may be wrapped into a tagged-backtrace element.
+                // And it's the only case when something will be on the elements stack.
+                ValueHolder<Frame> taggedBacktrace = tryPeek();
+                if (taggedBacktrace != null) {
+                    // Let's put the top frame into the tagged backtrace and let the next case clause handle it.
+                    taggedBacktrace.setValue(topFrame);
+                } else {
+                    // There's no tagged backtrace, so let's update the sample here.
+                    currentSample.setTopFrame(topFrame.getAddress(), topFrame.getName(), topFrame.getBinary());
+                }
+                break;
+            }
+            case XCTraceTableHandler.TAGGED_BACKTRACE: {
                 Frame topFrame = this.<ValueHolder<Frame>>pop().getValue();
                 currentSample.setTopFrame(topFrame.getAddress(), topFrame.getName(), topFrame.getBinary());
                 break;
+            }
             case XCTraceTableHandler.BINARY:
                 ValueHolder<String> bin = pop();
                 this.<Frame>peek().setBinary(bin.getValue());

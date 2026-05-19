@@ -55,6 +55,11 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
     }
 
     @Test
+    public void parseCpuProfileXcode26_4_1() throws Exception {
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.CPU_PROFILE, "cpu-profile.xcode26.4.1", true);
+    }
+
+    @Test
     public void unsupportedSchema() throws Exception {
         XCTraceTableProfileHandler handler = new XCTraceTableProfileHandler(XCTraceTableHandler.ProfilingTableType.CPU_PROFILE, sample -> fail("Expected no samples"));
         assertThrows(IllegalStateException.class, () ->
@@ -64,6 +69,11 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
     @Test
     public void parseCountersProfile() throws Exception {
         verifyProfile(XCTraceTableHandler.ProfilingTableType.COUNTERS_PROFILE, "counters-profile", true);
+    }
+
+    @Test
+    public void parseCountersProfileXcode26_4_1() throws Exception {
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.COUNTERS_PROFILE, "counters-profile.xcode26.4.1", true);
     }
 
     @Test
@@ -79,6 +89,11 @@ public class XCTraceTableProfileHandlerTest extends XCTraceTestBase {
     @Test
     public void parseTimeProfileXcode12_5() throws Exception {
         verifyProfile(XCTraceTableHandler.ProfilingTableType.TIME_PROFILE, "time-profile.xcode12.5", false);
+    }
+
+    @Test
+    public void parseTimeProfileXcode26_4_1() throws Exception {
+        verifyProfile(XCTraceTableHandler.ProfilingTableType.TIME_PROFILE, "time-profile.xcode26.4.1", true);
     }
 
     private void verifyProfile(XCTraceTableHandler.ProfilingTableType tableType, String profileName,
