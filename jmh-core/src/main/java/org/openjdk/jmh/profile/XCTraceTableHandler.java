@@ -50,6 +50,7 @@ class XCTraceTableHandler extends DefaultHandler {
     static final String SAMPLE_RATE = "sample-rate-micro-seconds";
     static final String FRAME = "frame";
     static final String BACKTRACE = "backtrace";
+    static final String TAGGED_BACKTRACE = "tagged-backtrace";
     static final String TEXT_ADDRESSES = "text-addresses";
     static final String BINARY = "binary";
     static final String SAMPLE_TIME = "sample-time";
