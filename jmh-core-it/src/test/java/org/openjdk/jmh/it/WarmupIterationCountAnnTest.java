@@ -37,7 +37,6 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -49,7 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tests if harness honors warmup annotation settings.
  */
 @State(Scope.Thread)
-public class WarmupIterationCountAnnTest {
+public class WarmupIterationCountAnnTest implements RunnerFactory {
 
     private final AtomicInteger count = new AtomicInteger();
 
@@ -78,7 +77,7 @@ public class WarmupIterationCountAnnTest {
                 .include(Fixtures.getTestMask(this.getClass()))
                 .shouldFailOnError(true)
                 .build();
-        new Runner(opt).run();
+        createRunner(opt).run();
     }
 
 }
