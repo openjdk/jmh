@@ -46,16 +46,16 @@ questions.
 
     <target name="download-libs" description="Download libraries">
        <mkdir dir="${build}/libs/" />
-       <get src="http://central.maven.org/maven2/org/openjdk/jmh/jmh-core/${jmh.ver}/jmh-core-${jmh.ver}.jar"
+       <get src="https://repo1.maven.org/maven2/org/openjdk/jmh/jmh-core/${jmh.ver}/jmh-core-${jmh.ver}.jar"
             dest="${jmh-core.jar}"
             verbose="true" usetimestamp="true" skipexisting="true"/>
-       <get src="http://central.maven.org/maven2/org/openjdk/jmh/jmh-generator-annprocess/${jmh.ver}/jmh-generator-annprocess-${jmh.ver}.jar"
+       <get src="https://repo1.maven.org/maven2/org/openjdk/jmh/jmh-generator-annprocess/${jmh.ver}/jmh-generator-annprocess-${jmh.ver}.jar"
             dest="${jmh-generator-annprocess.jar}"
             verbose="true" usetimestamp="true" skipexisting="true"/>
-       <get src="http://central.maven.org/maven2/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"
+       <get src="https://repo1.maven.org/maven2/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"
             dest="${joptsimple.jar}"
             verbose="true" usetimestamp="true" skipexisting="true"/>
-       <get src="http://central.maven.org/maven2/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar"
+       <get src="https://repo1.maven.org/maven2/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar"
             dest="${commonsmath.jar}"
             verbose="true" usetimestamp="true" skipexisting="true"/>
     </target>
