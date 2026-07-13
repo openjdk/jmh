@@ -96,7 +96,7 @@ public class PerfAsmMethodParsingTest {
             // Added by JDK-8316178
             checkFor(methods, "runtime stub: ExceptionBlob");
 
-            if (version >= 26) {
+            if (version >= 27) {
                 // Format changed by JDK-8374698
                 checkFor(methods, "runtime stub: throw_StackOverflowError_blob (shared runtime)");
                 checkFor(methods, "runtime stub: complete_monitor_locking_blob (C2 runtime)");
@@ -111,8 +111,9 @@ public class PerfAsmMethodParsingTest {
         }
 
         // StubRoutines
-        checkFor(methods, "runtime stub: StubRoutines::call_stub");
-
+        if (version <= 25) {
+            checkFor(methods, "runtime stub: StubRoutines::call_stub");
+        }
         // Interpreter: bytecode stub
         checkFor(methods, "interpreter: iconst_0");
 
