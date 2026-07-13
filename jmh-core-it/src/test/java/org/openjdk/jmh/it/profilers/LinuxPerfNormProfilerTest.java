@@ -80,7 +80,7 @@ public class LinuxPerfNormProfilerTest {
             throw new IllegalStateException(String.format("Branches (%.2f) larger than instructions (%.3f)", branches, instructions));
         }
 
-        // Not on all platforms perf repots CPI/IPC metrics
+        // Not on all platforms perf reports CPI/IPC metrics
     }
 
 }
