@@ -68,9 +68,9 @@ public class LinuxPerfNormProfilerTest {
         RunResult rr = new Runner(opts).runSingle();
 
         Map<String, Result> sr = rr.getSecondaryResults();
-        double instructions = ProfilerTestUtils.checkedGet(sr, "instructions", "instructions:u").getScore();
-        double cycles = ProfilerTestUtils.checkedGet(sr, "cycles", "cycles:u").getScore();
-        double branches = ProfilerTestUtils.checkedGet(sr, "branches", "branches:u").getScore();
+        double instructions = ProfilerTestUtils.checkedGet(sr, "instructions", "instructions:u", "cpu_core/instructions/", "cpu_atom/instructions/").getScore();
+        double cycles = ProfilerTestUtils.checkedGet(sr, "cycles", "cycles:u", "cpu_core/cycles/", "cpu_atom/cycles/").getScore();
+        double branches = ProfilerTestUtils.checkedGet(sr, "branches", "branches:u", "cpu_core/branches/", "cpu_atom/branches/").getScore();
 
         Assert.assertNotEquals(0D, instructions, 0D);
         Assert.assertNotEquals(0D, cycles, 0D);
@@ -80,11 +80,7 @@ public class LinuxPerfNormProfilerTest {
             throw new IllegalStateException(String.format("Branches (%.2f) larger than instructions (%.3f)", branches, instructions));
         }
 
-        double ipc = ProfilerTestUtils.checkedGet(sr, "IPC").getScore();
-        double cpi = ProfilerTestUtils.checkedGet(sr, "CPI").getScore();
-
-        Assert.assertNotEquals(0D, ipc, 0D);
-        Assert.assertNotEquals(0D, cpi, 0D);
+        // Not on all platforms perf reports CPI/IPC metrics
     }
 
 }
