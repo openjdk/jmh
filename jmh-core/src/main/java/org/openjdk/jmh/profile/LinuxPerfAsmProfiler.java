@@ -156,6 +156,13 @@ public class LinuxPerfAsmProfiler extends AbstractPerfAsmProfiler {
         if (tagIdx != -1) {
             evName = evName.substring(0, tagIdx);
         }
+        if (evName.startsWith("cpu_core/") || evName.startsWith("cpu_atom/")) {
+            evName = evName.substring(9);
+        }
+        tagIdx = evName.lastIndexOf("/");
+        if (tagIdx != -1) {
+            evName = evName.substring(0, tagIdx);
+        }
         line = line.substring(evIdx + 2);
 
         // Chomp the addr:
