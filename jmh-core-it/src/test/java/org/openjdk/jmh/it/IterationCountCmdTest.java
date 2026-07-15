@@ -35,7 +35,6 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -47,7 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tests if harness favors the iteration count cmdline parameters.
  */
 @State(Scope.Thread)
-public class IterationCountCmdTest {
+public class IterationCountCmdTest implements RunnerFactory {
 
     private final AtomicInteger count = new AtomicInteger();
 
@@ -77,7 +76,7 @@ public class IterationCountCmdTest {
                 .measurementTime(TimeValue.milliseconds(100))
                 .warmupIterations(0)
                 .build();
-        new Runner(opt).run();
+        createRunner(opt).run();
     }
 
 }
