@@ -29,7 +29,7 @@ import org.openjdk.jmh.runner.format.OutputFormat;
 import java.io.IOException;
 import java.io.OutputStream;
 
-class OutputFormatAdapter extends OutputStream {
+public class OutputFormatAdapter extends OutputStream {
     private final OutputFormat out;
 
     public OutputFormatAdapter(OutputFormat out) {
