@@ -31,7 +31,7 @@ import org.openjdk.jmh.util.Utils;
 import java.util.List;
 import java.util.Map;
 
-class ProfilerOptionFormatter implements HelpFormatter {
+public class ProfilerOptionFormatter implements HelpFormatter {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 

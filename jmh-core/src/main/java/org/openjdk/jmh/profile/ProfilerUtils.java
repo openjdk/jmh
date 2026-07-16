@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 
-class ProfilerUtils {
+public class ProfilerUtils {
 
     public static OptionSet parseInitLine(String initLine, OptionParser parser) throws ProfilerException {
         parser.accepts("help", "Display help.");
