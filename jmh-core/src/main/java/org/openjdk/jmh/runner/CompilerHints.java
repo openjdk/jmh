@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@ public class CompilerHints extends AbstractResourceReader {
     public static final String LIST = "/META-INF/CompilerHints";
 
     // All OpenJDK/HotSpot VMs are supported
-    static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "HotSpot", "GraalVM" };
+    static final String[] HINT_COMPATIBLE_JVMS = { "OpenJDK", "HotSpot", "GraalVM", "OpenJ9" };
     // Zing is only compatible from post 5.10.*.* releases
     static final String JVM_ZING = "Zing";
 

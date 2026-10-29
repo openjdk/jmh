@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2018, 2026, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,6 +38,7 @@ class SupportedVMs {
     static final String[] EXPERIMENTAL_SUPPORT = {
             "Zing",
             "GraalVM",
+            "OpenJ9",
     };
 
     public static Level supportLevel(String name) {
