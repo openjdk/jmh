@@ -161,7 +161,16 @@ public final class BinaryLinkServer {
     private InetAddress getListenAddress() {
         // Try to use user-provided override first.
         String addr = System.getProperty("jmh.link.address");
+        // SECURITY: The binary link assumes trusted peers and uses Java
+        // serialization without authentication/encryption. Overriding the
+        // listen address may expose this endpoint. Do not expose
+        // it to untrusted networks. When using this property, appropriate
+        // operating system and network security controls must restrict access
+        // to trusted processes and hosts.
         if (addr != null) {
+            BinaryLinkServer.this.out.println("WARNING: jmh.link.address is set. " +
+                    "JMH communication assumes trusted peers and provides no authentication or encryption. " +
+                    "Restrict access to trusted processes and hosts using appropriate operating system and network security controls.");
             try {
                 return InetAddress.getByName(addr);
             } catch (UnknownHostException e) {

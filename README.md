@@ -94,6 +94,14 @@ If you want to build with an alternative build system, you may want to see the
 [Ant sample](https://github.com/openjdk/jmh/tree/master/jmh-ant-sample) which describes
 the steps to build JMH benchmark projects.
 
+## Security
+
+JMH is intended to run in a trusted environment. It shouldn't be run on systems shared with untrusted users or with its
+communication ports exposed to untrusted networks.
+
+Communication between the parent and forked JVMs uses Java serialization and assumes trusted peers. This protocol doesn't
+provide authentication or encryption. Access by an untrusted process may compromise the JMH process.
+
 ## Support and Development
 
 ### Pre-Requisite Steps
